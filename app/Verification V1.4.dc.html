@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Same vendored React the app uses. Without this the harness shell itself
+   still reaches unpkg, so a run that appears to prove the build is offline
+   clean would not be. No assertion is touched by this block. */
+window.__resources = Object.assign(window.__resources || {}, {
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': './react-18.3.1.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': './react-dom-18.3.1.production.min.js'
+});
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;1,400&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="./handoff/tests-v14.js?v=2"></script>
+<style>
+html,body{margin:0;min-height:100%;background:#05060a}
+body{color:#eef0f8;font-family:'Karla',system-ui,sans-serif}
+a{color:#2fff8f;text-decoration:none}a:hover{color:#7dffb9}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:rgba(47,79,214,.4);border-radius:8px}
+*::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<div style="max-width:1180px;margin:0 auto;padding:44px 26px 80px;display:flex;flex-direction:column;gap:30px">
+
+  <div style="display:flex;flex-direction:column;gap:9px">
+    <div style="font:600 9.5px 'Karla',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,240,248,.55)">inCommon &middot; verification</div>
+    <div style="font:400 38px/1.15 'Marcellus',serif;color:#eef0f8">V1.4 one canonical build</div>
+    <div style="font:italic 400 14px/1.7 'Newsreader',Georgia,serif;color:rgba(238,240,248,.62);max-width:78ch;text-wrap:pretty">Every assertion runs against the real merged build, in a real iframe, sized in real pixels, so the shell under test is the shell a device of that size would actually get. Nothing is forced into a layout mode from outside. The V1.2 and V1.3 suites still stand unchanged.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#14161d;border:1px solid rgba(47,79,214,.34);border-radius:16px;padding:16px 20px">
+    <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px">
+      <div style="font:600 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,240,248,.55)">Status</div>
+      <div style="font:400 14px 'Karla',sans-serif;color:#eef0f8">{{ status }}</div>
+    </div>
+    <div style="display:flex;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end">
+        <div style="font:600 26px 'Karla',sans-serif;color:#2fff8f">{{ passCount }}</div>
+        <div style="font:600 9px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,240,248,.55)">Passed</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end">
+        <div style="font:600 26px 'Karla',sans-serif;color:{{ failColor }}">{{ failCount }}</div>
+        <div style="font:600 9px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,240,248,.55)">Failed</div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasFails }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:12px;background:rgba(229,83,77,.08);border:1px solid rgba(229,83,77,.4);border-radius:16px;padding:18px 20px">
+      <div style="font:600 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#e5534d">Failures, in full</div>
+      <sc-for list="{{ fails }}" as="r" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid rgba(229,83,77,.24);padding-top:11px">
+          <div style="display:flex;gap:9px;align-items:baseline">
+            <span style="font:600 10px ui-monospace,'SF Mono',monospace;color:#e5534d">{{ r.id }}</span>
+            <span style="flex:1;font:400 13.5px/1.55 'Karla',sans-serif;color:#eef0f8">{{ r.name }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:74px 1fr;gap:3px 10px;font:400 11px/1.5 ui-monospace,'SF Mono',monospace">
+            <span style="color:rgba(238,240,248,.5)">expected</span><span style="color:#7dffb9;word-break:break-word">{{ r.expected }}</span>
+            <span style="color:rgba(238,240,248,.5)">actual</span><span style="color:#ff9f99;word-break:break-word">{{ r.actual }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;gap:11px;border-bottom:1px solid rgba(47,79,214,.34);padding-bottom:9px">
+        <span style="font:400 22px 'Marcellus',serif;color:#eef0f8">{{ g.title }}</span>
+        <span style="flex:1;font:400 12.5px/1.6 'Karla',sans-serif;color:rgba(238,240,248,.55)">{{ g.note }}</span>
+        <span style="font:600 11px 'Karla',sans-serif;color:{{ g.color }}">{{ g.tally }}</span>
+      </div>
+      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="5">
+        <div style="display:flex;gap:11px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(47,79,214,.14)">
+          <span style="flex:none;width:15px;text-align:center;font:400 13px 'Newsreader',serif;color:{{ r.color }}">{{ r.mark }}</span>
+          <span style="flex:none;width:62px;font:600 9.5px ui-monospace,'SF Mono',monospace;color:rgba(238,240,248,.45);padding-top:2px">{{ r.id }}</span>
+          <span style="flex:1;min-width:0;font:400 13px/1.55 'Karla',sans-serif;color:{{ r.textColor }}">{{ r.name }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="font:400 22px 'Marcellus',serif;color:#eef0f8;border-bottom:1px solid rgba(47,79,214,.34);padding-bottom:9px">The build at each viewport</div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px">
+      <sc-for list="{{ views }}" as="v" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <div style="font:600 12px 'Karla',sans-serif;color:#eef0f8">{{ v.label }}</div>
+            <div style="font:400 10.5px ui-monospace,'SF Mono',monospace;color:rgba(238,240,248,.5)">{{ v.note }}</div>
+          </div>
+          <div style="position:relative;overflow:hidden;width:{{ v.boxW }};height:{{ v.boxH }};border:1px solid rgba(47,79,214,.34);border-radius:12px;background:#000">
+            <iframe src="{{ v.src }}" title="{{ v.label }}" loading="lazy" scrolling="no" style="position:absolute;top:0;left:0;border:0;width:{{ v.w }};height:{{ v.h }};transform:scale({{ v.k }});transform-origin:0 0"></iframe>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { rows: [], status: 'Booting the V1.4 suite\u2026' };
+
+  // cache-busted per run: iframes otherwise serve the copy from the last run
+  SRC = './inCommonApp%20v2.dc.html?v=' + Date.now();
+
+  VIEWS = [
+    [375, 667, 'Phone', 'Check A \u00b7 375\u00d7667'],
+    [820, 1180, 'Tablet', 'Check B \u00b7 820\u00d71180'],
+    [1080, 1920, '9:16 vertical', 'Check C \u00b7 1080\u00d71920'],
+    [1440, 900, 'Desktop', 'Check D \u00b7 1440\u00d7900'],
+    [1024, 600, 'Short desktop', 'Check S \u00b7 1024\u00d7600']
+  ];
+
+  GROUPS = [
+    { key: 'A', title: 'Check A \u00b7 Phone', note: '375\u00d7667, vertical snap shell' },
+    { key: 'B', title: 'Check B \u00b7 Tablet', note: '820\u00d71180, desktop shell with a collapsed rail' },
+    { key: 'C', title: 'Check C \u00b7 9:16 vertical', note: '1080\u00d71920, treated as a tall phone' },
+    { key: 'D', title: 'Check D \u00b7 Desktop', note: '1440\u00d7900, full sidebar' },
+    { key: 'S', title: 'Check S \u00b7 Short desktop', note: '1024\u00d7600, the height the rail has to survive' },
+    { key: 'E', title: 'Check E \u00b7 Crossing breakpoints', note: 'One frame, resized live, no reload' },
+    { key: 'F', title: 'Functional repair sweep', note: 'Fixes 1 to 5, on the real build' },
+    { key: 'T', title: 'Theme sweep \u00b7 three identities', note: 'Each identity, plain and hardened, at phone and desktop width, held to the same gates' },
+    { key: 'R', title: 'Removal phase \u00b7 V1.6.0', note: 'Stella, the account gate and the tag badges are gone, and stay gone' },
+    { key: 'G', title: 'ADA phase \u00b7 V1.7.0', note: 'Fifteen audit gaps, each driven rather than read off an attribute' }
+  ];
+
+  async componentDidMount() {
+    /* A remount must not start a second run beside the first: two suites
+       racing meant ten live app frames and a run that looked hung. */
+    if (window.__v14Running) { this.setState({ status: 'A run is already in progress in this tab.' }); return; }
+    window.__v14Running = true;
+    const T = window.InCommonTestsV14;
+    if (!T) { this.setState({ status: 'Could not load handoff/tests-v14.js.' }); return; }
+    let rows = [];
+    // Each phase writes into its own sink as it goes. If the phase overruns,
+    // we keep what it proved and add one row saying the rest was not reached.
+    const race = async (mk, ms, id, label) => {
+      const sink = [];
+      const done = await Promise.race([
+        mk(sink).then(() => true),
+        new Promise(r => setTimeout(() => r(false), ms))
+      ]);
+      if (!done) sink.push({ id, name: label + ' ran out of time; ' + sink.length + ' assertions completed first', pass: false, expected: 'complete', actual: 'cut short' });
+      return sink;
+    };
+
+    this.setState({ status: 'Running the acceptance matrix across four viewports\u2026' });
+    rows = rows.concat(await race(sink => T.runMatrix(this.SRC, s => this.setState({ status: s }), sink), 900000, 'M-TIMEOUT', 'The matrix'));
+    this.setState({ rows: rows.slice(), status: 'Crossing the breakpoints\u2026' });
+    const rowsCross = [];
+
+    rows = rows.concat(await race(async () => { const r = await T.runCross(this.SRC, s => this.setState({ status: s })); rowsCross.push(...r); }, 180000, 'E-TIMEOUT', 'The resize run').then(x => x.concat(rowsCross)));
+    this.setState({ rows: rows.slice(), status: 'Running the functional repair sweep\u2026' });
+
+    rows = rows.concat(await race(sink => T.runSweep(this.SRC, s => this.setState({ status: s }), sink), 1500000, 'F-TIMEOUT', 'The sweep'));
+    this.setState({ rows: rows.slice(), status: 'Sweeping the three identities\u2026' });
+
+    /* Its own phase and its own budget. Riding at the tail of the sweep, the
+       theme rows were cut by the sweep's cap and vanished from the total
+       instead of failing.
+       600s, not 420s, and NOT because the work is slow: foregrounded, the whole
+       phase costs about 10s (__v14ThemeMs). A standalone run once measured 428s,
+       which read as a phase outgrowing its budget and was nothing of the kind:
+       the tab was in the background, where the browser clamps setTimeout to
+       roughly one call a minute, so the six cases metered out at one a minute
+       and the wall clock said 428s for 10s of work. The headroom is for that
+       throttling, since a run left in a background tab really would have died
+       at 420s. Read __v14ThemeMs, never the wall clock, when judging cost, and
+       treat any timing taken from a backgrounded tab as fiction. Nothing in
+       contrastFails() moved: the 4.5:1 floor and the size and t.length gates
+       are untouched. */
+    const tThemeStart = performance.now();
+    rows = rows.concat(await race(sink => T.runThemes(this.SRC, s => this.setState({ status: s }), sink), 900000, 'T-TIMEOUT', 'The theme sweep'));
+    window.__v14ThemeMs = Math.round(performance.now() - tThemeStart);
+    console.log('[V1.4] theme phase took ' + (window.__v14ThemeMs / 1000).toFixed(1) + 's of its 900s budget');
+    this.setState({ rows: rows.slice(), status: 'Checking what V1.6.0 removed\u2026' });
+
+    /* Its own phase, its own frame and its own budget, for the same reason the
+       theme rows got theirs: these assert ABSENCE, and a phase that is cut
+       short reports nothing rather than failing. One of its frames clears the
+       first-run key on purpose and puts it back, so it runs last, after every
+       phase that needs the app already past that screen. */
+    rows = rows.concat(await race(sink => T.runRemoval(this.SRC, s => this.setState({ status: s }), sink), 240000, 'R-TIMEOUT', 'The removal phase'));
+    this.setState({ rows: rows.slice(), status: 'Running the accessibility phase\u2026' });
+
+    /* The ADA phase, its own frame and its own budget for the same reason as
+       the two above it. Most of its rows are invisible when they pass, and it
+       opens sheets, drives keys and clears the first-run key, so it does not
+       ride at the tail of another phase where a trim would delete it. */
+    const tA11yStart = performance.now();
+    rows = rows.concat(await race(sink => T.runA11y(this.SRC, s => this.setState({ status: s }), sink), 420000, 'G-TIMEOUT', 'The ADA phase'));
+    window.__v14A11yMs = Math.round(performance.now() - tA11yStart);
+    console.log('[V1.4] ADA phase took ' + (window.__v14A11yMs / 1000).toFixed(1) + 's of its 420s budget');
+
+    window.__v14Running = false;
+    const fails = rows.filter(r => !r.pass).length;
+    this.setState({ rows, status: fails ? fails + ' assertion' + (fails === 1 ? '' : 's') + ' failed of ' + rows.length + '.' : 'All ' + rows.length + ' assertions passed.' });
+  }
+
+  fmt(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return String(v); } }
+
+  renderVals() {
+    const rows = this.state.rows;
+    const fails = rows.filter(r => !r.pass);
+    const groups = this.GROUPS.map(g => {
+      const rs = rows.filter(r => String(r.id).charAt(0) === g.key);
+      const bad = rs.filter(r => !r.pass).length;
+      return {
+        title: g.title, note: g.note,
+        tally: rs.length ? (rs.length - bad) + '/' + rs.length : 'pending',
+        color: bad ? '#e5534d' : '#2fff8f',
+        rows: rs.map(r => ({
+          id: r.id, name: r.name,
+          mark: r.pass ? '\u25CF' : '\u25B2',
+          color: r.pass ? '#2fff8f' : '#e5534d',
+          textColor: r.pass ? 'rgba(238,240,248,.82)' : '#eef0f8'
+        }))
+      };
+    }).filter(g => g.rows.length);
+
+    /* Anything the keys above do not claim gets its own group. The theme rows
+       ran for two versions with no group to land in: they were counted in the
+       total and rendered nowhere, so a passing tally was reported for rows
+       nobody could read. A row that cannot be seen is not verified. */
+    const claimed = this.GROUPS.map(g => g.key);
+    const loose = rows.filter(r => claimed.indexOf(String(r.id).charAt(0)) === -1);
+    if (loose.length) {
+      const bad = loose.filter(r => !r.pass).length;
+      groups.push({ title: 'Ungrouped', note: 'Rows with no declared group. Give them one.',
+        tally: (loose.length - bad) + '/' + loose.length, color: bad ? '#e5534d' : '#2fff8f',
+        rows: loose.map(r => ({ id: r.id, name: r.name, mark: r.pass ? '\u25CF' : '\u25B2',
+          color: r.pass ? '#2fff8f' : '#e5534d', textColor: r.pass ? 'rgba(238,240,248,.82)' : '#eef0f8' })) });
+    }
+
+    return {
+      status: this.state.status,
+      passCount: rows.filter(r => r.pass).length,
+      failCount: fails.length,
+      failColor: fails.length ? '#e5534d' : 'rgba(238,240,248,.35)',
+      hasFails: fails.length > 0,
+      fails: fails.map(r => ({ id: r.id, name: r.name, expected: this.fmt(r.expected), actual: this.fmt(r.actual) })),
+      groups,
+      views: this.VIEWS.map(([w, h, label, note]) => {
+        const k = Math.min(1, 250 / w, 500 / h);
+        return { label, note, src: this.SRC, w: w + 'px', h: h + 'px', k,
+          boxW: Math.round(w * k) + 'px', boxH: Math.round(h * k) + 'px' };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

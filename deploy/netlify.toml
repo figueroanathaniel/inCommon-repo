@@ -1,0 +1,46 @@
+# inCommon — Netlify configuration.
+# The whole app is one static index.html. No build step, nothing to install.
+
+[build]
+  publish = "."
+  command = ""
+
+# The service worker and the manifest must never be served stale, or a
+# redeploy will not reach phones that already installed the app.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Everything in the app stays on the device. Nothing is fetched from a third
+# party except the web fonts, so the policy can be narrow.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+[[headers]]
+  for = "/icon-*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# Deep links are hash-based (#/today, #/library/practices), so every path
+# resolves to the one page. This catches anyone who types a real path anyway.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

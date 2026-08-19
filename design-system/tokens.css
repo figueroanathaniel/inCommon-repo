@@ -1,0 +1,90 @@
+/*! handoff/tokens.css: inCommon V1.4 canonical palette and breakpoints.
+ *
+ * REFERENCE ONLY. Three blocks in the build declare these: the app root, the
+ * vertical shell [data-vt], and the desktop shell. The vertical shell
+ * deliberately overrides --bg, --sf, --sf2, --bd and --rad for a true-black
+ * OLED ground and softer corners, and --rad differs in all three (18 root,
+ * 22 vertical, 16 desktop). --nav, --hdr and --dock are declared only on the
+ * root and the vertical shell, because only the vertical shell has a bottom
+ * nav and a safe-area header; the desktop shell inherits them from the root
+ * and does not use them. EVERY OTHER TOKEN MUST MATCH ACROSS ALL THREE. A divergence here is invisible until someone trusts this file: it
+ * already happened once, when --crisis was left as the warning salmon in the
+ * vertical shell.
+ * The shipped build carries these values inline, on the app
+ * root, because inline styles paint from the first streamed character and a
+ * stylesheet does not. This file exists so a developer picking the project up
+ * has one readable place to see the system. If you change a value here, change
+ * it on the [data-app-root] style attribute in inCommonApp v2.dc.html too.
+ *
+ * Palette 2a: black ground, graphite cards, cosmic blue structure,
+ * neon green actions, purple second rank.
+ */
+
+:root {
+  /* ---- ground ---- */
+  --bg: #05060a;          /* app ground, true black-adjacent for OLED */
+  --sf: #14161d;          /* cards, sheets, headers */
+  --sf2: #1c1f29;         /* raised surface inside a card */
+
+  /* ---- structure ----
+     Cosmic blue at full saturation measures 3.07:1 on the ground, so it is
+     never used for text. It draws borders, atmosphere and glow only. */
+  --blue-deep: #2f4fd6;
+  --bd: rgba(47, 79, 214, .34);
+  --blue: #7d9bff;        /* 7.66:1 on --bg. The blue that may carry text. */
+
+  /* ---- action ---- */
+  --ac: #2fff8f;          /* neon green. Primary actions and active nav. */
+  --ac-hi: #7dffb9;       /* hover */
+  --ac-lo: #17d873;       /* pressed, gradient foot */
+  --ac2: #8b5cf6;         /* purple. Second rank, accent bars. */
+  --ac2-hi: #b79bff;         /* 7.93:1 on --sf. The ONLY purple allowed to carry small text.
+                                --ac2 measures 4.27:1 at 10px and must stay a fill or bar. */
+
+  /* ---- text ----
+     Every value below clears 4.5:1 against --bg. --mut was .38 in V1.3 and
+     measured 2.85:1; it is .58 here for that reason. Do not lower it. */
+  --tx: #eef0f8;
+  --dim: rgba(238, 240, 248, .6);
+  --mut: rgba(238, 240, 248, .58);
+
+  /* ---- state ----
+     Success green is deliberately muted so it never competes with --ac, which
+     means action. Crisis red is the loudest thing in the app and nothing else
+     is allowed near its hue. */
+  --ok: #59b37d;
+  --warn: #e08d7d;           /* salmon. NOT a crisis colour. Do not confuse the two. */
+  --crisis: #e5534d;
+  --mood: #7d9bff;
+
+  /* ---- type ---- */
+  --fd: 'Marcellus', serif;                    /* display */
+  --fb: 'Newsreader', Georgia, serif;          /* body, editorial */
+  --fu: 'Karla', system-ui, sans-serif;        /* UI */
+
+  /* ---- metrics ---- */
+  --rad: 18px;
+  --tap: 44px;                                 /* minimum touch target */
+  --nav: calc(66px + env(safe-area-inset-bottom));
+  --hdr: calc(58px + env(safe-area-inset-top));
+  --dock: 58px;
+}
+
+/* ---- breakpoints ----
+ * The build switches shells in JavaScript, off window.innerWidth, because the
+ * two shells are different component trees rather than one tree restyled.
+ * These queries exist so CSS-side work uses the same boundaries.
+ *
+ *   base    0    - 599    phone portrait          vertical snap shell
+ *   sm      600  - 819    phone landscape         vertical snap shell
+ *   md      820  - 1023   tablet                  desktop shell, 76px rail
+ *   lg      1024 - 1439   desktop                 desktop shell, 256px sidebar
+ *   xl      1440+         wide desktop            desktop shell, 256px sidebar
+ *
+ * 820 is the only boundary that changes the component tree. The others change
+ * layout within a shell.
+ */
+@custom-media --sm (min-width: 600px);
+@custom-media --md (min-width: 820px);
+@custom-media --lg (min-width: 1024px);
+@custom-media --xl (min-width: 1440px);
