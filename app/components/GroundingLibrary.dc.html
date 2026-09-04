@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" dark="{{ true }}" hint-size="430px,900px">
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;height:100%;position:relative;display:flex;flex-direction:column;padding-top:62px;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu)">
+
+<sc-if value="{{ inLib }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 18px 12px;border-bottom:1px solid var(--bd)">
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <div style="font:400 19px var(--fd)">Grounding</div>
+      <div style="font:400 11px var(--fu);color:var(--dim)">five exercises · your pace · nothing auto-advances</div>
+    </div>
+    <button onClick="{{ helpGo }}" aria-label="Get help — crisis resources" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--warn);border-radius:999px;font:600 12px var(--fu);color:var(--warn)" style-hover="background:rgba(224,141,125,.1)">Get help</button>
+  </div>
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:20px 18px 28px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+    <div style="font:italic 400 13.5px/1.55 var(--fb);color:var(--dim)">Small, physical ways to come back to the present. Every step waits for you — tap Next when you&rsquo;re ready, never before.</div>
+    <sc-for list="{{ cards }}" as="c" hint-placeholder-count="5">
+      <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px" style-hover="border-color:rgba(211,173,110,.45);background:var(--sf2)" style-active="transform:scale(.985)">
+        <div style="flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 17px var(--fd);color:var(--ac)">{{ c.n }}</div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <div style="font:400 16.5px var(--fd)">{{ c.t }}</div>
+          <div style="font:italic 400 12px/1.45 var(--fb);color:var(--dim)">{{ c.sub }}</div>
+        </div>
+        <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+          <div style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--dim)">{{ c.mins }}</div>
+          <div style="font:400 15px var(--fb);color:var(--ac)">→</div>
+        </div>
+      </button>
+    </sc-for>
+    <div style="font:400 11px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:12px">Grounding is a tool, not a treatment. If any moment feels too big for an exercise, <b style="color:var(--warn);font-weight:600">Get help</b> is always one tap away.</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ inEx }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 18px 10px;border-bottom:1px solid var(--bd)">
+    <button onClick="{{ toLib }}" aria-label="Back to library" style="all:unset;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;font:400 22px var(--fb);color:var(--ac)">‹</button>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+      <div style="font:400 17px var(--fd)">{{ exTitle }}</div>
+      <div style="font:400 11px var(--fu);color:var(--dim)">step {{ stepN }} of {{ stepTotal }}</div>
+    </div>
+    <div style="display:flex;gap:4px" aria-hidden="true">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="7">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ d.bg }}"></span>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .22s ease">
+    <div style="flex:none;height:190px;display:flex;align-items:center;justify-content:center">
+      <sc-if value="{{ vizNum }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="font:400 76px/1 var(--fd);color:var(--ac)">{{ vizBig }}</div>
+          <div style="font:600 11px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">{{ vizLabel }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vizBox }}" hint-placeholder-val="{{ false }}">
+        <div style="width:150px;height:150px;border:2px solid rgba(211,173,110,.55);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transform:scale({{ boxScale }});transition:transform 2.6s cubic-bezier(.45,0,.3,1)">
+          <div style="font:400 19px var(--fd);color:var(--ac)">{{ boxPhase }}</div>
+          <div style="font:600 10px var(--fu);letter-spacing:.14em;color:var(--dim)">COUNT 4</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vizChips }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:300px">
+          <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="6">
+            <span style="font:600 11px var(--fu);letter-spacing:.04em;padding:8px 13px;border-radius:999px;border:1px solid {{ ch.bd }};color:{{ ch.c }};background:{{ ch.bg }}">{{ ch.t }}</span>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vizWord }}" hint-placeholder-val="{{ false }}">
+        <div style="font:italic 400 24px var(--fb);color:var(--ac2)">{{ vizBig }}</div>
+      </sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:400 24px/1.3 var(--fd)">{{ stepH }}</div>
+      <div style="font:400 14.5px/1.6 var(--fb);color:var(--dim)">{{ stepD }}</div>
+    </div>
+  </div>
+
+  <div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 18px 24px;border-top:1px solid var(--bd)">
+    <button onClick="{{ nextGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:#141019;font:700 14px var(--fu)" style-hover="background:#e8caa0" style-active="transform:scale(.99)">{{ nextLabel }}</button>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <sc-if value="{{ hasPrev }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ prevGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;padding:0 4px;font:600 12px var(--fu);color:var(--dim)" style-hover="color:var(--tx)">‹ Previous step</button>
+      </sc-if>
+      <sc-if value="{{ noPrev }}" hint-placeholder-val="{{ true }}"><span></span></sc-if>
+      <button onClick="{{ helpGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;padding:0 4px;font:600 12px var(--fu);color:var(--warn)" style-hover="opacity:.8">This isn&rsquo;t helping →</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ helpClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:9">
+    <div role="dialog" aria-label="Crisis resources" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 30px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="font:400 21px var(--fd)">That&rsquo;s important information</div>
+      <div style="font:400 13px/1.6 var(--fb);color:var(--dim)">Grounding is a tool, not a treatment — and saying it isn&rsquo;t working takes honesty. If this moment feels heavy, urgent, or unsafe, please reach a human now. These are free and confidential.</div>
+      <sc-for list="{{ crisisRows }}" as="cr" hint-placeholder-count="4">
+        <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:2px">
+          <div style="font:600 13.5px var(--fu)">{{ cr.t }}</div>
+          <div style="font:400 12px/1.5 var(--fu);color:var(--dim)">{{ cr.d }}</div>
+        </div>
+      </sc-for>
+      <div style="font:400 11px/1.55 var(--fu);color:var(--dim)">Outside the US, findahelpline.com lists local lines. In immediate danger, call your local emergency number.</div>
+      <button onClick="{{ helpClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)" style-hover="border-color:rgba(211,173,110,.45)">Close</button>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900}, &quot;startExercise&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;library&quot;, &quot;options&quot;: [&quot;library&quot;, &quot;senses&quot;, &quot;box&quot;, &quot;bodyscan&quot;, &quot;cold&quot;, &quot;safeplace&quot;], &quot;tsType&quot;: &quot;'library'|'senses'|'box'|'bodyscan'|'cold'|'safeplace'&quot;, &quot;section&quot;: &quot;Grounding&quot;}, &quot;boxRounds&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 2, &quot;min&quot;: 1, &quot;max&quot;: 4, &quot;step&quot;: 1, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Grounding&quot;}}">
+class Component extends DCLogic {
+  state = { view: null, step: 0, helpOpen: false };
+
+  REGIONS = ['Feet', 'Legs', 'Belly', 'Hands & arms', 'Shoulders', 'Jaw & face'];
+
+  exercises() {
+    const rounds = Math.max(1, Math.min(4, this.props.boxRounds ?? 2));
+    const boxPhases = [
+      { h: 'Breathe in \u2014 four counts', d: 'Up the first side of the box. Steady, through the nose.', box: { phase: 'Breathe in', scale: 1 } },
+      { h: 'Hold \u2014 four counts', d: 'Across the top. Lungs full, shoulders soft.', box: { phase: 'Hold', scale: 1 } },
+      { h: 'Breathe out \u2014 four counts', d: 'Down the far side. Slow, through the mouth.', box: { phase: 'Breathe out', scale: 0.7 } },
+      { h: 'Hold empty \u2014 four counts', d: 'Along the bottom. Rest here.', box: { phase: 'Hold empty', scale: 0.7 } }
+    ];
+    let boxSteps = [{ h: 'Sit tall, soften your jaw', d: 'Four counts per side: in, hold, out, hold. The square breathes with you \u2014 and you set the pace. Tap Next when each side feels done.', box: { phase: 'Ready', scale: 0.7 } }];
+    for (let r = 0; r < rounds; r++) boxSteps = boxSteps.concat(boxPhases.map(p => ({ ...p, d: p.d + (r > 0 ? ' Round ' + (r + 1) + '.' : '') })));
+    boxSteps.push({ h: 'One more easy breath', d: 'That\u2019s ' + rounds + (rounds === 1 ? ' round' : ' rounds') + '. You can run it again any time \u2014 the box will be here.', box: { phase: 'Done', scale: 1 } });
+
+    const scan = (region, h, d) => ({ h, d, chips: this.REGIONS.map(t => ({ t, on: t === region })) });
+    return [
+      { id: 'senses', n: '01', t: '5-4-3-2-1 Senses', sub: 'Name what\u2019s around you, sense by sense', mins: '~3 MIN', steps: [
+        { h: 'Come back to the room', d: 'This walks your attention through your five senses, one at a time. Go slowly \u2014 out loud or silently. Nothing moves until you tap.' },
+        { h: 'Name five things you can see', d: 'Anywhere. The corner of the table, a shadow, your own hands. One at a time, slowly.', num: { big: '5', label: 'things you can see' } },
+        { h: 'Four things you can hear', d: 'The hum of the fridge, traffic, your own breath. If it\u2019s very quiet, that counts too.', num: { big: '4', label: 'things you can hear' } },
+        { h: 'Three things you can feel', d: 'The chair under you, fabric on your skin, the floor through your feet. Press into each one for a second.', num: { big: '3', label: 'things you can feel' } },
+        { h: 'Two things you can smell', d: 'Coffee, soap, the air from the window. If nothing comes, name two smells you like.', num: { big: '2', label: 'things you can smell' } },
+        { h: 'One thing you can taste', d: 'A sip of water counts. So does just noticing your mouth.', num: { big: '1', label: 'thing you can taste' } },
+        { h: 'You\u2019re here', d: 'Five senses, one room, this moment. Take one slower breath before you go back.' }
+      ]},
+      { id: 'box', n: '02', t: 'Box Breathing', sub: 'Four counts per side, a square to breathe with', mins: '~2 MIN', steps: boxSteps },
+      { id: 'bodyscan', n: '03', t: 'Body Scan', sub: 'Tense and release, feet to face', mins: '~4 MIN', steps: [
+        { h: 'Find some support', d: 'Sitting or lying down, whatever you have. You\u2019ll squeeze each area hard for about five counts, then let it go completely.', chips: this.REGIONS.map(t => ({ t, on: false })) },
+        scan('Feet', 'Squeeze your feet', 'Curl your toes hard \u2014 five counts\u2026 and release. Notice the difference between held and let-go.'),
+        scan('Legs', 'Tense your legs', 'Press your knees together or straighten your legs hard \u2014 five counts\u2026 and let them fall heavy.'),
+        scan('Belly', 'Tighten your belly', 'Pull it in like bracing \u2014 five counts\u2026 and soften. Let your breath drop back down into it.'),
+        scan('Hands & arms', 'Make two fists', 'Squeeze your fists and arms \u2014 five counts\u2026 and open your hands. Feel the warmth in your palms.'),
+        scan('Shoulders', 'Raise your shoulders', 'Up toward your ears \u2014 five counts\u2026 and drop them. Let them land lower than they started.'),
+        scan('Jaw & face', 'Scrunch your face', 'Clench your jaw, squeeze your eyes \u2014 five counts\u2026 and release everything. Lips apart, tongue loose.'),
+        { h: 'Whole body, heavy', d: 'One last pass: let everything be heavy at once for three breaths. Done is done \u2014 there\u2019s no wrong version of this.', chips: this.REGIONS.map(t => ({ t, on: true })) }
+      ]},
+      { id: 'cold', t: 'Cold Water / Cold Object', n: '04', sub: 'Strong sensation as a way home', mins: '~2 MIN', steps: [
+        { h: 'Find something cold', d: 'A running tap, a cold can, ice from the freezer, a window pane. Go get it \u2014 this screen will wait.', word: 'cold' },
+        { h: 'Hold the cold', d: 'Run cold water over your wrists, or press the object into your palm. Stay with it a moment.', word: 'hold' },
+        { h: 'Describe the temperature', d: 'Sharp? Dull? Stinging? Where exactly does the cold end on your skin? Use precise words.', word: 'describe' },
+        { h: 'Move it', d: 'Other hand, back of the neck, inside of the forearm. Notice how each spot reads it differently.', word: 'move' },
+        { h: 'Notice the after', d: 'Take the cold away. Feel the warmth flooding back in \u2014 that\u2019s your body, right now, working.', word: 'after' },
+        { h: 'Back in your body', d: 'Strong sensation is one of the fastest ways back to the present. Keep the cold thing nearby if it helped.' }
+      ]},
+      { id: 'safeplace', n: '05', t: 'Safe Place Visualization', sub: 'Somewhere yours, built in detail', mins: '~3 MIN', steps: [
+        { h: 'Somewhere you felt safe', d: 'Real or invented \u2014 a kitchen, a beach, a car at night, a grandmother\u2019s porch. Pick one before you tap Next.' },
+        { h: 'Look around it', d: 'What\u2019s to your left? Behind you? What does the light look like there \u2014 morning, lamplight, overcast?', word: 'look' },
+        { h: 'Listen to it', d: 'What does this place sound like? Even silence has a texture \u2014 name it.', word: 'listen' },
+        { h: 'Feel it in your body', d: 'Where does the safety sit \u2014 chest, shoulders, stomach? Let that exact spot soften a little.', word: 'feel' },
+        { h: 'Give it a name', d: 'One or two words \u2014 \u201Cthe porch,\u201D \u201Cgray beach.\u201D Saying the name later can bring a piece of this back.', word: 'name' },
+        { h: 'It stays with you', d: 'This place is yours; nobody else can edit it. Visit any time \u2014 with or without this screen.' }
+      ]}
+    ];
+  }
+
+  currentView() {
+    const start = this.props.startExercise ?? 'library';
+    return this.state.view ?? (start === 'library' ? 'lib' : start);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const EX = this.exercises();
+    const view = this.currentView();
+    const ex = EX.find(e => e.id === view) || null;
+    const step = ex ? Math.min(st.step, ex.steps.length - 1) : 0;
+    const s = ex ? ex.steps[step] : {};
+    const last = ex ? step === ex.steps.length - 1 : false;
+    return {
+      inLib: !ex, inEx: !!ex,
+      cards: EX.map(e => ({ n: e.n, t: e.t, sub: e.sub, mins: e.mins, go: () => this.setState({ view: e.id, step: 0 }) })),
+      toLib: () => this.setState({ view: 'lib', step: 0 }),
+      exTitle: ex ? ex.t : '', stepN: step + 1, stepTotal: ex ? ex.steps.length : 0,
+      dots: ex ? ex.steps.map((_, i) => ({ bg: i <= step ? 'var(--ac)' : 'var(--sf2)' })) : [],
+      vizNum: !!s.num, vizBox: !!s.box, vizChips: !!s.chips, vizWord: !!s.word,
+      vizBig: s.num ? s.num.big : (s.word || ''),
+      vizLabel: s.num ? s.num.label : '',
+      boxPhase: s.box ? s.box.phase : '', boxScale: s.box ? s.box.scale : 1,
+      chips: (s.chips || []).map(ch => ({ t: ch.t, on: ch.on, c: ch.on ? '#141019' : 'var(--dim)', bg: ch.on ? 'var(--ac)' : 'transparent', bd: ch.on ? 'var(--ac)' : 'var(--bd)' })),
+      stepH: s.h || '', stepD: s.d || '',
+      nextLabel: last ? 'Finish \u2014 back to library' : 'Next',
+      nextGo: () => { last ? this.setState({ view: 'lib', step: 0 }) : this.setState({ step: step + 1 }); },
+      hasPrev: step > 0, noPrev: step === 0,
+      prevGo: () => this.setState({ step: Math.max(0, step - 1) }),
+      helpOpen: st.helpOpen,
+      helpGo: () => this.setState({ helpOpen: true }),
+      helpClose: () => this.setState({ helpOpen: false }),
+      swallow: e => e.stopPropagation(),
+      crisisRows: [
+        { t: '988 \u2014 Suicide & Crisis Lifeline', d: 'Call or text 988 \u00b7 US \u00b7 24/7, free, confidential' },
+        { t: 'Crisis Text Line', d: 'Text HOME to 741741 \u00b7 US \u00b7 24/7' },
+        { t: 'Trevor Project (LGBTQ+ youth)', d: 'Call 1-866-488-7386 or text START to 678-678' },
+        { t: 'Someone you trust', d: 'A friend, family member, clinician, or counselor \u2014 a person beats an exercise, every time' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

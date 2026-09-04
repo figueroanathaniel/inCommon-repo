@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;1,400&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../app/today-integration.js"></script>
+<script src="../app/handoff/tests-v13.js?v=4"></script>
+<style>
+body{margin:0;background:#0d0c11;color:#e8e6ee;font-family:'Karla',system-ui,sans-serif}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;box-sizing:border-box;padding:40px 34px 80px;display:flex;flex-direction:column;gap:34px;background:#0d0c11">
+
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+    <div style="font:600 9.5px 'Karla',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,230,238,.5)">inCommon &middot; verification</div>
+    <div style="font:400 38px/1.15 'Marcellus',serif;color:#e8e6ee">V1.3 responsive shell, headers, Integration</div>
+    <div style="font:italic 400 14px/1.6 'Newsreader',Georgia,serif;color:rgba(232,230,238,.6)">Every assertion below runs against the real build, in a real iframe, at the real viewport size. The V1.2 safety, privacy and crisis suites are untouched and still live in <a href="./Test Runner V1.2.dc.html">Test Runner V1.2</a>.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:2px;background:#17151e;border:1px solid rgba(211,173,110,.16);border-radius:14px;padding:14px 18px;min-width:120px">
+      <div style="font:600 9px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,230,238,.5)">Passing</div>
+      <div style="font:400 28px 'Marcellus',serif;color:#59b37d">{{ nPass }}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;background:#17151e;border:1px solid rgba(211,173,110,.16);border-radius:14px;padding:14px 18px;min-width:120px">
+      <div style="font:600 9px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,230,238,.5)">Failing</div>
+      <div style="font:400 28px 'Marcellus',serif;color:{{ failC }}">{{ nFail }}</div>
+    </div>
+    <div style="flex:1;min-width:220px;display:flex;flex-direction:column;justify-content:center;gap:3px;background:#17151e;border:1px solid rgba(211,173,110,.16);border-radius:14px;padding:14px 18px">
+      <div style="font:600 9px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,230,238,.5)">Status</div>
+      <div style="font:400 15px 'Newsreader',Georgia,serif;color:#e8e6ee">{{ status }}</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="font:400 22px 'Marcellus',serif;color:#e8e6ee">Assertions</div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font:600 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#d3ad6e">{{ g.name }}</div>
+        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+          <div style="display:flex;align-items:flex-start;gap:11px;background:#17151e;border:1px solid rgba(211,173,110,.14);border-left:3px solid {{ r.edge }};border-radius:10px;padding:10px 13px">
+            <span style="flex:none;font:700 8px 'Karla',sans-serif;letter-spacing:.1em;padding:3px 7px;border-radius:4px;color:{{ r.edge }};background:{{ r.chip }}">{{ r.mark }}</span>
+            <span style="flex:none;width:78px;font:600 10.5px 'Karla',sans-serif;color:rgba(232,230,238,.55)">{{ r.id }}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+              <span style="font:400 13px/1.5 'Newsreader',Georgia,serif;color:#e8e6ee">{{ r.name }}</span>
+              <sc-if value="{{ r.bad }}" hint-placeholder-val="{{ false }}">
+                <span style="font:400 11px/1.5 'Karla',sans-serif;color:#e08d7d">expected {{ r.expected }} &mdash; got {{ r.actual }}</span>
+              </sc-if>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font:400 22px 'Marcellus',serif;color:#e8e6ee">Viewport matrix</div>
+    <div style="font:italic 400 13px/1.6 'Newsreader',Georgia,serif;color:rgba(232,230,238,.6);max-width:720px">Each panel is the shipped build at that exact viewport, scaled only for this page. Under 820px the simulated bezel, status bar and home indicator stand down, so the phone draws the only chrome there is; at desktop width the framed presentation is unchanged.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:26px;padding-top:10px">
+      <sc-for list="{{ views }}" as="v" hint-placeholder-count="7">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font:600 11px 'Karla',sans-serif;color:#e8e6ee">{{ v.label }}</span>
+            <span style="font:400 10px 'Karla',sans-serif;color:rgba(232,230,238,.45)">{{ v.note }}</span>
+          </div>
+          <div style="position:relative;overflow:hidden;width:{{ v.boxW }};height:{{ v.boxH }};border:1px solid rgba(211,173,110,.2);border-radius:12px;background:#000">
+            <iframe src="{{ v.src }}" title="{{ v.label }}" loading="lazy" scrolling="no" style="position:absolute;top:0;left:0;border:0;width:{{ v.w }};height:{{ v.h }};transform:scale({{ v.k }});transform-origin:top left"></iframe>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1280, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { rows: [], status: 'Booting the suites\u2026' };
+
+  SRC = '../app/inCommonApp%20v2.dc.html';
+
+  VIEWS = [
+    [320, 568, 'iPhone SE (1st)', 'smallest supported'],
+    [360, 640, 'Android compact', ''],
+    [375, 667, 'iPhone SE (2nd/3rd)', ''],
+    [390, 844, 'iPhone 14', ''],
+    [393, 873, 'Pixel 8', ''],
+    [412, 915, 'Android large', ''],
+    [430, 932, 'iPhone 15 Pro Max', ''],
+    [768, 1024, 'iPad portrait', ''],
+    [1080, 1920, '9:16 capture', 'TikTok / Reels frame'],
+    [1280, 900, 'Desktop', 'framed presentation kept']
+  ];
+
+  async componentDidMount() {
+    for (let i = 0; i < 120 && !(window.TodayIntegration && window.InCommonTestsV13); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    const T = window.InCommonTestsV13;
+    if (!T || !window.TodayIntegration) {
+      this.setState({ status: 'Could not load today-integration.js or handoff/tests-v13.js.' });
+      return;
+    }
+    this.setState({ status: 'Running the Integration suite\u2026' });
+    let rows = T.runTodayIntegration(window.TodayIntegration);
+    this.setState({ rows: rows.slice(), status: 'Running the shell suite across ten viewports\u2026' });
+    const shell = await Promise.race([
+      T.runShell(this.SRC, T.SIZES, s => this.setState({ status: 'Shell: ' + s })),
+      new Promise(r => setTimeout(() => r([{ id: 'S-TIMEOUT', name: 'Shell suite exceeded 240s and was cut short', pass: false, expected: 'complete', actual: 'timeout' }]), 240000))
+    ]);
+    rows = rows.concat(shell);
+    const fail = rows.filter(r => !r.pass).length;
+    this.setState({ rows: rows, status: fail ? fail + ' assertion' + (fail === 1 ? '' : 's') + ' need attention.' : 'All assertions pass against the shipped build.' });
+  }
+
+  short(v) {
+    const s = typeof v === 'string' ? v : JSON.stringify(v);
+    return s && s.length > 150 ? s.slice(0, 150) + '\u2026' : String(s);
+  }
+
+  renderVals() {
+    const rows = this.state.rows || [];
+    const pass = rows.filter(r => r.pass).length;
+    const map = r => ({
+      id: r.id, name: r.name, bad: !r.pass,
+      mark: r.pass ? 'PASS' : 'FAIL',
+      edge: r.pass ? '#59b37d' : '#e08d7d',
+      chip: r.pass ? 'rgba(89,179,125,.16)' : 'rgba(224,141,125,.16)',
+      expected: this.short(r.expected), actual: this.short(r.actual)
+    });
+    const pure = rows.filter(r => /^V/.test(r.id)).map(map);
+    const shell = rows.filter(r => !/^V/.test(r.id)).map(map);
+    const groups = [];
+    if (pure.length) groups.push({ name: 'Today Integration \u00b7 pure', rows: pure });
+    if (shell.length) groups.push({ name: 'Shell, headers, routes \u00b7 live build', rows: shell });
+
+    return {
+      nPass: pass, nFail: rows.length - pass,
+      failC: rows.length - pass ? '#e08d7d' : 'rgba(232,230,238,.35)',
+      status: this.state.status,
+      groups: groups,
+      views: this.VIEWS.map(([w, h, label, note]) => {
+        const k = Math.min(1, 300 / w, 620 / h);
+        return { label: label, note: note || w + '\u00d7' + h, src: this.SRC,
+          w: w + 'px', h: h + 'px', k: k,
+          boxW: Math.round(w * k) + 'px', boxH: Math.round(h * k) + 'px' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# build temp: build-bundle.js writes beside the bundle and renames into place,
+# so a *.building file is a build that did not finish
+*.building
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store

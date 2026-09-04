@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Karla',system-ui,sans-serif;color:#1c1b21}
+a{color:#96762f;text-decoration:none}a:hover{color:#7a5e22;text-decoration:underline}
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="{{ paper }}" orientation="portrait" margin="0.7in" hint-size="100%,1400px">
+
+<div slot="header" style="display:flex;justify-content:space-between;gap:12px;font:600 8.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a8794;padding-bottom:6px;border-bottom:1px solid #e7e4dc">
+  <span>inCommon — Verification Report · V1</span>
+  <span>{{ confid }}</span>
+</div>
+<div slot="footer" style="display:flex;justify-content:space-between;gap:12px;font:500 8.5px 'Karla',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8a8794;padding-top:6px;border-top:1px solid #e7e4dc">
+  <span>Fable 5 · QA &amp; integrity</span>
+  <span>July 19, 2026</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:0;color:#1c1b21">
+  <div style="font:600 10px 'Karla',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#96762f;margin-top:10px">inCommon · Quality &amp; Integrity</div>
+  <div style="font:400 38px/1.12 'Marcellus',serif;margin-top:10px">Verification Report</div>
+  <div style="font:italic 400 15px/1.5 'Newsreader',Georgia,serif;color:#6b6974;margin-top:8px">Prototype V1, checked against the Fable 5 Master Build Prompt — requirements matrix, calculation verification, AI grounding, and phase acceptance (§20–23).</div>
+  <div style="font:700 10.5px 'Karla',sans-serif;letter-spacing:.04em;color:#a84a37;margin-top:10px">SUPERSEDED — reissued as <a href="./Verification Report V1.1.dc.html">Verification Report V1.1</a> per founder direction, Jul 19, 2026. V1 is retained unchanged for the record; V1 was accepted as a provisional prototype-status report only.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-top:20px;padding:14px 16px;border:1px solid #e7e4dc;border-radius:6px;break-inside:avoid">
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Build under test</b> — inCommon Prototype.dc.html · V1</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Specification</b> — inCommon_Fable_5_Master_Build_Prompt.md</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Test persona</b> — “Maya Lin Chen,” fictional · b. Jul 2, 1992, 9:41 PM · Seattle</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Reviewed</b> — July 19, 2026 · Fable 5 acting QA lead</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px;break-inside:avoid">
+    <span style="font:700 11px 'Karla',sans-serif;color:#1c1b21;margin-right:2px">{{ total }} —</span>
+    <sc-for list="{{ tallies }}" as="r" hint-placeholder-count="4">
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.08em;padding:3px 8px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap">{{ r.t }}</span>
+    </sc-for>
+  </div>
+  <div style="font:400 13px/1.65 'Newsreader',Georgia,serif;color:#3a3942;margin-top:10px">Verdict: the prototype demonstrates every launch-critical behavior in the specification, with honest seams — astrology, Human Design, Vedic, and BaZi figures remain reference-persona demos until a calculation engine is licensed and the §20 test suite passes against it. Per §20, this build does not claim production readiness.</div>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:34px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">1</span>
+    <span style="font:400 20px 'Marcellus',serif">Requirements matrix</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§23.2 grouping</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 4px">Every requirement traces to a spec section and a live surface in the build. Statuses: <b style="color:#256b45">PASS</b> verified working · <b style="color:#6d5b96">DEMO</b> UI complete, values engine-gated · <b style="color:#a3641c">PARTIAL</b> · <b style="color:#a84a37">GATED / OPEN</b> licensing or decision blocked · <b style="color:#6b6974">SPEC’D</b> designed, not built.</div>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:14px 0 2px">Launch-critical</div>
+  <sc-for list="{{ matA }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 60px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 2px">Post-foundation</div>
+  <sc-for list="{{ matB }}" as="r" hint-placeholder-count="4">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 60px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 2px">Licensing-gated</div>
+  <sc-for list="{{ matC }}" as="r" hint-placeholder-count="3">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 60px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">2</span>
+    <span style="font:400 20px 'Marcellus',serif">Calculation verification</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§20 · worked checks</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 8px">Numerology, angel-number, timezone, and lunar figures are live logic in the build and were re-derived by hand below. Positional astrology is sanity-checked only — the language model never calculates positions (§6); a validated ephemeris engine is the outstanding gate.</div>
+  <sc-for list="{{ calcs }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.45fr) 60px;gap:10px;padding:8px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font:600 11px/1.4 'Karla',sans-serif">{{ r.t }}</div>
+        <div style="font:400 10px/1.45 'Karla',sans-serif;color:#8a8794">{{ r.n }}</div>
+      </div>
+      <div style="font:500 10px/1.6 ui-monospace,Menlo,monospace;color:#3a3942;overflow-wrap:break-word">{{ r.w }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+  <div style="font:italic 400 11px/1.5 'Newsreader',Georgia,serif;color:#8a8794;margin-top:6px">† degree-level sanity check only; the licensed engine is the final authority, with the §20 reference-chart suite as its gate.</div>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">3</span>
+    <span style="font:400 20px 'Marcellus',serif">AI grounding — Stella</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§10 · behavioral tests</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 8px">Architecture under test: Stella never calculates. She receives pre-computed CONTEXT blocks — only those the user has enabled in her Context panel — must cite sources on every reply, and a deterministic crisis gate runs before any model call. Offline, a scripted library answers under the same rules, visibly tagged.</div>
+  <sc-for list="{{ ai }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:30px minmax(0,0.9fr) minmax(0,1.8fr) 60px;gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:700 9.5px/1.7 ui-monospace,Menlo,monospace;color:#96762f">{{ r.id }}</div>
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.m }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">4</span>
+    <span style="font:400 20px 'Marcellus',serif">Acceptance &amp; open items</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§21 phase gates</span>
+  </div>
+  <sc-for list="{{ phases }}" as="r" hint-placeholder-count="5">
+    <div style="display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1.55fr) 60px;gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:700 9.5px/1.7 ui-monospace,Menlo,monospace;color:#96762f">{{ r.id }}</div>
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+
+  <sc-if value="{{ founderCopy }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:20px 0 6px">Known gaps — stated plainly</div>
+    <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="5">
+      <div style="display:flex;gap:8px;padding:3px 0;break-inside:avoid">
+        <span style="color:#96762f;font:400 12px/1.55 'Newsreader',Georgia,serif">—</span>
+        <span style="font:400 12px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+      </div>
+    </sc-for>
+    <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 6px">Founder decisions required before Phase-1 lock</div>
+    <sc-for list="{{ decisions }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;gap:8px;padding:3px 0;break-inside:avoid">
+        <span style="color:#96762f;font:400 12px/1.55 'Newsreader',Georgia,serif">—</span>
+        <span style="font:400 12px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+      </div>
+    </sc-for>
+    <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:16px 18px;margin-top:18px;break-inside:avoid">
+      <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37;margin-bottom:8px">Founder re-prompt / edit here</div>
+      <div style="font:500 10.5px/1.8 ui-monospace,Menlo,monospace;color:#3a3942;white-space:pre-line">INCOMMON CHANGE REQUEST
+Requested change:
+Reason / desired outcome:
+Who it affects:
+Priority: Critical / High / Medium / Later
+Must remain unchanged:
+Acceptance test:
+Before implementing: identify conflicts, affected systems, data changes, licensing implications, cost changes, and rollback method — then show the updated build and regression results.</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:baseline;border-top:2px solid #1c1b21;margin-top:26px;padding-top:10px;break-inside:avoid">
+    <div style="font:600 11px 'Karla',sans-serif">Prepared by Fable 5 — acting QA &amp; integrity lead</div>
+    <div style="font:700 9.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#a84a37">STATUS: PROTOTYPE — NOT PRODUCTION-READY (§20)</div>
+  </div>
+  <div style="font:400 10px/1.5 'Karla',sans-serif;color:#8a8794;margin-top:6px">This report covers the interactive prototype only. The persona is fictional; no user data exists or was used. Companion build: <a href="./inCommon Prototype.dc.html">inCommon Prototype.dc.html</a>.</div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;paper&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;letter&quot;, &quot;a4&quot;], &quot;default&quot;: &quot;letter&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Page&quot;}, &quot;founderCopy&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Content&quot;}}">
+class Component extends DCLogic {
+  CHIP = { 'PASS': ['#256b45', 'rgba(37,107,69,.09)'], 'DEMO': ['#6d5b96', 'rgba(109,91,150,.10)'], 'PARTIAL': ['#a3641c', 'rgba(163,100,28,.10)'], 'GATED': ['#a84a37', 'rgba(168,74,55,.09)'], 'OPEN': ['#a84a37', 'rgba(168,74,55,.09)'], 'SPEC’D': ['#6b6974', 'rgba(107,105,116,.09)'] };
+  chip(rows) { return rows.map(r => ({ ...r, sc: this.CHIP[r.s][0], sbg: this.CHIP[r.s][1] })); }
+  renderVals() {
+    const matA = [
+      { t: 'Onboarding with birth-time integrity', sp: '§3', s: 'PASS', n: 'Exact / approximate / unknown paths; unknown suppresses Rising, houses, and Human Design rather than fabricating them' },
+      { t: 'Accuracy & Confidence layer on every calculation', sp: '§3', s: 'PASS', n: 'High / Moderate / Limited chips ride every calculated screen; persona reads High (exact recorded time)' },
+      { t: 'Consent before storing birth data', sp: '§3 §15', s: 'PASS', n: 'Granular ledger with grant, revoke, and re-grant history in Data & Consent' },
+      { t: 'Modular Library — inspect each chart before synthesis', sp: '§4 §5', s: 'PASS', n: '13 modules with filters; per-module method, engine version, and license footers' },
+      { t: 'Astrology: Big 3 · Big 6 · full wheel · aspects', sp: '§6', s: 'DEMO', n: 'UI and progressive disclosure complete; positions are reference-persona values (row 2.11)' },
+      { t: 'Transit Time Machine — any date', sp: '§6', s: 'DEMO', n: 'Past/present/future scrub with applying, exact, and separating states; engine-gated' },
+      { t: 'Numerology: Life Path, Personal Year/Month, masters', sp: '§4A', s: 'PASS', n: 'Live reductions — re-derived by hand in §2' },
+      { t: 'Angel numbers: original text, components, journal', sp: '§4B', s: 'PASS', n: 'Component analysis is live math; interpretations original — no Sacred Scribes content' },
+      { t: 'Compare Lab — two modes, no single score', sp: '§8', s: 'PASS', n: 'Consent-gated second-person invite; per-dimension, multi-system comparison' },
+      { t: 'My inCommon Profile — four analytic lenses', sp: '§9', s: 'PASS', n: 'Agreements, tensions, recurring themes, distinct contributions — each claim cites module + component' },
+      { t: 'Today dashboard', sp: '§10', s: 'PASS', n: 'Transits, cycles, moon, continue-your-thread, one grounded reflection — single screen' },
+      { t: 'Stella — grounded conversational guide', sp: '§10', s: 'PASS', n: 'Ten behavioral tests in §3, including consent, citations, forgetting, pacing, and the crisis gate' },
+      { t: 'Insight Records + Throughline Timeline', sp: '§11', s: 'PASS', n: 'Resonance ratings, check-ins, linked threads; persisted across sessions' },
+      { t: 'Four visual worlds, identical function', sp: '§13', s: 'PASS', n: 'One token system, live switch, reduced-motion respected; no competitor trade dress' }
+    ];
+    const matB = [
+      { t: 'Persistence · account export · deletion', sp: '§12 §15', s: 'PASS', n: 'Local store v1; one-tap JSON export; two-step armed deletion purges the store' },
+      { t: 'Notifications — opt-in by category', sp: '§12', s: 'PARTIAL', n: 'Preference model complete; no delivery service in a prototype' },
+      { t: 'Assessments: Big Five, Enneagram', sp: '§4C', s: 'PASS', n: 'Short-form instruments, labeled assessment-derived with date and retake history' },
+      { t: 'Human Design BodyGraph + transits', sp: '§7', s: 'DEMO', n: 'Graph renders with type/strategy/authority; engine and interpretation licensing open' },
+      { t: 'Founder admin console', sp: '§17', s: 'SPEC’D', n: 'Versioned content/prompt model reserved in the data design; no screens in this build' },
+      { t: 'PWA shell · offline states', sp: '§1', s: 'SPEC’D', n: 'Architecture documented; not built' },
+      { t: 'Backend, auth, encryption at rest', sp: '§15 §18', s: 'SPEC’D', n: 'Prototype is deliberately local-only; ownership plan sits with the founder per §18' }
+    ];
+    const matC = [
+      { t: 'Ephemeris engine license — Swiss vs alternative', sp: '§6', s: 'OPEN', n: 'AGPL/commercial decision blocks astrology PASS; memo with costs and migration drafted' },
+      { t: 'Gene Keys', sp: '§4A', s: 'GATED', n: 'Disabled shell with official external link; no copied or generated substitute content' },
+      { t: 'Sabian symbols — full 360° commentary', sp: '§14', s: 'PARTIAL', n: 'Cleared degrees shipped; remainder held in editorial/legal review' },
+      { t: 'Vedic + BaZi calculation engines', sp: '§7', s: 'GATED', n: 'Screens shipped marked “engine in validation”; no invented positions' },
+      { t: 'MBTI · Love Languages branding', sp: '§4C', s: 'GATED', n: 'Neutral 16-type and relational-preference frameworks used instead' }
+    ];
+    const calcs = [
+      { t: 'Life Path', n: 'app shows Life Path 3', w: '07·02·1992 → 7 + 2 + (1+9+9+2 = 21 → 3) = 12 → 3', s: 'PASS' },
+      { t: 'Personal Year 2026', n: 'app shows Personal Year 1 · Initiation', w: '7 + 2 + (2+0+2+6 = 10 → 1) = 10 → 1', s: 'PASS' },
+      { t: 'Personal Month — July', n: 'app shows Personal Month 8', w: 'PY 1 + month 7 = 8', s: 'PASS' },
+      { t: 'Expression — “Maya Lin Chen”', n: 'app shows 6 · name-at-birth, never merged with current name', w: 'MAYA 4+1+7+1=13→4 · LIN 3+9+5=17→8 · CHEN 3+8+5+5=21→3 · 4+8+3=15 → 6', s: 'PASS' },
+      { t: 'Soul Urge — vowels', n: 'app shows 7 · Y-as-consonant policy documented in Method', w: 'A+A=2 · I=9 · E=5 → 16 → 7', s: 'PASS' },
+      { t: 'Master-number preservation', n: 'angel lookup “29” reports 11 · master preserved', w: '29 → 2+9 = 11 · reduction stops (no 11 → 2)', s: 'PASS' },
+      { t: 'Angel component analysis', n: 'matches live lookup output', w: '1212 → 1+2+1+2 = 6 · 777 → 21 → 3 · repeats flagged', s: 'PASS' },
+      { t: 'Historical timezone resolution', n: 'profile footer reads “PDT resolved”', w: 'Jul 2 1992, Seattle → America/Los_Angeles · DST active · UTC−7', s: 'PASS' },
+      { t: 'Moon phase — Jul 19 2026', n: 'matches Today card', w: 'new Jul 14 → age ≈ 4.8 d → waxing crescent · first quarter Jul 21', s: 'PASS' },
+      { t: 'Sun degree sanity †', n: 'app shows Sun 11° Cancer', w: 'solstice Jun 20 ≈ 0° Cancer + 12 d ≈ 11°', s: 'PASS' },
+      { t: 'Moon 18° Scorpio H9 · AC 3° Aquarius · houses · aspects', n: 'reference-persona values — not engine-derived', w: 'awaiting licensed ephemeris + §20 reference-chart suite', s: 'DEMO' },
+      { t: 'HD gates · BaZi pillars · Vedic sidereal', n: 'no placeholder passes claimed', w: 'screens marked “in validation” until engines clear', s: 'GATED' }
+    ];
+    const ai = [
+      { id: 'T1', t: 'Citation coverage', m: 'Every reply renders source chips; live replies parse a SOURCES line; scripted replies carry per-branch cites plus a visible “Scripted · offline” tag', s: 'PASS' },
+      { id: 'T2', t: 'Exclusion honored', m: 'Journal toggled off in Context → journal question → Stella declines, names the exclusion, points to the panel, offers another angle — no workaround', s: 'PASS' },
+      { id: 'T3', t: 'All context off', m: 'Chart + timing disabled → reply stays general; zero placements or records named', s: 'PASS' },
+      { id: 'T4', t: 'Forget conversation', m: '“Forget” resets to the greeting and the purge propagates to the persisted store — nothing retained', s: 'PASS' },
+      { id: 'T5', t: 'Pacing limit', m: 'Seventh message inside 60 s is blocked with “up to 6 messages a minute” — gentle anti-dependency per §10–11', s: 'PASS' },
+      { id: 'T6', t: 'Crisis safety gate', m: 'Deterministic check runs before any model call; crisis phrasing routes to a scripted human-support redirect (988 / findahelpline.com) and is never interpreted astrologically', s: 'PASS' },
+      { id: 'T7', t: 'Offline fallback', m: 'With no API, the scripted library answers under identical grounding rules, visibly tagged', s: 'PASS' },
+      { id: 'T8', t: 'No invented data', m: 'System prompt injects only enabled CONTEXT blocks and forbids invention; scripted branches quote stored records verbatim', s: 'PASS' },
+      { id: 'T9', t: 'Prompt-injection resistance', m: 'Grounding rules assert precedence over user text; a proper adversarial red-team suite has not yet been run — required before launch (§20)', s: 'PARTIAL' },
+      { id: 'T10', t: 'Memory & consent parity', m: 'Chat history is local-only; the “Stella may reference my journal” consent row mirrors the Context panel live, in both directions', s: 'PASS' }
+    ];
+    const phases = [
+      { id: 'P0', t: 'Requirements traced', n: 'This document is the traceability matrix; spec converted §-by-§', s: 'PASS' },
+      { id: 'P1', t: 'Foundation & design system', n: 'Onboarding, consent, navigation, four-theme token engine — prototype level', s: 'PASS' },
+      { id: 'P2', t: 'Core identity modules', n: 'Astrology (demo values), numerology, angel numbers, Sabian framework', s: 'PASS' },
+      { id: 'P3', t: 'Timing, journaling, progress', n: 'Time Machine, Today, Insight Records, Throughline; notifications partial', s: 'PASS' },
+      { id: 'P4', t: 'Comparison & synthesis', n: 'Compare Lab, inCommon Profile, citation and confidence layers', s: 'PASS' },
+      { id: 'P5', t: 'Additional systems', n: 'Assessments live; HD demo; Vedic, BaZi, Gene Keys, Chaldean gated or queued', s: 'PARTIAL' },
+      { id: 'P6', t: 'AI guide & hardening', n: 'Stella verified above; security, accessibility, and licensing audits pending', s: 'PARTIAL' }
+    ];
+    const gaps = [
+      'No backend: all state lives in a local store — authentication, encryption at rest, and sync are unbuilt (§15, §18).',
+      'Astrology, Human Design, Vedic, and BaZi figures are reference-persona demos until an engine is licensed and the §20 suite passes.',
+      'Founder admin console (§17) is a data-model reservation, not a screen.',
+      'Notifications stop at preferences; there is no delivery layer (§12).',
+      'Accessibility: contrast and reduced-motion done; screen-reader labels and a full keyboard pass are incomplete (§13).',
+      'Interpretation library is draft-status — the editorial review workflow (§14) is not yet stood up.',
+      'PWA install and offline behavior are not built (§1).'
+    ];
+    const decisions = [
+      'Ephemeris: Swiss Ephemeris AGPL/commercial license vs a Moshier-class alternative — accuracy, cost, and migration memo attached to matrix row 1.',
+      'Hosting and data-ownership accounts, founder-controlled from day one (§18).',
+      'Minors policy and age gate before launch (§15).',
+      'Gene Keys: pursue a license, or ship the disabled shell indefinitely (§4A).'
+    ];
+    const all = [...matA, ...matB, ...matC, ...calcs, ...ai];
+    const tally = {}; all.forEach(r => tally[r.s] = (tally[r.s] || 0) + 1);
+    const order = ['PASS', 'DEMO', 'PARTIAL', 'GATED', 'OPEN', 'SPEC’D'];
+    const founderCopy = this.props.founderCopy ?? true;
+    return {
+      paper: this.props.paper ?? 'letter',
+      founderCopy,
+      confid: founderCopy ? 'Confidential — founder copy' : 'Review copy',
+      total: all.length + ' checks',
+      tallies: order.filter(k => tally[k]).map(k => ({ t: tally[k] + ' ' + k, sc: this.CHIP[k][0], sbg: this.CHIP[k][1] })),
+      matA: this.chip(matA), matB: this.chip(matB), matC: this.chip(matC),
+      calcs: this.chip(calcs), ai: this.chip(ai), phases: this.chip(phases),
+      gaps, decisions
+    };
+  }
+}
+</script>
+</body>
+</html>

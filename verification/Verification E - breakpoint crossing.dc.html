@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Same vendored React the app uses. Without this the harness shell itself
+   still reaches unpkg, so a run that appears to prove the build is offline
+   clean would not be. No assertion is touched by this block. */
+window.__resources = Object.assign(window.__resources || {}, {
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': '../app/react-18.3.1.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': '../app/react-dom-18.3.1.production.min.js'
+});
+</script>
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>inCommon: breakpoint crossing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="../app/handoff/tests-v6.0.js"></script>
+<style>
+  html, body { margin: 0; background: #05060a; }
+  a { color: #7dffb9; }
+  a:hover { color: #2fff8f; }
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;padding:28px clamp(18px,4vw,44px) 56px;background:#05060a;color:#eef0f8;font-family:'Karla',system-ui,sans-serif;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font:600 10px 'Karla';letter-spacing:.18em;text-transform:uppercase;color:#b79bff">inCommon verification</span>
+    <div style="font:400 clamp(28px,3vw,40px)/1.15 'Marcellus',serif">The breakpoint crossing</div>
+    <div style="font:400 13px/1.6 'Karla';color:rgba(238,240,248,.6);max-width:74ch;text-wrap:pretty">Check E: one frame, resized live across 820 in both directions with no reload, which is the only way to catch a shell that swaps correctly on a cold load and leaks on a resize. The last of the seven phases to get a runner of its own.</div>
+  </div>
+  <!-- runCross HAS A DIFFERENT SHAPE FROM EVERY OTHER PHASE, and it matters
+       here. The others take a sink and fill it as they go, so an overrun keeps
+       what it proved and reports the rest as unreached. This one RETURNS its
+       rows, so a timeout loses all of them and the report would be empty
+       rather than short. An empty result from this phase is therefore never
+       "nothing to say": it is the run failing to finish. -->
+  <sc-if value="{{ hasGuard }}" hint-placeholder-val="{{ false }}">
+    <div style="font:600 12px/1.6 'Karla';color:{{ guardC }};border-left:3px solid {{ guardC }};padding-left:11px;max-width:74ch">{{ guardLine }}</div>
+  </sc-if>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font:600 12px 'Karla';letter-spacing:.04em;color:{{ statusC }}">{{ status }}</div>
+    <sc-if value="{{ running }}" hint-placeholder-val="{{ true }}">
+      <span style="width:7px;height:7px;border-radius:50%;background:#2fff8f;animation:blink 1.1s infinite"></span>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hasCost }}" hint-placeholder-val="{{ false }}">
+    <div style="font:400 11.5px/1.6 'Karla';color:rgba(238,240,248,.55)">{{ cost }}</div>
+  </sc-if>
+  <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:9px;max-width:1100px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:start;background:#0d0f16;border:1px solid rgba(47,79,214,.3);border-left:3px solid {{ r.edge }};border-radius:12px;padding:12px 15px">
+          <span style="font:700 11px 'Karla';letter-spacing:.08em;color:{{ r.edge }}">{{ r.id }}</span>
+          <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+            <span style="font:400 13.5px/1.5 'Karla';color:#eef0f8;text-wrap:pretty">{{ r.name }}</span>
+            <sc-if value="{{ r.bad }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:3px;font:400 11px/1.55 ui-monospace,monospace;color:rgba(238,240,248,.62);word-break:break-word">
+                <span>expected {{ r.exp }}</span>
+                <span style="color:#e5534d">actual {{ r.act }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  SRC = '../app/inCommonApp v2.dc.html';
+  /* E0 is the boot guard and only fires when the frame fails to load, so a
+     healthy run emits E1 to E5 and nothing else. Subtract the guard when
+     setting a count: one that reddens every good run stops being read. */
+  EXPECTED = 5;
+  state = { rows: [], status: 'Loading the harness…', running: true, ms: 0, timedOut: false };
+
+  async componentDidMount() {
+    if (window.__vERunning) { this.setState({ status: 'A run is already in progress in this tab.', running: false }); return; }
+    window.__vERunning = true;
+    const T = window.InCommonTestsV14;
+    if (!T || !T.runCross) {
+      this.setState({ status: 'handoff/tests-v6.0.js did not load, or has no runCross export.', running: false });
+      window.__vERunning = false;
+      return;
+    }
+    /* 180s, matching the budget the full suite gives this phase. Note the
+       signature: runCross takes (src, onStep) and RETURNS its rows. There is
+       no sink to pass and nothing to salvage from a timeout. */
+    const started = performance.now();
+    let out = null;
+    try {
+      out = await Promise.race([
+        T.runCross(this.SRC, s => this.setState({ status: s })),
+        new Promise(r => setTimeout(() => r(null), 180000))
+      ]);
+    } catch (e) {
+      out = [{ id: 'E-ERR', name: 'Breakpoint crossing threw: ' + (e && e.message), pass: false, expected: 'no error', actual: String(e && e.message) }];
+    }
+    const ms = Math.round(performance.now() - started);
+    window.__vECrossMs = ms;
+    const timedOut = out === null;
+    const rows = timedOut
+      ? [{ id: 'E-TIMEOUT', name: 'The resize run did not finish inside 180s, and this phase returns rather than sinks, so no partial rows survive', pass: false, expected: 'complete', actual: 'cut short' }]
+      : out;
+    window.__vERunning = false;
+    window.__vECount = timedOut ? 0 : rows.length;
+    const bad = rows.filter(r => !r.pass).length;
+    this.setState({ rows: rows, running: false, ms: ms, timedOut: timedOut,
+      status: bad ? bad + ' of ' + rows.length + ' failed.' : 'All ' + rows.length + ' assertions passed.' });
+  }
+
+  fmt(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return String(v); } }
+
+  renderVals() {
+    const rows = this.state.rows, bad = rows.filter(r => !r.pass).length;
+    const real = rows.filter(r => /^E[1-9]/.test(String(r.id))).length;
+    const guard = rows.some(r => String(r.id) === 'E0');
+    const ok = !this.state.timedOut && !guard && real === this.EXPECTED;
+    return {
+      status: this.state.status,
+      statusC: this.state.running ? '#b79bff' : bad ? '#e5534d' : '#2fff8f',
+      running: this.state.running,
+      hasGuard: !this.state.running,
+      guardC: ok ? '#2fff8f' : '#e5534d',
+      guardLine: ok
+        ? real + ' rows arrived against ' + this.EXPECTED + ' declared, and the frame booted. Nothing was cut.'
+        : this.state.timedOut
+          ? 'The phase timed out. It returns its rows rather than filling a sink, so nothing survived: this is a failed run, not a short one.'
+          : guard
+            ? 'The frame failed to boot (E0), so the resize was never performed. Treat this run as void.'
+            : real + ' rows arrived and ' + this.EXPECTED + ' are declared. Rows can go MISSING rather than red in this suite.',
+      hasCost: !this.state.running && this.state.ms > 0,
+      cost: (this.state.ms / 1000).toFixed(1) + 's of the 180s budget. Read this rather than the wall clock: a backgrounded tab is throttled to roughly one timer a minute.',
+      hasRows: rows.length > 0,
+      rows: rows.map(r => ({ id: r.id, name: r.name, bad: !r.pass,
+        edge: r.pass ? '#2fff8f' : '#e5534d',
+        exp: this.fmt(r.expected), act: this.fmt(r.actual) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

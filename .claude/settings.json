@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node tools/run-tests-node.js)",
+      "Bash(node tools/run-fixtures.js)",
+      "Bash(node tools/check-purple-text.js)",
+      "Bash(node tools/check-dead-controls.js)",
+      "Bash(node tools/token-compare.js)",
+      "Bash(node tools/build-ui-icons.js)",
+      "Bash(node tools/build-icons.js)",
+      "Bash(npx serve:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)"
+    ]
+  }
+}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Same vendored React the app uses. Without this the harness shell itself
+   still reaches unpkg, so a run that appears to prove the build is offline
+   clean would not be. No assertion is touched by this block. */
+window.__resources = Object.assign(window.__resources || {}, {
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': '../app/react-18.3.1.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': '../app/react-dom-18.3.1.production.min.js'
+});
+</script>
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>inCommon: ADA phase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="../app/handoff/tests-v6.0.js"></script>
+<style>
+  html, body { margin: 0; background: #05060a; }
+  a { color: #7dffb9; }
+  a:hover { color: #2fff8f; }
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;padding:28px clamp(18px,4vw,44px) 56px;background:#05060a;color:#eef0f8;font-family:'Karla',system-ui,sans-serif;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font:600 10px 'Karla';letter-spacing:.18em;text-transform:uppercase;color:#b79bff">inCommon verification</span>
+    <div style="font:400 clamp(28px,3vw,40px)/1.15 'Marcellus',serif">The ADA phase</div>
+    <div style="font:400 13px/1.6 'Karla';color:rgba(238,240,248,.6);max-width:74ch;text-wrap:pretty">Group G only, split out the same way R, N and T were. It walks the skip link, the focus trap, the live regions and the announcements, and it needs the first run screen, so give it a clean origin.</div>
+  </div>
+  <!-- TWO ROWS CANNOT PASS IN AN UNFOCUSED WINDOW, AND THEY ARE NOT BUGS.
+       G1c and G12b need real focus. In a window the OS has not focused,
+       document.activeElement is set but el.matches(':focus') is false, so no
+       :focus rule applies and no focus event fires, while every other
+       measurement looks completely normal. The banner below runs exactly that
+       one line test before the phase starts, so a red G1c can be read as what
+       it is instead of being chased. -->
+  <sc-if value="{{ hasFocusWarning }}" hint-placeholder-val="{{ false }}">
+    <div style="font:600 12px/1.6 'Karla';color:#e5534d;border-left:3px solid #e5534d;padding-left:11px;max-width:74ch">{{ focusWarning }}</div>
+  </sc-if>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font:600 12px 'Karla';letter-spacing:.04em;color:{{ statusC }}">{{ status }}</div>
+    <sc-if value="{{ running }}" hint-placeholder-val="{{ true }}">
+      <span style="width:7px;height:7px;border-radius:50%;background:#2fff8f;animation:blink 1.1s infinite"></span>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hasCost }}" hint-placeholder-val="{{ false }}">
+    <div style="font:400 11.5px/1.6 'Karla';color:rgba(238,240,248,.55)">{{ cost }}</div>
+  </sc-if>
+  <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:9px;max-width:1100px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:start;background:#0d0f16;border:1px solid rgba(47,79,214,.3);border-left:3px solid {{ r.edge }};border-radius:12px;padding:12px 15px">
+          <span style="font:700 11px 'Karla';letter-spacing:.08em;color:{{ r.edge }}">{{ r.id }}</span>
+          <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+            <span style="font:400 13.5px/1.5 'Karla';color:#eef0f8;text-wrap:pretty">{{ r.name }}</span>
+            <sc-if value="{{ r.bad }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:3px;font:400 11px/1.55 ui-monospace,monospace;color:rgba(238,240,248,.62);word-break:break-word">
+                <span>expected {{ r.exp }}</span>
+                <span style="color:#e5534d">actual {{ r.act }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  SRC = '../app/inCommonApp v2.dc.html';
+  state = { rows: [], status: 'Loading the harness…', running: true, ms: 0, focusOk: true };
+
+  /* The documented one line test, run on a probe of this page rather than on
+     the app: focus something, then ask the two questions. activeElement true
+     and :focus false is an unfocused window, not a broken build. */
+  probeFocus() {
+    const b = document.createElement('button');
+    b.setAttribute('style', 'position:fixed;left:-9999px;width:44px;height:44px');
+    document.body.appendChild(b);
+    b.focus();
+    const active = document.activeElement === b;
+    let matched = false;
+    try { matched = b.matches(':focus'); } catch (e) {}
+    b.remove();
+    return { active: active, matched: matched, ok: active && matched, hasFocus: document.hasFocus() };
+  }
+
+  async componentDidMount() {
+    if (window.__vGRunning) { this.setState({ status: 'A run is already in progress in this tab.', running: false }); return; }
+    window.__vGRunning = true;
+    const T = window.InCommonTestsV14;
+    if (!T || !T.runA11y) {
+      this.setState({ status: 'handoff/tests-v6.0.js did not load, or has no runA11y export.', running: false });
+      window.__vGRunning = false;
+      return;
+    }
+    const f = this.probeFocus();
+    window.__vGFocus = f;
+    this.setState({ focusOk: f.ok });
+    const sink = [];
+    /* 420s matches the budget the full suite gives this phase. */
+    const started = performance.now();
+    const done = await Promise.race([
+      T.runA11y(this.SRC, s => this.setState({ status: s }), sink).then(() => true),
+      new Promise(r => setTimeout(() => r(false), 420000))
+    ]);
+    const ms = Math.round(performance.now() - started);
+    window.__vGAdaMs = ms;
+    if (!done) sink.push({ id: 'G-TIMEOUT', name: 'The ADA phase ran out of time; ' + sink.length + ' assertions completed first', pass: false, expected: 'complete', actual: 'cut short' });
+    window.__vGRunning = false;
+    const bad = sink.filter(r => !r.pass).length;
+    this.setState({ rows: sink, running: false, ms: ms,
+      status: bad ? bad + ' of ' + sink.length + ' failed.' : 'All ' + sink.length + ' assertions passed.' });
+  }
+
+  fmt(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return String(v); } }
+
+  renderVals() {
+    const rows = this.state.rows, bad = rows.filter(r => !r.pass).length;
+    const f = window.__vGFocus || { active: true, matched: true, ok: true, hasFocus: true };
+    return {
+      status: this.state.status,
+      statusC: this.state.running ? '#b79bff' : bad ? '#e5534d' : '#2fff8f',
+      running: this.state.running,
+      hasFocusWarning: !f.ok,
+      focusWarning: 'This window does not hold real focus: document.activeElement is ' + f.active +
+        ' but matches(":focus") is ' + f.matched + ' and document.hasFocus() is ' + f.hasFocus +
+        '. G1c and G12b cannot pass in that state and a red result from them here says nothing about the build. Click into this window and reload before believing either row.',
+      hasCost: !this.state.running && this.state.ms > 0,
+      cost: (this.state.ms / 1000).toFixed(1) + 's of the 420s budget. A backgrounded tab is throttled to about one timer a minute, so read this figure rather than the wall clock.',
+      hasRows: rows.length > 0,
+      rows: rows.map(r => ({ id: r.id, name: r.name, bad: !r.pass,
+        edge: r.pass ? '#2fff8f' : '#e5534d',
+        exp: this.fmt(r.expected), act: this.fmt(r.actual) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

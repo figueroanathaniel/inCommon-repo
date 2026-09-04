@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible,a:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" dark="{{ true }}" hint-size="430px,900px">
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;height:100%;display:flex;flex-direction:column;padding-top:62px;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu)">
+
+<div style="flex:none;display:flex;flex-direction:column;gap:2px;padding:6px 18px 12px;border-bottom:1px solid var(--bd)">
+  <div style="font:400 21px var(--fd)">You deserve a person</div>
+  <div style="font:400 11.5px var(--fu);color:var(--dim)">Real humans · free · confidential · no Oki here, just people</div>
+</div>
+
+<div style="flex:1;min-height:0;overflow-y:auto;padding:18px 18px 28px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+
+  <div style="background:rgba(224,141,125,.09);border:1px solid rgba(224,141,125,.4);border-radius:var(--rad);padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+    <div style="font:600 13.5px/1.5 var(--fu)">If you&rsquo;re in immediate danger, call your local emergency number.</div>
+    <sc-if value="{{ hasEmergency }}" hint-placeholder-val="{{ true }}">
+      <a href="{{ emergencyHref }}" style="box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--warn);color:#141019;font:700 15px var(--fu);text-decoration:none" style-hover="opacity:.88"><span>Call {{ emergencyNum }} now</span></a>
+      <div style="font:400 11px var(--fu);color:var(--dim)">That&rsquo;s {{ emergencyNum }} where you are — {{ regionLabel }}.</div>
+    </sc-if>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Where are you right now?</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px" role="radiogroup" aria-label="Country or region">
+      <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="7">
+        <button onClick="{{ ch.go }}" role="radio" aria-checked="{{ ch.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border-radius:999px;border:1px solid {{ ch.bd }};background:{{ ch.bg }};color:{{ ch.c }};font:600 12px var(--fu)" style-hover="border-color:rgba(211,173,110,.5)">{{ ch.t }}</button>
+      </sc-for>
+    </div>
+    <div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ detectNote }}</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ resources }}" as="r" hint-placeholder-count="3">
+      <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px;display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font:600 14.5px var(--fu)">{{ r.t }}</div>
+          <div style="font:400 13px/1.55 var(--fb);color:var(--dim)">{{ r.d }}</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ r.acts }}" as="a" hint-placeholder-count="2">
+            <sc-if value="{{ a.isLink }}" hint-placeholder-val="{{ true }}">
+              <a href="{{ a.href }}" target="{{ a.target }}" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid rgba(211,173,110,.4);border-radius:999px;font:700 12.5px var(--fu);color:var(--ac);text-decoration:none" style-hover="background:rgba(211,173,110,.1)">{{ a.t }}</a>
+            </sc-if>
+            <sc-if value="{{ a.isText }}" hint-placeholder-val="{{ false }}">
+              <span style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--sf2);font:600 12.5px var(--fu);color:var(--tx)">{{ a.t }}</span>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="font:400 13px/1.6 var(--fb);color:var(--dim);font-style:italic">These lines are for any kind of heavy. You don&rsquo;t need the &ldquo;right&rdquo; kind of crisis — or the right words — to reach out.</div>
+  <div style="font:400 10.5px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:12px">This list lives on your device and works with no connection — nothing here calls a server. Your place is guessed from the device&rsquo;s language settings and never sent anywhere. Numbers last checked July 2026.</div>
+</div>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900}, &quot;defaultRegion&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;auto&quot;, &quot;options&quot;: [&quot;auto&quot;, &quot;US&quot;, &quot;GB&quot;, &quot;CA&quot;, &quot;AU&quot;, &quot;NZ&quot;, &quot;IE&quot;, &quot;INTL&quot;], &quot;tsType&quot;: &quot;'auto'|'US'|'GB'|'CA'|'AU'|'NZ'|'IE'|'INTL'&quot;, &quot;section&quot;: &quot;Crisis&quot;}, &quot;rememberChoice&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Crisis&quot;}}">
+class Component extends DCLogic {
+  KEY = 'incommon.crisis.region';
+  state = { region: null, stored: null, detected: null };
+
+  REGIONS = [
+    { code: 'US', chip: 'US', label: 'the United States', emergency: '911', res: [
+      { t: '988 Suicide & Crisis Lifeline', d: 'Any hour, any kind of too-much. A trained human on the line \u2014 call, text, or chat.', acts: [
+        { t: 'Call 988', href: 'tel:988' }, { t: 'Chat online', href: 'https://988lifeline.org/chat/', ext: true }, { t: 'or text 988' }] },
+      { t: 'Crisis Text Line', d: 'If talking out loud feels like a lot right now, text instead. Same care, no voice.', acts: [{ t: 'Text HOME to 741741' }] },
+      { t: 'The Trevor Project', d: 'For LGBTQ+ young people \u2014 people who get it, around the clock.', acts: [
+        { t: 'Call 1-866-488-7386', href: 'tel:18664887386' }, { t: 'Text START to 678-678' }] },
+      { t: 'Veterans Crisis Line', d: 'For veterans, service members, and the people who love them.', acts: [
+        { t: 'Call 988, then press 1', href: 'tel:988' }, { t: 'Text 838255' }] }
+    ]},
+    { code: 'GB', aliases: ['UK'], chip: 'UK', label: 'the United Kingdom', emergency: '999', res: [
+      { t: 'Samaritans', d: 'Whatever you\u2019re carrying, they\u2019ll listen \u2014 no judgment, no rush, no charge, ever.', acts: [
+        { t: 'Call 116 123', href: 'tel:116123' }, { t: 'Email jo@samaritans.org', href: 'mailto:jo@samaritans.org' }] },
+      { t: 'Shout', d: 'A text conversation with a trained volunteer, any hour of the day or night.', acts: [{ t: 'Text SHOUT to 85258' }] },
+      { t: 'Papyrus HOPELINE247', d: 'For anyone under 35 \u2014 or anyone worried about a young person.', acts: [{ t: 'Call 0800 068 4141', href: 'tel:08000684141' }] }
+    ]},
+    { code: 'CA', chip: 'Canada', label: 'Canada', emergency: '911', res: [
+      { t: '988 Suicide Crisis Helpline', d: 'One number across Canada \u2014 call or text, day or night, English or French.', acts: [
+        { t: 'Call 988', href: 'tel:988' }, { t: 'or text 988' }] },
+      { t: 'Kids Help Phone', d: 'For young people \u2014 phone or text, whichever feels easier.', acts: [
+        { t: 'Call 1-800-668-6868', href: 'tel:18006686868' }, { t: 'Text CONNECT to 686868' }] },
+      { t: 'Hope for Wellness', d: 'For First Nations, Inuit, and M\u00e9tis \u2014 counselling in English, French, Cree, Ojibway, and Inuktitut.', acts: [
+        { t: 'Call 1-855-242-3310', href: 'tel:18552423310' }, { t: 'Chat online', href: 'https://hopeforwellness.ca', ext: true }] }
+    ]},
+    { code: 'AU', chip: 'Australia', label: 'Australia', emergency: '000', res: [
+      { t: 'Lifeline', d: 'Australia\u2019s crisis line \u2014 someone real, 24 hours, every day.', acts: [
+        { t: 'Call 13 11 14', href: 'tel:131114' }, { t: 'Text 0477 13 11 14' }] },
+      { t: 'Beyond Blue', d: 'For anxiety and depression \u2014 practical support, or just an ear.', acts: [
+        { t: 'Call 1300 22 4636', href: 'tel:1300224636' }, { t: 'Chat online', href: 'https://www.beyondblue.org.au', ext: true }] },
+      { t: 'Kids Helpline', d: 'Ages 5\u201325 \u2014 free from any phone, any time.', acts: [{ t: 'Call 1800 55 1800', href: 'tel:1800551800' }] }
+    ]},
+    { code: 'NZ', chip: 'NZ', label: 'New Zealand', emergency: '111', res: [
+      { t: '1737 \u2014 Need to Talk?', d: 'Aotearoa\u2019s line \u2014 free call or text with a trained counsellor.', acts: [
+        { t: 'Call 1737', href: 'tel:1737' }, { t: 'or text 1737' }] },
+      { t: 'Lifeline Aotearoa', d: 'Around the clock, for whatever tonight is holding.', acts: [
+        { t: 'Call 0800 543 354', href: 'tel:0800543354' }, { t: 'Text HELP to 4357' }] }
+    ]},
+    { code: 'IE', chip: 'Ireland', label: 'Ireland', emergency: '112', res: [
+      { t: 'Samaritans Ireland', d: 'Free to call, any hour \u2014 they\u2019ll stay on the line as long as you need.', acts: [{ t: 'Call 116 123', href: 'tel:116123' }] },
+      { t: 'Text About It', d: 'A 24/7 text service \u2014 start with one word.', acts: [{ t: 'Text HELLO to 50808' }] },
+      { t: 'Pieta', d: 'For self-harm and suicidal thoughts \u2014 real therapists, free of charge.', acts: [{ t: 'Call 1800 247 247', href: 'tel:1800247247' }] }
+    ]},
+    { code: 'INTL', chip: 'Elsewhere', label: 'your part of the world', emergency: null, res: [
+      { t: 'Find a Helpline', d: 'Type your country and get real, verified local lines \u2014 phone, text, and chat.', acts: [{ t: 'findahelpline.com', href: 'https://findahelpline.com', ext: true }] },
+      { t: 'Befrienders Worldwide', d: 'Volunteer listening centres in more than 30 countries, in local languages.', acts: [{ t: 'befrienders.org', href: 'https://befrienders.org', ext: true }] }
+    ]}
+  ];
+
+  detect() {
+    try {
+      const langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']).filter(Boolean);
+      for (const l of langs) {
+        const m = /[-_]([A-Za-z]{2})\b/.exec(l);
+        if (m) {
+          const c = m[1].toUpperCase();
+          const hit = this.REGIONS.find(r => r.code === c || (r.aliases || []).includes(c));
+          if (hit) return hit.code;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+  componentDidMount() {
+    let stored = null;
+    try { stored = localStorage.getItem(this.KEY); } catch (e) {}
+    if (stored && !this.REGIONS.some(r => r.code === stored)) stored = null;
+    this.setState({ stored, detected: this.detect() });
+  }
+  pick(code) {
+    this.setState({ region: code, stored: code });
+    if (this.props.rememberChoice ?? true) { try { localStorage.setItem(this.KEY, code); } catch (e) {} }
+  }
+
+  renderVals() {
+    const st = this.state;
+    const propR = this.props.defaultRegion ?? 'auto';
+    const code = st.region ?? (propR !== 'auto' ? propR : null) ?? st.stored ?? st.detected ?? 'INTL';
+    const region = this.REGIONS.find(r => r.code === code) || this.REGIONS[this.REGIONS.length - 1];
+    const chose = !!(st.region || st.stored);
+    return {
+      hasEmergency: !!region.emergency,
+      emergencyNum: region.emergency || '',
+      emergencyHref: 'tel:' + (region.emergency || ''),
+      regionLabel: region.label,
+      chips: this.REGIONS.map(r => ({ t: r.chip, on: r.code === region.code,
+        c: r.code === region.code ? '#141019' : 'var(--dim)',
+        bg: r.code === region.code ? 'var(--ac)' : 'transparent',
+        bd: r.code === region.code ? 'var(--ac)' : 'var(--bd)',
+        go: () => this.pick(r.code) })),
+      detectNote: chose
+        ? 'Your choice is remembered on this device \u2014 and only on this device.'
+        : (st.detected ? 'Guessed from this device\u2019s language settings \u2014 nothing was sent anywhere. Not right? Tap your place.' : 'We couldn\u2019t guess where you are \u2014 tap your place above.'),
+      resources: region.res.map(r => ({ t: r.t, d: r.d,
+        acts: r.acts.map(a => ({ t: a.t, isLink: !!a.href, isText: !a.href, href: a.href || '', target: a.ext ? '_blank' : '_self' })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

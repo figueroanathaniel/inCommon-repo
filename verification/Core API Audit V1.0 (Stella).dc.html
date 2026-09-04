@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Karla',system-ui,sans-serif;color:#1c1b21}
+a{color:#96762f;text-decoration:none}a:hover{color:#7a5e22;text-decoration:underline}
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="{{ paper }}" orientation="portrait" margin="0.7in" hint-size="100%,1400px">
+
+<div slot="header" style="display:flex;justify-content:space-between;gap:12px;font:600 8.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a8794;padding-bottom:6px;border-bottom:1px solid #e7e4dc">
+  <span>inCommon — Core API Audit · V1.0</span>
+  <span>Input to the Stella memory-system design</span>
+</div>
+<div slot="footer" style="display:flex;justify-content:space-between;gap:12px;font:500 8.5px 'Karla',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8a8794;padding-top:6px;border-top:1px solid #e7e4dc">
+  <span>Fable 5 · QA &amp; integrity</span>
+  <span>July 21, 2026</span>
+</div>
+
+<div style="display:flex;flex-direction:column;color:#1c1b21">
+  <div style="font:600 10px 'Karla',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#96762f;margin-top:10px">inCommon · Quality &amp; Integrity</div>
+  <div style="font:400 38px/1.12 'Marcellus',serif;margin-top:10px">Core API Audit</div>
+  <div style="font:italic 400 15px/1.5 'Newsreader',Georgia,serif;color:#6b6974;margin-top:8px">V1.0 · A pre-integration survey of <span style="font:400 13px ui-monospace,Menlo,monospace">incommon-core.js</span> — every public function, what it takes and returns, which outputs are calculations versus interpretations, where guidance risk concentrates, and how birth data flows to the screen and into Stella's prompt. Written so the Stella memory system can be designed against what she can actually see.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-top:20px;padding:14px 16px;border:1px solid #e7e4dc;border-radius:6px;break-inside:avoid">
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Module under audit</b> — incommon-core.js v1.2.0 · UMD, 286 lines · root copy executed by app + both test suites</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Consumer surveyed</b> — inCommon Prototype V1.2.dc.html (DCLogic UI framework)</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Test data</b> — handoff/calculation-fixtures.json (persona “Maya Lin Chen,” fictional)</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Executed evidence</b> — <a href="./Test Runner V1.2.dc.html">Test Runner V1.2</a> · handoff/test-results-v1.2.json · 55/55, exit 0 · Jul 21, 2026</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Method</b> — full source read + consumer call-site trace; no code changed; test IDs cited are from the executed V1.2 run</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Purpose</b> — controlling input for the Stella memory-system design round</div>
+  </div>
+
+  <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:12px 16px;margin-top:14px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f">Key finding</div>
+    <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:4px">The core emits <b>zero interpretations</b>. Every public function returns numbers, arithmetic traces, statuses, or validation verdicts. All meaning-language lives one layer up — in the prototype's static UI copy (demo-labeled) or in Stella's live replies (validator-gated). Exactly one core string is user-facing prose: the fixed birth-time caveat in <span style="font:400 11px ui-monospace,Menlo,monospace">deriveVisibility().note</span>. Consequence for memory design: core outputs may be stored as facts; UI interpretation text must never be stored as if it were calculated.</div>
+  </div>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:26px 0 4px">1 · Public API inventory</div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942">28 exports: 24 functions and 4 constants (SOURCE_REGISTRY is inventoried with the guardrails below); the persistence factory additionally returns an 8-method handle. Classes: <b>CALC</b> deterministic calculation · <b>FORMAT</b> presentation · <b>POLICY</b> product rule, not tradition-derived · <b>GUARD</b> constrains what guidance may claim · <b>INFRA</b> plumbing. Risk column is the §3 guidance flag.</div>
+
+  <sc-for list="{{ inv }}" as="g" hint-placeholder-count="8">
+    <div style="break-inside:avoid;margin-top:14px">
+      <div style="display:flex;align-items:baseline;gap:8px;border-bottom:2px solid #1c1b21;padding-bottom:4px">
+        <span style="font:600 12px 'Karla',sans-serif;letter-spacing:.06em;text-transform:uppercase">{{ g.h }}</span>
+        <span style="font:italic 400 11px 'Newsreader',Georgia,serif;color:#6b6974">{{ g.note }}</span>
+      </div>
+      <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:1.35fr 1.5fr 54px 46px .62fr;gap:10px;padding:6px 0;border-bottom:1px solid #eeebe3;align-items:start;break-inside:avoid">
+          <div>
+            <div style="font:600 10.5px ui-monospace,Menlo,monospace;color:#1c1b21;word-break:break-word">{{ r.fn }}</div>
+            <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974;margin-top:1px">{{ r.d }}</div>
+          </div>
+          <div style="font:400 10.5px/1.5 ui-monospace,Menlo,monospace;color:#3a3942;word-break:break-word">{{ r.out }}</div>
+          <span style="font:700 8.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2px 6px;border-radius:4px;color:{{ r.cc }};background:{{ r.cb }};justify-self:start">{{ r.cls }}</span>
+          <span style="font:700 8.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2px 6px;border-radius:4px;color:{{ r.rc }};background:{{ r.rb }};justify-self:start">{{ r.risk }}</span>
+          <div style="font:400 9.5px/1.5 ui-monospace,Menlo,monospace;color:{{ evColor }}">{{ r.ev }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-for>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:28px 0 4px">2 · Where calculation ends and interpretation begins</div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942">Three bands. The core occupies only the first; the <span style="font:400 11px ui-monospace,Menlo,monospace">work</span> strings it returns (e.g. “7 + 2 + (1992→3) = 12 → 3”) are arithmetic show-your-work, not meaning.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;break-inside:avoid">
+    <div style="border:1px solid #e7e4dc;border-top:3px solid #3a7d5b;border-radius:6px;padding:11px 13px">
+      <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#3a7d5b">Band 1 — Calculated</div>
+      <div style="font:600 11px 'Karla',sans-serif;margin-top:5px">incommon-core.js</div>
+      <div style="font:400 11px/1.6 'Karla',sans-serif;color:#3a3942;margin-top:4px">Numbers, digit traces, statuses, verdicts. Deterministic; fixture- and vector-tested; versioned (v1.2.0). No adjectives, no advice, no personality claims.</div>
+    </div>
+    <div style="border:1px solid #e7e4dc;border-top:3px solid #96762f;border-radius:6px;padding:11px 13px">
+      <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#96762f">Band 2 — Interpretation</div>
+      <div style="font:600 11px 'Karla',sans-serif;margin-top:5px">Prototype UI layer (static)</div>
+      <div style="font:400 11px/1.6 'Karla',sans-serif;color:#3a3942;margin-top:4px">Digit-theme blurbs (<span style="font:400 10px ui-monospace,Menlo,monospace">DIG</span> map), screen copy, scripted Stella branches (<span style="font:400 10px ui-monospace,Menlo,monospace">canned()</span>), assessment text. Fixed strings, demo/illustrative-labeled. Never generated by core.</div>
+    </div>
+    <div style="border:1px solid #e7e4dc;border-top:3px solid #3f5e96;border-radius:6px;padding:11px 13px">
+      <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#3f5e96">Band 3 — Synthesis</div>
+      <div style="font:600 11px 'Karla',sans-serif;margin-top:5px">Live model (Stella)</div>
+      <div style="font:400 11px/1.6 'Karla',sans-serif;color:#3a3942;margin-top:4px">The only place free text is generated. Constrained by the grounding prompt and by core guardrails: citation validation, history filtering, sanitizer, output crisis check, timeout.</div>
+    </div>
+  </div>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:28px 0 4px">3 · Guidance-risk flags</div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942">Flagged: any function whose <i>output</i> becomes psychological or spiritual guidance the moment it is paired with meaning text. Nothing in core generates guidance itself — the risk concentrates where its numbers meet language.</div>
+  <sc-for list="{{ flags }}" as="f" hint-placeholder-count="5">
+    <div style="display:grid;grid-template-columns:150px 46px 1fr 1fr;gap:10px;padding:7px 0;border-bottom:1px solid #eeebe3;align-items:start;break-inside:avoid">
+      <div style="font:600 10.5px ui-monospace,Menlo,monospace;word-break:break-word">{{ f.fn }}</div>
+      <span style="font:700 8.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2px 6px;border-radius:4px;color:{{ f.rc }};background:{{ f.rb }};justify-self:start">{{ f.risk }}</span>
+      <div style="font:400 10.5px/1.55 'Karla',sans-serif;color:#3a3942">{{ f.why }}</div>
+      <div style="font:400 10.5px/1.55 'Karla',sans-serif;color:#6b6974">{{ f.mit }}</div>
+    </div>
+  </sc-for>
+  <div style="font:italic 400 11px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin-top:6px">Not flagged (no guidance surface): reduce, digitSum, fmtToday, fmtShort, createPersistence, consent functions, withTimeout, constants. Guardrails (constrain guidance rather than produce it): SOURCE_REGISTRY, resolveChip, validateCitations, filterHistory, sanitizeForPrompt, crisisCheck.</div>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:28px 0 4px">4 · Data flow — birth data → calculation → display</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <sc-for list="{{ stages }}" as="s" hint-placeholder-count="4">
+      <div style="border:1px solid #e7e4dc;border-radius:6px;padding:11px 13px;break-inside:avoid">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font:400 15px 'Marcellus',serif;color:#96762f">{{ s.n }}</span><span style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase">{{ s.h }}</span></div>
+        <div style="font:400 11px/1.6 'Karla',sans-serif;color:#3a3942;margin-top:5px">{{ s.d }}</div>
+        <div style="font:400 9.5px/1.6 ui-monospace,Menlo,monospace;color:#6b6974;margin-top:5px">{{ s.code }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:11px 14px;margin-top:10px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37">Not derived from birth data</div>
+    <div style="font:400 11.5px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:3px">Astrology placements, houses, aspects, Human Design, transits, and moon phase are <b>fixed reference-persona constants</b> in the prototype (<span style="font:400 10px ui-monospace,Menlo,monospace">PLACEMENTS</span>, <span style="font:400 10px ui-monospace,Menlo,monospace">ASPECTS</span>, demo transit set) — DEMO-labeled on every surface and disclosed as such inside Stella's prompt. No core function computes them; a licensed ephemeris remains an open licensing gate (spec §20).</div>
+  </div>
+
+  <div style="font:400 16px 'Marcellus',serif;margin:18px 0 2px">4.1 · The Stella pipeline (every live reply)</div>
+  <sc-for list="{{ pipe }}" as="p" hint-placeholder-count="9">
+    <div style="display:flex;gap:10px;padding:4.5px 0;border-bottom:1px solid #f2efe8;break-inside:avoid">
+      <span style="font:400 12px 'Marcellus',serif;color:#96762f;min-width:18px;text-align:right">{{ p.n }}</span>
+      <div style="flex:1"><span style="font:600 11px 'Karla',sans-serif">{{ p.h }}</span> <span style="font:400 11px/1.55 'Karla',sans-serif;color:#3a3942">— {{ p.d }}</span></div>
+      <span style="font:400 9.5px ui-monospace,Menlo,monospace;color:#8a8794;white-space:nowrap">{{ p.fn }}</span>
+    </div>
+  </sc-for>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:28px 0 4px">5 · What Stella can see, scope by scope</div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942">Six user-facing context toggles (<span style="font:400 11px ui-monospace,Menlo,monospace">stellaCtx</span>) plus two always-legal sources. A toggle that is off renders its prompt block as an explicit <span style="font:400 11px ui-monospace,Menlo,monospace">EXCLUDED</span> marker — Stella is instructed to say the user turned it off, never to guess around it. Registry IDs are the citation vocabulary her replies must resolve to.</div>
+  <div style="display:grid;grid-template-columns:66px 1fr 1.35fr 92px 1fr;gap:10px;padding:6px 0 4px;border-bottom:2px solid #1c1b21;font:700 8.5px 'Karla',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6b6974;margin-top:10px">
+    <span>Source ID</span><span>Toggle</span><span>What the prompt block contains</span><span>Default</span><span>Consent interaction</span>
+  </div>
+  <sc-for list="{{ scopes }}" as="s" hint-placeholder-count="8">
+    <div style="display:grid;grid-template-columns:66px 1fr 1.35fr 92px 1fr;gap:10px;padding:6.5px 0;border-bottom:1px solid #eeebe3;align-items:start;break-inside:avoid">
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.05em;padding:2px 6px;border-radius:4px;color:{{ s.ic }};background:{{ s.ib }};justify-self:start">{{ s.id }}</span>
+      <div style="font:600 10.5px 'Karla',sans-serif">{{ s.t }}</div>
+      <div style="font:400 10.5px/1.55 'Karla',sans-serif;color:#3a3942">{{ s.what }}</div>
+      <div style="font:400 10px ui-monospace,Menlo,monospace;color:{{ s.dc }}">{{ s.def }}</div>
+      <div style="font:400 10.5px/1.55 'Karla',sans-serif;color:#6b6974">{{ s.consent }}</div>
+    </div>
+  </sc-for>
+
+  <div style="font:400 22px 'Marcellus',serif;margin:28px 0 4px">6 · Requirements this audit imposes on the memory system</div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942">Derived from the API surface and its executed guarantees — a memory design that violates any of these breaks a tested contract.</div>
+  <sc-for list="{{ reqs }}" as="r" hint-placeholder-count="8">
+    <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #f2efe8;break-inside:avoid">
+      <span style="font:400 13px 'Marcellus',serif;color:#96762f;min-width:22px">M{{ r.n }}</span>
+      <div style="flex:1;font:400 11.5px/1.6 'Karla',sans-serif;color:#3a3942"><b style="font-weight:600;color:#1c1b21">{{ r.h }}.</b> {{ r.d }}</div>
+    </div>
+  </sc-for>
+
+  <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:12px 16px;margin-top:18px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37">Limits of this audit</div>
+    <div style="font:400 11.5px/1.65 'Newsreader',Georgia,serif;color:#3a3942;margin-top:4px">No new tests were executed for this document — all cited IDs come from the existing V1.2 run (55/55, Jul 21, 2026); the codebase is unchanged, so that evidence remains current. <span style="font:400 10.5px ui-monospace,Menlo,monospace">personality()</span> and <span style="font:400 10.5px ui-monospace,Menlo,monospace">birthday()</span> have no direct fixture of their own (they share the tested per-word/reduce paths). <span style="font:400 10.5px ui-monospace,Menlo,monospace">crisisCheck</span> is an English-only regex; the T9 adversarial suite remains deferred. Astrology, lunar, and timezone fixture blocks remain reference targets for a licensed engine, not verified calculations.</div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:22px;padding-top:10px;border-top:2px solid #1c1b21;break-inside:avoid">
+    <div style="font:400 12px 'Marcellus',serif">Fable 5 — acting QA &amp; integrity lead</div>
+    <div style="font:400 10.5px 'Karla',sans-serif;color:#6b6974">Core API Audit V1.0 · July 21, 2026 · precedes the Stella memory-system design round</div>
+  </div>
+</div>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;paper&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;letter&quot;, &quot;options&quot;: [&quot;letter&quot;, &quot;a4&quot;], &quot;tsType&quot;: &quot;'letter'|'a4'&quot;, &quot;section&quot;: &quot;Document&quot;}, &quot;showEvidence&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Document&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const C = { CALC: ['#1f5c40', '#e3efe8'], FORMAT: ['#55525e', '#eceae4'], POLICY: ['#7a5e22', '#f3ecdd'], GUARD: ['#33507e', '#e5eaf4'], INFRA: ['#55525e', '#eceae4'] };
+    const R = { HIGH: ['#8c3a2a', '#f6e5e0'], MED: ['#7a5e22', '#f3ecdd'], GUARD: ['#33507e', '#e5eaf4'], '—': ['#8a8794', '#f2f0ea'] };
+    const row = (fn, d, out, cls, risk, ev) => ({ fn, d, out, cls, cc: C[cls][0], cb: C[cls][1], risk, rc: R[risk][0], rb: R[risk][1], ev: this.props.showEvidence === false ? '' : ev });
+    const inv = [
+      { h: 'Numerology engine', note: 'Pythagorean arithmetic; every return includes a work trace; policies are explicit parameters, never silent.', rows: [
+        row('reduce(n, {preserveMasters=true})', 'Digit reduction; halts at masters 11 / 22 / 33', '{value, steps[]}', 'CALC', 'HIGH', 'N6 · A3 · X1'),
+        row('digitSum(n)', 'Plain digit sum, no master handling', 'number', 'CALC', '—', 'via N1–N6'),
+        row('lifePath(isoDOB)', 'Month + day + year each reduced, summed, reduced', '{value|null, work}', 'CALC', 'HIGH', 'N1 · X1 · X9'),
+        row('birthday(isoDOB)', 'Day-of-month reduced', '{value|null, work}', 'CALC', 'HIGH', 'shared reduce path · IT2'),
+        row('expression(name, yPolicy?)', 'All letters; per-word reduce → sum → reduce', '{value, parts[], total, work}', 'CALC', 'HIGH', 'N4 · X vector'),
+        row('soulUrge(name, yPolicy?)', 'Vowels only; Y policy: consonant (default) · vowel · positional', '{value, parts[], total, work}', 'CALC', 'HIGH', 'N5'),
+        row('personality(name, yPolicy?)', 'Consonants only; same word math', '{value, parts[], total, work}', 'CALC', 'HIGH', 'shared nameNumber path (N4 · N5)'),
+        row('personalYear(isoDOB, year)', 'Birth month + day + reduced target year', '{value, work}', 'CALC', 'HIGH', 'N2'),
+        row('personalMonth(py, month)', 'PY + calendar month, reduced', '{value, work}', 'CALC', 'HIGH', 'N3'),
+        row('coreNumbers(profile, onDate?)', 'All seven from {dob, nameAtBirth, yPolicy}; the single call the app and Stella prompt both use', '{lifePath, birthday, expression, soulUrge, personality, personalYear, personalMonth}', 'CALC', 'HIGH', 'IT2 — live profile drives display')
+      ]},
+      { h: 'Observation input', note: 'The one function fed by user-observed (not birth) data.', rows: [
+        row('angelAnalyze(raw)', 'Strips to first 6 digits; component sum, reduction trace, repeat + master detection', '{ok, clean, digits[], sum, root, steps[], master, repeating, disp}', 'CALC', 'HIGH', 'A1–A3 · X vectors (0, 11:11, empty, non-digits)')
+      ]},
+      { h: 'Dates & formatting', note: 'Presentation only — but fmtShort defines the citation date format.', rows: [
+        row('fmtToday(date?)', 'Live weekday line', '"Sunday · July 19, 2026"', 'FORMAT', '—', 'D1'),
+        row('fmtShort(date?)', 'Record + citation date stamp', '"Jul 19"', 'FORMAT', '—', 'D2')
+      ]},
+      { h: 'Confidence policy', note: 'A product rule encoding spec §3 — not a calculation from any tradition.', rows: [
+        row('deriveVisibility(timeMode)', 'exact | approx/window | unknown → per-surface gating', "{rising, houses, moonDegree, humanDesign, sabian, planetsBySign, numerology: 'ok'|'window'|'suppressed', note}", 'POLICY', 'MED', 'V1–V3 · IT3 · IT3b')
+      ]},
+      { h: 'Persistence', note: 'Factory; the returned handle is the only sanctioned write path (audit B1).', rows: [
+        row('createPersistence(storage, opts)', 'Debounced snapshot writes (250 ms); tombstone survives remount; deleteAll verifies absence; reenable() only at re-onboarding', 'handle: {load, schedule, cancel, deleteAll → {removed[], verifiedAbsent}, isDeleted, hasTombstone, reenable}', 'INFRA', '—', 'P1–P3 · IT1 · IT8 · IT10')
+      ]},
+      { h: 'Consent', note: 'Event-sourced; state is always derived, never stored as flags (audit B5).', rows: [
+        row('consentReduce(events)', 'Last event per scope wins', '{scope: granted}', 'INFRA', '—', 'C1'),
+        row('consentAppend(events, scope, action, via?, ts?)', 'Append-only; returns new array', 'events′', 'INFRA', '—', 'C1 · C2 · IT7'),
+        row('deriveLedger(events)', 'Newest-first, human-dated audit rows', '[{scope, action, via, ts, date}]', 'INFRA', '—', 'C2')
+      ]},
+      { h: 'Stella grounding & safety', note: 'The guardrail set — these constrain guidance rather than produce it (audit B6).', rows: [
+        row('SOURCE_REGISTRY (const)', '8 source IDs with chip matchers; insights require a date; scripted + safety always legal', 'chart · transits · insights · journal · assess · duo · scripted · safety', 'GUARD', 'GUARD', 'S1–S9'),
+        row('resolveChip(raw)', 'Chip text → registry entry', 'entry | null', 'GUARD', 'GUARD', 'S2–S4'),
+        row('validateCitations(text, {scopes, records})', 'Rejects: missing SOURCES line, unknown chip, disabled scope, undated or unmatched insight date; one bad chip poisons the line', '{ok, text, chips[], scopes[], errors[]}', 'GUARD', 'GUARD', 'S1–S9 · IT5'),
+        row('filterHistory(msgs, scopes)', 'Drops assistant messages scoped to a now-disabled source; user + unscoped messages kept', 'msgs′', 'GUARD', 'GUARD', 'H1 · IT6'),
+        row('sanitizeForPrompt(text, max=200)', 'Guillemet-wraps user text; defuses "SOURCES:", strips `{}<>`, collapses whitespace, caps length', '«wrapped»', 'GUARD', 'GUARD', 'Z1'),
+        row('crisisCheck(text)', 'Regex crisis screen, applied to input and output', 'boolean', 'GUARD', 'GUARD', 'G1 · G2'),
+        row('withTimeout(promise, ms)', 'Rejects on deadline; app uses 20 s for live replies', 'Promise', 'INFRA', '—', 'W1 · W2')
+      ]},
+      { h: 'Constants', note: 'Exported for display and tests; the fourth constant, SOURCE_REGISTRY, is inventoried above with the guardrails.', rows: [
+        row("VERSION · MASTERS · LETTER", 'Engine version stamp; master set; Pythagorean A–Z→1–9 map', "'1.2.0' · [11, 22, 33] · {A:1 … Z:8}", 'INFRA', '—', '—')
+      ]}
+    ];
+    const flag = (fn, risk, why, mit) => ({ fn, risk, rc: R[risk][0], rb: R[risk][1], why, mit });
+    const flags = [
+      flag('coreNumbers + the seven numerology functions', 'HIGH', 'Outputs are identity and timing numbers — they become personality claims the moment paired with meaning text, and they are already injected into Stella\u2019s prompt as CONTEXT.', 'Computed live from the committed profile (IT2); work traces shown on screen; meaning text lives only in the labeled UI layer; Stella must cite the chart/transits scope to use them.'),
+      flag('angelAnalyze', 'HIGH', 'Root/master/repeating flags invite synchronicity guidance, and the journal context around each sighting is user-authored free text — a prompt-injection path.', 'Every journal/insight string entering the prompt passes sanitizeForPrompt (Z1); the journal scope defaults off and is seeded only by onboarding consent.'),
+      flag('deriveVisibility', 'MED', 'Gates which time-sensitive claims (Rising, houses, HD, Sabian) may be made at all; its note is user-facing wording.', 'Enforced across Natal, Today, HD, and inside the prompt (IT3/IT3b) — suppressed rows are omitted from Stella\u2019s context rather than caveated.')
+    ];
+    const stages = [
+      { n: '1', h: 'Input — onboarding', d: 'Display name, name at birth, DOB, place, birth time + timeMode (exact / approx / unknown), granular consents. Nothing persists until commit.', code: 'ob state → commitOnboarding()' },
+      { n: '2', h: 'Commit — profile becomes source of truth', d: 'DOB parsed to ISO; store/journal/analytics consents appended as events (via: onboarding); persistence re-enabled; profile enters persisted state.', code: 'profile {name, nameAtBirth, dobISO, timeMode…} + consentEvents → createPersistence → localStorage incommon_state_v1 (250 ms debounce; ?test=1 → _test keys)' },
+      { n: '3', h: 'Calculate — per render, never cached', d: 'Numerology and dates computed live from the profile on every render; visibility derived from timeMode; angel entries analyzed at capture.', code: 'coreNumbers(profile) → numVals() · deriveVisibility(timeMode) → visVals() · fmtToday/fmtShort · angelAnalyze(input)' },
+      { n: '4', h: 'Display — screens + Stella context', d: 'Numerology screen (values + work traces), Today (PY/PM + date line), Natal (Rising suppressed or windowed), HD/Sabian gating, Angel journal, consent ledger — and the same values assembled into Stella\u2019s CONTEXT blocks.', code: 'numVals/visVals → screens · sysPrompt() → Stella' }
+    ];
+    const pipe = [
+      { n: '1', h: 'Input crisis gate', d: 'crisis language bypasses everything; fixed safety reply with resources, no interpretation', fn: 'crisisCheck → safetyGate' },
+      { n: '2', h: 'Provider-consent gate', d: 'first live call requires the model-processing consent modal; decline = scripted-only forever until re-granted', fn: 'providerConsent · consentAppend' },
+      { n: '3', h: 'Effective scopes', d: 'context toggles ANDed with the consent ledger (duo requires unrevoked two-person consent)', fn: 'stellaCtx × consentReduce' },
+      { n: '4', h: 'History filter', d: 'last 12 messages, minus assistant replies scoped to any now-disabled source', fn: 'filterHistory' },
+      { n: '5', h: 'Prompt assembly', d: 'identity + grounding rules; per-scope CONTEXT blocks (off = EXCLUDED marker); live coreNumbers; DEMO disclosures; visibility note; sanitized insight/journal strings', fn: 'sysPrompt → coreNumbers · deriveVisibility · sanitizeForPrompt' },
+      { n: '6', h: 'Live call', d: 'host bridge, 20-second deadline, per-minute send cap', fn: 'claude.complete · withTimeout' },
+      { n: '7', h: 'Citation validation', d: 'SOURCES line required; chips resolved to enabled registry IDs; dated insight chips must match real records; failure withholds the reply with a visible notice + scripted fallback', fn: 'validateCitations' },
+      { n: '8', h: 'Output crisis gate', d: 'a crisis-flagged reply is withheld and replaced by the safety response', fn: 'crisisCheck (output)' },
+      { n: '9', h: 'Display + scope stamping', d: 'reply shown with its chips; resolved scopes stored on the message so a later revoke retro-filters it out of history', fn: 'msg.scopes ← v.scopes' }
+    ];
+    const SI = { on: ['#1f5c40', '#e3efe8'], off: ['#8c3a2a', '#f6e5e0'], al: ['#33507e', '#e5eaf4'] };
+    const sc = (id, k, t, what, def, dk, consent) => ({ id, t, what, def, ic: SI[k][0], ib: SI[k][1], dc: dk, consent });
+    const scopes = [
+      sc('chart', 'on', 'Birth chart & numbers', 'Live numerology from the committed profile (coreNumbers) + the fixed DEMO astrology/HD persona, disclosed as demo inside the prompt; visibility-gated by timeMode.', 'ON', '#1f5c40', 'Suppressed rows (unknown time) are omitted entirely.'),
+      sc('transits', 'on', 'Timing & sky', 'Real current date (fmtToday) + the fixed DEMO transit set anchored to July 2026, disclosed as demo.', 'ON', '#1f5c40', '—'),
+      sc('insights', 'on', 'Insight Records', 'Top 5 saved records — sanitized, with fmtShort dates and ratings; citations naming a date must match a real record.', 'ON', '#1f5c40', 'Records carry user reflections — sanitizer applies (Z1).'),
+      sc('journal', 'off', 'Journal & sightings', 'Top 3 angel entries — number + sanitized user context + date.', 'OFF', '#8c3a2a', 'Seeded by the onboarding journal consent; toggleable any time.'),
+      sc('assess', 'on', 'Assessments', 'Completed results only (Enneagram type/wing, Big Five), labeled illustrative demo instruments inside the prompt.', 'ON', '#1f5c40', 'Unfinished assessments contribute nothing.'),
+      sc('duo', 'off', 'Two-person data', 'Jordan\u2019s shared chart summary (SIMULATED — no real second party).', 'OFF', '#8c3a2a', 'Toggle ANDed with the consent ledger: revoke on the Compare screen force-disables it and retro-filters history (IT7).'),
+      sc('scripted', 'al', 'Scripted (always legal)', 'The guide\u2019s canned branches; contributes no data scopes.', 'ALWAYS', '#33507e', 'Legal even with every toggle off (S8).'),
+      sc('safety', 'al', 'Safety (always legal)', 'Crisis responses and resource referrals.', 'ALWAYS', '#33507e', 'Bypasses all other gates.')
+    ];
+    const reqs = [
+      { n: 1, h: 'Store facts as core outputs, not prose', d: 'A remembered fact is {function, inputs, value, work, VERSION, timestamp}. UI blurbs and Stella sentences are interpretations — storable only as quotes attributed to their band, never as calculated fact.' },
+      { n: 2, h: 'Every memory item carries a SOURCE_REGISTRY id at write time', d: 'The per-message scope stamping (pipeline step 9) is the precedent. Reads must filter by live scopes exactly as filterHistory does, so a revoke retro-applies to memory (H1, IT6, IT7).' },
+      { n: 3, h: 'Dates in memory use the fmtShort format', d: 'Citation validation matches "Insight · Jun 12" against record dates by prefix (S5–S7). A memory record dated any other way breaks Stella\u2019s ability to cite it.' },
+      { n: 4, h: 'User-authored text is sanitized at the memory boundary', d: 'Anything that can re-enter a prompt passes sanitizeForPrompt — guillemets, SOURCES defusing, 200-char cap (Z1). Sanitize at write, not just at prompt assembly.' },
+      { n: 5, h: 'Memory dies with the profile', d: 'Writes route through the createPersistence handle; the deleteAll tombstone blocks all writes until re-onboarding (P1, P2, IT1, IT10). A separate memory store with its own keys must join extraKeys or it survives deletion — a B1 regression.' },
+      { n: 6, h: 'Consult consent at read time, never cache grants', d: 'Consent is event-sourced (C1); the duo precedent ANDs the toggle with consentReduce on every use. Model-processing consent additionally gates any live egress of remembered content.' },
+      { n: 7, h: 'Recompute, don\u2019t remember, calculations', d: 'coreNumbers and deriveVisibility are cheap, deterministic, and versioned — storing their outputs invites staleness (Personal Year rolls over; a corrected birth time changes visibility). Remember the profile and the user\u2019s reactions; recompute the numbers.' },
+      { n: 8, h: 'Demo content stays demo in memory', d: 'Any remembered astrology/HD/transit claim must inherit the DEMO label. Memory that strips the label launders demo data into "remembered truth" — the exact failure class audit findings B3/B4 repaired.' }
+    ];
+    return { paper: this.props.paper ?? 'letter', evColor: this.props.showEvidence === false ? 'transparent' : '#8a8794', inv, flags, stages, pipe, scopes, reqs };
+  }
+}
+</script>
+</body>
+</html>

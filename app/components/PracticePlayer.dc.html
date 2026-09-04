@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../practice-library.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+textarea:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" dark="{{ true }}" hint-size="430px,900px">
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;height:100%;position:relative;display:flex;flex-direction:column;padding-top:62px;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu)">
+
+<div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 18px 10px;border-bottom:1px solid var(--bd)">
+  <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ backGo }}" aria-label="Back" style="all:unset;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;font:400 22px var(--fb);color:var(--ac)">‹</button>
+  </sc-if>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+    <div style="font:400 17px var(--fd)">{{ title }}</div>
+    <div style="font:400 11px var(--fu);color:var(--dim)">{{ headerLine }}</div>
+  </div>
+  <sc-if value="{{ inRun }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:4px" aria-hidden="true">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="5">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ d.bg }}"></span>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ inStart }}" hint-placeholder-val="{{ true }}">
+    <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.1em;padding:3px 8px;border-radius:5px;color:{{ riskC }};background:{{ riskBg }}">{{ riskT }}</span>
+  </sc-if>
+</div>
+
+<sc-if value="{{ inStart }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:22px 18px 28px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+    <div style="font:400 14px/1.6 var(--fb)">{{ desc }}</div>
+    <div style="display:flex;gap:8px;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--dim)">
+      <span style="color:var(--ac2)">{{ cat }}</span><span>·</span><span>{{ dur }}</span><span>·</span><span>{{ stepsN }} steps</span>
+    </div>
+    <sc-if value="{{ cautionLine }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:8px;align-items:flex-start;background:rgba(224,141,125,.08);border:1px solid rgba(224,141,125,.35);border-radius:12px;padding:10px 13px">
+        <span style="flex:none;font:700 9px var(--fu);letter-spacing:.08em;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:2px 5px">{{ cautionTag }}</span>
+        <span style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cautionText }}</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isBlocked }}" hint-placeholder-val="{{ false }}">
+      <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim);background:var(--sf);border:1px dashed var(--bd);border-radius:12px;padding:10px 13px">You marked this practice as not right for you. It stays available here, but Oki won&rsquo;t suggest it. <button onClick="{{ unblockGo }}" style="all:unset;cursor:pointer;color:var(--ac);font-weight:700">Undo</button></div>
+    </sc-if>
+    <button onClick="{{ beginGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:#141019;font:700 14px var(--fu)" style-hover="background:#e8caa0">{{ beginLabel }}</button>
+    <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim);text-align:center">One step at a time. Nothing advances until you tap.</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ inRun }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:22px 18px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .22s ease">
+    <div style="font:400 60px/1 var(--fd);color:var(--ac)">{{ stepBig }}</div>
+    <div style="font:400 22px/1.45 var(--fd)">{{ stepText }}</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ inFollow }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .22s ease">
+    <div style="font:400 23px/1.3 var(--fd)">Before you go</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font:600 12.5px var(--fu)">What shifted?</label>
+      <textarea value="{{ shifted }}" onChange="{{ typeShifted }}" rows="2" placeholder="Even a little counts…" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font:600 12.5px var(--fu)">What didn&rsquo;t?</label>
+      <textarea value="{{ notShifted }}" onChange="{{ typeNot }}" rows="2" placeholder="Honesty makes the record useful…" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font:600 12.5px var(--fu)">Should Oki remember this?</label>
+      <div style="display:flex;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Should Oki remember this">
+        <sc-for list="{{ rememberOpts }}" as="r" hint-placeholder-count="2">
+          <button onClick="{{ r.go }}" role="radio" aria-checked="{{ r.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:40px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:{{ r.c }};background:{{ r.bg }}">{{ r.t }}</button>
+        </sc-for>
+      </div>
+      <div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ rememberNote }}</div>
+    </div>
+    <button onClick="{{ saveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ saveBg }};color:{{ saveC }};font:700 13.5px var(--fu)" style-hover="opacity:.9">{{ saveLabel }}</button>
+    <button onClick="{{ finishGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 12px var(--fu);color:var(--dim)" style-hover="color:var(--tx)">Finish without saving</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ inDone }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:26px 18px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+    <div style="font:400 26px/1.3 var(--fd)">Done is done.</div>
+    <div style="font:400 13.5px/1.6 var(--fb);color:var(--dim)">{{ doneLine }}</div>
+    <button onClick="{{ againGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--ac)" style-hover="border-color:rgba(211,173,110,.45)">Back to the practice</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showFooter }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 18px 24px;border-top:1px solid var(--bd)">
+    <sc-if value="{{ inRun }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ nextGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:#141019;font:700 14px var(--fu)" style-hover="background:#e8caa0" style-active="transform:scale(.99)">{{ nextLabel }}</button>
+    </sc-if>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <sc-if value="{{ hasPrev }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ prevGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;padding:0 4px;font:600 12px var(--fu);color:var(--dim)" style-hover="color:var(--tx)">‹ Previous</button>
+      </sc-if>
+      <sc-if value="{{ noPrev }}" hint-placeholder-val="{{ true }}"><span></span></sc-if>
+      <button onClick="{{ adverseGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;padding:0 4px;font:600 12px var(--fu);color:var(--warn)" style-hover="opacity:.8">This didn&rsquo;t feel right</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ screeningOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;background:rgba(5,4,8,.78);display:flex;align-items:center;padding:22px;z-index:9">
+    <div role="dialog" aria-label="Screening before practice" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:13px;animation:fadeUp .25s ease">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="align-self:flex-start;font:700 9px var(--fu);letter-spacing:.1em;padding:3px 8px;border-radius:5px;color:var(--warn);background:rgba(224,141,125,.14)">REQUIRES SCREENING</span>
+        <div style="font:400 21px var(--fd)">Before you begin</div>
+        <div style="font:400 12.5px/1.55 var(--fb);color:var(--dim)">This practice can surface hard material. It&rsquo;s built for steady ground — check each line honestly.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <sc-for list="{{ checks }}" as="c" hint-placeholder-count="3">
+          <button onClick="{{ c.go }}" role="checkbox" aria-checked="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;min-height:48px;padding:4px 10px;border:1px solid {{ c.bd }};border-radius:12px;background:{{ c.rowBg }}">
+            <span style="flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ c.boxBd }};background:{{ c.boxBg }};display:flex;align-items:center;justify-content:center;color:#141019;font:700 13px var(--fu)">{{ c.mark }}</span>
+            <span style="font:600 12.5px/1.4 var(--fu)">{{ c.t }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <button onClick="{{ screenBeginGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ screenBeginBg }};color:{{ screenBeginC }};font:700 13.5px var(--fu)">{{ screenBeginLabel }}</button>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <button onClick="{{ screenCancelGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--dim)" style-hover="color:var(--tx)">Not today</button>
+        <button onClick="{{ helpGo }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--warn)" style-hover="opacity:.8">Get help instead</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ adverseOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ adverseClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:9">
+    <div role="dialog" aria-label="This didn't feel right" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 30px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="font:400 21px var(--fd)">Thank you for saying so</div>
+      <div style="font:400 13px/1.6 var(--fb);color:var(--dim)">A practice that lands wrong is real data — about the practice, not about you. Your report is logged for review and nothing about it is your fault.</div>
+      <button onClick="{{ blockToggle }}" role="checkbox" aria-checked="{{ blockOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;min-height:48px;padding:4px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2)">
+        <span style="flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ blockBd }};background:{{ blockBg }};display:flex;align-items:center;justify-content:center;color:#141019;font:700 13px var(--fu)">{{ blockMark }}</span>
+        <span style="font:600 12.5px var(--fu)">Don&rsquo;t suggest this practice again</span>
+      </button>
+      <button onClick="{{ adverseLogGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--warn);color:#141019;font:700 13px var(--fu)" style-hover="opacity:.88">Log it and stop for now</button>
+      <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">If it stirred up more than discomfort — if it feels heavy or unsafe — please reach a person:</div>
+      <sc-for list="{{ crisisRows }}" as="cr" hint-placeholder-count="2">
+        <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:2px">
+          <div style="font:600 13px var(--fu)">{{ cr.t }}</div>
+          <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cr.d }}</div>
+        </div>
+      </sc-for>
+      <button onClick="{{ adverseClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)" style-hover="border-color:rgba(211,173,110,.45)">Keep going instead</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:20;pointer-events:none">
+    <div style="max-width:84%;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:10px 18px;font:600 12px var(--fu);color:var(--tx);box-shadow:0 6px 24px rgba(0,0,0,.5);animation:fadeUp .2s ease">{{ toast }}</div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900}, &quot;practiceId&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;cognitive_defusion&quot;, &quot;options&quot;: [&quot;values_clarification&quot;, &quot;behavioral_experiment&quot;, &quot;difficult_conversation_rehearsal&quot;, &quot;grounding_anxiety&quot;, &quot;cognitive_defusion&quot;, &quot;journaling_prompt&quot;, &quot;sleep_hygiene_check&quot;, &quot;boundary_setting&quot;, &quot;gratitude_practice&quot;, &quot;spiritual_bypass_check&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Player&quot;}, &quot;riskOverride&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;from-library&quot;, &quot;options&quot;: [&quot;from-library&quot;, &quot;universal&quot;, &quot;mild_caution&quot;, &quot;requires_screening&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Player&quot;}}">
+class Component extends DCLogic {
+  DKEY = 'incommon.consent.data';
+  BKEY = 'incommon.practice.blocklist';
+  AKEY = 'incommon.adverse.log';
+  state = { view: 'start', step: 0, screeningOpen: false, checks: [false, false, false], adverseOpen: false, helpOpen: false,
+    shifted: '', notShifted: '', remember: null, blocklist: null, block: false, toast: '', savedNote: '' };
+
+  SCREEN_CHECKS = ['I\u2019m not in crisis right now', 'There\u2019s a person I could reach if I needed one', 'I know I can stop at any step'];
+
+  read(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  componentDidMount() {
+    this.setState({ blocklist: Array.isArray(this.read(this.BKEY)) ? this.read(this.BKEY) : [] });
+    if (!window.PracticeLibrary) this._t = setTimeout(() => this.forceUpdate(), 150);
+  }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._tt); }
+
+  practice() {
+    const PL = window.PracticeLibrary;
+    const id = this.props.practiceId ?? 'cognitive_defusion';
+    return PL ? (PL.PRACTICES.find(p => p.id === id) || PL.PRACTICES[0]) : null;
+  }
+  effRisk(p) {
+    const ov = this.props.riskOverride ?? 'from-library';
+    return ov === 'from-library' ? (p ? p.risk_level : 'universal') : ov;
+  }
+  toastMsg(t) { clearTimeout(this._tt); this.setState({ toast: t }); this._tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+
+  saveToJournal(p) {
+    const today = new Date().toISOString().slice(0, 10);
+    const clip = (s, n) => String(s || '').trim().slice(0, n);
+    const rec = { ts: today,
+      s: 'Practice \u2014 ' + p.title + ' \u00b7 shifted: \u201C' + (clip(this.state.shifted, 140) || '\u2014') + '\u201D \u00b7 didn\u2019t: \u201C' + (clip(this.state.notShifted, 140) || '\u2014') + '\u201D',
+      practiceId: p.id, stellaVisible: this.state.remember === 'yes' };
+    const data = this.read(this.DKEY) || {};
+    data.journal = Array.isArray(data.journal) ? data.journal : [];
+    data.journal.unshift(rec);
+    this.write(this.DKEY, data);
+    this.setState({ view: 'done', savedNote: 'saved' });
+    this.toastMsg('Saved to journal \u00b7 Oki ' + (rec.stellaVisible ? 'may remember it (if Journal consent is on)' : 'will not see it'));
+  }
+  logAdverse(p) {
+    const log = Array.isArray(this.read(this.AKEY)) ? this.read(this.AKEY) : [];
+    log.unshift({ ts: new Date().toISOString(), practiceId: p.id, title: p.title, flaggedForReview: true });
+    this.write(this.AKEY, log.slice(0, 50));
+    let blocklist = this.state.blocklist || [];
+    if (this.state.block && blocklist.indexOf(p.id) < 0) { blocklist = blocklist.concat([p.id]); this.write(this.BKEY, blocklist); }
+    try { console.warn('[PracticePlayer] adverse response logged:', p.id); } catch (e) {}
+    this.setState({ adverseOpen: false, view: 'start', step: 0, blocklist, savedNote: '' });
+    this.toastMsg('Logged for review' + (this.state.block ? ' \u00b7 won\u2019t be suggested again' : '') + '. Be gentle with yourself.');
+  }
+
+  renderVals() {
+    const st = this.state;
+    const p = this.practice();
+    const risk = this.effRisk(p);
+    const steps = p ? p.steps : [];
+    const last = st.step === steps.length - 1;
+    const blocklist = st.blocklist || [];
+    const blocked = p ? blocklist.indexOf(p.id) >= 0 : false;
+    const riskChips = {
+      universal: { t: 'UNIVERSAL', c: 'var(--ok)', bg: 'rgba(89,179,125,.14)' },
+      mild_caution: { t: 'MILD CAUTION', c: 'var(--warn)', bg: 'rgba(224,141,125,.13)' },
+      requires_screening: { t: 'REQUIRES SCREENING', c: 'var(--warn)', bg: 'rgba(224,141,125,.2)' }
+    };
+    const rc = riskChips[risk] || riskChips.universal;
+    const allChecked = st.checks.every(Boolean);
+    const inStart = st.view === 'start', inRun = st.view === 'run', inFollow = st.view === 'follow', inDone = st.view === 'done';
+    const saveReady = st.remember != null;
+    return {
+      title: p ? p.title : 'Practice',
+      headerLine: inRun ? 'step ' + (st.step + 1) + ' of ' + steps.length : inFollow ? 'review \u00b7 nothing saves without you' : inDone ? 'complete' : (p ? p.category + ' \u00b7 ' + p.duration : ''),
+      showBack: !inStart,
+      backGo: () => this.setState(inRun ? { view: 'start', step: 0 } : inFollow ? { view: 'run', step: steps.length - 1 } : { view: 'start', step: 0 }),
+      inStart, inRun, inFollow, inDone,
+      riskT: rc.t, riskC: rc.c, riskBg: rc.bg,
+      desc: p ? p.description : '', cat: p ? p.category : '', dur: p ? p.duration : '', stepsN: steps.length,
+      cautionLine: risk !== 'universal',
+      cautionTag: risk === 'requires_screening' ? 'SCREENED' : 'CAUTION',
+      cautionText: risk === 'requires_screening' ? 'This practice asks three readiness questions before it starts \u2014 every time.' : 'Can stir things up \u2014 skip it on a raw day. Help stays one tap away.',
+      isBlocked: blocked,
+      unblockGo: () => { const bl = blocklist.filter(x => x !== p.id); this.write(this.BKEY, bl); this.setState({ blocklist: bl }); },
+      beginGo: () => { risk === 'requires_screening' ? this.setState({ screeningOpen: true, checks: [false, false, false] }) : this.setState({ view: 'run', step: 0 }); },
+      beginLabel: risk === 'requires_screening' ? 'Check in, then begin' : risk === 'mild_caution' ? 'I\u2019m steady today \u2014 begin' : 'Begin',
+      dots: steps.map((_, i) => ({ bg: i <= st.step ? 'var(--ac)' : 'var(--sf2)' })),
+      stepBig: String(st.step + 1).padStart(2, '0'),
+      stepText: steps[st.step] || '',
+      showFooter: inRun || inFollow,
+      nextLabel: last ? 'Finish \u2014 review' : 'Next',
+      nextGo: () => { last ? this.setState({ view: 'follow' }) : this.setState({ step: st.step + 1 }); },
+      hasPrev: inRun && st.step > 0, noPrev: !(inRun && st.step > 0),
+      prevGo: () => this.setState({ step: Math.max(0, st.step - 1) }),
+      shifted: st.shifted, typeShifted: e => this.setState({ shifted: e.target.value }),
+      notShifted: st.notShifted, typeNot: e => this.setState({ notShifted: e.target.value }),
+      rememberOpts: [['yes', 'Yes \u2014 remember it'], ['no', 'No \u2014 just for me']].map(([v, t]) => ({ t, on: st.remember === v,
+        c: st.remember === v ? '#141019' : 'var(--dim)', bg: st.remember === v ? 'var(--ac)' : 'transparent', go: () => this.setState({ remember: v }) })),
+      rememberNote: st.remember === 'yes' ? 'Saved with a visible-to-Oki flag \u2014 she can only actually read it if your Journal consent switch is on.' : st.remember === 'no' ? 'Saved for your eyes only \u2014 flagged invisible to Oki regardless of consent switches.' : 'Your journal is yours either way; this flag only controls Oki.',
+      saveGo: () => { if (saveReady && p) this.saveToJournal(p); },
+      saveLabel: saveReady ? 'Save to Journal' : 'Answer the last question to save',
+      saveBg: saveReady ? 'var(--ac)' : 'var(--sf2)', saveC: saveReady ? '#141019' : 'var(--dim)',
+      finishGo: () => { this.setState({ view: 'done', savedNote: '' }); },
+      doneLine: st.savedNote === 'saved' ? 'Your reflection is in the journal. The experiment isn\u2019t the tap-through \u2014 it\u2019s what you do out there. Come back and re-run it any time.' : 'Nothing was saved \u2014 as you chose. The practice is here whenever you want another pass.',
+      againGo: () => this.setState({ view: 'start', step: 0, shifted: '', notShifted: '', remember: null, savedNote: '' }),
+      adverseOpen: st.adverseOpen,
+      adverseGo: () => this.setState({ adverseOpen: true }),
+      adverseClose: () => this.setState({ adverseOpen: false }),
+      adverseLogGo: () => p && this.logAdverse(p),
+      blockOn: st.block, blockToggle: () => this.setState({ block: !st.block }),
+      blockMark: st.block ? '\u2713' : '', blockBd: st.block ? 'var(--warn)' : 'var(--bd)', blockBg: st.block ? 'var(--warn)' : 'transparent',
+      screeningOpen: st.screeningOpen,
+      checks: this.SCREEN_CHECKS.map((t, i) => ({ t, on: st.checks[i],
+        mark: st.checks[i] ? '\u2713' : '', boxBd: st.checks[i] ? 'var(--ok)' : 'var(--bd)', boxBg: st.checks[i] ? 'var(--ok)' : 'transparent',
+        bd: st.checks[i] ? 'rgba(89,179,125,.4)' : 'var(--bd)', rowBg: st.checks[i] ? 'rgba(89,179,125,.06)' : 'transparent',
+        go: () => { const c = st.checks.slice(); c[i] = !c[i]; this.setState({ checks: c }); } })),
+      screenBeginGo: () => { if (allChecked) this.setState({ screeningOpen: false, view: 'run', step: 0 }); },
+      screenBeginLabel: allChecked ? 'Begin the practice' : 'Check all three to begin',
+      screenBeginBg: allChecked ? 'var(--ac)' : 'var(--sf2)', screenBeginC: allChecked ? '#141019' : 'var(--dim)',
+      screenCancelGo: () => this.setState({ screeningOpen: false }),
+      helpGo: () => { this.setState({ screeningOpen: false, adverseOpen: true }); },
+      swallow: e => e.stopPropagation(),
+      crisisRows: [
+        { t: '988 \u2014 Suicide & Crisis Lifeline', d: 'Call or text 988 \u00b7 US \u00b7 24/7, free, confidential' },
+        { t: 'Crisis Text Line', d: 'Text HOME to 741741 \u00b7 US \u00b7 24/7' }
+      ],
+      hasToast: !!st.toast, toast: st.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

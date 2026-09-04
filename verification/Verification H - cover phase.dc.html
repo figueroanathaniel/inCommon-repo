@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Same vendored React the app uses. Without this the harness shell itself
+   still reaches unpkg, so a run that appears to prove the build is offline
+   clean would not be. No assertion is touched by this block. */
+window.__resources = Object.assign(window.__resources || {}, {
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': '../app/react-18.3.1.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': '../app/react-dom-18.3.1.production.min.js'
+});
+</script>
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>inCommon: cover phase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="../app/handoff/tests-v6.0.js"></script>
+<style>
+  html, body { margin: 0; background: #05060a; }
+  a { color: #7dffb9; }
+  a:hover { color: #2fff8f; }
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;padding:28px clamp(18px,4vw,44px) 56px;background:#05060a;color:#eef0f8;font-family:'Karla',system-ui,sans-serif;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font:600 10px 'Karla';letter-spacing:.18em;text-transform:uppercase;color:#b79bff">inCommon verification</span>
+    <div style="font:400 clamp(28px,3vw,40px)/1.15 'Marcellus',serif">The cover phase</div>
+    <div style="font:400 13px/1.6 'Karla';color:rgba(238,240,248,.6);max-width:74ch;text-wrap:pretty">Group H only, for app/cover.html. Nothing else in this suite loads that page: every other phase points at the app through SRC, so until this existed the first screen a visitor meets had no gate at all. H2 is the row it exists for. The cover is a raytracer, and a shader that fails to compile does not throw: the loop runs, the first frame lands, __EH_LIVE goes true and the reveal fires over a canvas painting nothing. So this phase reads the drawing buffer back rather than asking whether the page booted.</div>
+  </div>
+  <sc-if value="{{ noGpu }}" hint-placeholder-val="{{ false }}">
+    <div style="background:rgba(229,83,77,.12);border:1px solid #e5534d;border-radius:12px;padding:12px 15px;font:400 12.5px/1.6 'Karla';color:#eef0f8;max-width:74ch;text-wrap:pretty">This browser cannot create a WebGL context at all, so H1 cannot pass and a red result from it says nothing about the build. The usual cause is a GPU process that has given out after many contexts in one session: it reports GL_VENDOR = Disabled and BindToCurrentSequence failed. Restart the browser and run this phase in a fresh window.</div>
+  </sc-if>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font:600 12px 'Karla';letter-spacing:.04em;color:{{ statusC }}">{{ status }}</div>
+    <sc-if value="{{ running }}" hint-placeholder-val="{{ true }}">
+      <span style="width:7px;height:7px;border-radius:50%;background:#2fff8f;animation:blink 1.1s infinite"></span>
+    </sc-if>
+  </div>
+  <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:9px;max-width:1100px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:start;background:#0d0f16;border:1px solid rgba(47,79,214,.3);border-left:3px solid {{ r.edge }};border-radius:12px;padding:12px 15px">
+          <span style="font:700 11px 'Karla';letter-spacing:.08em;color:{{ r.edge }}">{{ r.id }}</span>
+          <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+            <span style="font:400 13.5px/1.5 'Karla';color:#eef0f8;text-wrap:pretty">{{ r.name }}</span>
+            <sc-if value="{{ r.bad }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:3px;font:400 11px/1.55 ui-monospace,monospace;color:rgba(238,240,248,.62);word-break:break-word">
+                <span>expected {{ r.exp }}</span>
+                <span style="color:#e5534d">actual {{ r.act }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  SRC = '../app/inCommonApp v2.dc.html';
+  state = { rows: [], status: 'Loading the harness\u2026', running: true, noGpu: false };
+
+  async componentDidMount() {
+    /* The same courtesy the ADA runner pays its two focus dependent rows: a
+       phase that cannot run in this environment says so on the page rather
+       than reporting the build as broken. */
+    try {
+      const probe = document.createElement("canvas");
+      if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) this.setState({ noGpu: true });
+    } catch (e) { this.setState({ noGpu: true }); }
+    if (window.__vHRunning) { this.setState({ status: 'A run is already in progress in this tab.', running: false }); return; }
+    window.__vHRunning = true;
+    const T = window.InCommonTestsV14;
+    if (!T || !T.runCover) {
+      this.setState({ status: 'handoff/tests-v6.0.js did not load, or has no runCover export.', running: false });
+      window.__vHRunning = false;
+      return;
+    }
+    const sink = [];
+    /* Same contract as the full runner: the phase writes into its own sink as
+       it goes, so an overrun keeps what it proved and says the rest was not
+       reached. 180s is the budget: the exit alone is 2.2 seconds plus a hold, and the frame is 1280 wide. */
+    const done = await Promise.race([
+      T.runCover(this.SRC, s => this.setState({ status: s }), sink).then(() => true),
+      new Promise(r => setTimeout(() => r(false), 180000))
+    ]);
+    if (!done) sink.push({ id: 'H-TIMEOUT', name: 'The cover phase ran out of time; ' + sink.length + ' assertions completed first', pass: false, expected: 'complete', actual: 'cut short' });
+    window.__vHRunning = false;
+    const bad = sink.filter(r => !r.pass).length;
+    this.setState({ rows: sink, running: false,
+      status: bad ? bad + ' of ' + sink.length + ' failed.' : 'All ' + sink.length + ' assertions passed.' });
+  }
+
+  fmt(v) { try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return String(v); } }
+
+  renderVals() {
+    const rows = this.state.rows, bad = rows.filter(r => !r.pass).length;
+    return {
+      status: this.state.status,
+      noGpu: this.state.noGpu,
+      statusC: this.state.running ? '#b79bff' : bad ? '#e5534d' : '#2fff8f',
+      running: this.state.running,
+      hasRows: rows.length > 0,
+      rows: rows.map(r => ({ id: r.id, name: r.name, bad: !r.pass,
+        edge: r.pass ? '#2fff8f' : '#e5534d',
+        exp: this.fmt(r.expected), act: this.fmt(r.actual) }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

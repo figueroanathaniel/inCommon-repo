@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../safety-router.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+textarea:focus-visible,input:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+</style>
+</helmet>
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--blk:#ff6b61;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;min-height:100vh;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu);padding:40px 24px 64px;display:flex;justify-content:center">
+<div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:22px">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:18px">
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:400 30px var(--fd)">SafetyRouter</div>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.14)">PURE JS · NO AI · NO DEPS</span>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ac2);background:rgba(169,143,214,.16)">V1.3 · 3 LAYERS: KEYWORDS + SEMANTIC + MODEL</span>
+    </div>
+    <div style="font:italic 400 14px/1.5 var(--fb);color:var(--dim)">The deterministic gate every message passes before Oki sees it. Regex + lexicon sentiment; errs toward human help.</div>
+  </div>
+  <div style="font:400 12px var(--fu);color:{{ sumColor }};border:1px solid {{ sumColor }};border-radius:999px;padding:8px 16px;font-weight:700">{{ summary }}</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+  <sc-for list="{{ ladder }}" as="l" hint-placeholder-count="4">
+    <div style="background:var(--sf);border:1px solid var(--bd);border-top:2px solid {{ l.c }};border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:4px">
+      <div style="font:700 11px var(--fu);letter-spacing:.1em;color:{{ l.c }}">{{ l.t }}</div>
+      <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ l.d }}</div>
+      <div style="font:600 10px var(--fu);letter-spacing:.06em;color:var(--dim)">severity {{ l.sev }}</div>
+    </div>
+  </sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch">
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:11px">
+    <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Live route</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font:400 11px var(--fu);color:var(--dim)">Session history — one message per line</label>
+      <textarea value="{{ histText }}" onChange="{{ typeHist }}" rows="4" placeholder="(empty session)" style="box-sizing:border-box;width:100%;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font:400 12.5px/1.5 var(--fu);color:var(--tx)"></textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font:400 11px var(--fu);color:var(--dim)">Current message</label>
+      <input value="{{ input }}" onChange="{{ typeIn }}" onKeyDown="{{ keyIn }}" placeholder="Type a message to route…" aria-label="Message to route" style="box-sizing:border-box;width:100%;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button onClick="{{ routeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:#141019;font:700 12.5px var(--fu)" style-hover="background:#e8caa0">Route it</button>
+      <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3">
+        <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--bd);border-radius:999px;font:600 11px var(--fu);color:var(--dim)" style-hover="color:var(--ac);border-color:rgba(211,173,110,.45)">{{ p.t }}</button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Result</div>
+    <sc-if value="{{ noRes }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--bd);border-radius:12px;padding:20px;font:italic 400 13px var(--fb);color:var(--dim)">Route a message to see the decision.</div>
+    </sc-if>
+    <sc-if value="{{ hasRes }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font:700 14px var(--fu);letter-spacing:.08em;padding:8px 16px;border-radius:9px;color:#141019;background:{{ resColor }}">{{ resAction }}</span>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font:700 12px var(--fu);color:{{ resColor }}">severity {{ resSev }} / 10</div>
+            <div style="font:400 11px var(--fu);color:var(--dim)">sentiment {{ resSent }} · history {{ resHistN }} msg</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:3px" aria-label="Severity meter">
+          <sc-for list="{{ sevCells }}" as="cell" hint-placeholder-count="10">
+            <span style="flex:1;height:7px;border-radius:3px;background:{{ cell.bg }}"></span>
+          </sc-for>
+        </div>
+        <div style="font:400 13px/1.6 var(--fb);color:var(--tx);background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px">{{ resReason }}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button onClick="{{ llmGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 14px;border:1px solid rgba(169,143,214,.45);border-radius:999px;font:700 11.5px var(--fu);color:var(--ac2)" style-hover="background:rgba(169,143,214,.1)">{{ llmLabel }}</button>
+            <span style="font:400 10.5px var(--fu);color:var(--dim)">{{ llmTransport }}</span>
+          </div>
+          <sc-if value="{{ hasLLM }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid rgba(169,143,214,.35);border-radius:10px;padding:10px 12px;animation:fadeUp .2s ease">
+              <div style="font:700 10px var(--fu);letter-spacing:.1em;color:var(--ac2)">LAYER 3 · {{ llmClass }} · {{ llmSev }}/10</div>
+              <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ llmReason }}</div>
+              <div style="font:700 11px var(--fu);color:{{ llmFinalC }}">final route: {{ llmFinal }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ hasLLMErr }}" hint-placeholder-val="{{ false }}">
+            <div style="font:400 11px/1.5 var(--fu);color:var(--warn)">{{ llmErr }}</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">What it screens for</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <sc-for list="{{ catalog }}" as="cg" hint-placeholder-count="7">
+      <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:3px">
+        <div style="font:600 12.5px var(--fu)">{{ cg.cat }}</div>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ cg.routes }}</div>
+        <div style="font:italic 400 11px var(--fb);color:var(--dim)">{{ cg.example }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+  <div style="display:flex;align-items:baseline;gap:10px">
+    <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">28 embedded test cases</div>
+    <div style="font:400 11px var(--fu);color:var(--dim)">run on load · same suite is exported for Node</div>
+  </div>
+  <div style="border:1px solid var(--bd);border-radius:14px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:34px 1fr 150px 150px 64px;gap:10px;align-items:center;padding:9px 14px;background:var(--sf2);font:700 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">
+      <span>#</span><span>Input</span><span>Expected</span><span>Got</span><span>Status</span>
+    </div>
+    <sc-for list="{{ tests }}" as="t" hint-placeholder-count="20">
+      <div style="display:grid;grid-template-columns:34px 1fr 150px 150px 64px;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid rgba(211,173,110,.08);background:{{ t.rowBg }}">
+        <span style="font:400 11px var(--fu);color:var(--dim)">{{ t.n }}</span>
+        <span style="display:flex;flex-direction:column;gap:1px;min-width:0">
+          <span style="font:400 12.5px/1.4 var(--fb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.input }}</span>
+          <span style="font:400 10px var(--fu);color:var(--dim)">{{ t.meta }}</span>
+        </span>
+        <span style="font:700 10.5px var(--fu);letter-spacing:.04em;color:{{ t.expC }}">{{ t.exp }}</span>
+        <span style="font:700 10.5px var(--fu);letter-spacing:.04em;color:{{ t.gotC }}">{{ t.got }}</span>
+        <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ t.stC }}">{{ t.st }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="font:400 11px/1.65 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:12px">A keyword router is a first gate, not a diagnostic tool — it will miss oblique phrasing and flag some safe messages. By design it fails toward the human: BLOCK and HUMAN_RESOURCE both surface crisis lines (988, Crisis Text Line, DV Hotline 1-800-799-7233, NEDA 1-800-931-2237, SAMHSA 1-800-662-4357, Poison Control 1-800-222-1222). The real Oki runs downstream of this gate and never sees blocked messages. Console: <b style="color:var(--ac)">SafetyRouter.safetyRoute(msg, history)</b>.</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1160, &quot;height&quot;: 980}}">
+class Component extends DCLogic {
+  state = { tests: null, histText: '', input: '', res: null, resHistN: 0, llm: null, llmBusy: false, llmErr: '' };
+  COLORS = { OKI: '#59b37d', GROUNDING: '#d3ad6e', HUMAN_RESOURCE: '#e08d7d', BLOCK: '#ff6b61' };
+
+  componentDidMount() { this.tryInit(0); }
+  tryInit(n) {
+    const SR = window.SafetyRouter;
+    if (!SR) { if (n < 40) this._t = setTimeout(() => this.tryInit(n + 1), 100); return; }
+    this.setState({ tests: SR.runTests() });
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  route() {
+    const SR = window.SafetyRouter;
+    if (!SR) return;
+    const hist = this.state.histText.split('\n').map(s => s.trim()).filter(Boolean);
+    const res = SR.safetyRoute(this.state.input, hist);
+    res._sent = SR.scoreSentiment(this.state.input).norm;
+    this.setState({ res, resHistN: hist.length, llm: null, llmErr: '' });
+  }
+  async runLLM() {
+    const SR = window.SafetyRouter;
+    if (!SR || this.state.llmBusy) return;
+    const hist = this.state.histText.split('\n').map(s => s.trim()).filter(Boolean);
+    this.setState({ llmBusy: true, llmErr: '', llm: null });
+    try {
+      const cls = await SR.llmSafetyCheck(this.state.input, hist);
+      if (!cls) { this.setState({ llmBusy: false, llmErr: 'Model replied in an unparseable format \u2014 deterministic verdict stands (that\u2019s the designed fallback).' }); return; }
+      const merged = SR.mergeLLM(SR.safetyRoute(this.state.input, hist), cls);
+      this.setState({ llmBusy: false, llm: { cls, merged } });
+    } catch (e) {
+      this.setState({ llmBusy: false, llmErr: e && e.code === 'no-transport' ? 'No model transport in this preview \u2014 Layer 3 activates wherever window.claude or a proxy call is wired. Layers 1+2 already ran.' : 'Model check failed (' + (e.message || e) + ') \u2014 deterministic verdict stands.' });
+    }
+  }
+
+  renderVals() {
+    const st = this.state, C = this.COLORS;
+    const SR = window.SafetyRouter;
+    const tr = st.tests;
+    const short = a => a === 'HUMAN_RESOURCE' ? 'HUMAN_RES' : a;
+    return {
+      summary: tr ? tr.passed + ' / ' + tr.total + ' tests passing' : 'running tests\u2026',
+      sumColor: tr ? (tr.passed === tr.total ? 'var(--ok)' : 'var(--blk)') : 'var(--dim)',
+      ladder: [
+        { t: 'OKI', c: C.OKI, d: 'No risk signals \u2014 the message goes to the guide.', sev: '1\u20132' },
+        { t: 'GROUNDING', c: C.GROUNDING, d: 'Distress without crisis \u2014 open with a grounding exercise first.', sev: '3\u20136' },
+        { t: 'HUMAN_RESOURCE', c: C.HUMAN_RESOURCE, d: 'A person is needed \u2014 crisis lines shown before anything else.', sev: '4\u201310' },
+        { t: 'BLOCK', c: C.BLOCK, d: 'Oki must not respond at all \u2014 resources only. Means-seeking, med advice, active danger.', sev: '7\u201310' }
+      ],
+      histText: st.histText, typeHist: e => this.setState({ histText: e.target.value }),
+      input: st.input, typeIn: e => this.setState({ input: e.target.value }),
+      keyIn: e => { if (e.key === 'Enter') this.route(); },
+      routeGo: () => this.route(),
+      presets: [
+        { t: 'Safe chart question', h: '', i: 'What does my chart say about career this year?' },
+        { t: 'Hopeless session', h: 'nothing matters anymore\nI feel so empty\nno point in trying', i: 'why bother with any of it' },
+        { t: 'Imminent DV', h: 'My partner hit me again last night', i: 'He\u2019s outside the door right now and I\u2019m scared' }
+      ].map(p => ({ t: p.t, go: () => this.setState({ histText: p.h, input: p.i }, () => this.route()) })),
+      noRes: !st.res, hasRes: !!st.res,
+      resAction: st.res ? st.res.action : '',
+      resColor: st.res ? C[st.res.action] : 'var(--dim)',
+      resSev: st.res ? st.res.severity : 0,
+      resSent: st.res ? st.res._sent : 0,
+      resHistN: st.resHistN,
+      resReason: st.res ? st.res.reason : '',
+      llmGo: () => this.runLLM(),
+      llmLabel: st.llmBusy ? 'Asking the model\u2026' : 'Run Layer 3 model check',
+      llmTransport: (typeof window !== 'undefined' && window.claude && window.claude.complete) ? 'transport: host-managed Claude \u00b7 haiku \u00b7 temp 0 \u00b7 50 tok' : 'transport: none here \u2014 wire opts.call or window.claude',
+      hasLLM: !!st.llm,
+      llmClass: st.llm ? st.llm.cls.classification : '',
+      llmSev: st.llm ? st.llm.cls.severity : 0,
+      llmReason: st.llm ? (st.llm.cls.reason || 'no reason given') : '',
+      llmFinal: st.llm ? st.llm.merged.action + ' ' + st.llm.merged.severity : '',
+      llmFinalC: st.llm ? C[st.llm.merged.action] : 'var(--dim)',
+      hasLLMErr: !!st.llmErr, llmErr: st.llmErr,
+      sevCells: Array.from({ length: 10 }, (_, i) => ({ bg: st.res && i < st.res.severity ? C[st.res.action] : 'var(--sf2)' })),
+      catalog: SR ? SR.CATALOG : [],
+      tests: tr ? tr.results.map(r => ({
+        n: r.n, input: '\u201C' + r.input + '\u201D',
+        meta: r.name + (r.history.length ? ' \u00b7 +' + r.history.length + ' history msg' : ''),
+        exp: short(r.expect.action) + ' ' + (r.expect.sevMin === r.expect.sevMax ? r.expect.sevMin : r.expect.sevMin + '\u2013' + r.expect.sevMax),
+        expC: C[r.expect.action],
+        got: short(r.got.action) + ' ' + r.got.severity, gotC: C[r.got.action],
+        st: r.pass ? 'PASS' : 'FAIL', stC: r.pass ? 'var(--ok)' : 'var(--blk)',
+        rowBg: r.pass ? 'transparent' : 'rgba(255,107,97,.07)'
+      })) : []
+    };
+  }
+}
+</script>
+</body>
+</html>

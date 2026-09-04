@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../oki-post-processor.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+textarea:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+</style>
+</helmet>
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--blk:#ff6b61;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu);padding:40px 24px 64px;display:flex;justify-content:center">
+<div style="width:100%;max-width:1120px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:18px">
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:400 30px var(--fd)">OkiPostProcessor</div>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.14)">PURE JS · LAST GATE OUT</span>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ac2);background:rgba(169,143,214,.16)">V1.0</span>
+    </div>
+    <div style="font:italic 400 14px/1.5 var(--fb);color:var(--dim)">Every Claude reply passes through here before a user sees it. Violations are logged, flagged for review, and replaced with a safe fallback.</div>
+  </div>
+  <div style="font:700 12px var(--fu);color:{{ logColor }};border:1px solid {{ logColor }};border-radius:999px;padding:8px 16px">{{ logSummary }}</div>
+</div>
+
+<div style="display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start">
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Raw model response</div>
+      <textarea value="{{ raw }}" onChange="{{ typeRaw }}" rows="7" placeholder="Paste a raw Claude reply…" style="box-sizing:border-box;width:100%;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font:400 12px/1.6 var(--mono);color:var(--tx)"></textarea>
+      <div style="display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Mode contract">
+        <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:{{ m.c }};background:{{ m.bg }}">{{ m.t }}</button>
+        </sc-for>
+      </div>
+      <button onClick="{{ runGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:#141019;font:700 13px var(--fu)" style-hover="background:#e8caa0">Validate</button>
+    </div>
+
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:9px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Try a canned response</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ demos }}" as="d" hint-placeholder-count="8">
+          <button onClick="{{ d.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px;border:1px solid var(--bd);border-radius:10px" style-hover="border-color:rgba(211,173,110,.45);background:var(--sf2)">
+            <span style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ d.dot }}"></span>
+            <span style="flex:1;font:400 12px var(--fu);color:var(--tx)">{{ d.t }}</span>
+            <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--dim)">{{ d.mode }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+    <sc-if value="{{ noRes }}" hint-placeholder-val="{{ true }}">
+      <div style="border:1.5px dashed var(--bd);border-radius:16px;padding:40px;display:flex;align-items:center;justify-content:center;font:italic 400 13.5px var(--fb);color:var(--dim)">Validate a response to see the gate&rsquo;s decision.</div>
+    </sc-if>
+    <sc-if value="{{ hasRes }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font:700 14px var(--fu);letter-spacing:.08em;padding:9px 18px;border-radius:9px;color:#141019;background:{{ vColor }}">{{ vLabel }}</span>
+          <span style="font:400 12px var(--fu);color:var(--dim)">{{ vMeta }}</span>
+        </div>
+        <sc-if value="{{ hasViolations }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ violations }}" as="v" hint-placeholder-count="2">
+              <div style="background:rgba(255,107,97,.07);border:1px solid rgba(255,107,97,.35);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font:700 9.5px var(--fu);letter-spacing:.1em;padding:2.5px 8px;border-radius:5px;color:var(--blk);background:rgba(255,107,97,.14)">{{ v.code }}</span>
+                  <span style="font:600 12.5px var(--fu)">{{ v.label }}</span>
+                </div>
+                <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ v.detail }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">What the user gets instead</div>
+            <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px 16px 16px 4px;padding:13px 15px;font:400 13.5px/1.6 var(--fb)">{{ fallback }}</div>
+            <div style="font:400 10.5px var(--fu);color:var(--dim)">Rejected reply logged + flagged for human review — never shown, never silently retried.</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isClean }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Formatted for UI — parsed segments</div>
+            <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px 16px 16px 4px;padding:13px 15px;display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ segments }}" as="sg" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <sc-if value="{{ sg.hasTag }}" hint-placeholder-val="{{ true }}">
+                    <span style="align-self:flex-start;font:700 8.5px var(--fu);letter-spacing:.1em;padding:2.5px 7px;border-radius:5px;color:{{ sg.c }};background:{{ sg.bg }}">{{ sg.tag }}</span>
+                  </sc-if>
+                  <div style="font:400 13.5px/1.6 var(--fb)">{{ sg.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Review queue — this session</div>
+        <button onClick="{{ clearLog }}" style="all:unset;cursor:pointer;min-height:36px;display:flex;align-items:center;font:600 11px var(--fu);color:var(--dim)" style-hover="color:var(--warn)">Clear</button>
+      </div>
+      <sc-if value="{{ logEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="font:italic 400 12px var(--fb);color:var(--dim)">No rejections yet.</div>
+      </sc-if>
+      <sc-for list="{{ logRows }}" as="l" hint-placeholder-count="2">
+        <div style="border-top:1px solid rgba(211,173,110,.08);padding-top:8px;display:flex;flex-direction:column;gap:2px">
+          <div style="display:flex;gap:8px;align-items:baseline">
+            <span style="font:600 10px var(--mono);color:var(--warn)">{{ l.codes }}</span>
+            <span style="font:400 9.5px var(--fu);color:var(--dim)">{{ l.ts }} · {{ l.mode }}</span>
+          </div>
+          <div style="font:400 11px/1.5 var(--mono);color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.excerpt }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font:400 11px/1.65 var(--fu);color:var(--dim)">Pipeline: SafetyRouter (in) → PromptBuilder → Claude → <b style="color:var(--ac)">PostProcessor (out)</b> → UI. Accepts raw strings or the Claude API content-block shape. Console: <b style="color:var(--ac)">OkiPostProcessor.postProcess(raw, mode)</b>.</div>
+  </div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 1000}}">
+class Component extends DCLogic {
+  state = { raw: '', mode: 'standard', res: null, logTick: 0 };
+
+  TAG_COLORS = {
+    CALCULATED: { c: '#59b37d', bg: 'rgba(89,179,125,.16)' }, REPORTED: { c: '#8fb0c9', bg: 'rgba(143,176,201,.16)' },
+    TRADITIONAL: { c: '#d3ad6e', bg: 'rgba(211,173,110,.15)' }, POSSIBILITY: { c: '#a98fd6', bg: 'rgba(169,143,214,.16)' },
+    SYNTHESIS: { c: '#e8caa0', bg: 'rgba(232,202,160,.14)' }, OBSERVED: { c: '#59b37d', bg: 'rgba(89,179,125,.16)' },
+    PRACTICE: { c: '#e8e6ee', bg: 'rgba(232,230,238,.12)' }, SAFETY: { c: '#e08d7d', bg: 'rgba(224,141,125,.16)' }
+  };
+  DEMOS = [
+    { t: 'Clean standard reply', mode: 'standard', clean: true, raw: '[TRADITIONAL] Numerology reads your 1 Personal Year as a clearing year \u2014 old structures thinning so one priority can surface. [POSSIBILITY] That may show up as the new role feeling lighter to imagine than the current one. I can\u2019t choose for you \u2014 that stays yours. What would the you of next year regret not trying?' },
+    { t: 'Clean quick reply', mode: 'quick', clean: true, raw: '[POSSIBILITY] Fog like this is often two honest options talking over each other. Which one did you defend without being asked?' },
+    { t: 'No epistemic tags', mode: 'standard', clean: false, raw: 'You\u2019re overthinking this. Just relax, trust the process, and everything will sort itself out soon.' },
+    { t: 'Diagnosis violation', mode: 'standard', clean: false, raw: '[SYNTHESIS] Honestly, what you\u2019re describing sounds like depression \u2014 you probably have depression, and your chart agrees.' },
+    { t: 'Destiny declaration', mode: 'standard', clean: false, raw: '[TRADITIONAL] With Saturn here, this partnership is meant to be \u2014 it\u2019s written in the stars and there\u2019s nothing you need to decide.' },
+    { t: 'Parasocial bonding', mode: 'standard', clean: false, raw: '[POSSIBILITY] I feel so close to you after these talks \u2014 we have a special bond, and I need you to come back tomorrow.' },
+    { t: 'Unapproved exercise', mode: 'deep', clean: false, raw: '[PRACTICE] Let\u2019s try EMDR right now: move your eyes left to right while recalling the memory of the argument.' },
+    { t: 'Quick mode, too long', mode: 'quick', clean: false, raw: '[POSSIBILITY] There is a lot moving in your chart today. The moon squares your natal sun. That usually stirs restlessness. It might be worth waiting a day before deciding anything important at all.' }
+  ];
+
+  run(raw, mode) {
+    const PP = window.OkiPostProcessor;
+    if (!PP) return;
+    const res = PP.postProcess(raw, mode);
+    this.setState({ raw, mode, res, logTick: this.state.logTick + 1 });
+  }
+
+  renderVals() {
+    const st = this.state, PP = window.OkiPostProcessor;
+    const res = st.res;
+    const log = PP ? PP.violationLog().slice().reverse() : [];
+    return {
+      raw: st.raw, typeRaw: e => this.setState({ raw: e.target.value }),
+      modes: ['quick', 'standard', 'deep'].map(k => ({ t: k[0].toUpperCase() + k.slice(1), on: st.mode === k, c: st.mode === k ? '#141019' : 'var(--dim)', bg: st.mode === k ? 'var(--ac)' : 'transparent', go: () => this.setState({ mode: k }) })),
+      runGo: () => this.run(st.raw, st.mode),
+      demos: this.DEMOS.map(d => ({ t: d.t, mode: d.mode.toUpperCase(), dot: d.clean ? 'var(--ok)' : 'var(--blk)', go: () => this.run(d.raw, d.mode) })),
+      noRes: !res, hasRes: !!res,
+      isClean: !!(res && res.clean), hasViolations: !!(res && !res.clean),
+      vLabel: res ? (res.clean ? 'CLEAN \u2014 SHIP IT' : 'REJECTED') : '',
+      vColor: res ? (res.clean ? 'var(--ok)' : 'var(--blk)') : 'var(--dim)',
+      vMeta: res ? (res.clean ? res.segments.length + ' segments parsed for UI' : res.violations.length + ' violation' + (res.violations.length === 1 ? '' : 's') + ' \u00b7 fallback served') : '',
+      violations: res ? res.violations.map(v => ({ code: v.code, label: v.label, detail: v.detail })) : [],
+      fallback: res ? res.fallback : '',
+      segments: res && res.clean ? res.segments.map(sg => ({ hasTag: !!sg.tag, tag: sg.tag || '', text: sg.text,
+        c: sg.tag ? this.TAG_COLORS[sg.tag].c : '', bg: sg.tag ? this.TAG_COLORS[sg.tag].bg : '' })) : [],
+      logSummary: log.length ? log.length + ' flagged for review' : 'review queue empty',
+      logColor: log.length ? 'var(--warn)' : 'var(--ok)',
+      logEmpty: log.length === 0,
+      logRows: log.slice(0, 6).map(l => ({ codes: l.codes.join(', '), ts: l.ts.slice(11, 19), mode: l.mode, excerpt: l.excerpt })),
+      clearLog: () => { if (PP) PP.clearViolationLog(); this.setState({ logTick: st.logTick + 1 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

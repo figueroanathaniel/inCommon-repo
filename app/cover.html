@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
+
+     The shader half is the design and is ported from the handoff reference
+     rather than retyped. VERT, COMMON, BRIGHT_FRAG, DOWN_FRAG and UP_FRAG are
+     unedited, and the constants in them are physical rather than art directed.
+
+     Two shaders differ, and each differs in one direction only.
+
+     MAIN_FRAG gains the violet rim on the horizon, at the very end, after the
+     photon ring and the shimmer. Nothing above that is touched: the geodesic integration, the disk,
+     the jets and the starfield are the reference's. The mark is drawn in this
+     pass rather than the final one so the bright pass sees it, which is what
+     makes it bloom and take the aberration with everything else instead of
+     sitting on top as a decal.
+
+     FINAL_FRAG differs by a removal:
+     the two layer film grain is gone, asked for and taken out whole rather
+     than turned down to zero. A uGrain of 0.0 is a dial somebody restores by
+     accident; an absent pass is a decision. The uniform, the uSeed that
+     reseeded it per frame and the h21 hash that generated it went with it,
+     along with the max(c, 0.0) that existed only to stop grain subtracting a
+     near black pixel below zero. Chromatic aberration, bloom, vignette and
+     the ACES fit are untouched.
+
+     The four corner brackets went in the same pass, DOM and both CSS blocks.
+
+     The page also scrolls now, which the reference did not. Every layer is
+     still position:fixed, so the scroll moves nothing: it drives one number,
+     which fades the wordmark out and brings the mark in. b_crit = 3*sqrt(3)/2 falls out of the geodesic integration and
+     is not tunable; the disk bounds, the step clamp and the four star shells
+     are measured values. Retyping any of it from a description does not
+     reproduce the image.
+
+     What is NOT from the reference, and why, is marked at each site: the
+     import map is local, the two comment em dashes are gone because this repo
+     has none anywhere, and the hash forward below exists because the app's
+     router is the hash.
+
+     The arrow's target is the one thing that differs between this file and
+     the shipped bundle. Here it is the app source; tools/build-bundle.js
+     rewrites both occurrences to ./app.html and fails loudly if it does not
+     find exactly two. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05060a">
+<link rel="manifest" href="./manifest.json">
+
+<!-- A LINK THAT NAMES A SCREEN GOES TO THE SCREEN, NOT TO THE COVER.
+
+     The app's router is the hash, so /#/spirit/dreams reaches the server as
+     "/" and the server answers with this page. Every address written before
+     the cover existed has that shape: bookmarks, shared links, the addresses
+     CLAUDE.md itself names. Without this they all land here, one click from
+     where they were going and with nothing on screen saying so, which is the
+     same failure as a Library card writing an address whose screen is
+     somewhere else.
+
+     Synchronous, and first, so a deep link never paints the cover at all.
+     location.replace rather than assignment: the cover should not become a
+     back-button stop on the way to a screen the reader asked for by name. -->
+<script>
+(function () {
+  var h = location.hash;
+  if (h && h.length > 1) location.replace('./inCommonApp%20v2.dc.html' + location.search + h);
+})();
+</script>
+<title>inCommon // Event Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+<!-- THREE IS VENDORED, AND THE INTEGRITY BLOCK IS GONE WITH THE CDN.
+
+     The design reference pulled three@0.184.0 from unpkg with SRI hashes. On a
+     page whose entire promise is that nothing leaves the device, a landing
+     screen that calls a third party before the visitor has clicked anything is
+     the wrong first contact, so both files are committed beside the vendored
+     React they sit next to.
+
+     The hashes are not carried over. SRI answers "did a CDN I do not control
+     hand me the bytes I asked for", and these bytes are served from this
+     origin now, so the question no longer has a subject. What replaced it is
+     provenance: the two files were downloaded from the pinned URLs and checked
+     against those exact hashes before they were committed, and both matched.
+
+     Upstream filenames are kept on purpose. three.module.js imports
+     ./three.core.js by that name, so renaming either one means editing
+     vendored source, and an edit to vendored source is an edit the next
+     re-vendor silently drops. The version lives in three.core.js as
+     REVISION = '184'. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./three.module.js"
+  }
+}
+</script>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* THE PAGE SCROLLS, AND NOTHING SCROLLS WITH IT.
+
+     Every layer on this cover is position:fixed, so the scroll moves no pixels
+     of its own. What it does is drive one number, and that number cross fades
+     the wordmark out and the mark in. The height is what makes the gesture
+     available at all: with overflow hidden there is no scroll to link to, and
+     a wheel handler faking one would take the scrollbar away from keyboard and
+     assistive users to animate an opacity. */
+  html { background: #05060a; }
+  body { min-height: 300vh; background: #05060a; overflow-x: hidden; }
+  a { color: #a5b4cf; text-decoration: none; }
+  a:hover { color: #fff8e7; }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #veil {
+    position: fixed; inset: 0; background: #05060a; pointer-events: none;
+    opacity: 1; transition: opacity 1400ms cubic-bezier(.4,0,.2,1);
+  }
+  body.live #veil { opacity: 0; }
+  /* THE REVEAL AND THE SCROLL FADE ARE TWO OPACITIES, ON PURPOSE.
+
+     .markwrap carries the reveal, which is a CSS transition fired once by
+     body.live. .mark carries the scroll fade, which JS writes on every scroll
+     event. They are on nested elements so the browser multiplies them, and
+     neither has to know the other exists. Put both on one element and the
+     per frame write and the 2600ms transition fight over the property: the
+     fade then lags the scrollbar by whatever is left of the reveal. */
+  .markwrap {
+    position: fixed; inset: 0; display: grid; place-content: center;
+    pointer-events: none; opacity: 0;
+    transition: opacity 2600ms ease 800ms;
+  }
+  body.live .markwrap { opacity: 1; }
+  .mark {
+    text-align: center;
+    font-family: "Marcellus", "Times New Roman", serif; font-weight: 400;
+    font-size: clamp(44px, 11.6vw, 196px); line-height: 1;
+    letter-spacing: .15em; color: #fff8e7; opacity: .96;
+    text-shadow: 0 0 34px rgba(5,6,10,.72), 0 0 100px rgba(5,6,10,.92), 0 0 150px rgba(139,92,246,.30);
+    transition: letter-spacing 3200ms cubic-bezier(.2,.7,.2,1) 800ms;
+  }
+  body.live .mark { letter-spacing: .055em; }
+  .enter {
+    position: fixed; top: 32px; right: 32px; width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 2200ms ease 1100ms, transform 500ms cubic-bezier(.2,.8,.2,1);
+  }
+  body.live .enter { opacity: 1; }
+  .enter svg { animation: arrow-tw 4600ms ease-in-out infinite; }
+  .enter:hover { transform: translateX(3px); }
+  .enter:focus-visible { outline: 1px solid rgba(255,248,231,.5); outline-offset: 4px; border-radius: 4px; }
+  @keyframes arrow-tw {
+    0%, 100% { opacity: .74; filter: drop-shadow(0 0 3px rgba(255,248,231,.55)) drop-shadow(0 0 10px rgba(255,248,231,.30)); }
+    50%      { opacity: 1;   filter: drop-shadow(0 0 6px rgba(255,255,255,.95)) drop-shadow(0 0 16px rgba(255,248,231,.58)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .markwrap { transition: opacity 1200ms ease 600ms; }
+    .mark { letter-spacing: .055em; transition: none; }
+    .enter svg { animation: none; filter: drop-shadow(0 0 4px rgba(255,248,231,.7)) drop-shadow(0 0 12px rgba(255,248,231,.35)); }
+  }
+  /* THE DECORATED I, SET INSIDE THE SHADOW.
+
+     Sized and placed from the render rather than from the viewport: JS writes
+     a transform every frame from uHoleS and uHoleR, so it sits in the hole and
+     drifts with it. The box is centred on the viewport by left/top/margin and
+     the transform is the offset from there, which keeps the maths in one place
+     and lets transform-origin stay at the box centre so the scale is about the
+     letter itself.
+
+     It is the last thing to arrive, after both rims, and it is aria-hidden:
+     the accessible name of this page is the h1 that says inCommon, and a
+     decorative initial announcing itself as a letter I would be noise. */
+  .glyph {
+    position: fixed; left: 50%; top: 50%; width: 120px; height: 200px;
+    margin: -100px 0 0 -60px; pointer-events: none; opacity: 0;
+    filter: drop-shadow(0 0 9px rgba(139,92,246,.38));
+    will-change: transform, opacity;
+  }
+  .glyph svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  #fallback, #notice {
+    position: fixed; left: 30px; right: 30px; bottom: 26px; text-align: left;
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 300; letter-spacing: .16em; color: #64748b;
+    text-shadow: 0 0 18px rgba(5,6,10,.9);
+    opacity: 0; transition: opacity 600ms ease; pointer-events: none;
+  }
+  #notice { line-height: 2; text-wrap: pretty; }
+
+  /* TWO OWNERS, AND THE CSS ONE IS THE FALLBACK.
+
+     scrollFade() writes .mark's opacity inline and already folds this dim in,
+     and an inline style beats this rule, so while the module is alive this is
+     inert. It matters when the module is NOT alive: with no WebGL at all the
+     THREE.WebGLRenderer constructor throws, everything below it in the module
+     never runs, and scrollFade is never defined. The 9 second fallback timer
+     still fires, because it is a plain script in the head for exactly this
+     reason, and without this rule the wordmark would then sit at full strength
+     on top of the SIGNAL LOST message it is supposed to defer to. */
+  body.signal-lost .mark { opacity: .18; }
+  @media (max-width: 640px) {
+    .mark { font-size: clamp(34px, 13.5vw, 96px); }
+    #fallback, #notice { left: 18px; right: 18px; bottom: 18px; font-size: 10px; letter-spacing: .13em; }
+    body.live .mark { letter-spacing: .04em; }
+    .enter { top: 20px; right: 20px; }
+    .enter svg { width: 16px; height: 16px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="veil"></div>
+<div class="markwrap"><h1 class="mark">inCommon</h1></div>
+<div class="glyph" aria-hidden="true">
+  <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#8b5cf6" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round">
+      <line x1="24" y1="23" x2="96" y2="23"></line>
+      <line x1="24" y1="177" x2="96" y2="177"></line>
+    </g>
+    <g fill="#8b5cf6" fill-opacity=".55">
+      <path d="M60 6 66 13 60 20 54 13Z"></path>
+      <path d="M60 180 66 187 60 194 54 187Z"></path>
+      <circle cx="34" cy="100" r="2.2"></circle>
+      <circle cx="86" cy="100" r="2.2"></circle>
+    </g>
+    <g fill="#fff8e7">
+      <rect x="31" y="35" width="58" height="10" rx="1.5"></rect>
+      <rect x="31" y="155" width="58" height="10" rx="1.5"></rect>
+      <rect x="53.5" y="41" width="13" height="118"></rect>
+    </g>
+  </svg>
+</div>
+<a class="enter" href="./inCommonApp%20v2.dc.html" aria-label="Enter inCommon" title="Enter inCommon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="18.5" y2="12"></line><polyline points="12.5,6 18.5,12 12.5,18"></polyline></svg></a>
+<div id="fallback">SIGNAL LOST // RENDERER UNAVAILABLE OFFLINE</div>
+<div id="notice"></div>
+<script>
+  setTimeout(function () {
+    if (!window.__EH_LIVE) {
+      document.getElementById('fallback').style.opacity = '1';
+      document.body.classList.add('signal-lost');
+    }
+  }, 9000);
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ------------------------------------------------------------------ *
+ *  Schwarzschild raytracer.  rs = 1, disk in the y = 0 plane,
+ *  photon geodesics integrated from  d²r/dλ² = -3/2 · h² · r / r⁵
+ *  (exact orbit equation for null geodesics; h = |r × v| is conserved,
+ *  so b_crit falls out at 3√3/2 · rs as it should).
+ * ------------------------------------------------------------------ */
+
+const VERT = `
+varying vec2 vUv;
+void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+`;
+
+const COMMON = `
+precision highp float;
+varying vec2 vUv;
+
+vec3 lin(vec3 c){ return c*c*(0.6 + 0.4*c); }
+
+float h1(vec3 p){
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+vec3 h3(vec3 p){
+  vec3 q = vec3(dot(p, vec3(127.1, 311.7, 74.7)),
+                dot(p, vec3(269.5, 183.3, 246.1)),
+                dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(q) * 43758.5453123);
+}
+float vn(vec3 x){
+  vec3 i = floor(x), f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h1(i),                h1(i + vec3(1,0,0)), f.x),
+                 mix(h1(i + vec3(0,1,0)),  h1(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h1(i + vec3(0,0,1)),  h1(i + vec3(1,0,1)), f.x),
+                 mix(h1(i + vec3(0,1,1)),  h1(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+float fbm(vec3 p, int oct){
+  float a = 0.5, s = 0.0;
+  for (int i = 0; i < 5; i++){
+    if (i >= oct) break;
+    s += a * vn(p);
+    p = p * 2.02 + 7.31;
+    a *= 0.5;
+  }
+  return s;
+}
+`;
+
+const MAIN_FRAG = COMMON + `
+uniform vec2  uRes;
+uniform float uTime;
+uniform vec3  uCam;
+uniform vec3  uRight;
+uniform vec3  uUp;
+uniform vec3  uFwd;
+uniform vec2  uHoleS;
+uniform float uTan;
+uniform float uAspect;
+uniform float uSpin;
+uniform float uDiskGain;
+uniform float uMotion;
+uniform int   uSteps;
+uniform float uRim;
+uniform float uHoleR;
+uniform float uExit;
+
+#define RS    1.0
+#define DIN   3.0
+#define DOUT  10.5
+#define BCRIT 2.5980762
+#define ESC   44.0
+#define MAXSTEPS 260
+
+/* accretion disk temperature ramp: outer violet-purple -> inner ancient white */
+vec3 diskPal(float x){
+  x = clamp(x, 0.0, 1.0);
+  vec3 c = mix(lin(vec3(0.176,0.106,0.306)), lin(vec3(0.482,0.173,0.749)), smoothstep(0.00, 0.30, x));
+  c = mix(c, lin(vec3(0.600,0.000,1.000)), smoothstep(0.26, 0.54, x));
+  c = mix(c, lin(vec3(1.000,0.000,0.800)), smoothstep(0.50, 0.74, x));
+  c = mix(c, lin(vec3(1.000,0.894,0.882)), smoothstep(0.72, 0.90, x));
+  c = mix(c, lin(vec3(1.000,0.973,0.906)), smoothstep(0.88, 1.00, x));
+  c += lin(vec3(1.0,0.843,0.0)) * 0.17 * exp(-pow((x - 0.46) / 0.13, 2.0));
+  return c;
+}
+
+/* turbulent sheet + relativistic beaming at one disk crossing */
+void diskAt(vec3 p, vec3 rd, out vec3 em, out float al){
+  float r = length(p.xz);
+  float t = clamp((r - DIN) / (DOUT - DIN), 0.0, 1.0);
+  float prof = smoothstep(0.0, 0.055, t) * (1.0 - smoothstep(0.50, 1.0, t));
+
+  float ang = atan(p.z, p.x);
+  float om  = uSpin * 1.35 / (r * sqrt(r));          /* keplerian: inner rings run faster */
+  float ph  = ang - om * uTime;
+  float lr  = log(r) * 2.4;
+
+  vec3 q = vec3(cos(ph) * 3.2, sin(ph) * 3.2, lr);
+  float n1  = fbm(q * 1.35 + vec3(0.0, 0.0,  uTime * 0.020 * uMotion), 4);
+  float n2  = fbm(q * 3.60 + vec3(0.0, 0.0, -uTime * 0.055 * uMotion), 3);
+  float fil = pow(1.0 - abs(n2 * 2.0 - 1.0), 3.5);   /* plasma filaments */
+  float arms = 0.5 + 0.5 * sin(lr * 4.6 - ph * 2.0 + n1 * 5.0);
+  float fine = 0.86 + 0.28 * sin(lr * 19.0 + n2 * 7.0);        /* shear striations */
+
+  float dens = prof * (0.16 + 1.15 * n1) * (0.38 + 0.92 * arms) * (0.62 + 1.15 * fil) * fine;
+  float bright = pow(1.0 - t, 2.6) * 1.45 + 0.055;
+  float temp = clamp(pow(1.0 - t, 1.25) * 0.86 + n1 * 0.12 + fil * 0.14 - 0.06, 0.0, 1.0);
+
+  /* doppler beaming + gravitational redshift */
+  vec3  rh = normalize(vec3(p.x, 0.0, p.z));
+  vec3  vh = normalize(cross(vec3(0.0, 1.0, 0.0), rh)) * uSpin;
+  float v   = sqrt(0.5 * RS / r);
+  float gam = 1.0 / sqrt(max(0.02, 1.0 - v * v));
+  float mu  = dot(vh, -rd);
+  float D   = 1.0 / (gam * max(0.10, 1.0 - v * mu));
+  float grv = sqrt(max(0.05, 1.0 - RS / r));
+  float sh  = clamp(D * grv, 0.34, 2.40);
+  float beam = pow(sh, 2.4);
+
+  temp = clamp(temp + (sh - 1.0) * 0.34, 0.0, 1.0);
+  vec3 col = diskPal(temp);
+  float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  col = mix(col, lin(vec3(0.80,0.89,1.00)) * max(lum, 0.30), clamp((sh - 1.0) * 0.85, 0.0, 0.50));
+  col = mix(col, lin(vec3(0.46,0.17,0.60)) * (0.55 + lum), clamp((1.0 - sh) * 1.05, 0.0, 0.45));
+
+  em = col * bright * beam * uDiskGain;
+  al = clamp(dens * 1.25, 0.0, 1.0);
+}
+
+/* ---- procedural deep field ---- */
+vec3 starLayer(vec3 d, float sc, float thr, vec3 tint, float gain, float px){
+  vec3 p  = d * sc;
+  vec3 id = floor(p);
+  vec3 f  = p - id - 0.5;
+  vec3 rn = h3(id);
+  if (rn.x < thr) return vec3(0.0);
+  vec3 o = (h3(id + 19.7) - 0.5) * 0.62;
+  float dist = length(f - o);
+  float sz   = max(0.050, 1.55 * sc * px);
+  float core = smoothstep(sz, 0.0, dist);
+  float halo = exp(-dist * dist / (sz * sz * 9.0));
+  float mag  = pow((rn.x - thr) / (1.0 - thr), 1.7);
+  float tw   = 0.88 + 0.12 * sin(uTime * 0.45 * uMotion + rn.z * 44.0);
+  vec3  c    = mix(lin(vec3(1.0,0.973,0.906)), tint, rn.y * 0.85);
+  return c * (core * 2.4 + halo * 0.35) * mag * gain * tw;
+}
+
+vec3 galaxies(vec3 d, float px){
+  vec3 p  = d * 30.0;
+  vec3 id = floor(p);
+  vec3 f  = p - id - 0.5;
+  vec3 rn = h3(id);
+  if (rn.x < 0.9980) return vec3(0.0);
+  vec3 o = (h3(id + 3.7) - 0.5) * 0.66;
+  vec3 u = normalize(h3(id + 8.1) - 0.5 + 1e-4);
+  vec3 q = f - o;
+  q -= u * dot(q, u) * 0.26;                       /* squash into an ellipse */
+  float dd = length(q) / max(0.048, 30.0 * px * 3.0);
+  float core = exp(-dd * dd * 2.6);
+  float halo = exp(-dd * dd * 0.80) * 0.34;
+  vec3 c = mix(lin(vec3(1.00,0.843,0.32)), lin(vec3(0.86,0.90,1.00)), step(0.55, rn.y));
+  return c * (core * 0.80 + halo) * 0.80;
+}
+
+vec3 sky(vec3 d){
+  float px = 2.0 * uTan / uRes.y;
+  float n  = fbm(d * 2.4, 4);
+  float n2 = fbm(d * 7.3 + 13.0, 3);
+  float zg = 0.5 + 0.5 * dot(d, normalize(vec3(0.34, 0.52, -0.78)));   /* redshift gradient */
+  vec3 cool = mix(lin(vec3(0.043,0.063,0.149)), lin(vec3(0.086,0.125,0.267)), n);
+  vec3 warm = mix(lin(vec3(0.102,0.043,0.180)), lin(vec3(0.176,0.106,0.306)), n);
+  vec3 bg = mix(cool, warm, smoothstep(0.10, 0.92, zg));
+  bg *= 0.48 + 1.20 * pow(n, 1.7);
+  bg += lin(vec3(0.35,0.18,0.42)) * pow(n2, 3.0) * 0.13;
+
+  vec3 c = bg * 1.35;
+  c += starLayer(d,  62.0, 0.9860, lin(vec3(1.00,0.894,0.882)), 1.85, px);
+  c += starLayer(d, 118.0, 0.9880, lin(vec3(1.00,0.843,0.350)), 1.00, px);
+  c += starLayer(d, 205.0, 0.9925, lin(vec3(0.80,0.880,1.000)), 0.50, px);
+  c += starLayer(d, 340.0, 0.9945, lin(vec3(1.00,0.973,0.906)), 0.30, px);
+  c += galaxies(d, px);
+  return c;
+}
+
+void main(){
+  vec2 s = vUv * 2.0 - 1.0;
+  s.x *= uAspect;
+  vec3 rd  = normalize(uRight * (s.x * uTan) + uUp * (s.y * uTan) + uFwd);
+  vec3 pos = uCam;
+  vec3 vel = rd;
+
+  vec3  hv = cross(pos, vel);
+  float h2 = dot(hv, hv);
+  float b  = sqrt(h2);                 /* impact parameter (|vel| = 1) */
+
+  vec4 acc = vec4(0.0);                /* disk sheet, front-to-back */
+  vec3 vol = vec3(0.0);                /* volumetrics: disk halo + jets */
+  bool escaped = false;
+  int  crossings = 0;
+  vec3 jetc = lin(vec3(0.58,0.40,1.00));
+
+  for (int i = 0; i < MAXSTEPS; i++){
+    if (i >= uSteps) break;
+    float r2 = dot(pos, pos);
+    float r  = sqrt(r2);
+    if (r < RS * 1.02) break;                                   /* captured */
+    if (r > ESC && dot(pos, vel) > 0.0){ escaped = true; break; }
+
+    float rho = length(pos.xz);
+    float dt  = clamp(0.050 * r, 0.022, 1.70);
+    if (abs(pos.y) < 1.15 && rho < DOUT + 1.5) dt = min(dt, 0.20);
+
+    vec3 p0 = pos;
+    vec3 a0 = -1.5 * h2 * pos / (r2 * r2 * r);
+    vec3 vm = vel + a0 * (dt * 0.5);
+    vec3 pn = pos + vm * dt;
+    float n2r = dot(pn, pn);
+    vec3 a1 = -1.5 * h2 * pn / (n2r * n2r * sqrt(n2r));
+    vel = vm + a1 * (dt * 0.5);
+    pos = pn;
+
+    /* disk crossing -> emissive sheet */
+    if (p0.y * pos.y < 0.0 && crossings < 4){
+      float fr = p0.y / (p0.y - pos.y);
+      vec3 cp = mix(p0, pos, fr);
+      float cr = length(cp.xz);
+      if (cr > DIN - 0.15 && cr < DOUT + 0.6){
+        vec3 em; float al;
+        diskAt(cp, normalize(vel), em, al);
+        acc.rgb += (1.0 - acc.a) * em * al;
+        acc.a   += (1.0 - acc.a) * al;
+        crossings++;
+      }
+    }
+
+    /* scattered light above and below the sheet: gives the disk thickness */
+    if (rho > DIN - 0.7 && rho < DOUT + 1.0 && abs(pos.y) < 1.7){
+      float t  = clamp((rho - DIN) / (DOUT - DIN), 0.0, 1.0);
+      float pr = smoothstep(0.0, 0.10, t) * (1.0 - smoothstep(0.48, 1.0, t));
+      float vt = exp(-pos.y * pos.y * 4.6);
+      vec3  rh = normalize(vec3(pos.x, 0.0, pos.z));
+      vec3  vv = normalize(cross(vec3(0.0, 1.0, 0.0), rh)) * uSpin;
+      float vm2 = sqrt(0.5 * RS / max(rho, DIN));
+      float dd  = 1.0 / max(0.18, 1.0 - vm2 * dot(vv, -normalize(vel)));
+      vol += diskPal(clamp(pow(1.0 - t, 1.2), 0.0, 1.0)) * pr * vt * pow(dd, 2.2) * dt * 0.019 * uDiskGain;
+    }
+
+    /* faint relativistic jets along the poles */
+    float ay = abs(pos.y);
+    if (ay > 0.55 && rho < 0.45 + ay * 0.22){
+      float cr2 = 0.17 + ay * 0.115;
+      float rad = exp(-(rho * rho) / (cr2 * cr2));
+      float axl = 1.0 / (1.0 + ay * 0.62);
+      float fl  = 0.55 + 0.55 * vn(vec3(rho * 4.0, ay * 1.1 - uTime * 0.55 * uMotion, uTime * 0.13 * uMotion));
+      vol += jetc * rad * axl * fl * dt * 0.055;
+    }
+  }
+
+  vec3 col = acc.rgb + vol;
+  if (escaped) col += sky(normalize(vel)) * (1.0 - acc.a);
+
+  /* photon ring: trapped light at the critical impact parameter,
+     dispersed per channel so the rim carries its own chromatic fringe */
+  vec2  dq = s - uHoleS;
+  float az = atan(dq.y, dq.x);
+  float ax = cos(az);
+  float dr = b - BCRIT;
+  float w  = 0.040;
+  vec3 ringC = vec3(exp(-pow((dr + 0.0012) / w, 2.0)),
+                    exp(-pow((dr         ) / w, 2.0)),
+                    exp(-pow((dr - 0.0012) / w, 2.0)));
+  float amp = (0.14 + 1.05 * pow(abs(ax), 2.1)) * (1.0 + 0.45 * uSpin * ax);
+  col += ringC * lin(vec3(1.00,0.95,0.90)) * amp * 0.20;
+
+  /* holographic shimmer hugging the inside of the silhouette */
+  float rim = exp(-pow((dr + 0.17) / 0.21, 2.0));
+  float sph = vn(vec3(cos(az) * 3.0, sin(az) * 3.0, uTime * 0.22 * uMotion)) * 3.0 + az * 2.0;
+  vec3 shim = 0.5 + 0.5 * cos(6.2831853 * (vec3(0.0, 0.33, 0.67) + sph));
+  col += shim * rim * 0.042;
+
+  /* THE HORIZON WEARS THE MARK'S VIOLET, AND THAT IS THE WHOLE OF IT.
+
+     For one revision this was the entire mark: two circles of its own
+     proportions with the silhouette lying in their shared lens, and green on
+     the lens boundary. It was correct and it read as a graphic sitting on the
+     picture, which is the one thing this was supposed not to be. What is left
+     is the part that never sat on anything.
+
+     A violet ring on the silhouette's own edge, at uHoleR, which is the photon
+     ring's radius. The boundary of the shadow is not a drawn circle: it is
+     where the last light that could reach the camera came round, so this rides
+     on light that is already there rather than being laid over it. It is
+     centred on uHoleS, the hole's projected screen position, which the camera
+     already hands both shaders every frame, so it tracks the drift instead of
+     sitting at the middle of the viewport. And it is drawn in this pass rather
+     than the final one so the bright pass sees it: it blooms, catches the
+     vignette and takes the chromatic aberration with everything else, which is
+     the difference between merged and pasted on.
+
+     The stroke is 0.173 of the radius, the mark's own ratio from
+     tools/build-icons.js, applied to the one circle that is left. That is the
+     only number here that is not free.
+
+     THE GREEN IS A SECOND LINE NOW, NOT A SHARED LENS.
+
+     inCommon Logo/README.md reserves #2fff8f for what two wholes share and
+     says it is never decoration. With one circle on screen nothing is being
+     shared, so this green is not carrying that meaning: it is a second rim,
+     chosen for the cover. That is a deliberate departure and it is recorded
+     rather than quietly taken, because the rule it departs from is a real one
+     and the next person reading this file should not have to guess whether it
+     was noticed.
+
+     Two things keep it honest. It is thin, so it is a line and not a shape
+     competing with the one control on the page, which is a white arrow and
+     stays white. And it is the only green on the cover, so nothing else can
+     start borrowing it. */
+  /* THE SCENE LEAVES AND THE MARK STAYS.
+
+     Multiplying col here rather than fading a DOM veil over the canvas: the
+     veil sits above the canvas and below the wordmark, so raising it would
+     black out the mark along with everything else, and the mark is drawn IN
+     the canvas. Everything above this line is the render, so this one line
+     takes the disk, the jets, the starfield and the sky to black together and
+     leaves the mark, which is added below it, untouched. */
+  col *= 1.0 - uExit;
+
+  float pres = max(uRim, uExit);
+  if (pres > 0.0015) {
+    /* THE RIM BECOMES THE MARK.
+
+       At e = 0 this is exactly the horizon rim: two circles of the hole's
+       radius with their centres coincident, which draws as one. As e runs to
+       1 the centres separate to R/2, the radius doubles, the stroke thickens
+       from the thin rim to the mark's own 0.173R, and the whole thing walks
+       from the hole's projected position to the middle of the screen. So the
+       mark is not drawn over the rim, it is the rim, moved.
+
+       The lens only earns its green once the circles have actually parted:
+       split gates it from 0.15 to 0.75, because at e = 0 the two circles are
+       coincident and arcs would otherwise claim half the single ring. That is
+       what the first version did and it read as a ring half violet and half
+       green before anything had moved. */
+    float e = uExit;
+    vec2  ctr = mix(uHoleS, vec2(0.0), e);
+    float R   = uHoleR * mix(1.0, 2.0, e);
+    float DX  = R * 0.5 * e;
+    float hw  = mix(uHoleR * 0.0435, R * 0.0865, e);
+
+    vec2  mk = s - ctr;
+    float d1 = length(mk - vec2(-DX, 0.0));
+    float d2 = length(mk - vec2( DX, 0.0));
+    float b1 = 1.0 - smoothstep(hw * 0.85, hw * 1.15, abs(d1 - R));
+    float b2 = 1.0 - smoothstep(hw * 0.85, hw * 1.15, abs(d2 - R));
+    float in1 = 1.0 - smoothstep(R - hw, R + hw, d1);
+    float in2 = 1.0 - smoothstep(R - hw, R + hw, d2);
+    float lensIn = in1 * in2;
+
+    /* split gates the green boundary from 0.15 to 0.75, because at e = 0 the
+       two circles are coincident and arcs would otherwise claim half of the
+       single ring. fill is the last move: the lens goes solid and the green
+       boundary hands back to violet, so what lands is the mark as the identity
+       sheet draws it, two whole violet rings with a filled green lens, rather
+       than the outlined version the rim wears while it is sitting in a
+       picture. Green filling the lens is the colour doing exactly the job the
+       logo README reserves it for, which is naming what two wholes share. */
+    float split = smoothstep(0.15, 0.75, e);
+    float fill  = smoothstep(0.55, 1.00, e);
+    float arcs  = max(b1 * in2, b2 * in1) * split * (1.0 - fill);
+    float outer = max(max(b1, b2) - arcs, 0.0);
+
+    float near = min(abs(d1 - R), abs(d2 - R));
+    float halo = exp(-pow(near / (hw * 3.0), 2.0));
+
+    /* The desaturation eases off as the mark arrives, so what lands at the end
+       is the identity's own #8b5cf6 rather than the muted version the rim
+       wears while it is sitting in the picture. */
+    vec3 vio = lin(vec3(0.545, 0.361, 0.965));
+    vio = mix(vio, vec3(dot(vio, vec3(0.2126, 0.7152, 0.0722))), 0.45 * (1.0 - e));
+    col += vio * (outer * 0.95 + halo * 0.06 * (1.0 - lensIn)) * pres;
+
+    vec3 grn = lin(vec3(0.184, 1.000, 0.561));
+    float bleed = exp(-pow(near / (hw * 1.5), 2.0)) * lensIn;
+    /* The fill stops where the ring band is, so the violet stroke passes over
+       the green lens instead of summing with it. Without the (1 - ring) term
+       the boundary went pale where the two overlapped, which is the same
+       additive fault as the lens arcs and the horizon rim before it: this
+       block has now hit it three times, and any new light drawn here has to
+       say which colour owns the pixels it lands on. */
+    float ring = max(b1, b2);
+    col += grn * (arcs * 0.82 + bleed * 0.10 * split * (1.0 - fill)
+                  + lensIn * fill * 0.80 * (1.0 - ring)) * pres;
+
+    /* The thin inner rim is the rim's own green and has nowhere to go once the
+       lens exists, so it leaves over the first half of the move. */
+    float inner = 1.0 - smoothstep(0.0, 0.45, e);
+    float ghw = hw * 0.50;
+    float dg  = length(mk) - (R - hw * 2.1);
+    col += grn * exp(-pow(dg / ghw, 2.0)) * 0.40 * pres * inner;
+  }
+
+
+  gl_FragColor = vec4(max(col, 0.0), 1.0);
+}
+`;
+
+const BRIGHT_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform float uThr;
+uniform float uKnee;
+void main(){
+  vec3 c = texture2D(tSrc, vUv).rgb;
+  float l = max(c.r, max(c.g, c.b));
+  float soft = clamp(l - uThr + uKnee, 0.0, 2.0 * uKnee);
+  soft = soft * soft / (4.0 * uKnee + 1e-4);
+  float mul = max(soft, l - uThr) / max(l, 1e-4);
+  gl_FragColor = vec4(c * mul, 1.0);
+}
+`;
+
+const DOWN_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform vec2 uTexel;
+vec3 T(vec2 o){ return texture2D(tSrc, vUv + o * uTexel).rgb; }
+void main(){
+  vec3 a = T(vec2(-2, 2)), b = T(vec2(0, 2)), c = T(vec2(2, 2));
+  vec3 d = T(vec2(-2, 0)), e = T(vec2(0, 0)), f = T(vec2(2, 0));
+  vec3 g = T(vec2(-2,-2)), h = T(vec2(0,-2)), i = T(vec2(2,-2));
+  vec3 j = T(vec2(-1, 1)), k = T(vec2(1, 1)), l = T(vec2(-1,-1)), m = T(vec2(1,-1));
+  vec3 o = e * 0.125 + (a + c + g + i) * 0.03125 + (b + d + f + h) * 0.0625 + (j + k + l + m) * 0.125;
+  gl_FragColor = vec4(o, 1.0);
+}
+`;
+
+const UP_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform vec2 uTexel;
+uniform float uRadius;
+vec3 T(vec2 o){ return texture2D(tSrc, vUv + o * uTexel * uRadius).rgb; }
+void main(){
+  vec3 o = (T(vec2(-1, 1)) + T(vec2(1, 1)) + T(vec2(-1,-1)) + T(vec2(1,-1)))
+         + (T(vec2( 0, 1)) + T(vec2(0,-1)) + T(vec2(-1, 0)) + T(vec2(1, 0))) * 2.0
+         +  T(vec2( 0, 0)) * 4.0;
+  gl_FragColor = vec4(o / 16.0, 1.0);
+}
+`;
+
+const FINAL_FRAG = COMMON + `
+uniform sampler2D tScene;
+uniform sampler2D tBloom;
+uniform vec2  uHoleS;
+uniform float uAspect;
+uniform float uRingS;
+uniform float uCA;
+uniform float uBloom;
+uniform float uVig;
+
+const mat3 ACESin = mat3(0.59719, 0.07600, 0.02840,
+                         0.35458, 0.90834, 0.13383,
+                         0.04823, 0.01566, 0.83777);
+const mat3 ACESout = mat3( 1.60475, -0.10208, -0.00327,
+                          -0.53108,  1.10813, -0.07276,
+                          -0.07367, -0.00605,  1.07602);
+vec3 rrt(vec3 v){
+  vec3 a = v * (v + 0.0245786) - 0.000090537;
+  vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
+  return a / b;
+}
+vec3 aces(vec3 c){ return clamp(ACESout * rrt(ACESin * c), 0.0, 1.0); }
+
+void main(){
+  vec2 q = vUv * 2.0 - 1.0;
+  q.x *= uAspect;
+  vec2 dq = q - uHoleS;
+  float rq = length(dq);
+  float ring = exp(-pow((rq - uRingS) / (uRingS * 0.085 + 1e-4), 2.0));
+  vec2 dir = rq > 1e-5 ? dq / rq : vec2(0.0);
+  vec2 off = dir * uCA * (0.35 + 2.0 * ring);
+
+  vec3 c;
+  c.r = texture2D(tScene, vUv + off).r;
+  c.g = texture2D(tScene, vUv).g;
+  c.b = texture2D(tScene, vUv - off).b;
+
+  vec3 bl;
+  bl.r = texture2D(tBloom, vUv + off * 0.6).r;
+  bl.g = texture2D(tBloom, vUv).g;
+  bl.b = texture2D(tBloom, vUv - off * 0.6).b;
+  c += bl * uBloom;
+
+  c *= 1.0 - uVig * pow(clamp(rq / (0.95 + uAspect * 0.35), 0.0, 1.0), 2.4);
+  c = aces(c * 1.02);
+
+  c = mix(c * 12.92, 1.055 * pow(max(c, 1e-5), vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
+  gl_FragColor = vec4(c, 1.0);
+}
+`;
+
+/* ------------------------------ pipeline ------------------------------ */
+
+const canvas = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+renderer.autoClear = false;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+
+const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const quadGeo = new THREE.PlaneGeometry(2, 2);
+const passScene = new THREE.Scene();
+const passMesh = new THREE.Mesh(quadGeo, null);
+passMesh.frustumCulled = false;
+passScene.add(passMesh);
+
+function mat(frag, uniforms, additive) {
+  return new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: frag, uniforms,
+    depthTest: false, depthWrite: false,
+    blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+    transparent: !!additive
+  });
+}
+
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const mainU = {
+  uRes:   { value: new THREE.Vector2(1, 1) },
+  uTime:  { value: 0 },
+  uCam:   { value: new THREE.Vector3() },
+  uRight: { value: new THREE.Vector3() },
+  uUp:    { value: new THREE.Vector3() },
+  uFwd:   { value: new THREE.Vector3() },
+  uHoleS: { value: new THREE.Vector2() },
+  uTan:   { value: 0.24 },
+  uAspect:{ value: 1.78 },
+  uSpin:  { value: 1.0 },
+  uDiskGain: { value: 0.46 },
+  uMotion:{ value: REDUCE ? 0.35 : 1.0 },
+  uSteps: { value: 190 },
+  uRim:   { value: 0 },
+  uHoleR: { value: 0.2 },
+  uExit:  { value: 0 }
+};
+const brightU = { tSrc: { value: null }, uThr: { value: 1.25 }, uKnee: { value: 0.55 } };
+const downU   = { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } };
+const upU     = { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uRadius: { value: 1.0 } };
+const finalU = {
+  tScene: { value: null }, tBloom: { value: null },
+  uHoleS: { value: new THREE.Vector2() }, uAspect: { value: 1.78 },
+  uRingS: { value: 0.35 }, uCA: { value: 0.00085 }, uBloom: { value: 0.44 },
+  uVig: { value: 0.34 }
+};
+
+const mainMat   = mat(MAIN_FRAG, mainU);
+const brightMat = mat(BRIGHT_FRAG, brightU);
+const downMat   = mat(DOWN_FRAG, downU);
+const upMat     = mat(UP_FRAG, upU, true);
+const finalMat  = mat(FINAL_FRAG, finalU);
+
+function makeRT(w, h) {
+  return new THREE.WebGLRenderTarget(Math.max(2, w | 0), Math.max(2, h | 0), {
+    type: THREE.HalfFloatType,
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+    wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping,
+    depthBuffer: false, stencilBuffer: false, generateMipmaps: false
+  });
+}
+
+const LEVELS = 5;
+let rtScene = null;
+const rtB = [];
+let W = 2, H = 2, DPR = 1;
+
+/* THE FLOOR IS LOWER THAN A GOOD GPU WILL EVER NEED, BECAUSE A WEAK ONE DOES.
+
+   The ladder used to stop at 0.58 and 116 steps, and on an Intel UHD 600 that
+   floor still cost about 98ms a frame. Held there, the machine logged three
+   igfx driver resets in five minutes and Chrome then disabled WebGL for the
+   whole profile. A tier ladder whose last rung still kills the driver has no
+   last rung.
+
+   Cost here is pixels times steps, and both halves come down together, so
+   0.28/62 is roughly an eighth of the old floor rather than half of it. The
+   top of the ladder is unchanged: nothing about a capable GPU's experience
+   moves. */
+const QL = [
+  { ss: 1.30, steps: 235 },
+  { ss: 1.12, steps: 212 },
+  { ss: 1.00, steps: 190 },
+  { ss: 0.86, steps: 166 },
+  { ss: 0.72, steps: 140 },
+  { ss: 0.58, steps: 116 },
+  { ss: 0.46, steps: 96 },
+  { ss: 0.36, steps: 78 },
+  { ss: 0.28, steps: 62 }
+];
+let qi = 2;
+
+function buildScene() {
+  const ss = QL[qi].ss;
+  const cap = 4.6e6;
+  let sw = W * ss, sh = H * ss;
+  const over = (sw * sh) / cap;
+  if (over > 1) { const k = Math.sqrt(over); sw /= k; sh /= k; }
+  if (rtScene) rtScene.dispose();
+  rtScene = makeRT(sw, sh);
+  mainU.uRes.value.set(rtScene.width, rtScene.height);
+  mainU.uSteps.value = QL[qi].steps;
+}
+
+/* THE BLOOM CHAIN IS SIZED OFF THE SCENE BUFFER, NOT THE CANVAS.
+
+   This was built from W and H, which are the full device resolution, so the
+   nine bloom passes cost exactly the same at the bottom of the ladder as at
+   the top: dropping a tier bought nothing back from a third of the frame. It
+   is the reason lowering the floor alone did not help. The chain is sampled by
+   UV in the final pass, so its absolute size is free to follow the tier; the
+   only visible effect is a slightly softer bloom on a machine that is already
+   choosing softness over stalling. */
+function buildBloom() {
+  for (const t of rtB) t.dispose();
+  rtB.length = 0;
+  const bw = rtScene ? rtScene.width : W, bh = rtScene ? rtScene.height : H;
+  for (let i = 0; i < LEVELS; i++) rtB.push(makeRT(bw / Math.pow(2, i + 1), bh / Math.pow(2, i + 1)));
+}
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 1.6);
+  const cw = Math.max(2, window.innerWidth), ch = Math.max(2, window.innerHeight);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(cw, ch, false);
+  W = Math.max(2, Math.floor(cw * DPR));
+  H = Math.max(2, Math.floor(ch * DPR));
+  const aspect = W / H;
+  mainU.uAspect.value = aspect;
+  finalU.uAspect.value = aspect;
+  mainU.uTan.value = Math.min(0.47, Math.max(0.235, 0.425 / aspect));
+  finalU.uCA.value = 0.00075 + 0.0004 / Math.max(1, aspect);
+  buildScene();
+  buildBloom();
+}
+
+/* --------------------------- camera drift --------------------------- */
+
+const BCRIT = 2.5980762;
+const WUP = new THREE.Vector3(0, 1, 0);
+const cam = new THREE.Vector3(), tgt = new THREE.Vector3();
+const fwd = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3(), dv = new THREE.Vector3();
+
+function updateCamera(t) {
+  const drift = REDUCE ? 0.35 : 1.0;
+  const az   = 1.02 + (Math.sin(t * 0.037) * 0.085 + Math.sin(t * 0.0143 + 1.7) * 0.050) * drift;
+  const inc  = 0.178 + Math.sin(t * 0.029 + 0.4) * 0.030 * drift;
+  const dist = 30.5 + Math.sin(t * 0.021 + 2.1) * 1.10 * drift;
+  const ci = Math.cos(inc), si = Math.sin(inc);
+  cam.set(dist * ci * Math.cos(az), dist * si, dist * ci * Math.sin(az));
+  tgt.set(Math.sin(t * 0.0173) * 0.50 * drift, Math.sin(t * 0.0231 + 1.1) * 0.22 * drift, Math.cos(t * 0.0191 + 0.6) * 0.50 * drift);
+
+  fwd.copy(tgt).sub(cam).normalize();
+  right.crossVectors(fwd, WUP).normalize();
+  up.crossVectors(right, fwd).normalize();
+
+  mainU.uCam.value.copy(cam);
+  mainU.uRight.value.copy(right);
+  mainU.uUp.value.copy(up);
+  mainU.uFwd.value.copy(fwd);
+
+  dv.copy(cam).negate().normalize();
+  const zf = Math.max(1e-3, dv.dot(fwd)), tn = mainU.uTan.value;
+  mainU.uHoleS.value.set(dv.dot(right) / (zf * tn), dv.dot(up) / (zf * tn));
+  finalU.uHoleS.value.copy(mainU.uHoleS.value);
+  finalU.uRingS.value = Math.tan(Math.asin(Math.min(0.98, BCRIT / dist))) / tn;
+
+  /* The rim is the hole's own screen radius, so it is a size the render
+     decides and cannot drift from the thing it outlines. There is nothing to
+     fit to the frame any more: the ring is never wider than the shadow, so it
+     is never in danger of running off the edges the way the mark's outer
+     circles were on a portrait phone. */
+  mainU.uHoleR.value = finalU.uRingS.value;
+
+  /* The glyph is placed from the same two numbers the rim is drawn from, so it
+     cannot drift away from the hole it sits in.
+
+     uHoleS is in the shader's screen space, where y runs up and x has already
+     been multiplied by the aspect, so x spans plus and minus uAspect while y
+     spans plus and minus one. Converting: the horizontal offset from the
+     centre of the viewport is uHoleS.x * W / (2 * aspect), and the vertical is
+     -uHoleS.y * H / 2, negated because CSS pixels run down. The hole's radius
+     in pixels is uHoleR * H / 2 by the same reasoning, and the glyph's 200 unit
+     box is scaled to 1.7 of that radius so the letter sits inside the shadow
+     with room around it. */
+  if (glyphEl) {
+    const W = window.innerWidth, H = window.innerHeight;
+    const gx = mainU.uHoleS.value.x * W / (2 * mainU.uAspect.value);
+    const gy = -mainU.uHoleS.value.y * H / 2;
+    const gk = (finalU.uRingS.value * H / 2) * 1.7 / 200;
+    glyphEl.style.transform =
+      'translate(' + gx.toFixed(1) + 'px,' + gy.toFixed(1) + 'px) scale(' + gk.toFixed(4) + ')';
+  }
+}
+
+/* ------------------------------- loop ------------------------------- */
+
+function blit(material, target, clear) {
+  passMesh.material = material;
+  renderer.setRenderTarget(target);
+  if (clear) renderer.clear(true, false, false);
+  renderer.render(passScene, quadCam);
+}
+
+let T = 0, last = performance.now(), acc = 0, frames = 0, cooldown = 0, live = false;
+let rafId = 0, lost = false, panic = 0;
+const notice = document.getElementById('notice');
+
+/* Both callers rebuild the bloom chain as well as the scene, because the chain
+   is sized off the scene buffer now and a tier change that moved one without
+   the other would leave the two disagreeing until the next resize. */
+function drop(raw) {
+  if (qi >= QL.length - 1) return;
+  const over = Math.max(2, raw / 0.030);
+  const jump = Math.max(1, Math.min(QL.length - 1 - qi, Math.round(Math.log2(over))));
+  qi += jump;
+  buildScene(); buildBloom();
+  panic = 0; acc = 0; frames = 0; cooldown = 4;
+}
+
+function frame(now) {
+  rafId = 0;
+  if (lost) return;
+  /* THE CLOCK STEP AND THE FRAME TIME ARE TWO DIFFERENT NUMBERS.
+
+     raw is clamped to 50ms so a tab that was backgrounded for a minute does
+     not jump the animation a minute forward when it comes back. Reusing it to
+     judge performance is what made every tier guard below unreachable: raw
+     cannot exceed 0.05, so "raw > 0.060" was dead code, in this build and in
+     the reference it was ported from. The only demotion that ever ran was the
+     50 frame average, one rung per window plus a three window cooldown, which
+     on a machine at 6fps is about 25 seconds a rung. That is how a starved GPU
+     had time to take the display driver down before the ladder reached a tier
+     it could survive.
+
+     dt is the honest frame time and the guards read it. A frame over a second
+     is a tab returning from the background rather than a slow GPU, so it is
+     not counted at all. */
+  const dt = (now - last) / 1000;
+  const raw = Math.min(0.05, dt);
+  const perf = dt < 1.0 ? dt : 0;
+  last = now;
+  T += raw * (REDUCE ? 0.4 : 1.0);
+  mainU.uTime.value = T;
+  updateCamera(T);
+
+  blit(mainMat, rtScene, true);
+
+  brightU.tSrc.value = rtScene.texture;
+  blit(brightMat, rtB[0], true);
+  for (let i = 1; i < LEVELS; i++) {
+    downU.tSrc.value = rtB[i - 1].texture;
+    downU.uTexel.value.set(1 / rtB[i - 1].width, 1 / rtB[i - 1].height);
+    blit(downMat, rtB[i], true);
+  }
+  for (let i = LEVELS - 1; i > 0; i--) {
+    upU.tSrc.value = rtB[i].texture;
+    upU.uTexel.value.set(1 / rtB[i].width, 1 / rtB[i].height);
+    blit(upMat, rtB[i - 1], false);
+  }
+
+  finalU.tScene.value = rtScene.texture;
+  finalU.tBloom.value = rtB[0].texture;
+  blit(finalMat, null, true);
+
+  if (!live) {
+    live = true;
+    window.__EH_LIVE = true;
+    requestAnimationFrame(() => document.body.classList.add('live'));
+  }
+
+  /* keep the frame budget: trade supersampling and step count for fps */
+  if (perf > 0) {
+  acc += perf * 1000; frames++;
+  if (perf > 0.150) {
+    /* ONE CATASTROPHIC FRAME IS ENOUGH, AND ONE RUNG IS NOT.
+
+       Falling a single tier per two slow frames took six slow frames to reach
+       the old floor, and on a machine already timing out its display driver
+       those six frames are the ones that lose the context. The drop is sized
+       from how far over budget the frame actually was, so a 400ms frame falls
+       four rungs and a 160ms frame falls two. */
+    drop(perf);
+  } else if (perf > 0.060) {
+    panic++;
+    if (panic >= 2) drop(perf);
+  } else if (frames >= 50) {
+    const avg = acc / frames;
+    acc = 0; frames = 0; panic = 0;
+    if (cooldown > 0) cooldown--;
+    else if (avg > 21.0 && qi < QL.length - 1) { qi++; buildScene(); buildBloom(); cooldown = 3; }
+    else if (avg < 12.5 && qi > 0) { qi--; buildScene(); buildBloom(); cooldown = 3; }
+  }
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+/* context loss: stop the loop, say so, rebuild on restore */
+canvas.addEventListener('webglcontextlost', (e) => {
+  e.preventDefault();
+  lost = true;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  notice.textContent = 'SIGNAL LOST // REACQUIRING APERTURE';
+  notice.style.opacity = '1';
+  document.body.classList.add('signal-lost');
+}, false);
+
+canvas.addEventListener('webglcontextrestored', () => {
+  lost = false;
+  qi = Math.min(QL.length - 1, qi + 1);      /* come back cheaper than we left */
+  panic = 0; acc = 0; frames = 0; cooldown = 4;
+  resize();
+  notice.style.opacity = '0';
+  document.body.classList.remove('signal-lost');
+  last = performance.now();
+  if (!rafId) rafId = requestAnimationFrame(frame);
+}, false);
+
+setInterval(() => {
+  if (lost || !renderer.getContext().isContextLost()) return;
+  /* lost without an event, or never restored: surface it instead of a black frame */
+  lost = true;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  notice.textContent = 'SIGNAL LOST // RELOAD TO RESUME OBSERVATION';
+  notice.style.opacity = '1';
+  document.body.classList.add('signal-lost');
+}, 2000);
+
+/* ONE NUMBER, READ FROM THE SCROLLBAR, DRIVING TWO THINGS.
+
+   The wordmark leaves over the first stretch and the mark arrives over the
+   second, with an overlap in the middle so the screen is never empty of both.
+   Neither curve is eased in JS: the scrollbar is the easing, and a scroll
+   linked fade that runs its own timing feels detached from the finger.
+
+   This is deliberately NOT inside frame(). It has to keep working when the
+   renderer does not: with no WebGL the canvas is a black rectangle and the
+   9 second fallback message appears over it, and a wordmark that then refused
+   to move while the page scrolled would look like a second failure. */
+const markEl = document.querySelector('.mark');
+const glyphEl = document.querySelector('.glyph');
+
+/* Declared here rather than beside the click handler below, because
+   scrollFade reads it and scrollFade is called at module scope before that
+   line would have been reached: a let in the temporal dead zone throws a
+   ReferenceError, and it would have taken the whole module with it. */
+let exiting = false;
+
+function scrollFade() {
+  if (exiting) return;
+  const doc = document.documentElement;
+  const span = Math.max(1, doc.scrollHeight - window.innerHeight);
+  const t = Math.min(1, Math.max(0, window.scrollY / span));
+
+  /* THREE BEATS, IN ORDER, OFF ONE NUMBER.
+
+     The wordmark leaves, the rims arrive, and the letter is set into the hole
+     last. Each overlaps the one before it so the screen is never empty of
+     everything, but the letter does not begin until the rims are done: it is
+     the thing the rims were making room for, and starting it early would read
+     as three things fading at once rather than a sequence. The page is 300vh
+     rather than 260 for the same reason, which is one more beat of scroll and
+     not a longer one. */
+  const outT = Math.min(1, t / 0.42);
+  const wordmark = (1 - outT * outT) * (document.body.classList.contains('signal-lost') ? 0.18 : 0.96);
+  markEl.style.opacity = wordmark.toFixed(4);
+
+  const inT = Math.min(1, Math.max(0, (t - 0.14) / 0.41));
+  mainU.uRim.value = inT * inT * (3.0 - 2.0 * inT);
+
+  const gT = Math.min(1, Math.max(0, (t - 0.62) / 0.30));
+  glyphEl.style.opacity = (gT * gT * (3.0 - 2.0 * gT)).toFixed(4);
+}
+
+addEventListener('scroll', scrollFade, { passive: true });
+scrollFade();
+
+/* THE WAY OUT, AND WHY THE LINK STILL WORKS WITHOUT IT.
+
+   preventDefault is called only once this has decided it can actually run the
+   transition: the first frame has landed, the context is alive, and no exit is
+   already in flight. Any other state falls through and the anchor navigates
+   the way an anchor does, which is also what happens with the module dead, and
+   is why the href is real markup rather than something JS assigns.
+
+   The DOM layers are faded by writing their opacity here rather than through a
+   class, because scrollFade already owns those properties inline and an inline
+   style beats a rule. scrollFade returns early while exiting for the same
+   reason: without that, a scroll event mid transition would put the wordmark
+   back. */
+const enterEl = document.querySelector('a.enter');
+const wrapEl = document.querySelector('.markwrap');
+
+enterEl.addEventListener('click', function (ev) {
+  if (exiting || lost || !live) return;
+  ev.preventDefault();
+  exiting = true;
+
+  const href = enterEl.getAttribute('href');
+  const dur = REDUCE ? 620 : 2200;
+  const g0 = parseFloat(glyphEl.style.opacity || '0') || 0;
+  const t0 = performance.now();
+
+  (function step(now) {
+    const u = Math.min(1, Math.max(0, (now - t0) / dur));
+    const eased = u * u * (3.0 - 2.0 * u);
+    mainU.uExit.value = eased;
+
+    const k = 1 - eased;
+    wrapEl.style.opacity = k.toFixed(4);
+    glyphEl.style.opacity = (g0 * k).toFixed(4);
+    enterEl.style.opacity = k.toFixed(4);
+
+    if (u < 1) requestAnimationFrame(step);
+    /* a beat on the finished mark before the page goes */
+    else setTimeout(function () { location.href = href; }, 420);
+  })(t0);
+});
+
+let rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (!lost) resize(); scrollFade(); }, 140); });
+resize();
+rafId = requestAnimationFrame(frame);
+</script>
+</body>
+</html>

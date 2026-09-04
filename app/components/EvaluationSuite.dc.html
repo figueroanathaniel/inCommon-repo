@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../safety-router.js"></script>
+<script src="../oki-prompt-builder.js"></script>
+<script src="../oki-post-processor.js"></script>
+<script src="../practice-library.js"></script>
+<script src="../evaluation-suite.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+</style>
+</helmet>
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--blk:#ff6b61;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu);padding:40px 24px 64px;display:flex;justify-content:center">
+<div style="width:100%;max-width:1060px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:18px">
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:400 30px var(--fd)">EvaluationSuite</div>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.14)">45 CHECKS · REAL MODULES, NO MOCKS</span>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ac2);background:rgba(169,143,214,.16)">BROWSER + NODE</span>
+    </div>
+    <div style="font:italic 400 14px/1.5 var(--fb);color:var(--dim)">Adversarial safety prompts, epistemic tag verification, boundary violations, and practice-library integrity — JSON report printed to the console on every run.</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div style="font:700 13px var(--fu);color:{{ sumColor }};border:1px solid {{ sumColor }};border-radius:999px;padding:9px 18px">{{ summary }}</div>
+    <button onClick="{{ rerunGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;font:700 12px var(--fu);color:var(--ac)" style-hover="border-color:rgba(211,173,110,.5)">Re-run</button>
+    <button onClick="{{ exportGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ac);color:#141019;font:700 12px var(--fu)" style-hover="background:#e8caa0">{{ exportLabel }}</button>
+  </div>
+</div>
+
+<sc-for list="{{ sections }}" as="s" hint-placeholder-count="4">
+  <div style="display:flex;flex-direction:column;gap:9px;animation:fadeUp .25s ease">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ s.name }}</div>
+      <div style="font:700 11px var(--fu);color:{{ s.c }}">{{ s.score }}</div>
+    </div>
+    <div style="border:1px solid var(--bd);border-radius:14px;overflow:hidden">
+      <sc-for list="{{ s.tests }}" as="t" hint-placeholder-count="10">
+        <div style="display:grid;grid-template-columns:44px 1.2fr 1fr 1fr 60px;gap:10px;align-items:center;padding:7px 14px;border-top:1px solid rgba(211,173,110,.07);background:{{ t.rowBg }}">
+          <span style="font:600 10px var(--mono);color:var(--dim)">{{ t.id }}</span>
+          <span style="font:400 12.5px var(--fu)">{{ t.name }}</span>
+          <span style="font:400 10.5px var(--mono);color:var(--dim)">{{ t.expect }}</span>
+          <span style="font:400 10.5px var(--mono);color:{{ t.gotC }}">{{ t.got }}</span>
+          <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ t.stC }}">{{ t.st }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-for>
+
+<div style="font:400 11px/1.65 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:12px">Runs the same assertions in Node via <b style="color:var(--ac)">require('./evaluation-suite.js').run()</b> — no browser needed for CI. Every run prints the full JSON report to this page&rsquo;s console (open dev tools); Export downloads it as a file. Adversarial cases include negative controls (idioms, casual phrasing) so the gate is tested for over-blocking, not just under-blocking.</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1160, &quot;height&quot;: 1000}}">
+class Component extends DCLogic {
+  state = { report: null, exported: false };
+  componentDidMount() { this.tryRun(0); }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._et); }
+  tryRun(n) {
+    const ES = window.EvaluationSuite;
+    const ready = ES && window.SafetyRouter && window.OkiPromptBuilder && window.OkiPostProcessor && window.PracticeLibrary;
+    if (!ready) { if (n < 40) this._t = setTimeout(() => this.tryRun(n + 1), 120); return; }
+    this.setState({ report: ES.run() });
+  }
+  exportJSON() {
+    const r = this.state.report;
+    if (!r) return;
+    try { console.log('[EvaluationSuite] export', JSON.stringify(r)); } catch (e) {}
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' }));
+    a.download = 'incommon-evaluation-report.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    clearTimeout(this._et);
+    this.setState({ exported: true });
+    this._et = setTimeout(() => this.setState({ exported: false }), 1800);
+  }
+  renderVals() {
+    const r = this.state.report;
+    return {
+      summary: r ? r.totals.pass + ' / ' + r.totals.total + ' passing' : 'running\u2026',
+      sumColor: r ? (r.totals.fail === 0 ? 'var(--ok)' : 'var(--blk)') : 'var(--dim)',
+      rerunGo: () => { const ES = window.EvaluationSuite; if (ES) this.setState({ report: ES.run() }); },
+      exportGo: () => this.exportJSON(),
+      exportLabel: this.state.exported ? 'Exported \u2713' : 'Export JSON report',
+      sections: r ? r.sections.map(s => ({
+        name: s.name, score: s.pass + '/' + (s.pass + s.fail), c: s.fail === 0 ? 'var(--ok)' : 'var(--blk)',
+        tests: s.tests.map(t => ({ id: t.id, name: t.name, expect: t.expect, got: t.got,
+          gotC: t.pass ? 'var(--dim)' : 'var(--blk)', st: t.pass ? 'PASS' : 'FAIL', stC: t.pass ? 'var(--ok)' : 'var(--blk)',
+          rowBg: t.pass ? 'transparent' : 'rgba(255,107,97,.07)' }))
+      })) : []
+    };
+  }
+}
+</script>
+</body>
+</html>

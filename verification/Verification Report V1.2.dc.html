@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../app/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Karla',system-ui,sans-serif;color:#1c1b21}
+a{color:#96762f;text-decoration:none}a:hover{color:#7a5e22;text-decoration:underline}
+</style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="{{ paper }}" orientation="portrait" margin="0.7in" hint-size="100%,1400px">
+
+<div slot="header" style="display:flex;justify-content:space-between;gap:12px;font:600 8.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a8794;padding-bottom:6px;border-bottom:1px solid #e7e4dc">
+  <span>inCommon — Verification Report · V1.2</span>
+  <span>{{ confid }}</span>
+</div>
+<div slot="footer" style="display:flex;justify-content:space-between;gap:12px;font:500 8.5px 'Karla',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8a8794;padding-top:6px;border-top:1px solid #e7e4dc">
+  <span>Fable 5 · QA &amp; integrity</span>
+  <span>July 21, 2026</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:0;color:#1c1b21">
+  <div style="font:600 10px 'Karla',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#96762f;margin-top:10px">inCommon · Quality &amp; Integrity</div>
+  <div style="font:400 38px/1.12 'Marcellus',serif;margin-top:10px">Verification Report</div>
+  <div style="font:italic 400 15px/1.5 'Newsreader',Georgia,serif;color:#6b6974;margin-top:8px">V1.2 · Integrity Repair Pass — the V1 build checked against the Independent Source Audit V1.0, repaired, and re-verified with an executed automated test suite. Evidence standard: nothing below is marked PASS on displayed values, toasts, or intent — PASS requires an executed test or live computation traced to source.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-top:20px;padding:14px 16px;border:1px solid #e7e4dc;border-radius:6px;break-inside:avoid">
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Build under test</b> — inCommon Prototype V1.2.dc.html</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Controlling documents</b> — Independent Source Audit V1.0 · Fable 5 Master Build Prompt</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Test persona</b> — “Maya Lin Chen,” fictional · b. Jul 2, 1992, 9:41 PM · Seattle</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Reviewed</b> — July 21, 2026 · Fable 5 acting QA lead</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Version</b> — V1.2 · supersedes <a href="./Verification Report V1.1.dc.html">V1.1</a> and <a href="./Verification Report.dc.html">V1</a>, both retained unchanged</div>
+    <div style="font:400 11px/1.5 'Karla',sans-serif;color:#6b6974"><b style="color:#1c1b21;font-weight:600">Executed evidence</b> — <a href="./Test Runner V1.2.dc.html">Test Runner V1.2</a> · handoff/test-results-v1.2.json · 55/55, exit 0</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px;break-inside:avoid">
+    <span style="font:700 11px 'Karla',sans-serif;color:#1c1b21;margin-right:2px">{{ total }} —</span>
+    <sc-for list="{{ tallies }}" as="r" hint-placeholder-count="5">
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.08em;padding:3px 8px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap">{{ r.t }}</span>
+    </sc-for>
+  </div>
+  <div style="font:400 13px/1.65 'Newsreader',Georgia,serif;color:#3a3942;margin-top:10px">Verdict: the audit’s blocking findings (B1–B6) are repaired in the V1.2 build and covered by executed regression tests, including both of the audit’s reproduction cases. B7 (CDN-dependent build) remains open and is now disclosed accurately. Astrology, Human Design, Vedic, BaZi, moon, and timezone figures remain reference-persona demos — now labeled as such on every surface, including inside Stella’s prompt — until a calculation engine is licensed and the §20 suite passes against it. Numerology and angel-number math is live, computed from the user’s profile by the same tested module the suite executes. Per §20, this build does not claim production readiness.</div>
+  <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:12px 16px;margin-top:12px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37">Acceptance status</div>
+    <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:4px">V1.2 is a <b>repair pass against the independent audit</b> — it is not Phase 1 acceptance and makes no production-readiness claim. The V1.1 standing hold required independent inspection of the source bundle before further work; the Independent Source Audit V1.0 is that inspection, and this pass answers it. Remaining holds: production build (B7), licensed engines, live-provider demonstration (T11).</div>
+  </div>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:16px 0 2px">Changes from V1.1 → V1.2</div>
+  <sc-for list="{{ chg }}" as="g" hint-placeholder-count="7">
+    <div style="display:flex;gap:8px;padding:2.5px 0;break-inside:avoid">
+      <span style="color:#96762f;font:400 11.5px/1.55 'Newsreader',Georgia,serif">—</span>
+      <span style="font:400 11.5px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:34px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">1</span>
+    <span style="font:400 20px 'Marcellus',serif">Executed verification suite</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">new in V1.2 · the evidence layer</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 8px">One UMD module — <b>incommon-core.js</b> — holds the calculation, persistence, consent, and citation logic. The app executes it, the browser suite executes it, and the Node suite executes it; there is no test-time copy or transform. Integration tests boot the real V1.2 prototype in an iframe under <b>?test=1</b> (storage keys namespaced <b>_test</b>) and drive it through the documented <b>window.__incommon</b> hook. Every test id cited in this report resolves to a record in <b>handoff/test-results-v1.2.json</b>, captured verbatim from execution.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;break-inside:avoid">
+    <div style="border:1px solid #e7e4dc;border-radius:6px;padding:10px 12px"><div style="font:400 24px 'Marcellus',serif">55</div><div style="font:600 8.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a8794">Assertions</div></div>
+    <div style="border:1px solid #e7e4dc;border-radius:6px;padding:10px 12px"><div style="font:400 24px 'Marcellus',serif;color:#256b45">55</div><div style="font:600 8.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a8794">Pass</div></div>
+    <div style="border:1px solid #e7e4dc;border-radius:6px;padding:10px 12px"><div style="font:400 24px 'Marcellus',serif">43 + 12</div><div style="font:600 8.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a8794">Pure + integration</div></div>
+    <div style="border:1px solid #e7e4dc;border-radius:6px;padding:10px 12px"><div style="font:400 24px 'Marcellus',serif;color:#256b45">0</div><div style="font:600 8.5px 'Karla',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a8794">Fail · exit code 0</div></div>
+  </div>
+  <div style="font:500 9px/1.7 ui-monospace,Menlo,monospace;color:#6b6974;border:1px solid #e7e4dc;border-radius:6px;padding:9px 12px;margin-top:8px;overflow-wrap:break-word;break-inside:avoid">executed 2026-07-21T01:49:20Z · Chrome 150 / Windows<br>sha256 incommon-core.js&nbsp;&nbsp;ebdbdcf9cea7ee0637184bb2d9a884986a74c0d11304f513c19214ecec87dddf<br>sha256 handoff/tests.js&nbsp;&nbsp;&nbsp;90e8913e731504af105a8b735e300c758cc16998d76d9ab52fe6b27f3fe7dfee</div>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:14px 0 2px">What the suite pins down</div>
+  <sc-for list="{{ suiteHi }}" as="g" hint-placeholder-count="6">
+    <div style="display:flex;gap:8px;padding:2.5px 0;break-inside:avoid">
+      <span style="color:#96762f;font:400 11.5px/1.55 'Newsreader',Georgia,serif">—</span>
+      <span style="font:400 11.5px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+    </div>
+  </sc-for>
+  <div style="border:1px solid #d8b8ae;background:#fbf4f1;border-radius:6px;padding:12px 16px;margin-top:12px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37">Defects the harness itself exposed — both fixed in V1.2</div>
+    <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:4px">Wiring the integration tests revealed that the page <b>never loaded incommon-core.js</b> (missing script reference — every core-backed feature silently ran a no-op fallback), and that <b>UI updates never triggered the debounced persist</b> (the runtime invokes componentDidUpdate without prevState, so a guard skipped the write forever). Both are repaired and now held down by IT1, IT2b, and IT8 — a concrete demonstration of why executed tests, not displayed values, are this report’s evidence standard.</div>
+  </div>
+  <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:10px;break-inside:avoid"><b style="font-weight:600">Re-run it:</b> open <a href="./Test Runner V1.2.dc.html">Test Runner V1.2.dc.html</a> over any static server (it auto-runs and prints the SHA-256 of the sources under test), or <b style="font:500 10.5px ui-monospace,Menlo,monospace">node handoff/run-tests-node.js</b> for the pure half. Instructions: handoff/README-RUN-LOCALLY.md.</div>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">2</span>
+    <span style="font:400 20px 'Marcellus',serif">Requirements matrix</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§23.2 grouping · reclassified per audit</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 4px">Statuses: <b style="color:#256b45">PASS</b> verified by executed test or live computation · <b style="color:#6d5b96">DEMO</b> UI complete, values engine-gated or illustrative · <b style="color:#a3641c">PARTIAL</b> · <b style="color:#3e5f7e">PROTO PASS</b> fully working in prototype, production layer unbuilt · <b style="color:#b0578a">SIMULATED</b> one-device stand-in for a multi-party flow · <b style="color:#a84a37">GATED / OPEN</b> licensing or decision blocked · <b style="color:#6b6974">SPEC’D</b> designed, not built.</div>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:14px 0 2px">Launch-critical</div>
+  <sc-for list="{{ matA }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 68px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 2px">Post-foundation</div>
+  <sc-for list="{{ matB }}" as="r" hint-placeholder-count="4">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 68px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 2px">Licensing-gated</div>
+  <sc-for list="{{ matC }}" as="r" hint-placeholder-count="3">
+    <div style="display:grid;grid-template-columns:minmax(0,1.5fr) 46px 68px minmax(0,1.75fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#8a8794">{{ r.sp }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">3</span>
+    <span style="font:400 20px 'Marcellus',serif">Modality coverage</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">audit H6 · full §4 system list</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 4px">The audit required an honest status for every modality the specification names — including the ones this build does not touch. <b style="color:#8a8794">DEFERRED</b> means not in this build at all, by sequencing choice; no percentage-complete claim is made against the §21 gates.</div>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:12px 0 2px">§4A · Birth-calculated</div>
+  <sc-for list="{{ modA }}" as="r" hint-placeholder-count="5">
+    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 68px minmax(0,1.9fr);gap:10px;padding:6px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 10.5px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:14px 0 2px">§4B · Observation-based</div>
+  <sc-for list="{{ modB }}" as="r" hint-placeholder-count="5">
+    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 68px minmax(0,1.9fr);gap:10px;padding:6px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 10.5px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:14px 0 2px">§4C · Assessment-based</div>
+  <sc-for list="{{ modC }}" as="r" hint-placeholder-count="4">
+    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 68px minmax(0,1.9fr);gap:10px;padding:6px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 10.5px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">4</span>
+    <span style="font:400 20px 'Marcellus',serif">Calculation verification</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§20 · executed, not hand-derived</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 8px">V1.1 re-derived these by hand; V1.2 executes them. Numerology and angel-number rows cite suite ids and run against <b>incommon-core.js</b> — the same functions the app calls with the live profile (IT2 proves the equivalence). Timezone and moon rows were <b>reclassified DEMO</b>: the displayed values are static persona text, not computed; the fixtures remain as targets for the licensed engine.</div>
+  <sc-for list="{{ calcs }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.45fr) 68px;gap:10px;padding:8px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font:600 11px/1.4 'Karla',sans-serif">{{ r.t }}</div>
+        <div style="font:400 10px/1.45 'Karla',sans-serif;color:#8a8794">{{ r.n }}</div>
+      </div>
+      <div style="font:500 10px/1.6 ui-monospace,Menlo,monospace;color:#3a3942;overflow-wrap:break-word">{{ r.w }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+  <div style="font:italic 400 11px/1.5 'Newsreader',Georgia,serif;color:#8a8794;margin-top:6px">† degree-level sanity check only; the licensed engine is the final authority, with the §20 reference-chart suite as its gate.</div>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">5</span>
+    <span style="font:400 20px 'Marcellus',serif">AI grounding — Stella</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§10 · enforced, tested</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 8px">The audit’s central finding: V1’s grounding was advisory — the UI rendered citation chips but accepted uncited replies, and one scripted branch leaked numerology with the chart scope off. V1.2 makes the contract <b>enforced</b>: every live reply must carry a SOURCES line whose chips resolve, via a fixed registry, to real enabled sources — or the reply is withheld with a visible notice and a scripted fallback. Both audit reproduction cases are now regression tests (S1/IT5, IT4). A model-processing consent modal gates the first live call; declining keeps Stella scripted-only.</div>
+  <sc-for list="{{ ai }}" as="r" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:30px minmax(0,0.9fr) minmax(0,1.8fr) 68px;gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:700 9.5px/1.7 ui-monospace,Menlo,monospace;color:#96762f">{{ r.id }}</div>
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.m }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">6</span>
+    <span style="font:400 20px 'Marcellus',serif">Acceptance &amp; open items</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">§21 phase gates</span>
+  </div>
+  <sc-for list="{{ phases }}" as="r" hint-placeholder-count="5">
+    <div style="display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1.55fr) 68px;gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:700 9.5px/1.7 ui-monospace,Menlo,monospace;color:#96762f">{{ r.id }}</div>
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ r.t }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ r.n }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ r.sc }};background:{{ r.sbg }};white-space:nowrap;justify-self:start">{{ r.s }}</span>
+    </div>
+  </sc-for>
+
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:20px 0 6px">Unresolved after this pass — stated plainly</div>
+  <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="5">
+    <div style="display:flex;gap:8px;padding:3px 0;break-inside:avoid">
+      <span style="color:#96762f;font:400 12px/1.55 'Newsreader',Georgia,serif">—</span>
+      <span style="font:400 12px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+    </div>
+  </sc-for>
+
+  <sc-if value="{{ founderCopy }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:18px 0 6px">Founder decisions required before Phase-1 lock</div>
+    <sc-for list="{{ decisions }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;gap:8px;padding:3px 0;break-inside:avoid">
+        <span style="color:#96762f;font:400 12px/1.55 'Newsreader',Georgia,serif">—</span>
+        <span style="font:400 12px/1.55 'Newsreader',Georgia,serif;color:#3a3942">{{ g }}</span>
+      </div>
+    </sc-for>
+    <div style="border:1px solid #d8d4c8;background:#faf9f4;border-radius:6px;padding:16px 18px;margin-top:18px;break-inside:avoid">
+      <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37;margin-bottom:8px">Founder re-prompt / edit here</div>
+      <div style="font:500 10.5px/1.8 ui-monospace,Menlo,monospace;color:#3a3942;white-space:pre-line">INCOMMON CHANGE REQUEST
+Requested change:
+Reason / desired outcome:
+Who it affects:
+Priority: Critical / High / Medium / Later
+Must remain unchanged:
+Acceptance test:
+Before implementing: identify conflicts, affected systems, data changes, licensing implications, cost changes, and rollback method — then show the updated build and regression results.</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">7</span>
+    <span style="font:400 20px 'Marcellus',serif">Ephemeris engine comparison</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">carried from V1.1 · unchanged</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 2px">Named engines, owners, licenses, and the Moshier clarification, as issued in V1.1. Figures from vendor documentation read July 2026 — every number is re-verified at contract time, and the §20 reference-chart suite runs against whichever engine is chosen.</div>
+  <sc-for list="{{ engines }}" as="e" hint-placeholder-count="4">
+    <div style="border:1px solid #e7e4dc;border-radius:6px;padding:12px 14px;margin-top:8px;display:flex;flex-direction:column;gap:5px;break-inside:avoid">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">
+        <div style="font:600 11.5px 'Karla',sans-serif">{{ e.t }}</div>
+        <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ e.sc }};background:{{ e.sbg }};white-space:nowrap">{{ e.tag }}</span>
+      </div>
+      <div style="font:400 10px/1.5 'Karla',sans-serif;color:#8a8794">{{ e.own }}</div>
+      <div style="font:500 10px/1.6 ui-monospace,Menlo,monospace;color:#3a3942">{{ e.d1 }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ e.d2 }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ e.d3 }}</div>
+    </div>
+  </sc-for>
+  <div style="font:italic 400 11.5px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:10px">QA recommendation stands: license the Swiss Ephemeris Professional Edition, with a short Astronomy Engine spike as the MIT fallback. The matrix row stays OPEN; this decision is the founder’s to sign.</div>
+
+  <div style="display:flex;align-items:baseline;gap:12px;margin:36px 0 4px;border-bottom:2px solid #1c1b21;padding-bottom:8px;break-inside:avoid">
+    <span style="font:400 20px 'Marcellus',serif;color:#96762f">8</span>
+    <span style="font:400 20px 'Marcellus',serif">Companion bundle &amp; dependencies</span>
+    <span style="font:500 10px 'Karla',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a8794;margin-left:auto">audit B7 · disclosure corrected</span>
+  </div>
+  <div style="font:400 12.5px/1.6 'Newsreader',Georgia,serif;color:#6b6974;margin:6px 0 6px">The amended bundle ships with this report. Exact local-run and re-verification instructions are in <b>handoff/README-RUN-LOCALLY.md</b> (static server; file:// will not work).</div>
+  <sc-for list="{{ bundle }}" as="b" hint-placeholder-count="6">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:10px;padding:5px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:500 9.5px/1.6 ui-monospace,Menlo,monospace;color:#3a3942;overflow-wrap:break-word">{{ b.f }}</div>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ b.r }}</div>
+    </div>
+  </sc-for>
+  <div style="font:700 10px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#96762f;margin:16px 0 2px">Self-contained, or hosted?</div>
+  <sc-for list="{{ deps }}" as="d" hint-placeholder-count="4">
+    <div style="display:grid;grid-template-columns:minmax(0,0.9fr) 118px minmax(0,1.8fr);gap:10px;padding:7px 0;border-bottom:1px solid #edeae2;align-items:start;break-inside:avoid">
+      <div style="font:600 11px/1.45 'Karla',sans-serif">{{ d.t }}</div>
+      <span style="font:700 9px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:2.5px 7px;border-radius:4px;color:{{ d.sc }};background:{{ d.sbg }};white-space:nowrap;justify-self:start">{{ d.tag }}</span>
+      <div style="font:400 10.5px/1.5 'Karla',sans-serif;color:#6b6974">{{ d.d }}</div>
+    </div>
+  </sc-for>
+  <div style="border:1px solid #d8b8ae;background:#fbf4f1;border-radius:6px;padding:12px 16px;margin-top:14px;break-inside:avoid">
+    <div style="font:700 9.5px 'Karla',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#a84a37">Standing holds</div>
+    <div style="font:400 12px/1.6 'Newsreader',Georgia,serif;color:#3a3942;margin-top:4px">The V1.1 inspection hold is answered by the Independent Source Audit V1.0 and this repair pass. Still standing: no production build or launch work until B7 (CDN dependence) is closed, engines are licensed and pass §20, the live provider is demonstrated (T11), and an adversarial red-team pass runs against Stella (T9). No responsive pass or stakeholder deck was begun in V1.2, per the founder’s scope instruction.</div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:baseline;border-top:2px solid #1c1b21;margin-top:26px;padding-top:10px;break-inside:avoid">
+    <div style="font:600 11px 'Karla',sans-serif">Prepared by Fable 5 — acting QA &amp; integrity lead</div>
+    <div style="font:700 9.5px ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#a84a37">STATUS: PROTOTYPE — NOT PRODUCTION-READY (§20)</div>
+  </div>
+  <div style="font:400 10px/1.5 'Karla',sans-serif;color:#8a8794;margin-top:6px">This report covers the interactive prototype only. The persona is fictional; no user data exists or was used. Companions: <a href="./inCommon Prototype V1.2.dc.html">the V1.2 build</a> · <a href="./Test Runner V1.2.dc.html">Test Runner</a> · handoff/test-results-v1.2.json · handoff/changelog-v1.2.md · <a href="./Verification Report V1.1.dc.html">report V1.1, retained</a>.</div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;paper&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;letter&quot;, &quot;a4&quot;], &quot;default&quot;: &quot;letter&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Page&quot;}, &quot;founderCopy&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Content&quot;}}">
+class Component extends DCLogic {
+  CHIP = { 'PASS': ['#256b45', 'rgba(37,107,69,.09)'], 'DEMO': ['#6d5b96', 'rgba(109,91,150,.10)'], 'PARTIAL': ['#a3641c', 'rgba(163,100,28,.10)'], 'GATED': ['#a84a37', 'rgba(168,74,55,.09)'], 'OPEN': ['#a84a37', 'rgba(168,74,55,.09)'], 'PROTO PASS': ['#3e5f7e', 'rgba(62,95,126,.09)'], 'SIMULATED': ['#b0578a', 'rgba(176,87,138,.10)'], 'SPEC’D': ['#6b6974', 'rgba(107,105,116,.09)'], 'DEFERRED': ['#8a8794', 'rgba(138,135,148,.12)'] };
+  chip(rows) { return rows.map(r => ({ ...r, sc: this.CHIP[r.s][0], sbg: this.CHIP[r.s][1] })); }
+  renderVals() {
+    const matA = [
+      { t: 'Onboarding commits a real profile', sp: '§3', s: 'PASS', n: 'B2 repaired: completing onboarding persists profile + consent events; the app computes from it thereafter. Exact / approximate / unknown birth-time paths gate Rising, houses, Moon degree, HD, and Sabian via tested visibility rules · tests V1–V3, IT2, IT3, IT3b' },
+      { t: 'Accuracy & Confidence layer', sp: '§3', s: 'DEMO', n: 'B4 reclassified: chips render, but they grade demo persona data — “High” badges removed; honest grading requires a licensed engine and real inputs' },
+      { t: 'Consent before storing birth data', sp: '§3 §15', s: 'PROTO PASS', n: 'B5 repaired: ledger derives from real append-only consent events (grant/revoke, via, timestamp); revocation mutates state and Stella’s context · tests C1, C2, IT7. Server-side records and enforcement unbuilt' },
+      { t: 'Modular Library — inspect before synthesis', sp: '§4 §5', s: 'PASS', n: '13 modules with filters; per-module method footers. Engine-version and “validated ephemeris” claims removed (B3); demo values banner-labeled per module' },
+      { t: 'Astrology: Big 3 · Big 6 · wheel · aspects', sp: '§6', s: 'DEMO', n: 'UI complete; positions are reference-persona values, labeled DEMO on-screen and inside Stella’s prompt (row 4.11)' },
+      { t: 'Transit Time Machine — any date', sp: '§6', s: 'DEMO', n: 'Scrub works with applying/exact/separating states; transit set is a fixed July-2026 sample; date arithmetic computes live' },
+      { t: 'Numerology: Life Path, cycles, masters', sp: '§4A', s: 'PASS', n: 'Computed live from the committed profile by incommon-core (Y-policy documented; masters preserved mid-sum) · tests N1–N6, X1–X4, X9; IT2 proves the app renders exactly what the tested module returns' },
+      { t: 'Angel numbers: components, journal', sp: '§4B', s: 'PASS', n: 'Component analysis is live math (edge cases included); sightings save with real dates; interpretations original · tests A1–A3, X5–X8' },
+      { t: 'Compare Lab — two modes, no single score', sp: '§8', s: 'SIMULATED', n: 'Labeled on-screen: one-device stand-in — no second account or real exchange. Revocation is now a real state change (scope off, ledger event, prompt exclusion, invite reset) · test IT7' },
+      { t: 'My inCommon Profile — four analytic lenses', sp: '§9', s: 'PARTIAL', n: 'Lens structure and per-claim citations work; the synthesis copy is authored demo content over labeled sources, not generated from live data' },
+      { t: 'Today dashboard', sp: '§10', s: 'PARTIAL', n: 'Date and greeting compute live (D1 — V1’s hard-coded wrong weekday fixed); numerology card is live; sky, transit, and moon cards remain demo-labeled' },
+      { t: 'Stella — grounded conversational guide', sp: '§10', s: 'PARTIAL', n: 'Grounding contract now enforced and tested (§5); live provider, model, retention, and costs remain undemonstrated — T11 is the gate' },
+      { t: 'Insight Records + Throughline', sp: '§11', s: 'PARTIAL', n: 'H2 repaired: saved records feed the Throughline; saves carry real dates and persist (IT1). Check-in scheduling remains illustrative' },
+      { t: 'Four visual worlds, identical function', sp: '§13', s: 'PARTIAL', n: 'H3 reclassified: four live token palettes with reduced-motion support — palettes, not yet four fully distinct visual worlds per spec' }
+    ];
+    const matB = [
+      { t: 'Persistence · export · deletion', sp: '§12 §15', s: 'PROTO PASS', n: 'B1 repaired: core-owned debounced store with guarded deleteAll — cancels pending writes, verifies empty, tombstones against remount rehydration; JSON export includes consent events · tests P1–P3, IT1, IT8, IT10. This device only; no server or account exists' },
+      { t: 'Notifications — opt-in by category', sp: '§12', s: 'PARTIAL', n: 'Preferences persist; UI copy now states plainly that no delivery service exists in the prototype' },
+      { t: 'Assessments: Big Five, Enneagram', sp: '§4C', s: 'DEMO', n: 'H1 reclassified: illustrative short-form demo instruments, labeled as such (also in Stella’s prompt). Known limit: the Enneagram answer key cannot reach types 3, 6, or 8' },
+      { t: 'Human Design BodyGraph + transits', sp: '§7', s: 'DEMO', n: 'Graph renders; values are demo persona data and now respect birth-time mode (suppressed when unknown, windowed when approximate) · IT3b' },
+      { t: 'Founder admin console', sp: '§17', s: 'SPEC’D', n: 'Versioned content/prompt model reserved in the data design; no screens in this build' },
+      { t: 'PWA shell · offline states', sp: '§1', s: 'SPEC’D', n: 'Architecture documented; not built' },
+      { t: 'Backend, auth, encryption at rest', sp: '§15 §18', s: 'SPEC’D', n: 'Prototype is deliberately local-only; ownership plan sits with the founder per §18' }
+    ];
+    const matC = [
+      { t: 'Ephemeris engine license', sp: '§6', s: 'OPEN', n: 'AGPL/commercial decision blocks astrology PASS; comparison in §7 unchanged from V1.1' },
+      { t: 'Gene Keys', sp: '§4A', s: 'GATED', n: 'Disabled shell with official external link; no copied or generated substitute content' },
+      { t: 'Sabian symbols — full 360° commentary', sp: '§14', s: 'PARTIAL', n: 'Cleared degrees shipped; remainder held in editorial/legal review; degree display suppressed when birth time is unknown' },
+      { t: 'Vedic + BaZi calculation engines', sp: '§7', s: 'GATED', n: 'Screens shipped marked “engine in validation”; no invented positions' },
+      { t: 'MBTI · Love Languages branding', sp: '§4C', s: 'GATED', n: 'Neutral 16-type and relational-preference frameworks planned instead; neither is in this build (see §3)' }
+    ];
+    const modA = [
+      { t: 'Western astrology', s: 'DEMO', n: 'Full UI; reference-persona values; engine-gated (§20)' },
+      { t: 'Pythagorean numerology + cycles', s: 'PASS', n: 'Live from profile via tested core · N1–N6, X1–X4, IT2' },
+      { t: 'Chaldean numerology', s: 'SPEC’D', n: 'Named in Method notes as a planned second system; no calculations in build' },
+      { t: 'Sabian symbols (360°)', s: 'PARTIAL', n: 'Cleared degrees only; editorial/legal review holds the rest' },
+      { t: 'Chinese zodiac / BaZi', s: 'GATED', n: '“Engine in validation” shell; no invented pillars' },
+      { t: 'Human Design', s: 'DEMO', n: 'BodyGraph with demo persona data; birth-time gated' },
+      { t: 'Vedic astrology', s: 'GATED', n: '“Engine in validation” shell; sidereal values not invented' },
+      { t: 'Gene Keys', s: 'GATED', n: 'License-gated shell + official link only' },
+      { t: 'Mayan / Tzolkin calendar', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Elven Star / sevenfold Sabian', s: 'DEFERRED', n: 'Not in this build; also legal-review-gated' }
+    ];
+    const modB = [
+      { t: 'Angel numbers', s: 'PASS', n: 'Live component math + journal with real dates · A1–A3, X5–X8' },
+      { t: 'Synchronicity log', s: 'DEFERRED', n: 'Angel-sighting context notes approximate it; the general log named in §4B is not built' },
+      { t: 'Moon phases & lunar planning', s: 'DEMO', n: 'Phase strip is a fixed July-2026 sample, labeled; no lunar engine' },
+      { t: 'Tarot journal', s: 'PROTO PASS', n: 'Draw + journal work and persist with real dates; deck content is a demo subset' },
+      { t: 'I Ching consultation journal', s: 'DEMO', n: 'Labeled demo subset — 5 of 64 hexagrams; journal persists' },
+      { t: 'Dream journal', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Chakra self-reflection', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Archetype exploration', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Meditation practices', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Rituals & affirmations', s: 'DEFERRED', n: 'Not in this build' }
+    ];
+    const modC = [
+      { t: 'Enneagram', s: 'DEMO', n: 'Illustrative short instrument; answer key cannot reach types 3/6/8 — disclosed' },
+      { t: 'Big Five', s: 'DEMO', n: 'Illustrative short instrument, labeled with date + retake history' },
+      { t: '16-type / Jungian (neutral framing)', s: 'DEFERRED', n: 'Planned as the legally-safe MBTI alternative; not built' },
+      { t: 'Attachment styles', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Relational preferences (love-languages alternative)', s: 'DEFERRED', n: 'Not in this build' },
+      { t: 'Values · Strengths · Spiritual gifts', s: 'DEFERRED', n: 'Not in this build' }
+    ];
+    const calcs = [
+      { t: 'Life Path', n: 'executed N1 · app parity IT2', w: '07·02·1992 → 7 + 2 + (1992→21→3) = 12 → 3', s: 'PASS' },
+      { t: 'Personal Year 2026 · Month', n: 'executed N2, N3', w: '7 + 2 + (2026→10→1) = 10 → 1 · PY 1 + Jul = 8', s: 'PASS' },
+      { t: 'Expression — “Maya Lin Chen”', n: 'executed N4 · name-at-birth, never merged', w: 'MAYA 13→4 · LIN 17→8 · CHEN 21→3 · 15 → 6', s: 'PASS' },
+      { t: 'Soul Urge — vowels', n: 'executed N5 · Y-policy param tested both ways (X4)', w: 'A+A=2 · I=9 · E=5 → 16 → 7', s: 'PASS' },
+      { t: 'Master-number preservation', n: 'executed N6, X1 — including masters mid-sum', w: '29 → 11, stops · 2000-11-29 → 11+11+2 = 24 → 6', s: 'PASS' },
+      { t: 'Angel component analysis', n: 'executed A1–A3, X5–X8 incl. “11:11”, “0”, junk input', w: '1212 → 6 · 777 → 21 → 3 · repeats flagged · masters kept', s: 'PASS' },
+      { t: 'Live dates & weekday', n: 'executed D1, D2 — V1 showed a wrong hard-coded weekday', w: 'fmtToday(2026-07-19) = “Sunday · July 19, 2026”', s: 'PASS' },
+      { t: 'Birth-time visibility rules', n: 'executed V1–V3 · in-app IT3/IT3b', w: 'unknown → suppress angles/HD · approx → window · exact → full', s: 'PASS' },
+      { t: 'Historical timezone resolution', n: 'reclassified from V1.1 PASS — displayed footer was static text', w: 'no tz database in build; fixture TZ1 is the engine target', s: 'DEMO' },
+      { t: 'Moon phase — Jul 2026', n: 'reclassified from V1.1 PASS — fixed sample, no lunar engine', w: 'fixture L1 is the engine target', s: 'DEMO' },
+      { t: 'Sun degree sanity †', n: 'app shows Sun 11° Cancer', w: 'solstice Jun 20 ≈ 0° Cancer + 12 d ≈ 11°', s: 'PASS' },
+      { t: 'Moon/AC degrees · houses · aspects · HD gates · BaZi · Vedic', n: 'reference-persona values — not engine-derived', w: 'awaiting licensed ephemeris + §20 reference-chart suite', s: 'DEMO' }
+    ];
+    const ai = [
+      { id: 'T1', t: 'Citation coverage — enforced', m: 'AUDIT REPRO FIXED: a live reply with no SOURCES line is withheld with a visible notice, never rendered as grounded · S1, IT5. Chips resolve via a fixed registry; model-invented sources rejected · S4', s: 'PASS' },
+      { id: 'T2', t: 'Exclusion honored', m: 'Chips citing a disabled scope are rejected and the reply withheld · S3, IT6. AUDIT REPRO FIXED: the scripted start-branch no longer discloses Personal Year with the chart scope off · IT4', s: 'PASS' },
+      { id: 'T3', t: 'All context off', m: 'Chart + timing disabled → scripted reply stays general; validated scopes stay empty · S8', s: 'PASS' },
+      { id: 'T4', t: 'Forget conversation', m: 'Reset to greeting propagates to the persisted store — verified against storage, not the UI · IT8', s: 'PASS' },
+      { id: 'T5', t: 'Pacing limit', m: 'Seventh message inside 60 s is blocked with the pacing toast · IT9', s: 'PASS' },
+      { id: 'T6', t: 'Crisis safety gate', m: 'Deterministic, runs before consent modal and any model call; regex tested for hits and everyday-phrasing misses · G1, G2; crisis language in model OUTPUT also routes to the safety message', s: 'PASS' },
+      { id: 'T7', t: 'Offline / failure fallback', m: 'No bridge, declined consent, timeout (20 s · W2), or failed validation → scripted library under identical scope rules, visibly tagged', s: 'PASS' },
+      { id: 'T8', t: 'No invented data', m: 'Prompt injects only enabled CONTEXT blocks; insight/journal text is sanitized and quoted as data («…») · Z1; dated insight citations must match real records · S5–S7; history filtered by per-message scopes on revoke · H1', s: 'PASS' },
+      { id: 'T9', t: 'Prompt-injection resistance', m: 'Sanitizer has unit coverage (Z1); a proper adversarial red-team suite has not been run — required before launch (§20)', s: 'PARTIAL' },
+      { id: 'T10', t: 'Memory & consent parity', m: 'Ledger derives from real consent events; Context panel, Data screen, and prompt EXCLUDED blocks stay in sync through revocation · IT7', s: 'PASS' },
+      { id: 'T11', t: 'Live provider demonstration', m: 'Provider, model, retention, and unit costs undemonstrated. New in V1.2: an informed model-processing consent modal gates the first live call; declining keeps Stella scripted-only. Grounding is enforced locally either way', s: 'PARTIAL' }
+    ];
+    const phases = [
+      { id: 'P0', t: 'Requirements traced', n: 'Matrix maintained; audit findings mapped finding → fix → executed evidence in handoff/changelog-v1.2.md', s: 'PASS' },
+      { id: 'P1', t: 'Foundation & design system', n: 'Onboarding now commits real state; consent events real; four palettes live (worlds PARTIAL per H3)', s: 'PARTIAL' },
+      { id: 'P2', t: 'Core identity modules', n: 'Numerology + angel live and tested; astrology/Sabian demo or gated', s: 'PARTIAL' },
+      { id: 'P3', t: 'Timing, journaling, progress', n: 'Real dates throughout; records persist and feed the Throughline; timing values demo', s: 'PARTIAL' },
+      { id: 'P4', t: 'Comparison & synthesis', n: 'Compare Lab SIMULATED (labeled); profile lenses PARTIAL; citation layer real', s: 'PARTIAL' },
+      { id: 'P5', t: 'Additional systems', n: 'Assessments DEMO; HD demo + time-gated; Vedic, BaZi, Gene Keys gated; most §4 modalities deferred (§3)', s: 'PARTIAL' },
+      { id: 'P6', t: 'AI guide & hardening', n: 'Grounding enforced + regression-tested; red-team (T9), provider demo (T11), full a11y audit pending', s: 'PARTIAL' }
+    ];
+    const gaps = [
+      'B7 — the build depends on CDN-served React/Babel at runtime; a production build does not exist. Disclosure corrected; the defect stands.',
+      'No backend: auth, encryption at rest, server-side deletion, and sync are unbuilt (§15, §18). Deletion/export verified for the local store only.',
+      'Astrology, HD, Vedic, BaZi, moon, and timezone values are demos until an engine is licensed and passes the §20 suite.',
+      'Two-person exchange is simulated end-to-end; no real second party or account exists.',
+      'Assessments are illustrative instruments; the Enneagram key cannot produce types 3, 6, or 8.',
+      'Accessibility: real buttons/labels and reduced-motion in place; a full screen-reader and keyboard audit has not been run.',
+      'Founder admin console (§17), PWA/offline (§1), and the editorial review workflow (§14) remain unbuilt.'
+    ];
+    const decisions = [
+      'Ephemeris engine — comparison in §7; QA recommends the Swiss professional license; the row stays OPEN until the founder signs.',
+      'Hosting and data-ownership accounts, founder-controlled from day one (§18).',
+      'Minors policy and age gate before launch (§15).',
+      'Gene Keys: pursue a license, or ship the disabled shell indefinitely (§4A).',
+      'Live AI provider for Stella — provider, model, retention, and cost demonstration is the T11 gate; the consent modal names whatever bridge the host configures.'
+    ];
+    const chg = [
+      'Evidence standard changed: one shared module (incommon-core.js) executes in the app and in both test suites; 55 executed assertions (43 pure + 12 integration, incl. both audit repro cases) replace hand-derivation. Raw results ship as handoff/test-results-v1.2.json.',
+      'The harness exposed two silent wiring defects — the core module was never loaded, and UI updates never triggered the debounced persist — both fixed and regression-tested (§1).',
+      'Deletion made real (B1): guarded deleteAll cancels pending writes, verifies storage empty, and tombstones against remount rehydration · P1, P2, IT10.',
+      'Onboarding commits a persisted profile (B2); numerology and all dates compute live from it · IT2, D1. Demo astrology/HD/transit/moon data labeled DEMO on every surface including Stella’s prompt (B3/B4).',
+      'Consent is an event ledger (B5): revocation flips scope, logs the event, excludes the prompt block, resets the invite · C1, C2, IT7. New model-processing consent modal before the first live AI call.',
+      'Stella’s citation contract is enforced (B6): SOURCES required and registry-validated; failures withhold the reply visibly; history filters on revoke; injection sanitizer; output crisis check; 20 s timeout · S1–S9, H1, Z1, IT4–IT6.',
+      'Bundle disclosure corrected (B7): the build is CDN-dependent — the V1.1 “self-contained” claim was wrong. Statuses SIMULATED and DEFERRED added; §3 modality coverage added; timezone and moon calc rows reclassified DEMO.'
+    ];
+    const suiteHi = [
+      'B1 end-to-end: delete → pending debounce cancelled → reload → remount → storage verifiably empty, factory state · P1, P2, IT10.',
+      'The app provably runs the tested code: rendered Life Path equals the module’s output for the live profile, and the persistence object is core-built with the test namespace · IT2, IT2b.',
+      'Both audit reproductions locked as regressions: missing-SOURCES acceptance (now withheld · S1, IT5) and the scripted numerology leak with chart off (now clean · IT4).',
+      'Birth-time integrity holds across UI and prompt: unknown suppresses, approximate windows · V1–V3, IT3, IT3b.',
+      'Consent revocation is a state change with a ledger trail, prompt exclusion, and history filtering · C1, C2, H1, IT7.',
+      'Guardrails behave: crisis regex both ways, prompt sanitizer, hung-bridge timeout, pacing limit · G1, G2, Z1, W1, W2, IT9.'
+    ];
+    const engines = [
+      { t: 'Swiss Ephemeris — Professional Edition', own: 'Astrodienst AG, Zürich (Koch / Treindl) · one-time commercial license', d1: 'Matches JPL DE441 to 0.001″ · range 13,201 BCE – 17,191 CE · DE441-based since May 2026', d2: 'Houses: all common systems + ~40 ayanamsas native. Cost per current sheet: CHF 750 first license; “unlimited” shown at CHF 700 in the June 2026 contract (older docs list CHF 1550) — confirm at signing; no recurring fee', d3: 'Risk: low — the industry standard, actively maintained; migration means swapping one C library behind our engine interface', tag: 'RECOMMENDED', sc: '#256b45', sbg: 'rgba(37,107,69,.09)' },
+      { t: 'Swiss Ephemeris — AGPL edition', own: 'Identical code · AGPL-3.0', d1: 'Identical accuracy and range', d2: 'Cost: free', d3: 'Risk: copyleft propagates over the network — an inCommon backend would have to open-source the entire application; incompatible with a founder-owned proprietary product', tag: 'NOT ADVISED', sc: '#a84a37', sbg: 'rgba(168,74,55,.09)' },
+      { t: 'Swiss Ephemeris — built-in Moshier mode', own: 'Astrodienst’s wrapper of Moshier’s semi-analytic theory (SEFLG_MOSEPH)', d1: 'No data files · better than 0.1″ planets, ~3″ Moon · 3000 BCE – 3000 CE (DE404-based)', d2: 'Clarification requested by the founder: V1’s “Moshier-class” meant this mode. It is Swiss Ephemeris code and carries the same dual license — it is NOT an independent free path', d3: 'Risk: none beyond the Swiss license itself; useful as a no-data-files deployment mode after licensing', tag: 'SAME LICENSE', sc: '#a3641c', sbg: 'rgba(163,100,28,.10)' },
+      { t: 'Independent Moshier implementation', own: 'Stephen L. Moshier’s theory · his original C sources under permissive terms; community ports exist', d1: 'Arcsecond-class within roughly ±3000 years', d2: 'We would own apparent-position reduction, houses, angles, ayanamsas, and all validation; license cost none', d3: 'Risk: moderate–high — unmaintained upstream and a large in-house math surface to build and test', tag: 'HIGH EFFORT', sc: '#6d5b96', sbg: 'rgba(109,91,150,.10)' },
+      { t: 'Astronomy Engine', own: 'Don Cross · MIT', d1: '±1 arcminute vs JPL · 1700 – 2200 CE · pure TS/JS/C/Python, no data files', d2: 'No houses or ayanamsas — we build our own; free and actively maintained', d3: 'Risk: arcminute precision is fine for sign/degree display but borderline for exact-aspect timing near boundaries; date range too short for deep Time Machine use', tag: 'FALLBACK SPIKE', sc: '#3e5f7e', sbg: 'rgba(62,95,126,.09)' },
+      { t: 'Managed astrology APIs (Swiss-backed SaaS)', own: 'Various vendors reselling Swiss-grade calculation', d1: 'Accuracy inherited from Swiss Ephemeris · ~300 ms network latency per call', d2: 'Recurring per-call cost; no offline use', d3: 'Risk: a standing vendor dependency conflicts with §18 founder ownership and the PWA offline goal', tag: 'NOT PREFERRED', sc: '#6b6974', sbg: 'rgba(107,105,116,.09)' }
+    ];
+    const bundle = [
+      { f: 'inCommon Prototype V1.2.dc.html', r: 'Current app build — all repairs; V1 retained unchanged alongside' },
+      { f: 'incommon-core.js', r: 'Shared core (UMD): the calculation, persistence, consent, and citation logic under test — executed by app, browser suite, and Node' },
+      { f: 'Test Runner V1.2.dc.html · handoff/tests.js · handoff/run-tests-node.js', r: 'Executable suite: auto-running browser runner (SHA-256 of sources shown), UMD test module, Node runner for the pure half' },
+      { f: 'handoff/test-results-v1.2.json', r: 'Raw executed results — timestamp, environment, source hashes, all 55 assertion records, exit code' },
+      { f: 'handoff/changelog-v1.2.md', r: 'Audit finding → fix → evidence map, plus the unresolved list' },
+      { f: 'handoff/README-RUN-LOCALLY.md', r: 'Local-run + re-verification instructions; corrected dependency disclosure; documented test hook' },
+      { f: 'handoff/local-storage-schema.md', r: 'Persistence schema v2: all keys and shapes, deletion guard, test namespace' },
+      { f: 'handoff/stella-grounding.md', r: 'Grounding contract v2: enforced citation registry, sanitizer, gates, limits' },
+      { f: 'handoff/calculation-fixtures.json', r: 'Test vectors — numerology/angel executed by the suite; tz/lunar/astrology remain licensed-engine targets' },
+      { f: 'uploads/inCommon_Independent_Source_Audit_V1.0.md', r: 'The independent audit this pass answers' },
+      { f: 'support.js · ios-frame.jsx · doc-page.js', r: 'Runtime, device frame, print shell' },
+      { f: 'uploads/inCommon_Fable_5_Master_Build_Prompt.md', r: 'Founding specification' }
+    ];
+    const deps = [
+      { t: 'Executable code', tag: 'CDN-DEPENDENT', d: 'Corrected per audit B7: support.js loads React, ReactDOM, and Babel from unpkg at runtime — offline or CDN-blocked, the app does not boot. The V1.1 “self-contained” claim was wrong. A production build is the open fix.', sc: '#a84a37', sbg: 'rgba(168,74,55,.09)' },
+      { t: 'Google Fonts CDN', tag: 'COSMETIC', d: 'Typography only; offline it degrades to system fonts and nothing breaks.', sc: '#6b6974', sbg: 'rgba(107,105,116,.09)' },
+      { t: 'window.claude.complete AI bridge', tag: 'HOST-OPTIONAL', d: 'Provided by the embedding host. New in V1.2: first live use requires explicit model-processing consent naming the bridge and the scopes that would leave the browser; declined or absent → scripted-only under the same enforced grounding. Production bridge undemonstrated — T11.', sc: '#a3641c', sbg: 'rgba(163,100,28,.10)' },
+      { t: 'Analytics · network writes · accounts · secrets', tag: 'NONE', d: 'None in the bundle. All personal data stays in browser localStorage (schema v2 in handoff/); the only possible egress is the consented AI bridge above.', sc: '#256b45', sbg: 'rgba(37,107,69,.09)' }
+    ];
+    const all = [...matA, ...matB, ...matC, ...calcs, ...ai];
+    const tally = {}; all.forEach(r => tally[r.s] = (tally[r.s] || 0) + 1);
+    const order = ['PASS', 'PROTO PASS', 'DEMO', 'PARTIAL', 'SIMULATED', 'GATED', 'OPEN', 'SPEC’D'];
+    const founderCopy = this.props.founderCopy ?? true;
+    return {
+      paper: this.props.paper ?? 'letter',
+      founderCopy,
+      confid: founderCopy ? 'Confidential — founder copy' : 'Review copy',
+      total: all.length + ' checks (§2, §4, §5)',
+      tallies: order.filter(k => tally[k]).map(k => ({ t: tally[k] + ' ' + k, sc: this.CHIP[k][0], sbg: this.CHIP[k][1] })),
+      matA: this.chip(matA), matB: this.chip(matB), matC: this.chip(matC),
+      modA: this.chip(modA), modB: this.chip(modB), modC: this.chip(modC),
+      calcs: this.chip(calcs), ai: this.chip(ai), phases: this.chip(phases),
+      gaps, decisions, chg, suiteHi, engines, bundle, deps
+    };
+  }
+}
+</script>
+</body>
+</html>

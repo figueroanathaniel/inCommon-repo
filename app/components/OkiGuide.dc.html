@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../incommon-core.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+input:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" dark="{{ isDark }}" hint-size="430px,900px">
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;height:100%;display:flex;flex-direction:column;padding-top:62px;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu)">
+
+<div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 18px 12px;border-bottom:1px solid var(--bd)">
+  <sc-if value="{{ inChat }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ goToday }}" aria-label="Back to Today" style="all:unset;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;font:400 22px var(--fb);color:var(--ac)">‹</button>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font:400 19px var(--fd)">Oki</div>
+      <span style="font:700 8.5px var(--fu);letter-spacing:.14em;padding:3px 7px;border-radius:5px;color:var(--ac2);background:rgba(169,143,214,.16)" title="Oki is not built yet — every reply is a local mock">MOCK</span>
+    </div>
+    <div style="font:400 11px var(--fu);color:var(--dim)">Guide · software, not a person · replies are scripted mocks</div>
+  </div>
+  <button onClick="{{ helpOpenGo }}" aria-label="Get help — crisis resources" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--warn);border-radius:999px;font:600 12px var(--fu);color:var(--warn)" style-hover="background:rgba(224,141,125,.1)">Get help</button>
+</div>
+
+<div style="flex:1;min-height:0;position:relative;display:flex;flex-direction:column">
+
+<sc-if value="{{ inToday }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;overflow-y:auto;padding:22px 18px 28px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <div style="font:400 12px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ todayLine }}</div>
+      <div style="font:400 27px/1.25 var(--fd)">{{ greet }}. What do you<br>want from today?</div>
+      <div style="font:italic 400 13.5px/1.5 var(--fb);color:var(--dim)">Pick an intention and I'll open with it — or skip straight to the conversation. Your own experience stays the final authority.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" role="group" aria-label="Intentions">
+      <sc-for list="{{ intentions }}" as="it" hint-placeholder-count="7">
+        <button onClick="{{ it.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-column:{{ it.span }};min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:13px 16px" style-hover="border-color:rgba(211,173,110,.45);background:var(--sf2)" style-active="transform:scale(.985)">
+          <span style="font:400 16.5px var(--fd);color:var(--tx)">{{ it.t }}</span>
+          <span style="font:italic 400 11.5px var(--fb);color:var(--dim)">{{ it.sub }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <button onClick="{{ goChatPlain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--ac)" style-hover="border-color:rgba(211,173,110,.45)">Open the conversation<span style="font:400 15px var(--fb)">→</span></button>
+    <div style="font:400 11px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:12px">Prototype note — Oki does not exist yet. Replies here are local mocks ({{ latencyLabel }} delay), nothing is sent anywhere, and nothing is stored. If today feels heavier than a reading should carry, use <b style="color:var(--warn);font-weight:600">Get help</b> above.</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ inChat }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 18px 10px;border-bottom:1px solid var(--bd)">
+    <div style="display:flex;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Reply mode">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+        <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:36px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:{{ m.c }};background:{{ m.bg }}">{{ m.t }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="font:italic 400 11px var(--fb);color:var(--dim)">{{ modeHint }}</div>
+      <button onClick="{{ tagHelpToggle }}" aria-expanded="{{ tagHelpOpen }}" style="all:unset;cursor:pointer;min-height:32px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ tagHelpLabel }}</button>
+    </div>
+    <sc-if value="{{ tagHelpOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+        <sc-for list="{{ tagLegend }}" as="tg" hint-placeholder-count="5">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.1em;padding:2.5px 7px;border-radius:5px;color:{{ tg.c }};background:{{ tg.bg }}">{{ tg.t }}</span>
+            <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ tg.d }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <div ref="{{ scrollRef }}" style="flex:1;min-height:0;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:{{ m.align }};animation:fadeUp .22s ease">
+        <sc-if value="{{ m.mine }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:82%;background:rgba(211,173,110,.14);border:1px solid rgba(211,173,110,.3);border-radius:16px 16px 4px 16px;padding:10px 14px;font:400 13.5px/1.55 var(--fu)">{{ m.text }}</div>
+        </sc-if>
+        <sc-if value="{{ m.oki }}" hint-placeholder-val="{{ true }}">
+          <div style="max-width:88%;background:var(--sf);border:1px solid var(--bd);border-radius:16px 16px 16px 4px;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ m.segs }}" as="sg" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <sc-if value="{{ sg.hasTag }}" hint-placeholder-val="{{ false }}">
+                  <span style="align-self:flex-start;font:700 8.5px var(--fu);letter-spacing:.1em;padding:2.5px 7px;border-radius:5px;color:{{ sg.c }};background:{{ sg.bg }}">{{ sg.tag }}</span>
+                </sc-if>
+                <div style="font:400 13.5px/1.6 var(--fb);color:var(--tx)">{{ sg.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;font:400 10px var(--fu);letter-spacing:.05em;color:var(--dim)">
+            <span style="color:var(--ac2)">scripted mock</span><span>·</span><span>{{ m.modeLabel }}</span>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+      <div style="align-self:flex-start;background:var(--sf);border:1px solid var(--bd);border-radius:16px 16px 16px 4px;padding:13px 16px;display:flex;gap:5px" aria-label="Oki is composing">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 1.1s infinite"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 1.1s .18s infinite"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--ac);animation:blink 1.1s .36s infinite"></span>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none;display:flex;gap:9px;padding:12px 18px 22px;border-top:1px solid var(--bd)">
+    <input value="{{ input }}" onChange="{{ typeIn }}" onKeyDown="{{ keyIn }}" placeholder="Say what's on your mind…" aria-label="Message Oki" style="flex:1;min-height:46px;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13.5px var(--fu);color:var(--tx)">
+    <button onClick="{{ sendGo }}" aria-label="Send" style="all:unset;cursor:pointer;box-sizing:border-box;width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ac);color:#141019;font:400 19px var(--fb)" style-hover="background:#e8caa0" style-active="transform:scale(.94)">↑</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ helpClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:9">
+    <div role="dialog" aria-label="Crisis resources" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 30px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="font:400 21px var(--fd)">You deserve a person, not a reading</div>
+      <div style="font:400 13px/1.6 var(--fb);color:var(--dim)">Oki is software. If things feel heavy, urgent, or unsafe, please reach a human now — these are free and confidential.</div>
+      <sc-for list="{{ crisisRows }}" as="cr" hint-placeholder-count="4">
+        <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;display:flex;flex-direction:column;gap:2px">
+          <div style="font:600 13.5px var(--fu)">{{ cr.t }}</div>
+          <div style="font:400 12px/1.5 var(--fu);color:var(--dim)">{{ cr.d }}</div>
+        </div>
+      </sc-for>
+      <div style="font:400 11px/1.55 var(--fu);color:var(--dim)">Outside the US, findahelpline.com lists local lines. In immediate danger, call your local emergency number.</div>
+      <button onClick="{{ helpClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)" style-hover="border-color:rgba(211,173,110,.45)">Close</button>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900}, &quot;defaultMode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;standard&quot;, &quot;options&quot;: [&quot;quick&quot;, &quot;standard&quot;, &quot;deep&quot;], &quot;tsType&quot;: &quot;'quick'|'standard'|'deep'&quot;, &quot;section&quot;: &quot;Oki&quot;}, &quot;mockLatencyMs&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 800, &quot;min&quot;: 0, &quot;max&quot;: 5000, &quot;step&quot;: 100, &quot;unit&quot;: &quot;ms&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Oki&quot;}, &quot;showTagHelp&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Oki&quot;}}">
+class Component extends DCLogic {
+  state = { view: 'today', mode: null, msgs: null, typing: false, input: '', helpOpen: false, tagHelpOpen: false };
+
+  TAGS = {
+    TRADITIONAL: { c: '#d3ad6e', bg: 'rgba(211,173,110,.15)', d: 'What a named system says about a pattern — reported, not endorsed.' },
+    POSSIBILITY: { c: '#a98fd6', bg: 'rgba(169,143,214,.16)', d: 'An interpretation to test against your life — this may show up as, you might recognize.' },
+    OBSERVED: { c: '#59b37d', bg: 'rgba(89,179,125,.16)', d: 'Drawn from your own saved records or words — nothing invented.' },
+    PRACTICE: { c: '#e8e6ee', bg: 'rgba(232,230,238,.12)', d: 'One small, optional way to work with this.' },
+    SAFETY: { c: '#e08d7d', bg: 'rgba(224,141,125,.16)', d: 'Crisis support — always shown, never interpreted.' }
+  };
+  INTENTIONS = [
+    { t: 'Clarity', sub: 'something feels foggy', seed: 'I want clarity — something feels foggy today.' },
+    { t: 'Calm', sub: 'the mind is loud', seed: 'I\u2019m looking for calm; my mind is loud.' },
+    { t: 'Courage', sub: 'for the avoided thing', seed: 'I need courage for something I\u2019ve been avoiding.' },
+    { t: 'Connection', sub: 'toward other people', seed: 'I want to feel more connected to the people around me.' },
+    { t: 'Meaning', sub: 'in what\u2019s happening', seed: 'Help me find the meaning in what\u2019s been happening lately.' },
+    { t: 'A Decision', sub: 'that won\u2019t settle', seed: 'I\u2019m sitting with a decision I can\u2019t quite make.' },
+    { t: 'Just Listen', sub: 'no answers needed', seed: 'I don\u2019t need answers right now — just listen for a minute.' }
+  ];
+  MOCKS = {
+    clarity: {
+      pos: 'Fog is often a sign of too many honest options, not too few. This may show up as re-reading the same choice from different moods and getting different answers.',
+      trad: 'Numerology reads a 1 Personal Year as a clearing year — old structures thin out so a single priority can become visible.',
+      prac: 'Name the three options out loud, then notice which one you defended without being asked. Sit with that one first.',
+      q: 'If the fog lifted for one hour, what would you look at first?'
+    },
+    calm: {
+      pos: 'A loud mind usually has one underfed worry doing most of the talking. You might recognize it by the thought that returns in the same words each time.',
+      trad: 'Several traditions treat stillness as something you borrow from the body first — breath before belief.',
+      prac: 'Four slow breaths, counting the exhale to six. Not as a fix — as a volume knob.',
+      q: 'What is the one sentence your mind keeps repeating today?'
+    },
+    courage: {
+      pos: 'Avoidance often guards something you value, not something you fear. This may show up as protecting a relationship by not testing it.',
+      trad: 'The I Ching tends to frame crossings like this as smaller than they look from the near bank.',
+      prac: 'Shrink the avoided thing to its first two minutes — the message opened, the sentence said — and do only that.',
+      q: 'What would the bravest boring version of this step look like?'
+    },
+    connection: {
+      pos: 'Wanting connection is already a form of it — the reach precedes the bridge. You might notice you feel closest to people right after you\u2019ve been honest, not impressive.',
+      trad: 'Relational frameworks mostly agree on one mechanism: specific, low-stakes bids answered quickly.',
+      prac: 'Send one message today that asks a real question and expects a real answer.',
+      q: 'Who came to mind first just now — and what stopped you last time?'
+    },
+    meaning: {
+      pos: 'Meaning tends to be assembled in hindsight, not found in the moment. This may show up as events feeling random now and patterned later.',
+      trad: 'Traditions differ loudly here — some read seasons, some read lessons. inCommon\u2019s stance: hold both, and let your record decide.',
+      prac: 'Write the last month as one plain paragraph, then underline the sentence that surprised you.',
+      q: 'What would this stretch of life need to teach for it to have been worth it?'
+    },
+    decision: {
+      pos: 'A decision that won\u2019t settle is often two decisions wearing one coat — what you want, and what you want to want. You might recognize the difference by which one tires you.',
+      trad: 'Decision frameworks across systems converge on separating the choice from the timing of the choice.',
+      prac: 'Decide provisionally tonight, tell no one, and watch your first feeling tomorrow morning. Relief and dread are both data.',
+      q: 'If both paths went fine, which one would you rather have been the person who chose?'
+    },
+    listen: {
+      pos: '',
+      trad: '',
+      prac: '',
+      q: ''
+    }
+  };
+
+  componentDidMount() {
+    window.__okiGuide = this; // dev hook, same pattern as window.__incommon in the V1.2 prototype
+    if (!this.state.msgs) this.setState({ msgs: [this.greetMsg()], mode: this.props.defaultMode ?? 'standard' });
+  }
+  componentDidUpdate() {
+    const el = this._scroll;
+    if (el && this.state.view === 'chat') { try { el.scrollTop = el.scrollHeight; } catch (e) {} }
+  }
+  greetMsg() {
+    return { who: 's', modeLabel: 'greeting', segs: [
+      { tag: null, text: 'I\u2019m Oki — the guide inside inCommon. I\u2019m software: I read what your charts and records say, I don\u2019t know anything on my own, and your experience outranks anything I offer.' },
+      { tag: 'POSSIBILITY', text: 'Pick an intention above, or just say what\u2019s on your mind. Each part of a reply is tagged with what kind of claim it is.' }
+    ] };
+  }
+
+  // Public mock API — the real Oki will replace this. Returns a Promise resolving after ~800 ms.
+  sendToOki(message, mode) {
+    const latency = this.props.mockLatencyMs ?? 800;
+    return new Promise(res => setTimeout(() => res(this.mockReply(message, mode)), latency));
+  }
+  mockKey(message) {
+    const m = String(message || '').toLowerCase();
+    if (/clarity|foggy|clear/.test(m)) return 'clarity';
+    if (/calm|loud|anxio|quiet/.test(m)) return 'calm';
+    if (/courage|avoid|afraid|brave/.test(m)) return 'courage';
+    if (/connect|people|lonel|friend/.test(m)) return 'connection';
+    if (/meaning|happening|why|purpose/.test(m)) return 'meaning';
+    if (/decision|decide|choice|choos/.test(m)) return 'decision';
+    if (/listen/.test(m)) return 'listen';
+    return null;
+  }
+  mockReply(message, mode) {
+    const k = this.mockKey(message);
+    if (k === 'listen') {
+      return { segs: [
+        { tag: null, text: 'Okay. No tags, no reading — the floor is yours. I\u2019ll hold onto whatever you say for this conversation only.' },
+        { tag: 'OBSERVED', text: 'You said: \u201C' + String(message).slice(0, 120) + '\u201D — I\u2019m not going to interpret it unless you ask me to.' }
+      ], mode };
+    }
+    const M = k ? this.MOCKS[k] : {
+      pos: 'I can sit with that. This may be one of those threads that looks different once it\u2019s said out loud — you might already hear it differently now.',
+      trad: 'No system speaks directly to this one, and I won\u2019t force a fit — inCommon\u2019s rule is that silence beats a stretched interpretation.',
+      prac: 'Say one more sentence about it — the one you left out.',
+      q: 'What made today the day this came up?'
+    };
+    const segs = [{ tag: 'POSSIBILITY', text: M.pos }];
+    if (mode !== 'quick') segs.push({ tag: 'TRADITIONAL', text: M.trad });
+    if (mode === 'deep') segs.push({ tag: 'PRACTICE', text: M.prac });
+    if (mode !== 'quick') segs.push({ tag: null, text: M.q });
+    return { segs, mode };
+  }
+  safetySegs() {
+    return [
+      { tag: 'SAFETY', text: 'What you\u2019re carrying sounds heavier than anything a chart should hold, and I\u2019m not going to interpret it — I want you to have a person, not a reading.' },
+      { tag: null, text: 'In the US: call or text 988 (Suicide & Crisis Lifeline), or text HOME to 741741. Elsewhere, findahelpline.com lists local lines. The Get help button above keeps these one tap away.' }
+    ];
+  }
+  crisis(q) {
+    const core = window.InCommonCore;
+    return core ? core.crisisCheck(q) : /suicid|kill (myself|me)|self.?harm|hurt (myself|me)|want to die|end (it all|my life)|no reason to live|overdose/i.test(q);
+  }
+  async send(text) {
+    const q = String(text || '').trim();
+    if (!q || this.state.typing) return;
+    const mode = this.state.mode || 'standard';
+    if (this.crisis(q)) {
+      this.setState(s => ({ input: '', view: 'chat', helpOpen: true, msgs: [...(s.msgs || [this.greetMsg()]), { who: 'u', text: q }, { who: 's', modeLabel: 'safety', segs: this.safetySegs() }] }));
+      return;
+    }
+    this.setState(s => ({ input: '', view: 'chat', typing: true, msgs: [...(s.msgs || [this.greetMsg()]), { who: 'u', text: q }] }));
+    const r = await this.sendToOki(q, mode);
+    this.setState(s => ({ typing: false, msgs: [...s.msgs, { who: 's', modeLabel: this.modeLabel(r.mode), segs: r.segs }] }));
+  }
+  modeLabel(m) { return m === 'quick' ? 'Quick' : m === 'deep' ? 'Deep' : 'Standard'; }
+
+  renderVals() {
+    const st = this.state, T = this.TAGS;
+    const core = window.InCommonCore;
+    const mode = st.mode || (this.props.defaultMode ?? 'standard');
+    const msgs = st.msgs || [this.greetMsg()];
+    const hints = { quick: 'Quick — one thought, nothing else', standard: 'Standard — a reading plus a question back', deep: 'Deep — adds a small practice to try' };
+    return {
+      isDark: true,
+      inToday: st.view === 'today', inChat: st.view === 'chat',
+      goToday: () => this.setState({ view: 'today', helpOpen: false }),
+      goChatPlain: () => this.setState({ view: 'chat' }),
+      todayLine: core ? core.fmtToday(new Date()) : '',
+      greet: (h => h < 5 ? 'Still up' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')(new Date().getHours()),
+      latencyLabel: (this.props.mockLatencyMs ?? 800) + ' ms',
+      intentions: this.INTENTIONS.map((it, i) => ({ ...it, span: i === 6 ? '1 / -1' : 'auto', go: () => this.send(it.seed) })),
+      modes: ['quick', 'standard', 'deep'].map(k => ({ t: this.modeLabel(k), on: mode === k, c: mode === k ? '#141019' : 'var(--dim)', bg: mode === k ? 'var(--ac)' : 'transparent', go: () => this.setState({ mode: k }) })),
+      modeHint: hints[mode],
+      tagHelpOpen: this.props.showTagHelp === false ? false : st.tagHelpOpen,
+      tagHelpToggle: () => this.setState(s => ({ tagHelpOpen: !s.tagHelpOpen })),
+      tagHelpLabel: st.tagHelpOpen ? 'HIDE TAGS' : 'WHAT THE TAGS MEAN',
+      tagLegend: Object.keys(T).map(k => ({ t: k, c: T[k].c, bg: T[k].bg, d: T[k].d })),
+      msgs: msgs.map(m => ({
+        mine: m.who === 'u', oki: m.who === 's', align: m.who === 'u' ? 'flex-end' : 'flex-start',
+        text: m.text || '', modeLabel: m.modeLabel || '',
+        segs: (m.segs || []).map(sg => ({ hasTag: !!sg.tag, tag: sg.tag || '', text: sg.text, c: sg.tag ? T[sg.tag].c : '', bg: sg.tag ? T[sg.tag].bg : '' }))
+      })),
+      typing: st.typing,
+      input: st.input,
+      typeIn: e => this.setState({ input: e.target.value }),
+      keyIn: e => { if (e.key === 'Enter') this.send(this.state.input); },
+      sendGo: () => this.send(this.state.input),
+      scrollRef: el => { this._scroll = el; },
+      helpOpen: st.helpOpen,
+      helpOpenGo: () => this.setState({ helpOpen: true }),
+      helpClose: () => this.setState({ helpOpen: false }),
+      swallow: e => e.stopPropagation(),
+      crisisRows: [
+        { t: '988 — Suicide & Crisis Lifeline', d: 'Call or text 988 · US · 24/7, free, confidential' },
+        { t: 'Crisis Text Line', d: 'Text HOME to 741741 · US · 24/7' },
+        { t: 'Trevor Project (LGBTQ+ youth)', d: 'Call 1-866-488-7386 or text START to 678-678' },
+        { t: 'Someone you trust', d: 'A friend, family member, clinician, or counselor — a person beats a reading, every time' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

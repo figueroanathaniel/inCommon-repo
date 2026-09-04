@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../oki-prompt-builder.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0;text-decoration:underline}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+input:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+</style>
+</helmet>
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:100vh;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu);padding:40px 24px 64px;display:flex;justify-content:center">
+<div style="width:100%;max-width:1120px;display:flex;flex-direction:column;gap:20px">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:18px">
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font:400 30px var(--fd)">OkiPromptBuilder</div>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.14)">DETERMINISTIC · NO NETWORK</span>
+      <span style="font:700 9px var(--fu);letter-spacing:.14em;padding:3px 8px;border-radius:5px;color:var(--ac2);background:rgba(169,143,214,.16)">CLAUDE-READY</span>
+    </div>
+    <div style="font:italic 400 14px/1.5 var(--fb);color:var(--dim)">Assembles the exact payload Oki will be called with — persona, taxonomy, boundaries, mode, healthy loop, consent-gated context, few-shots.</div>
+  </div>
+  <button onClick="{{ copyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:700 12px var(--fu);color:var(--ac)" style-hover="border-color:rgba(211,173,110,.5)">{{ copyLabel }}</button>
+</div>
+
+<div style="display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start">
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Inputs</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font:400 11px var(--fu);color:var(--dim)">userId — opaque, never echoed</label>
+        <input value="{{ userId }}" onChange="{{ typeId }}" style="box-sizing:border-box;width:100%;min-height:42px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 12.5px var(--mono);color:var(--tx)">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font:400 11px var(--fu);color:var(--dim)">User message</label>
+        <input value="{{ msg }}" onChange="{{ typeMsg }}" placeholder="Why do I keep abandoning my projects?" style="box-sizing:border-box;width:100%;min-height:42px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <label style="font:400 11px var(--fu);color:var(--dim)">Mode</label>
+        <div style="display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Response mode">
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+            <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:{{ m.c }};background:{{ m.bg }}">{{ m.t }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Consented data</div>
+        <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Mirrors ConsentManager — only checked categories reach the context block.</div>
+      </div>
+      <sc-for list="{{ consents }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.go }}" role="checkbox" aria-checked="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;min-height:44px;padding:2px 4px">
+          <span style="flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ c.bd }};background:{{ c.bg }};display:flex;align-items:center;justify-content:center;color:#141019;font:700 13px var(--fu)">{{ c.mark }}</span>
+          <span style="flex:1;display:flex;flex-direction:column;gap:0">
+            <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ c.t }}</span>
+            <span style="font:400 10.5px var(--fu);color:var(--dim)">{{ c.sub }}</span>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;display:flex;flex-direction:column;gap:1px">
+          <div style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ s.k }}</div>
+          <div style="font:600 14px var(--mono);color:{{ s.c }}">{{ s.v }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bd)">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">system</div>
+        <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ sysMeta }}</div>
+      </div>
+      <pre style="margin:0;max-height:460px;overflow:auto;padding:14px 16px;font:400 11px/1.65 var(--mono);color:var(--tx);white-space:pre-wrap;word-break:break-word">{{ sysText }}</pre>
+    </div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bd)">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">messages · temperature · max_tokens</div>
+        <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ msgMeta }}</div>
+      </div>
+      <pre style="margin:0;max-height:260px;overflow:auto;padding:14px 16px;font:400 11px/1.65 var(--mono);color:var(--ac2);white-space:pre-wrap;word-break:break-word">{{ msgText }}</pre>
+    </div>
+    <div style="font:400 11px/1.65 var(--fu);color:var(--dim)">Order of operations in production: ConsentManager gates the data → SafetyRouter screens the message (BLOCK/HUMAN_RESOURCE never reach this builder) → buildPrompt assembles → transport sends. The <b style="color:var(--ac)">Withheld</b> line tells Oki what she must not infer or request. Console: <b style="color:var(--ac)">OkiPromptBuilder.buildPrompt(id, msg, mode, data)</b>.</div>
+  </div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 1000}, &quot;defaultMode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;standard&quot;, &quot;options&quot;: [&quot;quick&quot;, &quot;standard&quot;, &quot;deep&quot;], &quot;tsType&quot;: &quot;'quick'|'standard'|'deep'&quot;, &quot;section&quot;: &quot;Prompt&quot;}}">
+class Component extends DCLogic {
+  state = { userId: 'user_7f3a', msg: 'Why do I keep abandoning my projects?', mode: null, checked: null, copied: false };
+
+  SAMPLE = {
+    birthData: [{ ts: '2026-06-30', s: 'Birth profile \u2014 July 2, 1992 \u00b7 9:41 PM \u00b7 Seattle, WA' }],
+    journal: [
+      { ts: '2026-07-21', s: 'Tarot \u2014 Two of Swords, \u201Cthe decision I keep re-deciding.\u201D' },
+      { ts: '2026-07-19', s: 'Paused the garden project again \u2014 two months in, same as the podcast.' },
+      { ts: '2026-07-14', s: 'Reflection \u2014 \u201Cstarted smaller than felt impressive; it worked.\u201D' }
+    ],
+    relationships: [
+      { ts: '2026-05-02', s: 'Jordan \u2014 partner \u00b7 b. March 14, 1990 \u00b7 synastry enabled' },
+      { ts: '2026-06-11', s: 'Priya \u2014 close friend \u00b7 no birth time on file' }
+    ],
+    assessments: [
+      { ts: '2025-11-08', s: 'Big Five \u2014 high openness, mid conscientiousness' },
+      { ts: '2026-01-22', s: 'Attachment patterns \u2014 secure-leaning; anxious under deadline stress' }
+    ],
+    mood: [
+      { ts: '2026-07-22', s: 'Steady \u00b7 7 am \u2014 \u201Cquiet, slept well\u201D' },
+      { ts: '2026-07-21', s: 'Frayed \u00b7 9 pm \u2014 \u201Ctoo many tabs open, in life\u201D' },
+      { ts: '2026-07-18', s: 'Low \u00b7 8 am \u2014 \u201Cgray day, gray mood\u201D' }
+    ],
+    conversation: [
+      { role: 'user', content: 'I keep re-deciding the same choice.' },
+      { role: 'assistant', content: '[POSSIBILITY] Re-deciding is often two wants wearing one coat \u2014 what you want, and what you want to want. Which one tires you?' }
+    ]
+  };
+  CATS = [
+    { id: 'birthData', t: 'Birth Data', sub: '1 record \u2192 <birth_data>' },
+    { id: 'journal', t: 'Journal Entries', sub: '3 records \u2192 <journal_entries>' },
+    { id: 'relationships', t: 'Relationships', sub: '2 records \u2192 <relationships>' },
+    { id: 'assessments', t: 'Assessments', sub: '2 records \u2192 <assessments>' },
+    { id: 'mood', t: 'Mood Check-ins', sub: '3 records \u2192 <mood_checkins>' },
+    { id: 'conversation', t: 'Conversation History', sub: '2 turns \u2192 messages[] + context' }
+  ];
+
+  copy(payload) {
+    try { navigator.clipboard.writeText(JSON.stringify(payload, null, 2)); } catch (e) {}
+    clearTimeout(this._ct);
+    this.setState({ copied: true });
+    this._ct = setTimeout(() => this.setState({ copied: false }), 1800);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const SB = window.OkiPromptBuilder;
+    const mode = st.mode ?? (this.props.defaultMode ?? 'standard');
+    const checked = st.checked ?? { birthData: true, journal: true, mood: true, relationships: false, assessments: false, conversation: false };
+    const consented = {};
+    this.CATS.forEach(c => { if (checked[c.id]) consented[c.id] = this.SAMPLE[c.id]; });
+    let payload = null, err = '';
+    if (SB) { try { payload = SB.buildPrompt(st.userId, st.msg, mode, consented); } catch (e) { err = String(e); } }
+    const withheld = this.CATS.filter(c => !checked[c.id]).length;
+    const est = t => Math.round(t.length / 4);
+    return {
+      userId: st.userId, typeId: e => this.setState({ userId: e.target.value }),
+      msg: st.msg, typeMsg: e => this.setState({ msg: e.target.value }),
+      modes: ['quick', 'standard', 'deep'].map(k => ({ t: k[0].toUpperCase() + k.slice(1), on: mode === k, c: mode === k ? '#141019' : 'var(--dim)', bg: mode === k ? 'var(--ac)' : 'transparent', go: () => this.setState({ mode: k }) })),
+      consents: this.CATS.map(c => ({ t: c.t, sub: c.sub, on: !!checked[c.id],
+        mark: checked[c.id] ? '\u2713' : '', bd: checked[c.id] ? 'var(--ok)' : 'var(--bd)', bg: checked[c.id] ? 'var(--ok)' : 'transparent',
+        go: () => this.setState({ checked: { ...checked, [c.id]: !checked[c.id] } }) })),
+      stats: payload ? [
+        { k: 'temperature', v: String(payload.temperature), c: 'var(--ac)' },
+        { k: 'max_tokens', v: String(payload.max_tokens), c: 'var(--ac)' },
+        { k: 'system size', v: '~' + est(payload.system) + ' tok', c: 'var(--tx)' },
+        { k: 'messages', v: String(payload.messages.length), c: 'var(--tx)' },
+        { k: 'withheld', v: withheld + ' of 6', c: withheld ? 'var(--warn)' : 'var(--ok)' }
+      ] : [{ k: 'status', v: err || 'loading builder\u2026', c: 'var(--warn)' }],
+      sysText: payload ? payload.system : '',
+      sysMeta: payload ? payload.system.length + ' chars \u00b7 rebuilt live' : '',
+      msgText: payload ? JSON.stringify({ messages: payload.messages, temperature: payload.temperature, max_tokens: payload.max_tokens }, null, 2) : '',
+      msgMeta: payload ? (payload.messages.length > 1 ? 'includes consented conversation turns' : 'no conversation consent \u2014 single turn') : '',
+      copyGo: () => payload && this.copy(payload),
+      copyLabel: st.copied ? 'Copied \u2713' : 'Copy payload JSON'
+    };
+  }
+}
+</script>
+</body>
+</html>

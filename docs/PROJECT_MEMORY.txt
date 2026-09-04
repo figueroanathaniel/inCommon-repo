@@ -1,0 +1,1368 @@
+PROJECT: inCommon v1.4.2
+LAST UPDATED: 2026-08-04
+
+VISION
+A consent-first self-knowledge app combining astrology, numerology, human design,
+and AI-guided reflection. It reads a chart, names its sources, and never claims
+to know what will happen.
+
+FRAMEWORK
+Design Components (DCLogic). Entry point: "inCommonApp v2.dc.html".
+Standalone/offline build: "inCommon Offline Source.dc.html" -> "inCommon (offline).html".
+Shell is wrapped in ios-frame.jsx (IOSDevice) for prototype presentation.
+
+DESIGN SYSTEM
+Background          #0d0c11
+Card surface        #17151e, gradient to #1a1922
+Raised surface      #201d2a
+Border              rgba(211,173,110,.16)
+Text primary        #e8e6ee
+Text secondary      rgba(232,230,238,.55)
+Accent gold         #d3ad6e
+Accent violet       #a98fd6
+Success green       #59b37d
+Warning             #e08d7d
+Mood blue           #8fb0c9
+Display font        Marcellus, serif        (--fd)
+Body font           Newsreader, Georgia     (--fb)
+UI font             Karla, system-ui        (--fu)
+Radius              18px cards, 12px inner items, 999px buttons
+Motion              .2s ease out, .3s ease in. Nothing hurries.
+Styling is INLINE ONLY. No stylesheets, no CSS classes. Keyframes and body
+resets live in the DC helmet.
+Full rules: web-design-system.md
+
+ARCHITECTURE
+Local-only. localStorage / IndexedDB. Offline-first. Single-file bundled build.
+No cloud sync. Service worker: sw.js (cache incommon-v2, cache-first for local
+modules, stale-while-revalidate for Google Fonts).
+PWA: manifest.json, icon-192.png, icon-512.png, splash.png. Installable on iOS
+via Share > Add to Home Screen. Safe-area insets handled on the app shell.
+
+MULTI-PROFILE
+Max 6 profiles. Active profile drives every reading. Birth-data consent is
+assumed at creation. Memory consent (journal, mood, conversations) is OFF by
+default and toggled after creation. PIN-gated switching and deletion.
+
+STELLA
+The guide. Epistemic tags are mandatory: [CALCULATED], [TRADITIONAL],
+[POSSIBILITY], [SYNTHESIS]. No diagnosis. No destiny declarations. No "I feel"
+or "I need you." Safety router is two-layer: deterministic then semantic.
+
+EPISTEMIC RULE
+Every interpretation carries a tag. No untagged spiritual or psychological claim
+appears anywhere in the app.
+
+VOICE
+Scholarly and unhurried. Never the vocabulary of machinery: no calculate,
+compute, algorithm, data, process, system, function, output, input, variable,
+parameter. Use reveals, shows, speaks, suggests, indicates, points toward,
+unfolds, emerges, dwells in, carries the quality of, holds the memory of.
+NO EM DASHES anywhere in generated content. Use a period, a comma, or a colon.
+
+TIME
+All astrological and numerological reckoning is standardised on Eastern time,
+regardless of device location. Display format: "Monday, July 28, 2026 - 11:47 AM
+EST". The clock refreshes every 60 seconds (this._clk in componentDidMount).
+
+SABIAN SYMBOLS
+360 verified symbols after Marc Edmund Jones (public domain), modified for
+modern sensitivity. Lives in Library as the Sabian Lexicon.
+Files: sabian-symbols.js, sabian-symbols-data.js
+
+PLACEMENT PAGES
+Every planet, asteroid, node, and angle has its own page with ten sections:
+House, Sign in House, Planet, Planet in House, Planet in Sign, Dignity
+(conditional), Synthesis, Strengths/Challenges/Opportunities/Obstacles, Degree
+Analysis, Sabian Symbol. Content engine: placement-content.js.
+Decan rulers follow the CHALDEAN sequence (Aries: Mars, Sun, Venus), each with a
+ruler "filter" description. This is deliberate. Do not swap it for the
+triplicity sequence without saying so.
+
+SCREENS SHIPPED
+Today          greeting, Today's Alignment dropdown, per-tradition sections that
+               navigate into Spirit, Stella entry, EST footer
+Spirit         My Astrology (interactive wheel, placement grid, stelliums,
+               Important Today), My Human Design, My Numerology, Daily Alignment
+               (expanded), Angel Numbers, number detail pages, Together
+               (two-chart synastry, consent gated)
+Library        Sabian Lexicon, Human Design Atlas, Astropedia, practices,
+               traditions
+Throughline    timeline of journal, mood, practices, angel-number sightings
+Settings       profiles, consent, birth data, PIN, deletion
+Stella         conversation with tags, crisis routing, grounding library
+
+KEY FILES
+inCommonApp v2.dc.html        the app
+incommon-core.js              chart reckoning
+profile-manager.js            profiles, birth data, consent
+placement-content.js          placement page content engine
+numerology-content.js         numerology content engine
+angel-numbers.js              angel number library
+astropedia.js                 astrology reference
+hd-atlas.js                   human design reference
+sabian-symbols-data.js        360 symbols
+safety-router.js              two-layer safety gate
+stella-prompt-builder.js      prompt assembly
+stella-post-processor.js      tag enforcement
+stella-api.js                 model call, offline fallback
+practice-library.js           practices
+memory-store.js               local memory
+minor-bodies-ephemeris.js     nodes, Chiron, asteroids
+gazetteer-us.js               birthplace lookup
+sw.js / manifest.json         offline and install
+web-design-system.md          visual governance
+
+
+V1.3.1, RESPONSIVE SHELL, HEADERS, INTEGRATION (2026-07-29)
+Source of truth: inCommonApp v2.dc.html  ->  bundled to deploy/index.html
+Verification page: Verification V1.3.dc.html (runs handoff/tests-v13.js)
+
+1. ONE LAYER OF DEVICE CHROME
+   ios-frame.jsx gained responsive={true}. At 820px and under it drops the bezel,
+   the simulated status bar and the home indicator, and becomes a plain
+   full-viewport flex column sized to var(--app-h) (kept in sync from
+   window.innerHeight / visualViewport on resize, orientationchange and scroll,
+   100dvh as the CSS fallback). It publishes --ios-top / --ios-bottom, so the app
+   pads for whichever chrome is actually present instead of hardcoding 62px.
+   Desktop keeps the framed presentation unchanged.
+   Root cause of the doubled header and doubled slider: the simulated iPhone
+   chrome was drawn unconditionally, so on a real phone it sat on top of the
+   phone's own status bar and home indicator.
+
+2. TODAY HEADER
+   heads.today subtitle is now empty and the subtitle div is inside
+   <sc-if value="{{ hasHeadSub }}">, so no empty row is left. The body date row
+   is gone; the Eastern clock keeps that row, right aligned.
+
+3. STELLA HEADER
+   headTitle / headSub / hasHeadSub are derived in renderVals from
+   st.stellaOpen ? heads.stella : heads[st.tab]. Nothing is stored, so every
+   entry path (tab bar, bubble, peek, #/stella, hashchange from back/forward)
+   titles it Stella. The Stella panel's own duplicate title row was removed, so
+   the app header is the only header on that screen.
+
+4. DAILY ALIGNMENT REMOVED
+   The chart card, the My Charts teaser button, goTodayAlign, and the
+   daily entry in SPIRIT_PATHS are gone. Audit finding: spiritView 'daily' had
+   NO template block at all, the card led to a blank screen. alignVals(),
+   dailyAlignVals(), alignPack(), the week/month/year builders and
+   dailyIntegrationLines() were never called from renderVals; 349 lines of dead
+   code removed. Labels that referred to it now read "Today's Alignment", which
+   is the live panel on the Today tab. Saved 'alignment' memories still render in
+   the Archive.
+
+5. INTEGRATION
+   today-integration.js (window.TodayIntegration) is pure and testable.
+   Component.intElements(d) feeds it QUALITIES, never identifiers: aspect class
+   and the two bodies' energies, the centre theme plus defined/borrowed ground
+   and whether a channel completes, the day/year/blend essences, moon phase and
+   whether it is filling. build() returns context + interaction + possibility as
+   one passage, deduped by sentence, invitational only, with a single-element
+   fallback and a neutral empty state. Variation is seeded from the element
+   combination, so a state is reproducible and different states diverge.
+
+6. TODAY'S TRANSITS DISCLOSURE
+   A <button aria-expanded aria-controls="today-transits-panel"> with a rotating
+   chevron. Open by default; the choice is kept in localStorage under
+   incommon.transits.open (trIsOpen / trVals). A prefers-reduced-motion rule in
+   the helmet neutralises the animation.
+
+7. TEST HOOKS
+   data-app-header, data-app-nav on the shell; data-ios-statusbar, data-ios-home
+   on the frame. handoff/tests-v13.js asserts them at 320x568, 360x640, 375x667,
+   390x844, 393x873, 412x915, 430x932, 768x1024, 1080x1920 and 1280x900.
+   The V1.2 suite in handoff/tests.js is untouched.
+
+
+V1.4.1, TOGETHER, AND AN EVERYDAY TONE (2026-08-04)
+Source of truth: inCommonApp v2.dc.html. Both features live in the one build and
+render in both shells. No forks, no new files.
+
+1. TOGETHER (SYNASTRY)
+   A fifth Spirit view: spiritView 'synastry', route /spirit/together, and a
+   fifth entry in VT_TABS so the vertical shell reaches it by swiping past Angel
+   Numbers. Desktop reaches it from the My Charts hub, where chartCards gained a
+   Together card whose meta line reports how many profiles are shared.
+   Gate order, and it matters: no second profile -> "This one takes two"; a
+   second profile but no pair consent -> "Two people, two yeses", which links to
+   Shared Guidance; consent on both sides -> the reading. Consent is read live
+   through ProfileManager.getTwoPersonConsent, never cached, so revoking in
+   Settings removes the page on the next render.
+   What it draws, all on device from two birth dates:
+     - a summary ring, 24 to 94. It is a RATIO of harmonious to frictional
+       contact weight, not a running total, so a busy chart cannot score high
+       just for being busy. Weight is the PRODUCT of the two bodies' personal
+       weights times an orb factor, which is what keeps Sun/Moon/Venus contacts
+       above an outer planet that happens to sit close.
+     - the six contacts worth naming, each with CALCULATED degrees and orb,
+       TRADITIONAL reading, POSSIBILITY caveat. SYN_SWEET flags the six pairs
+       people mean by chemistry and marks them "the tender one".
+     - a 7x7 aspect grid (Sun through Saturn, rows are the active profile).
+       Marked data-chart="synastry" because a grid cannot give 44px to 49 cells.
+     - element blend, two bars per element, active profile in --ac and the other
+       in --ac2 fill.
+     - Life Path pairing, with a single sentence when both numbers match.
+     - Human Design electromagnetics: channels where one gate comes from each
+       chart and neither person has both. Caveated for missing birth times.
+   Voice is deliberately celebratory, addressed to two people at once:
+   "Good news, {A} and {B}." The caveat under the ring is load bearing. A number
+   is a summary, not a verdict.
+
+2. EVERYDAY TONE
+   A fourth reply tone beside Quick, Standard and Deep. Basic conversation is
+   answered ON DEVICE and never reaches the model: greeting, farewell, thanks,
+   how-are-you, a bare yes/ok, and a mirror case for any short scrap she cannot
+   place, where she quotes the user's own words back rather than guessing.
+   21 languages: en es pt fr it de nl pl ru tr ar hi zh ja ko sw tl vi id el he.
+   Detection is script first (Arabic, Hebrew, Cyrillic, Greek, Devanagari, Kana,
+   Hangul, Han), then colloquial markers per language, and it is STICKY: the
+   chosen language persists in state.stLang and localStorage
+   incommon.stella.lang, so a follow-up in one word stays in the right language.
+   Every reply is a greeting plus either a joke or a chart line plus an opening
+   question, alternating on state.stTurn so a repeated "hello" does not repeat.
+   Chart lines stay tagged CALCULATED and are filled from the user's own Sun
+   sign and Life Path. Safety comes first: the router still runs before any of
+   this, so a hard message is never answered with small talk.
+   chatOut() appends a short language directive to anything that DOES reach the
+   live chain, so a chart question asked in Polish comes back in Polish.
+   Chat bubbles carry dir="auto" so Arabic and Hebrew set right to left.
+
+3. NEW STATE AND STORAGE
+   state: synWith (chosen partner profile id), stLang, stTurn.
+   localStorage: incommon.stella.lang. Nothing else was added.
+
+4. AUDIT
+   Palette unchanged: no new hexes, #8b5cf6 never used as text, --crisis absent
+   from both features, purple text is --ac2-hi only, friction glyphs use --warn
+   (declared in all three token blocks). Every control is 44px or more except
+   the desktop "My Charts" back link at 32px, which is copied verbatim from the
+   existing Astrology, Human Design and Numerology desktop blocks. Raise all
+   four together or none.
+
+5. VERIFIED
+   handoff/tests-v14.js re-run 2026-08-04 with both features in place:
+   110 assertions, 0 failed. A 17/17, B 19/19, C 18/18, D 18/18, S 18/18,
+   E 5/5, and the functional sweep reported a plausible element count at every
+   viewport. contrastFails() gates untouched.
+
+6. TOUCH TARGETS
+   The desktop "My Charts" back link is 44px in all four Spirit views now
+   (Astrology, Human Design, Numerology, Together), not 32px. The three
+   remaining 32px controls are the two Archive close buttons and the error
+   banner dismiss, all dialog-header icon buttons with min-width:32px as well.
+   Dialog-header icon buttons (close, dismiss) intentionally remain at 32px /
+   32px min-width as secondary chrome; revisit if touch viewport share
+   increases.
+
+
+V1.4.2, ACCOUNT GATE AND THE SKY LETTER (2026-08-04)
+One overlay at the app root, above BOTH shells, z-index 200. Not a shell fork:
+a single centred card, max-width 440px, that works unchanged at 375, 820 and
+1440 because it never depends on the shell around it.
+
+FIRST RUN
+No account -> the gate. Five ways in: email, phone, Google, Facebook, TikTok,
+ChatGPT. Steps live in state.auth, form fields in state.af, and the whole thing
+is local: no mail, no texts, no network.
+  email    address, password, confirm, CAPTCHA, then a "check your inbox" panel
+           carrying the one-time verification link (shown on screen because
+           nothing is actually sent), then birth info.
+  phone    number -> six digit code (displayed, derived from the number so it is
+           stable) -> set a password -> birth info.
+  oauth    Facebook and TikTok: "open the app?" -> web approve -> return.
+           ChatGPT: same, and sets chatgptLinked, which is the one provider that
+           can read charts back out of inCommon.
+           Google: an account chooser, no app step.
+  Facebook and TikTok get shareCharts (send a chart out) but never read access,
+  so no assistant on those platforms can interpret a chart. That distinction is
+  in the copy on the approval screen, not just in the flag.
+
+RETURNING
+Password, or "send a push to my phone" with an approve button. Remember me is a
+real switch: with it on the session never expires; without it the session is
+twelve hours, and signOut() sets remember false and zeroes the session, which is
+the "logged out as a byproduct of security" path.
+
+BIRTH STEP
+Name, date, time, city. Continue is the primary button; "Skip for now" sits
+under it at 11px, which is the smaller-font requirement. Continue writes through
+ProfileManager.updateProfile, so it lands in the normal profile record and every
+reading picks it up.
+
+MAILING LIST
+A checkbox on email and phone signup, and a switch in Settings > Account in both
+shells, showing the address it goes to. Key: incommon.mailing.
+
+KEYS WRITTEN
+incommon.account, incommon.session, incommon.mailing. Nothing else.
+
+BRAND MARKS
+Provider buttons carry monogram tiles in --sf2 with --tx letters, not
+trademarked artwork, and the palette rules hold. The tile is 30x30 to the LEFT
+of the label exactly as specified, so dropping in official assets is a swap with
+no layout change.
+
+VERIFIED BY HAND
+Captcha refuses a wrong answer; verification link creates the account; wrong SMS
+code refused, right one passes; Facebook approve sets share without read;
+ChatGPT approve sets both; Google chooser lists accounts; sign out returns to
+the login step; push approve signs back in; skip closes the gate.
+
+
+V1.4.3, REAL SIGN-IN WINDOWS, AND SMALL TALK IN EVERY TONE (2026-08-04)
+
+1. SMALL TALK WAS TONE GATED. THAT WAS THE BUG.
+   chatterSegs() only ran when the tone was Everyday, so "hi stella" in Standard
+   went to the model, came back as a reading, failed the post-processor length
+   contract, and the user was shown the draft-rejected message. Greetings,
+   farewells, thanks and how-are-you are now recognised in EVERY tone. The two
+   looser cases, a bare acknowledgement and the mirror, stay behind Everyday,
+   because in Standard a four word message is usually a question. The meta line
+   reads "small talk" outside Everyday and "everyday tone" inside it.
+   CHAT_GUARD still protects chart questions: "what is my life path" is never
+   treated as conversation.
+
+2. OAUTH IS A REAL POPUP AND A REAL HANDSHAKE
+   oauthOpen() now does window.open with a named target, listens for a
+   postMessage from that window, polls for the user closing it, and cleans both
+   up in componentWillUnmount. States: waiting, approved, cancelled, closed
+   early, and popup blocked.
+   WHY IT STILL CANNOT REACH GOOGLE, META, TIKTOK OR OPENAI: a provider will
+   only redirect to an https URI that is whitelisted against a registered client
+   id, and the code exchange needs a secret that cannot live in a browser. This
+   build has no backend and no registered origin. Additionally OpenAI publishes
+   no consumer "sign in with ChatGPT" for third parties, and TikTok Login Kit
+   requires app review before any redirect works.
+   THE SEAM IS ONE LINE. oauthUrl(id) reads window.INCOMMON_OAUTH[id] =
+   {clientId, redirectUri, scope}. With that set, the same popup opens the
+   provider's own authorize URL from OAUTH_ENDPOINTS. Without it, the popup
+   renders inCommon's own consent screen, which says so in its footer. The
+   postMessage contract, {source:'incommon-oauth', provider, ok, email}, does not
+   change either way, so the callback page only has to post that message.
+
+
+V1.4.4, THE VOICE LAYER, RECONCILED (2026-08-05)
+
+1. A VOICE DOCUMENT ARRIVED THAT THE PIPELINE WOULD HAVE REJECTED WHOLESALE
+   uploads/stella_voice_reference_v1.4.4.md carries six gold-standard responses
+   written for persona. All six would have been WITHHELD by the live pipeline.
+   Not for tone. For contracts the document could not see: no epistemic tags,
+   em dashes throughout, tradition claims stated as fact without attribution,
+   no SOURCES line, and 180 to 260 words against a 180-word ceiling.
+   THE LESSON WORTH KEEPING: a voice reference has to be tested AGAINST the
+   pipeline, not beside it. Persona work written in isolation encodes invisible
+   constraints as hedging. The seven conflicts and their resolutions are in
+   handoff/stella-voice-v144-reconciliation.md, which is the reusable artifact.
+
+2. R3 IS THE FIX THAT MATTERS: ATTRIBUTE ONCE, THEN SPEAK
+   Name the system one time, then describe declaratively inside that frame.
+   "Astrology puts your Sun in the tenth house, and reads Scorpio there as..."
+   The tag and the attribution carry the epistemics; the prose does not have to.
+   Hedging every clause after the frame is established was making the voice
+   mush, and it was never what the contracts asked for. Hedging is not honesty.
+
+3. NEW FILE: stella-voice-v144.js (UMD, no deps, runs in Node)
+   voiceSection(mode)   system-prompt block, spliced into buildSystem()
+   ARCH                 Reception/Terrain/Reading/Invitation, each mapped onto
+                        the healthy loop. A voice surface over an ethical spine,
+                        not a rival architecture. Never printed as labels.
+   SHOTS                the six examples rewritten contract-compliant
+   selectShots(q,n,ctx) domain-matched, capped at TWO per the document's own
+                        instruction. Reads chart context as well as the query,
+                        because "why do I burn out when I lead" contains no
+                        Human Design vocabulary at all and routed to S1 without it.
+   checkVoice(text,mode) mechanical drift detector, 14 checks
+   TESTS                12 mechanical (self-checking) + 6 judge-only
+
+4. THE READING MODE, AND THE THREE PLACES A MODE HAS TO BE DECLARED
+   The document's examples are readings, not chat turns. quick/standard/deep
+   were left untouched so the harness kept passing; reading was ADDED:
+     stella-prompt-builder.js MODES.reading         t=0.85, max_tokens 1100
+     stella-post-processor.js LIMITS.reading        26 sentences, 363 words
+                                                    (330 + the 10% grace deep gets)
+     stella-api.js            CONFIG.models.reading claude-opus-4-5  (StellaAPI -> 1.1)
+   ALL THREE FAIL THE SAME WAY: SILENTLY, BY FALLING BACK TO STANDARD.
+   Missing from LIMITS, postProcess caps at 140 words and withholds every
+   reading. Missing from CONFIG.models, send() rewrites the mode to standard,
+   so the LONGEST mode runs on the mid model tier with the wrong token budget
+   and the wrong offline branch. Neither throws. Neither logs.
+   A MODE IS NOT WIRED UNTIL IT EXISTS IN ALL THREE FILES. The api.js entry was
+   missed on the first pass and only found in review, because no UI calls
+   reading yet. Grep the mode name across all three before believing it works.
+   Also fixed here: configure() iterated CONFIG.models, so it could only
+   overwrite keys that already existed and a host could not patch in a missing
+   mode from outside. It now iterates opts.models and accepts new string keys.
+   Verified: all six shots pass postProcess in reading mode and all six FAIL it
+   as standard, which is how you know the new entry carries them and no gate
+   was loosened.
+
+5. SHOTS GO IN THE USER TURN, NEVER THE SYSTEM PROMPT
+   buildPrompt gained an optional fifth argument:
+     {injectShots, maxShots, chartContext} -> <voice_example> blocks prepended
+     to the user message, plus shotsInjected[] on the returned payload.
+   WHY NOT THE SYSTEM PROMPT: evaluation-suite E9 counts exactly three
+   "<example mode=" blocks in the system text. Adding voice shots there breaks
+   it. The document also prescribes user-turn injection on drift. Both agree.
+   Soft dependency: stella-prompt-builder.js resolves StellaVoice off the global
+   and behaves exactly as V1.0 if the file is absent. It is deliberately NOT in
+   modulesReady()'s hard gate.
+
+6. LOAD ORDER
+   stella-voice-v144.js goes BEFORE stella-prompt-builder.js in the helmet.
+
+7. THE GATE HELD
+   Verification V1.4.dc.html, full run, after wiring: 110 assertions, 0 failed.
+   A 17/17, B 19/19, C 18/18, D 18/18, S 18/18, E 5/5, functional 15/15.
+   Re-run again after the stella-api.js fix: 110/0 a second time.
+   Only then: sw.js cache incommon-v1.6 -> incommon-v1.7, deploy1.1/index.html
+   rebuilt (1.6 MB), unpack verified clean in a real load.
+   Final bundle probe: api 1.1, builder 1.1, pp 1.0, voice 1.4.4; all four modes
+   present in all three sites; six shots clean as reading and six rejected as
+   standard; configure() accepts new model keys.
+
+7b. VERIFYING A REBUILT BUNDLE: THE PREVIEW CACHES index.html
+   Three consecutive rebuilds appeared to ship a stale stella-api.js. The bundle
+   was correct every time; the PREVIEW was serving the first index.html from
+   cache, so the probe kept reading old globals. A plain location.reload() did
+   not clear it. What works:
+     location.href = location.pathname + '?cb=' + Date.now()
+   Do that before believing any version number read out of a rebuilt bundle.
+   The bundle itself cannot be grepped for the answer, because assets are stored
+   compressed and UUID-mapped, so plaintext and naive base64 probes both miss.
+   Cost of not knowing this: a filename was churned to bust a cache that was
+   never the problem. It has been reverted; stella-api.js keeps its name.
+
+8. STILL OPEN
+   TRACKED GAP 1 - NO UI AFFORDANCE FOR READING MODE. HELD DELIBERATELY.
+     The tone radio is still quick/standard/deep/everyday. Reading is
+     architecturally ready; the open question is DISCOVERY, which is a UI/UX
+     problem with its own constraints, not a backend one.
+     A fifth chip at 375px fails Check A one of two ways: it shrinks under the
+     44px touch floor, or it wraps to a second row and breaks layout. Both are
+     real failures, and the tone selector is a high-interaction surface where a
+     broken chip is worse than a missing mode.
+     SEQUENCE WHEN IT IS PICKED UP (as V1.4.5 / V1.5.0, its own pass):
+       1. design the affordance in isolation
+       2. run Check A alone at 375px with all five tones active
+       3. green -> bundle with a targeted run; red -> take an alternative
+     ALTERNATIVES ALREADY ON THE TABLE, in rough order of preference:
+       - horizontal scroll for the chips, with snap and fade indicators
+       - a "More" overflow chip that expands to reveal reading
+       - reading as a separate entry point entirely, not a tone chip: its own
+         button or tab, since a long-form reading is arguably not a "tone"
+     DO NOT force the fifth chip to avoid designing the alternative.
+
+   TRACKED GAP 2 - 'everyday' IS DECLARED IN NONE OF THE THREE SITES.
+     Not urgent. It falls back to standard's prompt, standard's 140-word cap and
+     standard's model everywhere. This is invisible today only because small talk
+     is answered on device and never reaches a provider.
+     It becomes a real bug the moment an everyday message does reach one, or the
+     moment Everyday needs its own voice section or its own looser limit (it
+     probably should: four-word chatter and mirroring do not fit standard's
+     3-to-5-sentence contract). When that day comes it needs the same three-site
+     treatment as item 4. Same class of bug, tracked, not scheduled.
+   - checkVoice's rhythm gate (one sentence under ten words, mean under 32) is a
+     PROXY for the document's paragraph music. Unlike contrastFails(), it is not
+     load-bearing for safety. If it starts rejecting good replies, loosen it.
+
+
+V1.4.5, READING MODE UNWIRED (2026-08-05)
+
+WHY: the mode had no UI entry point. The fifth tone chip was held because it
+risks Check A's 44px touch floor and wrap assertions at 375px, and without an
+entry point the mode was unreachable code sitting in a 1.6 MB bundle. Held
+features do not need to ship. This is an UNWIRE, not a deletion: every Stella
+artifact stays in the repo and re-adding it is a feature change with its own
+harness run and its own reconciliation pass.
+
+1. THE THREE SEAMS, REVERSED
+   stella-prompt-builder.js  1.1 -> 1.2
+     - MODES.reading removed
+     - the voiceSection() splice removed from buildSystem()
+     - the fifth buildPrompt argument removed, with it the <voice_example>
+       user-turn injection and the voice / shotsInjected payload keys
+     - the voice() global resolver removed; nothing consults StellaVoice now
+   stella-post-processor.js  1.0 (unchanged version, LIMITS.reading removed)
+   stella-api.js             1.1 -> 1.2, CONFIG.models.reading removed
+   inCommonApp v2.dc.html    the <script src="./stella-voice-v144.js"> helmet
+                             line removed
+   Restoring the mode means putting back all four. A comment at the top of
+   stella-prompt-builder.js names them so the next person does not have to
+   rediscover the list.
+
+2. WHAT WAS KEPT ON PURPOSE
+   - configure() still accepts NEW model keys (the V1.4.4 fix). It was a real
+     bug independent of reading mode: a host could not patch in any missing
+     model from outside. Removing it would have reintroduced the bug.
+   - buildPrompt now logs an explicit console.debug when an undeclared mode
+     falls back to standard. Previously silent. That silence is exactly how the
+     missing CONFIG.models entry hid for a whole pass, so the unwire kept the
+     lesson even though it dropped the feature.
+   - PRESERVED, NOT DELETED: stella-voice-v144.js, Stella Voice v1.4.4.dc.html,
+     handoff/stella-voice-v144-reconciliation.md, uploads/stella_voice_reference
+     _v1.4.4.md, uploads/stella_test_matrix_v1.4.4.md, uploads/stella_judge_
+     prompt_v1.4.4.md.
+
+3. TWO INSTRUCTIONS IN THE REMOVAL BRIEF WERE NOT FOLLOWED, DELIBERATELY
+   a) "E9 should now expect two <example mode=> blocks, not three."
+      WRONG, and following it would have turned a passing assertion red. Those
+      three blocks are the ORIGINAL V1.0 FEWSHOTS: quick, standard, deep. They
+      predate the voice layer and have nothing to do with reading. The voice
+      shots were deliberately injected as <voice_example> in the USER turn
+      precisely so E9 would stay at three. It is still three. Untouched.
+   b) "If any tone chip, button, or route references 'reading' or 'Stella' in
+      the frontend, remove or hide it."
+      Scoped to 'reading' only. Stella IS the assistant and the product; there
+      was never a reading chip to remove, and stripping Stella from the UI would
+      have gutted the app. Read as a drafting overreach, not an instruction.
+   Also noted: the brief lists stella_judge_kit_selfcontained_v1.4.4_rev1.md as
+   a file to preserve. It does not exist in this project. Nothing was lost.
+
+4. VERIFICATION
+   Verification V1.4.dc.html, full run after the unwire: 110 assertions,
+   0 failed. A 17/17, B 19/19, C 18/18, D 18/18, S 18/18, E 5/5, functional
+   15/15. Check A passes with FOUR tone chips, as it did before V1.4.4.
+   Cache incommon-v1.7 -> incommon-v1.8, deploy1.1/index.html rebuilt, verified
+   on a cache-busted load (see 7b in V1.4.4 for why that matters).
+
+5. TRACKED GAPS CARRIED FORWARD
+   Gap 1 (reading mode discovery) and Gap 2 ('everyday' declared in none of the
+   three sites) both still stand, unchanged, under V1.4.4. Gap 1 is now larger
+   in scope: re-adding reading means re-wiring the seams AND designing the
+   affordance, in that order, in one branch.
+
+
+V1.4.6, THE ASSISTANT LEAVES THE INTERFACE, RETROGRADE ARRIVES (2026-08-06)
+
+Asked for directly: remove all visibility of Stella, including the taskbar icon,
+and add a Retrograde dropdown under Stellium with explanations matching the rest
+of the app.
+
+1. WHAT "ALL VISIBILITY" MEANT IN PRACTICE
+   132 lines matched /stella/i. They split three ways, and only the first two
+   were the user's request:
+     VISIBLE SURFACES, REMOVED: the nav entry in DT_NAV and VT_SECTIONS and the
+       phone tab array; the whole <section data-vt-sec="Stella"> snap screen; the
+       desktop chat panel; the "Talk to Stella about today" card; the desktop
+       "Start the conversation" card; four "Ask Stella" buttons (voice sheet,
+       human-design popover, archive detail, synastry); the /stella hash route
+       and the hash emitter that produced it.
+     VISIBLE COPY, REWRITTEN to speak as inCommon or in the passive: consent
+       switches, memory sheet, profile switcher, birth-data explainer, welcome
+       sheet, crisis sheet, About line, diagnostics row, four toasts, and the
+       error banner that said "Stella pipeline error".
+     INTERNAL PLUMBING, LEFT ALONE: state keys (stellaOpen), localStorage keys
+       (incommon.stella.*), module globals (StellaPromptBuilder, StellaAPI),
+       memory-kind keys (stella_conversation), and code comments. None of it is
+       user-visible and renaming it would have been a large silent-risk refactor
+       for zero user benefit. The three script tags still load.
+   THE FLOATING BUBBLE AND PEEK WERE ALREADY DEAD: showBubble and peekOpen were
+   computed in renderVals but referenced nowhere in either template. Found while
+   hunting for their markup. Left computed, still unreferenced.
+
+2. THE ONE REAL REGRESSION THE HARNESS CAUGHT
+   Removing the chat composer removed the mic button with it, and that button was
+   what A14 through S14 used as their handle on the voice sheet. The sheet itself
+   was still reachable from the "Speak it instead" control in the Mark a moment
+   sheet, so spoken journal entries never actually broke, but the CONTROL THE
+   TEST NAMED no longer existed. Fixed properly rather than by deleting the
+   assertion: "Speak it instead" now carries aria-label="Record your voice",
+   which is what it is, and the check opens addOpen instead of the dead
+   stellaOpen so it renders the panel the mic actually lives in.
+   IF THAT BLOCK OPENS NOTHING, A15 TO A17 SWEEP AN EMPTY DOM AND REPORT GREEN
+   HAVING PROVED NOTHING. That is why it was repointed and not dropped.
+
+3. TWO ASSERTIONS ENCODED THE OLD SHAPE AND WERE UPDATED, NOT LOOSENED
+   A8 expected 6 vertical snap sections; there are 5 now that the assistant
+   screen is gone. F3c expected a "start the conversation" control that the
+   product no longer has. Both are spec changes following a deliberate product
+   change. contrastFails() and its size/length gates were NOT touched: those are
+   the load-bearing ones and they stayed exactly as they were.
+
+4. RETROGRADE
+   Engine, next to isRetro() which already existed and was unused by any screen:
+     RETRO_BODIES   Mercury through Pluto. The Sun and Moon never retrograde.
+     retroScan()    scans +/-300 days at ONE-DAY steps and groups contiguous runs.
+                    One day matters: Mercury's passage is about three weeks, so a
+                    coarser step can miss a whole retrograde. Cached per calendar
+                    day; about 9,600 lonOf calls on first open, then free.
+     openStart/openEnd mark runs touching a window edge, so the UI never prints a
+                    station date it cannot actually see. This is the same honesty
+                    rule the asteroids follow when no ephemeris is supplied.
+     posOn()        station degree and sign at each end.
+   Presentation: one row appended to the chartFeatures array, immediately after
+   stellium. BOTH SHELLS RENDER THAT ARRAY, so the phone and desktop got it from
+   a single insertion with no fork, which is the whole point of the one-codebase
+   rule. Content follows the app's existing grammar: CALCULATED for computed
+   positions and dates, TRADITIONAL for per-body doctrine and the apparent-motion
+   explanation, POSSIBILITY for the testable framing, and a closing CALCULATED
+   line stating the accuracy and the range rather than implying precision it does
+   not have. Collapsed sub-line reads either "Saturn · Neptune · Pluto retrograde
+   now" or "all direct · Mercury turns Oct 24".
+   Spot-checked against the real sky for August 2026: Saturn and Neptune
+   retrograde into December, Pluto to mid-October, Mercury just finished in late
+   July and returns late October, Uranus turns in September. All within the day
+   of accuracy the panel claims.
+
+5. VERIFICATION
+   Three runs. First: 103/110 (7 failures, all shape or the mic). Second: 105/110
+   after the assertion updates. Third, after repointing A14: 110 assertions,
+   0 failed. A 17/17, B 19/19, C 18/18, D 18/18, S 18/18, E 5/5, functional
+   15/15. Cache incommon-v1.8 -> incommon-v1.9, bundle rebuilt.
+
+6. GAPS
+   Gap 1 (reading-mode discovery) is now moot as written: there is no tone
+   selector to add a fifth chip to, because there is no assistant surface at all.
+   If a reading UI ever returns it starts from nothing. Gap 2 ('everyday'
+   undeclared in all three sites) still stands and is now unreachable from the
+   interface, which lowers its urgency without fixing it.
+
+
+V1.4.7, CLICKABLE HOUSES (2026-08-06)
+
+Asked for: let the user click a house and get a detailed explanation of what it
+consists of.
+
+1. TWO CLICK SURFACES, BOTH SHELLS
+   THE WHEEL: a 1px cusp line cannot be hit, so each house is now a 30-degree
+   wedge <path> across the 322-386 band, drawn behind the cusp line, transparent
+   until hover. The wedge reuses the arc() helper the sign ring already uses. It
+   lives inside [data-chart], which is the one place the 44px floor does not
+   apply, so a twelfth of a ring is legitimate here.
+   CORRECTED IN V1.4.9, THE ORIGINAL ENTRY HERE WAS WRONG. It claimed the house
+   bands were unlabelled and that V1.4.7 added the numbers. They were already
+   labelled, by wheelLabels, which builds HTML overlay buttons positioned over the
+   SVG. The grep that led to the wrong conclusion looked for h.n in the template
+   and found only the list, because the wheel numbers come from a different array
+   entirely. wheelHouses.n/nx/ny were indeed unused, but the numbers were on
+   screen the whole time. V1.4.7 added a redundant SVG <text> that never laid out;
+   V1.4.9 deleted it and wired the real buttons. See V1.4.9.
+   THE LIST: the twelve Houses rows were plain divs. Now buttons with a chevron,
+   min-height 44px in both shells (they are outside [data-chart], so the floor
+   does apply, and at padding:8px they had been about 30px).
+
+2. NO NEW SHEET WAS BUILT
+   The dpSel popover already existed in both shells with a scroll cap, tagged
+   lines and a CTA, and already carried three kinds: planet, gate, number. Houses
+   became the fourth. That is one branch in dailyPopVals() and zero new template
+   for the sheet itself, versus a new full-page view duplicated across two
+   shells. Precedent: the placement page is a full view because a planet has five
+   sections and a dignity panel; a house does not.
+
+3. CONTENT COMES FROM PlacementContent, NOT FROM NEW PROSE
+   PC.houses already held twelve rich entries (theme, arena, definition, asks,
+   presence, inLife, gift, shadow, growth, block) and PC.signInHouse() and
+   PC.planetInHouse() already existed. houseDetail(n) assembles nine or ten
+   tagged lines from them, so A HOUSE CAN NEVER CONTRADICT A PLANET PAGE: both
+   read the same layer. New in the app class, because PC had no notion of them:
+     HOUSE_CLASS  angular / succedent / cadent, with what each does
+     HOUSE_AXIS   the six oppositions, so every house names its opposite
+   Empty houses were the case worth getting right. They are not skipped: the
+   sheet names the cusp ruler, says where that ruler actually sits, and states
+   the traditional reading that an empty house is an area handled without a
+   resident planet insisting on it. The CTA then opens the ruler instead of an
+   occupant, so the sheet always has somewhere to go.
+
+4. THREE BUGS CAUGHT BY READING THE OUTPUT, NOT BY THE HARNESS
+   a) "It is a angular house." Needed the article branch.
+   b) SIGN_INFO writes rulers as PROSE: 'the Sun', 'the Moon'. Body names carry
+      no article, so natal.find(r => r.name === ruler) silently failed for Leo
+      and Cancer, the empty-house ruler clause vanished, and the CTA would have
+      tried to open a placement page for "the Sun". Fixed with a rulerBody field
+      that strips the article; the prose keeps the article, the lookup does not.
+      THE SYMPTOM WAS A MISSING SENTENCE, NOT AN ERROR. Nothing threw.
+   c) The cusp line said "runs 30 degrees to Virgo" when it meant 22 Virgo.
+   None of these would have failed an assertion. They were found by printing the
+   generated text for houses 1, 5 and 10 and reading it.
+
+5. VERIFICATION
+   Verification V1.4.dc.html: 110 assertions, 0 failed, first run, no assertion
+   changes needed. A 17/17, B 19/19, C 18/18, D 18/18, S 18/18, E 5/5,
+   functional 15/15. Row heights confirmed at 44px and above. Cache
+   incommon-v1.9 -> incommon-v2.0, bundle rebuilt.
+
+
+V1.4.8, THE HOUSE SHEET WAS 73% BOILERPLATE (2026-08-06)
+
+Caught in review, not by the harness. The house sheet shipped in V1.4.7 with
+massive verbatim duplication in any house holding more than one body.
+
+1. THE BUG
+   houseDetail() called PC.planetInHouse(body, n) once per occupant.
+   THAT HELPER IS WRITTEN FOR THE PLANET PAGE, WHERE IT APPEARS EXACTLY ONCE, so
+   it deliberately bundles shared house context onto its tail:
+     body + ' in the Nth house turns ' + b.energy + ' toward ' + h.arena + '. '
+       + h.asks + ' ' + h.presence
+   Called N times, the tail repeats N times. Measured on house 4, which holds
+   Sun, Mercury, Venus and Saturn: h.asks appeared 5 times in one sheet, the
+   three-sentence h.presence block appeared 4 times back to back, and each
+   occupant line was 357 characters of which 261 were shared boilerplate. Only
+   the leading ~96 characters were body-specific. It read as padded, which is the
+   opposite of the detail the feature was for.
+
+2. THE FIX
+   Shared context is now stated ONCE above the loop (h.presence as its own line,
+   and only when the house is occupied, since it is literally about planets
+   resting there). The loop emits only what is specific to the body:
+     r.name + b.verb + b.energy + ' here, from ' + deg + sign + '. ' + b.role
+   All four of those fields are per-body, so no two occupant lines can collide.
+   Also removed h.asks from the angular/succedent/cadent line: PC.signInHouse()
+   restates it two lines below as "The house asks ...", which was a second,
+   subtler duplication in EVERY house including the empty ones.
+   Verified with a sentence-level duplicate count across houses 1, 3, 4, 7 and
+   10: zero repeated sentences anywhere, longest line 401 characters.
+
+3. WHY IT SHIPPED, AND THE PROCESS LESSON
+   The content was spot-checked on houses 1, 5 and 10. FIVE AND TEN ARE EMPTY AND
+   ONE HAS ONLY TWO BODIES, so the loop never ran more than twice and the
+   duplication stayed under the threshold where it is obvious. The worst case was
+   never printed.
+   WHEN A FEATURE LOOPS OVER USER DATA, SPOT-CHECK THE HEAVIEST CASE, NOT AN
+   AVERAGE ONE. For this app that means: the house holding the stellium, which is
+   also the house a user is most likely to open first. Same class of mistake as
+   the V1.4.4 shot-length check, which passed on five examples and failed on the
+   sixth because only the sixth was near a boundary.
+   No assertion could have caught this. It is not a crash, a contrast failure or
+   a layout break; it is prose quality, and the only detector is reading the
+   generated output at its worst case.
+
+4. VERIFICATION
+   Verification V1.4.dc.html: 110 assertions, 0 failed. A 17/17, B 19/19,
+   C 18/18, D 18/18, S 18/18, E 5/5, functional 15/15. Cache incommon-v2.0 ->
+   incommon-v2.1, bundle rebuilt.
+
+
+V1.4.9, THE HOUSE NUMBERS WERE ALREADY THERE, AND WERE DEAD (2026-08-06)
+
+Caught in review. Two defects from V1.4.7, both from one unread source.
+
+1. THE WHEEL HAS TWO LABEL SYSTEMS AND I ONLY READ ONE
+   wheelHouses draws the SVG geometry. wheelLabels builds HTML overlay BUTTONS
+   positioned over the SVG in percentage coordinates, and it already contained
+   twelve house-number buttons: text "1".."12", aria-label "House N",
+   cur: 'default', go: noop. They had been on screen since the wheel was built.
+   My grep was for h.n in the template. That found the Houses LIST and nothing
+   else, because the wheel numbers come from a different array with different
+   field names. I concluded the bands were unlabelled. They were not.
+   CONSEQUENCE 1: the dead button sat at the exact mid-house point a user aims
+   for, with pointer-events auto and cursor default, so it SWALLOWED THE WEDGE
+   CLICK. The most obvious target on the wheel did nothing while the wedge around
+   it worked, which is worse than either all-dead or all-live.
+   CONSEQUENCE 2: I added an SVG <text> for numbers that already existed. It never
+   laid out at all (getBBox 0x0 on all twelve, collapsed at the SVG origin) so it
+   painted nothing, and had it rendered it would have double-drawn the existing
+   number at the identical coordinate in a different size, 15px over 13px.
+   CONSEQUENCE 3: two "House 1" controls in the accessibility tree, one dead.
+
+2. FIX
+   The twelve wheelLabels number buttons now carry cur: 'pointer', the full
+   aria-label "House N, open its details", and the same dpSel handler as the
+   wedge. They are already buttons and already inside [data-chart], so the 44px
+   floor does not apply. The redundant SVG <text> line was deleted from both
+   shells. Confirmed: clicking the NUMBER (not the wedge) opens the sheet,
+   document.querySelectorAll('svg text').length === 0.
+
+3. THE LESSON, WHICH IS THE SAME ONE AS V1.4.8
+   BEFORE ADDING AN ELEMENT TO A VIEW, CHECK WHETHER IT IS ALREADY THERE UNDER A
+   DIFFERENT NAME. One grep on one field name is not a survey of a view that
+   composes SVG and HTML overlays. The tell was available and ignored: wheelHouses
+   computed n/nx/ny that no template consumed, which should have prompted the
+   question "so where DO the numbers come from" rather than the assumption that
+   they were missing.
+   Also: a dead control is not visually distinguishable from a live one. Nothing
+   in a screenshot or an assertion shows that a button does nothing. The only way
+   to find it is to click it, or to read the handler.
+
+4. VERIFICATION
+   Verification V1.4.dc.html: 110 assertions, 0 failed. A 17/17, B 19/19,
+   C 18/18, D 18/18, S 18/18, E 5/5, functional 15/15. Cache incommon-v2.1 ->
+   incommon-v2.2, bundle rebuilt.
+   The V1.4.7 entry above has been corrected in place, since it recorded the false
+   premise that the bands were unlabelled and would have misled the next pass.
+
+
+V1.5.0, THE ANGLES BECOME PLACEMENTS, AND TOGETHER BECOMES CHOOSABLE (2026-08-06)
+
+Asked for: the Ascendant and the other points as clickable items on the natal
+chart, with aspects and transits; and in Today's Alignment, let the reader click
+Together and choose static, shuffled, or a custom transit/gate pairing.
+
+1. THE ANGLES WERE NEVER IN THE CHART SET
+   fullChart() carried planets plus EXTRA (nodes, Chiron, asteroids). The four
+   angles existed only as rim decoration on the wheel. anglePoints() now derives
+   Ascendant, Midheaven, Descendant and IC from ascendant(), so they exist only
+   when birth time AND place are known, and fullChart() appends them. Everything
+   downstream picked them up for free: natalAspects, the Placements list, search
+   in both shells, the placement page, prev/next.
+   Three deliberate exclusions, each for a reason:
+   - stelliums() filters group 'angle'. A stellium is a gathering of bodies; the
+     Ascendant is not a body and would inflate every count.
+   - natalAspects() drops angle-to-angle pairs. AC always opposes DC and MC is
+     square to both by construction. That is geometry, not a feature of a chart.
+   - the wheel glyph ring filters group 'angle'. They are already labelled on the
+     rim; a second glyph inside would draw every angle twice.
+   transitsNow() natal set = chartAt(natalDate) CONCAT anglePoints(), so transits
+   to the angles now appear in Today's hits like any other contact.
+
+2. THE RIM LABELS WERE ALREADY THERE AND WERE DEAD, SAME SHAPE AS V1.4.9
+   wheelLabels already pushed ASC / DC / MC / IC at radius 368 with cur 'default'
+   and go: noop. Checked first this time, per the V1.4.9 lesson, instead of adding
+   a second set. They now carry cur 'pointer', aria "Ascendant, open its reading",
+   and openPlanet(fullName). Colour moved from #2fff8f to #7d9bff so an angle is
+   not mistaken for a planet, both are text-legal on these surfaces.
+
+3. THE PLACEMENT PAGE HAD NO ASPECTS AND NO TRANSITS, FOR ANY BODY
+   Adding the angles exposed the gap: the page read house, sign, dignity,
+   synthesis, working-with, degree and Sabian, and never once said what the
+   placement was in contact with. Two new sections in both shells:
+   - ASPECTS TO THIS POINT: every natal aspect involving this body, tightest
+     first, capped at 8, each a button through to the other end.
+   - TRANSITS HERE NOW: live sky against this point, with TIGHTER orbs than natal
+     (4/4/3/3/2 against 8/8/6/4/3), each marked tightening or separating by
+     comparing the orb against tomorrow's position.
+   Aspect edge colours come from ASP_COLOR, which holds no #8b5cf6, so the colour
+   rule holds.
+
+4. TOGETHER IS NOW THREE MODES, AND ONLY THE SYNTHESIS MOVES
+   State: alignMode ('today' | 'shuffle' | 'custom'), alignHit, alignGate,
+   alignSeed. The three system lines above Together ALWAYS report the real day: only the synthesis line reads the chosen pairing, and a caption under it names
+   which pairing is being read and why.
+   - today: the live sky. Top contact within orb, Sun's gate. Unchanged default.
+   - shuffle: one of up to ten live transits paired with one of the gates the
+     transiting bodies currently occupy. Seeded off alignSeed, so a re-render
+     never silently swaps the reading under the reader; "Shuffle again" bumps it.
+   - custom: chips for the transit and chips for the gate. Both pools are LIVE
+     positions, not arbitrary numbers: the reader recombines today's sky, they
+     do not invent one.
+   alignVariant() rebuilds center, definedCenter, natalHasGate, chan and partner
+   from the chosen gate before the Integration passage is built, so a custom gate
+   reads its real centre rather than the Sun's.
+   All controls 44px in both shells.
+
+5. VERIFICATION
+   Pending: Verification V1.4.dc.html has not been re-run against this pass.
+   Deploy bundle NOT yet rebuilt, deploy1.1 still carries V1.4.9.
+
+
+V1.5.1, THE READINGS TAB BECOMES A TAROT DECK, AND MY TAROT ENTERS THE LIBRARY (2026-08-06)
+
+Asked for: replace the content of the Readings filter in Throughline with an
+interactive tarot reading (3/6/9/11 cards, collective message from meaning,
+direction and sequence, revolving rather than listed, in Quick / Divine /
+Celestial lengths, across Love and Romance / Finance / General); and add a
+"My Tarot" reference to the Library in the same relation as Astropedia is to
+astrology and the Atlas is to Human Design.
+
+1. NEW FILE: tarot.js
+   Same shape as astropedia.js and hd-atlas.js: a UMD module, no profile access,
+   no network. It carries the whole deck and the weaver.
+   - 78 cards. 22 Majors written individually with upright, reversed, a love
+     clause, a finance clause, historical note and utility. 56 minors written as
+     a 14 by 4 table, with history and utility carried at the suit level because
+     that is honestly where a minor's history lives: the suit is the old object
+     (baton, chalice, sword, coin) and the rank is the number.
+   - Every card knows its number in the sequence (0 to 77) as well as its
+     traditional number, which is what the Library page prints.
+   - draw() is a seeded xorshift Fisher-Yates. The seed is stored in state, so a
+     reading re-renders identically instead of reshuffling under the reader, and
+     a kept reading can be traced back to the exact shuffle.
+
+2. THE WEAVE IS THE POINT, SO NO CARD IS EVER DESCRIBED ALONE
+   Passages are built from relations, not from a list: adjacency (card i hands on
+   to card i+1), the first/pivot/last arc, suit weight and absent suits, elemental
+   balance, orientation ratio, Major Arcana density, repeated numbers, court
+   count, aces. Quick is three sentences off a three card pull. Divine is four
+   passages. Celestial is seven, ending on a prediction stated plainly enough to
+   be checked. Tagging matches the rest of the app: the draw is CALCULATED, the
+   card meanings are TRADITIONAL, the synthesis is SYNTHESIS, the prediction is
+   POSSIBILITY.
+
+3. GRAMMAR IS A REAL FAILURE MODE IN GENERATED PROSE
+   First pass produced "A 11 card draw", "the number 7 2 times", "1 of them
+   belong", and lowercase second sentences spliced mid clause, because several
+   card meanings run to two sentences and the weaver lowercased the whole string.
+   Fixed with firstSent(), cap(), artN() and wordN(), then swept 400 seeds across
+   every depth, count and topic looking for double spaces, orphan articles,
+   "undefined", and a lowercase letter after a full stop. Zero remaining.
+   THE LESSON: generated prose needs a sweep, not a spot check. One reading
+   reading well says nothing about the other 400.
+
+4. THE TAB
+   tlFilter === 'reading' now renders the tarot surface instead of the filtered
+   list; every other filter renders the timeline unchanged, and the + button is
+   inside the timeline branch so it does not float over the deck. The surface
+   opens on a fanned stack of seven decorative backs, then topic, then depth,
+   then count, then draw. Kept readings are written to the manual store with
+   type 'reading', so they appear on the line under Everything.
+
+5. MY TAROT
+   Library entry between Astropedia and the Atlas, route /library/my-tarot, five
+   accordion sections (Majors, then the four suits) with a card list inside each
+   and a per card panel: keywords, number in the sequence, upright, reversed, in
+   love, in money and work, where it comes from, what it is useful for. Same
+   accordion vocabulary as Astropedia so the Library reads as one shelf.
+
+6. VERIFICATION
+   Pending: V1.4 harness not re-run. Deploy bundle still V1.4.9. The new surface
+   adds controls at 44px in both shells but has not been measured by Check A.
+
+
+V1.5.2, ECLIPSES (2026-08-12)
+
+Asked for: eclipses in the astrology section, tied to a general overview and to the
+user's own chart, and shown on Today's Forecast when presently considerable.
+
+1. NO NEW TEMPLATE, IN EITHER SHELL
+   Eclipses are one more row in the chartFeatures array (title, sub, lines, tabs,
+   body), which both shells already render, and one more entry in horoSky, which
+   both shells already render. The retrograde row had established every part
+   needed, tabs included. Total template diff: zero lines. Same one-codebase
+   result as V1.4.6.
+
+2. THE ENGINE
+   An eclipse is a lunation near a lunar node, so the scan finds New and Full
+   Moons first and only tests those, then refines each to the nearest hour before
+   measuring node distance. eclipseScan() caches per calendar day.
+   LIMITS WERE CALIBRATED, NOT LOOKED UP. Solar 18.5 degrees, lunar 13.9 rather
+   than the textbook 12.15: this truncated Moon series puts the Aug 17 2027
+   penumbral eclipse about 1.4 degrees further from the node than it really is,
+   and at 12.15 the scan missed a real eclipse. With 18.5 / 13.9 the window finds
+   all TEN eclipses between Sep 2025 and Aug 2027 and invents none. Dates match
+   the real sky exactly (Mar 3 2026 total lunar, Aug 12 2026 total solar, Aug 28
+   2026 partial lunar, Feb 6 2027 annular).
+   The class bands cannot be sharp and say so. Aug 12 2026 is total at 10.3
+   degrees from the node while Sep 21 2025 is partial at 11.6, which is inside
+   this ephemeris's own error, so 11.0 to 12.2 is a declared "central or partial"
+   band with certainty 'uncertain' instead of a guess. Total versus annular is
+   never claimed at all: that needs the Moon's distance. Neither is visibility,
+   duration, or saros family. Same honesty rule as the open-ended retrograde runs.
+
+3. TIED TO THE USER IN THREE PLACES
+   The house the eclipse degree falls in AND its opposite, because an eclipse
+   always works an axis; the natal contacts within 3 degrees (2 for squares); and
+   the eclipse season it belongs to, named from the other eclipses within 40 days.
+
+4. FOUR BUGS FOUND BY READING THE OUTPUT AT ITS HEAVIEST CASE
+   Per V1.4.8: the case printed first was an eclipse touching nothing, which is
+   the easy one. The Aug 28 tab touches five things, and it was wrong four ways.
+     a) "A partial solar solar eclipse." The class string carried the word solar
+        and so did the sentence. ECL_CLASS is now keyed kind|klass.
+     b) "5 contacts: A, B, C and D." Said five, listed four, because the list was
+        sliced and the count was not.
+     c) Midheaven opposite AND IC conjunct, printed as two contacts at the same
+        0.1 degrees. An eclipse lights both ends of an axis by construction.
+        eclipseTouch now dedupes on HORO_AXIS, which the forecast casts have used
+        since V1.3, and prints "your natal Midheaven axis".
+     d) "Midheaven ... its own business." PL_MEAN has no entry for an angle, and
+        the fallback was doing the talking. horoMean() covers the angles and is
+        what the rest of the forecast already uses.
+   Also "one contact ... the tightest of those" got its own branch.
+   NONE of these would have failed an assertion. All four were visible in one
+   read of one tab.
+
+5. VERIFICATION
+   Pending: V1.4 harness not re-run for this pass, and it is still outstanding
+   from V1.5.0 and V1.5.1 as well. The eclipse tabs are the retro tab markup
+   verbatim, min-height 44px, and no new hex was introduced, but Check A has not
+   measured them. Deploy bundle still V1.4.9.
+
+
+V1.5.3, THE PILL SHEET GETS TWO TABS AND FOUR WORKING LISTS (2026-08-12)
+
+Asked for: tabs in the pill sheet, General with what it has now and For You written
+as a personal lesson, plus Strengths / Opportunities / Challenges / Obstacles on
+every pill, as direct utilities.
+
+1. ONE SHEET, FOUR KINDS, TWO TABS
+   dailyPopBase() now returns general[] and you[] per kind and pack() picks by tab.
+   The four kinds each got the split: planet, gate, house, number.
+   THE SPLIT IS THE FEATURE. A general statement on For You is padding and a
+   personal claim on General is a lie about who it applies to, so the sorting rule
+   was applied line by line: what the body/sign/house/gate/number IS stays General;
+   degrees, dignity, decan, occupants, cusp, ruler placement, defined centers, line,
+   stage and Life Path comparison move to For You.
+   houseDetail() now returns general/you alongside the combined lines, so the older
+   shape still reads identically for any caller that wants the whole list.
+
+2. THE TAB IS KEYED TO THE SELECTION, NOT RESET ON OPEN
+   dpSel is written from the wheel, the placement list, the forecast cards, the house
+   rows and the hole trail. A reset inside dpOpen() would have covered one path and
+   left the rest opening on the previous pill's tab. state.dpTab plus dpTabFor
+   (the selection key) makes every entry path open on General with no per-caller
+   change. Same lesson as the V1.3.1 Stella header: derive it, do not store it.
+
+3. SOCO SOURCES, REUSED RATHER THAN REWRITTEN
+   planet  PC.workingWith(body, sign, house), which is body+sign+house so no two
+           placements read alike; falls back to body gifts/shadows with no birth time.
+   number  NC.build().lists, already per-number.
+   house   composed here from PC.houses gift/shadow/growth/block, the cusp sign's
+           gift/shadow, the ruler's own house, and the occupant count.
+   gate    composed from the atlas gate gift/shadow, whether it is natal, the line,
+           the center's definition, and which channel it closes with a natal gate.
+   Each list gets ONE utility item written for it (a thing to do, dated, testable)
+   above the descriptive ones, which is what "direct utility" was asked for.
+
+4. THE DUPLICATE THAT READING CAUGHT
+   On the Sun sheet, Opportunities read "One move to test: spend your warmth where
+   it is received" directly above "This placement invites you to spend your warmth
+   where it is received." My utility line and PC's list draw on the same growth
+   clause. Fixed generically in dpSocoBlocks with a shared-long-word test against
+   the SHORTER item, so a clause wrapped in a longer sentence still counts as the
+   same item. Same class as V1.4.8: it is prose quality, no assertion sees it, and
+   the only detector is reading the output.
+   Also fixed while reading: the house axis line ran two sentences together with no
+   full stop, and an occupant line read "IC rests on roots and private ground into
+   this room" because the template assumed a transitive verb.
+
+4b. THE RULER CAN SIT IN THE HOUSE IT RULES, AND I DID NOT PRINT THAT CASE
+   Caught in review, on the 1st house, which is the row users open first. Both
+   ruler lines were written as cross-house links off hd2.rulerHouse with no test
+   against n, so with Pluto in the Scorpio-cusped 1st they read "reach this room
+   through that one" and "change something in your 1st house and watch what happens
+   here." Self-referential advice, and the 4th house I DID print (Uranus in the 3rd)
+   could not show it. Same shape as V1.4.8 again: I printed a case where the loop
+   was harmless. Fixed with an ownRuler branch that says the true and more useful
+   thing, a house holding its own ruler being self-contained, rather than
+   suppressing the line.
+   Also: arena.split(',')[0] yields a bare "self" for house 1, so a first segment
+   under ten characters now falls back to the house theme.
+
+5. VERIFICATION
+   Pending, with V1.5.0 to V1.5.2. Tabs measured at 44px in the sheet; the sheet
+   markup is identical in both shells (two anchors, one edit each) and no new hex
+   was introduced: strengths use --ac, opportunities --blue, challenges --warn,
+   obstacles --ac2-hi, all text-legal, --crisis untouched.
+
+
+--- V1.5.4 ---------------------------------------------------------------
+Numerology cycling headroom, widened:
+  * dvarIndex rolling no-repeat window k: 5 -> 8, chunk anchor 90 -> 120 days.
+    This is app-wide, so every pooled slot in every system spends more of its
+    pool before any phrasing can return.
+  * dcycVarIndex / dcycPick added. A pool tied to a figure that itself repeats
+    was being cycled against the calendar alone, so the Personal Day (a nine
+    day cycle, the fastest figure in the app) brought back the same content
+    every ninth day however the wrapper was phrased. The number of times the
+    figure has come round now folds into the salt.
+  * NUM_EXPECT: one shape/trap pair per number -> three, chosen by cycle turn.
+    This was the actual source of the 41% peak overlap, not the wrapper.
+  * dailyNumGroups: the four closing lines were one fixed sentence per position
+    printed every day of the year. Pools now, cycled against their own figure
+    at its own span (9 / 30 / 365).
+
+Tone and structure, brought level with astrology:
+  * Human Design sheets (hdPopVals) rebuilt on the General / For You split with
+    Strengths, Opportunities, Challenges and Obstacles on the For You tab. The
+    four epistemic tags are gone from this surface; headings carry the same
+    work. Tab state is hdPopTab / hdPopTabFor. NOT hdTab, which already drives
+    the teachings strip underneath and swapped it when a sheet changed tab.
+  * Together (synVals): the six named contacts are dual-tabbed per card
+    (General / For You Two) with their own SOCO blocks. Numbers together and
+    the design bridges moved from tag chips to headed lines, and each closes
+    on a lesson.
+
+Zero em AND en dash rule, project-wide, and it took three passes because each
+pass fixed the defect in front of it instead of the rule's scope. Pass one: the
+canonical app and the content modules, literal U+2014 only. Pass two: en dashes,
+in three files. Pass three, the one that should have been first: every project
+surface (20 sibling components, 6 modules, 13 handoff files, the docs) and all
+three encodings, since the JS escape and the HTML entity forms are invisible to
+a grep for the character. 615 removed in that pass alone. The scope and the
+pattern are both written into CLAUDE.md now, along with the three traps:
+character classes, test fixtures, and hand-listed file sets. The first sweep took U+2014
+only while the rule as written banned both, which left en dashes in a source
+comment and two docs. 175 removed across app, content
+modules, service worker and docs. Two repairs were needed afterwards and both
+are documented in CLAUDE.md: the sweep had eaten a regex character class in
+checkVoice(), and had disarmed the V2 fixture that tests the dash detector.
+Both now build the character from String.fromCharCode.
+
+Headroom, second pass, after review caught the first one:
+  * The first attempt folded the figure and the elapsed cycle into dvarIndex's
+    SALT. Two faults, both measured. The rolling window replays history under
+    the salt it is handed, so a salt carrying today's figure made it replay a
+    sequence that was never shown: it could not see yesterday's real variant,
+    and adjacent days repeated a phrasing 28% of the time against a guarantee
+    of never. And a reseed only redraws independently, so the same figure nine
+    days later still landed on the same variant about one time in n, which is
+    the collision it was written to prevent. DO NOT put a per-day value in a
+    dvarIndex salt. The salt identifies the SLOT; the date is the input.
+  * Second correction, also from review. Counting ELAPSED NINE DAY WINDOWS was
+    wrong: the Personal Day is not a nine day cycle. It is reduce(personal month
+    + day of month), so at every month boundary the month climbs while the date
+    resets and the same digit returns after 1, 2, 3 or 6 days. An elapsed-window
+    count does not advance across a gap that short, so a 5 on Nov 29 and a 5 on
+    Dec 1 drew the same shape and the same trap. 41 such collisions over two
+    years, 13 of them at gaps of one or two days.
+    The check missed it because it generated figures as (i % 9) + 1, a stream
+    that by construction only ever returns at gap nine: it could confirm the
+    arithmetic and never the real stream. Exactly the trap CLAUDE.md warns
+    about. TEST AGAINST dpdOf, NEVER AGAINST A SYNTHETIC CYCLE.
+  * Now: dfigOrd counts how many times the figure has ACTUALLY appeared since a
+    fixed anchor, so consecutive appearances differ by exactly one at any gap.
+    Anchor 3600 days, which puts the one possible repeat at the reset once a
+    decade. Measured on the real figure stream, dob 1994-02-17, 730 days from
+    2026-08-13: 0 collisions at every gap 1 to 11, against 41 before. Adjacent
+    wrapper repeats 0 at pool sizes 2 to 9, minimum repeat gap exactly the pool
+    size. First call 9.8ms, then cached per day and figure.
+  * n.open, n.expect and n.tom each gained variants, since more material is the
+    only honest way to widen a wrapper pool that a stable window already cycles
+    perfectly.
+  * dvarIndex was 51.9% of a cold render once the window widened. Rewritten
+    allocation free (one reused array, a fixed ring for history, arithmetic
+    instead of per-step key strings) and memoized per day, salt, n and profile.
+    Cold cost for 44 slots: 257.5ms to 7.6ms. The old readable version cost
+    4.7ms per call because it built and hashed a key string on all 128 steps,
+    not because of the shuffling.
+
+Not yet run: the V1.4 harness against any of V1.5.0 to V1.5.5.
+
+
+--- V1.5.6: harness baseline, and the theme brief ------------------------
+V1.4 harness run against the current build, as asked, before any theme work,
+so a failure would be attributable. First run: 109 of 110, one failure, F4c.
+It predated all of V1.5.x.
+
+  F4c, root cause: LIB_PATHS.practices maps to /library/practices, but the
+  practices shelf IS libView null, and currentPath() returned the bare
+  /library for that state. openPath() resolves both addresses to the shelf, so
+  arriving at /library/practices rewrote the address to /library and Back had
+  nothing to restore. Fix: the shelf writes back the specific address,
+  LIB_PATHS[libView] || LIB_PATHS.practices. Re-run: 110 of 110, 0 failed.
+
+THEME BOUNDARY, decided over five rounds. BUILT in V1.5.7, see below.
+
+  The boundary already exists. Tokens are inline custom properties on three
+  roots (app root, [data-vt], desktop shell) and every component reads var(--*).
+  A theme swap is three token strings. It is NOT a migration of literals into
+  JS holes: a hole cannot resolve while the template streams, so
+  style="background:' + theme.card + '" would leave the app unpainted until the
+  stream finished. One hole per root, 3 total.
+
+  Four visual identities, three themes plus a modifier:
+    midnight  today's tokens exactly, no visual change, default
+    dawn      warm, ground #1a1512 card #221c18 raised #2d2520
+    gold      the v1.4.9 palette, #0d0c11 with gold #d3ad6e violet #a98fd6
+    contrast  a MODIFIER over any of the three, not a fourth palette
+  Type travels with the theme: midnight keeps its face, dawn takes Petrona
+  (user's pick over my Gilda), gold takes Marcellus. Body Newsreader, UI Karla
+  everywhere. Dawn card titles at 500 so 24px does not go soft, the date at 400.
+  Contrast modifier: colour, alphas, borders, AND type. Display and reading both
+  fall back to the UI face, with a 16px / 1.8 floor on readings. It does not
+  switch itself on from prefers-contrast; it is asked for.
+  prefers-reduced-motion overrides theme.motion to none in renderVals(),
+  whatever theme is active. Token only, not the helmet keyframes.
+  #2fff8f action and #e5534d safety are FIXED in all four. Gold gets a green
+  primary button on purpose. The CLAUDE.md table does not move.
+  Fonts: active face loaded up front, the other two prefetched once idle. The
+  service worker precaches the ACTIVE face only, so a theme switched offline
+  falls back to the UI face, and the theme row says so in place until cached.
+  Theme is PER PROFILE, not per device. A new profile inherits whatever was
+  active on the device once, then owns it independently.
+  contrastFails() takes a theme object instead of literal hexes. No assertion
+  is removed and no gate is loosened: the same 110 run against each theme.
+  Dawn's secondary text cannot ship at .55 alpha. On #221c18 that measures
+  about 4.2:1 and fails the body gate. It goes to .72, which is the first
+  value that clears. Same check owed on gold before it ships.
+
+  Three specimens exist for the record: Dawn Face Gilda / Petrona / Eczar.
+
+
+--- V1.5.7: the theme boundary, built -------------------------------------
+Harness: 128 of 128. The original 110 unchanged and passing, plus 18 theme rows.
+
+  Three roots each end with one override hole (themeAppVars / themeVtVars /
+  themeDtVars). Midnight returns an empty string, so the default identity paints
+  from the literals already in the markup and costs nothing. Dawn and gold
+  append deltas that win on the later declaration. No per-property holes: that
+  would have left the app unpainted until the stream finished.
+  48 reading surfaces moved off literal sizes onto --rd/--rdlh (body),
+  --rd2/--rdlh2 (secondary) and --rdd/--rddlh (display prose). That is what
+  makes the 16px / 1.8 contrast floor possible without touching 48 sites again.
+  The atmosphere layer had rgba(47,79,214,...) written out in 33 places with
+  eight different alphas, so dawn and gold kept a cosmic blue glow. --atmc holds
+  a bare triplet and substitutes inside rgba(), preserving every alpha.
+  Settings gained "Visual Identity & Accessibility" in both shells: three 44px
+  radio rows, a 44px contrast switch, and a line that appears only when the
+  active identity's face failed to load.
+
+  Contrast, measured not assumed: dawn and gold both pass 4.5:1 body text and
+  44px targets in all six theme-by-contrast cases. Values I had to move off the
+  brief: dawn secondary text .55 to .72 alpha (.55 measures about 4.2:1 on
+  #221c18), gold secondary .55 to .62. Dawn's violet went to #c9b3e0 for text
+  with #b89fd0 kept for fills. Nothing else moved.
+
+  contrastFails() was NOT rewritten to take a theme object, and the spec's
+  premise there was wrong: it already reads getComputedStyle and the effective
+  painted background, which is strictly better than trusting a declared value.
+  The gap was coverage, so T1 to T6 sweep every identity hardened and plain.
+  Each T row also asserts checked > 40, per the CLAUDE.md rule about believing a
+  green result only when it looked at a plausible number of elements.
+
+  Still literal, deliberately: transition and animation durations. --motion is
+  declared and the theme sets it, but the helmet media query already neutralises
+  every keyframe under prefers-reduced-motion, so no transition literal was
+  touched. Migrating them buys nothing today and would touch hundreds of sites.
+
+
+--- V1.5.8: colour policing, the step V1.5.7 skipped -----------------------
+Harness: 128 of 128 again, after the sweep changed what it measures.
+
+V1.5.7 claimed the boundary was done. It was not. Three identities shipped
+while 186 literal hexes were still sitting in template style attributes, so
+those surfaces stayed midnight no matter which theme was active. The audit that
+found it is one grep the first pass never ran: every hex between </helmet> and
+the logic class, bucketed by zone.
+
+  186 sites migrated, by literal:
+    #05060a  x72   65 of them "color:" on green buttons, now --onac; 7 gradient
+                   grounds, now var(--bg)
+    #7dffb9  x52   the hover state of the action green. No token existed at all.
+    #181b24  x16   card gradient second stop, now --sf-g
+    #24222c  x14   natal wheel rings, now --chl
+    #eef0f8  x8    --tx        #b79bff x6  --ac2-hi     #1c1f29 x6  --sf2
+    #14161d  x3    --sf        #1c1a23 x2  --chl2       #e08d7d x2  --warn
+    #0b0d13 / #080a0f x2 each  desktop rail, now --rail1 / --rail2
+
+  Seven new tokens on all three roots. Two are deliberately NOT themed: --onac
+  and --ac-hi belong to --ac, which is fixed in every identity, so theming them
+  would break the guaranteed contrast pair. The other five carry dawn and gold
+  deltas.
+
+  What remains literal in the template is exactly right: #2fff8f, #8b5cf6,
+  #e5534d, #000, #fff, and the three token-declaration roots.
+
+  Checked live rather than assumed: gold hardened resolves --rd 16px,
+  --rdd 16px, --fd Karla, --tx #ffffff; gold plain resolves 13px / Marcellus /
+  #e8e6ee; midnight resolves --chl #24222c against gold's #2a2733. var() inside
+  an SVG stroke presentation attribute resolves, so the wheel rings theme.
+
+  Note for next time: html-to-image screenshots do NOT reflect a setState theme
+  change. The live DOM was correct on every probe while four screenshots looked
+  identical. Verify themes with getComputedStyle, not with pictures.
+
+  Cleanup: verifying by CLICKING the real Settings rows persisted the test state
+  into the user's own profile, so a cold start opened in gold hardened. Both
+  incommon.theme.device and incommon.theme.<id> reset to midnight. Drive theme
+  checks with setState, the way the T rows do; the controls write through.
+
+
+--- V1.5.9: the second atmosphere lobe ------------------------------------
+Harness: 134 of 134. The 128 unchanged and passing, plus 6 atmosphere rows.
+
+The one visual surface the two colour passes both missed. V1.5.7 moved the
+atmosphere's primary radial onto --atmc and stopped there; the layer has three
+lobes, and the second one was written rgba(139,92,246,.32), a midnight violet
+that survived into dawn and gold because a violet literal is on CLAUDE.md's
+allowed list. Allowed as an accent, which it is not: it is atmosphere.
+
+  --atmc2, a bare triplet like --atmc, midnight 139,92,246. Declared in all
+  three roots, overridden by dawn (190,118,96, warm clay so the glow agrees
+  with Petrona and the warm ground) and gold (154,122,200, the softer violet
+  the older identity used). Kept separate from --ac2 on purpose: --ac2 is an
+  accent that draws borders and chart glyphs, and the two do not want the same
+  value. Absent from HC_SHARED, so hardening never moves the glow.
+
+  The third lobe, rgba(47,255,143,.07), stays literal. It is --ac, --ac is
+  fixed in every identity by the colour table, and .07 green over any of the
+  three grounds reads the same.
+
+  Why the harness needed a new row shape: a hue is painted, not written, so
+  contrastFails() cannot see it. A midnight glow under dawn passes 4.5:1 on
+  every text pair in the app and still looks wrong. T1d to T6d read
+  getComputedStyle().backgroundImage on the atmosphere div and assert both
+  triplets resolve to the active identity's values, whitespace normalised
+  because the computed form spaces them. Six rows, one per theme-by-contrast
+  case, which is also what proves hardening leaves the glow alone.
+
+
+--- V1.5.9b: what the green 128 was actually measuring --------------------
+Theme phase: 24 of 24, and passing for the first time on purpose.
+
+Adding the atmosphere rows found two older faults, both of the same kind: a
+check that reports green without having looked at the thing it names.
+
+  The sweep set themeProf: 'harness' as a sentinel. themeVals() compares
+  state.themeProf against themeProfId() and, when they differ, defers a
+  themeLoad() for that profile. The sentinel can never match a real profile id,
+  so every case was clobbered on the next render back to the value in
+  incommon.theme.device. All six identity cases had been measuring one identity,
+  whichever the device last stored. The 18 rows V1.5.7 added were real
+  assertions run six times against the same palette. Fixed by passing the app's
+  own themeProfId(), so the guard sees no change and the state holds.
+  The tell was absurd on its face and I nearly explained it away: T5d and T6d,
+  the gold rows, passed while midnight and dawn failed. A stored gold theme is
+  the only arrangement that produces that pattern.
+
+  Second: T rows had no group in the report. groups filters by the first
+  character of the id, T was not a key, so 24 rows were counted in the total
+  and rendered nowhere. Two versions of "128 of 128" included 18 rows no one
+  could read. There is now a T group, and a catch-all that collects any id whose
+  letter is unclaimed, so a row can never again be counted and hidden.
+
+  Third: the theme block sat at the tail of runSweep and was cut when the sweep
+  overran its 25 minute cap. The rows did not fail, they vanished, and the total
+  read 108 instead of 134. It is now runThemes, its own phase, own frame, own
+  budget, exported alongside runMatrix, runCross and runSweep.
+
+  Every T row asserts which identity was actually live, alongside the atmosphere
+  hue. The a, b and c rows run in that same settled state, so the d row is what
+  proves they measured what they claim. A gate that cannot say what it looked at
+  is not a gate.
+
+
+--- V1.5.7 verified: 134 of 134, and two false alarms ---------------------
+Full V1.4 harness run against the theme build. 134 of 134 passed: the matrix
+(A to D plus S), the resize run, the functional sweep including F4c, and the
+24 theme rows. No T-TIMEOUT, no T-ERR. First green run of the complete suite
+against V1.5.7.
+
+Two diagnoses arrived before the run and both were wrong. Recording them
+because each was wrong in a way that will recur.
+
+  FALSE ALARM 1, "the harness lost same-origin access". The evidence was a real
+  SecurityError naming claudeusercontent.com, and the conclusion was that the
+  preview serves the verification page and the app frame from different origins,
+  so contentWindow.document is no longer readable and the harness must be
+  rebuilt around postMessage. A probe settled it: parent and child share scheme,
+  host and port, document and getComputedStyle are readable across the boundary,
+  __incommonApp is reachable, no sandbox attribute. The error came from a blind
+  Object.keys(window) scan, which enumerates top and parent, and the HOST page is
+  cross-origin. The harness never touches top or parent, only child frames it
+  creates. The falsification was available for free: runMatrix, runCross and
+  runSweep use the same frame() helper across a hundred passing rows, so an
+  origin change cannot break the theme phase alone. Also note the proposed cure
+  was impossible: a cross-origin window exposes no named properties either, so
+  win.__incommonApp throws exactly like contentWindow.document. postMessage is
+  the only survivor, and it would have the app grade itself, which is the one
+  thing contrastFails() exists not to do.
+
+  FALSE ALARM 2, mine, "the theme phase has outgrown its 420s budget". Run
+  standalone it appeared to take between 361s and 428s, and I proposed widening
+  the cap. The real figure is about 10s: __v14ThemeMs, measured in the
+  foreground during the full run, read 10283. The 428s was background timer
+  throttling. Chrome clamps setTimeout to roughly one call a minute in a
+  backgrounded tab, and the six theme cases metered out at exactly one a minute.
+  I was polling between sleeps with the tab out of focus and read the clamp as
+  render cost.
+
+  The cap is 600s anyway, which is now correct for a different reason: a run
+  left in a background tab genuinely would die at 420s, as that one did. The
+  comment at the call site states the real cause, because the old rationale
+  would have been read later as evidence the theme work was expensive.
+
+  Rule out of this: never time a phase by the wall clock across a poll. Read
+  __v14ThemeMs. Any duration measured while the tab was backgrounded is fiction.
+
+  T-ERR EXISTS. I said it did not, having grepped the verification page instead
+  of the harness. It is the catch-all row at the tail of runThemes, emitted when
+  the phase throws outside a per-case try. It has never fired.
+
+  The b rows now carry their coverage count in the row name, "(saw 132)". The
+  count cannot go in expected or actual because mkPush compares by
+  JSON.stringify and a passing row has to be equal. A bare green "plausible"
+  could not tell 900 elements from 41, and CLAUDE.md already warns that a check
+  reporting green means nothing until you confirm it examined a plausible
+  number. Now the report says so on its face. The gate itself, checked > 40, is
+  unchanged.

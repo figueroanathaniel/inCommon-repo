@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<script src="../incommon-core.js"></script>
+<style>
+body{margin:0;background:#0d0c11;font-family:'Karla',system-ui,sans-serif;color:#e8e6ee}
+a{color:#d3ad6e;text-decoration:none}a:hover{color:#e8caa0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font-family:inherit}button:focus-visible{outline:2px solid #d3ad6e;outline-offset:2px}
+input:focus-visible,textarea:focus-visible{outline:2px solid #d3ad6e;outline-offset:-2px}
+input[type="date"]{color-scheme:dark}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="../ios-frame.jsx" dark="{{ true }}" hint-size="430px,900px">
+<div style="--bg:#0d0c11;--sf:#17151e;--sf2:#201d2a;--bd:rgba(211,173,110,.16);--tx:#e8e6ee;--dim:rgba(232,230,238,.55);--ac:#d3ad6e;--ac2:#a98fd6;--ok:#59b37d;--warn:#e08d7d;--mood:#8fb0c9;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;height:100%;position:relative;display:flex;flex-direction:column;padding-top:62px;box-sizing:border-box;background:var(--bg);color:var(--tx);font-family:var(--fu)">
+
+<div style="flex:none;display:flex;flex-direction:column;gap:10px;padding:6px 18px 12px;border-bottom:1px solid var(--bd)">
+  <div style="display:flex;flex-direction:column;gap:1px">
+    <div style="font:400 19px var(--fd)">Throughline</div>
+    <div style="font:400 11px var(--fu);color:var(--dim)">a record, not a scoreboard — your experience is the final authority</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px" role="radiogroup" aria-label="Filter timeline">
+    <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+      <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:38px;display:flex;align-items:center;padding:0 13px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11.5px var(--fu)">{{ f.t }}</button>
+    </sc-for>
+  </div>
+</div>
+
+<div style="flex:1;min-height:0;overflow-y:auto;padding:18px 18px 96px">
+  <div style="position:relative;padding-left:24px">
+    <div style="position:absolute;left:5px;top:6px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(211,173,110,.4),rgba(211,173,110,.08))"></div>
+
+    <div style="position:relative;margin-bottom:22px;animation:fadeUp .25s ease">
+      <span style="position:absolute;left:-24px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px rgba(211,173,110,.18)"></span>
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">{{ todayLine }}</div>
+      <sc-if value="{{ showCycles }}" hint-placeholder-val="{{ true }}">
+        <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim);margin-top:3px">{{ pyLine }}</div>
+      </sc-if>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+      <div style="margin-bottom:6px">
+        <div style="position:relative;margin:14px 0 12px">
+          <span style="position:absolute;left:-21px;top:6px;width:5px;height:5px;border-radius:50%;background:rgba(211,173,110,.5)"></span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.label }}</div>
+          <sc-if value="{{ showCycles }}" hint-placeholder-val="{{ true }}">
+            <div style="font:italic 400 11.5px/1.5 var(--fb);color:rgba(211,173,110,.75)">{{ g.pmLine }}</div>
+          </sc-if>
+        </div>
+        <sc-for list="{{ g.entries }}" as="e" hint-placeholder-count="3">
+          <div style="position:relative;margin-bottom:12px;animation:fadeUp .22s ease">
+            <span style="position:absolute;left:-21px;top:16px;width:7px;height:7px;border-radius:50%;background:{{ e.dot }}"></span>
+            <button onClick="{{ e.toggle }}" aria-expanded="{{ e.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;background:var(--sf);border:1px solid {{ e.bdC }};border-radius:var(--rad);padding:13px 15px" style-hover="border-color:rgba(211,173,110,.4)">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
+                <span style="flex:1"></span>
+                <span style="flex:none;font:600 10px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ e.date }}</span>
+              </div>
+              <div style="font:400 16.5px/1.35 var(--fd);margin-top:3px">{{ e.title }}</div>
+              <sc-if value="{{ e.closed }}" hint-placeholder-val="{{ true }}">
+                <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.preview }}</div>
+              </sc-if>
+              <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:8px;animation:fadeUp .2s ease">
+                  <div style="font:400 13px/1.6 var(--fb)">{{ e.body }}</div>
+                  <sc-for list="{{ e.details }}" as="d" hint-placeholder-count="2">
+                    <div style="display:flex;gap:8px;align-items:baseline;border-top:1px solid rgba(211,173,110,.08);padding-top:7px">
+                      <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ d.k }}</span>
+                      <span style="font:italic 400 12px/1.5 var(--fb);color:var(--tx)">{{ d.v }}</span>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ showCycles }}" hint-placeholder-val="{{ true }}">
+                    <div style="font:400 10.5px/1.5 var(--fu);color:rgba(211,173,110,.7);border-top:1px solid rgba(211,173,110,.08);padding-top:7px">{{ e.cycleLine }}</div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+
+    <div style="position:relative;padding:8px 0 4px">
+      <span style="position:absolute;left:-21px;top:12px;width:5px;height:5px;border-radius:50%;background:rgba(211,173,110,.35)"></span>
+      <div style="font:italic 400 12px/1.6 var(--fb);color:var(--dim)">The line goes back as far as you&rsquo;ve written. Everything above lives on this device; readings cite their sources, and you decide what holds.</div>
+    </div>
+  </div>
+</div>
+
+<button onClick="{{ addGo }}" aria-label="Mark a moment" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:20px;bottom:24px;width:56px;height:56px;border-radius:50%;background:var(--ac);color:#141019;display:flex;align-items:center;justify-content:center;font:400 28px/1 var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:8" style-hover="background:#e8caa0" style-active="transform:scale(.94)">+</button>
+
+<sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ addClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:9">
+    <div role="dialog" aria-label="Mark a moment" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 30px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font:400 21px var(--fd)">Mark a moment</div>
+        <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">Life doesn&rsquo;t wait for the app. Add it by hand — it counts the same.</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" role="radiogroup" aria-label="Kind of moment">
+        <sc-for list="{{ draftTypes }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;gap:6px;padding:0 13px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.c }};font:600 11.5px var(--fu)"><span style="width:7px;height:7px;border-radius:50%;background:{{ t.dotC }}"></span>{{ t.t }}</button>
+        </sc-for>
+      </div>
+      <input value="{{ draftTitle }}" onChange="{{ typeTitle }}" placeholder="What happened?" aria-label="Title" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <textarea value="{{ draftNote }}" onChange="{{ typeNote }}" rows="3" placeholder="A few honest sentences — future-you is the reader…" aria-label="Note" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:italic 400 13px/1.55 var(--fb);color:var(--tx)"></textarea>
+      <input value="{{ draftDate }}" onChange="{{ typeDate }}" type="date" aria-label="Date" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+      <button onClick="{{ saveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ saveBg }};color:{{ saveC }};font:700 13.5px var(--fu)" style-hover="opacity:.92">{{ saveLabel }}</button>
+      <button onClick="{{ addClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 12px var(--fu);color:var(--dim)" style-hover="color:var(--tx)">Not now</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:20;pointer-events:none">
+    <div style="max-width:84%;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:10px 18px;font:600 12px var(--fu);color:var(--tx);box-shadow:0 6px 24px rgba(0,0,0,.5);animation:fadeUp .2s ease">{{ toast }}</div>
+  </div>
+</sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 430, &quot;height&quot;: 900}, &quot;showCycles&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Throughline&quot;}, &quot;defaultFilter&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;all&quot;, &quot;options&quot;: [&quot;all&quot;, &quot;event&quot;, &quot;practice&quot;, &quot;mood&quot;, &quot;reading&quot;], &quot;tsType&quot;: &quot;'all'|'event'|'practice'|'mood'|'reading'&quot;, &quot;section&quot;: &quot;Throughline&quot;}}">
+class Component extends DCLogic {
+  MKEY = 'incommon.throughline.manual';
+  DOB = '1992-07-02';
+  static localDay() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  state = { filter: null, openId: null, addOpen: false, manual: null, toast: '',
+    draft: { type: 'event', title: '', note: '', date: Component.localDay() } };
+
+  TYPES = {
+    event: { t: 'LIFE EVENT', label: 'Life event', c: 'var(--ac)' },
+    practice: { t: 'PRACTICE', label: 'Practice', c: 'var(--ok)' },
+    mood: { t: 'MOOD', label: 'Mood', c: 'var(--mood)' },
+    reading: { t: 'READING', label: 'Reading', c: 'var(--ac2)' }
+  };
+  PM_GLOSS = { 1: 'beginnings', 2: 'patience & pairing', 3: 'finding the voice', 4: 'foundations', 5: 'change moves through', 6: 'care & repair', 7: 'the inward month', 8: 'harvest & accounting', 9: 'release', 11: 'the tuning fork', 22: 'the long build' };
+
+  SAMPLES = [
+    { id: 's1', date: '2026-07-22', type: 'mood', title: 'Steady', preview: 'quiet, slept well', body: 'Quiet morning. Slept well for the third night running \u2014 writing it down so the streak is real.', details: [{ k: 'logged', v: '7 am check-in' }] },
+    { id: 's2', date: '2026-07-21', type: 'practice', title: 'Cognitive Defusion', preview: 'the grip loosened at line three', body: 'Ran the four lines on \u201CI\u2019m behind everyone I know.\u201D By the cartoon voice it was just a sentence again.', details: [{ k: 'shifted', v: 'the thought lost its verdict weight' }, { k: 'didn\u2019t', v: 'the schedule is still real \u2014 defusion isn\u2019t a calendar' }] },
+    { id: 's3', date: '2026-07-21', type: 'reading', title: 'Two of Swords, again', preview: 'the decision I keep re-deciding', body: 'Third draw of this card in six weeks, always near the same choice. Oki reported the traditional stalemate reading and offered one possibility to test \u2014 that the tie-breaker I\u2019m waiting for doesn\u2019t exist.', details: [{ k: 'tags', v: 'TRADITIONAL \u00b7 POSSIBILITY \u2014 offered, not declared' }, { k: 'source', v: 'Tarot journal \u00b7 cited' }] },
+    { id: 's4', date: '2026-07-19', type: 'event', title: 'The housing call', preview: 'saw 11:11 on the hold screen, of course', body: 'Forty minutes on hold, then a real answer: the lease can carry to March. Not the answer I rehearsed for \u2014 better. Logged the 11:11 sighting mostly out of honesty.', details: [{ k: 'crossref', v: 'Angel journal \u00b7 11:11 \u00b7 housing thread (5th sighting)' }] },
+    { id: 's5', date: '2026-07-14', type: 'event', title: 'Started smaller', preview: 'it worked \u2014 noting it before I forget', body: 'Cut the project back to the two-page version and shipped it to one person instead of announcing it. It landed. \u201CStart smaller than feels impressive\u201D goes in the keep pile.', details: [] },
+    { id: 's6', date: '2026-07-08', type: 'mood', title: 'Frayed', preview: 'too many tabs open, in life', body: 'Evening check-in. Too many tabs open \u2014 in the browser and in life. Named it, closed three of each.', details: [{ k: 'logged', v: '9 pm check-in' }] },
+    { id: 's7', date: '2026-06-30', type: 'event', title: 'Committed my birth profile', preview: 'numerology went live from real numbers', body: 'Entered the full birth profile \u2014 date, 9:41 pm, Seattle. The numbers on the Today screen recalculated live. It reads differently when it\u2019s actually yours.', details: [{ k: 'effect', v: 'Life Path 3 \u00b7 Personal Year computed from this date forward' }] },
+    { id: 's8', date: '2026-06-18', type: 'reading', title: 'Personal Year reading with Oki', preview: 'a clearing year \u2014 hold it loosely', body: 'Standard-mode conversation about the 1 Personal Year. Oki named the tradition\u2019s claim \u2014 old structures thinning so one priority can surface \u2014 and asked which structure I\u2019d miss least. I knew immediately, which was the answer.', details: [{ k: 'tags', v: 'TRADITIONAL \u00b7 POSSIBILITY \u00b7 one question back' }] },
+    { id: 's9', date: '2026-05-26', type: 'practice', title: 'Boundary Setting', preview: 'the small no held', body: 'Delivered the two-sentence no to the standing Thursday ask. They said \u201Cof course\u201D and the sky did not fall. The resentment I\u2019d been carrying turned out to be the boundary, sideways.', details: [{ k: 'shifted', v: 'Thursday evenings came back' }, { k: 'didn\u2019t', v: 'still rehearsing apologies nobody asked for' }] },
+    { id: 's10', date: '2026-05-11', type: 'mood', title: 'Bright', preview: 'noon, no reason, taking it', body: 'Bright at noon for no reason I can name. Logging the good ones too \u2014 the record shouldn\u2019t only know my weather when it rains.', details: [] },
+    { id: 's11', date: '2026-04-30', type: 'event', title: 'Jordan added to Relationships', preview: 'synastry on \u2014 with their yes', body: 'Added Jordan with their actual birthday and their actual permission. The comparison view is careful \u2014 differences framed as translation work, not verdicts.', details: [{ k: 'consent', v: 'Jordan said yes over dinner \u00b7 revocable any time' }] }
+  ];
+
+  read() { try { const v = JSON.parse(localStorage.getItem(this.MKEY)); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  componentDidMount() { this.setState({ manual: this.read() }); if (!window.InCommonCore) this._t = setTimeout(() => this.forceUpdate(), 150); }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._tt); }
+  toastMsg(t) { clearTimeout(this._tt); this.setState({ toast: t }); this._tt = setTimeout(() => this.setState({ toast: '' }), 2400); }
+
+  save() {
+    const d = this.state.draft;
+    if (!d.title.trim()) return;
+    const entry = { id: 'm' + Date.now(), date: d.date || Component.localDay(), type: d.type,
+      title: d.title.trim().slice(0, 80), preview: (d.note.trim() || 'marked by hand').slice(0, 90),
+      body: d.note.trim() || 'Marked by hand, no note \u2014 the date itself was the point.',
+      details: [{ k: 'added', v: 'by you, by hand' }], manual: true };
+    const manual = [entry, ...(this.state.manual || [])];
+    try { localStorage.setItem(this.MKEY, JSON.stringify(manual)); } catch (e) {}
+    this.setState({ manual, addOpen: false, openId: entry.id, draft: { type: 'event', title: '', note: '', date: Component.localDay() } });
+    this.toastMsg('Marked. The line remembers.');
+  }
+
+  renderVals() {
+    const st = this.state;
+    const core = window.InCommonCore;
+    const showCycles = this.props.showCycles ?? true;
+    const filter = st.filter ?? (this.props.defaultFilter ?? 'all');
+    const all = [...(st.manual || []), ...this.SAMPLES].sort((a, b) => b.date.localeCompare(a.date));
+    const shown = filter === 'all' ? all : all.filter(e => e.type === filter);
+    const py = core ? core.personalYear(this.DOB, 2026) : null;
+    const pmOf = m => { if (!core || !py) return null; const pm = core.personalMonth(py.value, m); return pm ? pm.value : null; };
+    const monthName = k => new Date(k + '-15T12:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const groups = [];
+    shown.forEach(e => {
+      const k = e.date.slice(0, 7);
+      let g = groups.find(x => x.k === k);
+      if (!g) {
+        const pm = pmOf(+k.slice(5, 7));
+        g = { k, label: monthName(k), pmLine: pm ? 'Personal Month ' + pm + ' \u2014 ' + (this.PM_GLOSS[pm] || '') + ' \u00b7 computed live' : '', entries: [] };
+        groups.push(g);
+      }
+      const T = this.TYPES[e.type] || this.TYPES.event;
+      const open = st.openId === e.id;
+      const pm = pmOf(+e.date.slice(5, 7));
+      g.entries.push({
+        title: e.title, body: e.body, preview: e.preview, details: e.details || [],
+        typeT: T.t, typeC: T.c, dot: T.c, bdC: open ? 'rgba(211,173,110,.4)' : 'var(--bd)',
+        date: new Date(e.date + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        open, closed: !open,
+        toggle: () => this.setState({ openId: open ? null : e.id }),
+        cycleLine: pm && py ? 'Logged in Personal Month ' + pm + ' (' + (this.PM_GLOSS[pm] || '') + ') of your ' + py.value + ' Personal Year \u2014 numerology computed from your birth profile, not stored.' : ''
+      });
+    });
+    const draftT = this.TYPES[st.draft.type];
+    return {
+      showCycles,
+      todayLine: core ? 'Today \u00b7 ' + core.fmtToday(new Date()) : 'Today',
+      pyLine: py ? 'A ' + py.value + ' Personal Year \u2014 the clearing year, if the tradition holds. The entries below are how you\u2019ll know.' : '',
+      filters: [['all', 'Everything'], ['event', 'Life events'], ['practice', 'Practices'], ['mood', 'Moods'], ['reading', 'Readings']].map(([v, t]) => ({
+        t, on: filter === v, c: filter === v ? '#141019' : 'var(--dim)', bg: filter === v ? 'var(--ac)' : 'transparent', bd: filter === v ? 'var(--ac)' : 'var(--bd)',
+        go: () => this.setState({ filter: v }) })),
+      groups,
+      addOpen: st.addOpen,
+      addGo: () => this.setState({ addOpen: true }),
+      addClose: () => this.setState({ addOpen: false }),
+      swallow: e => e.stopPropagation(),
+      draftTypes: Object.keys(this.TYPES).map(k => ({ t: this.TYPES[k].label, on: st.draft.type === k, dotC: this.TYPES[k].c,
+        c: st.draft.type === k ? 'var(--tx)' : 'var(--dim)', bd: st.draft.type === k ? 'rgba(211,173,110,.5)' : 'var(--bd)', bg: st.draft.type === k ? 'rgba(211,173,110,.08)' : 'transparent',
+        go: () => this.setState({ draft: { ...st.draft, type: k } }) })),
+      draftTitle: st.draft.title, typeTitle: e => this.setState({ draft: { ...st.draft, title: e.target.value } }),
+      draftNote: st.draft.note, typeNote: e => this.setState({ draft: { ...st.draft, note: e.target.value } }),
+      draftDate: st.draft.date, typeDate: e => this.setState({ draft: { ...st.draft, date: e.target.value } }),
+      saveGo: () => this.save(),
+      saveLabel: st.draft.title.trim() ? 'Mark it' : 'Give it a title first',
+      saveBg: st.draft.title.trim() ? 'var(--ac)' : 'var(--sf2)', saveC: st.draft.title.trim() ? '#141019' : 'var(--dim)',
+      hasToast: !!st.toast, toast: st.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
