@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.2 cover  |  built 2026-09-04 -->
+<!-- inCommon incommon-v6.2 cover  |  built 2026-09-08 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -872,9 +872,20 @@ function buildBloom() {
   for (let i = 0; i < LEVELS; i++) rtB.push(makeRT(bw / Math.pow(2, i + 1), bh / Math.pow(2, i + 1)));
 }
 
+/* The render box is documentElement.clientWidth, never window.innerWidth.
+   Every layer on this page is position: fixed with inset: 0, so the canvas
+   element's box is the client box, which excludes a classic scrollbar, and
+   body { min-height: 300vh } guarantees there is one on every platform that
+   reserves space for it. setSize is called with updateStyle false, so a buffer
+   sized from innerWidth is the scrollbar's width wider than the box it is
+   scaled into, and the whole image is squashed horizontally: about 1.2% at
+   1280 and 2% at 768. A slightly oval event horizon is the kind of wrong that
+   reads as a design choice. Mobile is unaffected, because overlay scrollbars
+   take no space, which is why this survives a phone check. */
 function resize() {
+  const doc = document.documentElement;
   DPR = Math.min(window.devicePixelRatio || 1, 1.6);
-  const cw = Math.max(2, window.innerWidth), ch = Math.max(2, window.innerHeight);
+  const cw = Math.max(2, doc.clientWidth), ch = Math.max(2, doc.clientHeight);
   renderer.setPixelRatio(DPR);
   renderer.setSize(cw, ch, false);
   W = Math.max(2, Math.floor(cw * DPR));
@@ -936,9 +947,13 @@ function updateCamera(t) {
      -uHoleS.y * H / 2, negated because CSS pixels run down. The hole's radius
      in pixels is uHoleR * H / 2 by the same reasoning, and the glyph's 200 unit
      box is scaled to 1.7 of that radius so the letter sits inside the shadow
-     with room around it. */
+     with room around it.
+
+     W and H are the client box for the same reason resize() reads it: the
+     letter is placed inside the canvas's box, not inside the window. */
   if (glyphEl) {
-    const W = window.innerWidth, H = window.innerHeight;
+    const doc = document.documentElement;
+    const W = doc.clientWidth, H = doc.clientHeight;
     const gx = mainU.uHoleS.value.x * W / (2 * mainU.uAspect.value);
     const gy = -mainU.uHoleS.value.y * H / 2;
     const gk = (finalU.uRingS.value * H / 2) * 1.7 / 200;
