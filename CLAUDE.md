@@ -1946,15 +1946,22 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds thirteen scripts. Eight are gates and are worth running before you
-believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
+`tools/` holds eighteen scripts. Twelve are gates and are worth running before
+you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
-`token-compare.js`, `check-competitor-surface.js`,
-`check-layer-boundary.js`. Four generate:
+`token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
+`check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
+`check-hd-atlas-map.js`. Four generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`. `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
+
+The last four gates arrived with the V1.6 and v6.1 passes and this paragraph
+did not move with them, so it said eight for as long as there were twelve.
+**Count the folder rather than trusting this sentence**, and correct it here
+when a script is added: an inventory that is wrong is worse than no inventory,
+because somebody runs the list and believes they have run the gates.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.
