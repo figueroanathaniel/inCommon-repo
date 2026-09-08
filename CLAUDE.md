@@ -1307,6 +1307,26 @@ the same courtesy the G runner pays its two focus dependent rows. Restart the
 browser and run the phase in a fresh window rather than reading it as a broken
 cover.
 
+**H2 needs a real animation loop, and an automated browser pane does not supply
+one.** A pane that only produces frames while a screenshot is being captured
+puts `dt` in the band `drop()` treats as a stalled machine, so the quality
+ladder falls several rungs at once and the step count goes from 190 toward 62.
+The bright core survives that and the faint sky does not, which is exactly the
+shape of the failure: `painted` passes on `max` every time and only
+`mostlyLit > 50` falls. Measured over five runs on 8 September 2026, the same
+bytes read 95.2%, 95.2%, 24.5%, 24.5% and 6.9% lit. **A varying litPct on an
+unchanged build is the frame supply, not the cover.** H11, H12 and H15 went red
+under the same conditions and they are the timing rows named above, so the
+whole failure set has one cause.
+
+**That was settled by diffing rather than by another run**, after four runs had
+falsified a degraded GPU and then the launch surface. `deploy/<version>/index.html`
+is `app/cover.html` with three differences and no more: the build's header
+comment and the arrow target in its two places. There is no third thing for a
+bundle run to be measuring, so a bundle H2 that reds while the source is green
+is the pane. Diff the two covers before spending a run on the difference
+between them.
+
 
 **The theme sweep measures `#/today` and nothing else.** Four identities, each
 hardened, at two widths, and every one of the 64 rows is taken on the Today
