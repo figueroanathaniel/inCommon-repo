@@ -1742,11 +1742,12 @@
       t('N9', 'The month page exists on the desktop and is drawn for this month',
         { page: true, label: app.fmtMonth(new Date()), sections: true },
         { page: !!page, label: r0 ? r0.label : 'no reading', sections: heads.length >= 6 });
-      t('N9b', 'The reading covers the sky, the reader’s own windows, a date and the numbers',
-        { shape: true, marked: true },
+      t('N9b', 'The reading covers the sky, the reader’s own windows, the gates the Sun walks, a date and the numbers',
+        { shape: true, marked: true, gates: true },
         { shape: heads.indexOf('What the month is made of') !== -1 && heads.indexOf('What is working on you') !== -1 &&
             heads.indexOf('The tempo underneath') !== -1 && heads.indexOf('How to hold it') !== -1,
-          marked: heads.indexOf('The date worth marking') !== -1 });
+          marked: heads.indexOf('The date worth marking') !== -1,
+          gates: heads.indexOf('The gates the Sun walks') !== -1 });
       var stamp0 = page ? txt(page) : '';
       t('N10', 'This month’s issue names its publication date and the next one',
         { published: true, next: true },
@@ -2546,15 +2547,18 @@
       var a = d.querySelector('a.enter');
       var links = d.querySelectorAll('a[href]');
       var box = a ? a.getBoundingClientRect() : { width: 0, height: 0 };
-      t('H5', 'One labelled way in, and it points at the app',
-        { links: 1, label: 'Enter inCommon', target: true, svgHidden: 'true' },
+      /* The way in is named by its own text now, so the accessible name and
+         what a sighted reader sees are the same words and cannot drift. An svg
+         inside it would be the old arrow coming back beside the words. */
+      t('H5', 'One way in, named by its own text, and it points at the app',
+        { links: 1, name: 'enter here', target: true, noArrow: true },
         { links: links.length,
-          label: a ? a.getAttribute('aria-label') : 'no arrow',
+          name: a ? a.textContent.trim().toLowerCase() : 'no link',
           target: !!(a && /inCommonApp|app\.html/.test(a.getAttribute('href') || '')),
-          svgHidden: a && a.querySelector('svg') ? a.querySelector('svg').getAttribute('aria-hidden') : 'none' });
-      t('H6', 'The arrow is a 44px target',
-        { w: 44, h: 44 },
-        { w: Math.round(box.width), h: Math.round(box.height) });
+          noArrow: !!(a && !a.querySelector('svg')) });
+      t('H6', 'The way in is at least a 44px target',
+        { tall: true, wide: true },
+        { tall: Math.round(box.height) >= 44, wide: Math.round(box.width) >= 44 });
       t('H7', 'No control on the cover is under 44px', [], tapTargets(w, d));
       t('H8', 'Cover text passes 4.5:1 against what is painted behind it', [], contrastFails(w, d, 4.5).fails);
 
@@ -2613,7 +2617,7 @@
       }
       /* preventDefault ran and the transition is running: an anchor left alone
          would already have left. */
-      t('H15', 'The arrow runs the exit instead of navigating at once',
+      t('H15', 'The link runs the exit instead of navigating at once',
         { stillOnTheCover: true, transitionRunning: true },
         { stillOnTheCover: stillHere, transitionRunning: fading });
 

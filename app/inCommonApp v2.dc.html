@@ -15469,7 +15469,8 @@ class Component extends DCLogic {
    *
    * NOTHING IN IT IS WRITTEN IN ADVANCE. Every line is drawn from this month's
    * sky against this profile's chart: the ingress, the lunations, the eclipses
-   * if any, the stations, and the windows already dated on the Throughline. A
+   * if any, the stations, the windows already dated on the Throughline, and
+   * the Human Design gates the Sun and the Earth hold through the month. A
    * month with nothing in it says so. That is the answer to the failure this
    * category is known for, which is 365 daily readings a year written by
    * people who only ever wrote 40.
@@ -15607,8 +15608,89 @@ class Component extends DCLogic {
       ? wins.map(w => H(w.label + ' · ' + w.range, w.ask + ' ' + w.exactLine))
       : [H('', 'Nothing slow reaches your chart inside these dates. That is not a hole in the reading, it is the reading: a month with no weather in it is where things get built on purpose rather than under pressure.')]);
 
-    /* 6. One date, named, so the month can be checked afterwards. */
-    const marks = [];
+    /* 6. Human Design. The same month through the wheel of sixty four gates:
+          which gates the Sun holds, where each lands in this chart, and whether
+          it closes a channel the chart carries half of. The Earth sits opposite
+          and changes gate on the same day, because the gate boundaries line up
+          across the wheel, so every run asks about both. A gate that is already
+          natal closes nothing new: its channels are ones the chart has. Type
+          and authority are set at birth and no transit moves them, so that is
+          said once rather than on every run. */
+    let hd = null;
+    try { hd = this.hdChart(); } catch (e) { hd = null; }
+    const gRuns = hd ? this.gateRuns(b.from, days) : [];
+    const hdMarks = [];
+    let hdCloses = 0;
+    if (gRuns.length) {
+      const mine = new Set(hd.gates.map(g => g.gate));
+      const gname = g => this.GATE_NAMES[g] || '';
+      const closing = g => mine.has(g) ? [] : this.HD_CHANNELS
+        .filter(c => (c[0] === g && mine.has(c[1])) || (c[1] === g && mine.has(c[0])))
+        .map(c => ({ c: c, partner: c[0] === g ? c[1] : c[0] }));
+      const chName = x => 'the ' + x.c[0] + '-' + x.c[1] + ' channel';
+      const word = n => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][n] || String(n);
+      /* Neighbouring gates often share a center: October walks six in a row
+         through the Spleen. A sentence the reader has just read is shortened
+         the next time rather than printed again, so `said` tracks which of
+         the long forms have been used in this month's section. */
+      const said = {};
+      let prevC = null;
+      const lines = gRuns.map((r, i) => {
+        const g = r.gate, e = this.gateOf(this.sunOn(r.from).lon + 180).gate;
+        const C = this.gateCenter(g), sc = closing(g), ec = closing(e);
+        if (sc.length || ec.length) hdCloses++;
+        /* The first run may have begun last month; only an arrival inside
+           these dates is a day worth naming. */
+        const arrives = i > 0 || this.gateOf(this.sunOn(this.addDays(b.from, -1)).lon).gate !== g;
+        if (arrives && sc.length) hdMarks.push({ d: r.from, w: 2.5, why: 'the Sun enters Gate ' + g + ' and closes ' + chName(sc[0]) + ' against your Gate ' + sc[0].partner });
+        else if (arrives && ec.length) hdMarks.push({ d: r.from, w: 2.5, why: 'the Earth enters Gate ' + e + ' and closes ' + chName(ec[0]) + ' against your Gate ' + ec[0].partner });
+        const def = !!C && hd.defined.has(C);
+        let where = '';
+        if (C && C === prevC) where = 'Still the ' + C + ' center, ' + (def ? 'defined' : 'open') + ' in your chart. ';
+        else if (C) {
+          const k = def ? 'def' : 'open';
+          where = 'It sits in the ' + C + ' center, which the system assigns to ' + this.centerTheme(C) + ', and that center is ' + (def ? 'defined' : 'open') + ' in your chart'
+            + (said[k] ? '. ' : def ? ', so the tradition reads a gate there as landing on something steady. '
+              : ', where the tradition expects a theme to be taken in from other people as much as held. ');
+          said[k] = 1;
+        }
+        prevC = C;
+        let rel;
+        if (mine.has(g)) {
+          rel = said.natal ? 'Gate ' + g + ' is one of yours as well: a known theme, louder.'
+            : 'Gate ' + g + ' is already one of your natal gates, so this reads as a known theme with more light on it rather than a new one.';
+          said.natal = 1;
+        } else if (sc.length) {
+          const more = sc.length > 1 ? ', and ' + this.listJoin(sc.slice(1).map(x => chName(x) + ' closes against Gate ' + x.partner)) + ' as well' : '';
+          rel = said.chan
+            ? 'Your natal Gate ' + sc[0].partner + ', ' + gname(sc[0].partner) + ', takes the other end of ' + chName(sc[0]) + ', joining the ' + sc[0].c[2] + ' and ' + sc[0].c[3] + ' centers while the Sun stays' + more + '.'
+            : 'Your natal Gate ' + sc[0].partner + ', ' + gname(sc[0].partner) + ', holds the other end of ' + chName(sc[0]) + ', so for these days the '
+              + sc[0].c[2] + ' and ' + sc[0].c[3] + ' centers are joined in a way your chart does not join them on its own' + more
+              + '. The link leaves when the Sun does, which makes what it gets used for the question worth asking.';
+          said.chan = 1;
+        } else {
+          rel = said.none ? 'No natal gate of yours answers this one.'
+            : 'None of your natal gates sits at the other end of it, and the tradition reads that as a subject passing through the room rather than a current you carry.';
+          said.none = 1;
+        }
+        const earth = ' Opposite it the Earth holds Gate ' + e + ', ' + gname(e)
+          + (mine.has(e) ? ', which is in your chart as well.'
+            : ec.length ? ', and that side closes ' + chName(ec[0]) + ' against your Gate ' + ec[0].partner + '.'
+            : ', with no partner for it in your chart.');
+        const dates = r.from.getTime() === r.to.getTime() ? this.fmtDay(r.from) : this.fmtDay(r.from) + ' to ' + this.fmtDay(r.to);
+        return H('Gate ' + g + ' · ' + gname(g) + ' · ' + dates, where + rel + earth);
+      });
+      const auth = String(hd.authority).split(':')[0];
+      lines.unshift(H('', 'Human Design reads the same sky through a wheel of sixty four gates. In ' + label + ' the Sun works through '
+        + word(gRuns.length) + ' of them, with the Earth always in the gate across the wheel, and '
+        + (hdCloses ? word(hdCloses) + (hdCloses === 1 ? ' of those stretches closes' : ' of those stretches close') + ' a channel your chart holds half of.'
+          : 'none of those stretches closes a channel against your chart.')
+        + ' Your type, ' + hd.type + ', and your ' + auth + ' authority were fixed at birth; a transit lends a gate for a few days and moves neither.'));
+      sec('The gates the Sun walks', '', lines);
+    }
+
+    /* 7. One date, named, so the month can be checked afterwards. */
+    const marks = hdMarks.slice();
     wins.forEach(w => { if (inM(w.exact)) marks.push({ d: w.exact, w: w.weight, why: w.label + ' is exact' }); });
     ecl.forEach(e => marks.push({ d: e.date, w: 99, why: 'a ' + e.kind.toLowerCase() + ' eclipse falls at ' + Math.floor(e.deg) + '° ' + e.sign }));
     lun.forEach(l => {
@@ -15624,7 +15706,7 @@ class Component extends DCLogic {
       H('', 'A marked date is a question, never a promise. Put it on the Throughline, then come back at the end of the month and find out whether the sky earned it.')
     ]);
 
-    /* 7. The numbers, on the same month. */
+    /* 8. The numbers, on the same month. */
     if (core) {
       const py = core.personalYear(this.dob(), b.from.getFullYear());
       const pyV = py ? py.value : 0;
@@ -15637,7 +15719,7 @@ class Component extends DCLogic {
       ]);
     }
 
-    /* 8. WHAT IT IS, SAID ONCE.
+    /* 9. WHAT IT IS, SAID ONCE.
 
        This was two paragraphs and the second was an instruction: "What decides
        whether any of it held is your own record". True, and the reader did not
@@ -15655,7 +15737,8 @@ class Component extends DCLogic {
       summary: this.listJoin(
         (ecl.length ? [ecl.length + (ecl.length === 1 ? ' eclipse' : ' eclipses')] : [])
           .concat([lun.length + (lun.length === 1 ? ' moon' : ' moons'),
-            wins.length + (wins.length === 1 ? ' window on your chart' : ' windows on your chart')])) };
+            wins.length + (wins.length === 1 ? ' window on your chart' : ' windows on your chart')])
+          .concat(hdCloses ? [hdCloses + (hdCloses === 1 ? ' gate closing a channel' : ' gates closing a channel')] : [])) };
     return this._mr;
   }
   monthVals() {

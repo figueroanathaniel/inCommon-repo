@@ -232,6 +232,25 @@ the seventh page of the phone pager, `spiritView: 'month'` on the desktop,
 reached by `goMonthGo()` and by an `openPath()` branch that splits on the width
 exactly as Synchronicities does.
 
+**The month reading carries Human Design as its own section**, "The gates the
+Sun walks", between the reader's windows and the marked date. It walks
+`gateRuns()` over the month and asks each run where the gate's centre sits in
+this chart and which channels it closes against a natal gate. The Earth is asked
+too, because it sits opposite and the gate boundaries line up across the wheel,
+so both change gate on the same day. **A gate that is already natal closes
+nothing new**, which is why `closing()` returns empty for it: a channel with
+both gates natal is one the chart already has, and calling it a transit would
+be a false finding. A closing run that begins inside the month joins the marked
+date candidates at weight 2.5, below the lightest transit window, so it names
+the day only when the slower sky offers nothing.
+
+**A sentence the reader has just read is shortened, not repeated.** Neighbouring
+gates share a centre, so October walks six in a row through the Spleen, and the
+full centre sentence six times over read as the app running out of things to
+say. A run in the same centre as the one before says so in one clause, and each
+long explanation (defined, open, natal, closing, unanswered) is given once per
+month and shortened after.
+
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
@@ -1322,7 +1341,7 @@ whole failure set has one cause.
 **That was settled by diffing rather than by another run**, after four runs had
 falsified a degraded GPU and then the launch surface. `deploy/<version>/index.html`
 is `app/cover.html` with three differences and no more: the build's header
-comment and the arrow target in its two places. There is no third thing for a
+comment and the app address in its two places. There is no third thing for a
 bundle run to be measuring, so a bundle H2 that reds while the source is green
 is the pane. Diff the two covers before spending a run on the difference
 between them.
@@ -1524,19 +1543,21 @@ helmet has one again.
 
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the
-wordmark, and one arrow. It is the first thing a visitor meets, and it is the
+wordmark, and "enter here" under it. It is the first thing a visitor meets, and it is the
 reason the site has two pages instead of one. The app is `app.html` in the
 bundle now; `index.html` is the cover.
 
 **The shader half is the design and is ported, never retyped.** `VERT`,
 `COMMON`, `BRIGHT_FRAG`, `DOWN_FRAG` and `UP_FRAG` came across byte for byte and
 were checked against the reference after the edits, because the constants in
-them are physical rather than art directed. Two shaders now differ, and each in
-one direction only: `MAIN_FRAG` gains the mark at the very end, below the photon
-ring and the shimmer, with the geodesic integration and everything above it
-untouched; `FINAL_FRAG` lost the grain.
+them are physical rather than art directed. Two shaders now differ:
+`MAIN_FRAG` gains the mark at the very end, below the photon ring and the
+shimmer, with the geodesic integration and everything above it untouched;
+`FINAL_FRAG` lost the grain and gained the same mark on the way out. The mark
+is one function, `markLight()`, in its own `MARK` string, which both shaders
+prepend after `COMMON` so `COMMON` itself stays byte for byte.
 
-**`FINAL_FRAG` is the one that differs, and it differs by a removal.** The two
+**`FINAL_FRAG` lost the grain whole.** The two
 layer film grain was taken out whole rather than turned down: a `uGrain` of 0.0
 is a dial somebody restores by accident, and an absent pass is a decision. The
 uniform went, `uSeed` went with it because it existed only to reseed the hash
@@ -1586,8 +1607,8 @@ the next person reading this should not have to work out whether it was
 noticed.
 
 Two things keep it honest. It is thin, so it is a line rather than a shape
-competing with the one control on the page, which is a white arrow and stays
-white. And it is the only green on the cover, so nothing else can start
+competing with the one control on the page, which is the cream "enter here"
+and stays cream. And it is the only green on the cover, so nothing else can start
 borrowing it.
 
 **The violet is desaturated in the shader, not rewritten as a new hex.** The
@@ -1664,17 +1685,55 @@ in the head for exactly this reason, and without the rule the wordmark would sit
 at full strength on top of the SIGNAL LOST message it is meant to defer to. That
 was live for three revisions after the dim was moved into JS.
 
-**The arrow does not just navigate: the rim becomes the logo and the render
+**The way in is a subtitle, and it waits for the title.** The arrow in the top
+corner is gone. "enter here" sits under the wordmark inside `.markwrap`, in
+Marcellus at roughly a third of the wordmark's size, and fades in over 2800ms
+starting 3200ms after `body.live`, so the title has finished arriving before
+anything asks to be clicked. Its glow is a cream and violet `text-shadow` that
+breathes slowly once it is up, and it is cream rather than `--ac` for the same
+reason the arrow was white. Three things own opacity and each owns one: the
+reveal is on `.markwrap`, the late fade on `.sub`, and the scroll fade on the
+link itself, written inline by `scrollFade()`, which also sets it
+`visibility: hidden` once it has gone so a keyboard cannot tab to it. It does
+not take the signal-lost dim: with the renderer gone it is the one thing on the
+page still doing its job. It is named by its own text, so there is no
+`aria-label` to drift from what is on screen, and H5 and `build-bundle.js` both
+look for the words.
+
+**The link does not just navigate: the rim becomes the logo and the render
 goes out under it.** At `uExit` 0 the drawing is exactly the horizon rim, two
 circles of the hole's radius with coincident centres, which paints as one. As
-it runs to 1 the centres separate to `R/2`, the radius doubles, the stroke
+it runs to 1 the centres separate to `R/2`, the radius grows, the stroke
 thickens from the thin rim to the mark's `0.173R`, and the whole thing walks
 from `uHoleS` to the middle of the screen. The mark is not drawn over the rim.
 It is the rim, moved.
 
+**The logo lands at a size the frame can hold.** It used to finish at twice the
+hole's radius, and the mark is three radii wide, so on a portrait phone it
+landed at 118% of the screen's width. It finishes at the smallest of 1.7 hole
+radii, `0.43` of the half width and `0.60` of the half height: about 68% of a
+portrait phone's width and 54% of a desktop's. Its glow is violet and drawn
+only where neither the stroke nor the lens is, because two additive lights in
+the same pixels sum toward white, and it rises over the second half of the exit
+so the rim at rest carries none.
+
+**The logo is drawn in `FINAL_FRAG` once the exit starts, and that is what keeps
+it sharp.** The scene buffer is capped at 1.6 device pixels and cut further by
+the quality ladder, so a mark drawn there and upscaled came out soft on a 3x
+phone. `markLight()` crossfades from the scene pass to the final pass over the
+first 18% of the exit, with weights `1 - xf` and `xf` so the handover moves
+where it is drawn and not how bright it is, and the final pass hands it an edge
+of three quarters of a device pixel through `uPx`. The canvas itself is sized at
+the screen's density up to 3 while the scene stays at 1.6: the final pass is a
+few texture reads, and the picture is the same bilinear upscale it always was,
+done by the GPU instead of the compositor. `finalU` holds the SAME `uRim` and
+`uExit` objects as `mainU`, not copies, so there is nothing to keep in step. Its
+colours sit under the bloom threshold, so leaving the bloom behind costs nothing.
+
 **`col *= 1.0 - uExit` is why the scene leaves and the mark stays.** Everything
 above that line is the render, so one multiply takes the disk, the jets, the
-starfield and the sky to black together, and the mark is added below it. Do not
+starfield and the sky to black together, and the mark is added below it, in
+both passes. Do not
 reach for `#veil` here: it sits above the canvas and below the wordmark, so
 raising it would black out the mark along with everything else, and the mark is
 drawn IN the canvas.
@@ -1716,7 +1775,11 @@ module with it. The DOM layers are faded by writing opacity inline in the exit
 step rather than through a class, because `scrollFade` already owns those
 properties inline and an inline style beats a rule, and `scrollFade` returns
 early while exiting so a scroll event mid transition cannot put the wordmark
-back.
+back. The exit sets `transition: none` on `.markwrap` before its first write,
+because the reveal transition applies to inline writes too: without it every
+write landed 800ms late and 2600ms slow, and the title sat at half strength
+over the finished logo as the page left. The fade starts from the computed
+opacity, so a click before the reveal finishes does not jump the title up.
 
 **The quality ladder has nine rungs, and the bottom three exist because the old
 floor killed a driver.** It stopped at `0.58 / 116`, and on an Intel UHD 600
@@ -1783,8 +1846,8 @@ the Doppler exponents are measured values. A description of this image does not
 reproduce it, so a rewrite from one is a different picture wearing its name.
 
 **The catch-all points at the app, not at the cover.** An address that names a
-screen is a reader asking for that screen, and answering it with a cover and an
-arrow is one more click with nothing on the page saying why. So `/` is the
+screen is a reader asking for that screen, and answering it with a cover and a
+link is one more click with nothing on the page saying why. So `/` is the
 cover, and `/*` is the app, in all three `_redirects` files: the bundle's own,
 and the two generated ones at the repo root and in `deploy/`.
 
@@ -1818,11 +1881,12 @@ drops. The version lives in the file, as `REVISION = '184'`. Both are declared
 `vendored` in `check-layer-boundary.js`, because an unclassified `app/*.js` is
 a failure there and that is the whole point of the rule.
 
-**`build-bundle.js` builds both pages and refuses on four faults.** The arrow's
-target is the only thing that differs between the source shell and the bundle,
-and it appears twice, once as the href and once inside the hash forward, so the
-build asserts the count is exactly two before rewriting. Rewriting one and
-missing the other ships a cover whose arrow works and whose deep links go
+**`build-bundle.js` builds both pages and refuses on four faults.** The app
+address is the only thing that differs between the source shell and the bundle,
+and it appears twice, once as the href on "enter here" and once inside the hash
+forward, so the build asserts the count is exactly two before rewriting.
+Rewriting one and missing the other ships a cover whose link works and whose deep
+links go
 nowhere, and nothing on screen would report it. It also refuses a cover with no
 `canvas#view`, one with no labelled way into the app, one carrying a dash, and a
 build with either three.js file missing, because a cover that cannot reach its
@@ -1850,8 +1914,8 @@ screen and it is worth knowing rather than discovering.
 **The theme phase does not cover this screen.** `runThemes` navigates to
 `#/today` and stays there, so the 64 contrast rows say nothing about the cover,
 and the cover is deliberately outside the theme system anyway: it is not the
-app shell, it paints its own Deep Field palette from the shader, and its arrow
-is white rather than `--ac` because it is a cover rather than a primary action
+app shell, it paints its own Deep Field palette from the shader, and its link
+is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
 ## Where things live in this repository

@@ -385,12 +385,12 @@ try {
 
    app/cover.html is the Event Horizon screen. Its shader half is the design
    and is copied through untouched; the only thing this build changes is the
-   arrow's target, because in the source shell it points at the app file and in
-   the bundle the app is app.html.
+   target of "enter here", because in the source shell it points at the app
+   file and in the bundle the app is app.html.
 
    Both occurrences are rewritten and the count is asserted, because there are
-   two: the href on the arrow and the hash forward in the head. Rewriting one
-   and missing the other produces a cover whose arrow works and whose deep
+   two: the href on the link and the hash forward in the head. Rewriting one
+   and missing the other produces a cover whose link works and whose deep
    links go nowhere, which nothing on screen would report.
 
    three.module.js and three.core.js are copied rather than inlined. They are
@@ -406,8 +406,8 @@ const APP_ADDR = './inCommonApp%20v2.dc.html';
 const addrCount = cover.split(APP_ADDR).length - 1;
 if (addrCount !== 2) {
   die('the cover names the app at ' + addrCount + ' places, expected 2\n' +
-      '  One is the arrow href and one is the hash forward in the head.\n' +
-      '  Rewriting one and missing the other ships a cover whose arrow works\n' +
+      '  One is the enter here href and one is the hash forward in the head.\n' +
+      '  Rewriting one and missing the other ships a cover whose link works\n' +
       '  and whose deep links go nowhere, which nothing on screen would report.');
 }
 cover = cover.split(APP_ADDR).join('./app.html');
@@ -417,7 +417,10 @@ cover = cover.split(APP_ADDR).join('./app.html');
 if (cover.indexOf('<canvas id="view">') === -1) {
   die('the cover has no canvas#view; refusing to ship a blank first screen');
 }
-if (cover.indexOf('aria-label="Enter inCommon"') === -1) {
+/* The way in is named by its own text, so the check is for an enter anchor
+   with an href and words inside it: an empty anchor is a control nobody can
+   find by ear. */
+if (!/<a class="enter" href="[^"]+">\s*\S[^<]*<\/a>/.test(cover)) {
   die('the cover has no labelled way into the app');
 }
 
