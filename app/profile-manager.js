@@ -382,7 +382,7 @@
     consentFor: function (type) { return this.MEMORY_CONSENT[type] || null; },
 
     addMemory: function (a, b, c, d) {
-      /* Object form: addMemory({ profileId, type, content, isPrivate, consentRequired })
+      /* Object form: addMemory({ profileId, type, content, isPrivate, consentRequired, keep })
          Positional form kept for the earlier call sites: (type, content, isPrivate, id) */
       var o = (a && typeof a === 'object' && !Array.isArray(a)) ? a
         : { type: a, content: b, isPrivate: c, profileId: d };
@@ -399,16 +399,22 @@
       var k = 'incommon.p.' + pid + '.memories', list = read(k, []);
       var row = { id: uuid(), profile_id: pid, memory_type: type, content: JSON.stringify(o.content == null ? {} : o.content),
         created_at: o.createdAt || nowISO(), is_private: o.isPrivate ? 1 : 0, consent_required: need || null };
+      /* keep: the reader asked for this one entry to stay in view while its
+         consent is off. It is a mark on the row rather than a null consent, so
+         the entry still says which consent it belongs to, and getMemory reads
+         the mark. A type the app writes on the reader's behalf cannot carry it. */
+      var keep = !!o.keep && !this.ENFORCE_ON_WRITE[type];
+      if (keep) row.kept = 1;
       list.unshift(row);
       write(k, list.slice(0, 800));
       this._emit('memory:added', { profileId: pid, type: type });
-      return { ok: true, id: row.id, stellaVisible: granted, memory: this._hydrate(row) };
+      return { ok: true, id: row.id, stellaVisible: granted || keep, kept: keep, memory: this._hydrate(row) };
     },
 
     _hydrate: function (m) {
       var c = m.content; try { c = JSON.parse(m.content); } catch (e) {}
       return { id: m.id, profileId: m.profile_id, type: m.memory_type, memoryType: m.memory_type,
-        content: c, createdAt: m.created_at, isPrivate: !!m.is_private, consentRequired: m.consent_required || null };
+        content: c, createdAt: m.created_at, isPrivate: !!m.is_private, consentRequired: m.consent_required || null, kept: !!m.kept };
     },
 
     /* getMemory({ profileId, type, respectConsent })
@@ -426,7 +432,7 @@
           if (m.profile_id !== pid) return false;
           if (opts.type && m.memory_type !== opts.type) return false;
           if (opts.includePrivate === false && m.is_private) return false;
-          if (respect) { var need = m.consent_required || self.consentFor(m.memory_type); if (need && !con[need]) return false; }
+          if (respect && !m.kept) { var need = m.consent_required || self.consentFor(m.memory_type); if (need && !con[need]) return false; }
           return true;
         })
         .map(function (m) { return self._hydrate(m); });

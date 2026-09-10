@@ -317,6 +317,21 @@ which lookup produced a row. There is no lookup behind this one, so it takes
 `markC` moved into `angelSightings()` for that reason: the two way conditional
 that used to live in `sightPast` would have painted the third kind blue.
 
+## Writing a sighting down, and keeping it
+Adding an entry opens a composer: the prompts for that kind, each with its own
+answer field, and a freehand field under them. `sightBody()` joins the prompts,
+each followed by its answer, and the freehand text into one journal body. An
+unanswered prompt is saved as the bare question, which is exactly what an entry
+held before the composer existed, so older entries and new ones read alike.
+
+**A reader may keep one entry while journal memory is off.** The keep switch
+passes `keep` to `addMemory()`, which stamps `kept: 1` on the row, and
+`getMemory()` skips the consent filter for a kept row and only for it. The
+switch appears only while the setting is off, because with memory on it would
+be a control that does nothing. The consent setting still governs every other
+row; a kept row is the reader's own explicit exception, written one entry at a
+time, never a default.
+
 ## The Dream Journal
 `dream-symbols.js` holds the registry, `dreamVals()` the page, gate
 `spiritDream`, addressed `/spirit/dreams`, the eighth page of the phone pager
@@ -1175,6 +1190,47 @@ clicked, the field is typed into through a real input event, and the row is
 clicked, because the failure this surface can have is the one that reads as
 correct. N37b names all thirteen groups one query at a time, so a shelf that
 silently drops out of the index is a red row rather than a quiet absence.
+
+## Aspects teach what the contact offers
+Five tables, and each has one job. `ASP_MEAN` is the short gloss inside
+generated sentences. `ASP_SHORT` is one sentence, used as a row subtitle and at
+the end of the Today contact paragraph. `ASP_NATURE` is the teaching text for
+the sheet: the angle, what the elements and modalities at that angle have to do
+with each other, and what the contact makes possible. `ASP_POSS` and `ASP_PLAY`
+are the possibility layer. **Do not put `ASP_NATURE` in a subtitle**: it is
+several sentences, and a row that carries a paragraph stops being a row.
+
+The writing is framed as what the aspect offers the reader to work with, not as
+a verdict on them. A square is productive tension that builds skill, not a
+problem; a trine is a gift that deepens with use, not a free pass. `ASP_CLOSE`
+is untouched and must stay that way: `check-aspect-text` holds its closers to
+single unique sentences naming both bodies.
+
+## Learn from Atlas lands on the entry, not the section
+`hdAtlasTo(sec, item)` takes the section and the entry inside it. The item is
+slugged by `atlasSlug()` and stored as `atlasItem`; `atlasVals()` gives every
+block and row an anchor, `incommon-atlas-<section>-<slug>`, and the entry asked
+for wears a green left edge so the eye finds it after the scroll.
+`scrollAtlasIntoView()` looks for the entry first and falls back to the section
+after 900ms, so an item that matches nothing still lands somewhere true.
+
+The idents: a Type by its name, a profile by its key (`1/3` slugs to `1-3`), a
+centre by its `CENTERS` key, a gate row as `g<n>`, a channel row by its pair, a
+strategy and an authority by name. The chart popup passes the one it is about.
+Learn from Atlas passes the reader's own entry where the tab has one
+(`hdAtlasItemFor()`: Type and sleep give the Type, mood the authority, work the
+strategy) and null otherwise, which lands on the section as before.
+
+**A search row cannot scroll**, because its target is state rather than a
+handler. `syncAtlasItem()`, called from the one `componentDidUpdate`, scrolls
+once per new item. `hdAtlasTo` marks the item it scrolls to itself in
+`_atlasScrolled`, so the two never run the same scroll twice. Toggling a section
+and leaving the atlas clear `atlasItem`, and every clean bag that clears
+`atlasSec` clears it too.
+
+The anchors are on the HD atlas markup only. Astropedia shares the block and
+row markup byte for byte, so an edit to it has to be anchored on `atlasSecs`, or
+a replace across the file lands on four sites instead of two.
 
 ## Touch targets
 44px minimum on every control in both shells. There are exactly two exceptions,
