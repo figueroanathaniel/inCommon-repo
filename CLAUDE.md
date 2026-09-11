@@ -988,6 +988,50 @@ cannot represent most boundaries exactly, and what a reader is owed is that the
 same longitude always gives the same answer. Twelve rows assert it, including a
 sweep at every thousandth of a degree against the app's own fallback literal.
 
+## The gates in the sky now
+`hd-transit.js` returns every body's gate and line at an instant, in a declared
+order, and splits that list by whether a chart holds each gate. It is the on
+device half of the daily transit study of 11 September 2026, which is a draft
+and not ratified. Its bucket cache (Prompt 3) and its notifications (Prompt 6)
+were dropped: a position is already memoised by `ephemeris-cache.js`, and this
+build raises no notification, which A13 holds.
+
+**The instant is a minute, and it is the start of that minute.** The Moon moves a
+line in under two hours, so a day is not an instant, and a reading taken at local
+noon is not the sky now. `reading()` floors to the minute and carries the instant
+inside it, so the card can say which minute it shows. The civil day belongs to a
+zone and the instant belongs to nobody: one minute is the 11th in Tonga and the
+10th in Pago Pago and the gates are the same in both. X11 to X14 hold that,
+across a New York clock change.
+
+**The module reads no clock and carries no ephemeris.** The app hands it
+`lonOf` and `Date.now()`, the same shape `arc-solver.js` takes, which is what lets
+X5 put the Moon exactly on a line boundary and read the minute either side. X1
+loads it with the clock and Intl both broken, and X18 fails on any storage API.
+
+**The order is declared, never sorted.** The app's `PLNS` order, each derived
+body after its source. An order computed from positions moves with the sky, and
+an order that moves is one somebody eventually reads as meaning something.
+
+**Numbers only.** No gate names, no keynotes, no sentence in the module (X17)
+and none on the card beyond its headings and one line when there is no birth
+date. Interpretive text for this layer waits on review (Open Gate 5). No field
+counts, ranks or remembers anything (X16), and a reading knows nothing about
+yesterday, so there is nothing a streak could be built from.
+
+**The card is on Today in both shells and is not inside the alignment.** The
+alignment can be stepped to another date through `horoNow()`; this card is always
+now, so `gnowVals()` asks `Date.now()` and never `horoNow()`. It memoises one
+reading per minute in `_gnow`, which the clock tick replaces on the minute.
+**The split is drawn only from a birth date the reader gave.** `dob()` falls back
+to a demo date for the rest of Today, and splitting against that would put gates
+in a chart nobody has, so with no birth date the card lists the sky and says
+what would complete it. **A stored date is not enough**: first run writes the
+placeholder into the default profile, so `birthDate` is set while the banner
+says none of it is yours. The gate is `usingSampleBirth()` as well, which is how
+the first build of this card got it wrong. "In your chart" wears `--ac2-hi` on a `--ac2` border,
+never `--ac`: whether a gate is natal is not an action.
+
 ## Connection charts
 `hd-composite.js` overlays two bodygraphs and returns structured data: which of
 the thirty six channels complete only when the two are together, which both
@@ -2015,7 +2059,7 @@ that a later change is most likely to break:
   splatted, because the app's paths are relative and `./manifest.json`
   resolving at the site root has to be rewritten into the bundle.
 - **There are two service workers and they are different programs.**
-  `app/sw.js` is the source shell and precaches all 38 modules separately,
+  `app/sw.js` is the source shell and precaches all 39 modules separately,
   because `app/` is flat and the app loads them as separate script tags.
   `deploy/<version>/sw.js` precaches one inlined `index.html` and five install
   assets. **Their cache names must differ**, because `activate()` deletes every

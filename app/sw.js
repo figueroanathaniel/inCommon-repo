@@ -51,7 +51,7 @@ var PRECACHE = [
   './profile-manager.js', './placement-content.js', './numerology-content.js', './angel-numbers.js', './animal-symbolism.js',
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
-  './birth-time.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-composite.js', './hd-circle.js',
+  './birth-time.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',
   './people-library.js', './pair-cache.js', './analytics.js'
 ];
 self.addEventListener('install', function (e) {

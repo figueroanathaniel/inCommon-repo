@@ -100,6 +100,9 @@ const MODULES = [
   'ephemeris-cache.js',
   /* The wheel order and the boundary rule, as data. */
   'hd-wheel.js',
+  /* The gates the sky stands in at one instant. Reads the wheel above by
+     name, so it has to follow it. */
+  'hd-transit.js',
   'hd-circle.js',
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',

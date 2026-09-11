@@ -1118,6 +1118,134 @@ tTrue('G39', 'the only sentences a Ground carries are the two safety constants',
     return seen.every(s => s === HDG.GROUP_CAUTION || s === HDG.ANCHOR_NOTE);
   })());
 
+/* ------------------------------------------ X: the gates the sky stands in */
+
+/* The clock and the formatter are taken away while the module loads, so a
+   module that read either at require time throws here instead of passing. */
+const HT = (() => {
+  const realNow = Date.now, realDTF = Intl.DateTimeFormat;
+  Date.now = () => { throw new Error('clock read at load'); };
+  Intl.DateTimeFormat = function () { throw new Error('formatter built at load'); };
+  try { return require(path.join(repo, 'app', 'hd-transit.js')); }
+  catch (e) { return { loadError: String(e) }; }
+  finally { Date.now = realNow; Intl.DateTimeFormat = realDTF; }
+})();
+const HTW = require(path.join(repo, 'app', 'hd-wheel.js'));
+const X_OPT = { wheel: HTW };
+
+/* A synthetic sky: each body at a fixed rate from a base longitude, so every
+   row can say exactly where a boundary is. The bases sit half a line inside a
+   line, except the Moon, which stands exactly on the start of gate 41 line 4
+   at the epoch, so the minute before it is line 3. */
+const X_EPOCH = Date.UTC(2026, 8, 10, 12, 0);
+const xT = ms => ms / 86400000 + 2440587.5 - 2451545.0;
+const xLon = k => 302 + k * HTW.LINE_DEG + HTW.LINE_DEG / 2;
+const X_BASE = { Sun: xLon(150), Moon: 302 + 3 * HTW.LINE_DEG, Mercury: xLon(141), Venus: xLon(190),
+  Mars: xLon(20), Jupiter: xLon(77), Saturn: xLon(300), Uranus: xLon(260), Neptune: xLon(345),
+  Pluto: xLon(310), 'North Node': xLon(5) };
+const X_RATE = { Sun: 0.9856, Moon: 13.176, Mercury: 1.2, Venus: 1.1, Mars: 0.52, Jupiter: 0.083,
+  Saturn: 0.033, Uranus: 0.012, Neptune: 0.006, Pluto: 0.004, 'North Node': -0.053 };
+const xSky = (missing) => (name, t) =>
+  (missing || []).indexOf(name) !== -1 ? null : X_BASE[name] + X_RATE[name] * (t - xT(X_EPOCH));
+const xGL = a => a && [a.gate, a.line];
+const xBody = (acts, b) => acts.filter(a => a.body === b)[0];
+
+tTrue('X1', 'the module loads without reading the clock or building a formatter',
+  !HT.loadError && typeof HT.reading === 'function');
+t('X2', 'every body comes back in one declared order, with each derived body after its source',
+  HT.activations(xSky(), X_EPOCH, X_OPT).map(a => a.body),
+  ['Sun', 'Earth', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'North Node', 'South Node']);
+tTrue('X3', 'the same instant read twice gives equal readings, never a held one',
+  (() => { const a = HT.reading(xSky(), X_EPOCH, X_OPT), b = HT.reading(xSky(), X_EPOCH, X_OPT);
+    return a !== b && a.activations !== b.activations && JSON.stringify(a) === JSON.stringify(b); })());
+t('X4', 'a reading is taken at the start of the minute it is asked in',
+  (() => { const a = HT.reading(xSky(), X_EPOCH + 59999, X_OPT), b = HT.reading(xSky(), X_EPOCH, X_OPT);
+    return [a.instant, JSON.stringify(a) === JSON.stringify(b)]; })(),
+  ['2026-09-10T12:00:00.000Z', true]);
+t('X5', 'the Moon changes line across a minute, and the boundary belongs to the line that begins there',
+  [xGL(xBody(HT.activations(xSky(), X_EPOCH - 60000, X_OPT), 'Moon')),
+    xGL(xBody(HT.activations(xSky(), X_EPOCH, X_OPT), 'Moon'))],
+  [[41, 3], [41, 4]]);
+t('X6', 'and nothing else moved in that minute',
+  (() => { const a = HT.activations(xSky(), X_EPOCH - 60000, X_OPT), b = HT.activations(xSky(), X_EPOCH, X_OPT);
+    return a.filter((x, i) => x.body !== 'Moon' && JSON.stringify(x) !== JSON.stringify(b[i])).map(x => x.body); })(),
+  []);
+t('X7', 'Earth and the South Node sit opposite the Sun and the North Node',
+  (() => { const acts = HT.activations(xSky(), X_EPOCH, X_OPT);
+    return [xGL(xBody(acts, 'Earth')), xGL(xBody(acts, 'South Node'))]; })(),
+  [xGL(HTW.gateLine(X_BASE.Sun + 180)), xGL(HTW.gateLine(X_BASE['North Node'] + 180))]);
+t('X8', 'a body the caller cannot place comes back empty rather than guessed, and so does its opposite',
+  (() => { const acts = HT.activations(xSky(['Sun', 'Moon']), X_EPOCH, X_OPT);
+    return ['Sun', 'Earth', 'Moon', 'Mars'].map(b => { const a = xBody(acts, b); return a.gate === null && a.line === null; }); })(),
+  [true, true, true, false]);
+tTrue('X9', 'a split puts every placed body in exactly one half, and both halves keep the declared order',
+  (() => {
+    const acts = HT.activations(xSky(['Venus']), X_EPOCH, X_OPT);
+    const chart = new Set([xBody(acts, 'Sun').gate, xBody(acts, 'Moon').gate, xBody(acts, 'Pluto').gate]);
+    const s = HT.split(acts, chart), placed = acts.filter(a => a.gate !== null);
+    const order = xs => xs.map(a => a.body).join();
+    return order(s.inside) === order(placed.filter(a => chart.has(a.gate)))
+      && order(s.outside) === order(placed.filter(a => !chart.has(a.gate)))
+      && s.inside.length + s.outside.length === placed.length && s.inside.length >= 3
+      && [].concat(s.inside, s.outside).every(a => a.body !== 'Venus');
+  })());
+t('X10', 'a split takes an array as well as a Set, and refuses anything else',
+  (() => { const acts = HT.activations(xSky(), X_EPOCH, X_OPT), g = [acts[0].gate, acts[2].gate];
+    return [JSON.stringify(HT.split(acts, g)) === JSON.stringify(HT.split(acts, new Set(g))),
+      HT.split(acts, null), HT.split(acts, '41'), HT.split(null, g)]; })(),
+  [true, null, null, null]);
+t('X11', 'one instant is the same sky in every zone, and only the civil day moves',
+  (() => { const ms = Date.UTC(2026, 8, 10, 12, 30);
+    const rs = ['Pacific/Tongatapu', 'UTC', 'Pacific/Pago_Pago'].map(z => HT.reading(xSky(), ms, { wheel: HTW, timeZone: z }));
+    return [rs.map(r => r.day), rs.every(r => r.instant === rs[0].instant),
+      rs.every(r => JSON.stringify(r.activations) === JSON.stringify(rs[0].activations))]; })(),
+  [['2026-09-11', '2026-09-10', '2026-09-10'], true, true]);
+t('X12', 'east of UTC the day turns over at local midnight, thirteen hours ahead',
+  [HT.civilDay(Date.UTC(2026, 8, 10, 10, 59), 'Pacific/Tongatapu'), HT.civilDay(Date.UTC(2026, 8, 10, 11, 0), 'Pacific/Tongatapu')],
+  ['2026-09-10', '2026-09-11']);
+t('X13', 'west of UTC the day turns over at local midnight, eleven hours behind',
+  [HT.civilDay(Date.UTC(2026, 8, 11, 10, 59), 'Pacific/Pago_Pago'), HT.civilDay(Date.UTC(2026, 8, 11, 11, 0), 'Pacific/Pago_Pago')],
+  ['2026-09-10', '2026-09-11']);
+t('X14', 'on the day New York moves its clocks the day is 23 hours long, and the skipped hour still has a sky',
+  [HT.civilDay(Date.UTC(2026, 2, 8, 4, 59), 'America/New_York'), HT.civilDay(Date.UTC(2026, 2, 8, 5, 0), 'America/New_York'),
+    HT.civilDay(Date.UTC(2026, 2, 9, 3, 59), 'America/New_York'), HT.civilDay(Date.UTC(2026, 2, 9, 4, 0), 'America/New_York'),
+    (r => [r.instant, r.day, r.activations.length])(HT.reading(xSky(), Date.UTC(2026, 2, 8, 7, 0), { wheel: HTW, timeZone: 'America/New_York' }))],
+  ['2026-03-07', '2026-03-08', '2026-03-08', '2026-03-09', ['2026-03-08T07:00:00.000Z', '2026-03-08', 13]]);
+t('X15', 'a reading refuses without an instant, a longitude function or a wheel',
+  (() => { const saved = globalThis.HDWheel; delete globalThis.HDWheel;
+    try { return [HT.reading(xSky(), undefined, X_OPT), HT.reading(null, X_EPOCH, X_OPT), HT.reading(xSky(), X_EPOCH, {}), HT.civilDay(X_EPOCH, 'Not/AZone')]; }
+    finally { if (saved !== undefined) globalThis.HDWheel = saved; } })(),
+  [null, null, null, null]);
+tTrue('X16', 'a reading carries gate and line numbers and no field that ranks, counts, rates or remembers',
+  (() => {
+    const r = HT.reading(xSky(), X_EPOCH, X_OPT), s = HT.split(r.activations, new Set([41]));
+    const keys = [];
+    (function walk(v) {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') Object.keys(v).forEach(k => { keys.push(k); walk(v[k]); });
+    })([r, s]);
+    return JSON.stringify(Object.keys(r)) === '["instant","day","activations"]'
+      && r.activations.every(a => JSON.stringify(Object.keys(a)) === '["body","gate","line"]'
+        && Number.isInteger(a.gate) && a.gate >= 1 && a.gate <= 64 && Number.isInteger(a.line) && a.line >= 1 && a.line <= 6)
+      && !keys.some(k => /score|rank|streak|compat|match|percent|best|count|total|yesterday|last/i.test(k));
+  })());
+tTrue('X17', 'the only strings in a reading are body names, the instant and the day: no gate names and no sentences',
+  (() => {
+    const r = HT.reading(xSky(), X_EPOCH, X_OPT), strs = [];
+    (function walk(v) {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') Object.keys(v).forEach(k => walk(v[k]));
+      else if (typeof v === 'string') strs.push(v);
+    })(r);
+    return strs.every(x => HT.BODIES.indexOf(x) !== -1 || x === r.instant || x === r.day);
+  })());
+t('X18', 'the module names no storage API and never asks the clock for now',
+  (() => { const src = fs.readFileSync(path.join(repo, 'app', 'hd-transit.js'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    return ['localStorage', 'sessionStorage', 'indexedDB', 'setItem', 'Date.now', 'new Date()', 'setInterval', 'setTimeout']
+      .filter(s => src.indexOf(s) !== -1); })(),
+  []);
+
 /* ------------------------------------------------------------------ report */
 
 const pass = rows.filter(r => r.pass).length, fail = rows.length - pass;
@@ -1126,7 +1254,7 @@ if (!quiet) {
   console.log('run-module-tests: ' + pass + '/' + rows.length + ' passed' + (fail ? ', ' + fail + ' FAILED' : ''));
   [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
     ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
-    ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js']].forEach(([k, name]) => {
+    ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js']].forEach(([k, name]) => {
     const g = rows.filter(r => r.id[0] === k);
     console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
   });
