@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.2  |  built 2026-09-08  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.2  |  built 2026-09-11  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3138,7 +3138,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     consentFor: function (type) { return this.MEMORY_CONSENT[type] || null; },
 
     addMemory: function (a, b, c, d) {
-      /* Object form: addMemory({ profileId, type, content, isPrivate, consentRequired })
+      /* Object form: addMemory({ profileId, type, content, isPrivate, consentRequired, keep })
          Positional form kept for the earlier call sites: (type, content, isPrivate, id) */
       var o = (a && typeof a === 'object' && !Array.isArray(a)) ? a
         : { type: a, content: b, isPrivate: c, profileId: d };
@@ -3155,16 +3155,22 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       var k = 'incommon.p.' + pid + '.memories', list = read(k, []);
       var row = { id: uuid(), profile_id: pid, memory_type: type, content: JSON.stringify(o.content == null ? {} : o.content),
         created_at: o.createdAt || nowISO(), is_private: o.isPrivate ? 1 : 0, consent_required: need || null };
+      /* keep: the reader asked for this one entry to stay in view while its
+         consent is off. It is a mark on the row rather than a null consent, so
+         the entry still says which consent it belongs to, and getMemory reads
+         the mark. A type the app writes on the reader's behalf cannot carry it. */
+      var keep = !!o.keep && !this.ENFORCE_ON_WRITE[type];
+      if (keep) row.kept = 1;
       list.unshift(row);
       write(k, list.slice(0, 800));
       this._emit('memory:added', { profileId: pid, type: type });
-      return { ok: true, id: row.id, stellaVisible: granted, memory: this._hydrate(row) };
+      return { ok: true, id: row.id, stellaVisible: granted || keep, kept: keep, memory: this._hydrate(row) };
     },
 
     _hydrate: function (m) {
       var c = m.content; try { c = JSON.parse(m.content); } catch (e) {}
       return { id: m.id, profileId: m.profile_id, type: m.memory_type, memoryType: m.memory_type,
-        content: c, createdAt: m.created_at, isPrivate: !!m.is_private, consentRequired: m.consent_required || null };
+        content: c, createdAt: m.created_at, isPrivate: !!m.is_private, consentRequired: m.consent_required || null, kept: !!m.kept };
     },
 
     /* getMemory({ profileId, type, respectConsent })
@@ -3182,7 +3188,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           if (m.profile_id !== pid) return false;
           if (opts.type && m.memory_type !== opts.type) return false;
           if (opts.includePrivate === false && m.is_private) return false;
-          if (respect) { var need = m.consent_required || self.consentFor(m.memory_type); if (need && !con[need]) return false; }
+          if (respect && !m.kept) { var need = m.consent_required || self.consentFor(m.memory_type); if (need && !con[need]) return false; }
           return true;
         })
         .map(function (m) { return self._hydrate(m); });
@@ -15361,7 +15367,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ angelSeenAt }}</div>
               <sc-if value="{{ angelUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ angelJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ angelAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ angelFree }}" onChange="{{ angelFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ angelJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                </div>
               </sc-if>
               <sc-if value="{{ angelSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -15404,7 +15434,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ animFree }}" onChange="{{ animFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                </div>
               </sc-if>
               <sc-if value="{{ animSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -15419,7 +15473,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)" style-hover="border-color:rgba(47,255,143,.48);color:var(--ac)">Keep it anyway</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ animFree }}" onChange="{{ animFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)" style-hover="border-color:rgba(47,255,143,.48);color:var(--ac)">Keep it anyway</button>
+                </div>
               </sc-if>
               <sc-if value="{{ animSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -15438,6 +15516,31 @@ input[type="date"]{color-scheme:dark}
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What else keeps appearing?</div>
           <input value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <div style="font:400 11.5px/1.6 var(--fu);color:var(--mut);border-left:2px solid var(--bd);padding-left:10px">{{ otherNote }}</div>
+          <sc-if value="{{ otherComposing }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
+              <sc-for list="{{ otherAsk }}" as="a" hint-placeholder-count="4">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                  <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                </label>
+              </sc-for>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                <textarea value="{{ otherFree }}" onChange="{{ otherFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+              </label>
+              <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                    <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                    <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                  </span>
+                  <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                    <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                  </span>
+                </button>
+              </sc-if>
+            </div>
+          </sc-if>
           <button onClick="{{ otherGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">{{ otherSaveLabel }}</button>
           <sc-if value="{{ otherSaved }}" hint-placeholder-val="{{ false }}">
             <div style="font:400 11px/1.55 var(--fu);color:var(--ok)">{{ otherSeenAt }}</div>
@@ -16649,13 +16752,13 @@ input[type="date"]{color-scheme:dark}
         <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .2s ease">
             <sc-for list="{{ sec.blocks }}" as="b" hint-placeholder-count="5">
-              <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px">
+              <div id="{{ b.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px;border-left:{{ b.bl }};padding-left:{{ b.pl }}">
                 <div style="font:600 12.5px var(--fu);color:var(--ac)">{{ b.head }}</div>
                 <sc-if value="{{ b.hasSub }}" hint-placeholder-val="{{ false }}">
                   <div style="font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ b.sub }}</div>
                 </sc-if>
                 <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
-                  <div style="display:flex;flex-direction:column;gap:2px">
+                  <div id="{{ r.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:2px;border-left:{{ r.bl }};padding-left:{{ r.pl }}">
                     <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}">
                       <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ r.tc }};background:{{ r.tb }}">{{ r.tag }}</span>
                     </sc-if>
@@ -20139,13 +20242,13 @@ input[type="date"]{color-scheme:dark}
         <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .2s ease">
             <sc-for list="{{ sec.blocks }}" as="b" hint-placeholder-count="5">
-              <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px">
+              <div id="{{ b.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px;border-left:{{ b.bl }};padding-left:{{ b.pl }}">
                 <div style="font:600 12.5px var(--fu);color:var(--ac)">{{ b.head }}</div>
                 <sc-if value="{{ b.hasSub }}" hint-placeholder-val="{{ false }}">
                   <div style="font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ b.sub }}</div>
                 </sc-if>
                 <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
-                  <div style="display:flex;flex-direction:column;gap:2px">
+                  <div id="{{ r.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:2px;border-left:{{ r.bl }};padding-left:{{ r.pl }}">
                     <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}">
                       <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ r.tc }};background:{{ r.tb }}">{{ r.tag }}</span>
                     </sc-if>
@@ -21099,7 +21202,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ angelSeenAt }}</div>
               <sc-if value="{{ angelUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ angelJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ angelAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ angelFree }}" onChange="{{ angelFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ angelJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                </div>
               </sc-if>
               <sc-if value="{{ angelSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -21142,7 +21269,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ animFree }}" onChange="{{ animFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.48);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac)" style-hover="background:rgba(47,255,143,.11)">Journal this sighting</button>
+                </div>
               </sc-if>
               <sc-if value="{{ animSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -21157,7 +21308,31 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
               <div style="font:400 11.5px/1.55 var(--fu);color:var(--dim)">{{ animSeenAt }}</div>
               <sc-if value="{{ animUnsaved }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)" style-hover="border-color:rgba(47,255,143,.48);color:var(--ac)">Keep it anyway</button>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Write it down while it is fresh</div>
+                  <sc-for list="{{ animAsk }}" as="a" hint-placeholder-count="3">
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                      <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                    </label>
+                  </sc-for>
+                  <label style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                    <textarea value="{{ animFree }}" onChange="{{ animFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                  </label>
+                  <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                        <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                      </span>
+                      <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                      </span>
+                    </button>
+                  </sc-if>
+                  <button onClick="{{ animJournalGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)" style-hover="border-color:rgba(47,255,143,.48);color:var(--ac)">Keep it anyway</button>
+                </div>
               </sc-if>
               <sc-if value="{{ animSaved }}" hint-placeholder-val="{{ false }}">
                 <div style="font:600 11.5px var(--fu);color:var(--ok)">Saved to your journal, and on your Throughline.</div>
@@ -21176,6 +21351,31 @@ input[type="date"]{color-scheme:dark}
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What else keeps appearing?</div>
           <input value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <div style="font:400 11.5px/1.6 var(--fu);color:var(--mut);border-left:2px solid var(--bd);padding-left:10px">{{ otherNote }}</div>
+          <sc-if value="{{ otherComposing }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
+              <sc-for list="{{ otherAsk }}" as="a" hint-placeholder-count="4">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">{{ a.q }}</span>
+                  <textarea value="{{ a.val }}" onChange="{{ a.set }}" rows="2" aria-label="{{ a.q }}" style="box-sizing:border-box;width:100%;resize:vertical;min-height:56px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+                </label>
+              </sc-for>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font:600 12px/1.45 var(--fu);color:var(--tx)">In your own words</span>
+                <textarea value="{{ otherFree }}" onChange="{{ otherFreeSet }}" rows="4" placeholder="Anything else, however it comes out" aria-label="In your own words" style="box-sizing:border-box;width:100%;resize:vertical;min-height:96px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.6 var(--fu);color:var(--tx)"></textarea>
+              </label>
+              <sc-if value="{{ sightKeepShow }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ sightKeepGo }}" role="switch" aria-checked="{{ sightKeepOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                    <span style="font:600 12px var(--fu);color:var(--tx)">Keep it logged anyway</span>
+                    <span style="font:400 11px/1.5 var(--fu);color:var(--dim)">{{ sightKeepNote }}</span>
+                  </span>
+                  <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ sightKeepBg }};border:1px solid {{ sightKeepBd }};display:flex;align-items:center;transition:background-color .2s">
+                    <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ sightKeepX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+                  </span>
+                </button>
+              </sc-if>
+            </div>
+          </sc-if>
           <button onClick="{{ otherGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">{{ otherSaveLabel }}</button>
           <sc-if value="{{ otherSaved }}" hint-placeholder-val="{{ false }}">
             <div style="font:400 11px/1.55 var(--fu);color:var(--ok)">{{ otherSeenAt }}</div>
@@ -22121,13 +22321,14 @@ class Component extends DCLogic {
     q: '', selId: null, pv: 'detail', pstep: 0, shifted: '', notShifted: '', remember: null,
     tlFilter: 'all', tlOpen: null, addOpen: false, monthOff: 0, monthSaved: null,
     sightMode: 'number', animInput: '', animResult: null, animSaved: false, animUnknownFor: '',
+    sightAns: {}, sightFree: {}, sightKeep: false,
     otherInput: '', otherSaved: false,
     icQuestion: '', icMethod: 'coins', icSeed: null, icSaved: false, icOpenLine: null,
     icSec: null, icHex: null, icQuery: '', draft: { title: '', note: '', date: Component.localDay() },
     voiceOpen: false, voiceTarget: 'journal', recOn: false, recSecs: 0, recText: '', recInterim: '', recErr: '', recSup: null,
     consentTick: 0, helpOpen: false, toast: '',
     spiritView: null, focusToday: false, dailyNumOpen: false, reflOpen: false, convOpen: false, pracOpen: false,
-    memTick: 0, dropOpen: false, trOpen: null, hdSel: null, hdTab: 'type', bgMode: 'both', atlasSec: null, apSec: null, featOpen: null,
+    memTick: 0, dropOpen: false, trOpen: null, hdSel: null, hdTab: 'type', bgMode: 'both', atlasSec: null, atlasItem: null, apSec: null, featOpen: null,
     tarotTopic: null, tarotDepth: null, tarotCount: null, tarotSeed: 0, tarotStage: 'choose',
     tarotSaved: false, tarotOpenCard: null, ttSec: null, ttCard: null,
     libSub: 'library', arcFilter: 'all', arcQuery: '', arcSel: null, relFor: null, relText: '',
@@ -22360,6 +22561,7 @@ class Component extends DCLogic {
       msgs: [this.greetMsg()], input: '', typing: false,
       spiritView: null, focusToday: false, dailyNumOpen: false, selId: null, pv: 'detail', pstep: 0, tlOpen: null, tlFilter: 'all', monthOff: 0, monthSaved: null,
       sightMode: 'number', animInput: '', animResult: null, animSaved: false, animUnknownFor: '',
+      sightAns: {}, sightFree: {}, sightKeep: false,
       otherInput: '', otherSaved: false,
       angelInput: '', angelResult: null, angelSaved: false, angelOpenId: null, numSel: null, nameDraft: '', dpSel: null,
       /* A half written dream belongs to the person who dreamt it. Carrying the
@@ -22618,6 +22820,7 @@ class Component extends DCLogic {
     this.announceChanges();
     this.skySync();
     this.syncSectionToTab();
+    this.syncAtlasItem();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -22691,7 +22894,7 @@ class Component extends DCLogic {
   openPath(path) {
     const seg = path.split('/').filter(Boolean);
     const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
-      selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, apSec: null, arcSel: null };
+      selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null };
     // The arriving path may normalise (a bare /library resolves to practices).
     // That correction is a replace, never a second history entry, or Back has to
     // be pressed twice to leave a screen it only appeared to visit once.
@@ -22758,7 +22961,7 @@ class Component extends DCLogic {
       const view = Object.keys(this.LIB_PATHS).find(k => this.LIB_PATHS[k] === '/' + seg.join('/')) || (seg[1] ? null : 'practices');
       /* A bare /library is the shelf itself, and the shelf is libView null.
          Resolving it to 'practices' matched no view and painted an empty pane. */
-      return go({ tab: 'library', libSub: 'library', libView: (view && view !== 'practices') ? view : null, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
+      return go({ tab: 'library', libSub: 'library', libView: (view && view !== 'practices') ? view : null, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, atlasItem: null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
     }
     const tabs = ['today', 'library', 'spirit', 'throughline', 'settings'];
     return go({ tab: tabs.indexOf(seg[0]) === -1 ? 'today' : seg[0] });
@@ -22821,7 +23024,7 @@ class Component extends DCLogic {
     if (!granted && PM && PM.activeId()) {
       // Revocation hides the rows immediately; the Memory & Privacy panel is
       // where a person erases them outright.
-      const n = PM.getMemory({ respectConsent: false }).filter(m => (m.consentRequired || PM.consentFor(m.type)) === id).length;
+      const n = PM.getMemory({ respectConsent: false }).filter(m => !m.kept && (m.consentRequired || PM.consentFor(m.type)) === id).length;
       if (n) this.toastMsg('Hidden · ' + n + ' ' + (n === 1 ? 'entry' : 'entries') + ' kept for you');
     }
     this.setState({ consentTick: this.state.consentTick + 1 });
@@ -23019,10 +23222,10 @@ class Component extends DCLogic {
   async flushOutbox() {}
 
   // Single write path for everything remembered about a person.
-  remember(type, content, isPrivate) {
+  remember(type, content, isPrivate, opts) {
     const PM = this.PM();
     if (!PM || !PM.activeId()) return { ok: false, reason: 'no-active-profile' };
-    return PM.addMemory({ profileId: PM.activeId(), type, content, isPrivate: !!isPrivate });
+    return PM.addMemory({ profileId: PM.activeId(), type, content, isPrivate: !!isPrivate, keep: !!(opts && opts.keep) });
   }
   /* Notes written while a practice runs. They belong to the practice, so they
      travel into the Journal entry rather than living in a second store. */
@@ -23534,7 +23737,7 @@ class Component extends DCLogic {
   ASPECTS = [[0, 'conjunct', 8], [60, 'sextile', 5], [90, 'square', 6], [120, 'trine', 6], [180, 'opposite', 8]];
   ASP_NAME = { conjunct: 'conjunction', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposition' };
   aspName(a) { return this.ASP_NAME[String(a).toLowerCase()] || String(a); }
-  ASP_MEAN = { conjunct: 'fused, hard to tell apart', sextile: 'available if you reach for it', square: 'friction that asks for a choice', trine: 'flows easily, easy to waste', opposite: 'pulled between two poles' };
+  ASP_MEAN = { conjunct: 'a fusion, two drives that act as one and amplify each other', sextile: 'a cooperative opening that grows stronger each time it is used', square: 'productive tension, the pressure that builds skill and resolve', trine: 'a natural gift, talent that flows and ripens when it is put to work', opposite: 'a polarity, two needs that teach balance, often through other people' };
   MOON_PHASES = ['New', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
   HD_WHEEL = [41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60];
   GATE_NAMES = { 1: 'Self-Expression', 2: 'Direction of the Self', 3: 'Ordering', 4: 'Formulization', 5: 'Fixed Rhythms', 6: 'Friction', 7: 'The Role of the Self', 8: 'Contribution', 9: 'Focus', 10: 'Behaviour of the Self', 11: 'Ideas', 12: 'Caution', 13: 'The Listener', 14: 'Power Skills', 15: 'Extremes', 16: 'Skills', 17: 'Opinions', 18: 'Correction', 19: 'Wanting', 20: 'The Now', 21: 'The Hunter', 22: 'Openness', 23: 'Assimilation', 24: 'Rationalization', 25: 'Spirit of the Self', 26: 'The Egoist', 27: 'Caring', 28: 'The Game Player', 29: 'Saying Yes', 30: 'Recognition of Feelings', 31: 'Influence', 32: 'Continuity', 33: 'Privacy', 34: 'Power', 35: 'Change', 36: 'Crisis', 37: 'Friendship', 38: 'The Fighter', 39: 'Provocation', 40: 'Aloneness', 41: 'Contraction', 42: 'Growth', 43: 'Insight', 44: 'Alertness', 45: 'The Gatherer', 46: 'Determination of the Self', 47: 'Realizing', 48: 'Depth', 49: 'Principles', 50: 'Values', 51: 'Shock', 52: 'Stillness', 53: 'Beginnings', 54: 'Ambition', 55: 'Spirit', 56: 'Stimulation', 57: 'Intuitive Clarity', 58: 'Vitality', 59: 'Sexuality', 60: 'Acceptance', 61: 'Inner Truth', 62: 'Detail', 63: 'Doubt', 64: 'Confusion' };
@@ -23845,11 +24048,11 @@ class Component extends DCLogic {
   /* How the angle itself behaves in a life, as opposed to what it is. Used for
      the middle of the paragraph, never for the last sentence. */
   ASP_PLAY = {
-    conjunct: 'They do not take turns. Whatever starts one of them starts the other in the same movement, which is why this pair is the hardest in your chart to see from the inside: there is no gap between them to look through.',
-    sextile: 'Nothing here happens by itself. This pair works when you deliberately put one in the service of the other, and it stays quiet, indefinitely, if you never do.',
-    square: 'These two want incompatible things at the same moment, and the moment keeps arriving. Every workable version of your life has had to answer this, which is why it feels less like a problem to solve than a question you keep being asked.',
-    trine: 'This runs without supervision, which is exactly the risk. Ease is easy to spend and hard to notice spending, so the talent here is often the one you undersell because it never cost you anything.',
-    opposite: 'You tend to hold one end and meet the other in someone else. That is what makes this pair feel like it is about other people, when the pull is entirely inside you and they are only where you set it down.'
+    conjunct: 'They do not take turns. Whatever starts one of them starts the other in the same movement, which gives this pair a concentrated force few other parts of your chart can match. The work it offers is learning to see the blend from the inside, so the strength can be aimed rather than only felt.',
+    sextile: 'These two cooperate as soon as they are introduced. Put one in the service of the other, even in small ways, and each makes the other more capable: this is a skill that compounds with practice, and it is often where a modest habit turns into a real ability.',
+    square: 'These two want different things at the same moment, and the moment keeps arriving. That pressure is what builds capacity: each time you find a way to serve both, you gain range and resolve that an easier chart would never have asked you to develop.',
+    trine: 'This runs without supervision, which makes it one of your natural gifts. Because it never cost you anything, it is easy to undervalue, and the opportunity is to treat it as a talent worth training: given a direction, ease here becomes mastery.',
+    opposite: 'You tend to hold one end and meet the other in someone else. That makes relationships the place this pair teaches, and the reward is range: as you learn to hold both ends yourself, the pull becomes perspective, a way of seeing a situation from both sides at once.'
   };
   /* THE LAST SENTENCE, AND WHY IT IS BUILT RATHER THAN PICKED.
 
@@ -23920,11 +24123,21 @@ class Component extends DCLogic {
     opposite: (a, b, pa, pb) => 'The stretch is between ' + a + ' asking ' + pa + ' at one end and ' + b + ' asking ' + pb + ' at the other, and you will keep meeting the far end in people until you can hold both ends yourself.'
   };
   ASP_NATURE = {
-    conjunct: 'Fused. The two act as one and are hard to tell apart.',
-    sextile: 'Available if you reach for it; nothing happens on its own.',
-    square: 'Friction that asks for a choice, and keeps asking.',
-    trine: 'Flows easily, which makes it easy to waste.',
-    opposite: 'Pulled between two poles, usually through other people.'
+    conjunct: 'Zero degrees: the two bodies stand together, usually in the same sign. Their energies merge into a single drive, so each one colours everything the other does. That concentration is the gift. A conjunction is where a chart is most focused, and the blend is often the part other people recognise first, because it arrives at full strength.',
+    sextile: 'Sixty degrees, usually between signs of compatible elements, fire with air or earth with water. The tradition calls it an opportunity aspect: the two bodies speak a common language and cooperate readily. What it offers is a talent that grows with practice, a door that opens a little wider each time it is walked through, so small deliberate efforts here tend to pay back more than their size.',
+    square: 'Ninety degrees, between signs that share a modality but differ in element, so the two bodies pursue the same kind of momentum toward different ends. The tension is real, and it is also the engine of the chart. Squares are where effort gets built: working through this friction tends to produce resilience, skill and a drive that easier contacts never demand, which is why the tradition treats them as the aspects of growth.',
+    trine: 'A hundred and twenty degrees, usually between signs of the same element, so the two bodies already understand each other. Energy moves between them without resistance. The tradition reads a trine as a natural gift: a capacity that feels effortless, and one that grows into real mastery when it is given a direction and some deliberate use rather than left to run on its own.',
+    opposite: 'A hundred and eighty degrees, across the wheel between complementary signs that share a modality. The two bodies face each other like the ends of a balance, each holding what the other lacks. An opposition offers perspective and awareness: it tends to show up in relationships, where other people reflect the far end back, and learning to hold both ends turns the pull into balance, a range most charts do not have.'
+  };
+  /* ASP_NATURE teaches the angle and is too long for a row subtitle or the
+     middle of a sentence. ASP_SHORT is the one line version of the same
+     reading, for the aspect list and the Today contact paragraph. */
+  ASP_SHORT = {
+    conjunct: 'Two drives fused into one concentrated strength.',
+    sextile: 'A cooperative opening that rewards small, deliberate effort.',
+    square: 'Productive tension that builds skill and resolve.',
+    trine: 'A natural gift that deepens when it is put to use.',
+    opposite: 'A polarity that offers perspective and balance.'
   };
   NATAL_ORBS = { conjunct: 8, opposite: 8, trine: 6, square: 4, sextile: 3 };
   norm360(x) { return ((x % 360) + 360) % 360; }
@@ -24456,28 +24669,79 @@ class Component extends DCLogic {
     this.vtGoSection(1);
     this.vtGoTab(6);
   }
+  /* ---- The sighting composer -----------------------------------------------
+     The prompts an entry used to print bare are fields now, answered in place,
+     with a freehand field after them. The questions still come from the
+     modules, split on the blank line each already writes between its parts, so
+     the screen and the saved entry cannot ask different things. A prompt left
+     blank is saved bare, as it always was, so it can be come back to. */
+  sightSplit(text) {
+    const parts = String(text || '').split('\n\n');
+    return { header: parts[0] || '', prompts: parts.slice(1).filter(Boolean) };
+  }
+  sightPrompts(kind) {
+    const st = this.state;
+    if (kind === 'number') {
+      const AN = window.AngelNumbers, r = st.angelResult;
+      return AN && r ? this.sightSplit(AN.journalPrompt(r.number, r.traditional, '')).prompts : [];
+    }
+    if (kind === 'animal') {
+      const AS = window.AnimalSymbolism, r = st.animResult, u = st.animUnknownFor;
+      if (!AS || (!r && !u)) return [];
+      return this.sightSplit(r ? AS.journalPrompt(r.name, r.tradition, '') : AS.unlistedPrompt(u, '')).prompts;
+    }
+    return this.OTHER_PROMPTS;
+  }
+  sightBody(kind, header, prompts) {
+    const ans = this.state.sightAns || {}, free = String((this.state.sightFree || {})[kind] || '').trim();
+    const parts = [header].concat(prompts.map((q, i) => {
+      const a = String(ans[kind + i] || '').trim();
+      return a ? q + '\n' + a : q;
+    }));
+    if (free) parts.push(free);
+    return parts.join('\n\n');
+  }
+  sightCleared(kind) {
+    const ans = { ...(this.state.sightAns || {}) }, free = { ...(this.state.sightFree || {}) };
+    Object.keys(ans).forEach(k => { if (k.indexOf(kind) === 0) delete ans[k]; });
+    delete free[kind];
+    return { sightAns: ans, sightFree: free };
+  }
+  /* Journal memory off hides an entry from every reader that respects consent.
+     The keep switch overrides that for one entry, so it only exists while
+     there is something to override. */
+  sightKeepable() {
+    const PM = this.PM(), pid = PM && PM.activeId();
+    return !!pid && !PM.getConsents(pid).journal;
+  }
+  sightSave(entry, kind, done, onMsg, offMsg) {
+    const res = this.remember('journal', entry, false, { keep: this.sightKeepable() && !!this.state.sightKeep });
+    if (res.ok) {
+      this.setState({ ...done, ...this.sightCleared(kind), sightKeep: false });
+      this.toastMsg(res.kept ? 'Saved, and kept in your record while journal memory is off.' : res.stellaVisible ? onMsg : offMsg);
+      return;
+    }
+    this.setState({ errBanner: res.reason === 'no-active-profile' ? 'Add a profile before journalling.' : 'Could not save this entry: ' + res.reason });
+  }
   angelLookup() {
     const AN = window.AngelNumbers;
     if (!AN) { this.setState({ errBanner: 'The angel number module did not load.' }); return; }
     const r = AN.lookup(this.state.angelInput);
     if (!r) { this.toastMsg('Enter a number you keep seeing, like 111.'); return; }
-    this.setState({ angelResult: r, angelSaved: false });
+    /* What was written about one number does not follow the reader to another. */
+    const prev = this.state.angelResult, same = !!prev && prev.number === r.number;
+    this.setState({ angelResult: r, angelSaved: false, ...(same ? {} : this.sightCleared('number')) });
   }
   angelJournal() {
     const AN = window.AngelNumbers, r = this.state.angelResult;
     if (!AN || !r) return;
     const when = this.estClock();
+    const sp = this.sightSplit(AN.journalPrompt(r.number, r.traditional, when + ' on ' + Component.localDay()));
     const entry = { date: Component.localDay(), ts: Component.localDay(), type: 'event', tag: AN.TAG,
       number: r.number, title: AN.journalTitle(r.number),
       preview: ('Noticed ' + r.number + ' at ' + when).slice(0, 90),
-      body: AN.journalPrompt(r.number, r.traditional, when + ' on ' + Component.localDay()) };
-    const res = this.remember('journal', entry);
-    if (res.ok) {
-      this.setState({ angelSaved: true });
-      this.toastMsg(res.stellaVisible ? 'Saved. It is on your Throughline now.' : 'Saved to your journal. Nobody reads it while journal memory is off.');
-      return;
-    }
-    this.setState({ errBanner: res.reason === 'no-active-profile' ? 'Add a profile before journalling.' : 'Could not save this entry: ' + res.reason });
+      body: this.sightBody('number', sp.header, sp.prompts) };
+    this.sightSave(entry, 'number', { angelSaved: true }, 'Saved. It is on your Throughline now.', 'Saved to your journal. Nobody reads it while journal memory is off.');
   }
   /* ---- The animal half ---------------------------------------------------- */
   animalLookup() {
@@ -24488,14 +24752,19 @@ class Component extends DCLogic {
     const r = AS.lookup(raw);
     /* Not found is a state of its own, not an error and not an empty result.
        The reader still saw something. */
-    this.setState({ animResult: r, animUnknownFor: r ? '' : raw, animSaved: false });
+    this.setState({ animResult: r, animUnknownFor: r ? '' : raw, animSaved: false, ...this.animCarry(r ? r.name : raw) });
   }
   /* The suggestion chips resolve in one setState rather than setting the input
      and calling the lookup after it: the runtime does not promise a state
      callback, and a pick that only fills the field looks broken. */
   animalPick(name) {
     const AS = window.AnimalSymbolism, r = AS ? AS.lookup(name) : null;
-    this.setState({ animInput: name, animResult: r, animUnknownFor: r ? '' : name, animSaved: false });
+    this.setState({ animInput: name, animResult: r, animUnknownFor: r ? '' : name, animSaved: false, ...this.animCarry(r ? r.name : name) });
+  }
+  /* The same animal keeps what was written about it; a different one starts clean. */
+  animCarry(name) {
+    const st = this.state, prev = st.animResult ? st.animResult.name : st.animUnknownFor;
+    return prev && String(prev).toLowerCase() === String(name).toLowerCase() ? {} : this.sightCleared('animal');
   }
   animalJournal() {
     const AS = window.AnimalSymbolism;
@@ -24504,18 +24773,13 @@ class Component extends DCLogic {
     if (!r && !unknown) return;
     const when = this.estClock();
     const name = r ? r.name : unknown;
+    const sp = this.sightSplit(r ? AS.journalPrompt(r.name, r.tradition, when + ' on ' + Component.localDay())
+      : AS.unlistedPrompt(unknown, when + ' on ' + Component.localDay()));
     const entry = { date: Component.localDay(), ts: Component.localDay(), type: 'event', tag: AS.TAG,
       animal: name, title: AS.journalTitle(name),
       preview: ('Saw a ' + String(name).toLowerCase() + ' at ' + when).slice(0, 90),
-      body: r ? AS.journalPrompt(r.name, r.tradition, when + ' on ' + Component.localDay())
-        : AS.unlistedPrompt(unknown, when + ' on ' + Component.localDay()) };
-    const res = this.remember('journal', entry);
-    if (res.ok) {
-      this.setState({ animSaved: true });
-      this.toastMsg(res.stellaVisible ? 'Saved. It is on your Throughline now.' : 'Saved to your journal. It goes no further while journal memory is off.');
-      return;
-    }
-    this.setState({ errBanner: res.reason === 'no-active-profile' ? 'Add a profile before journalling.' : 'Could not save this entry: ' + res.reason });
+      body: this.sightBody('animal', sp.header, sp.prompts) };
+    this.sightSave(entry, 'animal', { animSaved: true }, 'Saved. It is on your Throughline now.', 'Saved to your journal. It goes no further while journal memory is off.');
   }
   /* ---- Anything else -------------------------------------------------------
    *
@@ -24543,28 +24807,21 @@ class Component extends DCLogic {
    *
    * DO NOT ADD A LOOKUP HERE without the construct that governs it. */
   OTHER_TAG = 'other_sighting';
+  /* Circumstantial prompts only. Nothing here asks what it means, because
+     that is the reader's to say and nobody else's, and a leading question is
+     a reading wearing a question mark. The freehand field under them is the
+     reader's own, and its label stays as neutral as these. */
+  OTHER_PROMPTS = ['What was happening just before?', 'Where was I, and who was I with?',
+    'Has it come up before, and when?', 'Anything worth remembering about it?'];
   otherJournal() {
     const what = String(this.state.otherInput || '').trim();
     if (!what) { this.toastMsg('Name the thing you keep noticing, in your own words.'); return; }
     const when = this.estClock(), day = Component.localDay();
-    /* Circumstantial prompts only. Nothing here asks what it means, because
-       that is the reader's to say and nobody else's, and a leading question is
-       a reading wearing a question mark. */
     const entry = { date: day, ts: day, type: 'event', tag: this.OTHER_TAG,
       other: what, title: 'Noticed: ' + what,
       preview: ('Noticed ' + what + ' at ' + when).slice(0, 90),
-      body: 'I noticed ' + what + ' at ' + when + ' on ' + day + '.\n\n' +
-        'What was happening just before?\n\n' +
-        'Where was I, and who was I with?\n\n' +
-        'Has it come up before, and when?\n\n' +
-        'Anything worth remembering about it?' };
-    const res = this.remember('journal', entry);
-    if (res.ok) {
-      this.setState({ otherSaved: true });
-      this.toastMsg(res.stellaVisible ? 'Kept. It is on your Throughline now.' : 'Kept in your journal, and nowhere else while journal memory is off.');
-      return;
-    }
-    this.setState({ errBanner: res.reason === 'no-active-profile' ? 'Add a profile before journalling.' : 'Could not save this entry: ' + res.reason });
+      body: this.sightBody('other', 'I noticed ' + what + ' at ' + when + ' on ' + day + '.', this.OTHER_PROMPTS) };
+    this.sightSave(entry, 'other', { otherSaved: true }, 'Kept. It is on your Throughline now.', 'Kept in your journal, and nowhere else while journal memory is off.');
   }
   /* One log, all three kinds. The run of entries is the whole point of the
      page, so splitting it by tag on screen would have thrown away the only
@@ -24624,6 +24881,13 @@ class Component extends DCLogic {
     ] : [];
     const typed = String(st.animInput || '').trim();
     const modeGo = k => () => this.setState({ sightMode: k });
+    /* Handlers read this.state when they fire, not st, so two fields typed
+       into in quick succession cannot overwrite each other's answers. */
+    const ans = st.sightAns || {}, free = st.sightFree || {};
+    const ask = kind => this.sightPrompts(kind).map((q, i) => ({ q: q, val: ans[kind + i] || '',
+      set: e => this.setState({ sightAns: { ...(this.state.sightAns || {}), [kind + i]: String(e.target.value || '').slice(0, 2000) } }) }));
+    const freeSet = kind => e => this.setState({ sightFree: { ...(this.state.sightFree || {}), [kind]: String(e.target.value || '').slice(0, 4000) } });
+    const keepable = this.sightKeepable(), keepOn = keepable && !!st.sightKeep;
     return {
       spiritAngel: true, angelInput: st.angelInput,
       angelType: e => this.setState({ angelInput: String(e.target.value || '').replace(/[^0-9]/g, '').slice(0, 6) }),
@@ -24634,6 +24898,14 @@ class Component extends DCLogic {
       angelLines: lines, angelSeenAt: 'Logged as noticed at ' + this.estClock() + '.',
       angelSaved: !!st.angelSaved, angelUnsaved: !!r && !st.angelSaved,
       angelJournalGo: () => this.angelJournal(),
+      angelAsk: ask('number'), angelFree: free.number || '', angelFreeSet: freeSet('number'),
+      sightKeepShow: keepable, sightKeepOn: keepOn ? 'true' : 'false',
+      sightKeepGo: () => this.setState({ sightKeep: !this.state.sightKeep }),
+      sightKeepBg: keepOn ? 'rgba(47,255,143,.28)' : 'var(--sf)', sightKeepBd: keepOn ? 'rgba(47,255,143,.6)' : 'var(--bd)',
+      sightKeepX: keepOn ? '20px' : '0px',
+      sightKeepNote: keepOn
+        ? 'This entry stays in your record, your export included, even with journal memory off.'
+        : 'Journal memory is off, so this entry would be saved but hidden from your export and from anything else that honours that setting. Switch this on to keep this one in.',
 
       sightNumberOn: mode === 'number', sightAnimalOn: mode === 'animal', sightOtherOn: mode === 'other',
       otherInput: st.otherInput || '',
@@ -24641,6 +24913,8 @@ class Component extends DCLogic {
       otherKey: e => { if (e.key === 'Enter') this.otherJournal(); },
       otherGo: () => this.otherJournal(),
       otherSaved: !!st.otherSaved,
+      otherAsk: ask('other'), otherFree: free.other || '', otherFreeSet: freeSet('other'),
+      otherComposing: !!String(st.otherInput || '').trim() && !st.otherSaved,
       otherHas: !!String(st.otherInput || '').trim(),
       otherSaveLabel: st.otherSaved ? 'Kept' : 'Keep this sighting',
       otherSeenAt: 'Logged as noticed at ' + this.estClock() + '.',
@@ -24660,6 +24934,7 @@ class Component extends DCLogic {
       animHas: !!ar, animName: ar ? ar.name : '', animLines: aLines,
       animSaved: !!st.animSaved, animUnsaved: (!!ar || !!st.animUnknownFor) && !st.animSaved,
       animJournalGo: () => this.animalJournal(),
+      animAsk: ask('animal'), animFree: free.animal || '', animFreeSet: freeSet('animal'),
       animSeenAt: 'Logged as noticed at ' + this.estClock() + '.',
       /* Suggestions while typing, and a starter row before anything is typed.
          Both resolve straight to a reading, because a chip that only fills the
@@ -24692,11 +24967,11 @@ class Component extends DCLogic {
   /* ---- Today’s Alignment ----------------------------------------------------
      One reading, three systems kept separate. Every figure here is computed
      from this profile's own birth data and the current minute in New York.  */
-  ASP_POSS = { conjunct: 'one impulse rather than two, hard to separate while it is happening',
-    sextile: 'an opening you have to reach for, easy to miss on a busy day',
-    square: 'friction that asks for a choice instead of a balance',
-    trine: 'unusual ease, which can also pass by unused',
-    opposite: 'a pull between two needs that both have a claim' };
+  ASP_POSS = { conjunct: 'a single concentrated drive, two impulses moving as one and gathering strength together',
+    sextile: 'an opening that rewards a small first step and widens each time it is taken',
+    square: 'pressure that sharpens, the kind of push that turns effort into capability',
+    trine: 'an ease that is really a talent, ready to deepen once it is given a direction',
+    opposite: 'a pull between two needs with equal claims, which settles into balance once both are honoured' };
   SYS_CHIP = { ASTROLOGY: ['#2fff8f', 'rgba(var(--atmc),.32)'], 'HUMAN DESIGN': ['#b79bff', 'rgba(139,92,246,.16)'], NUMEROLOGY: ['#7d9bff', 'rgba(125,155,255,.16)'] };
   fmtPos(p) { return Math.floor(p.deg) + '\u00b0 ' + p.sign; }
   gateCenter(g) { const c = this.HD_CHANNELS.find(x => x[0] === g || x[1] === g); return c ? (c[0] === g ? c[2] : c[3]) : null; }
@@ -26599,18 +26874,53 @@ class Component extends DCLogic {
     atme: 'open'          /* what the world does to you amplifies the undefined */
   };
   hdAtlasFor(tab) { return this.HD_ATLAS_SEC[tab] || 'intro'; }
-  hdAtlasTo(sec) {
-    return () => this.setState(
-      { tab: 'library', libSub: 'library', libView: 'hdatlas', atlasSec: sec || 'intro', selId: null, spiritView: null, hdSel: null },
-      () => {
-        if ((this.state.dtW || window.innerWidth || 1440) < this.BP.md) this.vtGoSection(2);
-        /* The accordion renders in a later tick than this callback, so the
-           scroll waits for it. Two frames is enough on both shells; the section
-           id is set in the markup below. It is a section move, not a route, so
-           it does not touch the hash. */
-        this.scrollAtlasIntoView(sec || 'intro');
-      }
-    );
+  /* The section answers the tab; the item is the entry inside it that is
+     about this reader, so the Type tab lands on their own Type and not on the
+     first of five. Tabs with no single entry of their own return null and
+     land on the section. */
+  hdAtlasItemFor(tab, hd) {
+    const A = this.A();
+    if (!A || !hd) return null;
+    if (tab === 'type' || tab === 'sleep') return hd.type || null;
+    if (tab === 'mood') {
+      const first = String(hd.authority || '').split(':')[0].trim().toLowerCase();
+      const au = first && (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1);
+      return au ? au.name : null;
+    }
+    if (tab === 'work') {
+      const s2 = (A.STRATEGIES || []).find(x => x.who.indexOf(hd.type) !== -1);
+      return s2 ? s2.name : null;
+    }
+    return null;
+  }
+  atlasSlug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  /* A search row names an atlas entry but cannot scroll to it, because a
+     target is state rather than a handler. So the scroll follows the state,
+     once per item. hdAtlasTo marks the item it scrolls to itself, so the two
+     never run the same scroll twice. */
+  syncAtlasItem() {
+    const it = this.state.libView === 'hdatlas' ? this.state.atlasItem : null;
+    if (!it) { this._atlasScrolled = null; return; }
+    if (it === this._atlasScrolled) return;
+    this._atlasScrolled = it;
+    this.scrollAtlasIntoView(this.state.atlasSec || 'intro', it);
+  }
+  hdAtlasTo(sec, item) {
+    const it = item != null && item !== '' ? this.atlasSlug(item) : null;
+    return () => {
+      this._atlasScrolled = it;
+      this.setState(
+        { tab: 'library', libSub: 'library', libView: 'hdatlas', atlasSec: sec || 'intro', atlasItem: it, selId: null, spiritView: null, hdSel: null },
+        () => {
+          if ((this.state.dtW || window.innerWidth || 1440) < this.BP.md) this.vtGoSection(2);
+          /* The accordion renders in a later tick than this callback, so the
+             scroll waits for it. Two frames is enough on both shells; the section
+             id is set in the markup below. It is a section move, not a route, so
+             it does not touch the hash. */
+          this.scrollAtlasIntoView(sec || 'intro', it);
+        }
+      );
+    };
   }
   /* Bring the opened atlas section to the top of whatever is scrolling it.
 
@@ -26623,8 +26933,9 @@ class Component extends DCLogic {
      the phone's smooth-scroll budget plus a margin; the desktop has no section
      to cross and only needs the accordion to render. Existence is still polled,
      because the block does not mount until atlasSec commits. */
-  scrollAtlasIntoView(sec) {
+  scrollAtlasIntoView(sec, item) {
     const phone = (this.state.dtW || window.innerWidth || 1440) < this.BP.md;
+    const want = item ? 'incommon-atlas-' + sec + '-' + item : null;
     /* SCROLL THE INNER SHELF, NEVER THE OUTER SNAP.
 
        scrollIntoView scrolls every ancestor that can scroll, and on the phone
@@ -26657,7 +26968,11 @@ class Component extends DCLogic {
        because a smooth inner scroll is interrupted by the snap re-engaging. */
     const start = Date.now();
     const place = () => {
-      const el = document.getElementById('incommon-atlas-' + sec);
+      /* The named entry first. An item that matches nothing (a chart whose
+         authority has no atlas entry) falls back to its section once the
+         section has had time to render, rather than scrolling nowhere. */
+      let el = want ? document.getElementById(want) : null;
+      if (!el && (!want || Date.now() - start > 900)) el = document.getElementById('incommon-atlas-' + sec);
       if (el) {
         const inner = innerScrollerOf(el);
         if (inner) {
@@ -26966,10 +27281,10 @@ class Component extends DCLogic {
     if (!A) return { hdPopOpen: false };
     const H = (h, x) => this.headLine(h, x);
     const art = t => /^[AEIOU]/.test(String(t)) ? 'an ' : 'a ';
-    let title = '', kicker = '', youKicker = '', gen = [], you = [], sc = {}, sec = 'intro', edge = 'var(--bd)', ask = '';
+    let title = '', kicker = '', youKicker = '', gen = [], you = [], sc = {}, sec = 'intro', item = null, edge = 'var(--bd)', ask = '';
     if (sel.kind === 'type') {
       const t = A.TYPES[hd.type] || {};
-      title = hd.type; kicker = 'Type \u00b7 ' + (t.pct || ''); sec = 'types'; edge = 'rgba(47,255,143,.42)';
+      title = hd.type; kicker = 'Type \u00b7 ' + (t.pct || ''); sec = 'types'; item = hd.type; edge = 'rgba(47,255,143,.42)';
       youKicker = 'Yours \u00b7 ' + hd.defined.size + ' of nine centers defined';
       gen = [H('What the system holds', t.def || ''),
         H('The strategy it comes with', t.strategy || ''),
@@ -26982,7 +27297,7 @@ class Component extends DCLogic {
       ask = 'What does being ' + art(hd.type) + hd.type + ' actually ask of me day to day?';
     } else if (sel.kind === 'strategy') {
       const s2 = (A.STRATEGIES || []).find(x => x.who.indexOf(hd.type) !== -1) || A.STRATEGIES[1];
-      title = s2.name; kicker = 'Strategy \u00b7 ' + s2.who; sec = 'strategies'; edge = 'rgba(47,255,143,.42)';
+      title = s2.name; kicker = 'Strategy \u00b7 ' + s2.who; sec = 'strategies'; item = s2.name; edge = 'rgba(47,255,143,.42)';
       youKicker = 'Yours \u00b7 ' + s2.who;
       gen = [H('What the system holds', s2.when), H('How correct timing is recognised', s2.recognize), H('When it is ignored', s2.ignored)];
       you = [H('What your chart gives', 'Your chart gives the strategy as: ' + hd.strategy),
@@ -26996,7 +27311,7 @@ class Component extends DCLogic {
     } else if (sel.kind === 'authority') {
       const first = String(hd.authority).split(':')[0].trim().toLowerCase();
       const au = (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1) || A.AUTHORITIES[0];
-      title = au.name; kicker = 'Inner authority'; sec = 'authorities'; edge = 'rgba(139,92,246,.4)';
+      title = au.name; kicker = 'Inner authority'; sec = 'authorities'; item = au.name; edge = 'rgba(139,92,246,.4)';
       youKicker = 'Yours \u00b7 ' + au.name;
       gen = [H('What the system holds', au.how), H('How the signal is recognised', au.recognize), H('How it is followed', au.follow)];
       you = [H('What your chart gives', 'Your chart gives: ' + hd.authority),
@@ -27009,7 +27324,7 @@ class Component extends DCLogic {
       ask = 'Walk me through using my authority on a decision I am sitting on.';
     } else if (sel.kind === 'profile') {
       const pr = this.hdProfile(), lc = A.LINES[pr.c] || {}, lu = A.LINES[pr.u] || {};
-      title = pr.key + ' \u00b7 ' + pr.name; kicker = 'Profile \u00b7 conscious over unconscious'; sec = 'profiles'; edge = 'rgba(139,92,246,.4)';
+      title = pr.key + ' \u00b7 ' + pr.name; kicker = 'Profile \u00b7 conscious over unconscious'; sec = 'profiles'; item = pr.key; edge = 'rgba(139,92,246,.4)';
       youKicker = 'Yours \u00b7 line ' + pr.c + ' over line ' + pr.u;
       gen = [H('Line ' + pr.c + ', ' + lc.name, (lc.theme || '') + ' ' + (lc.behavior || '')),
         H('Line ' + pr.u + ', ' + lu.name, (lu.theme || '') + ' ' + (lu.behavior || '')),
@@ -27026,7 +27341,7 @@ class Component extends DCLogic {
     } else if (sel.kind === 'center') {
       const c = A.CENTERS[sel.name] || {}, defined = hd.defined.has(sel.name);
       const mine = hd.gates.filter(g => this.hdCenterOf(g.gate) === sel.name);
-      title = c.label || sel.name; kicker = defined ? 'Defined center' : 'Undefined center'; sec = 'centers';
+      title = c.label || sel.name; kicker = defined ? 'Defined center' : 'Undefined center'; sec = 'centers'; item = sel.name;
       edge = defined ? 'rgba(89,179,125,.4)' : 'var(--bd)';
       youKicker = (defined ? 'Defined in yours' : 'Open in yours') + ' \u00b7 ' + (mine.length ? mine.length + (mine.length === 1 ? ' gate' : ' gates') : 'no gates');
       gen = [H('What this center handles', c.fn || ''),
@@ -27048,7 +27363,7 @@ class Component extends DCLogic {
       ask = 'What does my ' + (defined ? 'defined' : 'open') + ' ' + sel.name + ' center mean for how I decide things?';
     } else if (sel.kind === 'gate') {
       const g = A.GATES[sel.gate] || [], gl = this.hdGateLines(sel.gate, sel.line) || [];
-      title = 'Gate ' + sel.gate + (g[0] ? ', ' + g[0] : ''); kicker = 'Gate \u00b7 ' + (g[1] || '') + ' center'; sec = 'gates'; edge = 'rgba(47,255,143,.42)';
+      title = 'Gate ' + sel.gate + (g[0] ? ', ' + g[0] : ''); kicker = 'Gate \u00b7 ' + (g[1] || '') + ' center'; sec = 'gates'; item = 'g' + sel.gate; edge = 'rgba(47,255,143,.42)';
       youKicker = sel.line ? 'Yours \u00b7 line ' + sel.line : 'In your chart';
       const take = tags => gl.filter(l => tags.indexOf(l.tag) !== -1)
         .map((l, i) => H(i === 0 ? (tags[0] === 'TRADITIONAL' ? 'What the system holds' : 'What your chart shows') : '', l.text));
@@ -27065,7 +27380,8 @@ class Component extends DCLogic {
     } else if (sel.kind === 'channel') {
       const info = A.channel(sel.a, sel.b);
       const ca = this.hdCenterOf(sel.a), cb = this.hdCenterOf(sel.b);
-      title = (info ? info.name : 'Channel') + ' \u00b7 ' + sel.a + '-' + sel.b; kicker = 'Channel \u00b7 ' + ca + ' to ' + cb; sec = 'channels'; edge = 'rgba(139,92,246,.4)';
+      title = (info ? info.name : 'Channel') + ' \u00b7 ' + sel.a + '-' + sel.b; kicker = 'Channel \u00b7 ' + ca + ' to ' + cb; sec = 'channels';
+      item = info ? info.key : Math.min(sel.a, sel.b) + '-' + Math.max(sel.a, sel.b); edge = 'rgba(139,92,246,.4)';
       youKicker = 'Defined in yours \u00b7 ' + ca + ' to ' + cb;
       gen = [H('What the system holds', info ? info.theme + '. ' + info.meaning : 'A completed circuit between two centers.'),
         H('What a channel is', 'Two gates meeting across two centers. Both ends have to be activated for the circuit to exist, which is why some charts carry a theme outright and others only borrow it from the people around them.')];
@@ -27085,7 +27401,7 @@ class Component extends DCLogic {
       hdPopLines: lines,
       hdPopHasSoco: TV.hdPopYou && soco.length > 0, hdPopSoco: soco,
       hdPopClose: () => this.setState({ hdSel: null }),
-      hdPopAtlas: this.hdAtlasTo(sec),
+      hdPopAtlas: this.hdAtlasTo(sec, item),
       hdPopAsk: () => { this.setState({ hdSel: null }); this.send(ask); } };
   }
   atlasBlocks(key) {
@@ -27099,7 +27415,7 @@ class Component extends DCLogic {
     ];
     if (key === 'types') return Object.keys(A.TYPES).map(k => {
       const t = A.TYPES[k];
-      return { head: k, hasSub: true, sub: t.pct + ' of people', rows: [
+      return { id: k, head: k, hasSub: true, sub: t.pct + ' of people', rows: [
         row('TRADITIONAL', t.def), row('TRADITIONAL', 'Strategy: ' + t.strategy), row('TRADITIONAL', 'Authority: ' + t.authority),
         row('POSSIBILITY', 'In men: ' + t.male), row('POSSIBILITY', 'In women: ' + t.female),
         plain('Strengths: ' + t.strengths), plain('Challenges: ' + t.challenges),
@@ -27108,17 +27424,17 @@ class Component extends DCLogic {
     });
     if (key === 'lines') return [1, 2, 3, 4, 5, 6].map(n => {
       const l = A.LINES[n];
-      return { head: 'Line ' + n + ' \u00b7 ' + l.name, hasSub: true, sub: l.theme, rows: [
+      return { id: n, head: 'Line ' + n + ' \u00b7 ' + l.name, hasSub: true, sub: l.theme, rows: [
         row('TRADITIONAL', l.behavior), row('POSSIBILITY', 'In men: ' + l.male), row('POSSIBILITY', 'In women: ' + l.female)
       ] };
     });
     if (key === 'profiles') return Object.keys(A.PROFILES).map(k => {
       const pr = A.PROFILES[k];
-      return { head: k + ' \u00b7 ' + pr.name, hasSub: false, sub: '', rows: [plain(pr.line), row('TRADITIONAL', pr.how)] };
+      return { id: k, head: k + ' \u00b7 ' + pr.name, hasSub: false, sub: '', rows: [plain(pr.line), row('TRADITIONAL', pr.how)] };
     });
     if (key === 'centers') return Object.keys(A.CENTERS).map(k => {
       const c = A.CENTERS[k];
-      return { head: c.label, hasSub: true, sub: c.fn, rows: [
+      return { id: k, head: c.label, hasSub: true, sub: c.fn, rows: [
         row('TRADITIONAL', 'Defined: ' + c.defined), row('TRADITIONAL', 'Undefined: ' + c.open), row('POSSIBILITY', 'Wisdom when open: ' + c.wisdom)
       ] };
     });
@@ -27126,24 +27442,24 @@ class Component extends DCLogic {
       const byCenter = {};
       Object.keys(A.GATES).forEach(n => { const g = A.GATES[n]; (byCenter[g[1]] = byCenter[g[1]] || []).push([+n, g]); });
       return Object.keys(A.CENTERS).filter(c => byCenter[c]).map(c => ({
-        head: A.CENTERS[c].label + ' \u00b7 ' + byCenter[c].length + ' gates', hasSub: false, sub: '',
-        rows: byCenter[c].sort((x, y) => x[0] - y[0]).map(([n, g]) => plain(n + '. ' + g[0] + ', '.replace(': ', '\u00b7') + ' ' + g[2] + ' Low: ' + g[3] + ' High: ' + g[4]))
+        id: c, head: A.CENTERS[c].label + ' \u00b7 ' + byCenter[c].length + ' gates', hasSub: false, sub: '',
+        rows: byCenter[c].sort((x, y) => x[0] - y[0]).map(([n, g]) => ({ ...plain(n + '. ' + g[0] + ', '.replace(': ', '\u00b7') + ' ' + g[2] + ' Low: ' + g[3] + ' High: ' + g[4]), id: 'g' + n }))
       }));
     }
     if (key === 'channels') {
       const keys = Object.keys(A.CHANNELS);
       return [{ head: 'All ' + keys.length + ' channels', hasSub: true, sub: 'gate pair, name, theme',
-        rows: keys.map(k => { const c = A.CHANNELS[k]; return plain(k + ' \u00b7 ' + c[0] + '. ' + c[1] + '. ' + c[2]); }) }];
+        rows: keys.map(k => { const c = A.CHANNELS[k]; return { ...plain(k + ' \u00b7 ' + c[0] + '. ' + c[1] + '. ' + c[2]), id: k }; }) }];
     }
-    if (key === 'strategies') return A.STRATEGIES.map(st => ({ head: st.name, hasSub: true, sub: st.who, rows: [
+    if (key === 'strategies') return A.STRATEGIES.map(st => ({ id: st.name, head: st.name, hasSub: true, sub: st.who, rows: [
       row('TRADITIONAL', 'When: ' + st.when), row('TRADITIONAL', 'Correct timing: ' + st.recognize), row('POSSIBILITY', 'Ignored: ' + st.ignored)
     ] }));
-    if (key === 'authorities') return A.AUTHORITIES.map(au => ({ head: au.name, hasSub: false, sub: '', rows: [
+    if (key === 'authorities') return A.AUTHORITIES.map(au => ({ id: au.name, head: au.name, hasSub: false, sub: '', rows: [
       row('TRADITIONAL', au.how), row('TRADITIONAL', 'Recognising it: ' + au.recognize), row('POSSIBILITY', 'Following it: ' + au.follow)
     ] }));
     if (key === 'open') return Object.keys(A.CENTERS).map(k => {
       const c = A.CENTERS[k];
-      return { head: c.label, hasSub: false, sub: '', rows: [
+      return { id: k, head: c.label, hasSub: false, sub: '', rows: [
         plain('Defined means consistent: ' + c.defined), plain('Undefined means variable: ' + c.open), row('POSSIBILITY', c.wisdom)
       ] };
     });
@@ -27232,14 +27548,28 @@ class Component extends DCLogic {
     if (!A) return { libAtlas: false };
     const counts = { types: '5', lines: '6', profiles: '12', centers: '9', gates: '64', channels: '36',
       strategies: '4', authorities: '7', open: '9', example: '8 steps', intro: '' };
+    /* Every block and row carries an anchor, so Learn from Atlas, the chart
+       popup and the search bar can land on the entry itself rather than the
+       top of its section. The entry asked for wears an edge so the eye finds
+       it after the scroll. atlasItem is stored already slugged. */
+    const hit = '2px solid rgba(47,255,143,.42)', miss = '0px solid transparent';
+    const want = st.atlasItem ? 'incommon-atlas-' + st.atlasSec + '-' + st.atlasItem : null;
+    const mark = k => this.atlasBlocks(k).map((b, i) => {
+      const anchor = 'incommon-atlas-' + k + '-' + this.atlasSlug(b.id != null ? b.id : i);
+      return { ...b, anchor, bl: anchor === want ? hit : miss, pl: anchor === want ? '10px' : '0px',
+        rows: b.rows.map((r, j) => {
+          const ra = r.id != null ? 'incommon-atlas-' + k + '-' + this.atlasSlug(r.id) : anchor + '-r' + j;
+          return { ...r, anchor: ra, bl: ra === want ? hit : miss, pl: ra === want ? '10px' : '0px' };
+        }) };
+    });
     return { libAtlas: true,
-      atlasBack: () => this.setState({ libView: null, atlasSec: null }),
+      atlasBack: () => this.setState({ libView: null, atlasSec: null, atlasItem: null }),
       atlasSecs: A.SECTIONS.map(([k, title]) => ({
         title: title, count: counts[k] || '', open: st.atlasSec === k, icon: st.atlasSec === k ? '\u2212' : '+',
         anchor: 'incommon-atlas-' + k,
         bd: st.atlasSec === k ? 'rgba(47,255,143,.42)' : 'var(--bd)',
-        toggle: () => this.setState({ atlasSec: st.atlasSec === k ? null : k }),
-        blocks: st.atlasSec === k ? this.atlasBlocks(k) : []
+        toggle: () => this.setState({ atlasSec: st.atlasSec === k ? null : k, atlasItem: null }),
+        blocks: st.atlasSec === k ? mark(k) : []
       })) };
   }
   todayVals() {
@@ -29611,7 +29941,8 @@ class Component extends DCLogic {
    *
    * NOTHING IN IT IS WRITTEN IN ADVANCE. Every line is drawn from this month's
    * sky against this profile's chart: the ingress, the lunations, the eclipses
-   * if any, the stations, and the windows already dated on the Throughline. A
+   * if any, the stations, the windows already dated on the Throughline, and
+   * the Human Design gates the Sun and the Earth hold through the month. A
    * month with nothing in it says so. That is the answer to the failure this
    * category is known for, which is 365 daily readings a year written by
    * people who only ever wrote 40.
@@ -29749,8 +30080,89 @@ class Component extends DCLogic {
       ? wins.map(w => H(w.label + ' · ' + w.range, w.ask + ' ' + w.exactLine))
       : [H('', 'Nothing slow reaches your chart inside these dates. That is not a hole in the reading, it is the reading: a month with no weather in it is where things get built on purpose rather than under pressure.')]);
 
-    /* 6. One date, named, so the month can be checked afterwards. */
-    const marks = [];
+    /* 6. Human Design. The same month through the wheel of sixty four gates:
+          which gates the Sun holds, where each lands in this chart, and whether
+          it closes a channel the chart carries half of. The Earth sits opposite
+          and changes gate on the same day, because the gate boundaries line up
+          across the wheel, so every run asks about both. A gate that is already
+          natal closes nothing new: its channels are ones the chart has. Type
+          and authority are set at birth and no transit moves them, so that is
+          said once rather than on every run. */
+    let hd = null;
+    try { hd = this.hdChart(); } catch (e) { hd = null; }
+    const gRuns = hd ? this.gateRuns(b.from, days) : [];
+    const hdMarks = [];
+    let hdCloses = 0;
+    if (gRuns.length) {
+      const mine = new Set(hd.gates.map(g => g.gate));
+      const gname = g => this.GATE_NAMES[g] || '';
+      const closing = g => mine.has(g) ? [] : this.HD_CHANNELS
+        .filter(c => (c[0] === g && mine.has(c[1])) || (c[1] === g && mine.has(c[0])))
+        .map(c => ({ c: c, partner: c[0] === g ? c[1] : c[0] }));
+      const chName = x => 'the ' + x.c[0] + '-' + x.c[1] + ' channel';
+      const word = n => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'][n] || String(n);
+      /* Neighbouring gates often share a center: October walks six in a row
+         through the Spleen. A sentence the reader has just read is shortened
+         the next time rather than printed again, so `said` tracks which of
+         the long forms have been used in this month's section. */
+      const said = {};
+      let prevC = null;
+      const lines = gRuns.map((r, i) => {
+        const g = r.gate, e = this.gateOf(this.sunOn(r.from).lon + 180).gate;
+        const C = this.gateCenter(g), sc = closing(g), ec = closing(e);
+        if (sc.length || ec.length) hdCloses++;
+        /* The first run may have begun last month; only an arrival inside
+           these dates is a day worth naming. */
+        const arrives = i > 0 || this.gateOf(this.sunOn(this.addDays(b.from, -1)).lon).gate !== g;
+        if (arrives && sc.length) hdMarks.push({ d: r.from, w: 2.5, why: 'the Sun enters Gate ' + g + ' and closes ' + chName(sc[0]) + ' against your Gate ' + sc[0].partner });
+        else if (arrives && ec.length) hdMarks.push({ d: r.from, w: 2.5, why: 'the Earth enters Gate ' + e + ' and closes ' + chName(ec[0]) + ' against your Gate ' + ec[0].partner });
+        const def = !!C && hd.defined.has(C);
+        let where = '';
+        if (C && C === prevC) where = 'Still the ' + C + ' center, ' + (def ? 'defined' : 'open') + ' in your chart. ';
+        else if (C) {
+          const k = def ? 'def' : 'open';
+          where = 'It sits in the ' + C + ' center, which the system assigns to ' + this.centerTheme(C) + ', and that center is ' + (def ? 'defined' : 'open') + ' in your chart'
+            + (said[k] ? '. ' : def ? ', so the tradition reads a gate there as landing on something steady. '
+              : ', where the tradition expects a theme to be taken in from other people as much as held. ');
+          said[k] = 1;
+        }
+        prevC = C;
+        let rel;
+        if (mine.has(g)) {
+          rel = said.natal ? 'Gate ' + g + ' is one of yours as well: a known theme, louder.'
+            : 'Gate ' + g + ' is already one of your natal gates, so this reads as a known theme with more light on it rather than a new one.';
+          said.natal = 1;
+        } else if (sc.length) {
+          const more = sc.length > 1 ? ', and ' + this.listJoin(sc.slice(1).map(x => chName(x) + ' closes against Gate ' + x.partner)) + ' as well' : '';
+          rel = said.chan
+            ? 'Your natal Gate ' + sc[0].partner + ', ' + gname(sc[0].partner) + ', takes the other end of ' + chName(sc[0]) + ', joining the ' + sc[0].c[2] + ' and ' + sc[0].c[3] + ' centers while the Sun stays' + more + '.'
+            : 'Your natal Gate ' + sc[0].partner + ', ' + gname(sc[0].partner) + ', holds the other end of ' + chName(sc[0]) + ', so for these days the '
+              + sc[0].c[2] + ' and ' + sc[0].c[3] + ' centers are joined in a way your chart does not join them on its own' + more
+              + '. The link leaves when the Sun does, which makes what it gets used for the question worth asking.';
+          said.chan = 1;
+        } else {
+          rel = said.none ? 'No natal gate of yours answers this one.'
+            : 'None of your natal gates sits at the other end of it, and the tradition reads that as a subject passing through the room rather than a current you carry.';
+          said.none = 1;
+        }
+        const earth = ' Opposite it the Earth holds Gate ' + e + ', ' + gname(e)
+          + (mine.has(e) ? ', which is in your chart as well.'
+            : ec.length ? ', and that side closes ' + chName(ec[0]) + ' against your Gate ' + ec[0].partner + '.'
+            : ', with no partner for it in your chart.');
+        const dates = r.from.getTime() === r.to.getTime() ? this.fmtDay(r.from) : this.fmtDay(r.from) + ' to ' + this.fmtDay(r.to);
+        return H('Gate ' + g + ' · ' + gname(g) + ' · ' + dates, where + rel + earth);
+      });
+      const auth = String(hd.authority).split(':')[0];
+      lines.unshift(H('', 'Human Design reads the same sky through a wheel of sixty four gates. In ' + label + ' the Sun works through '
+        + word(gRuns.length) + ' of them, with the Earth always in the gate across the wheel, and '
+        + (hdCloses ? word(hdCloses) + (hdCloses === 1 ? ' of those stretches closes' : ' of those stretches close') + ' a channel your chart holds half of.'
+          : 'none of those stretches closes a channel against your chart.')
+        + ' Your type, ' + hd.type + ', and your ' + auth + ' authority were fixed at birth; a transit lends a gate for a few days and moves neither.'));
+      sec('The gates the Sun walks', '', lines);
+    }
+
+    /* 7. One date, named, so the month can be checked afterwards. */
+    const marks = hdMarks.slice();
     wins.forEach(w => { if (inM(w.exact)) marks.push({ d: w.exact, w: w.weight, why: w.label + ' is exact' }); });
     ecl.forEach(e => marks.push({ d: e.date, w: 99, why: 'a ' + e.kind.toLowerCase() + ' eclipse falls at ' + Math.floor(e.deg) + '° ' + e.sign }));
     lun.forEach(l => {
@@ -29766,7 +30178,7 @@ class Component extends DCLogic {
       H('', 'A marked date is a question, never a promise. Put it on the Throughline, then come back at the end of the month and find out whether the sky earned it.')
     ]);
 
-    /* 7. The numbers, on the same month. */
+    /* 8. The numbers, on the same month. */
     if (core) {
       const py = core.personalYear(this.dob(), b.from.getFullYear());
       const pyV = py ? py.value : 0;
@@ -29779,7 +30191,7 @@ class Component extends DCLogic {
       ]);
     }
 
-    /* 8. WHAT IT IS, SAID ONCE.
+    /* 9. WHAT IT IS, SAID ONCE.
 
        This was two paragraphs and the second was an instruction: "What decides
        whether any of it held is your own record". True, and the reader did not
@@ -29797,7 +30209,8 @@ class Component extends DCLogic {
       summary: this.listJoin(
         (ecl.length ? [ecl.length + (ecl.length === 1 ? ' eclipse' : ' eclipses')] : [])
           .concat([lun.length + (lun.length === 1 ? ' moon' : ' moons'),
-            wins.length + (wins.length === 1 ? ' window on your chart' : ' windows on your chart')])) };
+            wins.length + (wins.length === 1 ? ' window on your chart' : ' windows on your chart')])
+          .concat(hdCloses ? [hdCloses + (hdCloses === 1 ? ' gate closing a channel' : ' gates closing a channel')] : [])) };
     return this._mr;
   }
   monthVals() {
@@ -31351,7 +31764,7 @@ class Component extends DCLogic {
                   if (hits.length) {
                     const h = hits[0], k = String(h.asp).toLowerCase(), a = this.aspName(k);
                     out.push(S('The contact that matters most today',
-                      'Transiting ' + h.a.name + ' at ' + this.fmtPos(h.a) + ' is ' + a + ' your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', within ' + h.orb.toFixed(1) + ' degrees. In plain terms: something moving overhead has lined up with something fixed in you. The tradition reads it as ' + this.bodyEnergy(h.b.name) + ' being called forward, in the manner of ' + (this.ASP_NATURE[k] || 'a conversation between the two').replace(/\.$/, '').toLowerCase() + '.'));
+                      'Transiting ' + h.a.name + ' at ' + this.fmtPos(h.a) + ' is ' + a + ' your natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', within ' + h.orb.toFixed(1) + ' degrees. In plain terms: something moving overhead has lined up with something fixed in you. The tradition reads it as ' + this.bodyEnergy(h.b.name) + ' being called forward. ' + (this.ASP_SHORT[k] || 'The two are in conversation.')));
                     const tally = {};
                     hits.forEach(x => { const hs = houseOf(x.b); if (hs) tally[hs] = (tally[hs] || 0) + 1; });
                     const top = Object.keys(tally).sort((x, y) => tally[y] - tally[x])[0];
@@ -31539,7 +31952,7 @@ class Component extends DCLogic {
               natalAspectRows: asps.slice(0, 14).map((x, i) => ({
                 label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name,
                 orb: x.orb.toFixed(1) + '\u00b0 orb', c: this.ASP_COLOR[x.asp][0],
-                mean: this.ASP_NATURE[x.asp], go: () => this.setState({ aspSel: i })
+                mean: this.ASP_SHORT[x.asp], go: () => this.setState({ aspSel: i })
               })),
               aspOpen: st.aspSel != null && !!asps[st.aspSel],
               aspClose: () => this.setState({ aspSel: null }),
@@ -31655,8 +32068,9 @@ class Component extends DCLogic {
             desc: 'Open here. You take ' + c[1] + ' in from the people around you, and it is not consistently yours.',
             go: this.hdOpen({ kind: 'center', name: c[0] }) })),
           /* Learn from Atlas lands on the section that answers the HD tab the
-             reader is on, not the atlas root. hdTab is the teachings strip. */
-          hdAtlasGo: this.hdAtlasTo(this.hdAtlasFor(this.state.hdTab)),
+             reader is on, and on the reader's own entry inside it where the tab
+             has one. hdTab is the teachings strip. */
+          hdAtlasGo: this.hdAtlasTo(this.hdAtlasFor(this.state.hdTab), this.hdAtlasItemFor(this.state.hdTab, hd)),
           hdCaveat: 'Drawn from your birth date with an offline approximation. A precise chart needs your exact birth time and place. Gates near a boundary may shift.'
         };
       })() : {}),
@@ -32412,7 +32826,7 @@ class Component extends DCLogic {
          degree, so a jump that did not clear them would open the tarot deck at
          whatever card the last search happened to land on. */
       const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
-        selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, apSec: null, arcSel: null,
+        selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
         ttSec: null, ttCard: null, icSec: null, icHex: null, icQuery: '',
         dlSec: null, dlOpen: null, dlQuery: '', lexSign: null, lexDeg: null, lexQuery: '', tlOpen: null,
         dtSearch: false, dtQuery: '', vtSearch: false, vtQuery: '' };
@@ -32602,29 +33016,29 @@ class Component extends DCLogic {
     const AT = window.HDAtlas;
     if (AT) {
       const hd = [];
-      const to = sec => this.searchLib('hdatlas', { atlasSec: sec });
+      const to = (sec, item) => this.searchLib('hdatlas', { atlasSec: sec, atlasItem: this.atlasSlug(item) });
       Object.keys(AT.GATES || {}).forEach(n => { const g = AT.GATES[n];
         hd.push({ glyph: '◈', title: 'Gate ' + n + ' · ' + g[0], sub: g[1] + ' · ' + cut(g[2], 64),
-          keys: 'gate ' + n + ' ' + g[1], body: g[2], target: to('gates') }); });
+          keys: 'gate ' + n + ' ' + g[1], body: g[2], target: to('gates', 'g' + n) }); });
       Object.keys(AT.CHANNELS || {}).forEach(k => { const c = AT.CHANNELS[k];
         hd.push({ glyph: '◇', title: 'Channel ' + k + ' · ' + c[0], sub: c[1] + ' · ' + cut(c[2], 60),
-          keys: 'channel ' + k, body: c[2], target: to('channels') }); });
+          keys: 'channel ' + k, body: c[2], target: to('channels', k) }); });
       Object.keys(AT.CENTERS || {}).forEach(k => { const c = AT.CENTERS[k];
         hd.push({ glyph: '⬡', title: c.label || k, sub: 'centre · ' + cut(c.fn, 64),
-          keys: 'center centre ' + k, body: c.fn, target: to('centers') }); });
+          keys: 'center centre ' + k, body: c.fn, target: to('centers', k) }); });
       Object.keys(AT.TYPES || {}).forEach(k => { const t = AT.TYPES[k];
         hd.push({ glyph: '☉', title: k, sub: 'type · ' + t.pct + ' · ' + cut(t.strategy, 52),
-          keys: 'type', body: t.def, target: to('types') }); });
+          keys: 'type', body: t.def, target: to('types', k) }); });
       Object.keys(AT.PROFILES || {}).forEach(k => { const p = AT.PROFILES[k];
         hd.push({ glyph: '◔', title: 'Profile ' + k + ' · ' + p.name, sub: p.line,
-          keys: 'profile ' + k, body: p.how, target: to('profiles') }); });
+          keys: 'profile ' + k, body: p.how, target: to('profiles', k) }); });
       Object.keys(AT.LINES || {}).forEach(n => { const l = AT.LINES[n];
         hd.push({ glyph: '│', title: 'Line ' + n + ' · ' + l.name, sub: l.theme,
-          keys: 'line ' + n, body: l.behavior, target: to('lines') }); });
+          keys: 'line ' + n, body: l.behavior, target: to('lines', n) }); });
       (AT.AUTHORITIES || []).forEach(a => hd.push({ glyph: '◎', title: a.name,
-        sub: 'authority · ' + cut(a.how, 62), keys: 'authority', body: a.follow, target: to('authorities') }));
+        sub: 'authority · ' + cut(a.how, 62), keys: 'authority', body: a.follow, target: to('authorities', a.name) }));
       (AT.STRATEGIES || []).forEach(s => hd.push({ glyph: '△', title: s.name,
-        sub: 'strategy · ' + s.who, keys: 'strategy', body: s.recognize, target: to('strategies') }));
+        sub: 'strategy · ' + s.who, keys: 'strategy', body: s.recognize, target: to('strategies', s.name) }));
       push('Human Design', this.searchRank(q, hd, 8));
     }
 
@@ -32996,7 +33410,7 @@ class Component extends DCLogic {
   sectionRoot(id) {
     const shared = { placeSel: null, aspSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
     if (id === 'spirit') return { ...shared, spiritView: null, focusToday: false, hdSel: null, ttCard: null, icHex: null, dlOpen: null };
-    if (id === 'library') return { ...shared, libView: null, selId: null, atlasSec: null, apSec: null, arcSel: null, ypCat: null, ypPick: false, ttCard: null, icHex: null, dlOpen: null };
+    if (id === 'library') return { ...shared, libView: null, selId: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null, ypCat: null, ypPick: false, ttCard: null, icHex: null, dlOpen: null };
     if (id === 'today') return { ...shared, dropOpen: false, focusToday: false };
     return shared;
   }

@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.2 cover  |  built 2026-09-08 -->
+<!-- inCommon incommon-v6.2 cover  |  built 2026-09-11 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -38,10 +38,11 @@
      has none anywhere, and the hash forward below exists because the app's
      router is the hash.
 
-     The arrow's target is the one thing that differs between this file and
-     the shipped bundle. Here it is the app source; tools/build-bundle.js
-     rewrites both occurrences to ./app.html and fails loudly if it does not
-     find exactly two. -->
+     The app's address is the one thing that differs between this file and
+     the shipped bundle: it is the href on "enter here" and the target of the
+     hash forward. Here it is the app source; tools/build-bundle.js rewrites
+     both occurrences to ./app.html and fails loudly if it does not find
+     exactly two. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -142,23 +143,50 @@
     transition: letter-spacing 3200ms cubic-bezier(.2,.7,.2,1) 800ms;
   }
   body.live .mark { letter-spacing: .055em; }
-  .enter {
-    position: fixed; top: 32px; right: 32px; width: 44px; height: 44px;
-    display: inline-flex; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity 2200ms ease 1100ms, transform 500ms cubic-bezier(.2,.8,.2,1);
+  /* THE WAY IN IS A SUBTITLE, AND IT WAITS FOR THE TITLE.
+
+     It hangs from the middle of the screen by half the title's own height, so
+     the title stays exactly where it was instead of being pushed up by a
+     second row. It begins at 3.2s, as the title's reveal completes, and takes
+     2.8s to arrive: the title is the first thing and the invitation is the
+     second. Three opacities are in play and each has one owner: .markwrap the
+     reveal of both, .sub this later one, and .enter the scroll fade, which
+     scrollFade writes inline.
+
+     Cream and violet, never --ac: the cover is outside the theme system, and
+     a green word here would be the action colour borrowed for a cover. The
+     glow breathes in text-shadow only, so the link's own opacity stays at 1
+     and the contrast gate measures the colour it will actually paint. */
+  .sub {
+    position: absolute; left: 0; right: 0;
+    top: calc(50% + clamp(22px, 5.8vw, 98px) + clamp(10px, 1.5vw, 26px));
+    display: flex; justify-content: center;
+    opacity: 0; transition: opacity 2800ms cubic-bezier(.4,0,.2,1) 3200ms;
   }
-  body.live .enter { opacity: 1; }
-  .enter svg { animation: arrow-tw 4600ms ease-in-out infinite; }
-  .enter:hover { transform: translateX(3px); }
-  .enter:focus-visible { outline: 1px solid rgba(255,248,231,.5); outline-offset: 4px; border-radius: 4px; }
-  @keyframes arrow-tw {
-    0%, 100% { opacity: .74; filter: drop-shadow(0 0 3px rgba(255,248,231,.55)) drop-shadow(0 0 10px rgba(255,248,231,.30)); }
-    50%      { opacity: 1;   filter: drop-shadow(0 0 6px rgba(255,255,255,.95)) drop-shadow(0 0 16px rgba(255,248,231,.58)); }
+  body.live .sub { opacity: 1; }
+  .enter {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px;
+    padding: 0 .9em 0 1.24em;
+    font-family: "Marcellus", "Times New Roman", serif; font-weight: 400;
+    font-size: clamp(15px, 1.75vw, 30px); line-height: 1; letter-spacing: .34em;
+    color: #fff8e7; border-radius: 999px;
+    text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55);
+    animation: enter-glow 4200ms ease-in-out 6000ms infinite both;
+  }
+  .enter:hover, .enter:focus-visible {
+    color: #fff; animation: none;
+    text-shadow: 0 0 6px rgba(255,255,255,.95), 0 0 22px rgba(183,155,255,.9), 0 0 54px rgba(139,92,246,.9);
+  }
+  .enter:focus-visible { outline: 1px solid rgba(255,248,231,.5); outline-offset: 2px; }
+  @keyframes enter-glow {
+    0%, 100% { text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55); }
+    50%      { text-shadow: 0 0 6px rgba(255,248,231,.85), 0 0 20px rgba(183,155,255,.78), 0 0 46px rgba(139,92,246,.78); }
   }
   @media (prefers-reduced-motion: reduce) {
     .markwrap { transition: opacity 1200ms ease 600ms; }
     .mark { letter-spacing: .055em; transition: none; }
-    .enter svg { animation: none; filter: drop-shadow(0 0 4px rgba(255,248,231,.7)) drop-shadow(0 0 12px rgba(255,248,231,.35)); }
+    .sub { transition: opacity 1200ms ease 1400ms; }
+    .enter { animation: none; }
   }
   /* THE DECORATED I, SET INSIDE THE SHADOW.
 
@@ -204,15 +232,18 @@
     .mark { font-size: clamp(34px, 13.5vw, 96px); }
     #fallback, #notice { left: 18px; right: 18px; bottom: 18px; font-size: 10px; letter-spacing: .13em; }
     body.live .mark { letter-spacing: .04em; }
-    .enter { top: 20px; right: 20px; }
-    .enter svg { width: 16px; height: 16px; }
+    .sub { top: calc(50% + clamp(17px, 6.75vw, 48px) + clamp(8px, 2.6vw, 18px)); }
+    .enter { font-size: clamp(14px, 3.9vw, 20px); letter-spacing: .3em; padding: 0 .8em 0 1.1em; }
   }
 </style>
 </head>
 <body>
 <canvas id="view"></canvas>
 <div id="veil"></div>
-<div class="markwrap"><h1 class="mark">inCommon</h1></div>
+<div class="markwrap">
+  <h1 class="mark">inCommon</h1>
+  <div class="sub"><a class="enter" href="./app.html">enter here</a></div>
+</div>
 <div class="glyph" aria-hidden="true">
   <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
     <g stroke="#8b5cf6" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round">
@@ -232,7 +263,6 @@
     </g>
   </svg>
 </div>
-<a class="enter" href="./app.html" aria-label="Enter inCommon" title="Enter inCommon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="18.5" y2="12"></line><polyline points="12.5,6 18.5,12 12.5,18"></polyline></svg></a>
 <div id="fallback">SIGNAL LOST // RENDERER UNAVAILABLE OFFLINE</div>
 <div id="notice"></div>
 <script>
@@ -296,7 +326,106 @@ float fbm(vec3 p, int oct){
 }
 `;
 
-const MAIN_FRAG = COMMON + `
+/* THE MARK IS ONE FUNCTION, AND TWO PASSES DRAW IT.
+
+   markLight() draws the horizon rim at rest and the logo that rim becomes on
+   the way out. At rest MAIN_FRAG draws it, inside the picture, so the rim
+   blooms and takes the aberration with everything else. Once the exit starts
+   it crossfades into FINAL_FRAG, which renders at the screen's own pixel
+   density, so the logo that lands is drawn once per device pixel rather than
+   upscaled from a scene buffer capped at 1.6 and cut further on a slow GPU.
+   Its colours sit below the bloom threshold, so leaving the bloom behind costs
+   nothing visible.
+
+   It is its own string rather than part of COMMON because COMMON is ported
+   byte for byte and the three bloom shaders have no use for this.
+
+   aa is the stroke's edge width in screen units: the final pass hands it
+   three quarters of a device pixel, and the scene pass hands -1 and keeps the
+   proportional edge it always had. glow is how much violet halo to draw, and
+   it is zero at rest: the glow belongs to the logo, not to the rim sitting in
+   the picture. The function returns light with no presence applied, so each
+   caller weights it. */
+const MARK = `
+vec3 markLight(vec2 s, vec2 hole, float holeR, float aspect, float e, float aa, float glow){
+  /* THE LOGO LANDS AT A SIZE THE FRAME CAN HOLD.
+
+     It used to finish at twice the hole's radius, and the mark is three radii
+     wide, so a portrait phone landed it at 118% of the screen's width. It now
+     finishes at the smallest of 1.7 hole radii, 0.43 of the half width and
+     0.60 of the half height: about 68% of a portrait phone's width and 54% of
+     a desktop's, with the glow still inside the frame. At e = 0 the radius is
+     still exactly the hole's, so the rim at rest has not moved. */
+  vec2  ctr  = mix(hole, vec2(0.0), e);
+  float Rend = min(holeR * 1.7, min(0.43 * aspect, 0.60));
+  float R    = mix(holeR, Rend, e);
+  float DX   = R * 0.5 * e;
+  float hw   = mix(holeR * 0.0435, R * 0.0865, e);
+  float edge = aa < 0.0 ? hw * 0.15 : aa;
+
+  vec2  mk = s - ctr;
+  float d1 = length(mk - vec2(-DX, 0.0));
+  float d2 = length(mk - vec2( DX, 0.0));
+  float b1 = 1.0 - smoothstep(hw - edge, hw + edge, abs(d1 - R));
+  float b2 = 1.0 - smoothstep(hw - edge, hw + edge, abs(d2 - R));
+  float in1 = 1.0 - smoothstep(R - hw, R + hw, d1);
+  float in2 = 1.0 - smoothstep(R - hw, R + hw, d2);
+  float lensIn = in1 * in2;
+
+  /* split gates the green boundary from 0.15 to 0.75, because at e = 0 the
+     two circles are coincident and arcs would otherwise claim half of the
+     single ring: the first version read as a ring half violet and half green
+     before anything had moved. fill is the last move: the lens goes solid and
+     the green boundary hands back to violet, so what lands is the mark as the
+     identity sheet draws it, two whole violet rings with a filled green lens.
+     Green filling the lens is the colour doing exactly the job the logo README
+     reserves it for, which is naming what two wholes share. */
+  float split = smoothstep(0.15, 0.75, e);
+  float fill  = smoothstep(0.55, 1.00, e);
+  float arcs  = max(b1 * in2, b2 * in1) * split * (1.0 - fill);
+  float outer = max(max(b1, b2) - arcs, 0.0);
+  float ring  = max(b1, b2);
+
+  float near = min(abs(d1 - R), abs(d2 - R));
+  float halo = exp(-pow(near / (hw * 3.0), 2.0));
+
+  /* The desaturation eases off as the mark arrives, so what lands at the end
+     is the identity's own #8b5cf6 rather than the muted version the rim wears
+     while it is sitting in the picture. */
+  vec3 vio = lin(vec3(0.545, 0.361, 0.965));
+  vio = mix(vio, vec3(dot(vio, vec3(0.2126, 0.7152, 0.0722))), 0.45 * (1.0 - e));
+  vec3 col = vio * (outer * 0.95 + halo * 0.06 * (1.0 - lensIn));
+
+  /* THE GLOW IS VIOLET, AND IT OWNS ONLY THE DARK.
+
+     Two falloffs from the stroke's outer edge, a tight one that reads as the
+     line lit and a wide one that reads as light on the dark around it, both
+     scaled by R so the glow keeps its proportion at every size. It is kept
+     off the stroke by (1 - ring) and out of the lens by (1 - lensIn), because
+     two additive lights in the same pixels sum toward white: violet over the
+     violet stroke would bleach the line, and violet over the green lens would
+     turn it cyan, which is the fault this block has hit three times already. */
+  float go = max(near - hw, 0.0);
+  float lit = exp(-pow(go / (R * 0.045), 2.0)) * 0.50 + exp(-pow(go / (R * 0.20), 2.0)) * 0.20;
+  col += vio * lit * (1.0 - lensIn) * (1.0 - ring) * glow;
+
+  vec3 grn = lin(vec3(0.184, 1.000, 0.561));
+  float bleed = exp(-pow(near / (hw * 1.5), 2.0)) * lensIn;
+  /* The fill stops where the ring band is, so the violet stroke passes over
+     the green lens instead of summing with it. */
+  col += grn * (arcs * 0.82 + bleed * 0.10 * split * (1.0 - fill)
+                + lensIn * fill * 0.80 * (1.0 - ring));
+
+  /* The thin inner rim is the rim's own green and has nowhere to go once the
+     lens exists, so it leaves over the first half of the move. */
+  float inner = 1.0 - smoothstep(0.0, 0.45, e);
+  float dg = length(mk) - (R - hw * 2.1);
+  col += grn * exp(-pow(dg / (hw * 0.50), 2.0)) * 0.40 * inner;
+  return col;
+}
+`;
+
+const MAIN_FRAG = COMMON + MARK + `
 uniform vec2  uRes;
 uniform float uTime;
 uniform vec3  uCam;
@@ -561,9 +690,9 @@ void main(){
      was noticed.
 
      Two things keep it honest. It is thin, so it is a line and not a shape
-     competing with the one control on the page, which is a white arrow and
-     stays white. And it is the only green on the cover, so nothing else can
-     start borrowing it. */
+     competing with the one control on the page, which is the cream "enter
+     here" and stays cream. And it is the only green on the cover, so nothing
+     else can start borrowing it. */
   /* THE SCENE LEAVES AND THE MARK STAYS.
 
      Multiplying col here rather than fading a DOM veil over the canvas: the
@@ -574,79 +703,23 @@ void main(){
      leaves the mark, which is added below it, untouched. */
   col *= 1.0 - uExit;
 
+  /* THE RIM BECOMES THE MARK, AND THE MARK MOVES TO THE LAST PASS.
+
+     At uExit 0 markLight() is exactly the horizon rim: two circles of the
+     hole's radius with their centres coincident, which draws as one. As the
+     exit runs the centres separate, the radius grows, the stroke thickens to
+     the mark's own 0.173R, and the whole thing walks from the hole to the
+     middle of the screen. The mark is not drawn over the rim, it is the rim,
+     moved.
+
+     xf hands it to FINAL_FRAG over the first 18% of the exit, so the logo that
+     lands is drawn at the screen's density rather than the scene buffer's. The
+     two weights are (1 - xf) here and xf there, so the handover changes where
+     it is drawn and not how bright it is. */
   float pres = max(uRim, uExit);
-  if (pres > 0.0015) {
-    /* THE RIM BECOMES THE MARK.
-
-       At e = 0 this is exactly the horizon rim: two circles of the hole's
-       radius with their centres coincident, which draws as one. As e runs to
-       1 the centres separate to R/2, the radius doubles, the stroke thickens
-       from the thin rim to the mark's own 0.173R, and the whole thing walks
-       from the hole's projected position to the middle of the screen. So the
-       mark is not drawn over the rim, it is the rim, moved.
-
-       The lens only earns its green once the circles have actually parted:
-       split gates it from 0.15 to 0.75, because at e = 0 the two circles are
-       coincident and arcs would otherwise claim half the single ring. That is
-       what the first version did and it read as a ring half violet and half
-       green before anything had moved. */
-    float e = uExit;
-    vec2  ctr = mix(uHoleS, vec2(0.0), e);
-    float R   = uHoleR * mix(1.0, 2.0, e);
-    float DX  = R * 0.5 * e;
-    float hw  = mix(uHoleR * 0.0435, R * 0.0865, e);
-
-    vec2  mk = s - ctr;
-    float d1 = length(mk - vec2(-DX, 0.0));
-    float d2 = length(mk - vec2( DX, 0.0));
-    float b1 = 1.0 - smoothstep(hw * 0.85, hw * 1.15, abs(d1 - R));
-    float b2 = 1.0 - smoothstep(hw * 0.85, hw * 1.15, abs(d2 - R));
-    float in1 = 1.0 - smoothstep(R - hw, R + hw, d1);
-    float in2 = 1.0 - smoothstep(R - hw, R + hw, d2);
-    float lensIn = in1 * in2;
-
-    /* split gates the green boundary from 0.15 to 0.75, because at e = 0 the
-       two circles are coincident and arcs would otherwise claim half of the
-       single ring. fill is the last move: the lens goes solid and the green
-       boundary hands back to violet, so what lands is the mark as the identity
-       sheet draws it, two whole violet rings with a filled green lens, rather
-       than the outlined version the rim wears while it is sitting in a
-       picture. Green filling the lens is the colour doing exactly the job the
-       logo README reserves it for, which is naming what two wholes share. */
-    float split = smoothstep(0.15, 0.75, e);
-    float fill  = smoothstep(0.55, 1.00, e);
-    float arcs  = max(b1 * in2, b2 * in1) * split * (1.0 - fill);
-    float outer = max(max(b1, b2) - arcs, 0.0);
-
-    float near = min(abs(d1 - R), abs(d2 - R));
-    float halo = exp(-pow(near / (hw * 3.0), 2.0));
-
-    /* The desaturation eases off as the mark arrives, so what lands at the end
-       is the identity's own #8b5cf6 rather than the muted version the rim
-       wears while it is sitting in the picture. */
-    vec3 vio = lin(vec3(0.545, 0.361, 0.965));
-    vio = mix(vio, vec3(dot(vio, vec3(0.2126, 0.7152, 0.0722))), 0.45 * (1.0 - e));
-    col += vio * (outer * 0.95 + halo * 0.06 * (1.0 - lensIn)) * pres;
-
-    vec3 grn = lin(vec3(0.184, 1.000, 0.561));
-    float bleed = exp(-pow(near / (hw * 1.5), 2.0)) * lensIn;
-    /* The fill stops where the ring band is, so the violet stroke passes over
-       the green lens instead of summing with it. Without the (1 - ring) term
-       the boundary went pale where the two overlapped, which is the same
-       additive fault as the lens arcs and the horizon rim before it: this
-       block has now hit it three times, and any new light drawn here has to
-       say which colour owns the pixels it lands on. */
-    float ring = max(b1, b2);
-    col += grn * (arcs * 0.82 + bleed * 0.10 * split * (1.0 - fill)
-                  + lensIn * fill * 0.80 * (1.0 - ring)) * pres;
-
-    /* The thin inner rim is the rim's own green and has nowhere to go once the
-       lens exists, so it leaves over the first half of the move. */
-    float inner = 1.0 - smoothstep(0.0, 0.45, e);
-    float ghw = hw * 0.50;
-    float dg  = length(mk) - (R - hw * 2.1);
-    col += grn * exp(-pow(dg / ghw, 2.0)) * 0.40 * pres * inner;
-  }
+  float xf = smoothstep(0.0, 0.18, uExit);
+  if (pres * (1.0 - xf) > 0.0015)
+    col += markLight(s, uHoleS, uHoleR, uAspect, uExit, -1.0, smoothstep(0.3, 1.0, uExit)) * pres * (1.0 - xf);
 
 
   gl_FragColor = vec4(max(col, 0.0), 1.0);
@@ -694,7 +767,7 @@ void main(){
 }
 `;
 
-const FINAL_FRAG = COMMON + `
+const FINAL_FRAG = COMMON + MARK + `
 uniform sampler2D tScene;
 uniform sampler2D tBloom;
 uniform vec2  uHoleS;
@@ -703,6 +776,9 @@ uniform float uRingS;
 uniform float uCA;
 uniform float uBloom;
 uniform float uVig;
+uniform float uRim;
+uniform float uExit;
+uniform float uPx;
 
 const mat3 ACESin = mat3(0.59719, 0.07600, 0.02840,
                          0.35458, 0.90834, 0.13383,
@@ -736,6 +812,15 @@ void main(){
   bl.g = texture2D(tBloom, vUv).g;
   bl.b = texture2D(tBloom, vUv - off * 0.6).b;
   c += bl * uBloom;
+
+  /* The logo, once the exit has started, drawn here at one sample per device
+     pixel with an edge of three quarters of one. It goes in before the
+     vignette and the tone curve so it is graded exactly as it was in the scene
+     pass, and after the aberration so its edges stay single. */
+  float xf = smoothstep(0.0, 0.18, uExit);
+  float pres = max(uRim, uExit) * xf;
+  if (pres > 0.0015)
+    c += markLight(q, uHoleS, uRingS, uAspect, uExit, uPx * 0.75, smoothstep(0.3, 1.0, uExit)) * pres;
 
   c *= 1.0 - uVig * pow(clamp(rq / (0.95 + uAspect * 0.35), 0.0, 1.0), 2.4);
   c = aces(c * 1.02);
@@ -796,7 +881,11 @@ const finalU = {
   tScene: { value: null }, tBloom: { value: null },
   uHoleS: { value: new THREE.Vector2() }, uAspect: { value: 1.78 },
   uRingS: { value: 0.35 }, uCA: { value: 0.00085 }, uBloom: { value: 0.44 },
-  uVig: { value: 0.34 }
+  uVig: { value: 0.34 },
+  /* The same uniform objects as the scene pass, not copies: the two passes
+     draw one mark between them, so there is one rim value and one exit value
+     and nothing to keep in step. uPx is one device pixel in screen units. */
+  uRim: mainU.uRim, uExit: mainU.uExit, uPx: { value: 0.002 }
 };
 
 const mainMat   = mat(MAIN_FRAG, mainU);
@@ -881,13 +970,23 @@ function buildBloom() {
    scaled into, and the whole image is squashed horizontally: about 1.2% at
    1280 and 2% at 768. A slightly oval event horizon is the kind of wrong that
    reads as a design choice. Mobile is unaffected, because overlay scrollbars
-   take no space, which is why this survives a phone check. */
+   take no space, which is why this survives a phone check.
+
+   TWO DENSITIES. The scene buffer is capped at 1.6 device pixels per CSS
+   pixel, because the raytracer's cost is pixels times steps. The canvas is
+   not: it takes the screen's own density up to 3, because the final pass is a
+   handful of texture reads and it is where the logo is drawn on the way out.
+   Sized at 1.6, a phone at 3x scaled the whole canvas up by nearly two and the
+   mark's edges came out soft; sized here, it is drawn once per device pixel.
+   The picture itself is the same bilinear upscale it always was, done by the
+   GPU instead of the compositor. */
 function resize() {
   const doc = document.documentElement;
   DPR = Math.min(window.devicePixelRatio || 1, 1.6);
   const cw = Math.max(2, doc.clientWidth), ch = Math.max(2, doc.clientHeight);
-  renderer.setPixelRatio(DPR);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
   renderer.setSize(cw, ch, false);
+  finalU.uPx.value = 2 / Math.max(2, renderer.domElement.height);
   W = Math.max(2, Math.floor(cw * DPR));
   H = Math.max(2, Math.floor(ch * DPR));
   const aspect = W / H;
@@ -1108,6 +1207,7 @@ setInterval(() => {
    to move while the page scrolled would look like a second failure. */
 const markEl = document.querySelector('.mark');
 const glyphEl = document.querySelector('.glyph');
+const enterEl = document.querySelector('a.enter');
 
 /* Declared here rather than beside the click handler below, because
    scrollFade reads it and scrollFade is called at module scope before that
@@ -1134,6 +1234,14 @@ function scrollFade() {
   const wordmark = (1 - outT * outT) * (document.body.classList.contains('signal-lost') ? 0.18 : 0.96);
   markEl.style.opacity = wordmark.toFixed(4);
 
+  /* The way in is the title's subtitle, so it leaves with the title. It does
+     not take the signal-lost dim, because with the renderer gone the link is
+     the only thing on the page still doing its job. Hidden once it is gone,
+     so a keyboard cannot tab to a control nobody can see. */
+  const way = 1 - outT * outT;
+  enterEl.style.opacity = way.toFixed(4);
+  enterEl.style.visibility = way < 0.02 ? 'hidden' : '';
+
   const inT = Math.min(1, Math.max(0, (t - 0.14) / 0.41));
   mainU.uRim.value = inT * inT * (3.0 - 2.0 * inT);
 
@@ -1156,8 +1264,14 @@ scrollFade();
    class, because scrollFade already owns those properties inline and an inline
    style beats a rule. scrollFade returns early while exiting for the same
    reason: without that, a scroll event mid transition would put the wordmark
-   back. */
-const enterEl = document.querySelector('a.enter');
+   back.
+
+   The reveal transition on .markwrap has to be switched off first. It applies
+   to inline writes as much as to the class, so without that every write here
+   arrived 800ms late and 2600ms slow, and the title was still at half strength
+   over the finished logo when the page went. The fade starts from whatever the
+   reveal had reached, so a click before it finished does not jump the title
+   up. */
 const wrapEl = document.querySelector('.markwrap');
 
 enterEl.addEventListener('click', function (ev) {
@@ -1168,6 +1282,8 @@ enterEl.addEventListener('click', function (ev) {
   const href = enterEl.getAttribute('href');
   const dur = REDUCE ? 620 : 2200;
   const g0 = parseFloat(glyphEl.style.opacity || '0') || 0;
+  const w0 = parseFloat(getComputedStyle(wrapEl).opacity) || 0;
+  wrapEl.style.transition = 'none';
   const t0 = performance.now();
 
   (function step(now) {
@@ -1176,9 +1292,8 @@ enterEl.addEventListener('click', function (ev) {
     mainU.uExit.value = eased;
 
     const k = 1 - eased;
-    wrapEl.style.opacity = k.toFixed(4);
+    wrapEl.style.opacity = (w0 * k).toFixed(4);
     glyphEl.style.opacity = (g0 * k).toFixed(4);
-    enterEl.style.opacity = k.toFixed(4);
 
     if (u < 1) requestAnimationFrame(step);
     /* a beat on the finished mark before the page goes */
