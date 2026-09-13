@@ -16558,6 +16558,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
+.syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
 input[type="date"]{color-scheme:dark}
@@ -18182,7 +18183,7 @@ input[type="date"]{color-scheme:dark}
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
                 <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
-                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                  <button class="syn-cell" onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent">{{ cl.g }}</button>
                 </sc-if>
                 <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
                   <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
@@ -22160,7 +22161,7 @@ input[type="date"]{color-scheme:dark}
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
                 <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
-                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                  <button class="syn-cell" onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent">{{ cl.g }}</button>
                 </sc-if>
                 <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
                   <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
