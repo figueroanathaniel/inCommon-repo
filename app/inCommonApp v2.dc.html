@@ -739,7 +739,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, ten planets, and four angles. Each house is a wedge you can open for its meaning.</p>
+          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
             <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -764,7 +764,7 @@ input[type="date"]{color-scheme:dark}
                 <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
               </g>
             </sc-for>
-            <sc-for list="{{ wheelPlanets }}" as="p" hint-placeholder-count="10">
+            <sc-for list="{{ wheelPlanets }}" as="p" hint-placeholder-count="11">
               <g onClick="{{ p.go }}" style="cursor:pointer">
                 <title>{{ p.tip }}</title>
                 <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
@@ -4820,7 +4820,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, ten planets, and four angles. Each house is a wedge you can open for its meaning.</p>
+          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
             <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -4845,7 +4845,7 @@ input[type="date"]{color-scheme:dark}
                 <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
               </g>
             </sc-for>
-            <sc-for list="{{ wheelPlanets }}" as="p" hint-placeholder-count="10">
+            <sc-for list="{{ wheelPlanets }}" as="p" hint-placeholder-count="11">
               <g onClick="{{ p.go }}" style="cursor:pointer">
                 <title>{{ p.tip }}</title>
                 <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
@@ -9661,12 +9661,12 @@ class Component extends DCLogic {
     }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
   }
   RAD = Math.PI / 180;
-  PLNS = [['Sun', '\u2609'], ['Moon', '\u263D'], ['Mercury', '\u263F'], ['Venus', '\u2640'], ['Mars', '\u2642'], ['Jupiter', '\u2643'], ['Saturn', '\u2644'], ['Uranus', '\u2645'], ['Neptune', '\u2646'], ['Pluto', '\u2647'], ['North Node', '\u260A']];
+  PLNS = [['Sun', '\u2609'], ['Moon', '\u263D'], ['Mercury', '\u263F'], ['Venus', '\u2640'], ['Mars', '\u2642'], ['Jupiter', '\u2643'], ['Saturn', '\u2644'], ['Uranus', '\u2645'], ['Neptune', '\u2646'], ['Pluto', '\u2647'], ['North Node', '\u260A'], ['South Node', '\u260B']];
   // [L0, deg/day, eccentricity, longitude of perihelion, semi-major axis AU]. Heliocentric, converted to geocentric in lonOf()
   PL_EL = { Mercury: [252.25084, 4.09233445, .20563, 77.456, .38710], Venus: [181.97973, 1.60213034, .00677, 131.564, .72333], Mars: [355.433, .52402068, .09341, 336.041, 1.52368], Jupiter: [34.35151, .08309257, .04839, 14.331, 5.20260], Saturn: [50.07744, .03344414, .05415, 93.057, 9.55491], Uranus: [314.05501, .01172577, .04717, 173.005, 19.21845], Neptune: [304.34867, .00598158, .00859, 48.124, 30.11039], Pluto: [238.92881, .00396372, .24883, 224.075, 39.48168] };
   EARTH_EL = [100.46435, .98564736, .01671, 102.937, 1.00000];
   SIGNS12 = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction' };
+  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction', 'South Node': 'gifts to release' };
   HOUSE_THEMES = ['self and body', 'resources and worth', 'mind, siblings, near things', 'home and roots', 'creativity and play', 'work and health', 'partnership', 'depth and what is shared', 'meaning and distance', 'vocation and standing', 'community and hope', 'solitude and the inner room'];
   ASPECTS = [[0, 'conjunct', 8], [60, 'sextile', 5], [90, 'square', 6], [120, 'trine', 6], [180, 'opposite', 8]];
   ASP_NAME = { conjunct: 'conjunction', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposition' };
@@ -10127,7 +10127,7 @@ class Component extends DCLogic {
      A Sabian symbol is a claim about ONE degree of arc. Printing one for a body
      whose position is good to about a degree is a precise statement resting on
      an imprecise number, and it reads as the most exact thing on the page
-     because it is the most specific. The ten planets and the nodes are computed
+     because it is the most specific. The ten planets and both nodes are computed
      to well inside a degree and keep their symbols; Chiron is fitted to 0.92
      and does not; the asteroids are unpinned and do not.
 
