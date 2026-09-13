@@ -76,8 +76,8 @@ function render(w, h, bg, markFrac) {
   const cx = w / 2, cy = h / 2;
   const buf = Buffer.alloc(w * h * 3);
 
-  /* A soft bloom around the lens, the glow the identity sheet carries. */
-  const glowR = (r + 0.14);
+  /* A prominent bloom around the lens, matching the raytracer glow on the cover. */
+  const glowR = (r + 0.25);
 
   for (let py = 0; py < h; py++) {
     for (let px = 0; px < w; px++) {
@@ -96,7 +96,7 @@ function render(w, h, bg, markFrac) {
       const gd = Math.hypot(ux, uy);
       if (gd < glowR) {
         const t = 1 - gd / glowR;
-        c = mix(c, LENS, 0.10 * t * t);
+        c = mix(c, LENS, 0.28 * t * t);
       }
       if (lensHits) c = mix(c, LENS, lensHits / n);
       if (ringHits) c = mix(c, RINGS, ringHits / n);
