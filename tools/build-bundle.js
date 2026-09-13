@@ -62,6 +62,12 @@ const checkOnly = process.argv.indexOf('--check') !== -1;
 /* The modules, in the order the helmet loads them. Several read globals set
    by earlier ones, so this order is part of the contract, not a preference. */
 const MODULES = [
+  /* Ephemeris architecture (V1.0.0): dual-backend system with fallback */
+  'ephemeris-points.js',
+  'ephemeris-backend-current.js',
+  'ephemeris-backend-swiss.js',
+  'ephemeris-router.js',
+  'ephemeris-integration.js',
   'incommon-core.js',
   'practice-library.js',
   'profile-manager.js',

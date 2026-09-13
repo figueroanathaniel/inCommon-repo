@@ -18,7 +18,7 @@
  * refuses to build when the two numbers disagree. This drifted to v2.4 against
  * a shipped v6.0 precisely because nothing was checking.
  */
-var CACHE = 'incommon-dev-v6.2';
+var CACHE = 'incommon-dev-v6.3';
 var PRECACHE = [
   /* `./inCommon (offline).html` was here and the file has not existed for a
      long time. It was the standalone offline build, and the thing that does
