@@ -1,0 +1,685 @@
+<!-- ExpandChartOverlay: Full-screen expanded wheel with side panels and backdrop -->
+
+<div id="expand-chart-overlay"
+  style="
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.55);
+    z-index:9999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    animation:expandOverlayFadeIn 200ms ease-out forwards;
+  "
+  onclick="if(event.target===this) window.__incommonApp.closeExpandedChart();"
+  onkeydown="if(event.key==='Escape') window.__incommonApp.closeExpandedChart();"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Expanded natal chart"
+  tabindex="-1"
+>
+  <!-- Close button (top-right) -->
+  <button
+    id="expand-chart-close"
+    aria-label="Close expanded chart"
+    title="Close (Esc)"
+    style="
+      position:absolute;
+      top:16px;
+      right:16px;
+      width:40px;
+      height:40px;
+      border:none;
+      background:rgba(139,92,246,0.2);
+      color:var(--ac2-hi);
+      font:600 20px system-ui;
+      border-radius:6px;
+      cursor:pointer;
+      z-index:10000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:all 120ms ease-out;
+    "
+    onmouseover="this.style.background='rgba(139,92,246,0.35)';"
+    onmouseout="this.style.background='rgba(139,92,246,0.2)';"
+    onclick="window.__incommonApp.closeExpandedChart();"
+  >×</button>
+
+  <!-- Main container (desktop 3-column, mobile tabs) -->
+  <div id="expand-chart-container"
+    style="
+      position:relative;
+      width:92vw;
+      height:90vh;
+      background:var(--bg);
+      border:1px solid var(--bd);
+      border-radius:12px;
+      display:grid;
+      grid-template-columns:140px 1fr 320px;
+      grid-template-rows:1fr auto;
+      gap:0;
+      overflow:hidden;
+      animation:expandContainerScale 200ms ease-out forwards;
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    "
+  >
+    <!-- Left Panel: House Cusps -->
+    <div id="expand-houses-panel"
+      style="
+        grid-column:1;
+        grid-row:1 / 2;
+        background:var(--sf);
+        border-right:1px solid var(--bd);
+        overflow-y:auto;
+        padding:12px 10px;
+        font:400 11px var(--fu);
+        color:var(--tx);
+      "
+    >
+      <div style="font:600 11px var(--fu);color:var(--ac2-hi);letter-spacing:.04em;margin-bottom:8px;text-transform:uppercase">Houses</div>
+      <div id="houses-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Center Panel: Wheel -->
+    <div id="expand-wheel-panel"
+      style="
+        grid-column:2;
+        grid-row:1 / 2;
+        background:var(--sf);
+        border-right:1px solid var(--bd);
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+      "
+    >
+      <!-- Wheel controls -->
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:8px 12px;
+        border-bottom:1px solid var(--bd);
+        background:var(--sf);
+        font:400 10px var(--fu);
+        color:var(--dim);
+      ">
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="expand-show-comets" onChange="window.__incommonApp.toggleCometDisplay();" style="cursor:pointer" />
+            <span>Show comets</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="expand-show-minor-aspects" defaultChecked onChange="window.__incommonApp.toggleMinorAspects();" style="cursor:pointer" />
+            <span>Minor aspects</span>
+          </label>
+        </div>
+        <div style="color:var(--dim)" id="expand-point-count">80+ points</div>
+      </div>
+
+      <!-- SVG Wheel (same as ExpandedChart.dc.html) -->
+      <div style="flex:1;position:relative;overflow:hidden;background:var(--sf)">
+        <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel"
+          style="width:100%;height:100%;display:block">
+          <!-- Wheel content populated by JS -->
+          <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
+          <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+          <!-- Points, aspects, houses rendered here -->
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right Panel: Points Table (desktop) / Tabs (mobile) -->
+    <div id="expand-table-panel"
+      style="
+        grid-column:3;
+        grid-row:1 / 2;
+        background:var(--bg);
+        border-left:1px solid var(--bd);
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
+      "
+    >
+      <!-- Search + Filters -->
+      <div style="
+        padding:10px;
+        border-bottom:1px solid var(--bd);
+        background:var(--sf);
+        display:flex;
+        gap:8px;
+        align-items:center;
+      ">
+        <input type="text" placeholder="Search points..." id="expand-points-search"
+          onChange="window.__incommonApp.filterPointsTable(this.value);"
+          style="
+            flex:1;
+            padding:6px 8px;
+            border:1px solid var(--bd);
+            background:var(--bg);
+            color:var(--tx);
+            font:400 11px var(--fu);
+            border-radius:6px;
+          "
+        />
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font:400 10px var(--fu);color:var(--dim)">
+          <input type="checkbox" id="expand-group-by-category" defaultChecked onChange="window.__incommonApp.toggleGroupByCategory();" style="cursor:pointer" />
+          <span>Group</span>
+        </label>
+      </div>
+
+      <!-- Sortable Points Table -->
+      <div style="flex:1;overflow-y:auto;font:400 10px var(--fu)">
+        <table style="width:100%;border-collapse:collapse">
+          <thead style="position:sticky;top:0;background:var(--sf);border-bottom:1px solid var(--bd)">
+            <tr style="height:28px;border-bottom:1px solid var(--bd)">
+              <th style="padding:4px 6px;text-align:left;font-weight:600;color:var(--ac2-hi);cursor:pointer;user-select:none"
+                onclick="window.__incommonApp.sortPointsTable('name')">
+                Point <span style="opacity:.5">↕</span>
+              </th>
+              <th style="padding:4px 6px;text-align:center;font-weight:600;color:var(--ac2-hi);width:24px">✓</th>
+              <th style="padding:4px 6px;text-align:right;font-weight:600;color:var(--ac2-hi);cursor:pointer;user-select:none"
+                onclick="window.__incommonApp.sortPointsTable('lon')">
+                Position <span style="opacity:.5">↕</span>
+              </th>
+              <th style="padding:4px 6px;text-align:center;font-weight:600;color:var(--ac2-hi);width:20px">H</th>
+              <th style="padding:4px 6px;text-align:center;font-weight:600;color:var(--ac2-hi);width:20px">Spd</th>
+              <th style="padding:4px 6px;text-align:center;font-weight:600;color:var(--ac2-hi);width:16px">R</th>
+              <th style="padding:4px 6px;text-align:left;font-weight:600;color:var(--ac2-hi);width:40px">Status</th>
+            </tr>
+          </thead>
+          <tbody id="expand-points-table-body">
+            <!-- Rows populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Category Subtables (collapsible) -->
+      <div style="
+        border-top:1px solid var(--bd);
+        font:400 9px var(--fu);
+        max-height:200px;
+        overflow-y:auto;
+      ">
+        <details style="margin:0;border-bottom:1px solid var(--bd)">
+          <summary style="padding:6px 10px;background:var(--sf);cursor:pointer;font-weight:600;color:var(--ac2-hi);user-select:none">
+            Comets — Mundane only
+          </summary>
+          <div id="expand-comets-subtable" style="padding:4px;font-size:8px"></div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Bottom Panel: Aspects Grid (desktop) -->
+    <div id="expand-aspects-panel"
+      style="
+        grid-column:1 / -1;
+        grid-row:2 / 3;
+        background:var(--sf);
+        border-top:1px solid var(--bd);
+        overflow-x:auto;
+        overflow-y:hidden;
+        max-height:120px;
+        display:none;
+      "
+    >
+      <div style="padding:8px;font:400 9px var(--fu);color:var(--dim)">
+        Aspects grid (scrollable) — populated by JS
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Point Tooltip -->
+  <div id="expand-point-tooltip"
+    style="
+      position:fixed;
+      display:none;
+      background:rgba(0,0,0,.9);
+      color:var(--tx);
+      padding:8px 10px;
+      border:1px solid var(--ac2-hi);
+      border-radius:6px;
+      font:400 10px var(--fu);
+      z-index:10001;
+      max-width:300px;
+      line-height:1.5;
+      pointer-events:none;
+      box-shadow:0 2px 12px rgba(0,0,0,.5);
+      word-wrap:break-word;
+      white-space:normal;
+    "
+  >
+    <div id="expand-tooltip-content"></div>
+  </div>
+</div>
+
+<!-- Expand Button (added to chart card header) -->
+<button
+  id="expand-chart-button"
+  aria-label="Expand chart"
+  title="Maximize"
+  onclick="window.__incommonApp.openExpandedChart();"
+  style="
+    width:36px;
+    height:36px;
+    border:none;
+    background:transparent;
+    color:var(--ac2-hi);
+    font:600 18px system-ui;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:6px;
+    transition:all 120ms ease-out;
+  "
+  onmouseover="this.style.background='rgba(139,92,246,0.15)';"
+  onmouseout="this.style.background='transparent';"
+>⛶</button>
+
+<!-- Mobile Tabs (hidden on desktop, shown on mobile) -->
+<div id="expand-mobile-tabs"
+  style="
+    display:none;
+    grid-column:1 / -1;
+    grid-row:2 / 3;
+    background:var(--sf);
+    border-top:1px solid var(--bd);
+    height:200px;
+    overflow:hidden;
+  "
+  data-tab="points"
+>
+  <!-- Tab buttons -->
+  <div style="
+    display:flex;
+    gap:0;
+    border-bottom:1px solid var(--bd);
+    background:var(--bg);
+  ">
+    <button onclick="window.__incommonApp.switchExpandMobileTab('points');"
+      data-tab-button="points"
+      style="
+        flex:1;
+        padding:8px;
+        border:none;
+        background:transparent;
+        color:var(--dim);
+        font:400 10px var(--fu);
+        cursor:pointer;
+        border-bottom:2px solid transparent;
+        transition:all 120ms ease-out;
+      "
+    >Points</button>
+    <button onclick="window.__incommonApp.switchExpandMobileTab('aspects');"
+      data-tab-button="aspects"
+      style="
+        flex:1;
+        padding:8px;
+        border:none;
+        background:transparent;
+        color:var(--dim);
+        font:400 10px var(--fu);
+        cursor:pointer;
+        border-bottom:2px solid transparent;
+        transition:all 120ms ease-out;
+      "
+    >Aspects</button>
+    <button onclick="window.__incommonApp.switchExpandMobileTab('houses');"
+      data-tab-button="houses"
+      style="
+        flex:1;
+        padding:8px;
+        border:none;
+        background:transparent;
+        color:var(--dim);
+        font:400 10px var(--fu);
+        cursor:pointer;
+        border-bottom:2px solid transparent;
+        transition:all 120ms ease-out;
+      "
+    >Houses</button>
+  </div>
+
+  <!-- Tab content -->
+  <div id="expand-mobile-content" style="height:calc(100% - 36px);overflow-y:auto"></div>
+</div>
+
+<style>
+  @keyframes expandOverlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes expandOverlayFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes expandContainerScale {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes expandContainerScaleOut {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #expand-chart-overlay,
+    #expand-chart-container {
+      animation: none !important;
+    }
+  }
+
+  @media (max-width: 900px) {
+    #expand-chart-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    #expand-houses-panel {
+      grid-column: 1;
+      grid-row: 3 / 4;
+      max-height: 80px;
+      display: none;
+    }
+
+    #expand-wheel-panel {
+      grid-column: 1;
+      grid-row: 1 / 2;
+      border-right: none;
+      border-bottom: 1px solid var(--bd);
+    }
+
+    #expand-table-panel {
+      grid-column: 1;
+      grid-row: 2 / 3;
+      border-left: none;
+      border-bottom: 1px solid var(--bd);
+      max-height: 200px;
+    }
+
+    #expand-aspects-panel {
+      grid-column: 1;
+      grid-row: 3 / 4;
+      max-height: 100px;
+    }
+
+    #expand-mobile-tabs {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #expand-wheel-panel svg {
+      max-height: 50vh;
+    }
+  }
+
+  @media (max-width: 375px) {
+    #expand-chart-overlay {
+      padding: 8px;
+    }
+
+    #expand-chart-container {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+    }
+
+    #expand-chart-close {
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
+  /* Table row styles */
+  #expand-points-table-body tr {
+    height: 22px;
+    border-bottom: 1px solid var(--bd);
+  }
+
+  #expand-points-table-body tr:hover {
+    background: rgba(47, 255, 143, .08);
+  }
+
+  #expand-points-table-body td {
+    padding: 2px 6px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  #expand-points-table-body td[data-status="unavailable"] {
+    opacity: 0.5;
+    color: var(--dim);
+  }
+
+  /* Tooltip styles */
+  #expand-point-tooltip {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+
+  /* Details/summary styles */
+  #expand-chart-overlay details summary:hover {
+    background: var(--bg);
+  }
+
+  #expand-chart-overlay details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #expand-chart-overlay details > summary::before {
+    content: "▶ ";
+    opacity: 0.5;
+    margin-right: 4px;
+  }
+
+  #expand-chart-overlay details[open] > summary::before {
+    content: "▼ ";
+  }
+
+  /* Mobile tab active state */
+  button[data-tab-button].active {
+    color: var(--ac2-hi);
+    border-bottom-color: var(--ac2-hi);
+  }
+</style>
+
+<script>
+/* ExpandChartOverlay interaction handlers */
+
+// Initialize overlay state
+if (!window.__expandChartState) {
+  window.__expandChartState = {
+    isOpen: false,
+    focusedElement: null,
+    originalOverflow: 'auto'
+  };
+}
+
+/**
+ * Open expanded chart overlay
+ */
+function openExpandedChart() {
+  const overlay = document.getElementById('expand-chart-overlay');
+  const container = document.getElementById('expand-chart-container');
+  const app = window.__incommonApp;
+
+  if (!overlay || !app) return;
+
+  // Save current focus
+  window.__expandChartState.focusedElement = document.activeElement;
+
+  // Show overlay
+  overlay.style.display = 'flex';
+  window.__expandChartState.originalOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+
+  // Load from localStorage
+  const wasExpanded = localStorage.getItem('chart.expanded') === '1';
+  if (!wasExpanded) localStorage.setItem('chart.expanded', '1');
+
+  // Restore animation
+  container.style.animation = 'none';
+  void container.offsetWidth; // Trigger reflow
+  container.style.animation = 'expandContainerScale 200ms ease-out forwards';
+
+  // Set up focus trap
+  overlay.addEventListener('keydown', handleExpandKeydown);
+  overlay.focus();
+
+  window.__expandChartState.isOpen = true;
+
+  // Render expanded content
+  if (app.expandedChartData) {
+    renderExpandedChartContent();
+  }
+}
+
+/**
+ * Close expanded chart overlay
+ */
+function closeExpandedChart() {
+  const overlay = document.getElementById('expand-chart-overlay');
+  const container = document.getElementById('expand-chart-container');
+
+  if (!overlay) return;
+
+  // Fade out animation
+  container.style.animation = 'expandContainerScaleOut 200ms ease-out forwards';
+  overlay.style.animation = 'expandOverlayFadeOut 200ms ease-out forwards';
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.style.animation = 'expandOverlayFadeIn 200ms ease-out forwards';
+    container.style.animation = 'expandContainerScale 200ms ease-out forwards';
+
+    // Restore scroll
+    document.body.style.overflow = window.__expandChartState.originalOverflow;
+
+    // Update localStorage
+    localStorage.setItem('chart.expanded', '0');
+
+    // Restore focus
+    const focusEl = window.__expandChartState.focusedElement;
+    if (focusEl && document.contains(focusEl)) {
+      focusEl.focus();
+    } else {
+      document.getElementById('expand-chart-button')?.focus();
+    }
+
+    // Clean up event listener
+    overlay.removeEventListener('keydown', handleExpandKeydown);
+
+    window.__expandChartState.isOpen = false;
+  }, 200);
+}
+
+/**
+ * Handle keyboard in overlay (Escape, Tab trap)
+ */
+function handleExpandKeydown(e) {
+  if (e.key === 'Escape') {
+    closeExpandedChart();
+    e.preventDefault();
+  }
+
+  // Focus trap: Tab within overlay only
+  if (e.key === 'Tab') {
+    const overlay = document.getElementById('expand-chart-overlay');
+    const focusableElements = overlay.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstEl = focusableElements[0];
+    const lastEl = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey && document.activeElement === firstEl) {
+      lastEl.focus();
+      e.preventDefault();
+    } else if (!e.shiftKey && document.activeElement === lastEl) {
+      firstEl.focus();
+      e.preventDefault();
+    }
+  }
+}
+
+/**
+ * Switch mobile tab (points, aspects, houses)
+ */
+function switchExpandMobileTab(tabName) {
+  const buttons = document.querySelectorAll('button[data-tab-button]');
+  const container = document.getElementById('expand-mobile-tabs');
+  const content = document.getElementById('expand-mobile-content');
+
+  buttons.forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.tabButton === tabName) {
+      btn.classList.add('active');
+    }
+  });
+
+  container.dataset.tab = tabName;
+
+  // Populate content based on tab
+  if (tabName === 'points') {
+    content.innerHTML = '<p style="padding:8px;color:var(--dim)">Points table here</p>';
+  } else if (tabName === 'aspects') {
+    content.innerHTML = '<p style="padding:8px;color:var(--dim)">Aspects grid here</p>';
+  } else if (tabName === 'houses') {
+    content.innerHTML = '<p style="padding:8px;color:var(--dim)">House cusps here</p>';
+  }
+}
+
+/**
+ * Render expanded chart content (delegated to app methods)
+ */
+function renderExpandedChartContent() {
+  const app = window.__incommonApp;
+  if (!app) return;
+
+  // Call app's expanded chart methods to populate the overlay
+  // This is delegated to the Component methods from expandedChartMethods.js
+  if (app.renderExpandedChartOverlay) {
+    app.renderExpandedChartOverlay();
+  }
+}
+
+// Restore expanded state from localStorage on page load
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('chart.expanded') === '1') {
+    setTimeout(() => {
+      openExpandedChart();
+    }, 100);
+  }
+});
+
+// Wire up handlers to global scope
+window.__expandChart = {
+  open: openExpandedChart,
+  close: closeExpandedChart,
+  switchTab: switchExpandMobileTab
+};
+</script>
