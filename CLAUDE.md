@@ -2151,12 +2151,13 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds nineteen scripts. Thirteen are gates and are worth running before
+`tools/` holds twenty scripts. Fourteen are gates and are worth running before
 you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
-`check-hd-atlas-map.js`, `check-point-registry.js`. Four generate:
+`check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`.
+Four generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`. `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position

@@ -1,18 +1,60 @@
-/*! ephemeris/engine.ts: Computation engine for astrological points.
+/*! ephemeris/engine.ts: computation layer behind pointRegistry.ts (Prompt 3).
  *
- * Wraps swisseph-wasm (browser WASM) or swisseph (Node.js) binding.
- * Falls back to MOSEPH (built-in ephemeris) if .se1 files unavailable.
- * Implements all 8 computation layers from Prompt 2.
+ * WHY THIS DOES NOT WRAP SWISS EPHEMERIS, even though the brief asked for
+ * a binding and named the functions sweBody/sweAsteroid/sweHypothetical.
+ * There is no Swiss Ephemeris anywhere in this project to wrap: no
+ * pyswisseph (this is not a Python project), no swisseph npm package, no
+ * swisseph-wasm global. The app's own ephemeris-backend-swiss.js already
+ * documents this exact state: an optional backend for "if you npm install
+ * swisseph-wasm", never installed, with the current analytical backend as
+ * the real, shipping default. This repository also has no package.json
+ * and no build step (CLAUDE.md: "app/ stays flat... paints from the first
+ * streamed character"), so `npm install swisseph` is not a small addition
+ * here; it would mean inventing a bundler this project has deliberately
+ * never had, for a native Node addon that cannot run in a browser at all.
+ * The previous engine.ts tried anyway: every function checked
+ * isEngineReady() first and threw or returned null otherwise, so nothing
+ * in it could ever produce a real number in this app's actual runtime.
+ * computeAll() also hardcoded `const ascLon = 0; // FIXME`, and only one
+ * of eighty expanded points (Ceres) had a real switch-case; everything
+ * else fell through to 'unavailable' whether or not the engine was ready.
  *
- * UNIT TEST VECTORS:
- * - Sun at J2000.0 (2000-01-01 12:00:00 TT) ≈ 280.4° ± 0.1°
- * - Halley perihelion (1986-02-09) ± 0.5° of true position
- * - South Node = Mean Node + 180° exactly
- * - Vertex test: NYC (40.7128°N, 74.0060°W) at 1990-04-19 14:02:00 EDT
- *   (computed against astro.com baseline if available)
+ * What this file does instead is what the rest of this app already does
+ * successfully: analytical Keplerian orbits from published or fitted
+ * elements, the same two-body model already live in
+ * inCommonApp v2.dc.html (PL_EL, EARTH_EL, lonRaw, minorLon) and in
+ * minor-bodies-ephemeris.js (Chiron, Ceres, Pallas, Juno, Vesta, fitted
+ * against 81 JPL Horizons positions). Reusing those exact constants
+ * rather than re-deriving new ones means this module cannot silently
+ * disagree with the chart the app already draws.
+ *
+ * HONESTY ABOUT COVERAGE. Of the registry's 97 points, this file computes
+ * a real position for the ten planets, both lunar nodes, the four angles
+ * (given, not derived here), Chiron and four asteroids (fitted elements,
+ * ported), two more asteroids/TNOs with real cited elements (Eris,
+ * Sedna), the eight planetary nodes (published J2000 mean elements), the
+ * three named comets (mundane only), and every point the spec defines by
+ * formula (selena, ariesPoint, antivertex, partOfFortune, partOfSpirit,
+ * sunmoonMidpoint, vertex). Mean Lilith gets a cited secular formula;
+ * osculating Lilith needs a fuller lunar perturbation theory this file
+ * does not implement and says so. The remaining ~68 asteroids, centaurs,
+ * TNOs and Hamburg School hypotheticals have no orbital elements sourced
+ * anywhere in this codebase, and inventing numbers for them would be
+ * worse than the honest 'unavailable' computeAll() gives them: a made up
+ * planetary position is not a smaller error than a missing one, it is a
+ * wrong one presented as a right one. Adding a body here means giving it
+ * the same treatment Chiron got: real elements, cited, measured against
+ * a reference ephemeris, worst case recorded.
  */
 
-import { PointDef, pointById } from './pointRegistry';
+/* Relative imports carry an explicit .ts extension: Node's native
+   TypeScript support treats a file using import/export syntax as an ES
+   module, and ES module resolution (unlike require()'s CommonJS
+   resolution) does not guess extensions. */
+import { allPoints } from './pointRegistry.ts';
+import { keplerSolve } from './cometSolver.ts';
+import { COMET_ELEMENTS } from './cometElements.ts';
+import type { CometElements } from './cometElements.ts';
 
 // ============================================================================
 // TYPES
@@ -21,776 +63,615 @@ import { PointDef, pointById } from './pointRegistry';
 export interface PointData {
   id: string;
   name: string;
-  lon: number;           // ecliptic longitude 0-360
-  speed?: number;        // degrees/day; <0 = retrograde
-  lat?: number;          // ecliptic latitude (most points ≈ 0)
-  house?: number;        // house number 1-12 (if applicable)
+  lon: number;
+  speed?: number;             // degrees/day; < 0 = retrograde
+  house?: number;
   status: 'ok' | 'unavailable' | 'fixed';
-  // 'ok' = computed from ephemeris
-  // 'unavailable' = body not in ephemeris (e.g., asteroid without .se1 file)
-  // 'fixed' = manually derived (e.g., Aries Point = 0°)
+  note?: string;               // present only when status is not 'ok'
+}
+
+export interface Angles {
+  asc: number;
+  mc: number;
 }
 
 export interface ComputeOpts {
-  forceHouseSystem?: string;
+  /** Default 'reverse': Part of Fortune uses the night formula (Asc + Sun -
+   *  Moon) when isNightChart is true. 'same' keeps the day formula (Asc +
+   *  Moon - Sun) regardless, which is a documented simplification, not the
+   *  classical rule, and is only useful for callers that want one formula
+   *  for every chart. */
+  partOfFortuneNightChart?: 'reverse' | 'same';
+  isNightChart?: boolean;
   logErrors?: boolean;
-  partOfFortuneFormula?: 'day' | 'night' | 'reverse';
-  fallbackToMoseph?: boolean;
 }
 
 // ============================================================================
-// SWISS EPHEMERIS BINDING
+// SHARED CONSTANTS AND THE ONE KEPLER SOLVER
 // ============================================================================
 
-let swe: any = null;
-let swe_initialized = false;
-let swe_init_error: Error | null = null;
+const RAD = Math.PI / 180;
+function norm360(x: number): number { return ((x % 360) + 360) % 360; }
+function t2000(jd: number): number { return jd - 2451545.0; }
 
 /**
- * Initialize Swiss Ephemeris. Called once per session.
- * @throws if neither swisseph-wasm (browser) nor swisseph (Node) available
+ * Solve Kepler's equation M = E - e sin E for E, by Newton-Raphson.
+ * Shared by every body below: planets, minor bodies, Eris and Sedna all
+ * go through this one function, so a fix here fixes all of them at once
+ * rather than needing to be repeated per body the way the old planet
+ * formula (a truncated equation-of-centre series) and the old minor-body
+ * formula (this same Newton solve) used to disagree in method.
  */
-export async function initEngine(): Promise<void> {
-  if (swe_initialized) return;
-  if (swe_init_error) throw swe_init_error;
-
-  try {
-    // Try browser WASM first
-    if (typeof window !== 'undefined' && (window as any).SwissEph) {
-      const SwissEph = (window as any).SwissEph;
-      swe = new SwissEph();
-      if (swe.initSwissEph) {
-        await swe.initSwissEph();
-      }
-      swe_initialized = true;
-      return;
-    }
-
-    // Try Node.js swisseph binding
-    if (typeof require !== 'undefined') {
-      try {
-        const swephModule = require('swisseph');
-        swe = swephModule;
-        swe_initialized = true;
-        return;
-      } catch (e) {
-        // Fall through
-      }
-    }
-
-    throw new Error(
-      'Swiss Ephemeris not available. Install swisseph-wasm (browser) ' +
-      'or swisseph (Node.js), or the app will use the fallback ephemeris.'
-    );
-  } catch (err) {
-    swe_init_error = err as Error;
-    throw err;
+function solveKepler(M: number, e: number, tol = 1e-10, maxIter = 30): number {
+  let m = M % (2 * Math.PI);
+  if (m < -Math.PI) m += 2 * Math.PI;
+  if (m > Math.PI) m -= 2 * Math.PI;
+  let E = m + e * Math.sin(m);
+  for (let k = 0; k < maxIter; k++) {
+    const d = (E - e * Math.sin(E) - m) / (1 - e * Math.cos(E));
+    E -= d;
+    if (Math.abs(d) < tol) break;
   }
+  return E;
 }
 
-/**
- * Check if Swiss Ephemeris is ready.
- */
-export function isEngineReady(): boolean {
-  return swe_initialized && swe !== null;
+function trueAnomaly(E: number, e: number): number {
+  return 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
 }
 
-// ============================================================================
-// 1. SWEBODY: Sun, Moon, planets (ephemeris IDs 0-9)
-// ============================================================================
+/** [L0, n (deg/day), e, varpi, a]: identical layout and identical values
+ *  to PL_EL / EARTH_EL in inCommonApp v2.dc.html, so a chart drawn from
+ *  this module and a chart drawn from the app agree by construction. */
+type CoplanarEl = [number, number, number, number, number];
+
+const EARTH_EL: CoplanarEl = [100.46435, 0.98564736, 0.01671, 102.937, 1.00000];
+
+const PLANET_EL: Record<string, CoplanarEl> = {
+  mercury: [252.25084, 4.09233445, 0.20563, 77.456, 0.38710],
+  venus: [181.97973, 1.60213034, 0.00677, 131.564, 0.72333],
+  mars: [355.433, 0.52402068, 0.09341, 336.041, 1.52368],
+  jupiter: [34.35151, 0.08309257, 0.04839, 14.331, 5.20260],
+  saturn: [50.07744, 0.03344414, 0.05415, 93.057, 9.55491],
+  uranus: [314.05501, 0.01172577, 0.04717, 173.005, 19.21845],
+  neptune: [304.34867, 0.00598158, 0.00859, 48.124, 30.11039],
+  pluto: [238.92881, 0.00396372, 0.24883, 224.075, 39.48168]
+};
 
 /**
- * Compute body position (Sun, Moon, planets).
- * @param sweId Swiss Ephemeris body ID (0-9)
- * @param jd Julian Day number (TT)
- * @returns { lon, speed } in degrees; speed < 0 indicates retrograde
+ * Heliocentric [x, y] and the mean motion's own instantaneous speed for a
+ * coplanar body (inclination treated as zero). This is the exact model
+ * lonRaw()'s helio() and minorLon() already use; it is not the source of
+ * the "coplanar" simplification, it is the same simplification, reused.
  */
-export function sweBody(sweId: number, jd: number): { lon: number; speed: number } {
-  if (!isEngineReady()) {
-    throw new Error('Engine not initialized');
-  }
+function coplanarXY(el: CoplanarEl, t: number): [number, number] {
+  const [L0, n, e, varpi, a] = el;
+  const M = norm360(L0 + n * t - varpi) * RAD;
+  const E = solveKepler(M, e);
+  const v = trueAnomaly(E, e);
+  const r = a * (1 - e * Math.cos(E));
+  const lon = varpi * RAD + v;
+  return [r * Math.cos(lon), r * Math.sin(lon)];
+}
 
-  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
+function geocentricLonCoplanar(el: CoplanarEl, t: number): number {
+  const [px, py] = coplanarXY(el, t);
+  const [ex, ey] = coplanarXY(EARTH_EL, t);
+  return norm360(Math.atan2(py - ey, px - ex) / RAD);
+}
 
-  try {
-    const result = swe.swe_calc_ut(jd, sweId, flags);
-    if (result.error) {
-      // Retry with MOSEPH fallback
-      const mFlags = swe.SEFLG_MOSEPH | swe.SEFLG_SPEED;
-      const mResult = swe.swe_calc_ut(jd, sweId, mFlags);
-      if (mResult.error) {
-        throw new Error(`sweBody(${sweId}) failed: ${mResult.error}`);
-      }
-      return { lon: mResult.longitude, speed: mResult.speed };
-    }
-    return { lon: result.longitude, speed: result.speed };
-  } catch (err) {
-    throw new Error(`sweBody(${sweId}) at JD ${jd}: ${(err as Error).message}`);
-  }
+/** Numerical speed (degrees/day), central difference. Cheap enough to
+ *  take twice per body: computeAll() runs once per chart, not per frame. */
+function speedOf(lonAt: (t: number) => number, t: number): number {
+  const h = 0.5; // half a day either side
+  let a = lonAt(t - h), b = lonAt(t + h);
+  let d = b - a;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return d / (2 * h);
 }
 
 // ============================================================================
-// 2. SWEASTEROID: Asteroids by MPC number
+// 1. PLANETS (Sun, Moon, Mercury..Pluto)
 // ============================================================================
 
-/**
- * Compute asteroid position by MPC number.
- * Handles missing ephemeris gracefully (marks status "unavailable").
- * @param mpcId MPC asteroid number
- * @param jd Julian Day number (TT)
- * @returns { lon, speed } or null if asteroid not available
- */
-export function sweAsteroid(
-  mpcId: number,
-  jd: number
-): { lon: number; speed: number } | null {
-  if (!isEngineReady()) {
-    return null;
-  }
-
-  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-
-  try {
-    const result = swe.swe_calc_ut(jd, mpcId, flags);
-    if (result.error) {
-      // Try MOSEPH fallback
-      const mFlags = swe.SEFLG_MOSEPH | swe.SEFLG_SPEED;
-      const mResult = swe.swe_calc_ut(jd, mpcId, mFlags);
-      if (mResult.error) {
-        // Asteroid not in ephemeris
-        return null;
-      }
-      return { lon: mResult.longitude, speed: mResult.speed };
-    }
-    return { lon: result.longitude, speed: result.speed };
-  } catch (err) {
-    // Silently return null; do not crash batch
-    return null;
-  }
+/** Sun's geometric ecliptic longitude, low-precision series (Meeus 25.5
+ *  truncated to two terms). Same formula lonRaw() uses; ~0.01deg accurate
+ *  near J2000, good to a few hundredths of a degree for centuries either
+ *  side. Verified: at t=0 (J2000.0) this returns 280.375..., which is
+ *  within 0.1 degree of the textbook value 280.4 degrees. */
+function sunLon(t: number): number {
+  const M = norm360(357.5291 + 0.98560028 * t) * RAD;
+  const L = norm360(280.459 + 0.98564736 * t);
+  return norm360(L + 1.915 * Math.sin(M) + 0.02 * Math.sin(2 * M));
 }
 
-// ============================================================================
-// 3. SWEHYPOTHETICAL: Hamburg School TNPs (IDs 40-47)
-// ============================================================================
-
-/**
- * Compute hypothetical planet position (Hamburg School TNPs).
- * @param sweId Swiss Ephemeris ID 40-47
- * @param jd Julian Day number (TT)
- * @returns { lon, speed }
- */
-export function sweHypothetical(
-  sweId: number,
-  jd: number
-): { lon: number; speed: number } {
-  if (!isEngineReady()) {
-    throw new Error('Engine not initialized');
-  }
-
-  if (sweId < 40 || sweId > 47) {
-    throw new Error(`Invalid hypothetical ID: ${sweId} (must be 40-47)`);
-  }
-
-  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-
-  try {
-    const result = swe.swe_calc_ut(jd, sweId, flags);
-    if (result.error) {
-      throw new Error(`sweHypothetical(${sweId}) failed: ${result.error}`);
-    }
-    return { lon: result.longitude, speed: result.speed };
-  } catch (err) {
-    throw new Error(`sweHypothetical(${sweId}) at JD ${jd}: ${(err as Error).message}`);
-  }
-}
-
-// ============================================================================
-// 4. LUNARNODE: Mean lunar node (includes South Node as +180°)
-// ============================================================================
-
-/**
- * Compute mean lunar node (North Node).
- * South Node is automatically +180° from North.
- * @param jd Julian Day number (TT)
- * @returns { northNode: lon, southNode: lon }
- */
-export function lunarNode(
-  jd: number
-): { northNode: number; southNode: number } {
-  if (!isEngineReady()) {
-    throw new Error('Engine not initialized');
-  }
-
-  const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-
-  try {
-    // Mean node is body ID 11 in Swiss Ephemeris
-    const result = swe.swe_calc_ut(jd, 11, flags);
-    if (result.error) {
-      throw new Error(`lunarNode() failed: ${result.error}`);
-    }
-    const northNode = result.longitude;
-    const southNode = (northNode + 180) % 360;
-    return { northNode, southNode };
-  } catch (err) {
-    throw new Error(`lunarNode() at JD ${jd}: ${(err as Error).message}`);
-  }
-}
-
-// ============================================================================
-// 5. PLANETARYNODES: Ascending nodes for each planet
-// ============================================================================
-
-/**
- * Compute ascending nodes for specified planets (once per chart).
- * @param jd Julian Day number (TT)
- * @param sweIds Array of planet IDs (e.g., [2, 3, 4] for Mercury, Venus, Mars)
- * @returns { [sweId]: lon }
- */
-export function planetaryNodes(
-  jd: number,
-  sweIds: number[]
-): Record<number, number> {
-  if (!isEngineReady()) {
-    throw new Error('Engine not initialized');
-  }
-
-  const nodes: Record<number, number> = {};
-
-  for (const sweId of sweIds) {
-    try {
-      // Use swe_nod_aps_ut if available (calculates nodes and apsides)
-      // Otherwise fall back to swe_calc_ut with a marker or estimation
-      if (swe.swe_nod_aps_ut) {
-        // Ascending node + aphelion calculation
-        const result = swe.swe_nod_aps_ut(jd, sweId, swe.SEFLG_SWIEPH, 0);
-        if (!result.error && result.xnode && result.xnode[0] !== undefined) {
-          // xnode[0] is ascending node longitude
-          nodes[sweId] = result.xnode[0];
-        } else {
-          // Fall back to mean position
-          const pos = sweBody(sweId, jd);
-          nodes[sweId] = pos.lon;
-        }
-      } else {
-        // Fallback: use current position (not exact but functional)
-        const pos = sweBody(sweId, jd);
-        nodes[sweId] = pos.lon;
-      }
-    } catch (err) {
-      // On error, fall back to main position
-      try {
-        const pos = sweBody(sweId, jd);
-        nodes[sweId] = pos.lon;
-      } catch (e) {
-        // Skip this planet
-      }
-    }
-  }
-
-  return nodes;
-}
-
-// ============================================================================
-// 6. MANUAL POINTS
-// ============================================================================
-
-/**
- * Compute Selena (White Moon).
- * Selena = (Lilith Mean + 180°) mod 360
- */
-export function computeSelena(lilithMeanLon: number): number {
-  return (lilithMeanLon + 180) % 360;
+/** Moon's geometric ecliptic longitude, low-precision series (Meeus 47,
+ *  two largest perturbation terms). Same formula lonRaw() uses; good to
+ *  roughly a degree, which is what a Moon phase and a wide aspect need. */
+function moonLon(t: number): number {
+  const Mp = norm360(134.963 + 13.064993 * t) * RAD;
+  const D = norm360(297.85 + 12.190749 * t) * RAD;
+  return norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp) + 1.274 * Math.sin(2 * D - Mp));
 }
 
 /**
- * Aries Point: always 0° (vernal equinox).
+ * 1. sweBody: named for the brief's Swiss Ephemeris shape, computed from
+ * this file's own analytical elements (see the file header for why).
+ * id follows the Swiss Ephemeris body numbering the registry already
+ * uses (0 Sun, 1 Moon, 2 Mercury .. 9 Pluto), so a future real binding
+ * could replace this function's body without changing its callers.
  */
-export function computeAriesPoint(): number {
-  return 0;
+const BODY_BY_ID: Record<number, string> = {
+  0: 'sun', 1: 'moon', 2: 'mercury', 3: 'venus', 4: 'mars',
+  5: 'jupiter', 6: 'saturn', 7: 'uranus', 8: 'neptune', 9: 'pluto'
+};
+
+export function sweBody(id: number, jd: number): { lon: number; speed: number } {
+  const t = t2000(jd);
+  const name = BODY_BY_ID[id];
+  if (name === 'sun') return { lon: sunLon(t), speed: speedOf(sunLon, t) };
+  if (name === 'moon') return { lon: moonLon(t), speed: speedOf(moonLon, t) };
+  const el = name ? PLANET_EL[name] : undefined;
+  if (!el) throw new Error('sweBody: unknown body id ' + id);
+  const lon = geocentricLonCoplanar(el, t);
+  const speed = speedOf(tt => geocentricLonCoplanar(el, tt), t);
+  return { lon, speed };
+}
+
+// ============================================================================
+// 2. ASTEROIDS (Ceres, Pallas, Juno, Vesta: fitted, ported from
+//    minor-bodies-ephemeris.js; Eris and Sedna: real cited elements, new)
+// ============================================================================
+
+/** deg/day from semi-major axis (AU), Kepler's third law. Not a free
+ *  parameter for any body below: letting it float fits a curve, not an
+ *  orbit (see minor-bodies-ephemeris.js's own comment on this, which
+ *  found exactly that failure mode once). */
+function meanMotion(aAU: number): number { return 0.9856076686 / (aAU * Math.sqrt(aAU)); }
+
+/** Ceres, Pallas, Juno, Vesta: identical a/e/varpi/L0 to
+ *  minor-bodies-ephemeris.js's EL table (retrieved from that file, not
+ *  re-derived), coplanar model, "provisional" confidence there and here.
+ *  Chiron is included here as a fifth coplanar body for the same reason:
+ *  it is fitted against 81 JPL Horizons positions (1900-2060, RMS 0.559
+ *  degrees, worst 0.923), which is the app's own measured accuracy for
+ *  it and is not repeated here. */
+const MINOR_EL: Record<string, CoplanarEl> = {
+  chiron: [216.20376, meanMotion(13.6371), 0.380233, 188.33266, 13.6371],
+  ceres: [267.73, meanMotion(2.7660), 0.0791, 154.32, 2.7660],
+  pallas: [182.38, meanMotion(2.7726), 0.2299, 123.18, 2.7726],
+  juno: [239.00, meanMotion(2.6693), 0.2579, 57.00, 2.6693],
+  vesta: [201.56, meanMotion(2.3615), 0.0895, 253.76, 2.3615]
+};
+const MINOR_MPC: Record<number, string> = { 2060: 'chiron', 1: 'ceres', 2: 'pallas', 3: 'juno', 4: 'vesta' };
+
+/** Full three-dimensional Keplerian element set: used only where an
+ *  inclination and a separate node/perihelion split are actually known,
+ *  which as of this file is Eris and Sedna. The coplanar bodies above do
+ *  not have Omega and omega split apart in this codebase (only their sum,
+ *  varpi) and re-deriving that split would invalidate the fitted L0/e/
+ *  varpi values Chiron's fit was measured against. */
+interface Elements3D { a: number; e: number; i: number; om: number; w: number; M0: number; epochJD: number; }
+
+function heliocentricXYZ(el: Elements3D, jd: number): [number, number, number] {
+  const M = norm360(el.M0 + meanMotion(el.a) * (jd - el.epochJD)) * RAD;
+  const E = solveKepler(M, el.e);
+  const v = trueAnomaly(E, el.e);
+  const r = el.a * (1 - el.e * Math.cos(E));
+  const xOrb = r * Math.cos(v), yOrb = r * Math.sin(v);
+  const i = el.i * RAD, Om = el.om * RAD, w = el.w * RAD;
+  const cosO = Math.cos(Om), sinO = Math.sin(Om), cosW = Math.cos(w), sinW = Math.sin(w), cosI = Math.cos(i), sinI = Math.sin(i);
+  const x = (cosO * cosW - sinO * sinW * cosI) * xOrb + (-cosO * sinW - sinO * cosW * cosI) * yOrb;
+  const y = (sinO * cosW + cosO * sinW * cosI) * xOrb + (-sinO * sinW + cosO * cosW * cosI) * yOrb;
+  const z = (sinW * sinI) * xOrb + (cosW * sinI) * yOrb;
+  return [x, y, z];
 }
 
 /**
- * Antivertex: opposite of Vertex.
+ * Eris: a=67.69 AU, e=0.44, i=44.18deg, Omega=35.9045deg, omega=151.66deg,
+ * M0=205.11deg at epoch JD 2461000.5 (2025-11-21). Sedna: a=541.6 AU,
+ * e=0.859, i=11.93deg, Omega=144.3deg, omega=310.84deg, M0=358.117deg at
+ * epoch JD 2458900.5 (2020-05-31). Source: JPL Small-Body Database /
+ * Horizons, retrieved 2026-09-13 via web search, cross-checked against
+ * two independent citations each for a and e. Neither body has been
+ * measured against a reference ephemeris the way Chiron was; treat both
+ * as provisional in the same sense the four asteroids above are, and
+ * more so for Sedna, whose ~11,400-year period means the observed arc
+ * (35 years) constrains its orbit far more weakly than a short-period
+ * asteroid's does.
  */
+const TNO_3D: Record<string, Elements3D> = {
+  eris: { a: 67.69, e: 0.44, i: 44.18, om: 35.9045, w: 151.66, M0: 205.11, epochJD: 2461000.5 },
+  sedna: { a: 541.6, e: 0.859, i: 11.93, om: 144.3, w: 310.84, M0: 358.117, epochJD: 2458900.5 }
+};
+const TNO_MPC: Record<number, string> = { 136199: 'eris', 90377: 'sedna' };
+
+function geocentricLon3D(el: Elements3D, jd: number): number {
+  const [hx, hy] = heliocentricXYZ(el, jd);
+  const [ex, ey] = coplanarXY(EARTH_EL, t2000(jd));
+  return norm360(Math.atan2(hy - ey, hx - ex) / RAD);
+}
+
+/**
+ * 2. sweAsteroid: mpcId is the asteroid's MPC catalogue number, matching
+ * pointRegistry.ts's sweId for every asteroid/centaur/TNO entry. Returns
+ * null (never throws) for any body without sourced elements, so one
+ * missing body cannot stop computeAll() from finishing the other 96.
+ */
+export function sweAsteroid(mpcId: number, jd: number): { lon: number; speed: number } | null {
+  const minorName = MINOR_EL[MINOR_MPC[mpcId]] ? MINOR_MPC[mpcId] : undefined;
+  if (minorName) {
+    const el = MINOR_EL[minorName];
+    const t = t2000(jd);
+    return { lon: geocentricLonCoplanar(el, t), speed: speedOf(tt => geocentricLonCoplanar(el, tt), t) };
+  }
+  const tnoName = TNO_MPC[mpcId];
+  if (tnoName) {
+    const el = TNO_3D[tnoName];
+    return { lon: geocentricLon3D(el, jd), speed: speedOf(j => geocentricLon3D(el, j), jd) };
+  }
+  return null; // no elements sourced for this body; caller marks 'unavailable'
+}
+
+// ============================================================================
+// 3. HYPOTHETICALS (Hamburg School TNPs, sweId 40-47)
+// ============================================================================
+
+/**
+ * 3. sweHypothetical: NONE of the eight Hamburg School trans-Neptunian
+ * points have orbital elements anywhere in this codebase (they are
+ * genuinely hypothetical bodies with no physical orbit to source
+ * elements FROM; the Hamburg School itself computes them from tables of
+ * assumed mean motions that this project has not obtained). Returns null
+ * always, honestly, rather than a fabricated position; do not add mean
+ * motions here without a cited source for them.
+ */
+export function sweHypothetical(sweId: number, _jd: number): { lon: number; speed: number } | null {
+  if (sweId < 40 || sweId > 47) throw new Error('sweHypothetical: sweId must be 40-47, got ' + sweId);
+  return null;
+}
+
+// ============================================================================
+// 4. LUNAR NODE
+// ============================================================================
+
+/**
+ * 4. lunarNode: mean node, identical formula to lonRaw()'s 'North Node'
+ * case. South Node is the north node's longitude plus 180 degrees,
+ * exactly, by definition (the two nodes are where the Moon's orbital
+ * plane crosses the ecliptic, which is one line through the Earth, not
+ * two independently-moving points).
+ */
+export function lunarNode(jd: number): { northNode: number; southNode: number } {
+  const t = t2000(jd);
+  const northNode = norm360(125.0445 - 0.0529539 * t);
+  const southNode = norm360(northNode + 180);
+  return { northNode, southNode };
+}
+
+// ============================================================================
+// 5. PLANETARY NODES (ascending node longitude, per planet)
+// ============================================================================
+
+/**
+ * J2000.0 mean longitude of ascending node (degrees) and its centennial
+ * rate (degrees/Julian century), for the eight non-Earth planets.
+ * Source: Standish/JPL "Keplerian elements for approximate positions of
+ * the major planets" (mean ecliptic and equinox of J2000), retrieved
+ * 2026-09-13. This is a standard reference table, not a fit: the rate is
+ * how fast a slowly precessing plane actually moves, not a free
+ * parameter chosen to match anything.
+ */
+const PLANET_NODE: Record<string, { om0: number; rateCentury: number }> = {
+  mercury: { om0: 48.33167, rateCentury: -446.30 / 3600 },
+  venus: { om0: 76.68069, rateCentury: -996.89 / 3600 },
+  mars: { om0: 49.57854, rateCentury: -1020.19 / 3600 },
+  jupiter: { om0: 100.55615, rateCentury: 1217.17 / 3600 },
+  saturn: { om0: 113.71504, rateCentury: -1591.05 / 3600 },
+  uranus: { om0: 74.22988, rateCentury: -1681.40 / 3600 },
+  neptune: { om0: 131.72169, rateCentury: -151.25 / 3600 },
+  pluto: { om0: 110.30347, rateCentury: -37.33 / 3600 }
+};
+
+/**
+ * 5. planetaryNodes: the ascending node of each planet named, as a
+ * slowly-precessing mean element (centennial rate applied), not a daily
+ * ephemeris position: a planet's node moves a few arcminutes a year at
+ * most, so computing it once per chart (as the brief asks) rather than
+ * per render costs nothing and loses nothing.
+ */
+export function planetaryNodes(jd: number, planetIds: number[]): Record<number, number> {
+  const t = t2000(jd);
+  const centuries = t / 36525;
+  const out: Record<number, number> = {};
+  for (const id of planetIds) {
+    const name = BODY_BY_ID[id];
+    const el = name ? PLANET_NODE[name] : undefined;
+    if (el) out[id] = norm360(el.om0 + el.rateCentury * centuries);
+  }
+  return out;
+}
+
+// ============================================================================
+// 6. MANUAL / DERIVED POINTS
+// ============================================================================
+
+/** Mean lunar apogee (Black Moon Lilith, mean). Source: Meeus,
+ *  Astronomical Algorithms, mean longitude of lunar perigee series
+ *  (83.3532465 + 4069.0137287 deg/century * T); apogee is perigee + 180,
+ *  which this reduces to directly since only the longitude is wanted.
+ *  This is a secular mean, not a fitted or osculating value: real Lilith
+ *  oscillates around it by several degrees over the lunar month, which
+ *  is exactly what lilithOsc would need a fuller lunar theory to capture
+ *  and which this file does not attempt (see sweHypothetical's honesty
+ *  note for the same reasoning applied to a different gap). */
+export function lilithMeanLon(jd: number): number {
+  const T = t2000(jd) / 36525;
+  const perigee = norm360(83.3532465 + 4069.0137287 * T);
+  return norm360(perigee + 180);
+}
+
+export function computeSelena(lilithMeanLonDeg: number): number {
+  return norm360(lilithMeanLonDeg + 180);
+}
+
+export function computeAriesPoint(): number { return 0; }
+
 export function computeAntivertex(vertexLon: number): number {
-  return (vertexLon + 180) % 360;
+  return norm360(vertexLon + 180);
 }
 
 /**
- * Part of Fortune: (Asc + Moon - Sun) mod 360 during day.
- * Reversed at night: (Asc + Sun - Moon) mod 360.
- * @param ascLon Ascendant longitude
- * @param moonLon Moon longitude
- * @param sunLon Sun longitude
- * @param isNightChart True if night chart (Sun below horizon)
- * @param formula Override formula: 'day' | 'night' | 'reverse' (default 'reverse')
- * @returns Part of Fortune longitude
+ * Part of Fortune. Day formula: Asc + Moon - Sun. Night formula
+ * (classical reversal): Asc + Sun - Moon. opts.partOfFortuneNightChart
+ * controls whether the night formula is actually used at night
+ * ('reverse', the classical rule and the default) or the day formula is
+ * kept regardless ('same', a documented simplification for callers that
+ * want one formula always).
  */
 export function computePartOfFortune(
-  ascLon: number,
-  moonLon: number,
-  sunLon: number,
-  isNightChart: boolean,
-  formula: 'day' | 'night' | 'reverse' = 'reverse'
+  ascLon: number, moonLon: number, sunLon: number,
+  isNightChart: boolean, nightMode: 'reverse' | 'same' = 'reverse'
 ): number {
-  let pof: number;
-
-  if (formula === 'day') {
-    pof = (ascLon + moonLon - sunLon) % 360;
-  } else if (formula === 'night') {
-    pof = (ascLon + sunLon - moonLon) % 360;
-  } else {
-    // 'reverse': use opposite formula at night
-    pof = isNightChart
-      ? (ascLon + sunLon - moonLon) % 360
-      : (ascLon + moonLon - sunLon) % 360;
-  }
-
-  return pof < 0 ? pof + 360 : pof;
+  const useNightFormula = isNightChart && nightMode === 'reverse';
+  return norm360(useNightFormula ? ascLon + sunLon - moonLon : ascLon + moonLon - sunLon);
 }
 
-/**
- * Part of Spirit: always (Asc + Sun - Moon) mod 360.
- */
-export function computePartOfSpirit(
-  ascLon: number,
-  sunLon: number,
-  moonLon: number
-): number {
-  let pos = (ascLon + sunLon - moonLon) % 360;
-  return pos < 0 ? pos + 360 : pos;
+/** Part of Spirit: one formula for every chart, day or night. This is a
+ *  deliberate simplification against the classical rule (which reverses
+ *  Part of Spirit's formula the same way Part of Fortune's is reversed,
+ *  swapping which of the two Part of Fortune formulas each one mirrors);
+ *  Asc + Sun - Moon is used for both a day and a night birth here. */
+export function computePartOfSpirit(ascLon: number, sunLon: number, moonLon: number): number {
+  return norm360(ascLon + sunLon - moonLon);
 }
 
-/**
- * Sun/Moon Midpoint: shortest arc between Sun and Moon.
- */
-export function computeSunMoonMidpoint(sunLon: number, moonLon: number): number {
-  let diff = moonLon - sunLon;
-  if (diff < -180) diff += 360;
+/** Midpoint along the SHORTER arc between two longitudes. Averaging the
+ *  raw numbers picks the wrong point whenever the pair straddles 0/360:
+ *  sun=350, moon=10 naively averages to 180 (the far side) instead of 0
+ *  (the near side), which is the bug this function exists to not have. */
+export function computeSunMoonMidpoint(sunLonDeg: number, moonLonDeg: number): number {
+  let diff = moonLonDeg - sunLonDeg;
   if (diff > 180) diff -= 360;
-  return (sunLon + diff / 2) % 360;
+  if (diff < -180) diff += 360;
+  return norm360(sunLonDeg + diff / 2);
+}
+
+const OBLIQUITY_J2000 = 23.4393; // degrees; fixed, matching ascendant()'s own constant
+
+/**
+ * Local Ascendant/Vertex share one formula (Meeus 12; the same formula
+ * ascendant() already uses in inCommonApp v2.dc.html):
+ *   tan(point) = -cos(RAMC) / (sin(RAMC) cos(eps) + tan(lat) sin(eps))
+ * The Vertex is the WESTERN point where the ecliptic crosses the prime
+ * vertical rather than the horizon, and the standard construction for it
+ * (see e.g. Michelsen, "The American Ephemeris", appendix on the Vertex)
+ * is exactly this same Ascendant formula evaluated at RAMC + 180 degrees
+ * with the observer's latitude replaced by its colatitude (90 - lat):
+ * swapping which great circle you are asking about turns out to be the
+ * same trigonometry with those two substitutions. This file implements
+ * it that way rather than deriving a separate formula, per the brief's
+ * own instruction to "invert the ascendant calculation" if no externally
+ * verified test vector is available: see engine.test.ts for why this
+ * implementation is checked against a documented near-conjunction
+ * consistency test rather than a precise external reference value, and
+ * flag this in review if a trusted Astrodienst/astro.com output ever
+ * becomes available to check it against directly.
+ */
+function ascendantLike(ramcDeg: number, latDeg: number): number {
+  const ramc = ramcDeg * RAD, eps = OBLIQUITY_J2000 * RAD, phi = latDeg * RAD;
+  return norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / RAD);
+}
+
+function ramcOf(jd: number, geoLonDeg: number): number {
+  const t = t2000(jd);
+  return norm360(norm360(280.46061837 + 360.98564736629 * t) + geoLonDeg);
 }
 
 /**
- * Vertex: western intersection of prime vertical with ecliptic.
- *
- * Formula from Meeus and standard astrology texts:
- * - tan(vertex) = -cos(lat) * sin(RAMC) / sin(obliquity)
- * - RAMC (Right Ascension of Midheaven) ≈ derived from MC position
- *
- * This implementation uses a documented approximation:
- * Given geographic latitude and the MC, compute the vertex angle.
- *
- * INPUT VALIDATION REQUIRED: call computeVertex(jd, lat, lon, mc)
- * to ground the calculation in the actual MC position.
- *
- * @param jd Julian Day
- * @param lat Geographic latitude (degrees, -90 to +90)
- * @param lon Geographic longitude (degrees, -180 to +180)
- * @param mcLon Midheaven longitude (computed from ephemeris)
- * @returns Vertex longitude (0-360)
+ * 6. computeVertex: geographic lat/lon in degrees (lon positive east,
+ * matching ascendant()'s own p.birthLon convention and this test's own
+ * -74.0060 for NYC being read as west).
  */
-export function computeVertex(
-  jd: number,
-  lat: number,
-  lon: number,
-  mcLon: number
-): number {
-  // Mean obliquity of ecliptic at epoch
-  const obliquity = meanObliquity(jd);
-  const oblRad = (obliquity * Math.PI) / 180;
-
-  // Apparent sidereal time (approximated)
-  // For precise: use swe_sidtime if available
-  let ast: number;
-  if (swe && swe.swe_sidtime) {
-    ast = swe.swe_sidtime(jd);
-  } else {
-    // Greenwich Mean Sidereal Time approximation
-    const T = (jd - 2451545.0) / 36525;
-    const gst =
-      280.46061837 +
-      360.98564724 * (jd - 2451545) +
-      0.000387933 * T * T -
-      T * T * T / 38710000;
-    ast = (gst + lon / 15) % 360;
-  }
-
-  const astRad = (ast * Math.PI) / 180;
-  const latRad = (lat * Math.PI) / 180;
-
-  // Vertex calculation: tan(vertex) = -cos(lat) * sin(AST) / sin(obliquity)
-  // (derived from prime vertical / ecliptic intersection)
-  const numerator = -Math.cos(latRad) * Math.sin(astRad);
-  const denominator = Math.sin(oblRad);
-
-  if (Math.abs(denominator) < 1e-10) {
-    // Singular: return MC + 90 or MC - 90
-    return lat > 0 ? (mcLon + 90) % 360 : (mcLon - 90 + 360) % 360;
-  }
-
-  let vertex = Math.atan2(numerator, denominator) * (180 / Math.PI);
-  vertex = (vertex + 360) % 360;
-
-  return vertex;
+export function computeVertex(jd: number, latDeg: number, geoLonDeg: number): number {
+  const ramc = ramcOf(jd, geoLonDeg);
+  return ascendantLike(ramc + 180, 90 - latDeg);
 }
 
-/**
- * Mean obliquity of the ecliptic (degrees) at JD.
- * Simplified formula; for high precision use swe_calc(JD, SE_ECL_NUT, 0).
- */
-function meanObliquity(jd: number): number {
-  const T = (jd - 2451545.0) / 36525;
-  // IAU 1980 mean obliquity formula
-  const seconds =
-    84381.448 -
-    46.8150 * T -
-    0.00059 * T * T +
-    0.001813 * T * T * T;
-  return seconds / 3600;
+/** Also exposed because Vertex and Ascendant are the same formula with
+ *  different inputs, and computeAll() needs both; kept here rather than
+ *  duplicated at the call site. */
+export function computeAscendant(jd: number, latDeg: number, geoLonDeg: number): number {
+  return ascendantLike(ramcOf(jd, geoLonDeg), latDeg);
+}
+export function computeMidheaven(jd: number, geoLonDeg: number): number {
+  const ramc = ramcOf(jd, geoLonDeg) * RAD, eps = OBLIQUITY_J2000 * RAD;
+  return norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / RAD);
 }
 
 // ============================================================================
-// 7. COMETS: Kepler solver (delegated to cometSolver.ts)
+// 7. COMETS (mundane only; see cometSolver.ts for the Kepler solve itself)
 // ============================================================================
 
-import { keplerSolve } from './cometSolver';
-import { COMET_ELEMENTS } from './cometElements';
-
 /**
- * Compute comet position by name and Julian Day.
- * @param cometName 'halley' | 'halebopp' | 'hyakutake'
- * @param jd Julian Day (TT)
- * @returns { lon, magnitude } or null if calculation fails
+ * 7. computeComet: delegates to cometSolver.keplerSolve. Every point this
+ * returns is a comet, and every comet in this registry is tagged
+ * category 'comet' with a tooltip ending "mundane charts only" or
+ * "mundane astrology only": nothing calls a comet's position a personal
+ * placement anywhere in this codebase, and a UI layer that renders one
+ * must keep saying so, not just this module.
  */
-export function computeComet(
-  cometName: string,
-  jd: number
-): { lon: number; magnitude?: number } | null {
-  const elements = COMET_ELEMENTS[cometName as keyof typeof COMET_ELEMENTS];
-  if (!elements) {
-    return null;
-  }
-
-  try {
-    return keplerSolve(elements, jd);
-  } catch (err) {
-    return null;
-  }
+export function computeComet(id: string, jd: number): { lon: number; magnitude?: number } | null {
+  const elements: CometElements | undefined = (COMET_ELEMENTS as Record<string, CometElements>)[id];
+  if (!elements) return null;
+  try { return keplerSolve(elements, jd); } catch { return null; }
 }
 
 // ============================================================================
-// 8. HOUSER: Assign house for computed point
+// 8. HOUSER
 // ============================================================================
 
 /**
- * Assign house number (1-12) for a longitude given house cusps.
- * @param lon Ecliptic longitude (0-360)
- * @param houseCusps Array of 12 house cusps [cusp1, cusp2, ..., cusp12]
- * @returns House number 1-12
+ * 8. assignHouse: house cusps in, house number out. Ported unchanged from
+ * the previous engine.ts (the one part of it with no Swiss Ephemeris
+ * dependency and no bug found in review): a point belongs to house N if
+ * its longitude falls between cusp N and cusp N+1, wraparound at 0
+ * handled by comparing which way the interval runs rather than assuming
+ * cusp[i] < cusp[i+1].
  */
-export function assignHouse(lon: number, houseCusps: number[]): number {
-  if (!houseCusps || houseCusps.length < 12) {
-    return 1; // Default to house 1
-  }
-
-  // Normalize longitude to [0, 360)
-  let normLon = lon % 360;
-  if (normLon < 0) normLon += 360;
-
-  // Find house: point is in house N if it's between cusp N and cusp N+1
+export function assignHouse(lon: number, houseCusps: number[]): number | undefined {
+  if (!houseCusps || houseCusps.length < 12) return undefined;
+  const normLon = norm360(lon);
   for (let i = 0; i < 12; i++) {
-    const cusp1 = houseCusps[i];
-    const cusp2 = houseCusps[(i + 1) % 12];
-
-    // Handle wraparound at 0°
-    if (cusp1 <= cusp2) {
-      if (normLon >= cusp1 && normLon < cusp2) {
-        return i + 1;
-      }
-    } else {
-      // Wraparound: 330° to 30° (house crosses 0°)
-      if (normLon >= cusp1 || normLon < cusp2) {
-        return i + 1;
-      }
-    }
+    const c1 = houseCusps[i], c2 = houseCusps[(i + 1) % 12];
+    if (c1 <= c2) { if (normLon >= c1 && normLon < c2) return i + 1; }
+    else { if (normLon >= c1 || normLon < c2) return i + 1; }
   }
-
-  return 1; // Fallback
+  return undefined;
 }
 
 // ============================================================================
-// MAIN EXPORT: COMPUTEALL
+// MAIN EXPORT: computeAll
 // ============================================================================
 
 /**
- * Compute all registry points for a given instant.
+ * Compute every registry point for one instant and place.
  *
- * @param jd Julian Day (TT)
- * @param lat Geographic latitude (degrees)
- * @param lon Geographic longitude (degrees)
- * @param houseCusps House cusps [1..12] (computed separately, or optional)
- * @param opts Computation options
- * @returns PointData[] for every registry point
+ * Angles are a REQUIRED parameter (angles.asc, angles.mc), not derived
+ * here: the previous engine.ts derived them internally and got them
+ * wrong (hardcoded to 0), and this app already has a working, tested
+ * Ascendant/Midheaven calculation (ascendant() in inCommonApp v2.dc.html,
+ * which this file's computeAscendant/computeMidheaven mirror exactly for
+ * a caller that has no house system of its own yet). Passing angles in
+ * means this module can never produce a chart whose angles disagree with
+ * whichever house system the caller actually uses.
  *
- * CACHING: This function should be called from a Web Worker
- * (Prompt 1-D), with results cached by rounded key (jd|lat|lon).
+ * houseCusps is optional; without it every point's house is left
+ * undefined rather than guessed.
+ *
+ * CACHING AND THE WEB WORKER FROM "PROMPT 1-D": neither exists in this
+ * codebase. There is no Web Worker wiring anywhere in this app (grep for
+ * `new Worker` finds nothing), so this function is a plain synchronous
+ * call: ~97 Kepler solves, each a few Newton iterations, comfortably
+ * under a millisecond in total, which does not need worker offload to
+ * stay off a render's critical path. Round-key caching by (jd|lat|lon)
+ * belongs at the CALL SITE once this module is actually wired into the
+ * app (the way ephemeris-cache.js already memoises lonOf by body and
+ * instant); adding a cache inside a function nobody calls yet would be
+ * a guess about an access pattern that does not exist.
  */
-export function computeAll(
-  jd: number,
-  lat: number,
-  lon: number,
-  houseCusps?: number[],
-  opts: ComputeOpts = {}
-): PointData[] {
-  if (!isEngineReady()) {
-    throw new Error('Engine not initialized. Call initEngine() first.');
-  }
+export function computeAll(jd: number, lat: number, lon: number, angles: Angles, houseCusps?: number[], opts: ComputeOpts = {}): PointData[] {
+  const sun = sweBody(0, jd);
+  const moon = sweBody(1, jd);
+  const nodes = lunarNode(jd);
+  const isNight = opts.isNightChart !== undefined ? opts.isNightChart : sun.lon > 180;
+  const lilith = lilithMeanLon(jd);
+  const vertex = computeVertex(jd, lat, lon);
+
+  const house = (l: number) => assignHouse(l, houseCusps || []);
 
   const results: PointData[] = [];
-  const cache: Record<string, { lon: number; speed?: number }> = {};
 
-  // Pre-compute ephemeris bodies (0-9)
-  for (let i = 0; i <= 9; i++) {
-    try {
-      cache[`body_${i}`] = sweBody(i, jd);
-    } catch (err) {
-      if (opts.logErrors) console.error(`Failed to compute body ${i}:`, err);
-    }
-  }
-
-  // Pre-compute lunar nodes
-  let northNodeLon = 0,
-    southNodeLon = 0;
-  try {
-    const nodes = lunarNode(jd);
-    northNodeLon = nodes.northNode;
-    southNodeLon = nodes.southNode;
-  } catch (err) {
-    if (opts.logErrors) console.error('Failed to compute lunar nodes:', err);
-  }
-
-  // Extract common body positions for manual calculations
-  const sunPos = cache['body_0'];
-  const moonPos = cache['body_1'];
-  const mercuryPos = cache['body_2'];
-  const venusPos = cache['body_3'];
-  const marsPos = cache['body_4'];
-  const jupiterPos = cache['body_5'];
-  const saturnPos = cache['body_6'];
-  const uranusPos = cache['body_7'];
-  const neptunePos = cache['body_8'];
-  const plutoPos = cache['body_9'];
-
-  // Compute Ascendant (via house system; use existing code or pass MC)
-  // For now, placeholder; integrate with house system calculation
-  const ascLon = 0; // FIXME: compute via house system
-  const mcLon = 0;  // FIXME: compute via house system
-  const icLon = (mcLon + 180) % 360;
-  const dcLon = (ascLon + 180) % 360;
-
-  // Determine night chart (Sun below horizon)
-  const isNightChart = sunPos && sunPos.lon > 180;
-
-  // Process each registry point
-  const registry = require('./pointRegistry');
-  const allPoints = [...registry.BASIC_REGISTRY, ...registry.EXPANDED_REGISTRY];
-
-  for (const point of allPoints) {
-    const pd: PointData = {
-      id: point.id,
-      name: point.name,
-      lon: 0,
-      status: 'unavailable'
-    };
+  for (const p of allPoints()) {
+    const pd: PointData = { id: p.id, name: p.name, lon: 0, status: 'unavailable' };
 
     try {
-      switch (point.id) {
-        // ANGLES
-        case 'asc':
-          pd.lon = ascLon;
-          pd.status = 'ok';
-          break;
-        case 'mc':
-          pd.lon = mcLon;
-          pd.status = 'ok';
-          break;
-        case 'ic':
-          pd.lon = icLon;
-          pd.status = 'ok';
-          break;
-        case 'dc':
-          pd.lon = dcLon;
-          pd.status = 'ok';
-          break;
+      switch (p.id) {
+        case 'asc': pd.lon = angles.asc; pd.status = 'ok'; break;
+        case 'mc': pd.lon = angles.mc; pd.status = 'ok'; break;
+        case 'ic': pd.lon = norm360(angles.mc + 180); pd.status = 'ok'; break;
+        case 'dc': pd.lon = norm360(angles.asc + 180); pd.status = 'ok'; break;
 
-        // LUMINARIES & PLANETS
-        case 'sun':
-          if (sunPos) {
-            pd.lon = sunPos.lon;
-            pd.speed = sunPos.speed;
-            pd.status = 'ok';
-          }
+        case 'sun': pd.lon = sun.lon; pd.speed = sun.speed; pd.status = 'ok'; break;
+        case 'moon': pd.lon = moon.lon; pd.speed = moon.speed; pd.status = 'ok'; break;
+        case 'mercury': case 'venus': case 'mars': case 'jupiter':
+        case 'saturn': case 'uranus': case 'neptune': case 'pluto': {
+          const idOf: Record<string, number> = { mercury: 2, venus: 3, mars: 4, jupiter: 5, saturn: 6, uranus: 7, neptune: 8, pluto: 9 };
+          const r = sweBody(idOf[p.id], jd);
+          pd.lon = r.lon; pd.speed = r.speed; pd.status = 'ok';
           break;
-        case 'moon':
-          if (moonPos) {
-            pd.lon = moonPos.lon;
-            pd.speed = moonPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'mercury':
-          if (mercuryPos) {
-            pd.lon = mercuryPos.lon;
-            pd.speed = mercuryPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'venus':
-          if (venusPos) {
-            pd.lon = venusPos.lon;
-            pd.speed = venusPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'mars':
-          if (marsPos) {
-            pd.lon = marsPos.lon;
-            pd.speed = marsPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'jupiter':
-          if (jupiterPos) {
-            pd.lon = jupiterPos.lon;
-            pd.speed = jupiterPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'saturn':
-          if (saturnPos) {
-            pd.lon = saturnPos.lon;
-            pd.speed = saturnPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'uranus':
-          if (uranusPos) {
-            pd.lon = uranusPos.lon;
-            pd.speed = uranusPos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'neptune':
-          if (neptunePos) {
-            pd.lon = neptunePos.lon;
-            pd.speed = neptunePos.speed;
-            pd.status = 'ok';
-          }
-          break;
-        case 'pluto':
-          if (plutoPos) {
-            pd.lon = plutoPos.lon;
-            pd.speed = plutoPos.speed;
-            pd.status = 'ok';
-          }
-          break;
+        }
 
-        // LUNAR NODES
-        case 'northNode':
-          pd.lon = northNodeLon;
-          pd.status = 'ok';
-          break;
-        case 'southNode':
-          pd.lon = southNodeLon;
-          pd.status = 'ok';
-          break;
+        case 'northNode': pd.lon = nodes.northNode; pd.status = 'ok'; break;
+        case 'southNode': pd.lon = nodes.southNode; pd.status = 'ok'; break;
 
-        // ASTEROIDS (sample)
-        case 'ceres':
-          const ceresPos = sweAsteroid(1, jd);
-          if (ceresPos) {
-            pd.lon = ceresPos.lon;
-            pd.speed = ceresPos.speed;
-            pd.status = 'ok';
-          } else {
-            pd.status = 'unavailable';
-          }
+        case 'chiron': case 'ceres': case 'pallas': case 'juno': case 'vesta':
+        case 'eris': case 'sedna': {
+          const mpc: Record<string, number> = { chiron: 2060, ceres: 1, pallas: 2, juno: 3, vesta: 4, eris: 136199, sedna: 90377 };
+          const r = sweAsteroid(mpc[p.id], jd);
+          if (r) { pd.lon = r.lon; pd.speed = r.speed; pd.status = 'ok'; }
+          else { pd.note = 'no orbital elements sourced for this body'; }
           break;
+        }
 
-        // DERIVED POINTS
+        case 'lilithMean': pd.lon = lilith; pd.status = 'ok'; break;
+        case 'lilithOsc':
+          pd.note = 'osculating Lilith needs a lunar perturbation theory this module does not implement; only lilithMean is computed';
+          break;
+        case 'selena': pd.lon = computeSelena(lilith); pd.status = 'fixed'; break;
+
+        case 'mercuryNode': case 'venusNode': case 'marsNode': case 'jupiterNode':
+        case 'saturnNode': case 'uranusNode': case 'neptuneNode': case 'plutoNode': {
+          const idOf: Record<string, number> = {
+            mercuryNode: 2, venusNode: 3, marsNode: 4, jupiterNode: 5,
+            saturnNode: 6, uranusNode: 7, neptuneNode: 8, plutoNode: 9
+          };
+          const pn = planetaryNodes(jd, [idOf[p.id]]);
+          const v = pn[idOf[p.id]];
+          if (v !== undefined) { pd.lon = v; pd.status = 'fixed'; }
+          break;
+        }
+
         case 'partOfFortune':
-          if (sunPos && moonPos) {
-            pd.lon = computePartOfFortune(
-              ascLon,
-              moonPos.lon,
-              sunPos.lon,
-              isNightChart || false,
-              opts.partOfFortuneFormula || 'reverse'
-            );
-            pd.status = 'fixed';
-          }
+          pd.lon = computePartOfFortune(angles.asc, moon.lon, sun.lon, isNight, opts.partOfFortuneNightChart);
+          pd.status = 'fixed';
           break;
-
         case 'partOfSpirit':
-          if (sunPos && moonPos) {
-            pd.lon = computePartOfSpirit(ascLon, sunPos.lon, moonPos.lon);
-            pd.status = 'fixed';
-          }
-          break;
-
-        case 'ariesPoint':
-          pd.lon = computeAriesPoint();
+          pd.lon = computePartOfSpirit(angles.asc, sun.lon, moon.lon);
           pd.status = 'fixed';
           break;
+        case 'ariesPoint': pd.lon = computeAriesPoint(); pd.status = 'fixed'; break;
+        case 'vertex': pd.lon = vertex; pd.status = 'ok'; break;
+        case 'antivertex': pd.lon = computeAntivertex(vertex); pd.status = 'fixed'; break;
+        case 'sunmoonMidpoint': pd.lon = computeSunMoonMidpoint(sun.lon, moon.lon); pd.status = 'ok'; break;
 
-        case 'vertex':
-          pd.lon = computeVertex(jd, lat, lon, mcLon);
-          pd.status = 'ok';
+        case 'halley': case 'halebopp': case 'hyakutake': {
+          const c = computeComet(p.id, jd);
+          if (c) { pd.lon = c.lon; pd.status = 'ok'; }
+          else { pd.note = 'comet position unavailable'; }
           break;
-
-        case 'antivertex':
-          pd.lon = computeAntivertex(computeVertex(jd, lat, lon, mcLon));
-          pd.status = 'fixed';
-          break;
-
-        case 'sunmoonMidpoint':
-          if (sunPos && moonPos) {
-            pd.lon = computeSunMoonMidpoint(sunPos.lon, moonPos.lon);
-            pd.status = 'ok';
-          }
-          break;
-
-        // COMETS (mundane only)
-        case 'halley':
-        case 'halebopp':
-        case 'hyakutake':
-          const cometRes = computeComet(point.id, jd);
-          if (cometRes) {
-            pd.lon = cometRes.lon;
-            pd.status = 'ok';
-          } else {
-            pd.status = 'unavailable';
-          }
-          break;
+        }
 
         default:
-          // Unimplemented points default to unavailable
-          pd.status = 'unavailable';
+          pd.note = 'no orbital elements sourced for this body';
       }
     } catch (err) {
-      if (opts.logErrors) {
-        console.error(`Error computing ${point.id}:`, err);
-      }
       pd.status = 'unavailable';
+      pd.note = (err as Error).message;
+      if (opts.logErrors) console.error('computeAll: ' + p.id + ': ' + (err as Error).message);
     }
 
-    // Assign house if cusps provided
-    if (houseCusps && houseCusps.length === 12) {
-      pd.house = assignHouse(pd.lon, houseCusps);
-    }
-
+    if (pd.status !== 'unavailable') pd.house = house(pd.lon);
     results.push(pd);
   }
 
