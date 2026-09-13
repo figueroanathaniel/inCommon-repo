@@ -1,13 +1,22 @@
 /*! ephemeris/pointRegistry.ts: Complete astrological point registry (TypeScript)
  *
- * Single source of truth for all 17 basic + 40+ expanded points.
+ * Single source of truth for all 97 points: 17 basic + 80 expanded.
  * Every id here must be computable by Prompt 3.
- * Categories "asteroid"..."derived" (except South Node) are EXPANDED-only.
+ * Categories "asteroid".."derived" (except South Node) are EXPANDED-only.
  *
  * BASIC (17 points): asc, mc, ic, dc, sun, moon, mercury, venus, mars,
  * jupiter, saturn, uranus, neptune, pluto, northNode, southNode, partOfFortune.
  *
- * EXPANDED adds: asteroids, centaurs, TNOs, comets, lunar nodes, hypotheticals, derived.
+ * EXPANDED (80 points) adds: asteroids, centaurs, TNOs, comets, lunar nodes
+ * and planetary nodes, hypotheticals, derived.
+ *
+ * Two deliberate departures from the point-by-point spec this was built
+ * from, both to avoid a real collision rather than an imagined one:
+ * Priapus is not a separate entry (it is the same computed longitude as
+ * selena, apogee + 180, under a different tradition's name; see the
+ * comment there), and the Hamburg School hypothetical Cupido carries
+ * glyph 'Cud' rather than 'Cup', which the unrelated asteroid Cupido
+ * (id cupido_astr) already uses.
  */
 
 export type Category =
@@ -29,12 +38,16 @@ export interface PointDef {
   sweId?: number | string;       // Swiss Ephemeris ID (body, MPC, or manual)
   tooltip: string;               // ≤120 chars: archetype meaning
   reference: string;             // ≤120 chars: practical/mundane meaning
-  expanded?: boolean;            // true = EXPANDED-only (default false for basic)
 }
+// Whether a point is basic or expanded-only is which array it lives in
+// (BASIC_REGISTRY vs EXPANDED_REGISTRY), not a field on the point itself:
+// a per-entry flag would be a second place for that fact to drift out of
+// sync with the one that actually governs it. It drifted once already —
+// ceres was the only one of 80 expanded entries carrying `expanded: true`.
 
 export interface SymbolismEntry {
-  archetype: string;             // ≤120 chars: spiritual/archetypal meaning
-  practical: string;             // ≤120 chars: mundane/psychological meaning
+  symbolism: string;              // ≤120 chars: same text as the point's tooltip
+  reference: string;              // ≤120 chars: same text as the point's reference
 }
 
 // ============================================================================
@@ -202,7 +215,7 @@ export const BASIC_REGISTRY: PointDef[] = [
 ];
 
 // ============================================================================
-// EXPANDED REGISTRY (additional 40+ points)
+// EXPANDED REGISTRY (additional 80 points)
 // ============================================================================
 
 export const EXPANDED_REGISTRY: PointDef[] = [
@@ -214,8 +227,7 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     category: 'asteroid',
     sweId: 1,
     tooltip: 'nurturing, motherhood, grief, harvest, parenting',
-    reference: 'food, attachment, how you nurture',
-    expanded: true
+    reference: 'food, attachment, how you nurture'
   },
   {
     id: 'pallas',
@@ -415,6 +427,10 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     tooltip: 'oracle, prophecy, inner knowing, divination',
     reference: 'intuition, divination, prophetic voice'
   },
+  // The asteroid Fortuna keeps its own three-letter glyph rather than the
+  // classic circled-cross (⊗) that already names partOfFortune above: the
+  // two are different points sharing a name, and giving them the same
+  // glyph would make it impossible to tell which one a wheel is drawing.
   {
     id: 'fortuna',
     name: 'Fortuna',
@@ -550,7 +566,7 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     category: 'centaur',
     sweId: 52975,
     tooltip: 'sacrificial love, noble loss, devotion',
-    reference: 'love's cost, noble sacrifice'
+    reference: 'the cost of loving, noble sacrifice'
   },
   {
     id: 'amycus',
@@ -735,6 +751,11 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     tooltip: 'black moon, repressed rage (osculating)',
     reference: 'shadow, current cycle (osculating)'
   },
+  // Computed as lilithMean.lon + 180 (mean perigee). Some traditions call
+  // this same longitude Priapus and read it as a blunt masculine shadow
+  // rather than a guardian force; it is one computed point under two
+  // names, not two, so there is no separate priapus entry here. A future
+  // reading of the masculine-shadow tradition can key off this id.
   {
     id: 'selena',
     name: 'Selena',
@@ -742,14 +763,6 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     category: 'node',
     tooltip: 'white moon, purity, spiritual protection',
     reference: 'guardian force, pure intent, grace'
-  },
-  {
-    id: 'priapus',
-    name: 'Priapus',
-    glyph: 'Pri',
-    category: 'node',
-    tooltip: 'blunt masculine shadow, fertility, phallus',
-    reference: 'primal masculinity, raw vitality'
   },
 
   // Planetary Nodes (computed)
@@ -820,9 +833,12 @@ export const EXPANDED_REGISTRY: PointDef[] = [
 
   // ---- HYPOTHETICAL PLANETS (Hamburg School TNPs) ----
   {
+    // Two unrelated points share the name Cupido: MPC asteroid 763 (id
+    // cupido_astr, glyph 'Cup') and this Hamburg School hypothetical.
+    // 'Cud' keeps them distinguishable on a wheel or a table row.
     id: 'tnp_cupido',
     name: 'Cupido',
-    glyph: 'Cup',
+    glyph: 'Cud',
     category: 'hypothetical',
     sweId: 40,
     tooltip: 'love, family, art, bonds, harmony',
@@ -909,6 +925,11 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     tooltip: 'self-directed fate, personal agency',
     reference: 'your own doors, self-made fate'
   },
+  // Computed as ASC + Sun - Moon. The classical Part of Spirit reverses
+  // Part of Fortune's day/night formula (swapping which luminary is added
+  // and which is subtracted depending on a day or night birth); this
+  // build does not apply that correction and uses one formula for both,
+  // a simplification worth knowing about rather than a claim it isn't one.
   {
     id: 'partOfSpirit',
     name: 'Part of Spirit',
@@ -925,6 +946,10 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     tooltip: 'public visibility, world events, fame',
     reference: 'where you touch the public world (fixed 0°)'
   },
+  // Computed as the midpoint along the SHORTER arc between Sun and Moon,
+  // not a naive (sun.lon + moon.lon) / 2: averaging the raw longitudes
+  // picks the wrong point whenever the pair straddles the 0/360 seam,
+  // landing the midpoint opposite where it belongs.
   {
     id: 'sunmoonMidpoint',
     name: 'Sun/Moon Midpoint',
@@ -940,14 +965,14 @@ export const EXPANDED_REGISTRY: PointDef[] = [
 // ============================================================================
 
 /**
- * All basic points (17). Exclude EXPANDED-only.
+ * All basic points (17). Excludes EXPANDED-only.
  */
 export function basicPoints(): PointDef[] {
   return BASIC_REGISTRY;
 }
 
 /**
- * All expanded points (40+).
+ * All expanded points (80).
  */
 export function expandedPoints(): PointDef[] {
   return EXPANDED_REGISTRY;
@@ -978,89 +1003,18 @@ export function pointById(id: string): PointDef | undefined {
 // SYMBOLISM MAP
 // ============================================================================
 
-export const SYMBOLISM: Record<string, SymbolismEntry> = {
-  asc: {
-    archetype: 'Self-presentation, mask, first impression to the world',
-    practical: 'How others see you, persona, life direction'
+/* Built from allPoints() rather than typed out a second time: a hand
+   maintained copy is exactly how this map lost 78 of its 98 entries the
+   first time (see the earlier abbreviated version this replaced). Deriving
+   it means a point can never appear in the registry without also appearing
+   here, and the two texts can never drift into disagreeing with each other. */
+export const SYMBOLISM: Record<string, SymbolismEntry> = allPoints().reduce(
+  (map, p) => {
+    map[p.id] = { symbolism: p.tooltip, reference: p.reference };
+    return map;
   },
-  mc: {
-    archetype: 'Career, public image, highest achievement, life purpose',
-    practical: 'Professional path, reputation, ambition, legacy'
-  },
-  ic: {
-    archetype: 'Home, family roots, private self, foundation',
-    practical: 'Family legacy, inner security, psychological roots'
-  },
-  dc: {
-    archetype: 'Relationships, projections onto others, partnerships',
-    practical: 'Marriage partner, enemies, significant others'
-  },
-  sun: {
-    archetype: 'Core self, will, identity, creative essence',
-    practical: 'Conscious purpose, vitality, what you came to express'
-  },
-  moon: {
-    archetype: 'Emotions, needs, inner world, nurturing instinct',
-    practical: 'Emotional nature, instinct, security, family'
-  },
-  mercury: {
-    archetype: 'Communication, mind, ideas, learning, commerce',
-    practical: 'How you think and speak, trade, siblings'
-  },
-  venus: {
-    archetype: 'Love, beauty, values, relating, sensuality',
-    practical: 'Romantic nature, aesthetics, money, pleasure'
-  },
-  mars: {
-    archetype: 'Assertion, courage, desire, anger, drive',
-    practical: 'Sexual energy, aggression, competition, action'
-  },
-  jupiter: {
-    archetype: 'Expansion, luck, faith, excess, growth',
-    practical: 'Opportunity, abundance, optimism, over-extension'
-  },
-  saturn: {
-    archetype: 'Limitation, responsibility, time, structure, fear',
-    practical: 'Discipline, maturity, delays, earned success'
-  },
-  uranus: {
-    archetype: 'Rebellion, innovation, freedom, sudden change',
-    practical: 'Genius, disruption, detachment, revolution'
-  },
-  neptune: {
-    archetype: 'Illusion, spirituality, dreams, dissolve boundaries',
-    practical: 'Imagination, deception, mysticism, addiction'
-  },
-  pluto: {
-    archetype: 'Transformation, death/rebirth, power, shadow',
-    practical: 'Deep change, shared resources, control, obsession'
-  },
-  northNode: {
-    archetype: 'Soul growth direction, future potential, destiny',
-    practical: 'Life calling, evolution, what to move toward'
-  },
-  southNode: {
-    archetype: 'Past karma, natural talents, old patterns',
-    practical: 'Gifts from past, comfort zone, what to release'
-  },
-  partOfFortune: {
-    archetype: 'Luck, prosperity, natural ease, flow',
-    practical: 'Where fortune flows, material ease, life current'
-  },
-  chiron: {
-    archetype: 'Wounded healer, deepest wound, mentorship',
-    practical: 'Healing gift, wound-becoming-calling'
-  },
-  lilithMean: {
-    archetype: 'Black moon, repressed rage, raw feminine power',
-    practical: 'Shadow, taboo, exile, wildness'
-  },
-  vertex: {
-    archetype: 'Fated encounters, doors opened by others',
-    practical: 'Destiny events, other people\'s doors'
-  }
-  // ... (abbreviate for space; all basic + major expanded covered above)
-};
+  {} as Record<string, SymbolismEntry>
+);
 
 // ============================================================================
 // VALIDATION & TYPECHECK
@@ -1105,6 +1059,22 @@ export function validateRegistry(): { valid: boolean; errors: string[] } {
     // Check glyph is non-empty
     if (!point.glyph || point.glyph.length === 0) {
       errors.push(`${point.id}: empty glyph`);
+    }
+  }
+
+  // Two points sharing a glyph is not a typo like a duplicate id, but the
+  // same wheel-and-table confusion in practice: nothing on screen can tell
+  // Cupido the asteroid from Cupido the Hamburg School point apart. Caught
+  // once already (both wanted 'Cup'), which is why this is a gate now.
+  const byGlyph = new Map<string, string[]>();
+  for (const point of allPoints()) {
+    const ids = byGlyph.get(point.glyph) || [];
+    ids.push(point.id);
+    byGlyph.set(point.glyph, ids);
+  }
+  for (const [glyph, ids] of byGlyph) {
+    if (ids.length > 1) {
+      errors.push(`Glyph '${glyph}' shared by: ${ids.join(', ')}`);
     }
   }
 
