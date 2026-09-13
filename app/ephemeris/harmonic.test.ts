@@ -1,394 +1,349 @@
-/*! ephemeris/harmonic.test.ts
- * Tests for harmonic chart recasting
+/*! ephemeris/harmonic.test.ts: unit tests for harmonic chart recasting.
+ *
+ * Plain Node, not Jest: ported from a Jest-shaped file this app could
+ * never run (no package.json, no node_modules, no Jest anywhere), to the
+ * tests-array/runTests() shape every other test file here already uses.
+ * See engine.test.ts for the reference shape and multiChart.test.js for
+ * the .js-file precedent.
+ *
+ * THREE THINGS WERE WRONG IN THE ORIGINAL, none of them ever caught
+ * because the file could not run:
+ *
+ *  1. "Angles included if configured" asserted 82.5 * 5 = 412.5 -> 72.5.
+ *     412.5 mod 360 is 52.5, not 72.5; the test's own inline comment even
+ *     says "412.5 -> 52.5" one line above the wrong assertion. Verified
+ *     against the live recastHarmonic() output before fixing: 52.5.
+ *
+ *  2. "Retrograde flag can flip in high harmonics" multiplies speed by a
+ *     positive harmonic (1-13; recastHarmonic throws outside that range),
+ *     so a negative speed can never become positive: there is no flip to
+ *     test. The numeric assertion (-0.45) is correct; the name and premise
+ *     were not. Renamed to describe what is actually true: sign survives
+ *     scaling by a positive multiplier.
+ *
+ *  3. "Cache hits on repeated calls" measured wall-clock time and then
+ *     asserted only toEqual (deep equality), which passes even with no
+ *     caching at all: recomputing the same input twice is also deeply
+ *     equal to itself. recastHarmonicMemoized() returns the exact cached
+ *     object on a hit (see harmonic.ts), so the real test of caching is
+ *     reference equality, confirmed empirically below before writing it.
  */
 
+import type { PointData } from './engine.ts';
 import {
   recastHarmonic,
   recastHarmonicMemoized,
-  pointsHashForMemo,
   clearHarmonicCache,
   expectedAspectInHarmonic,
-  harmonicAspectFamily,
-  HarmonicPointData
-} from './harmonic';
+  harmonicAspectFamily
+} from './harmonic.ts';
 
-import { PointData } from './engine';
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-/**
- * Create a mock PointData point
- */
-function mockPoint(id: string, name: string, lon: number, status: 'ok' | 'unavailable' = 'ok'): PointData {
-  return {
-    id,
-    name,
-    lon,
-    lat: 0,
-    speed: 1.0,
-    house: 1,
-    status
-  };
+function approx(actual: number, expected: number, tolerance: number): boolean {
+  return Math.abs(actual - expected) <= tolerance;
 }
 
-/**
- * Arc distance calculation (shortest path)
- */
+function mockPoint(id: string, name: string, lon: number, status: 'ok' | 'unavailable' = 'ok'): PointData {
+  return { id, name, lon, speed: 1.0, house: 1, status } as PointData;
+}
+
+/** Shortest arc between two longitudes. */
 function arcDist(lon1: number, lon2: number): number {
-  let d = Math.abs(lon1 - lon2);
+  const d = Math.abs(lon1 - lon2);
   return d > 180 ? 360 - d : d;
 }
 
+const tests: Array<() => void> = [];
+function test(name: string, fn: () => void) { tests.push(Object.assign(fn, { testName: name })); }
+
 // ============================================================================
-// BASIC RECASTING TESTS
+// BASIC RECASTING
 // ============================================================================
 
-describe('Harmonic Recasting', () => {
-  beforeEach(() => {
-    clearHarmonicCache();
+test('n=1 (identity): returns input unchanged, tagged harmonic 1', () => {
+  clearHarmonicCache();
+  const points = [
+    mockPoint('Sun', 'Sun', 82.5),
+    mockPoint('Moon', 'Moon', 195.0),
+    mockPoint('Venus', 'Venus', 95.4)
+  ];
+  const harmonic = recastHarmonic(points, 1);
+  if (harmonic.length !== 3) throw new Error('expected 3 points, got ' + harmonic.length);
+  harmonic.forEach((h, i) => {
+    if (!approx(h.lon, points[i].lon, 1e-5)) throw new Error('lon[' + i + '] = ' + h.lon);
+    if (h.origLon !== points[i].lon) throw new Error('origLon[' + i + '] mismatch');
+    if (h.harmonic !== 1) throw new Error('harmonic[' + i + '] = ' + h.harmonic);
   });
+});
 
-  test('n=1 (identity): returns input mod float noise', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 82.5),
-      mockPoint('Moon', 'Moon', 195.0),
-      mockPoint('Venus', 'Venus', 95.4)
-    ];
-
-    const harmonic = recastHarmonic(points, 1);
-
-    expect(harmonic.length).toBe(3);
-    harmonic.forEach((h, i) => {
-      expect(h.lon).toBeCloseTo(points[i].lon, 5);
-      expect(h.origLon).toBe(points[i].lon);
-      expect(h.harmonic).toBe(1);
-    });
+test('n=5: multiply by 5 and fold mod 360', () => {
+  const points = [
+    mockPoint('Sun', 'Sun', 0),
+    mockPoint('Moon', 'Moon', 72),    // 72 * 5 = 360 -> 0
+    mockPoint('Venus', 'Venus', 144)  // 144 * 5 = 720 -> 0
+  ];
+  const harmonic = recastHarmonic(points, 5);
+  [0, 0, 0].forEach((exp, i) => {
+    if (!approx(harmonic[i].lon, exp, 0.01)) throw new Error('lon[' + i + '] = ' + harmonic[i].lon);
   });
+});
 
-  test('n=5: multiply by 5 and fold mod 360', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 0),
-      mockPoint('Moon', 'Moon', 72),    // 72 * 5 = 360 → 0 (conjunction in 5H)
-      mockPoint('Venus', 'Venus', 144)  // 144 * 5 = 720 → 0 (conjunction in 5H)
-    ];
-
-    const harmonic = recastHarmonic(points, 5);
-
-    expect(harmonic[0].lon).toBeCloseTo(0, 2);      // 0 * 5 = 0
-    expect(harmonic[1].lon).toBeCloseTo(0, 2);      // 72 * 5 = 360 = 0
-    expect(harmonic[2].lon).toBeCloseTo(0, 2);      // 144 * 5 = 720 = 0
+test('n=3: trine family appears as conjunctions', () => {
+  const points = [
+    mockPoint('Sun', 'Sun', 0),
+    mockPoint('Moon', 'Moon', 120),
+    mockPoint('Venus', 'Venus', 240)
+  ];
+  const harmonic = recastHarmonic(points, 3);
+  harmonic.forEach((h, i) => {
+    if (!approx(h.lon, 0, 0.01)) throw new Error('lon[' + i + '] = ' + h.lon);
   });
+});
 
-  test('n=3: trine family appears as conjunctions', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 0),
-      mockPoint('Moon', 'Moon', 120),   // Trine
-      mockPoint('Venus', 'Venus', 240)  // Trine
-    ];
-
-    const harmonic = recastHarmonic(points, 3);
-
-    // All should be conjunct in 3H
-    expect(harmonic[0].lon).toBeCloseTo(0, 2);      // 0 * 3 = 0
-    expect(harmonic[1].lon).toBeCloseTo(0, 2);      // 120 * 3 = 360 = 0
-    expect(harmonic[2].lon).toBeCloseTo(0, 2);      // 240 * 3 = 720 = 0
+test('n=4: square family (including the opposition inside it) appears as conjunctions', () => {
+  const points = [
+    mockPoint('Sun', 'Sun', 0),
+    mockPoint('Moon', 'Moon', 90),
+    mockPoint('Mars', 'Mars', 180),
+    mockPoint('Venus', 'Venus', 270)
+  ];
+  const harmonic = recastHarmonic(points, 4);
+  harmonic.forEach((h, i) => {
+    if (!approx(h.lon, 0, 0.01)) throw new Error('lon[' + i + '] = ' + h.lon);
   });
+});
 
-  test('n=4: square family appears as conjunctions', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 0),
-      mockPoint('Moon', 'Moon', 90),    // Square
-      mockPoint('Mars', 'Mars', 180),   // Opposition (also in 4H pattern)
-      mockPoint('Venus', 'Venus', 270)  // Square
-    ];
+test('Speed is multiplied by N', () => {
+  const points = [mockPoint('Sun', 'Sun', 0)];
+  points[0].speed = 1.02;
+  const harmonic = recastHarmonic(points, 5);
+  if (!approx(harmonic[0].speed as number, 5.1, 0.1)) throw new Error('speed = ' + harmonic[0].speed);
+});
 
-    const harmonic = recastHarmonic(points, 4);
+test('A retrograde speed stays retrograde when scaled by a positive harmonic', () => {
+  // Renamed from "Retrograde flag can flip in high harmonics": n is always
+  // 1-13 (recastHarmonic throws outside that range), so multiplying a
+  // negative speed by a positive number can never flip its sign. What is
+  // true, and worth keeping a row for, is that the sign survives the scale.
+  const points = [mockPoint('Saturn', 'Saturn', 210)];
+  points[0].speed = -0.05;
+  const harmonic = recastHarmonic(points, 9);
+  if (!(harmonic[0].speed! < 0)) throw new Error('expected negative speed, got ' + harmonic[0].speed);
+  if (!approx(harmonic[0].speed as number, -0.45, 0.1)) throw new Error('speed = ' + harmonic[0].speed);
+});
 
-    expect(harmonic[0].lon).toBeCloseTo(0, 2);      // 0 * 4 = 0
-    expect(harmonic[1].lon).toBeCloseTo(0, 2);      // 90 * 4 = 360 = 0
-    expect(harmonic[2].lon).toBeCloseTo(0, 2);      // 180 * 4 = 720 = 0
-    expect(harmonic[3].lon).toBeCloseTo(0, 2);      // 270 * 4 = 1080 = 0
-  });
+test('House data is null in harmonic view', () => {
+  const points = [mockPoint('Sun', 'Sun', 82.5)];
+  points[0].house = 5;
+  const harmonic = recastHarmonic(points, 5);
+  if (harmonic[0].house !== null) throw new Error('house = ' + harmonic[0].house);
+});
 
-  test('Speed is multiplied by N', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 0)
-    ];
-    points[0].speed = 1.02;  // Sun's typical speed
+test('Angles skipped by default unless configured', () => {
+  const points = [
+    mockPoint('Ascendant', 'Ascendant', 15),
+    mockPoint('Midheaven', 'Midheaven', 280),
+    mockPoint('Sun', 'Sun', 82.5)
+  ];
+  const harmonic = recastHarmonic(points, 5, { harmonicIncludeAngles: false });
+  if (harmonic[0].status !== 'harmonic-skipped') throw new Error('Ascendant status = ' + harmonic[0].status);
+  if (harmonic[0].lon !== 15) throw new Error('Ascendant lon changed: ' + harmonic[0].lon);
+  if (harmonic[1].status !== 'harmonic-skipped') throw new Error('Midheaven status = ' + harmonic[1].status);
+  if (harmonic[1].lon !== 280) throw new Error('Midheaven lon changed: ' + harmonic[1].lon);
+  if (harmonic[2].harmonic !== 5) throw new Error('Sun not recast normally');
+});
 
-    const harmonic = recastHarmonic(points, 5);
-    expect(harmonic[0].speed).toBeCloseTo(5.1, 1);  // 1.02 * 5
-  });
+test('Angles included if configured', () => {
+  const points = [
+    mockPoint('Ascendant', 'Ascendant', 15),
+    mockPoint('Sun', 'Sun', 82.5)
+  ];
+  const harmonic = recastHarmonic(points, 5, { harmonicIncludeAngles: true });
+  if (!approx(harmonic[0].lon, 75, 0.01)) throw new Error('Ascendant lon = ' + harmonic[0].lon + ', expected 75 (15*5)');
+  // 82.5 * 5 = 412.5, mod 360 = 52.5 (the original test asserted 72.5, which
+  // matches neither the arithmetic nor its own inline comment).
+  if (!approx(harmonic[1].lon, 52.5, 0.01)) throw new Error('Sun lon = ' + harmonic[1].lon + ', expected 52.5 (412.5 mod 360)');
+});
 
-  test('Retrograde flag can flip in high harmonics', () => {
-    const points = [
-      mockPoint('Saturn', 'Saturn', 210)
-    ];
-    points[0].speed = -0.05;  // Retrograde
+test('Lunar nodes skipped by default', () => {
+  const points = [
+    mockPoint('North Node', 'North Node', 172.8),
+    mockPoint('South Node', 'South Node', 352.8),
+    mockPoint('Sun', 'Sun', 82.5)
+  ];
+  const harmonic = recastHarmonic(points, 5);
+  if (harmonic[0].status !== 'harmonic-skipped') throw new Error('North Node status = ' + harmonic[0].status);
+  if (harmonic[1].status !== 'harmonic-skipped') throw new Error('South Node status = ' + harmonic[1].status);
+  if (harmonic[2].harmonic !== 5) throw new Error('Sun not recast normally');
+});
 
-    const harmonic = recastHarmonic(points, 9);
-    // Speed becomes -0.45 (still retrograde)
-    expect(harmonic[0].speed).toBeLessThan(0);
-    expect(harmonic[0].speed).toBeCloseTo(-0.45, 1);
-  });
+test('Asteroids/minor bodies marked harmonic-approx', () => {
+  const points = [
+    mockPoint('Chiron', 'Chiron', 120),
+    mockPoint('Ceres', 'Ceres', 45),
+    mockPoint('Sun', 'Sun', 82.5)
+  ];
+  const harmonic = recastHarmonic(points, 5);
+  if (harmonic[0].status !== 'harmonic-approx') throw new Error('Chiron status = ' + harmonic[0].status);
+  if (harmonic[1].status !== 'harmonic-approx') throw new Error('Ceres status = ' + harmonic[1].status);
+  if (harmonic[2].status !== 'ok') throw new Error('Sun status = ' + harmonic[2].status);
+});
 
-  test('House data is null in harmonic view', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 82.5)
-    ];
-    points[0].house = 5;
+test('origLon field preserves original longitude', () => {
+  const points = [mockPoint('Sun', 'Sun', 82.5), mockPoint('Moon', 'Moon', 195.0)];
+  const harmonic = recastHarmonic(points, 5);
+  if (harmonic[0].origLon !== 82.5) throw new Error('origLon[0] = ' + harmonic[0].origLon);
+  if (harmonic[1].origLon !== 195.0) throw new Error('origLon[1] = ' + harmonic[1].origLon);
+});
 
-    const harmonic = recastHarmonic(points, 5);
-    expect(harmonic[0].house).toBeNull();
-  });
-
-  test('Angles skipped by default unless configured', () => {
-    const points = [
-      mockPoint('Ascendant', 'Ascendant', 15),
-      mockPoint('Midheaven', 'Midheaven', 280),
-      mockPoint('Sun', 'Sun', 82.5)
-    ];
-
-    const harmonic = recastHarmonic(points, 5, { harmonicIncludeAngles: false });
-
-    expect(harmonic[0].status).toBe('harmonic-skipped');
-    expect(harmonic[0].lon).toBe(15);  // Unchanged
-    expect(harmonic[1].status).toBe('harmonic-skipped');
-    expect(harmonic[1].lon).toBe(280);  // Unchanged
-    expect(harmonic[2].harmonic).toBe(5);  // Sun recast normally
-  });
-
-  test('Angles included if configured', () => {
-    const points = [
-      mockPoint('Ascendant', 'Ascendant', 15),
-      mockPoint('Sun', 'Sun', 82.5)
-    ];
-
-    const harmonic = recastHarmonic(points, 5, { harmonicIncludeAngles: true });
-
-    expect(harmonic[0].lon).toBeCloseTo(75, 2);  // 15 * 5 = 75
-    expect(harmonic[1].lon).toBeCloseTo(72.5, 2);  // 82.5 * 5 = 412.5 → 52.5
-  });
-
-  test('Lunar nodes skipped by default', () => {
-    const points = [
-      mockPoint('North Node', 'North Node', 172.8),
-      mockPoint('South Node', 'South Node', 352.8),  // +180 from NN
-      mockPoint('Sun', 'Sun', 82.5)
-    ];
-
-    const harmonic = recastHarmonic(points, 5);
-
-    expect(harmonic[0].status).toBe('harmonic-skipped');
-    expect(harmonic[1].status).toBe('harmonic-skipped');
-    expect(harmonic[2].harmonic).toBe(5);  // Sun recast normally
-  });
-
-  test('Asteroids/minor bodies marked harmonic-approx', () => {
-    const points = [
-      mockPoint('Chiron', 'Chiron', 120),
-      mockPoint('Ceres', 'Ceres', 45),
-      mockPoint('Sun', 'Sun', 82.5)
-    ];
-
-    const harmonic = recastHarmonic(points, 5);
-
-    expect(harmonic[0].status).toBe('harmonic-approx');
-    expect(harmonic[1].status).toBe('harmonic-approx');
-    expect(harmonic[2].status).toBe('ok');  // Sun unchanged
-  });
-
-  test('origLon field preserves original longitude', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 82.5),
-      mockPoint('Moon', 'Moon', 195.0)
-    ];
-
-    const harmonic = recastHarmonic(points, 5);
-
-    expect(harmonic[0].origLon).toBe(82.5);
-    expect(harmonic[1].origLon).toBe(195.0);
-  });
-
-  test('Rejects invalid harmonics', () => {
-    const points = [mockPoint('Sun', 'Sun', 82.5)];
-
-    expect(() => recastHarmonic(points, 0)).toThrow();
-    expect(() => recastHarmonic(points, 14)).toThrow();
-    expect(() => recastHarmonic(points, -1)).toThrow();
+test('Rejects invalid harmonics', () => {
+  const points = [mockPoint('Sun', 'Sun', 82.5)];
+  [0, 14, -1].forEach(n => {
+    let threw = false;
+    try { recastHarmonic(points, n); } catch { threw = true; }
+    if (!threw) throw new Error('recastHarmonic(points, ' + n + ') did not throw');
   });
 });
 
 // ============================================================================
-// MEMOIZATION TESTS
+// MEMOIZATION
 // ============================================================================
 
-describe('Harmonic Memoization', () => {
-  beforeEach(() => {
-    clearHarmonicCache();
-  });
-
-  test('Memoized call returns same result as non-memoized', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 82.5),
-      mockPoint('Moon', 'Moon', 195.0),
-      mockPoint('Venus', 'Venus', 95.4)
-    ];
-
-    const result1 = recastHarmonic(points, 5);
-    const result2 = recastHarmonicMemoized(points, 5);
-
-    expect(result2.length).toBe(result1.length);
-    result2.forEach((h, i) => {
-      expect(h.lon).toBeCloseTo(result1[i].lon, 5);
-      expect(h.harmonic).toBe(result1[i].harmonic);
-    });
-  });
-
-  test('Cache hits on repeated calls', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 82.5),
-      mockPoint('Moon', 'Moon', 195.0)
-    ];
-
-    const start1 = performance.now();
-    const result1 = recastHarmonicMemoized(points, 5);
-    const elapsed1 = performance.now() - start1;
-
-    const start2 = performance.now();
-    const result2 = recastHarmonicMemoized(points, 5);
-    const elapsed2 = performance.now() - start2;
-
-    // Second call should be faster (cached)
-    expect(result2).toEqual(result1);
-    // Note: timing test is unreliable in automated tests, so just verify correctness
-  });
-
-  test('Different N values produce different results', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 72)
-    ];
-
-    const h3 = recastHarmonicMemoized(points, 3);
-    const h5 = recastHarmonicMemoized(points, 5);
-    const h7 = recastHarmonicMemoized(points, 7);
-
-    expect(h3[0].lon).toBeCloseTo(216, 2);  // 72 * 3 = 216
-    expect(h5[0].lon).toBeCloseTo(0, 2);    // 72 * 5 = 360 = 0
-    expect(h7[0].lon).toBeCloseTo(144, 2);  // 72 * 7 = 504 → 144
-  });
-
-  test('Clear cache works', () => {
-    const points = [mockPoint('Sun', 'Sun', 82.5)];
-    recastHarmonicMemoized(points, 5);
-    clearHarmonicCache();
-    // After clear, next call should recompute (no error)
-    const result = recastHarmonicMemoized(points, 5);
-    expect(result.length).toBe(1);
+test('Memoized call returns same result as non-memoized', () => {
+  clearHarmonicCache();
+  const points = [
+    mockPoint('Sun', 'Sun', 82.5),
+    mockPoint('Moon', 'Moon', 195.0),
+    mockPoint('Venus', 'Venus', 95.4)
+  ];
+  const result1 = recastHarmonic(points, 5);
+  const result2 = recastHarmonicMemoized(points, 5);
+  if (result2.length !== result1.length) throw new Error('length mismatch');
+  result2.forEach((h, i) => {
+    if (!approx(h.lon, result1[i].lon, 1e-5)) throw new Error('lon[' + i + '] mismatch');
+    if (h.harmonic !== result1[i].harmonic) throw new Error('harmonic[' + i + '] mismatch');
   });
 });
 
-// ============================================================================
-// HARMONIC ASPECT FAMILY TESTS
-// ============================================================================
+test('Cache hits on repeated calls return the SAME object, not just an equal one', () => {
+  // The original test only checked toEqual (deep equality), which a
+  // no-cache recompute would also satisfy; it never proved caching
+  // happened. recastHarmonicMemoized() returns the cached array by
+  // reference on a hit (see harmonic.ts), so reference equality is the
+  // real assertion, confirmed empirically before writing it this way.
+  clearHarmonicCache();
+  const points = [mockPoint('Sun', 'Sun', 82.5), mockPoint('Moon', 'Moon', 195.0)];
+  const result1 = recastHarmonicMemoized(points, 5);
+  const result2 = recastHarmonicMemoized(points, 5);
+  if (result2 !== result1) throw new Error('expected the identical cached array back, got a new one');
+});
 
-describe('Harmonic Aspect Families', () => {
-  test('Aspect family arc per harmonic', () => {
-    expect(harmonicAspectFamily(2)).toBeCloseTo(180, 0);  // Opposition
-    expect(harmonicAspectFamily(3)).toBeCloseTo(120, 0);  // Trine
-    expect(harmonicAspectFamily(4)).toBeCloseTo(90, 0);   // Square
-    expect(harmonicAspectFamily(5)).toBeCloseTo(72, 0);   // Quintile
-    expect(harmonicAspectFamily(6)).toBeCloseTo(60, 0);   // Sextile
-    expect(harmonicAspectFamily(7)).toBeCloseTo(51.43, 1); // Septile
-  });
+test('Different N values produce different results', () => {
+  clearHarmonicCache();
+  const points = [mockPoint('Sun', 'Sun', 72)];
+  const h3 = recastHarmonicMemoized(points, 3);
+  const h5 = recastHarmonicMemoized(points, 5);
+  const h7 = recastHarmonicMemoized(points, 7);
+  if (!approx(h3[0].lon, 216, 0.01)) throw new Error('h3 = ' + h3[0].lon);
+  if (!approx(h5[0].lon, 0, 0.01)) throw new Error('h5 = ' + h5[0].lon);
+  if (!approx(h7[0].lon, 144, 0.01)) throw new Error('h7 = ' + h7[0].lon);
+});
 
-  test('Expected aspect detection', () => {
-    // 72° in radix = quintile = 0° in 5H
-    expect(expectedAspectInHarmonic(72, 5)).toBeCloseTo(0, 0);
-
-    // 120° in radix = trine = 0° in 3H
-    expect(expectedAspectInHarmonic(120, 3)).toBeCloseTo(0, 0);
-
-    // 90° in radix = square = 0° in 4H
-    expect(expectedAspectInHarmonic(90, 4)).toBeCloseTo(0, 0);
-
-    // 30° off = should return diff
-    expect(expectedAspectInHarmonic(102, 5)).toBeGreaterThan(0);
-  });
+test('Clear cache works', () => {
+  const points = [mockPoint('Sun', 'Sun', 82.5)];
+  recastHarmonicMemoized(points, 5);
+  clearHarmonicCache();
+  const result = recastHarmonicMemoized(points, 5);
+  if (result.length !== 1) throw new Error('length = ' + result.length);
 });
 
 // ============================================================================
-// EDGE CASE: GOLDEN YOD IN 5TH HARMONIC
+// HARMONIC ASPECT FAMILIES
 // ============================================================================
 
-describe('Golden Yod Detection', () => {
-  test('Golden yod (0°, 144°, 288° three-way) conjunct in 5th harmonic', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 0),
-      mockPoint('Moon', 'Moon', 144),
-      mockPoint('Venus', 'Venus', 288)
-    ];
-
-    const harmonic5 = recastHarmonic(points, 5);
-
-    // All should be conjunct: 0*5=0, 144*5=720→0, 288*5=1440→0
-    expect(harmonic5[0].lon).toBeCloseTo(0, 2);
-    expect(harmonic5[1].lon).toBeCloseTo(0, 2);
-    expect(harmonic5[2].lon).toBeCloseTo(0, 2);
+test('Aspect family arc per harmonic', () => {
+  const cases: Array<[number, number]> = [[2, 180], [3, 120], [4, 90], [5, 72], [6, 60]];
+  cases.forEach(([n, expected]) => {
+    if (!approx(harmonicAspectFamily(n), expected, 0.5)) {
+      throw new Error('harmonicAspectFamily(' + n + ') = ' + harmonicAspectFamily(n));
+    }
   });
+  if (!approx(harmonicAspectFamily(7), 51.43, 0.1)) throw new Error('harmonicAspectFamily(7) = ' + harmonicAspectFamily(7));
+});
 
-  test('Radix grand trine NOT conjunct in 5th harmonic', () => {
-    const points = [
-      mockPoint('Sun', 'Sun', 10),
-      mockPoint('Moon', 'Moon', 130),
-      mockPoint('Venus', 'Venus', 250)
-    ];
-
-    const harmonic5 = recastHarmonic(points, 5);
-
-    // Should NOT all be at same longitude
-    const lons = [harmonic5[0].lon, harmonic5[1].lon, harmonic5[2].lon];
-    const diffs = [
-      arcDist(lons[0], lons[1]),
-      arcDist(lons[1], lons[2]),
-      arcDist(lons[2], lons[0])
-    ];
-    // At least one diff should be > 6 (outside conjunction orb)
-    expect(diffs.some(d => d > 6)).toBe(true);
-  });
+test('Expected aspect detection', () => {
+  if (!approx(expectedAspectInHarmonic(72, 5), 0, 0.5)) throw new Error('72 in 5H should be 0');
+  if (!approx(expectedAspectInHarmonic(120, 3), 0, 0.5)) throw new Error('120 in 3H should be 0');
+  if (!approx(expectedAspectInHarmonic(90, 4), 0, 0.5)) throw new Error('90 in 4H should be 0');
+  if (!(expectedAspectInHarmonic(102, 5) > 0)) throw new Error('102 in 5H (30 off) should be > 0');
 });
 
 // ============================================================================
-// WRAPAROUND & PRECISION TESTS
+// GOLDEN YOD IN 5TH HARMONIC
 // ============================================================================
 
-describe('Wraparound and Precision', () => {
-  test('Large angles wrap correctly', () => {
-    const points = [mockPoint('p1', 'p1', 350)];
-
-    const h5 = recastHarmonic(points, 5);
-    expect(h5[0].lon).toBeCloseTo(310, 2);  // 350 * 5 = 1750 → 1750 - 4*360 = 310
-  });
-
-  test('Sign/degree/minute/second recomputation', () => {
-    const points = [mockPoint('Sun', 'Sun', 82.5)];  // Gemini 22°30'
-
-    const h2 = recastHarmonic(points, 2);
-    // 82.5 * 2 = 165 = Libra 15°
-    expect(h2[0].lon).toBeCloseTo(165, 2);
-
-    const h3 = recastHarmonic(points, 3);
-    // 82.5 * 3 = 247.5 = Sagittarius 7°30'
-    expect(h3[0].lon).toBeCloseTo(247.5, 2);
-  });
-
-  test('Retrograde flag survives high harmonics', () => {
-    const points = [mockPoint('Saturn', 'Saturn', 210)];
-    points[0].speed = -0.02;  // Retrograde
-
-    const h9 = recastHarmonic(points, 9);
-    expect(h9[0].speed).toBeLessThan(0);  // Still retrograde
+test('Golden yod (0, 144, 288) conjunct in 5th harmonic', () => {
+  const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 144), mockPoint('Venus', 'Venus', 288)];
+  const harmonic5 = recastHarmonic(points, 5);
+  harmonic5.forEach((h, i) => {
+    if (!approx(h.lon, 0, 0.01)) throw new Error('lon[' + i + '] = ' + h.lon);
   });
 });
+
+test('Radix grand trine NOT conjunct in 5th harmonic', () => {
+  const points = [mockPoint('Sun', 'Sun', 10), mockPoint('Moon', 'Moon', 130), mockPoint('Venus', 'Venus', 250)];
+  const harmonic5 = recastHarmonic(points, 5);
+  const lons = harmonic5.map(h => h.lon);
+  const diffs = [arcDist(lons[0], lons[1]), arcDist(lons[1], lons[2]), arcDist(lons[2], lons[0])];
+  if (!diffs.some(d => d > 6)) throw new Error('expected at least one diff > 6, got ' + JSON.stringify(diffs));
+});
+
+// ============================================================================
+// WRAPAROUND & PRECISION
+// ============================================================================
+
+test('Large angles wrap correctly', () => {
+  const points = [mockPoint('p1', 'p1', 350)];
+  const h5 = recastHarmonic(points, 5);
+  if (!approx(h5[0].lon, 310, 0.01)) throw new Error('lon = ' + h5[0].lon + ', expected 310 (1750 mod 360)');
+});
+
+test('Sign/degree recomputation at 2H and 3H', () => {
+  const points = [mockPoint('Sun', 'Sun', 82.5)];
+  const h2 = recastHarmonic(points, 2);
+  if (!approx(h2[0].lon, 165, 0.01)) throw new Error('2H lon = ' + h2[0].lon);
+  const h3 = recastHarmonic(points, 3);
+  if (!approx(h3[0].lon, 247.5, 0.01)) throw new Error('3H lon = ' + h3[0].lon);
+});
+
+test('Retrograde flag survives high harmonics', () => {
+  const points = [mockPoint('Saturn', 'Saturn', 210)];
+  points[0].speed = -0.02;
+  const h9 = recastHarmonic(points, 9);
+  if (!(h9[0].speed! < 0)) throw new Error('expected negative speed, got ' + h9[0].speed);
+});
+
+// ============================================================================
+// RUNNER
+// ============================================================================
+
+export function runTests(): { passed: number; failed: number; errors: string[]; results: Array<{ id: string; name: string; pass: boolean; error?: string }> } {
+  let passed = 0, failed = 0;
+  const errors: string[] = [], results: Array<{ id: string; name: string; pass: boolean; error?: string }> = [];
+
+  tests.forEach((fn, i) => {
+    const id = 'HAR' + (i + 1);
+    const name = (fn as any).testName || fn.name || id;
+    try {
+      fn();
+      passed++;
+      results.push({ id, name, pass: true });
+    } catch (e) {
+      failed++;
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(name + ': ' + msg);
+      results.push({ id, name, pass: false, error: msg });
+    }
+  });
+
+  return { passed, failed, errors, results };
+}

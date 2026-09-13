@@ -2151,12 +2151,14 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds twenty scripts. Fourteen are gates and are worth running before
-you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
+`tools/` holds twenty-four scripts. Eighteen are gates and are worth running
+before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
-`check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`.
+`check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
+`check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
+`check-registry-integration.js`.
 Four generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`. `check-deployed.js` compares what
@@ -2168,6 +2170,33 @@ did not move with them, so it said eight for as long as there were twelve.
 **Count the folder rather than trusting this sentence**, and correct it here
 when a script is added: an inventory that is wrong is worse than no inventory,
 because somebody runs the list and believes they have run the gates.
+
+The four gates after that (`check-harmonic.js`, `check-patterns.js`,
+`check-harmonic-patterns.js`, `check-registry-integration.js`) came from
+porting `harmonic.test.ts`, `patterns.test.ts`, `harmonicPatterns.test.ts`
+and `integration.test.ts` off Jest globals (`describe`/`test`/`expect`),
+which this repo has never been able to run: no `package.json`, no
+`node_modules`, no Jest anywhere. Porting them surfaced that `patterns.ts`,
+`harmonic.ts` and `harmonicPatterns.ts` themselves used extensionless
+relative imports and mixed type-only interfaces into value imports, the
+same bug `engine.ts` already needed fixing for its own gate to load: none
+of the three could actually be `require()`d until that was corrected too,
+so these four gates are also what makes the underlying modules loadable at
+all, not only what tests them.
+
+Two real defects came out of writing tests the old ones never actually ran:
+`detectBoomerang()` in `patterns.ts` requires one point sextile (60°) to
+BOTH ends of an opposition; that is geometrically impossible (confirmed by
+exhaustive search), so it can never match any chart, ever, despite being
+surfaced in forecast copy (`app/forecast/content/{headlines,explainer,practical}.ts`)
+as a pattern the app claims to detect. And `isGoldenYodIn5thHarmonic()` in
+`harmonicPatterns.ts` can never return true for any Yod `detectYod()`
+actually finds: a Yod's 150° legs become 30°, not 120°, under a ×5 harmonic
+recast, for any rotation of the shape. Both are documented at the point
+they were found (`patterns.test.ts`'s Boomerang tests,
+`harmonicPatterns.test.ts`'s file header) rather than silently patched,
+since fixing either is a design decision about what the pattern should
+actually require, not a test-data correction.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.

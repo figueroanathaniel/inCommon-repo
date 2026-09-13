@@ -3,7 +3,7 @@
  * Detects classic, minor, and degree-based patterns from PointData[]
  */
 
-import { PointData } from '../ephemeris/engine';
+import type { PointData } from '../ephemeris/engine.ts';
 
 // ============================================================================
 // TYPES

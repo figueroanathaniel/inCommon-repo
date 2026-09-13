@@ -3,7 +3,7 @@
  * Multiply all longitudes by N mod 360 to reveal Nth-harmonic aspect family as conjunctions
  */
 
-import { PointData } from './engine';
+import type { PointData } from './engine.ts';
 
 // ============================================================================
 // TYPES

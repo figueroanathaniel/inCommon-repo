@@ -3,9 +3,11 @@
  * Run patterns engine on recast array with harmonic-specific naming and tagging
  */
 
-import { PointData } from '../ephemeris/engine';
-import { HarmonicPointData, recastHarmonicMemoized } from '../ephemeris/harmonic';
-import { detectPatterns, ChartPattern, PatternConfig } from './patterns';
+import type { PointData } from '../ephemeris/engine.ts';
+import type { HarmonicPointData } from '../ephemeris/harmonic.ts';
+import { recastHarmonicMemoized } from '../ephemeris/harmonic.ts';
+import { detectPatterns } from './patterns.ts';
+import type { ChartPattern, PatternConfig } from './patterns.ts';
 
 // ============================================================================
 // TYPES
