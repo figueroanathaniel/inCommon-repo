@@ -51,7 +51,7 @@ const srcPath = path.join(appDir, 'inCommonApp v2.dc.html');
    version it reads lives beside the output and neither path existed any more.
    Bump this when a new bundle folder is cut, or the build lands in the previous
    release. */
-const BUNDLE = path.join(repo, 'deploy', 'v6.2');
+const BUNDLE = path.join(repo, 'deploy', 'v6.3');
 
 const outFlag = process.argv.indexOf('--out');
 const outPath = outFlag !== -1 && process.argv[outFlag + 1]
@@ -108,7 +108,17 @@ const MODULES = [
   'people-library.js',
   'pair-cache.js',
   'hd-composite.js',
-  'analytics.js'
+  'analytics.js',
+  /* Extension modules: synastry news, Sky Wire, and localization (Prompts A, B, C) */
+  'forecast/newsEngine.js',
+  'forecast/news/synastryTemplates.js',
+  'forecast/news/multiChart.js',
+  'forecast/news/lint.js',
+  'forecast/news/skyWire.js',
+  'forecast/feedBuilder.js',
+  'i18n/index.js',
+  'i18n/en.js',
+  'i18n/es.js'
 ];
 
 const REACT = ['react-18.3.1.production.min.js', 'react-dom-18.3.1.production.min.js'];

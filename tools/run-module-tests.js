@@ -50,6 +50,11 @@ globalThis.HDAtlas = ATLAS;
 const AN = require(path.join(repo, 'app', 'analytics.js'));
 const IC = require(path.join(repo, 'app', 'iching.js'));
 
+/* Extension suites from Prompts A, B, C */
+const MC = require(path.join(repo, 'app', 'forecast', 'news', 'multiChart.test.js'));
+const SW = require(path.join(repo, 'app', 'forecast', 'news', 'skyWire.test.js'));
+const I18N = require(path.join(repo, 'app', 'i18n', 'i18n.test.js'));
+
 const rows = [];
 function t(id, desc, actual, expected) {
   const a = JSON.stringify(actual), e = JSON.stringify(expected);
@@ -1246,6 +1251,19 @@ t('X18', 'the module names no storage API and never asks the clock for now',
       .filter(s => src.indexOf(s) !== -1); })(),
   []);
 
+/* ---- Run the three extension suites (Prompts A, B, C) ---- */
+
+(function() {
+  const mcResult = MC.runTests();
+  mcResult.errors.forEach(msg => rows.push({ id: 'M?', desc: msg, pass: false, actual: '', expected: '' }));
+
+  const swResult = SW.runTests();
+  swResult.errors.forEach(msg => rows.push({ id: 'S?', desc: msg, pass: false, actual: '', expected: '' }));
+
+  const i18nResult = I18N.runTests();
+  i18nResult.errors.forEach(msg => rows.push({ id: 'L?', desc: msg, pass: false, actual: '', expected: '' }));
+})();
+
 /* ------------------------------------------------------------------ report */
 
 const pass = rows.filter(r => r.pass).length, fail = rows.length - pass;
@@ -1254,9 +1272,10 @@ if (!quiet) {
   console.log('run-module-tests: ' + pass + '/' + rows.length + ' passed' + (fail ? ', ' + fail + ' FAILED' : ''));
   [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
     ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
-    ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js']].forEach(([k, name]) => {
+    ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
+    ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
     const g = rows.filter(r => r.id[0] === k);
-    console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
+    if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
   });
 }
 process.exit(fail ? 1 : 0);
