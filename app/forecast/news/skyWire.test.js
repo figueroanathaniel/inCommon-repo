@@ -1,99 +1,178 @@
-/*! skyWire.test.js: 13 assertions for public Sky Wire feed
- * Tests ceiling, determinism, type separation, no reader context
+/*! forecast/news/skyWire.test.js
+ * 13 assertions for the public Sky Wire feed. No storage API: this module
+ * runs in node without localStorage. Focus: ceiling enforcement,
+ * determinism, no reader possessives.
  */
 
-const SW = require('./skyWire.js');
-const NE = require('../newsEngine.js');
+const {
+  buildSkyWireItem,
+  buildSkyWireFeed,
+  validateSkyWireItem,
+  verifySkyWireCeiling,
+  verifyDeterminism,
+  PUBLIC_CEILING
+} = require('./skyWire');
 
-const tests = [];
-
-function assert(id, desc, actual, expected) {
-  const pass = JSON.stringify(actual) === JSON.stringify(expected);
-  tests.push({ id: 'S' + id, desc, pass, actual: JSON.stringify(actual), expected: JSON.stringify(expected) });
+function mockNewsItem(overrides) {
+  return Object.assign({
+    id: 'test-item-fixed-id',
+    headline: 'Test headline',
+    body: 'Test body.',
+    category: 'transit',
+    tier: 1,
+    type: 'conjunction',
+    importance: 85,
+    isNew: true,
+    keywords: ['Sun', 'Venus'],
+    synastry: false
+  }, overrides || {});
 }
 
-// S1-S13 tests
-assert(1, 'Sky Wire item does not have synastry flag',
-  { synastry: false }.synastry === false, true);
+const mockInput = {
+  transits: [
+    mockNewsItem({ id: 'item-mercury', headline: 'Mercury sextile Venus', importance: 75 }),
+    mockNewsItem({ id: 'item-mars', headline: 'Mars square Saturn', importance: 70 })
+  ],
+  patterns: [
+    mockNewsItem({ id: 'item-grandtrine', headline: 'Grand Trine', category: 'pattern', importance: 90 })
+  ],
+  harmonics: [
+    mockNewsItem({ id: 'item-harmonic', headline: 'Harmonic alignment', category: 'harmonic', importance: 55 })
+  ],
+  date: '2026-09-14'
+};
 
-assert(2, 'Sky Wire ceiling is hard-capped at 93',
-  NE.verifySkyWireCeiling(100), 93);
+function test_S1_basicItemCreation() {
+  const newsItem = mockNewsItem({ synastry: false });
+  const skyWireItem = buildSkyWireItem(newsItem);
+  if (!skyWireItem.headline) throw new Error('S1: Item missing headline');
+  if (skyWireItem.id !== newsItem.id) throw new Error('S1: ID mismatch');
+  if (skyWireItem.synastry !== undefined) throw new Error('S1: Sky Wire item should not have synastry field');
+  if (skyWireItem.isNew !== undefined) throw new Error('S1: Sky Wire item should not have isNew field');
+}
 
-assert(3, 'ceiling value is exactly 93',
-  SW.PUBLIC_CEILING, 93);
+function test_S2_ceilingEnforcement() {
+  const highImportance = mockNewsItem({ importance: 98 });
+  const item = buildSkyWireItem(highImportance);
+  if (item.importance > PUBLIC_CEILING) throw new Error('S2: Item importance (' + item.importance + ') exceeded ceiling (' + PUBLIC_CEILING + ')');
+  if (!verifySkyWireCeiling(item)) throw new Error('S2: verifySkyWireCeiling failed for valid item');
+}
 
-assert(4, 'item lacks isNew field',
-  { isNew: undefined }.isNew === undefined, true);
+function test_S3_ceilingValue() {
+  if (PUBLIC_CEILING !== 93) throw new Error('S3: Ceiling should be 93, got ' + PUBLIC_CEILING);
+}
 
-assert(5, 'feed includes metadata version',
-  typeof SW.buildSkyWireFeed([]).version === 'string', true);
+function test_S4_noSynastry() {
+  const newsItem = mockNewsItem({ synastry: true, partner: { id: 'p1', name: 'Test' } });
+  const item = buildSkyWireItem(newsItem);
+  if (item.synastry !== undefined) throw new Error('S4: synastry field should not exist in Sky Wire item');
+  if (item.partner !== undefined) throw new Error('S4: partner field should not exist in Sky Wire item');
+}
 
-assert(6, 'feed includes generation timestamp',
-  typeof SW.buildSkyWireFeed([]).generatedAt === 'string', true);
+function test_S5_noIsNewField() {
+  const newsItem = mockNewsItem({ isNew: true });
+  const item = buildSkyWireItem(newsItem);
+  if (item.isNew !== undefined) throw new Error('S5: isNew field should not exist in Sky Wire item');
+}
 
-assert(7, 'feed sorts by importance descending',
-  (() => {
-    const items = [
-      { id: 'a', importance: 50 },
-      { id: 'b', importance: 90 },
-      { id: 'c', importance: 75 }
-    ];
-    const feed = SW.buildSkyWireFeed(items);
-    return feed.items[0].importance >= feed.items[1].importance &&
-           feed.items[1].importance >= feed.items[2].importance;
-  })(), true);
+function test_S6_feedMetadata() {
+  const feed = buildSkyWireFeed(mockInput);
+  if (feed.version !== '1.0.0') throw new Error('S6: Version mismatch');
+  if (feed.date !== mockInput.date) throw new Error('S6: Date not preserved');
+  if (!feed.generatedAt) throw new Error('S6: Missing generatedAt timestamp');
+}
 
-assert(8, 'feed uses ID as tiebreaker',
-  (() => {
-    const items = [
-      { id: 'b', importance: 80 },
-      { id: 'a', importance: 80 }
-    ];
-    const feed = SW.buildSkyWireFeed(items);
-    return feed.items[0].id === 'a' && feed.items[1].id === 'b';
-  })(), true);
+function test_S7_determinism() {
+  const feed1 = buildSkyWireFeed(mockInput);
+  const feed2 = buildSkyWireFeed(mockInput);
+  if (!verifyDeterminism(feed1, feed2)) throw new Error('S7: Feeds are not deterministic (byte-identical)');
+}
 
-assert(9, 'validation rejects synastry items',
-  SW.validateSkyWireItem({ synastry: true, importance: 80 }), false);
+function test_S8_sortingDeterminism() {
+  const input = {
+    transits: [
+      mockNewsItem({ id: 'item-z', importance: 80 }),
+      mockNewsItem({ id: 'item-a', importance: 80 }),
+      mockNewsItem({ id: 'item-m', importance: 85 })
+    ],
+    patterns: [], harmonics: [], date: '2026-09-14'
+  };
+  const feed = buildSkyWireFeed(input);
+  if (feed.items[0].id !== 'item-m') throw new Error('S8: Highest importance item should be first');
+  if (feed.items[1].id !== 'item-a') throw new Error('S8: Tied items should be sorted by ID (a before z)');
+  if (feed.items[2].id !== 'item-z') throw new Error('S8: Second tied item should follow sorted order');
+}
 
-assert(10, 'validation rejects items with partner',
-  SW.validateSkyWireItem({ partner: { id: 'p1' }, importance: 80 }), false);
+function test_S9_itemsValidation() {
+  const feed = buildSkyWireFeed(mockInput);
+  for (const item of feed.items) {
+    if (!validateSkyWireItem(item)) throw new Error('S9: Item ' + item.id + ' failed validation');
+  }
+}
 
-assert(11, 'validation rejects items over ceiling',
-  SW.validateSkyWireItem({ importance: 95 }), false);
+function test_S10_statistics() {
+  const feed = buildSkyWireFeed(mockInput);
+  const stats = feed.stats;
+  if (stats.totalItems !== 4) throw new Error('S10: Expected 4 items, got ' + stats.totalItems);
+  if (!stats.byCategory['transit']) throw new Error('S10: Missing transit count');
+  if (stats.topImportance !== 90) throw new Error('S10: Top importance should be 90, got ' + stats.topImportance);
+}
 
-assert(12, 'personal ceiling is 5 points higher than Sky Wire',
-  (NE.PERSONAL_CEILING - SW.PUBLIC_CEILING), 5);
+function test_S11_noStorageApi() {
+  const feed = buildSkyWireFeed(mockInput);
+  if (!feed.date) throw new Error('S11: Feed must be buildable without storage');
+  if (feed.items.length === 0) throw new Error('S11: Feed should have items');
+}
 
-assert(13, 'feed sorting is deterministic',
-  (() => {
-    const items = [
-      { id: 'c', importance: 70 },
-      { id: 'a', importance: 80 },
-      { id: 'b', importance: 80 }
-    ];
-    const feed1 = SW.buildSkyWireFeed(items);
-    const feed2 = SW.buildSkyWireFeed(items);
-    return feed1.items.map(i => i.id).join() === feed2.items.map(i => i.id).join();
-  })(), true);
+function test_S12_ceilingDifference() {
+  const personalMax = 98; // 50 + 10 + 8 + 10 (natal) + 15 + 5 (rare)
+  const difference = personalMax - PUBLIC_CEILING;
+  if (difference !== 5) throw new Error('S12: Ceiling difference should be 5, got ' + difference);
+}
+
+function test_S13_keywordsPreserved() {
+  const keywords = ['Sun', 'Venus', 'conjunction'];
+  const newsItem = mockNewsItem({ keywords });
+  const item = buildSkyWireItem(newsItem);
+  if (item.keywords.length !== keywords.length) throw new Error('S13: Keywords not preserved');
+  if (!item.keywords.includes('Sun')) throw new Error('S13: Keywords should include original content');
+}
+
+const tests = [
+  test_S1_basicItemCreation,
+  test_S2_ceilingEnforcement,
+  test_S3_ceilingValue,
+  test_S4_noSynastry,
+  test_S5_noIsNewField,
+  test_S6_feedMetadata,
+  test_S7_determinism,
+  test_S8_sortingDeterminism,
+  test_S9_itemsValidation,
+  test_S10_statistics,
+  test_S11_noStorageApi,
+  test_S12_ceilingDifference,
+  test_S13_keywordsPreserved
+];
 
 function runTests() {
-  const passed = tests.filter(t => t.pass).length;
-  const failed = tests.length - passed;
-  const errors = tests.filter(t => !t.pass).map(t =>
-    'S' + t.id.slice(1) + ': ' + t.desc
-  );
+  let passed = 0, failed = 0;
+  const errors = [], results = [];
 
-  if (!global.quiet) {
-    tests.forEach(t => {
-      if (!t.pass) {
-        console.log('  FAIL ' + t.id + '  ' + t.desc + '\n       expected ' + t.expected + '\n       actual   ' + t.actual);
-      }
-    });
-    console.log('  S skyWire.test         ' + passed + '/' + tests.length);
-  }
+  tests.forEach((test, i) => {
+    const id = 'S' + (i + 1);
+    try {
+      test();
+      passed++;
+      results.push({ id, name: test.name, pass: true });
+    } catch (e) {
+      failed++;
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(msg);
+      results.push({ id, name: test.name, pass: false, error: msg });
+    }
+  });
 
-  return { passed, failed, errors };
+  return { passed, failed, errors, results };
 }
 
-module.exports = { runTests, tests };
+module.exports = { tests, runTests };

@@ -52,7 +52,10 @@ var PRECACHE = [
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
   './birth-time.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',
-  './people-library.js', './pair-cache.js', './analytics.js'
+  './people-library.js', './pair-cache.js', './analytics.js',
+  './forecast/newsEngine.js', './forecast/news/synastryTemplates.js', './forecast/news/multiChart.js',
+  './forecast/news/skyWire.js', './forecast/news/lint.js', './forecast/feedBuilder.js',
+  './i18n/index.js', './i18n/en.js', './i18n/es.js'
 ];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {

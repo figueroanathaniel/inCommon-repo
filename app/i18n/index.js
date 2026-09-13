@@ -1,138 +1,248 @@
-/*! i18n/index.js
- * Localization runtime: locale switching, catalog loading, placeholder replacement
- * Never concatenates fragments; only fills placeholders in complete sentences
+/*! i18n/index.js: localization runtime (UMD)
+ * Locale switching, catalog loading, placeholder replacement. Never
+ * concatenates fragments; only fills placeholders in complete sentences.
  */
-
-let activeLocale = 'en';
-let activeCatalog = null;
-
-const EN = {
-  locale: 'en',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} and {planet2} meet at {time}. Same frequency. Watch for {theme}.',
-      'Merger alert: {planet1} {planet2} {time}. Two energies speaking the same language today.',
-      '{planet1} conjunct {planet2} {time}. They\'re not arguing. They\'re aligned.'
-    ],
-    'transit-trine': [
-      'A gift lands {time}: {planet1} trine {planet2}. {theme} flows. Don\'t waste it on autopilot.',
-      '{time}, {planet1} and {planet2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {planet1} trine {planet2}, {time}. This is what favor looks like.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} and their {planet2} meet today. Same frequency between you.',
-      'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
-      'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
-    ],
-    'synastry-trine': [
-      'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
-      'Your {planet1} and their {planet2} are in conversation. The air is clear.',
-      'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
-    ],
-    'locale-name-en': 'English'
-  },
-  metadata: { allowPartial: false, missingKeys: [], violations: [] }
-};
-
-const ES = {
-  locale: 'es',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} y {planet2} se encuentran a las {time}. La misma frecuencia.',
-      'Alerta de fusión: {planet1} {planet2} {time}. Dos energías hablando el mismo idioma hoy.',
-      '{planet1} en conjunción con {planet2} {time}. No están discutiendo. Están alineados.'
-    ],
-    'transit-trine': [
-      'Un regalo llega {time}: {planet1} trino con {planet2}. {theme} fluye.',
-      '{time}, {planet1} y {planet2} están en conversación. El aire es claro para {theme}.',
-      'Facilidad rara: {planet1} trino con {planet2}, {time}.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} y su {planet2} se encuentran hoy. La misma frecuencia entre ustedes.',
-      'Una fusión: tu {planet1} en conjunción con su {planet2}, {name}.',
-      'Tu {planet1} encuentra su {planet2} hoy. Están hablando el mismo idioma.'
-    ],
-    'synastry-trine': [
-      'Un regalo entre ustedes: tu {planet1} trino con su {planet2}, {name}.',
-      'Tu {planet1} y su {planet2} están en conversación. El aire es claro.',
-      'Facilidad rara entre ustedes hoy: tu {planet1} trino con su {planet2}.'
-    ],
-    'locale-name-es': 'Español'
-  },
-  metadata: { allowPartial: true, missingKeys: [], violations: [] }
-};
-
-function setLocale(locale) {
-  if (locale === 'en') {
-    activeLocale = 'en';
-    activeCatalog = EN;
-  } else if (locale === 'es') {
-    activeLocale = 'es';
-    activeCatalog = ES;
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('./en'), require('./es'));
   } else {
-    throw new Error('Unknown locale: ' + locale);
+    root.I18n = factory(root.I18nEN, root.I18nES);
   }
-}
+}(typeof self !== 'undefined' ? self : this, function (EN, ES) {
+  'use strict';
 
-function getLocale() {
-  return activeLocale;
-}
+  var activeLocale = 'en';
+  var activeCatalog = EN;
 
-function fillPlaceholders(template, placeholders) {
-  if (!placeholders || Object.keys(placeholders).length === 0) {
-    return template;
-  }
-  let result = template;
-  for (const key in placeholders) {
-    const placeholder = '{' + key + '}';
-    result = result.split(placeholder).join(String(placeholders[key]));
-  }
-  return result;
-}
+  // Every real template list in this catalog carries at most three flavor
+  // variants; a key with more is treated as a maintenance runaway.
+  var MAX_VARIANTS = 3;
 
-function t(key, placeholders) {
-  if (!activeCatalog) {
-    setLocale('en');
+  /**
+   * Set the active locale and load its catalog. Throws if the locale isn't
+   * available.
+   */
+  function setLocale(locale) {
+    var catalogs = { en: EN, es: ES };
+    if (!catalogs[locale]) throw new Error('Unknown locale: ' + locale);
+    activeLocale = locale;
+    activeCatalog = catalogs[locale];
   }
-  const entry = activeCatalog.strings[key];
-  if (!entry) {
-    console.warn('Missing translation key: ' + key);
+
+  function getLocale() {
+    return activeLocale;
+  }
+
+  function getCatalog() {
+    return activeCatalog;
+  }
+
+  /**
+   * Fill placeholders in a template string.
+   * Example: fillPlaceholders('Mercury sextile {planet2} at {time}', { planet2: 'Venus', time: '2pm' })
+   */
+  function fillPlaceholders(template, placeholders) {
+    if (!placeholders || Object.keys(placeholders).length === 0) return template;
+    var result = template;
+    Object.keys(placeholders).forEach(function (key) {
+      result = result.replace(new RegExp('\\{' + key + '\\}', 'g'), String(placeholders[key]));
+    });
+    return result;
+  }
+
+  /**
+   * Translate a key with placeholder substitution. Falls back to the key
+   * name when the entry is missing, so a missing translation is visible
+   * rather than blank.
+   */
+  function t(key, placeholders) {
+    var entry = activeCatalog.strings[key];
+
+    if (!entry) {
+      console.warn('Missing translation key: ' + key);
+      return key;
+    }
+
+    if (typeof entry === 'string') return fillPlaceholders(entry, placeholders);
+    if (Array.isArray(entry)) return fillPlaceholders(entry[0], placeholders);
     return key;
   }
-  if (Array.isArray(entry)) {
-    return fillPlaceholders(entry[0], placeholders);
-  }
-  return fillPlaceholders(entry, placeholders);
-}
 
-function pickVariant(key, variantIndex, placeholders) {
-  if (!activeCatalog) {
-    setLocale('en');
-  }
-  const entry = activeCatalog.strings[key];
-  if (!entry) {
-    console.warn('Missing translation key: ' + key);
+  /**
+   * Pick a specific variant and translate it.
+   */
+  function pickVariant(key, variantIndex, placeholders) {
+    var entry = activeCatalog.strings[key];
+
+    if (!entry) {
+      console.warn('Missing translation key: ' + key);
+      return key;
+    }
+
+    if (typeof entry === 'string') return fillPlaceholders(entry, placeholders);
+
+    if (Array.isArray(entry)) {
+      if (variantIndex >= entry.length) {
+        console.warn('Variant index ' + variantIndex + ' out of bounds for ' + key);
+        return fillPlaceholders(entry[0], placeholders);
+      }
+      return fillPlaceholders(entry[variantIndex], placeholders);
+    }
+
     return key;
   }
-  if (Array.isArray(entry)) {
-    const idx = Math.max(0, Math.min(variantIndex, entry.length - 1));
-    return fillPlaceholders(entry[idx], placeholders);
+
+  function setsEqual(a, b) {
+    if (a.size !== b.size) return false;
+    var ok = true;
+    a.forEach(function (item) { if (!b.has(item)) ok = false; });
+    return ok;
   }
-  return fillPlaceholders(entry, placeholders);
-}
 
-function availableLocales() {
-  return ['en', 'es'];
-}
+  /**
+   * Check tone violations in a translated string: dashes (all three
+   * encodings) and, for Spanish, reader-possessive phrases.
+   */
+  function checkTone(text, locale) {
+    var EM_DASH = String.fromCharCode(0x2014);
+    var EN_DASH = String.fromCharCode(0x2013);
 
-// Initialize
-setLocale('en');
+    if (text.indexOf(EM_DASH) !== -1 || text.indexOf(EN_DASH) !== -1) return 'Contains em or en dash';
 
-module.exports = {
-  setLocale,
-  getLocale,
-  t,
-  pickVariant,
-  fillPlaceholders,
-  availableLocales
-};
+    if (text.indexOf('&mdash;') !== -1 || text.indexOf('&ndash;') !== -1 ||
+        text.indexOf('&#8212;') !== -1 || text.indexOf('&#8211;') !== -1 ||
+        text.indexOf('&#x2014;') !== -1 || text.indexOf('&#x2013;') !== -1) {
+      return 'Contains dash entity';
+    }
+
+    if (locale === 'es') {
+      var forbidden = ['tu gráfico', 'tu cielo', 'en tu ', 'lo que significa para ti', 'tu natal', 'tu lectura'];
+      for (var i = 0; i < forbidden.length; i++) {
+        if (text.toLowerCase().indexOf(forbidden[i]) !== -1) return 'Contains reader-possessive phrase: "' + forbidden[i] + '"';
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate a locale catalog against expected placeholders.
+   * expectedPlaceholders: key -> [expected placeholder names]
+   * Checks: placeholder parity, variant counts, tone (dashes, forbidden words).
+   */
+  function validateCatalog(catalog, expectedPlaceholders) {
+    var result = {
+      valid: true,
+      placeholderMismatches: [],
+      unknownKeys: [],
+      variantOverflow: [],
+      toneFaults: []
+    };
+
+    Object.keys(catalog.strings).forEach(function (key) {
+      var entry = catalog.strings[key];
+
+      if (!expectedPlaceholders[key]) {
+        result.unknownKeys.push(key);
+        result.valid = false;
+        return;
+      }
+
+      var expectedPlaceholderSet = new Set(expectedPlaceholders[key]);
+      var variants = Array.isArray(entry) ? entry : [entry];
+
+      variants.forEach(function (variant, i) {
+        var placeholderMatch = variant.match(/\{([^}]+)\}/g) || [];
+        var actualPlaceholders = placeholderMatch.map(function (p) { return p.replace(/[{}]/g, ''); });
+        var actualSet = new Set(actualPlaceholders);
+
+        if (!setsEqual(expectedPlaceholderSet, actualSet)) {
+          result.placeholderMismatches.push({
+            key: key, variant: i,
+            expected: Array.from(expectedPlaceholderSet),
+            actual: actualPlaceholders
+          });
+          result.valid = false;
+        }
+
+        var toneFault = checkTone(variant, catalog.locale);
+        if (toneFault) {
+          result.toneFaults.push(key + '[' + i + ']: ' + toneFault);
+          result.valid = false;
+        }
+      });
+    });
+
+    /* Overflow is capped at a fixed ceiling rather than at
+       expectedPlaceholders[key].length: that array names placeholder
+       VARIABLES ('planet', 'day', ...), a count with no relationship to
+       how many flavor-text variants a key may carry. Tying the two
+       together flagged every real three-variant template (a placeholder
+       list of one name reads as "at most one variant") as overflowing. */
+    Object.keys(catalog.strings).forEach(function (key) {
+      var entry = catalog.strings[key];
+      if (Array.isArray(entry) && entry.length > MAX_VARIANTS) {
+        result.variantOverflow.push(key + ': has ' + entry.length + ', expected <=' + MAX_VARIANTS);
+        result.valid = false;
+      }
+    });
+
+    if (!catalog.metadata.allowPartial) {
+      if (result.placeholderMismatches.length > 0 || result.unknownKeys.length > 0 ||
+          result.variantOverflow.length > 0 || result.toneFaults.length > 0) {
+        result.valid = false;
+      }
+    } else {
+      // Partial locales only fail on critical violations, not missing keys.
+      if (result.placeholderMismatches.length > 0 || result.variantOverflow.length > 0 ||
+          result.toneFaults.length > 0) {
+        result.valid = false;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Register a locale catalog at startup. Validates against expected
+   * placeholders and returns missing keys as a work queue.
+   */
+  function registerLocale(catalog, expectedPlaceholders) {
+    var validation = validateCatalog(catalog, expectedPlaceholders);
+
+    if (!validation.valid && !catalog.metadata.allowPartial) {
+      var errors = [];
+      if (validation.placeholderMismatches.length > 0) errors.push('Placeholder mismatches: ' + validation.placeholderMismatches.length);
+      if (validation.unknownKeys.length > 0) errors.push('Unknown keys: ' + validation.unknownKeys.join(', '));
+      if (validation.variantOverflow.length > 0) errors.push('Variant overflow: ' + validation.variantOverflow.join(', '));
+      if (validation.toneFaults.length > 0) errors.push('Tone violations: ' + validation.toneFaults.join(', '));
+      throw new Error('Locale registration failed: ' + errors.join('; '));
+    }
+
+    catalog.metadata.violations = validation.toneFaults;
+
+    var missingKeys = [];
+    Object.keys(expectedPlaceholders).forEach(function (key) {
+      if (!catalog.strings[key]) missingKeys.push(key);
+    });
+    catalog.metadata.missingKeys = missingKeys;
+
+    return missingKeys;
+  }
+
+  function availableLocales() {
+    return ['en', 'es'];
+  }
+
+  return {
+    setLocale: setLocale,
+    getLocale: getLocale,
+    getCatalog: getCatalog,
+    t: t,
+    pickVariant: pickVariant,
+    fillPlaceholders: fillPlaceholders,
+    validateCatalog: validateCatalog,
+    registerLocale: registerLocale,
+    availableLocales: availableLocales
+  };
+}));

@@ -122,9 +122,9 @@ const MODULES = [
   'forecast/news/lint.js',
   'forecast/news/skyWire.js',
   'forecast/feedBuilder.js',
-  'i18n/index.js',
   'i18n/en.js',
-  'i18n/es.js'
+  'i18n/es.js',
+  'i18n/index.js'
 ];
 
 const REACT = ['react-18.3.1.production.min.js', 'react-dom-18.3.1.production.min.js'];

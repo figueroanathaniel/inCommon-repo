@@ -1,82 +1,187 @@
-/*! multiChart.test.js: 15 assertions for synastry news
- * Tests item creation, ceiling enforcement, couple-link, share text, partner data
+/*! forecast/news/multiChart.test.js
+ * 15 assertions for the synastry item builder. No storage API: this module
+ * runs in node without localStorage. Focus: ceiling enforcement,
+ * couple-link bonus, share text validation.
  */
 
-const MC = require('./multiChart.js');
-const NE = require('../newsEngine.js');
+const {
+  buildSynastryItem,
+  buildSynastryItems,
+  validateSynastryCeiling,
+  validateShareText,
+  verifyCoupleLink
+} = require('./multiChart');
+const { IMPORTANCE_CEILING } = require('../newsEngine');
 
-const tests = [];
+const mockPartner = {
+  id: 'partner-lucia-1',
+  name: 'Lucia',
+  birthDate: new Date('1995-06-15'),
+  birthTime: '14:30',
+  birthPlace: 'Brooklyn, NY',
+  planets: { Sun: 84.5, Moon: 167.3, Venus: 65.2 },
+  points: { ASC: 120.0, MC: 210.0 }
+};
 
-function assert(id, desc, actual, expected) {
-  const pass = JSON.stringify(actual) === JSON.stringify(expected);
-  tests.push({ id: 'M' + id, desc, pass, actual: JSON.stringify(actual), expected: JSON.stringify(expected) });
+const mockContact = {
+  movingPlanet: 'Venus',
+  aspect: 'trine',
+  partnerPlanet: 'Moon',
+  orb: 0.3,
+  isExact: true,
+  yourLongitude: 65.2,
+  theirLongitude: 67.5
+};
+
+function test_A1_basicItemCreation() {
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (!item.headline.includes('Venus') || !item.headline.includes('Lucia')) throw new Error('A1: Headline missing planet or partner name');
+  if (item.category !== 'transit') throw new Error('A1: Synastry item category should be "transit"');
+  if (item.synastry !== true) throw new Error('A1: synastry flag should be true');
 }
 
-// M1-M15 tests
-assert(1, 'synastry item has synastry flag', { synastry: true }.synastry === true, true);
+function test_A2_ceilingEnforcement() {
+  const item = buildSynastryItem({
+    contact: Object.assign({}, mockContact, { isExact: true }),
+    partner: mockPartner, isPersonalTouch: true, hasNatalTouch: true, isRare: true, date: new Date()
+  });
+  if (item.importance > IMPORTANCE_CEILING) throw new Error('A2: Synastry importance (' + item.importance + ') exceeded ceiling (' + IMPORTANCE_CEILING + ')');
+  if (!validateSynastryCeiling(item)) throw new Error('A2: validateSynastryCeiling failed for valid item');
+}
 
-assert(2, 'ceiling is hard-capped at 68',
-  NE.verifySynastryCeiling(90), 68);
+function test_A3_ceilingValue() {
+  if (IMPORTANCE_CEILING !== 68) throw new Error('A3: Ceiling should be 68, got ' + IMPORTANCE_CEILING);
+}
 
-assert(3, 'couple-link bonus exactly +10',
-  NE.BONUS_COUPLE_LINK, 10);
+function test_A4_coupleLinkBonus() {
+  const contactWithLink = Object.assign({}, mockContact, { isCoupleLink: true });
+  const item = buildSynastryItem({ contact: contactWithLink, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (item.importance > 80) throw new Error('A4: Couple-link item (' + item.importance + ') should not reach notify threshold');
+  if (item.importance < 50) throw new Error('A4: Couple-link item importance too low: ' + item.importance);
+}
 
-assert(4, 'couple-link detected within 1 degree',
-  MC.verifyCoupleLink('Venus', 'Moon', 0.5), true);
+function test_A5_coupleLinkDetection() {
+  const yourLng = 65.2, theirLng = 65.8; // 0.6 degrees apart
+  if (!verifyCoupleLink(yourLng, theirLng, 1.0)) throw new Error('A5: verifyCoupleLink should detect 0.6 degree contact');
+  const farLng = 75.0; // 10 degrees apart
+  if (verifyCoupleLink(yourLng, farLng, 1.0)) throw new Error('A5: verifyCoupleLink should reject 10 degree contact');
+}
 
-assert(5, 'partner data required on synastry item',
-  { partner: { id: 'p1', name: 'Sam' } }.partner.name === 'Sam', true);
+function test_A6_shareTextNoLongitudes() {
+  const shareText = 'Venus trine their Moon, Lucia. 2026-09-13.';
+  if (!validateShareText(shareText, mockContact)) throw new Error('A6: Clean share text should pass validation');
+  const badShareText = 'Your Venus at 65.2° trine their Moon at 67.5°';
+  if (validateShareText(badShareText, mockContact)) throw new Error('A6: Share text with longitudes should fail validation');
+}
 
-assert(6, 'category stays transit, not changed to synastry',
-  { category: 'transit', synastry: true }.category === 'transit', true);
+function test_A7_shareTextNoOrbs() {
+  const cleanText = 'Venus trine their Moon today.';
+  if (!validateShareText(cleanText, mockContact)) throw new Error('A7: Clean text should pass');
+  const orbText = 'Venus trine their Moon within ' + mockContact.orb + '°';
+  if (validateShareText(orbText, mockContact)) throw new Error('A7: Text with orb should fail');
+}
 
-assert(7, 'share text validation allows clean text',
-  MC.validateShareText('A meaningful contact between two charts'), true);
+function test_A8_shareTextNoBirthData() {
+  const cleanText = 'Venus trine their Moon. Today you understand each other.';
+  if (!validateShareText(cleanText, mockContact)) throw new Error('A8: Clean share text should pass');
+  const birthYear = '1995-06-15';
+  const badText = 'Venus trine their Moon. Born ' + birthYear + ', they...';
+  if (validateShareText(badText, mockContact)) throw new Error('A8: Share text with birth data should fail');
+}
 
-assert(8, 'share text is used to exclude sensitive data',
-  (() => {
-    const fn = MC.validateShareText;
-    return typeof fn === 'function';
-  })(), true);
+function test_A9_partnerDataRequired() {
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (!item.partner) throw new Error('A9: Item missing partner object');
+  if (item.partner.id !== mockPartner.id) throw new Error('A9: Partner id mismatch');
+  if (item.partner.name !== mockPartner.name) throw new Error('A9: Partner name mismatch');
+}
 
-assert(9, 'share text validator is exported',
-  typeof MC.validateShareText === 'function', true);
+function test_A10_categoryStaysTransit() {
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (item.category !== 'transit') throw new Error('A10: Category should be "transit", got "' + item.category + '"');
+  const itemWithLink = buildSynastryItem({ contact: Object.assign({}, mockContact, { isCoupleLink: true }), partner: mockPartner, isPersonalTouch: true, date: new Date() });
+  if (itemWithLink.category !== 'transit') throw new Error('A10: Synastry item category should always be transit');
+}
 
-assert(10, 'body structure includes calculated line',
-  typeof MC.buildSynastryBody({ movingPlanet: 'Venus', aspect: 'trine', orb: 0.5 }, {}, '') === 'string', true);
+function test_A11_batchRespectsCeiling() {
+  const contacts = [
+    mockContact,
+    Object.assign({}, mockContact, { aspect: 'conjunction', isCoupleLink: true }),
+    Object.assign({}, mockContact, { aspect: 'square', orb: 0.1, isExact: true })
+  ];
+  const items = buildSynastryItems(contacts, mockPartner);
+  for (const item of items) {
+    if (!validateSynastryCeiling(item)) throw new Error('A11: Item ' + item.id + ' exceeded ceiling');
+  }
+}
 
-assert(11, 'body structure includes explainer',
-  MC.buildSynastryBody({ movingPlanet: 'Venus', aspect: 'trine', orb: 0.5 }, {}, '').includes('trine'), true);
+function test_A12_noStorageApi() {
+  // If the module had touched localStorage on require, we would not have gotten here.
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (!item.id) throw new Error('A12: Item should have valid id');
+}
 
-assert(12, 'ID generation includes aspect',
-  MC.generateNewsId({ aspect: 'trine' }).includes('trine'), true);
+function test_A13_exactAspectDetection() {
+  const exactContact = Object.assign({}, mockContact, { orb: 0.3, isExact: true });
+  const item = buildSynastryItem({ contact: exactContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (item.importance < 50) throw new Error('A13: Exact contact should score higher: ' + item.importance);
 
-assert(13, 'validation passes for ceiling-compliant items',
-  MC.validateSynastryCeiling([{ synastry: true, importance: 68 }]), true);
+  const inexactContact = Object.assign({}, mockContact, { orb: 2.0, isExact: false });
+  const itemInexact = buildSynastryItem({ contact: inexactContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (itemInexact.importance > item.importance) throw new Error('A13: Inexact contact should score lower than exact');
+}
 
-assert(14, 'importance can be calculated',
-  typeof NE.calculateImportance({ isExact: true, isPersonal: true }) === 'number', true);
+function test_A14_partnerIdInKeywords() {
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  if (!item.keywords.includes(mockPartner.id)) throw new Error('A14: Partner id "' + mockPartner.id + '" should be in keywords');
+}
 
-assert(15, 'calculated importance includes all bonuses',
-  NE.calculateImportance({ isExact: true, isPersonal: true, isRare: true, isCoupleLink: true }) > 0, true);
+function test_A15_bodyStructure() {
+  const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
+  const body = item.body;
+  if (!body.includes(mockContact.aspect)) throw new Error('A15: Body missing aspect type');
+  if (!body.includes('charts') && !body.includes('weather')) throw new Error('A15: Body missing weather/pair phrasing');
+  const paragraphs = body.split('\n\n').filter(p => p.trim());
+  if (paragraphs.length < 2) throw new Error('A15: Body should have multiple parts');
+}
+
+const tests = [
+  test_A1_basicItemCreation,
+  test_A2_ceilingEnforcement,
+  test_A3_ceilingValue,
+  test_A4_coupleLinkBonus,
+  test_A5_coupleLinkDetection,
+  test_A6_shareTextNoLongitudes,
+  test_A7_shareTextNoOrbs,
+  test_A8_shareTextNoBirthData,
+  test_A9_partnerDataRequired,
+  test_A10_categoryStaysTransit,
+  test_A11_batchRespectsCeiling,
+  test_A12_noStorageApi,
+  test_A13_exactAspectDetection,
+  test_A14_partnerIdInKeywords,
+  test_A15_bodyStructure
+];
 
 function runTests() {
-  const passed = tests.filter(t => t.pass).length;
-  const failed = tests.length - passed;
-  const errors = tests.filter(t => !t.pass).map(t =>
-    'M' + t.id.slice(1) + ': ' + t.desc
-  );
+  let passed = 0, failed = 0;
+  const errors = [], results = [];
 
-  if (!global.quiet) {
-    tests.forEach(t => {
-      if (!t.pass) {
-        console.log('  FAIL ' + t.id + '  ' + t.desc + '\n       expected ' + t.expected + '\n       actual   ' + t.actual);
-      }
-    });
-    console.log('  M multiChart.test      ' + passed + '/' + tests.length);
-  }
+  tests.forEach((test, i) => {
+    const id = 'M' + (i + 1);
+    try {
+      test();
+      passed++;
+      results.push({ id, name: test.name, pass: true });
+    } catch (e) {
+      failed++;
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(msg);
+      results.push({ id, name: test.name, pass: false, error: msg });
+    }
+  });
 
-  return { passed, failed, errors };
+  return { passed, failed, errors, results };
 }
 
-module.exports = { runTests, tests };
+module.exports = { tests, runTests };

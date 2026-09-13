@@ -15217,642 +15217,1300 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
 </script>
 <script>
-/*! newsEngine.js: core news types and importance scoring
- * Centralized importance calculation with category-specific ceilings
+/*! forecast/newsEngine.js: core news item shape and importance scoring (UMD)
+ * Single source of truth: every other forecast module reads its constants
+ * from here rather than carrying its own copy.
  */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.NewsEngine = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
 
-const TIER_1_BASE = 50;
-const BONUS_EXACTNESS = 10;
-const BONUS_PERSONAL = 8;
-const BONUS_RARE = 5;
-const BONUS_COUPLE_LINK = 10;
-const BONUS_NATAL_TOUCH = 5;
+  var TIER_1_BASE = 50;      // Base importance: Grand Trine, major stations
+  var TIER_2_BASE = 45;      // Secondary patterns (T-Square, Yod)
+  var TIER_3_BASE = 35;      // Lesser patterns, aspects to slow movers
 
-const SYNASTRY_CEILING = 68;
-const SKY_WIRE_CEILING = 93;
-const PERSONAL_CEILING = 98;
+  var BONUS_EXACTNESS = 10;  // Orb under 0.5 degrees
+  var BONUS_PERSONAL = 8;    // Touches natal Sun/Moon/ASC
+  var BONUS_NATAL_TOUCH = 10;// Touches a natal point (non-personal)
+  var BONUS_RARE = 5;        // Very rare pattern (eg rare harmonic alignment)
+  var BONUS_COUPLE_LINK = 10;// Synastry: moving body also contacts reader point
 
-function calculateImportance(options) {
-  let score = TIER_1_BASE;
+  var IMPORTANCE_CEILING = 68; // Hard cap for synastry items
+  var NOTIFY_THRESHOLD = 80;   // Minimum importance to notify
 
-  if (options.isExact) {
-    score += BONUS_EXACTNESS;
+  function baseImportanceForTier(tier) {
+    if (tier === 1) return TIER_1_BASE;
+    if (tier === 2) return TIER_2_BASE;
+    if (tier === 3) return TIER_3_BASE;
+    return TIER_3_BASE;
   }
 
-  if (options.isPersonal) {
-    score += BONUS_PERSONAL;
+  /**
+   * Total importance with bonuses, respecting the synastry ceiling.
+   * Synastry items are hard-capped at IMPORTANCE_CEILING so they never
+   * reach NOTIFY_THRESHOLD and cannot trigger a push notification.
+   */
+  function calculateImportance(base, bonuses, isSynastry) {
+    bonuses = bonuses || {};
+    var total = base;
+
+    if (bonuses.exactness) total += BONUS_EXACTNESS;
+    if (bonuses.personalTouch) total += BONUS_PERSONAL;
+    if (bonuses.natalTouch) total += BONUS_NATAL_TOUCH;
+    if (bonuses.rare) total += BONUS_RARE;
+    if (bonuses.coupleLink) total += BONUS_COUPLE_LINK;
+
+    if (isSynastry) total = Math.min(total, IMPORTANCE_CEILING);
+
+    return Math.min(100, total);
   }
 
-  if (options.isRare) {
-    score += BONUS_RARE;
+  /**
+   * Ceiling components spelled out, for tests and review docs to quote
+   * rather than restate the arithmetic by hand.
+   */
+  function verifySynastryCeiling() {
+    var parts = [TIER_1_BASE, BONUS_EXACTNESS, BONUS_PERSONAL, BONUS_NATAL_TOUCH, BONUS_RARE];
+    var ceiling = parts.reduce(function (a, b) { return a + b; }, 0);
+    return { ceiling: ceiling, components: parts.join('+') };
   }
 
-  if (options.isCoupleLink) {
-    score += BONUS_COUPLE_LINK;
+  /**
+   * Stable ID for a news item: date + type + first two bodies.
+   * Deterministic for a given (date, type, bodies) triple.
+   */
+  function generateNewsId(type, bodies, date) {
+    var dateStr = date.toISOString().split('T')[0];
+    var bodyStr = (bodies || []).slice(0, 2).join('_');
+    return (dateStr + '_' + type + '_' + bodyStr).replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
   }
 
-  if (options.hasNatalTouch) {
-    score += BONUS_NATAL_TOUCH;
+  function sortByImportance(items) {
+    return items.slice().sort(function (a, b) { return b.importance - a.importance; });
   }
 
-  return score;
-}
+  function filterByCategory(items, category) {
+    return items.filter(function (i) { return i.category === category; });
+  }
 
-function verifySynastryCeiling(importance) {
-  return Math.min(importance, SYNASTRY_CEILING);
-}
+  function countByCategory(items) {
+    return items.reduce(function (acc, item) {
+      acc[item.category] = (acc[item.category] || 0) + 1;
+      return acc;
+    }, {});
+  }
 
-function verifySkyWireCeiling(importance) {
-  return Math.min(importance, SKY_WIRE_CEILING);
-}
+  function averageImportance(items) {
+    if (items.length === 0) return 0;
+    return items.reduce(function (acc, item) { return acc + item.importance; }, 0) / items.length;
+  }
 
-function verifyPersonalCeiling(importance) {
-  return Math.min(importance, PERSONAL_CEILING);
-}
-
-function generateNewsId(type, body, aspect) {
-  return [type, body, aspect]
-    .filter(Boolean)
-    .join('-')
-    .replace(/\s+/g, '-')
-    .toLowerCase();
-}
-
-module.exports = {
-  TIER_1_BASE,
-  BONUS_EXACTNESS,
-  BONUS_PERSONAL,
-  BONUS_RARE,
-  BONUS_COUPLE_LINK,
-  BONUS_NATAL_TOUCH,
-  SYNASTRY_CEILING,
-  SKY_WIRE_CEILING,
-  PERSONAL_CEILING,
-  calculateImportance,
-  verifySynastryCeiling,
-  verifySkyWireCeiling,
-  verifyPersonalCeiling,
-  generateNewsId
-};
-
-</script>
-<script>
-/*! synastryTemplates.js: synastry aspect headline templates
- * Three variants per aspect, placeholder-only substitution
- */
-
-const TEMPLATES = {
-  'conjunction': [
-    '{planet1} and their {planet2} meet today. Same frequency between you.',
-    'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
-    'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
-  ],
-  'sextile': [
-    'Ease between you: your {planet1} sextile their {planet2}, {name}. A green light.',
-    'Your {planet1} and their {planet2} are friends. This is the hour to start something.',
-    '{planet1} sextil a {planet2}, {name}: diplomacy gets the nod.'
-  ],
-  'trine': [
-    'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
-    'Your {planet1} and their {planet2} are in conversation. The air is clear.',
-    'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
-  ],
-  'square': [
-    'Your {planet1} square their {planet2}, {name}. Friction between you. Channel it.',
-    'A hard angle: your {planet1} and their {planet2} want different things today.',
-    'Your {planet1} meets resistance in their {planet2}. That\'s the work of the day.'
-  ],
-  'opposite': [
-    'Your {planet1} opposite their {planet2}, {name}. Tension, but also clarity.',
-    'Mirror time: two poles, one wants to lead, the other to reflect. Balance is today\'s work.',
-    'Who else\'s perspective are you avoiding?'
-  ]
-};
-
-function synastryTemplatesFor(type) {
-  return TEMPLATES[type] || [];
-}
-
-function pickSynastryTemplate(type, index) {
-  const templates = TEMPLATES[type] || [];
-  return templates[Math.max(0, Math.min(index, templates.length - 1))];
-}
-
-function fillSynastryTemplate(template, planet1, planet2, name) {
-  if (!template) return '';
-  let result = template;
-  result = result.replace(/{planet1}/g, planet1 || 'Unknown');
-  result = result.replace(/{planet2}/g, planet2 || 'Unknown');
-  result = result.replace(/{name}/g, name || 'You');
-  return result;
-}
-
-module.exports = {
-  TEMPLATES,
-  synastryTemplatesFor,
-  pickSynastryTemplate,
-  fillSynastryTemplate
-};
-
-</script>
-<script>
-/*! multiChart.js: synastry contact detection and item building
- * Builds NewsItems from partner chart contacts with importance ceiling 68
- */
-
-const SYNASTRY_CEILING = 68;
-const COUPLE_LINK_BONUS = 10;
-
-function verifyCoupleLink(movingPlanet, readerPoint, orb) {
-  return Math.abs(orb) <= 1.0;
-}
-
-function buildSynastryItem(contact, partner, importance) {
-  const capped = Math.min(importance, SYNASTRY_CEILING);
   return {
-    id: generateNewsId(contact),
-    category: 'transit',
-    synastry: true,
-    partner: partner,
-    importance: capped,
-    body: contact.movingPlanet,
-    aspect: contact.aspect,
-    orb: contact.orb,
-    isExact: contact.isExact,
-    isCoupleLink: verifyCoupleLink(contact.movingPlanet, contact.aspect, contact.orb)
+    TIER_1_BASE: TIER_1_BASE, TIER_2_BASE: TIER_2_BASE, TIER_3_BASE: TIER_3_BASE,
+    BONUS_EXACTNESS: BONUS_EXACTNESS, BONUS_PERSONAL: BONUS_PERSONAL,
+    BONUS_NATAL_TOUCH: BONUS_NATAL_TOUCH, BONUS_RARE: BONUS_RARE, BONUS_COUPLE_LINK: BONUS_COUPLE_LINK,
+    IMPORTANCE_CEILING: IMPORTANCE_CEILING, NOTIFY_THRESHOLD: NOTIFY_THRESHOLD,
+    baseImportanceForTier: baseImportanceForTier, calculateImportance: calculateImportance,
+    verifySynastryCeiling: verifySynastryCeiling, generateNewsId: generateNewsId,
+    sortByImportance: sortByImportance, filterByCategory: filterByCategory,
+    countByCategory: countByCategory, averageImportance: averageImportance
   };
-}
-
-function buildSynastryBody(contact, partner, headlineFilled) {
-  const lineText = contact.movingPlanet + ' is ' + contact.aspect + ' their ' + contact.aspect + ' within ' +
-                   Math.abs(contact.orb).toFixed(2) + '°.';
-  const explainer = 'A ' + contact.aspect + ' is ' + getExplainerFor(contact.aspect) + '.';
-  const weather = 'A contact between two charts is weather over the pair, never a verdict on it.';
-  return [lineText, explainer, weather].join(' ');
-}
-
-function getExplainerFor(aspect) {
-  const explanations = {
-    'conjunction': 'when two planets occupy the same degree',
-    'sextile': '60° angle of support',
-    'trine': '120° angle of harmony',
-    'square': '90° angle of friction',
-    'opposite': '180° angle of polarity'
-  };
-  return explanations[aspect] || 'an aspect';
-}
-
-function generateNewsId(contact) {
-  return 'synastry-' + (contact.movingPlanet || 'unknown').replace(/\s+/g, '-').toLowerCase() +
-         '-' + (contact.aspect || 'contact').replace(/\s+/g, '-').toLowerCase();
-}
-
-function validateSynastryCeiling(items) {
-  return items.every(item => !item.synastry || item.importance <= SYNASTRY_CEILING);
-}
-
-function validateShareText(text) {
-  if (!text) return true;
-  const forbidden = /longitude|orb|birth|date|time|coordinate|degree/i;
-  return !forbidden.test(text);
-}
-
-module.exports = {
-  SYNASTRY_CEILING,
-  COUPLE_LINK_BONUS,
-  verifyCoupleLink,
-  buildSynastryItem,
-  buildSynastryBody,
-  generateNewsId,
-  validateSynastryCeiling,
-  validateShareText
-};
+}));
 
 </script>
 <script>
-/*! lint.ts: validation for dashes and data leakage
- * Checks for em/en dashes and reader-possessive language
+/*! forecast/news/synastryTemplates.js: headlines for synastry items (UMD)
+ * Structure mirrors transit templates, keyed for localization.
+ * Format: {planet1} is {aspect} their {planet2}, {name}. Headline text.
  */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.SynastryTemplates = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
 
-const EM_DASH = String.fromCharCode(0x2014);
-const EN_DASH = String.fromCharCode(0x2013);
-
-const PUBLIC_FORBIDDEN = [
-  'your chart', 'your sky', 'your birth', 'your natal',
-  'in your ', 'what it means for you', 'how this affects you',
-  'your personal', 'for you today', 'your reading', 'your journey', 'your destiny'
-];
-
-function hasDash(text) {
-  if (!text) return false;
-  if (text.includes(EM_DASH) || text.includes(EN_DASH)) return true;
-  if (text.includes('&mdash;') || text.includes('&ndash;')) return true;
-  if (text.includes('&#8212;') || text.includes('&#8211;')) return true;
-  if (text.includes('&#x2014;') || text.includes('&#x2013;')) return true;
-  return false;
-}
-
-function lintHeadline(text) {
-  if (hasDash(text)) {
-    return { valid: false, error: 'Contains em or en dash' };
-  }
-  return { valid: true };
-}
-
-function lintBody(text) {
-  if (hasDash(text)) {
-    return { valid: false, error: 'Contains em or en dash' };
-  }
-  return { valid: true };
-}
-
-function lintShareText(text) {
-  if (hasDash(text)) {
-    return { valid: false, error: 'Contains em or en dash' };
-  }
-  if (/longitude|orb|degree|coordinate/i.test(text)) {
-    return { valid: false, error: 'Contains birth data' };
-  }
-  return { valid: true };
-}
-
-function publicLintFeed(items) {
-  const violations = [];
-  items.forEach(item => {
-    if (item.headline && PUBLIC_FORBIDDEN.some(phrase =>
-        item.headline.toLowerCase().includes(phrase))) {
-      violations.push({ id: item.id, issue: 'reader-possessive in headline' });
+  var SYNASTRY_TEMPLATES = [
+    {
+      id: 'synastry-conjunction', type: 'conjunction',
+      templates: [
+        '{planet1} and their {planet2} meet today. Same frequency between you.',
+        'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
+        'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
+      ]
+    },
+    {
+      id: 'synastry-sextile', type: 'sextile',
+      templates: [
+        'Your {planet1} sextile their {planet2} today, {name}. Diplomacy gets a green light.',
+        'A sextile between you two: your {planet1} to their {planet2}. Easy conversation.',
+        'Your {planet1} and their {planet2} are friends today. Lean on it.'
+      ]
+    },
+    {
+      id: 'synastry-square', type: 'square',
+      templates: [
+        'Your {planet1} square their {planet2}, {name}. Friction between you. Channel it.',
+        'A hard angle: your {planet1} and their {planet2} want different things today.',
+        'Your {planet1} meets resistance in their {planet2}. That\'s the work of the day.'
+      ]
+    },
+    {
+      id: 'synastry-trine', type: 'trine',
+      templates: [
+        'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
+        'Your {planet1} and their {planet2} are in conversation. The air is clear.',
+        'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
+      ]
+    },
+    {
+      id: 'synastry-opposite', type: 'opposite',
+      templates: [
+        'Your {planet1} opposite their {planet2}, {name}. You\'re seeing both sides.',
+        'Two poles between you: your {planet1} and their {planet2}. Balance is today\'s work.',
+        'Mirror moment: your {planet1} opposite their {planet2}. Who is the other seeing?'
+      ]
+    },
+    {
+      id: 'synastry-station-retrograde', type: 'station-retrograde',
+      templates: [
+        'Their {planet} stations retrograde today, {name}. What reverses between you.',
+        'Lookback time: a pause in their {planet}. This may echo in what you share.'
+      ]
+    },
+    {
+      id: 'synastry-station-direct', type: 'station-direct',
+      templates: [
+        'Their {planet} stations direct today, {name}. Forward motion resumes between you.',
+        'The pause lifts: their {planet} direct. What was held returns.'
+      ]
     }
-    if (item.body && PUBLIC_FORBIDDEN.some(phrase =>
-        item.body.toLowerCase().includes(phrase))) {
-      violations.push({ id: item.id, issue: 'reader-possessive in body' });
-    }
-  });
-  return violations;
-}
+  ];
 
-function sanitizeForPublic(text) {
-  let result = text;
-  PUBLIC_FORBIDDEN.forEach(phrase => {
-    const regex = new RegExp(phrase, 'gi');
-    result = result.replace(regex, '[removed]');
-  });
-  return result;
-}
+  function synastryTemplatesFor(type) {
+    var entry = SYNASTRY_TEMPLATES.filter(function (t) { return t.type === type; })[0];
+    return entry ? entry.templates : [];
+  }
 
-module.exports = {
-  EM_DASH,
-  EN_DASH,
-  PUBLIC_FORBIDDEN,
-  hasDash,
-  lintHeadline,
-  lintBody,
-  lintShareText,
-  publicLintFeed,
-  sanitizeForPublic
-};
+  /**
+   * Index 0 is the one variant that names the partner ({name}) for every
+   * aspect above; the rest are flavor-only alternates. Picking anything
+   * else at random would silently drop the partner's name from a
+   * two-person reading roughly two times in three.
+   */
+  function pickSynastryTemplate(templates) {
+    return templates[0];
+  }
 
-</script>
-<script>
-/*! skyWire.js: public deterministic feed builder
- * Builds SkyWireItem collection with importance ceiling 93, no reader context
- */
+  function fillSynastryTemplate(template, planet1, planet2, partnerName, aspect) {
+    var result = template;
+    result = result.replace(/\{planet1\}/g, planet1);
+    result = result.replace(/\{planet2\}/g, planet2);
+    result = result.replace(/\{name\}/g, partnerName);
+    result = result.replace(/\{aspect\}/g, aspect);
+    return result;
+  }
 
-const PUBLIC_CEILING = 93;
+  function availableSynastryTypes() {
+    var seen = {}, out = [];
+    SYNASTRY_TEMPLATES.forEach(function (t) {
+      if (!seen[t.type]) { seen[t.type] = true; out.push(t.type); }
+    });
+    return out;
+  }
 
-function buildSkyWireItem(contact, importance) {
-  const capped = Math.min(importance, PUBLIC_CEILING);
   return {
-    id: generateSkyWireId(contact),
-    category: 'public_transit',
-    importance: capped,
-    body: contact.body || 'Unknown',
-    aspect: contact.aspect || 'contact',
-    orb: contact.orb || 0,
-    isExact: contact.isExact || false
+    SYNASTRY_TEMPLATES: SYNASTRY_TEMPLATES,
+    synastryTemplatesFor: synastryTemplatesFor,
+    pickSynastryTemplate: pickSynastryTemplate,
+    fillSynastryTemplate: fillSynastryTemplate,
+    availableSynastryTypes: availableSynastryTypes
   };
-}
+}));
 
-function generateSkyWireId(contact) {
-  return 'sky-' + (contact.body || 'unknown').replace(/\s+/g, '-').toLowerCase() +
-         '-' + (contact.aspect || 'transit').replace(/\s+/g, '-').toLowerCase() +
-         '-' + Date.now();
-}
+</script>
+<script>
+/*! forecast/news/multiChart.js: synastry news items from partner charts (UMD)
+ * A synastry item IS a transit item with category='transit', synastry=true,
+ * partner={id,name}. Importance ceiling: 68 (hard-capped so it never
+ * triggers a push notification).
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('../newsEngine'), require('./synastryTemplates'));
+  } else {
+    root.MultiChart = factory(root.NewsEngine, root.SynastryTemplates);
+  }
+}(typeof self !== 'undefined' ? self : this, function (NE, ST) {
+  'use strict';
 
-function buildSkyWireFeed(items) {
-  const sorted = items
-    .filter(item => !item.synastry && item.category !== 'transit')
-    .sort((a, b) => {
+  /**
+   * Build a synastry news item from a contact.
+   * input: { contact, partner: {id,name}, isPersonalTouch, hasNatalTouch?, isRare?, date }
+   */
+  function buildSynastryItem(input) {
+    var contact = input.contact;
+    var partner = input.partner;
+    var isPersonalTouch = input.isPersonalTouch;
+    var hasNatalTouch = input.hasNatalTouch;
+    var isRare = input.isRare;
+    var date = input.date;
+
+    var tier = 1; // Synastry items are typically Tier 1
+    var base = NE.TIER_1_BASE;
+
+    var importance = NE.calculateImportance(
+      base,
+      {
+        exactness: contact.isExact,
+        personalTouch: isPersonalTouch,
+        natalTouch: hasNatalTouch,
+        rare: isRare,
+        coupleLink: contact.isCoupleLink
+      },
+      true // isSynastry caps at IMPORTANCE_CEILING
+    );
+
+    var templates = ST.synastryTemplatesFor(contact.aspect);
+    var template = ST.pickSynastryTemplate(templates);
+    var headline = ST.fillSynastryTemplate(
+      template, contact.movingPlanet, contact.partnerPlanet, partner.name, contact.aspect
+    );
+
+    var body = buildSynastryBody(contact);
+
+    var id = NE.generateNewsId(
+      'synastry-' + contact.aspect, [contact.movingPlanet, contact.partnerPlanet], date
+    );
+
+    var keywords = [
+      contact.movingPlanet.toLowerCase(),
+      contact.partnerPlanet.toLowerCase(),
+      contact.aspect,
+      'synastry',
+      partner.id
+    ];
+
+    return {
+      id: id,
+      headline: headline,
+      body: body,
+      category: 'transit', // Synastry items ARE transit items
+      tier: tier,
+      type: contact.aspect,
+      importance: importance,
+      isNew: true,
+      keywords: keywords,
+      synastry: true,
+      partner: { id: partner.id, name: partner.name },
+      bodies: [contact.movingPlanet, contact.partnerPlanet]
+    };
+  }
+
+  /**
+   * Body is three parts: the calculated line (always visible), the
+   * explainer (behind tap to expand), and a sentence about weather, not verdict.
+   */
+  function buildSynastryBody(contact) {
+    var movingPlanet = contact.movingPlanet, partnerPlanet = contact.partnerPlanet,
+        aspect = contact.aspect, orb = contact.orb;
+
+    var calculatedLine = movingPlanet + ' is ' + aspect.toLowerCase() + ' their ' + partnerPlanet + ' within ' + orb.toFixed(2) + '°.';
+    var explainer = getAspectExplainer(aspect);
+    var weatherLine = 'A contact between two charts is weather over the pair, never a verdict on it.';
+
+    return calculatedLine + '\n\n' + explainer + '\n\n' + weatherLine;
+  }
+
+  function getAspectExplainer(aspect) {
+    var explainers = {
+      conjunction: 'A conjunction is when two planets occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these planets represent are amplified when together, for better and for worse.',
+      sextile: 'A sextile (60 degrees) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
+      square: 'A square (90 degrees) is tension in geometric form. Between you, these planets want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+      trine: 'A trine (120 degrees) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
+      opposite: 'An opposition (180 degrees) is two planets facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+    };
+    return explainers[aspect] || 'A contact between your charts.';
+  }
+
+  /**
+   * Build synastry items from a list of contacts, sorted by importance
+   * (highest first).
+   */
+  function buildSynastryItems(contacts, partner, options) {
+    options = options || {};
+    var items = [];
+
+    for (var i = 0; i < contacts.length; i++) {
+      var contact = contacts[i];
+      var isPersonal = !!(options.personalPointIds && options.personalPointIds.indexOf(contact.movingPlanet) !== -1);
+
+      var item = buildSynastryItem({
+        contact: contact,
+        partner: { id: partner.id, name: partner.name },
+        isPersonalTouch: isPersonal,
+        hasNatalTouch: false, // Would be determined by actual chart data
+        isRare: false,        // Would be determined by pattern analysis
+        date: new Date()
+      });
+
+      if (options.filterByImportance !== undefined) {
+        if (item.importance >= options.filterByImportance) items.push(item);
+      } else {
+        items.push(item);
+      }
+    }
+
+    return items.sort(function (a, b) { return b.importance - a.importance; });
+  }
+
+  /**
+   * Non-synastry items are not capped; used in tests to ensure the ceiling
+   * is enforced on the items that need it.
+   */
+  function validateSynastryCeiling(item) {
+    if (!item.synastry) return true;
+    return item.importance <= NE.IMPORTANCE_CEILING;
+  }
+
+  /**
+   * Ensure no longitudes, orbs, or birth data leak into share text.
+   */
+  function validateShareText(shareText, contact) {
+    var hasLongitude = /\d+\.\d+[°]?/g.test(shareText);
+    var hasOrb = shareText.indexOf(contact.orb.toFixed(2)) !== -1;
+    var yearMatch = shareText.match(/\d{4}/);
+    var hasBirthData = /\d{4}/.test(shareText) && yearMatch && yearMatch[0] !== String(new Date().getFullYear());
+
+    return !hasLongitude && !hasOrb && !hasBirthData;
+  }
+
+  /**
+   * Couple-link bonus: moving body contacts the reader's own point within
+   * the given threshold (default 1 degree), wrapping across the 0/360 seam.
+   */
+  function verifyCoupleLink(movingLng, readerPointLng, threshold) {
+    threshold = threshold === undefined ? 1.0 : threshold;
+    var diff = Math.abs(movingLng - readerPointLng);
+    return diff <= threshold || Math.abs(diff - 360) <= threshold;
+  }
+
+  return {
+    buildSynastryItem: buildSynastryItem,
+    buildSynastryItems: buildSynastryItems,
+    validateSynastryCeiling: validateSynastryCeiling,
+    validateShareText: validateShareText,
+    verifyCoupleLink: verifyCoupleLink
+  };
+}));
+
+</script>
+<script>
+/*! forecast/news/lint.js: dash and reader-possessive validation (UMD)
+ * Three dash encodings checked: literal, escape, entity forms, per the
+ * project's zero-em-dash rule.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.NewsLint = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var EM_DASH_LITERAL = '—';
+  var EN_DASH_LITERAL = '–';
+  var EM_DASH_ESCAPE = '\\u2014';
+  var EN_DASH_ESCAPE = '\\u2013';
+  var EM_DASH_ENTITY = '&mdash;';
+  var EN_DASH_ENTITY = '&ndash;';
+  var EM_DASH_NUMERIC = '&#8212;';
+  var EN_DASH_NUMERIC = '&#8211;';
+  var EM_DASH_HEX = '&#x2014;';
+  var EN_DASH_HEX = '&#x2013;';
+
+  // Reader-possessive phrases forbidden in public Sky Wire
+  var PUBLIC_FORBIDDEN = [
+    'your chart', 'your sky', 'your birth', 'your natal', 'in your ',
+    'what it means for you', 'how this affects you', 'your personal',
+    'for you today', 'your reading', 'your journey', 'your destiny'
+  ];
+
+  function hasDash(text) {
+    if (!text) return false;
+    if (text.indexOf(EM_DASH_LITERAL) !== -1 || text.indexOf(EN_DASH_LITERAL) !== -1) return true;
+    if (text.indexOf(EM_DASH_ENTITY) !== -1 || text.indexOf(EN_DASH_ENTITY) !== -1 ||
+        text.indexOf(EM_DASH_NUMERIC) !== -1 || text.indexOf(EN_DASH_NUMERIC) !== -1 ||
+        text.indexOf(EM_DASH_HEX) !== -1 || text.indexOf(EN_DASH_HEX) !== -1) return true;
+    return false;
+  }
+
+  function hasEscapedDash(source) {
+    return source.indexOf(EM_DASH_ESCAPE) !== -1 || source.indexOf(EN_DASH_ESCAPE) !== -1;
+  }
+
+  function lintHeadline(headline) {
+    var errors = [];
+    if (hasDash(headline)) errors.push('Headline contains em or en dash');
+    if (headline.length > 90) errors.push('Headline exceeds 90 chars (' + headline.length + ')');
+    if (headline.trim() !== headline) errors.push('Headline has leading/trailing whitespace');
+    return { valid: errors.length === 0, errors: errors };
+  }
+
+  function lintBody(body) {
+    var errors = [];
+    if (hasDash(body)) errors.push('Body contains em or en dash');
+    if (body.trim() !== body) errors.push('Body has leading/trailing whitespace');
+    return { valid: errors.length === 0, errors: errors };
+  }
+
+  /**
+   * Lint share text for sensitive data leakage. Should contain only:
+   * first names, headline, date.
+   */
+  function lintShareText(shareText, confidentialData) {
+    var errors = [];
+    confidentialData = confidentialData || {};
+
+    if (hasDash(shareText)) errors.push('Share text contains em or en dash');
+
+    if (/\d+\.\d+[°´]?/.test(shareText)) {
+      errors.push('Share text contains degree notation (likely longitude)');
+    }
+
+    if (confidentialData.orb !== undefined) {
+      var orbStr = confidentialData.orb.toFixed(2);
+      if (shareText.indexOf(orbStr) !== -1) errors.push('Share text contains orb value (' + orbStr + ')');
+    }
+
+    if (confidentialData.birthDate) {
+      if (shareText.indexOf(confidentialData.birthDate) !== -1) errors.push('Share text contains birth date');
+      var year = confidentialData.birthDate.split('-')[0];
+      if (shareText.indexOf(year) !== -1 && year !== String(new Date().getFullYear())) {
+        errors.push('Share text contains potential birth year (' + year + ')');
+      }
+    }
+
+    return { valid: errors.length === 0, errors: errors };
+  }
+
+  /**
+   * Lint multiple news items (each: { headline, body, shareText? }).
+   */
+  function lintBatch(items) {
+    var issues = new Map();
+    var itemsValid = 0;
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var itemErrors = [];
+
+      var headlineResult = lintHeadline(item.headline);
+      if (!headlineResult.valid) itemErrors.push('Headline: ' + headlineResult.errors.join('; '));
+
+      var bodyResult = lintBody(item.body);
+      if (!bodyResult.valid) itemErrors.push('Body: ' + bodyResult.errors.join('; '));
+
+      if (item.shareText) {
+        var shareResult = lintShareText(item.shareText);
+        if (!shareResult.valid) itemErrors.push('ShareText: ' + shareResult.errors.join('; '));
+      }
+
+      if (itemErrors.length > 0) issues.set('item_' + i, itemErrors);
+      else itemsValid++;
+    }
+
+    return { itemsChecked: items.length, itemsValid: itemsValid, itemsInvalid: items.length - itemsValid, issues: issues };
+  }
+
+  /**
+   * Scan source text for literal and entity dash forms. Used in the build
+   * process to catch dashes that sneak into templates.
+   */
+  function scanSourceForDashes(source) {
+    var count = 0;
+    var locations = [];
+
+    for (var i = 0; i < source.length; i++) {
+      if (source[i] === EM_DASH_LITERAL || source[i] === EN_DASH_LITERAL) {
+        count++;
+        locations.push(i);
+      }
+    }
+
+    var entityMatches = source.match(/&mdash;|&ndash;|&#8212;|&#8211;|&#x2014;|&#x2013;/g) || [];
+    count += entityMatches.length;
+
+    return { hasDashes: count > 0, count: count, locations: locations };
+  }
+
+  function validateTemplateLiteral(literal) {
+    if (hasEscapedDash(literal)) {
+      return { valid: false, message: 'Template contains escaped em or en dash (\\u2014 or \\u2013)' };
+    }
+    if (hasDash(literal)) {
+      return { valid: false, message: 'Template contains literal em or en dash character' };
+    }
+    return { valid: true, message: 'Template is clean' };
+  }
+
+  /**
+   * Lint a Sky Wire feed for reader-possessive language. Fails the build
+   * if any PUBLIC_FORBIDDEN phrase appears in rendered strings.
+   */
+  function publicLintFeed(items) {
+    var violations = [];
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var lowerHeadline = (item.headline || '').toLowerCase();
+      var lowerBody = (item.body || '').toLowerCase();
+
+      for (var j = 0; j < PUBLIC_FORBIDDEN.length; j++) {
+        var forbidden = PUBLIC_FORBIDDEN[j];
+        if (lowerHeadline.indexOf(forbidden) !== -1) {
+          violations.push({ item: 'item[' + i + ']', field: 'headline', violatingPhrase: forbidden, context: (item.headline || '').substring(0, 100) });
+        }
+        if (lowerBody.indexOf(forbidden) !== -1) {
+          violations.push({ item: 'item[' + i + ']', field: 'body', violatingPhrase: forbidden, context: (item.body || '').substring(0, 100) });
+        }
+      }
+    }
+
+    return { valid: violations.length === 0, violations: violations };
+  }
+
+  /**
+   * Replace text with a safe fallback if any reader-possessive phrase is found.
+   */
+  function sanitizeForPublic(text, safeFallback) {
+    var lowerText = text.toLowerCase();
+    for (var i = 0; i < PUBLIC_FORBIDDEN.length; i++) {
+      if (lowerText.indexOf(PUBLIC_FORBIDDEN[i]) !== -1) return safeFallback;
+    }
+    return text;
+  }
+
+  return {
+    PUBLIC_FORBIDDEN: PUBLIC_FORBIDDEN,
+    hasDash: hasDash,
+    hasEscapedDash: hasEscapedDash,
+    lintHeadline: lintHeadline,
+    lintBody: lintBody,
+    lintShareText: lintShareText,
+    lintBatch: lintBatch,
+    scanSourceForDashes: scanSourceForDashes,
+    validateTemplateLiteral: validateTemplateLiteral,
+    publicLintFeed: publicLintFeed,
+    sanitizeForPublic: sanitizeForPublic
+  };
+}));
+
+</script>
+<script>
+/*! forecast/news/skyWire.js: public deterministic daily feed (UMD)
+ * No storage, no reader state. Same scoring as the personal feed minus the
+ * +10 natal-touch bonus. Tier 1 items top out at 93 here (personal: 98)
+ * because no natal points exist on the public surface.
+ *
+ * Public ceiling is 93 (Tier 1: 50+10+8+5+10+10 for exactness/personal/
+ * rare/pattern bonuses), personal is 98 (adds the +5 gap left by the
+ * absent natal-touch bonus); the 5-point gap reflects reader-specific
+ * context public Sky Wire cannot claim.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.SkyWire = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var PUBLIC_CEILING = 93;
+
+  /**
+   * Build a Sky Wire item from a news item. Strips synastry/partner/isNew,
+   * caps importance at the public ceiling, and keeps the source item's own
+   * id so the same input always produces the same item (determinism).
+   */
+  function buildSkyWireItem(newsItem) {
+    var importance = Math.min(newsItem.importance, PUBLIC_CEILING);
+
+    return {
+      id: newsItem.id,
+      headline: newsItem.headline,
+      body: newsItem.body,
+      category: newsItem.category,
+      tier: newsItem.tier,
+      type: newsItem.type,
+      importance: importance,
+      keywords: newsItem.keywords
+      // NOTE: no synastry, partner, or isNew field
+    };
+  }
+
+  function countByCategory(items) {
+    var counts = {};
+    for (var i = 0; i < items.length; i++) counts[items[i].category] = (counts[items[i].category] || 0) + 1;
+    return counts;
+  }
+
+  /**
+   * Build the complete Sky Wire feed from input. Deterministic: same input
+   * produces byte-identical output (aside from the generatedAt stamp).
+   */
+  function buildSkyWireFeed(input) {
+    var allItems = [].concat(input.transits, input.patterns, input.harmonics);
+    var skyWireItems = allItems.map(buildSkyWireItem);
+
+    skyWireItems.sort(function (a, b) {
       if (b.importance !== a.importance) return b.importance - a.importance;
-      return (a.id || '').localeCompare(b.id || '');
+      return a.id.localeCompare(b.id);
     });
 
+    var stats = {
+      totalItems: skyWireItems.length,
+      byCategory: countByCategory(skyWireItems),
+      topImportance: skyWireItems.length > 0 ? skyWireItems[0].importance : 0,
+      avgImportance: skyWireItems.length > 0
+        ? skyWireItems.reduce(function (sum, i) { return sum + i.importance; }, 0) / skyWireItems.length
+        : 0
+    };
+
+    return {
+      version: '1.0.0',
+      date: input.date,
+      generatedAt: new Date().toISOString(),
+      items: skyWireItems,
+      stats: stats
+    };
+  }
+
+  /**
+   * Verify a Sky Wire item has no reader-possessive fields.
+   */
+  function validateSkyWireItem(item) {
+    if (item.synastry !== undefined) return false;
+    if (item.partner !== undefined) return false;
+    if (item.isNew !== undefined) return false;
+    return true;
+  }
+
+  function verifySkyWireCeiling(item) {
+    return item.importance <= PUBLIC_CEILING;
+  }
+
+  /**
+   * Two feeds built from the same input produce identical JSON once the
+   * generatedAt stamp (which varies by wall clock) is normalized out.
+   */
+  function verifyDeterminism(feed1, feed2) {
+    var json1 = JSON.stringify(feed1).replace(/"generatedAt":"[^"]*"/g, '"generatedAt":""');
+    var json2 = JSON.stringify(feed2).replace(/"generatedAt":"[^"]*"/g, '"generatedAt":""');
+    return json1 === json2;
+  }
+
+  var CEILING_EXPLANATION = 'Public ceiling is 93 (50+10+8+5+10+10 for exactness/personal/rare/pattern bonuses), personal is 98 (adds the natal-touch bonus that has no counterpart here); the 5-point gap reflects reader-specific context public Sky Wire cannot claim.';
+
   return {
-    version: '1.0.0',
-    date: new Date().toISOString().split('T')[0],
-    generatedAt: new Date().toISOString(),
-    items: sorted,
-    stats: {
-      count: sorted.length,
-      maxImportance: sorted.length > 0 ? sorted[0].importance : 0
+    PUBLIC_CEILING: PUBLIC_CEILING,
+    CEILING_EXPLANATION: CEILING_EXPLANATION,
+    buildSkyWireItem: buildSkyWireItem,
+    buildSkyWireFeed: buildSkyWireFeed,
+    validateSkyWireItem: validateSkyWireItem,
+    verifySkyWireCeiling: verifySkyWireCeiling,
+    verifyDeterminism: verifyDeterminism
+  };
+}));
+
+</script>
+<script>
+/*! forecast/feedBuilder.js: feed orchestration and filtering (UMD)
+ * Merges base items with synastry items, sorts by importance. Single
+ * source of truth for feed composition.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('./newsEngine'), require('./news/multiChart'));
+  } else {
+    root.FeedBuilder = factory(root.NewsEngine, root.MultiChart);
+  }
+}(typeof self !== 'undefined' ? self : this, function (NE, MC) {
+  'use strict';
+
+  /**
+   * Build the complete feed, merging base items with synastry items.
+   * input: { baseItems, partners?, personalPointIds?, options?: { maxSynastryItems?, minImportance? } }
+   */
+  function buildFeed(input) {
+    var allItems = [].concat(input.baseItems);
+
+    if (input.partners && input.partners.length > 0) {
+      for (var p = 0; p < input.partners.length; p++) {
+        // In a real implementation this would compute synastry contacts;
+        // an empty contact list demonstrates the structure without one.
+        var synastryItems = MC.buildSynastryItems([], input.partners[p], {
+          personalPointIds: input.personalPointIds
+        });
+        allItems = allItems.concat(synastryItems);
+      }
+    }
+
+    var options = input.options || {};
+    var filtered = options.minImportance !== undefined
+      ? allItems.filter(function (i) { return i.importance >= options.minImportance; })
+      : allItems;
+
+    var final = NE.sortByImportance(filtered);
+
+    if (options.maxSynastryItems !== undefined) {
+      var baseNonSynastry = final.filter(function (i) { return !i.synastry; });
+      var synastryLimited = final.filter(function (i) { return i.synastry; }).slice(0, options.maxSynastryItems);
+      final = NE.sortByImportance(baseNonSynastry.concat(synastryLimited));
+    }
+
+    var stats = {
+      baseItems: input.baseItems.length,
+      synastryItems: final.filter(function (i) { return i.synastry; }).length,
+      totalItems: final.length,
+      itemsByCategory: countByCategory(final),
+      itemsByPartner: countByPartner(final)
+    };
+
+    return { items: final, stats: stats };
+  }
+
+  function countByCategory(items) {
+    var counts = {};
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var key = item.synastry ? item.category + ':synastry' : item.category;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    return counts;
+  }
+
+  function countByPartner(items) {
+    var counts = {};
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.synastry && item.partner) counts[item.partner.id] = (counts[item.partner.id] || 0) + 1;
+    }
+    return counts;
+  }
+
+  /**
+   * Filter feed by depth setting (headlines, standard, deep).
+   */
+  function filterByDepth(items, depth) {
+    depth = depth || 'standard';
+
+    if (depth === 'headlines') {
+      return items.filter(function (i) { return !i.synastry && i.tier === 1 && i.category === 'pattern'; });
+    }
+    if (depth === 'standard') {
+      return items.filter(function (i) { return i.category !== 'harmonic' && i.category !== 'degree-lore'; });
+    }
+    return items; // deep: everything
+  }
+
+  /**
+   * Cap the number of items shown, by feed surface.
+   */
+  function capByFeedType(items, feedType) {
+    feedType = feedType || 'today-forecast';
+
+    if (feedType === 'today-forecast') return items.slice(0, 5);
+    if (feedType === 'important-today') return items.slice(0, 10);
+    if (feedType === 'full') return items;
+    return items.slice(0, 5);
+  }
+
+  /**
+   * Load partners from the saved-people store. Respects the 12-person cap
+   * and the consent story; not yet wired to people-library.js.
+   */
+  function loadPartnersFromStore() {
+    return [];
+  }
+
+  function validatePartnerChart(partner) {
+    var errors = [];
+    if (!partner.id) errors.push('Partner missing id');
+    if (!partner.name) errors.push('Partner missing name');
+    if (!partner.birthDate) errors.push('Partner missing birthDate');
+    if (!partner.planets || Object.keys(partner.planets).length === 0) errors.push('Partner missing computed planets');
+    return { valid: errors.length === 0, errors: errors };
+  }
+
+  /**
+   * Display name for a news item. Synastry items carry a partner name chip.
+   */
+  function displayName(item) {
+    if (item.synastry && item.partner) return item.headline + ' (' + item.partner.name + ')';
+    return item.headline;
+  }
+
+  /**
+   * Visual distinction marker for synastry items.
+   */
+  function visualMarker(item) {
+    if (item.synastry && item.partner) {
+      return { marker: item.partner.name.substring(0, 1).toUpperCase(), type: 'chip' };
+    }
+    return { marker: '', type: 'glyph' };
+  }
+
+  /**
+   * Explainer text for synastry context: the third part of the three-part
+   * structure (calculated line, explainer, weather sentence).
+   */
+  function synastryExplainer(item) {
+    if (!item.synastry || !item.partner) return null;
+    return 'A contact between two charts is weather over the pair, never a verdict on it.';
+  }
+
+  return {
+    buildFeed: buildFeed,
+    filterByDepth: filterByDepth,
+    capByFeedType: capByFeedType,
+    loadPartnersFromStore: loadPartnersFromStore,
+    validatePartnerChart: validatePartnerChart,
+    displayName: displayName,
+    visualMarker: visualMarker,
+    synastryExplainer: synastryExplainer
+  };
+}));
+
+</script>
+<script>
+/*! i18n/en.js: English locale catalog (UMD)
+ * DERIVED from the template tables in app/forecast/content/*.ts and
+ * app/forecast/news/synastryTemplates.js; hand-editing this file is an
+ * error, add templates to the source table instead.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.I18nEN = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  return {
+    locale: 'en',
+    strings: {
+      // ---- TRANSIT: Aspects (Headlines) ----
+
+      'transit-conjunction': [
+        '{planet1} and {planet2} meet at {time}. Same frequency. Watch for {theme}.',
+        'Merger alert: {planet1} {planet2} {time}. Two energies speaking the same language today.',
+        '{planet1} conjunct {planet2} {time}. They\'re not arguing. They\'re aligned.'
+      ],
+
+      'transit-sextile': [
+        '{planet1} sextile {planet2}, {time}: diplomacy gets a green light. Use it before your inbox ruins your mood.',
+        'A sextile is luck showing up. {planet1} to {planet2}, {time}. {theme} is easy today if you ask for it.',
+        '{time}: {planet1} and {planet2} are friends. This is the hour to start {theme}.'
+      ],
+
+      'transit-square': [
+        '{planet1} square {planet2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
+        'Two planets at odds: {planet1} {planet2} {time}. Expect the resistance. It\'s trying to teach you something.',
+        'Hard aspect alert, {time}: {planet1} and {planet2} want different things. Channel it into {theme}.'
+      ],
+
+      'transit-trine': [
+        'A gift lands {time}: {planet1} trine {planet2}. {theme} flows. Don\'t waste it on autopilot.',
+        '{time}, {planet1} and {planet2} are in conversation. The air is clear for {theme}.',
+        'Rare ease: {planet1} trine {planet2}, {time}. This is what favor of the planets looks like.'
+      ],
+
+      'transit-opposite': [
+        '{planet1} opposite {planet2}, {time}. Tension, but also clarity. You\'re seeing both sides.',
+        'Two poles {time}: {planet1} {planet2}. One wants to lead, the other to reflect. Balance is today\'s work.',
+        'Mirror time {time}: {planet1} opposite {planet2}. Who else\'s perspective are you avoiding?'
+      ],
+
+      // ---- SYNASTRY: Aspects (Headlines) ----
+
+      'synastry-conjunction': [
+        '{planet1} and their {planet2} meet today. Same frequency between you.',
+        'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
+        'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
+      ],
+
+      'synastry-trine': [
+        'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
+        'Your {planet1} and their {planet2} are in conversation. The air is clear.',
+        'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
+      ],
+
+      'synastry-square': [
+        'Your {planet1} square their {planet2}, {name}. Friction between you. Channel it.',
+        'A hard angle: your {planet1} and their {planet2} want different things today.',
+        'Your {planet1} meets resistance in their {planet2}. That\'s the work of the day.'
+      ],
+
+      // ---- EXPLAINERS: Aspects ----
+
+      'explainer-conjunction': 'A conjunction is when two planets occupy the same degree. They\'re "merged." Whatever energies these planets represent are speaking in unison today, amplified, urgent, singular in focus. Conjunctions are powerful but undifferentiated; context matters enormously.',
+
+      'explainer-sextile': 'A sextile (60°) is one of astrology\'s "easy" aspects. Two planets at this angle support each other. It\'s like a green light: opportunity presenting itself. Sextiles don\'t force action, but they make forward motion possible. Look for doors opening.',
+
+      'explainer-trine': 'A trine (120°) is harmony. Two planets at this angle flow together naturally. Trines don\'t demand effort; they reward what\'s already in motion. The risk: taking them for granted. A trine is a gift, not a free pass. Use it or lose it.',
+
+      'explainer-opposite': 'An opposition (180°) is two planets facing each other across the sky. It\'s not conflict, it\'s awareness of two viewpoints simultaneously. Oppositions demand balance, not victory. You\'re seeing both sides, which is clarifying if uncomfortable. Integration is the goal.',
+
+      // ---- PRACTICAL: Action hooks ----
+
+      'practical-conjunction': [
+        'Journal: These two energies are speaking as one today. Which takes the lead? Which follows? Write the conversation between {planet1} and {planet2}.',
+        'Action: Start a project that combines both {planet1} and {planet2} themes. One meeting, one decision, one commitment that honors both.',
+        'Conversation: Ask someone close: "What do I do when these two parts of me want the same thing?" Listen for clarity.'
+      ],
+
+      'practical-trine': [
+        'Action: Do the thing you\'ve been delaying. {planet1} and {planet2} are holding the door open. Walk through.',
+        'Journal: What does "easy" feel like to you today? Write about it without analyzing.',
+        'Conversation: Tell someone you trust: "I need your help with {theme}." The moment you ask, the door opens wider.'
+      ],
+
+      // ---- SKY WIRE: Strings (public feed) ----
+
+      'skywire-header': 'Sky Wire: What the planets say today',
+      'skywire-footer': 'A view of the planetary movements at a glance. No birth data needed.',
+
+      // ---- UTILITY STRINGS ----
+
+      'locale-name-en': 'English',
+      'locale-name-es': 'Español'
+    },
+    metadata: {
+      allowPartial: false,
+      missingKeys: [],
+      violations: []
     }
   };
-}
-
-function validateSkyWireItem(item) {
-  if (!item) return false;
-  if (item.synastry) return false;
-  if (item.partner) return false;
-  if (item.isNew === true) return false;
-  return item.importance <= PUBLIC_CEILING;
-}
-
-module.exports = {
-  PUBLIC_CEILING,
-  buildSkyWireItem,
-  generateSkyWireId,
-  buildSkyWireFeed,
-  validateSkyWireItem
-};
+}));
 
 </script>
 <script>
-/*! feedBuilder.ts: feed orchestration and filtering
- * Merges base items with synastry items, sorts by importance
+/*! i18n/es.js: Spanish (Español) locale catalog, PARTIAL TRANSLATION (UMD)
+ * allowPartial: true until the violation and missing-key counts reach zero.
+ * Placeholder parity is enforced: a missing {placeholder} fails validation.
  */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.I18nES = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
 
-function buildFeed(baseItems, synastryItems, options) {
-  const allItems = (baseItems || []).concat(synastryItems || []);
+  return {
+    locale: 'es',
+    strings: {
+      // ---- TRANSIT: Aspects (Headlines) ----
 
-  const sorted = allItems.sort((a, b) => {
-    if (b.importance !== a.importance) {
-      return b.importance - a.importance;
+      'transit-conjunction': [
+        '{planet1} y {planet2} se encuentran a las {time}. La misma frecuencia. Observa el cambio hacia {theme}.',
+        'Alerta de fusión: {planet1} {planet2} {time}. Dos energías hablando el mismo idioma hoy.',
+        '{planet1} en conjunción con {planet2} {time}. No están discutiendo. Están alineados.'
+      ],
+
+      'transit-sextile': [
+        '{planet1} sextil a {planet2}, {time}: la diplomacia recibe luz verde. Úsala antes de que tu bandeja arruine tu día.',
+        'Un sextil es la suerte mostrándose. {planet1} hacia {planet2}, {time}. {theme} es fácil hoy si lo pides.',
+        '{time}: {planet1} y {planet2} son amigos. Esta es la hora para comenzar {theme}.'
+      ],
+
+      'transit-trine': [
+        'Un regalo llega {time}: {planet1} trino con {planet2}. {theme} fluye. No lo desperdicies en piloto automático.',
+        '{time}, {planet1} y {planet2} están en conversación. El aire es claro para {theme}.',
+        'Facilidad rara: {planet1} trino con {planet2}, {time}. Esto es lo que se ve cuando los planetas están a tu favor.'
+      ],
+
+      // ---- SYNASTRY: Aspects (Headlines) ----
+
+      'synastry-conjunction': [
+        '{planet1} y su {planet2} se encuentran hoy. La misma frecuencia entre ustedes.',
+        'Una fusión: tu {planet1} en conjunción con su {planet2}, {name}. Dos energías alineadas.',
+        'Tu {planet1} encuentra su {planet2} hoy. Están hablando el mismo idioma.'
+      ],
+
+      'synastry-trine': [
+        'Un regalo entre ustedes: tu {planet1} trino con su {planet2}, {name}. Fluye.',
+        'Tu {planet1} y su {planet2} están en conversación. El aire es claro.',
+        'Facilidad rara entre ustedes hoy: tu {planet1} trino con su {planet2}. Úsalo.'
+      ],
+
+      // ---- EXPLAINERS: Aspects ----
+
+      'explainer-conjunction': 'Una conjunción es cuando dos planetas ocupan el mismo grado. Están "fusionados". Las energías que estos planetas representan hablan al unísono hoy, amplificadas, urgentes, enfocadas. Las conjunciones son poderosas pero indiferenciadas; el contexto importa enormemente.',
+
+      'explainer-trine': 'Un trino (120°) es armonía. Dos planetas en este ángulo fluyen juntos naturalmente. Los trinos no exigen esfuerzo; recompensan lo que ya está en movimiento. El riesgo: darlos por sentado. Un trino es un regalo, no un pase libre. Úsalo o piérdelo.',
+
+      // ---- UTILITY STRINGS ----
+
+      'locale-name-en': 'English',
+      'locale-name-es': 'Español'
+
+      // Missing translations (work queue): transit-square, transit-opposite,
+      // synastry-square, explainer-sextile, explainer-opposite,
+      // practical-conjunction, practical-trine, skywire-header, skywire-footer
+    },
+    metadata: {
+      allowPartial: true, // Flip to false once all violations and missing keys are empty
+      missingKeys: [],
+      violations: [] // Populated by registerLocale
     }
-    return (a.id || '').localeCompare(b.id || '');
-  });
-
-  if (options && options.depth === 'headlines') {
-    return sorted.slice(0, 5);
-  }
-
-  if (options && options.depth === 'deep') {
-    return sorted.slice(0, 15);
-  }
-
-  return sorted.slice(0, 10);
-}
-
-function filterByDepth(items, depth) {
-  if (depth === 'headlines') return items.slice(0, 5);
-  if (depth === 'deep') return items.slice(0, 15);
-  return items.slice(0, 10);
-}
-
-function capByFeedType(items, feedType) {
-  const caps = { 'homepage': 3, 'today': 10, 'spirit': 20 };
-  const cap = caps[feedType] || 10;
-  return items.slice(0, cap);
-}
-
-function displayName(item) {
-  if (item.partner) {
-    return item.partner.name || 'Unknown';
-  }
-  return item.body || 'Unknown';
-}
-
-function visualMarker(item) {
-  if (item.synastry) return '◈';
-  if (item.isNew) return '●';
-  return '○';
-}
-
-function synastryExplainer(item) {
-  if (!item.synastry || !item.partner) return null;
-  return 'with ' + (item.partner.name || 'them');
-}
-
-module.exports = {
-  buildFeed,
-  filterByDepth,
-  capByFeedType,
-  displayName,
-  visualMarker,
-  synastryExplainer
-};
+  };
+}));
 
 </script>
 <script>
-/*! i18n/index.js
- * Localization runtime: locale switching, catalog loading, placeholder replacement
- * Never concatenates fragments; only fills placeholders in complete sentences
+/*! i18n/index.js: localization runtime (UMD)
+ * Locale switching, catalog loading, placeholder replacement. Never
+ * concatenates fragments; only fills placeholders in complete sentences.
  */
-
-let activeLocale = 'en';
-let activeCatalog = null;
-
-const EN = {
-  locale: 'en',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} and {planet2} meet at {time}. Same frequency. Watch for {theme}.',
-      'Merger alert: {planet1} {planet2} {time}. Two energies speaking the same language today.',
-      '{planet1} conjunct {planet2} {time}. They\'re not arguing. They\'re aligned.'
-    ],
-    'transit-trine': [
-      'A gift lands {time}: {planet1} trine {planet2}. {theme} flows. Don\'t waste it on autopilot.',
-      '{time}, {planet1} and {planet2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {planet1} trine {planet2}, {time}. This is what favor looks like.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} and their {planet2} meet today. Same frequency between you.',
-      'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
-      'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
-    ],
-    'synastry-trine': [
-      'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
-      'Your {planet1} and their {planet2} are in conversation. The air is clear.',
-      'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
-    ],
-    'locale-name-en': 'English'
-  },
-  metadata: { allowPartial: false, missingKeys: [], violations: [] }
-};
-
-const ES = {
-  locale: 'es',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} y {planet2} se encuentran a las {time}. La misma frecuencia.',
-      'Alerta de fusión: {planet1} {planet2} {time}. Dos energías hablando el mismo idioma hoy.',
-      '{planet1} en conjunción con {planet2} {time}. No están discutiendo. Están alineados.'
-    ],
-    'transit-trine': [
-      'Un regalo llega {time}: {planet1} trino con {planet2}. {theme} fluye.',
-      '{time}, {planet1} y {planet2} están en conversación. El aire es claro para {theme}.',
-      'Facilidad rara: {planet1} trino con {planet2}, {time}.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} y su {planet2} se encuentran hoy. La misma frecuencia entre ustedes.',
-      'Una fusión: tu {planet1} en conjunción con su {planet2}, {name}.',
-      'Tu {planet1} encuentra su {planet2} hoy. Están hablando el mismo idioma.'
-    ],
-    'synastry-trine': [
-      'Un regalo entre ustedes: tu {planet1} trino con su {planet2}, {name}.',
-      'Tu {planet1} y su {planet2} están en conversación. El aire es claro.',
-      'Facilidad rara entre ustedes hoy: tu {planet1} trino con su {planet2}.'
-    ],
-    'locale-name-es': 'Español'
-  },
-  metadata: { allowPartial: true, missingKeys: [], violations: [] }
-};
-
-function setLocale(locale) {
-  if (locale === 'en') {
-    activeLocale = 'en';
-    activeCatalog = EN;
-  } else if (locale === 'es') {
-    activeLocale = 'es';
-    activeCatalog = ES;
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('./en'), require('./es'));
   } else {
-    throw new Error('Unknown locale: ' + locale);
+    root.I18n = factory(root.I18nEN, root.I18nES);
   }
-}
+}(typeof self !== 'undefined' ? self : this, function (EN, ES) {
+  'use strict';
 
-function getLocale() {
-  return activeLocale;
-}
+  var activeLocale = 'en';
+  var activeCatalog = EN;
 
-function fillPlaceholders(template, placeholders) {
-  if (!placeholders || Object.keys(placeholders).length === 0) {
-    return template;
-  }
-  let result = template;
-  for (const key in placeholders) {
-    const placeholder = '{' + key + '}';
-    result = result.split(placeholder).join(String(placeholders[key]));
-  }
-  return result;
-}
+  // Every real template list in this catalog carries at most three flavor
+  // variants; a key with more is treated as a maintenance runaway.
+  var MAX_VARIANTS = 3;
 
-function t(key, placeholders) {
-  if (!activeCatalog) {
-    setLocale('en');
+  /**
+   * Set the active locale and load its catalog. Throws if the locale isn't
+   * available.
+   */
+  function setLocale(locale) {
+    var catalogs = { en: EN, es: ES };
+    if (!catalogs[locale]) throw new Error('Unknown locale: ' + locale);
+    activeLocale = locale;
+    activeCatalog = catalogs[locale];
   }
-  const entry = activeCatalog.strings[key];
-  if (!entry) {
-    console.warn('Missing translation key: ' + key);
+
+  function getLocale() {
+    return activeLocale;
+  }
+
+  function getCatalog() {
+    return activeCatalog;
+  }
+
+  /**
+   * Fill placeholders in a template string.
+   * Example: fillPlaceholders('Mercury sextile {planet2} at {time}', { planet2: 'Venus', time: '2pm' })
+   */
+  function fillPlaceholders(template, placeholders) {
+    if (!placeholders || Object.keys(placeholders).length === 0) return template;
+    var result = template;
+    Object.keys(placeholders).forEach(function (key) {
+      result = result.replace(new RegExp('\\{' + key + '\\}', 'g'), String(placeholders[key]));
+    });
+    return result;
+  }
+
+  /**
+   * Translate a key with placeholder substitution. Falls back to the key
+   * name when the entry is missing, so a missing translation is visible
+   * rather than blank.
+   */
+  function t(key, placeholders) {
+    var entry = activeCatalog.strings[key];
+
+    if (!entry) {
+      console.warn('Missing translation key: ' + key);
+      return key;
+    }
+
+    if (typeof entry === 'string') return fillPlaceholders(entry, placeholders);
+    if (Array.isArray(entry)) return fillPlaceholders(entry[0], placeholders);
     return key;
   }
-  if (Array.isArray(entry)) {
-    return fillPlaceholders(entry[0], placeholders);
-  }
-  return fillPlaceholders(entry, placeholders);
-}
 
-function pickVariant(key, variantIndex, placeholders) {
-  if (!activeCatalog) {
-    setLocale('en');
-  }
-  const entry = activeCatalog.strings[key];
-  if (!entry) {
-    console.warn('Missing translation key: ' + key);
+  /**
+   * Pick a specific variant and translate it.
+   */
+  function pickVariant(key, variantIndex, placeholders) {
+    var entry = activeCatalog.strings[key];
+
+    if (!entry) {
+      console.warn('Missing translation key: ' + key);
+      return key;
+    }
+
+    if (typeof entry === 'string') return fillPlaceholders(entry, placeholders);
+
+    if (Array.isArray(entry)) {
+      if (variantIndex >= entry.length) {
+        console.warn('Variant index ' + variantIndex + ' out of bounds for ' + key);
+        return fillPlaceholders(entry[0], placeholders);
+      }
+      return fillPlaceholders(entry[variantIndex], placeholders);
+    }
+
     return key;
   }
-  if (Array.isArray(entry)) {
-    const idx = Math.max(0, Math.min(variantIndex, entry.length - 1));
-    return fillPlaceholders(entry[idx], placeholders);
+
+  function setsEqual(a, b) {
+    if (a.size !== b.size) return false;
+    var ok = true;
+    a.forEach(function (item) { if (!b.has(item)) ok = false; });
+    return ok;
   }
-  return fillPlaceholders(entry, placeholders);
-}
 
-function availableLocales() {
-  return ['en', 'es'];
-}
+  /**
+   * Check tone violations in a translated string: dashes (all three
+   * encodings) and, for Spanish, reader-possessive phrases.
+   */
+  function checkTone(text, locale) {
+    var EM_DASH = String.fromCharCode(0x2014);
+    var EN_DASH = String.fromCharCode(0x2013);
 
-// Initialize
-setLocale('en');
+    if (text.indexOf(EM_DASH) !== -1 || text.indexOf(EN_DASH) !== -1) return 'Contains em or en dash';
 
-module.exports = {
-  setLocale,
-  getLocale,
-  t,
-  pickVariant,
-  fillPlaceholders,
-  availableLocales
-};
+    if (text.indexOf('&mdash;') !== -1 || text.indexOf('&ndash;') !== -1 ||
+        text.indexOf('&#8212;') !== -1 || text.indexOf('&#8211;') !== -1 ||
+        text.indexOf('&#x2014;') !== -1 || text.indexOf('&#x2013;') !== -1) {
+      return 'Contains dash entity';
+    }
 
-</script>
-<script>
-/*! i18n/en.js
- * English locale catalog for inCommon forecast system
- */
+    if (locale === 'es') {
+      var forbidden = ['tu gráfico', 'tu cielo', 'en tu ', 'lo que significa para ti', 'tu natal', 'tu lectura'];
+      for (var i = 0; i < forbidden.length; i++) {
+        if (text.toLowerCase().indexOf(forbidden[i]) !== -1) return 'Contains reader-possessive phrase: "' + forbidden[i] + '"';
+      }
+    }
 
-const EN = {
-  locale: 'en',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} and {planet2} meet at {time}. Same frequency. Watch for {theme}.',
-      'Merger alert: {planet1} {planet2} {time}. Two energies speaking the same language today.',
-      '{planet1} conjunct {planet2} {time}. They\'re not arguing. They\'re aligned.'
-    ],
-    'transit-trine': [
-      'A gift lands {time}: {planet1} trine {planet2}. {theme} flows. Don\'t waste it on autopilot.',
-      '{time}, {planet1} and {planet2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {planet1} trine {planet2}, {time}. This is what favor looks like.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} and their {planet2} meet today. Same frequency between you.',
-      'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
-      'Your {planet1} finds their {planet2} today. You\'re speaking the same language.'
-    ],
-    'synastry-trine': [
-      'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
-      'Your {planet1} and their {planet2} are in conversation. The air is clear.',
-      'Rare ease between you today: your {planet1} trine their {planet2}. Use it.'
-    ],
-    'locale-name-en': 'English'
-  },
-  metadata: { allowPartial: false, missingKeys: [], violations: [] }
-};
+    return null;
+  }
 
-module.exports = EN;
+  /**
+   * Validate a locale catalog against expected placeholders.
+   * expectedPlaceholders: key -> [expected placeholder names]
+   * Checks: placeholder parity, variant counts, tone (dashes, forbidden words).
+   */
+  function validateCatalog(catalog, expectedPlaceholders) {
+    var result = {
+      valid: true,
+      placeholderMismatches: [],
+      unknownKeys: [],
+      variantOverflow: [],
+      toneFaults: []
+    };
 
-</script>
-<script>
-/*! i18n/es.js
- * Spanish locale catalog for inCommon forecast system
- */
+    Object.keys(catalog.strings).forEach(function (key) {
+      var entry = catalog.strings[key];
 
-const ES = {
-  locale: 'es',
-  strings: {
-    'transit-conjunction': [
-      '{planet1} y {planet2} se encuentran a las {time}. La misma frecuencia.',
-      'Alerta de fusión: {planet1} {planet2} {time}. Dos energías hablando el mismo idioma hoy.',
-      '{planet1} en conjunción con {planet2} {time}. No están discutiendo. Están alineados.'
-    ],
-    'transit-trine': [
-      'Un regalo llega {time}: {planet1} trino con {planet2}. {theme} fluye.',
-      '{time}, {planet1} y {planet2} están en conversación. El aire es claro para {theme}.',
-      'Facilidad rara: {planet1} trino con {planet2}, {time}.'
-    ],
-    'synastry-conjunction': [
-      '{planet1} y su {planet2} se encuentran hoy. La misma frecuencia entre ustedes.',
-      'Una fusión: tu {planet1} en conjunción con su {planet2}, {name}.',
-      'Tu {planet1} encuentra su {planet2} hoy. Están hablando el mismo idioma.'
-    ],
-    'synastry-trine': [
-      'Un regalo entre ustedes: tu {planet1} trino con su {planet2}, {name}.',
-      'Tu {planet1} y su {planet2} están en conversación. El aire es claro.',
-      'Facilidad rara entre ustedes hoy: tu {planet1} trino con su {planet2}.'
-    ],
-    'locale-name-es': 'Español'
-  },
-  metadata: { allowPartial: true, missingKeys: [], violations: [] }
-};
+      if (!expectedPlaceholders[key]) {
+        result.unknownKeys.push(key);
+        result.valid = false;
+        return;
+      }
 
-module.exports = ES;
+      var expectedPlaceholderSet = new Set(expectedPlaceholders[key]);
+      var variants = Array.isArray(entry) ? entry : [entry];
+
+      variants.forEach(function (variant, i) {
+        var placeholderMatch = variant.match(/\{([^}]+)\}/g) || [];
+        var actualPlaceholders = placeholderMatch.map(function (p) { return p.replace(/[{}]/g, ''); });
+        var actualSet = new Set(actualPlaceholders);
+
+        if (!setsEqual(expectedPlaceholderSet, actualSet)) {
+          result.placeholderMismatches.push({
+            key: key, variant: i,
+            expected: Array.from(expectedPlaceholderSet),
+            actual: actualPlaceholders
+          });
+          result.valid = false;
+        }
+
+        var toneFault = checkTone(variant, catalog.locale);
+        if (toneFault) {
+          result.toneFaults.push(key + '[' + i + ']: ' + toneFault);
+          result.valid = false;
+        }
+      });
+    });
+
+    /* Overflow is capped at a fixed ceiling rather than at
+       expectedPlaceholders[key].length: that array names placeholder
+       VARIABLES ('planet', 'day', ...), a count with no relationship to
+       how many flavor-text variants a key may carry. Tying the two
+       together flagged every real three-variant template (a placeholder
+       list of one name reads as "at most one variant") as overflowing. */
+    Object.keys(catalog.strings).forEach(function (key) {
+      var entry = catalog.strings[key];
+      if (Array.isArray(entry) && entry.length > MAX_VARIANTS) {
+        result.variantOverflow.push(key + ': has ' + entry.length + ', expected <=' + MAX_VARIANTS);
+        result.valid = false;
+      }
+    });
+
+    if (!catalog.metadata.allowPartial) {
+      if (result.placeholderMismatches.length > 0 || result.unknownKeys.length > 0 ||
+          result.variantOverflow.length > 0 || result.toneFaults.length > 0) {
+        result.valid = false;
+      }
+    } else {
+      // Partial locales only fail on critical violations, not missing keys.
+      if (result.placeholderMismatches.length > 0 || result.variantOverflow.length > 0 ||
+          result.toneFaults.length > 0) {
+        result.valid = false;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Register a locale catalog at startup. Validates against expected
+   * placeholders and returns missing keys as a work queue.
+   */
+  function registerLocale(catalog, expectedPlaceholders) {
+    var validation = validateCatalog(catalog, expectedPlaceholders);
+
+    if (!validation.valid && !catalog.metadata.allowPartial) {
+      var errors = [];
+      if (validation.placeholderMismatches.length > 0) errors.push('Placeholder mismatches: ' + validation.placeholderMismatches.length);
+      if (validation.unknownKeys.length > 0) errors.push('Unknown keys: ' + validation.unknownKeys.join(', '));
+      if (validation.variantOverflow.length > 0) errors.push('Variant overflow: ' + validation.variantOverflow.join(', '));
+      if (validation.toneFaults.length > 0) errors.push('Tone violations: ' + validation.toneFaults.join(', '));
+      throw new Error('Locale registration failed: ' + errors.join('; '));
+    }
+
+    catalog.metadata.violations = validation.toneFaults;
+
+    var missingKeys = [];
+    Object.keys(expectedPlaceholders).forEach(function (key) {
+      if (!catalog.strings[key]) missingKeys.push(key);
+    });
+    catalog.metadata.missingKeys = missingKeys;
+
+    return missingKeys;
+  }
+
+  function availableLocales() {
+    return ['en', 'es'];
+  }
+
+  return {
+    setLocale: setLocale,
+    getLocale: getLocale,
+    getCatalog: getCatalog,
+    t: t,
+    pickVariant: pickVariant,
+    fillPlaceholders: fillPlaceholders,
+    validateCatalog: validateCatalog,
+    registerLocale: registerLocale,
+    availableLocales: availableLocales
+  };
+}));
 
 </script>
 <!-- Ephemeris system: dual-backend (Swiss WASM + fallback) with optional memoization.
@@ -17352,7 +18010,7 @@ input[type="date"]{color-scheme:dark}
     <div style="font:400 22px/1.3 var(--fd);color:var(--tx)">Two people, two yeses.</div>
     <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx)">{{ synGateText }}</div>
     <button onClick="{{ synToSettings }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">Open Shared Guidance</button>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">Choose someone else</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">Choose someone else</button>
   </div>
 </sc-if>
 <!-- A card that arrived in a message. Never added on the reader's behalf: a
@@ -17467,7 +18125,7 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ synShareCardGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ac2-hi);border-radius:999px;font:700 12px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ synShareCardLabel }}</button>
     </sc-if>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -17523,7 +18181,12 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;gap:3px">
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
-                <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                </sc-if>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
+                  <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -17535,6 +18198,36 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
     </div>
+    <sc-if value="{{ synCellOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:flex;align-items:flex-end">
+        <div style="width:100%;background:var(--sf);border-top:1px solid var(--bd);border-radius:18px 18px 0 0;padding:20px 16px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font:600 14px var(--fu);color:var(--tx)">Contact details</div>
+              <div style="font:400 13px/1.5 var(--fb);color:var(--dim)">{{ synCellDetail.head }}</div>
+            </div>
+            <button onClick="{{ synCellClose }}" style="all:unset;cursor:pointer;flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:600 16px var(--fu);color:var(--dim);margin:-4px -4px 0 0">×</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;font:400 13px/1.6 var(--fb);color:var(--tx)">
+            <div><strong>Aspect:</strong> {{ synCellDetail.asp }}</div>
+            <div><strong>Orb:</strong> {{ synCellDetail.orb.toFixed(1) }}°</div>
+            <sc-if value="{{ synCellDetail.hasCta }}" hint-placeholder-val="{{ false }}">
+              <div style="color:var(--ac2-hi);font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase">{{ synCellDetail.cta }}</div>
+            </sc-if>
+            <div style="border-top:1px solid var(--bd);padding-top:8px;display:flex;flex-direction:column;gap:6px">
+              <sc-for list="{{ synCellDetail.lines }}" as="l" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                  </sc-if>
+                  <div>{{ l.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
       <sc-for list="{{ synElRows }}" as="e" hint-placeholder-count="4">
@@ -21295,7 +21988,7 @@ input[type="date"]{color-scheme:dark}
     <div style="font:400 22px/1.3 var(--fd);color:var(--tx)">Two people, two yeses.</div>
     <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx)">{{ synGateText }}</div>
     <button onClick="{{ synToSettings }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">Open Shared Guidance</button>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">Choose someone else</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">Choose someone else</button>
   </div>
 </sc-if>
 <!-- A card that arrived in a message. Never added on the reader's behalf: a
@@ -21410,7 +22103,7 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ synShareCardGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ac2-hi);border-radius:999px;font:700 12px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ synShareCardLabel }}</button>
     </sc-if>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start">
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
@@ -21466,7 +22159,12 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;gap:3px">
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
-                <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                </sc-if>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
+                  <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -21478,6 +22176,36 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
     </div>
+    <sc-if value="{{ synCellOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center">
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:28px 24px;max-width:480px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+              <div style="font:600 16px var(--fu);color:var(--tx)">Contact details</div>
+              <div style="font:400 14px/1.5 var(--fb);color:var(--tx)">{{ synCellDetail.head }}</div>
+            </div>
+            <button onClick="{{ synCellClose }}" style="all:unset;cursor:pointer;flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:600 18px var(--fu);color:var(--dim);margin:-8px -8px 0 0">×</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font:400 14px/1.6 var(--fb);color:var(--tx)">
+            <div><strong>Aspect:</strong> {{ synCellDetail.asp }}</div>
+            <div><strong>Orb:</strong> {{ synCellDetail.orb.toFixed(1) }}°</div>
+            <sc-if value="{{ synCellDetail.hasCta }}" hint-placeholder-val="{{ false }}">
+              <div style="color:var(--ac2-hi);font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;margin-top:4px">{{ synCellDetail.cta }}</div>
+            </sc-if>
+            <div style="border-top:1px solid var(--bd);padding-top:10px;display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ synCellDetail.lines }}" as="l" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                  </sc-if>
+                  <div>{{ l.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
       <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
       <sc-for list="{{ synElRows }}" as="e" hint-placeholder-count="4">
@@ -30796,7 +31524,8 @@ class Component extends DCLogic {
       /* The composite is absent rather than empty in every closed state. */
       cxShow: false, cxGroups: [], cxPrecision: '', cxPrecC: 'var(--dim)', cxAbsent: '',
       synCanShareCard: false, synShareCardLabel: '', synShareCardGo: () => {},
-      synClear: () => this.setState({ synWith: null }) };
+      synCellOpen: null, synCellClose: () => this.setState({ synCellOpen: null }),
+      synSwitchGo: () => this.setState({ synPick: true, synWith: null }) };
     if (!PM || !me || !st.ready) return { ...off, synSolo: true };
     const manual = this.synManualPartner();
     const friends = this.friends();
@@ -30894,18 +31623,35 @@ class Component extends DCLogic {
            whichever layer the reader is standing in. */
         H('What it comes down to', this.synCloseLine(pr, A.first, B.first))
       ];
+      const planetMeaning = (pn) => {
+        const pm = this.PL_MEAN[pn] || 'its own business';
+        return pn + ' (' + pm + ')';
+      };
+      const aspectMeaning = D.note || 'the angle between them';
       const soco = this.dpSocoBlocks({
-        strengths: [easy
-          ? 'This one arrives without effort, which also makes it the part of you two most likely to go unnoticed and unthanked.'
-          : 'Friction between two charts is what keeps a pair interested past the first year. Said out loud it reads as range. Left silent it reads as incompatibility.'],
-        opportunities: ['One concrete move: name this out loud the next time it is actually happening. A shared word for a pattern is most of what makes the pattern workable.'],
-        challenges: [easy
-          ? 'Easy contacts get spent rather than used. The risk is coasting on this instead of pointing it at something you both want.'
-          : 'The difficulty is that ' + D.note + '. It will not resolve on its own, and it does not have to.'],
+        strengths: [
+          easy
+            ? 'This one arrives without effort, which also makes it the part of you two most likely to go unnoticed and unthanked.'
+            : 'Friction between two charts is what keeps a pair interested past the first year. Said out loud it reads as range. Left silent it reads as incompatibility.',
+          'The contact: ' + planetMeaning(pr.a.name) + ' in a ' + a + ' to ' + planetMeaning(pr.b.name) + ' means ' + aspectMeaning + '.'
+        ],
+        opportunities: [
+          'One concrete move: name this out loud the next time it is actually happening. A shared word for a pattern is most of what makes the pattern workable.',
+          'How ' + pr.a.name + ' and ' + pr.b.name + ' can work together: ' + (easy ? 'Let this contact do its own work without forcing it toward a purpose. Its gift is in the ease itself.' : 'The tension here is productive. It builds skill and depth when you both work with it rather than against it.')
+        ],
+        challenges: [
+          easy
+            ? 'Easy contacts get spent rather than used. The risk is coasting on this instead of pointing it at something you both want.'
+            : 'The difficulty is that ' + aspectMeaning + '. It will not resolve on its own, and it does not have to.',
+          'Where the friction lives: ' + (easy ? 'In the tendency to assume this part of you two needs no work.' : 'In the resistance when ' + pr.a.name + ' (in ' + A.first + ') meets ' + pr.b.name + ' (in ' + B.first + '). Neither will give naturally.')
+        ],
         /* The single remaining nod in the whole synastry surface. It is an
            observation about how charts get misused between two people, not an
            instruction to the reader about their own authority. */
-        obstacles: ['A contact explains a tendency. It has never settled which of you was right about Tuesday.']
+        obstacles: [
+          'A contact explains a tendency. It has never settled which of you was right about Tuesday.',
+          'What this contact is not: A predictor of whether you should be together, a measure of compatibility, or a ceiling on what you can build.'
+        ]
       });
       return { head: A.first + '\u2019s ' + pr.a.name + ' ' + D.v + ' ' + B.first + '\u2019s ' + pr.b.name,
         cta: sweet ? 'the tender one' : '', hasCta: sweet,
@@ -30915,12 +31661,19 @@ class Component extends DCLogic {
     });
     const cell = (rn, cn) => {
       const hit = pairs.filter(pr => pr.a.name === rn && pr.b.name === cn).sort((x, y) => x.orb - y.orb)[0];
-      if (!hit) return { g: '\u00b7', c: 'rgba(238,240,248,.26)', bg: 'transparent', lab: 'no contact within orb' };
+      if (!hit) return { g: '\u00b7', c: 'rgba(238,240,248,.26)', bg: 'transparent', lab: 'no contact within orb', clickable: false };
       const D = this.SYN_ASP[hit.asp];
       const c = D.k === 'f' ? 'var(--warn)' : hit.asp === 'conjunct' ? 'var(--ac2-hi)' : 'var(--ac)';
       const bg = D.k === 'f' ? 'rgba(224,141,125,.12)' : hit.asp === 'conjunct' ? 'rgba(139,92,246,.16)' : 'rgba(47,255,143,.1)';
+      const cellKey = rn + '|' + hit.asp + '|' + cn;
       return { g: D.g, c: c, bg: bg,
-        lab: A.first + ' ' + rn + ' ' + this.aspName(hit.asp) + ' ' + B.first + ' ' + cn + ', orb ' + hit.orb.toFixed(1) + '\u00b0' };
+        lab: A.first + ' ' + rn + ' ' + this.aspName(hit.asp) + ' ' + B.first + ' ' + cn + ', orb ' + hit.orb.toFixed(1) + '\u00b0',
+        clickable: true,
+        go: () => {
+          const relevantContact = ranked.find(r => r.a.name === rn && r.asp === hit.asp && r.b.name === cn);
+          this.setState({ synCellOpen: { rn: rn, cn: cn, asp: hit.asp, orb: hit.orb, contact: relevantContact || hit } });
+        }
+      };
     };
     const glyphOf = (chart, n) => { const r = chart.find(x => x.name === n); return r ? r.glyph : n.slice(0, 2); };
     const cols = this.SYN_GRID.map(n => ({ name: B.first + '\u2019s ' + n, glyph: glyphOf(cB, n) }));
@@ -31062,11 +31815,11 @@ class Component extends DCLogic {
          loudest contacts, and stops there. Everything it names is already on
          this screen; nothing that made it is. */
       synCanShareCard: true,
-      synShareCardLabel: 'Share this reading as a card',
+      synShareCardLabel: 'Share this reading',
       synShareCardGo: () => this.synCardShare({
         a: A.first, b: B.first,
         pairs: pairs.length, warm: warm, edge: edge, oneSided: oneSided,
-        top: ranked.slice(0, 3).map(pr => A.first + '’s ' + pr.a.name + ' ' + this.aspName(pr.asp) + ' ' + B.first + '’s ' + pr.b.name)
+        top: ranked.slice(0, 3).map(pr => A.first + ' ' + pr.a.name + ' ' + this.aspName(pr.asp) + ' ' + B.first + ' ' + pr.b.name)
       }),
       synCountLine: pairs.length
         ? pairs.length + ' contacts sit within orb: ' + warm + ' of the easy kind, ' + edge + ' that ask something.'
@@ -31088,7 +31841,14 @@ class Component extends DCLogic {
           ' channels, together or apart. Those are counted rather than listed: thirty rows saying nothing happened is not a reading, and the count is here so the lists above are read against the whole board.'
         : '',
       synSwitchLabel: 'Read with someone else',
-      synFooter: 'Drawn on your device from two birth dates. Nothing about ' + B.first + ' is stored in ' + A.first + '\u2019s profile, and either of you can switch Shared Guidance off in Settings, which removes this page again.' };
+      synFooter: 'Drawn on your device from two birth dates. Nothing about ' + B.first + ' is stored in ' + A.first + '\u2019s profile, and either of you can switch Shared Guidance off in Settings, which removes this page again.',
+      synCellOpen: st.synCellOpen || null,
+      synCellClose: () => this.setState({ synCellOpen: null }),
+      synCellDetail: st.synCellOpen ? (() => {
+        const cell = st.synCellOpen;
+        const matchingContact = ranked.find(r => r.a.name === cell.rn && r.asp === cell.asp && r.b.name === cell.cn);
+        return matchingContact || cell.contact;
+      })() : null };
   }
 
   /* ---- Circle ---------------------------------------------------------------

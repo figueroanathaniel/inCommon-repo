@@ -1254,14 +1254,17 @@ t('X18', 'the module names no storage API and never asks the clock for now',
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
-  const mcResult = MC.runTests();
-  mcResult.errors.forEach(msg => rows.push({ id: 'M?', desc: msg, pass: false, actual: '', expected: '' }));
-
-  const swResult = SW.runTests();
-  swResult.errors.forEach(msg => rows.push({ id: 'S?', desc: msg, pass: false, actual: '', expected: '' }));
-
-  const i18nResult = I18N.runTests();
-  i18nResult.errors.forEach(msg => rows.push({ id: 'L?', desc: msg, pass: false, actual: '', expected: '' }));
+  /* Each suite's runTests() returns one result per assertion (pass or
+     fail), not just failures, so every M/S/L row below is counted toward
+     the total the same way every B/C/... row above is. A version that
+     pushed rows only for failures under counted its own total: a fully
+     passing suite would contribute zero rows and vanish from the report. */
+  const pushSuite = (result, label) => {
+    result.results.forEach(r => t(r.id, label + ': ' + r.name + (r.pass ? '' : ' (' + r.error + ')'), r.pass, true));
+  };
+  pushSuite(MC.runTests(), 'multiChart');
+  pushSuite(SW.runTests(), 'skyWire');
+  pushSuite(I18N.runTests(), 'i18n');
 })();
 
 /* ------------------------------------------------------------------ report */
