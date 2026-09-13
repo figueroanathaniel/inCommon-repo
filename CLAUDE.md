@@ -2184,19 +2184,38 @@ of the three could actually be `require()`d until that was corrected too,
 so these four gates are also what makes the underlying modules loadable at
 all, not only what tests them.
 
-Two real defects came out of writing tests the old ones never actually ran:
-`detectBoomerang()` in `patterns.ts` requires one point sextile (60°) to
+Two real defects came out of writing tests the old ones never actually ran,
+and both are now fixed rather than left flagged.
+
+`detectBoomerang()` in `patterns.ts` required one point sextile (60°) to
 BOTH ends of an opposition; that is geometrically impossible (confirmed by
-exhaustive search), so it can never match any chart, ever, despite being
-surfaced in forecast copy (`app/forecast/content/{headlines,explainer,practical}.ts`)
-as a pattern the app claims to detect. And `isGoldenYodIn5thHarmonic()` in
-`harmonicPatterns.ts` can never return true for any Yod `detectYod()`
-actually finds: a Yod's 150° legs become 30°, not 120°, under a ×5 harmonic
-recast, for any rotation of the shape. Both are documented at the point
-they were found (`patterns.test.ts`'s Boomerang tests,
-`harmonicPatterns.test.ts`'s file header) rather than silently patched,
-since fixing either is a design decision about what the pattern should
-actually require, not a test-data correction.
+exhaustive search), so it could never match any chart, ever, despite being
+surfaced in forecast copy as a pattern the app claims to detect. Checked
+against a published definition (Astrology Weekly's "Yods and Boomerangs": a
+Boomerang is a Yod plus a fourth planet opposing the apex, nothing more),
+`detectBoomerang()` was rewritten to that actual shape, which is always
+achievable. `apex` on the returned pattern now names the release planet
+(opposite the Yod's own apex), since that is the notable addition a
+Boomerang has over a plain Yod, and `app/forecast/content/{headlines,explainer}.ts`
+were corrected from "T-Square with an escape route" to "Yod with an escape
+route" to match.
+
+`isGoldenYodIn5thHarmonic()` in `harmonicPatterns.ts` filtered radix
+patterns by name containing "Yod", which only ever matched the classical
+(quincunx/sextile) Yod from `detectYod()` - never an actual Golden Yod,
+because no detector for one existed anywhere in this codebase.
+`patterns.ts`'s `ASPECT_ORBS` already carried `'quintile'` and `'biquintile'`
+entries with nothing using either: `detectGoldenYod()` (a quintile [72°]
+between two planets, both biquintile [144°] from a third - checked against
+fifth-harmonic literature, and a genuinely different pattern from the
+classical Yod, not a variant of it) is the missing detector, added to
+Tier 1. And "becomes a Grand Trine at H5" was never the real fifth-harmonic
+signature: a quintile times 5 is exactly 360° and a biquintile times 5 is
+720° (also 0° mod 360°), so a real Golden Yod's three points land on the
+SAME longitude at H5 - a conjunction, not 120° apart.
+`isGoldenYodIn5thHarmonic()` now takes the radix points directly and checks
+for that conjunction itself, rather than asking `detectPatterns()` to name
+a pattern three exactly-conjunct points can never produce.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.

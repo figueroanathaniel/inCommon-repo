@@ -140,9 +140,9 @@ export function groupHarmonicPatternsByN(
 // ============================================================================
 
 /**
- * Verify a radix pattern appears in expected harmonics
- * For example, a radix golden yod (planets at 0°, 144°, 288°) should appear
- * as a 5H: Grand Trine (quintile family).
+ * Verify a radix pattern appears in expected harmonics. Generic lookup:
+ * finds a harmonic-N pattern claiming the exact same planet set as a given
+ * radix pattern.
  */
 export function patternAppearanceInHarmonic(
   radixPattern: ChartPattern,
@@ -156,27 +156,65 @@ export function patternAppearanceInHarmonic(
 }
 
 /**
- * Test case helper: verify that a radix golden yod (quintile pattern)
- * appears as a grand trine in the 5th harmonic
+ * Test case helper: verify that a radix Golden Yod (patterns.ts's
+ * detectGoldenYod: a quintile [72°] between two planets, both biquintile
+ * [144°] from a third) collapses to a genuine conjunction at the 5th
+ * harmonic.
+ *
+ * PREVIOUSLY checked for a "5H: Grand Trine" instead, and filtered radix
+ * patterns by name containing "Yod" - which only ever matched the
+ * classical (quincunx/sextile) Yod from detectYod(), never an actual
+ * Golden Yod, because no detector for one existed anywhere in this
+ * codebase (detectGoldenYod() above is the missing piece). Even with a
+ * real Golden Yod, "becomes a Grand Trine at H5" was never achievable: a
+ * quintile (72°) times 5 is exactly 360° (0°) and a biquintile (144°)
+ * times 5 is 720° (also 0° mod 360°), so a genuine Golden Yod's three
+ * points land on the SAME longitude at H5, not 120° apart. That is the
+ * real fifth-harmonic signature this fifth-harmonic-family pattern leaves
+ * (confirmed against fifth-harmonic literature and against this file's own
+ * recast arithmetic), so this checks for the conjunction directly rather
+ * than asking detectPatterns() to name a pattern that three exactly
+ * conjunct points can never produce (Grand Trine needs 120° separation;
+ * Stellium needs 4+ points).
  */
-export function isGoldenYodIn5thHarmonic(
-  radixPatterns: ChartPattern[],
-  allHarmonicPatterns: HarmonicPattern[]
-): boolean {
-  const goldenYods = radixPatterns.filter(p => p.name.includes('Yod'));
+export function isGoldenYodIn5thHarmonic(radixPoints: PointData[]): boolean {
+  const radixPatterns = detectPatterns(radixPoints);
+  const goldenYods = radixPatterns.filter(p => p.name === 'Golden Yod');
 
   if (goldenYods.length === 0) return false;
 
   return goldenYods.some(yod => {
-    const in5H = patternAppearanceInHarmonic(yod, 5, allHarmonicPatterns);
-    return in5H && in5H.name.includes('Grand Trine');
+    const members = radixPoints.filter(p => yod.planets.includes(p.id) && p.status === 'ok');
+    if (members.length < 2) return false;
+
+    const h5 = recastHarmonicMemoized(members, 5);
+    for (let i = 0; i < h5.length; i++) {
+      for (let j = i + 1; j < h5.length; j++) {
+        let d = Math.abs(h5[i].lon - h5[j].lon);
+        if (d > 180) d = 360 - d;
+        if (d > 6) return false; // not conjunct: not the fifth-harmonic collapse
+      }
+    }
+    return true;
   });
 }
 
 /**
- * Test case helper: verify that a radix grand trine does NOT appear as
- * a 5H: Grand Trine (because it's already a trine pattern in the radix,
- * not a quintile family pattern).
+ * Test case helper: verify whether a radix grand trine ALSO registers as a
+ * 5H Grand Trine.
+ *
+ * NAME KEPT for API stability, but the premise in its old doc comment
+ * ("should NOT appear... because it's already a trine pattern in the
+ * radix, not a quintile family pattern") is backwards. An exact Grand
+ * Trine's three points are 120° apart; multiplying by any harmonic n makes
+ * the spacing (120*n) mod 360, which is 120 or 240 (whose short arc is
+ * also 120) for every n NOT divisible by 3, and only collapses to 0
+ * (conjunction) when 3 | n. 5 is not divisible by 3, so an exact radix
+ * Grand Trine DOES reappear as "5H: Grand Trine" - confirmed empirically,
+ * not assumed. This function's own logic was already correct (it asks
+ * detectPatterns() and reports what it finds); only the comment describing
+ * what "should" happen was wrong, and callers should not expect `true`
+ * here for an exact Grand Trine tested against harmonic 5.
  */
 export function radixGrandTrineNotIn5th(
   radixPatterns: ChartPattern[],

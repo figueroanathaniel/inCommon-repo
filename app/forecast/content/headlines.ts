@@ -172,7 +172,7 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     type: 'Boomerang',
     templates: [
       'A Boomerang pattern: {planets}. Tension wants out. A resolution planet says "throw me". Do it.',
-      'Boomerang {planets}: T-Square with an escape route. The escape route is {apex}.',
+      'Boomerang {planets}: a Yod with an escape route. The escape route is {apex}.',
       '{planets} form a Boomerang. The tension reflects back to its solution. Pay attention.',
     ]
   },

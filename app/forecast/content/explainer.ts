@@ -118,7 +118,7 @@ export const EXPLAINERS: Explainer[] = [
     id: 'explainer-boomerang',
     category: 'pattern',
     type: 'Boomerang',
-    text: 'A T-Square with a fourth planet offering resolution. The tension looks for an outlet and finds one—the "handle" of the boomerang. It\'s pressure with a release valve. Today that valve is active. Finding and using it transforms tension into action.'
+    text: 'A Yod with a fourth planet offering resolution. The tension looks for an outlet and finds one—the "handle" of the boomerang. It\'s pressure with a release valve. Today that valve is active. Finding and using it transforms tension into action.'
   },
 
   {

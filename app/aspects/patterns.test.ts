@@ -28,16 +28,29 @@
  *     "positive" case actually returned zero patterns. Fixed with Sun=0,
  *     Moon=60, Venus=120, Mars=180, verified against the live detector.
  *
- *  4. Boomerang "true positive" and "true negative" are BOTH fixed at zero
- *     results, and cannot be otherwise: see the note above the Boomerang
- *     tests below. That is a production defect in patterns.ts, not a
- *     test-authoring mistake, and is flagged separately rather than
- *     silently "fixed" by inventing astrology that does not match the code.
+ *  4. Boomerang "true positive" and "true negative" were BOTH fixed at zero
+ *     results under the ORIGINAL detectBoomerang(), and could never be
+ *     otherwise: it required a T-Square's fourth point to be sextile (60°)
+ *     to BOTH members of an exact opposition, which is geometrically
+ *     impossible (confirmed by exhaustive search) - the positions sextile
+ *     to one end of an opposition and the positions sextile to the other
+ *     end never coincide. Checked against published definitions (Astrology
+ *     Weekly's "Yods and Boomerangs": a Boomerang is a Yod plus a fourth
+ *     planet opposite the apex, nothing more), detectBoomerang() was
+ *     rewritten in patterns.ts to that actual shape, which is always
+ *     achievable. The tests below exercise the fixed detector.
  *
  *  5. Grand Cross's "true positive" asserted the description contains
  *     "tension"; the live text is "intense challenge with no easy escape,
  *     demanding mastery" - no such substring. Fixed to check "challenge",
  *     which is actually there.
+ *
+ *  6. detectGoldenYod() is new: ASPECT_ORBS already carried 'quintile' and
+ *     'biquintile' entries with no detector using either. A Golden Yod
+ *     (checked against fifth-harmonic literature) is a quintile [72°]
+ *     between two planets, both biquintile [144°] from a third - a
+ *     distinct pattern from the classical (quincunx/sextile) Yod above,
+ *     not a variant of it.
  *
  * Every other mock chart in this file was independently run against
  * patterns.ts and produced the result asserted here before it was ported.
@@ -50,6 +63,7 @@ import {
   detectGrandCross,
   detectKite,
   detectYod,
+  detectGoldenYod,
   detectMysticRectangle,
   detectBoomerang,
   detectCradle,
@@ -218,6 +232,31 @@ test('Yod: true negative, no quincunx pair', () => {
 });
 
 // ============================================================================
+// GOLDEN YOD
+//
+// A distinct pattern from the classical Yod above, not a variant of it: a
+// quintile (72°) between two planets, both biquintile (144°) from a third.
+// No detector for this existed before this pass (ASPECT_ORBS already had
+// 'quintile'/'biquintile' entries with nothing using them).
+// ============================================================================
+
+test('Golden Yod: true positive, quintile + 2 biquintile', () => {
+  // Sun-Venus: |288-0| folds to 72 (quintile). Sun-Moon: |144-0|=144
+  // (biquintile). Venus-Moon: |288-144|=144 (biquintile). Moon is the apex.
+  const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 144), mockPoint('Venus', 'Venus', 288)];
+  const patterns = detectGoldenYod(points);
+  if (patterns.length !== 1) throw new Error('expected 1, got ' + patterns.length);
+  if (patterns[0].name !== 'Golden Yod') throw new Error('name = ' + patterns[0].name);
+  if (patterns[0].apex !== 'Moon') throw new Error('apex = ' + patterns[0].apex);
+  if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
+});
+
+test('Golden Yod: true negative, no quintile/biquintile relationship', () => {
+  const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 90), mockPoint('Venus', 'Venus', 180)];
+  if (detectGoldenYod(points).length !== 0) throw new Error('expected 0 patterns');
+});
+
+// ============================================================================
 // MYSTIC RECTANGLE
 // ============================================================================
 
@@ -242,37 +281,43 @@ test('Mystic Rectangle: true negative, wrong aspect configuration', () => {
 // ============================================================================
 // BOOMERANG
 //
-// detectBoomerang() requires ONE point sextile (60 +/- 4 deg) to BOTH
-// members of a T-square's opposition pair. That is geometrically
-// impossible: if p1 and p2 are ~180 apart, the candidate positions
-// sextile to p1 are p1+60/p1-60, and the candidates sextile to p2 are
-// (p1+180)+60/(p1+180)-60 = p1-120/p1+120 - two pairs of positions that
-// never overlap, orb or no orb. Confirmed by exhaustive search (every 3
-// degree step of p1 and every 1 degree opposition offset within orb,
-// every 3 degree apex and every 1 degree tail position: zero matches out
-// of the full search space) before writing this file. That makes
-// detectBoomerang() dead code: it can never return a result for ANY
-// input, which the original Jest "true positive" test never caught
-// because it could never run. This is a production defect (patterns.ts),
-// not a mock-data mistake, and is out of scope for a test port; flagged
-// separately. The tests below assert its actual, current behaviour
-// honestly rather than a "positive" case that cannot exist.
+// Rebuilt to the actual astrological shape (see the file header and
+// detectBoomerang()'s own comment in patterns.ts): a Yod plus a fourth
+// planet in exact opposition to the Yod's apex. The old T-Square-based
+// version required a fourth point sextile to BOTH ends of an opposition,
+// which is geometrically impossible and could never match any input.
 // ============================================================================
 
-test('Boomerang: current implementation cannot match any input (flagged defect, see file header)', () => {
+test('Boomerang: true positive, Yod + 4th planet opposite the apex', () => {
+  // Sun=0, Moon=60 (sextile), Mars=210 (apex: quincunx to both - |210-0|
+  // folds to 150, |210-60|=150). Venus=30 is exactly opposite Mars (210).
+  const points = [
+    mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60),
+    mockPoint('Mars', 'Mars', 210), mockPoint('Venus', 'Venus', 30)
+  ];
+  const patterns = detectBoomerang(points);
+  if (patterns.length !== 1) throw new Error('expected 1, got ' + patterns.length);
+  if (patterns[0].name !== 'Boomerang') throw new Error('name = ' + patterns[0].name);
+  // apex names the release planet (Venus, opposite the Yod's apex Mars),
+  // not the Yod's own tension point - see detectBoomerang()'s own comment.
+  if (patterns[0].apex !== 'Venus') throw new Error('apex = ' + patterns[0].apex);
+  if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
+});
+
+test('Boomerang: true negative, real Yod but no planet opposite the apex', () => {
+  const points = [
+    mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60),
+    mockPoint('Mars', 'Mars', 210), mockPoint('Venus', 'Venus', 100)
+  ];
+  if (detectBoomerang(points).some(p => p.name === 'Boomerang')) throw new Error('expected no Boomerang');
+});
+
+test('Boomerang: true negative, no Yod at all', () => {
   const points = [
     mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 180),
     mockPoint('Mars', 'Mars', 90), mockPoint('Venus', 'Venus', 60)
   ];
-  if (detectBoomerang(points).length !== 0) throw new Error('expected 0 (see detectBoomerang geometry note above)');
-});
-
-test('Boomerang: true negative, T-Square without resolution sextiles', () => {
-  const points = [
-    mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 180),
-    mockPoint('Mars', 'Mars', 90), mockPoint('Venus', 'Venus', 30)
-  ];
-  if (detectBoomerang(points).some(p => p.name === 'Boomerang')) throw new Error('expected no Boomerang');
+  if (detectBoomerang(points).length !== 0) throw new Error('expected 0 (no Yod here: see detectYod tests)');
 });
 
 // ============================================================================

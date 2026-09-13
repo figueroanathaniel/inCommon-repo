@@ -4,52 +4,51 @@
  * never run, to the tests-array/runTests() shape every other test file
  * here already uses. See engine.test.ts for the reference shape.
  *
- * FOUR THINGS WERE WRONG IN THE ORIGINAL, none of them ever caught
- * because the file could not run - all four centre on the same confused
- * premise, that a "Golden Yod" (0deg, 144deg, 288deg) turns into a Grand
- * Trine at the 5th harmonic:
+ * WHAT WAS WRONG IN THE ORIGINAL, none of it ever caught because the file
+ * could not run - and what was actually fixed rather than just documented:
  *
- *  1. (0, 144, 288) is not a Yod at all by this codebase's own detectYod()
- *     (which requires two quincunxes at 150deg and a sextile at 60deg,
- *     orbs 3deg/4deg): |144-0|=144, |288-144|=144, |288-0| folds to 72.
- *     None of those are quincunx or sextile. Confirmed: detectYod() and
- *     detectPatterns() both return zero patterns for these three points in
- *     the radix. They are a QUINTILE-family configuration (72 and 144 are
- *     both multiples of 72), which is exactly why multiplying by 5 folds
- *     all three to 0 - a CONJUNCTION, not a trine (harmonic.test.ts's own
- *     "Golden yod ... conjunct in 5th harmonic" test already gets this
- *     right). Three points sitting on top of each other cannot register
- *     as a Grand Trine (which needs 120deg separation) or a Stellium
- *     (which needs 4+ points), so detectPatterns() correctly finds NOTHING
- *     for this recast, confirmed empirically before writing this file.
+ *  1. (0, 144, 288) is a genuine GOLDEN YOD, not "not a Yod at all" as an
+ *     earlier pass of this file claimed. Checked against fifth-harmonic
+ *     literature: a Golden Yod is a quintile (72deg) between two planets
+ *     with a third biquintile (144deg) from each - Sun-Venus is |288-0|
+ *     folding to 72, and Moon is 144 from both. It is a DIFFERENT pattern
+ *     from the classical (quincunx/sextile) Yod, not a variant of it, and
+ *     no detector for it existed anywhere in this codebase: ASPECT_ORBS in
+ *     patterns.ts already carried 'quintile'/'biquintile' entries with
+ *     nothing using either. detectGoldenYod() is the fix, added to
+ *     patterns.ts's Tier 1 set.
  *
- *  2. A REAL classical Yod (verified against detectYod(): Sun=0, Moon=60,
- *     Mars=210 as apex) does not fare any better at the 5th harmonic, and
- *     provably never can: a Yod's two 150deg legs become (150*5) mod 360 =
- *     30deg at H5, not 120deg, for any rotation of the same shape - this
- *     is arithmetic, not a search failure (confirmed empirically with a
- *     real detected Yod, and confirmed by exhaustive search over the
- *     mock-longitude space finding zero counter-examples). isGoldenYodIn5thHarmonic()
- *     can therefore never return true for any Yod this codebase's
- *     detectYod() actually finds. That is a defect in the function's
- *     premise (it tests for a correspondence that cannot occur under
- *     "multiply by 5"), not something a different mock chart can fix, so
- *     it is documented rather than silently made to pass.
+ *  2. Even with a real Golden Yod, "becomes a Grand Trine at H5" was never
+ *     achievable and still is not: a quintile (72deg) times 5 is exactly
+ *     360deg (0deg), and a biquintile (144deg) times 5 is 720deg (also
+ *     0deg mod 360deg), so a genuine Golden Yod's three points land on the
+ *     SAME longitude at H5 - a conjunction, not 120deg apart. That is the
+ *     real fifth-harmonic signature (confirmed against fifth-harmonic
+ *     literature and this file's own recast arithmetic), so
+ *     isGoldenYodIn5thHarmonic() was rewritten to check for that
+ *     conjunction directly (it now takes the radix points and recasts the
+ *     Golden Yod's own three members to H5 itself) rather than ask
+ *     detectPatterns() to name a pattern three exactly-conjunct points can
+ *     never produce (Grand Trine needs 120deg separation; Stellium needs
+ *     4+ points).
  *
- *  3. "Radix grand trine does NOT appear as 5H: Grand Trine" is
+ *  3. A classical (quincunx/sextile) Yod's two 150deg legs become
+ *     (150*5) mod 360 = 30deg at H5, not 120deg, for any rotation of the
+ *     shape - arithmetic, not a search failure. isGoldenYodIn5thHarmonic()
+ *     correctly returns false for a real classical Yod (it is filtered out
+ *     by name: only 'Golden Yod' counts), which is asserted below rather
+ *     than left untested.
+ *
+ *  4. "Radix grand trine does NOT appear as 5H: Grand Trine" is
  *     mathematically backwards. An exact Grand Trine's three points are
  *     120deg apart; multiplying by any harmonic n makes the spacing (120*n)
  *     mod 360, which is 120 or 240 (whose short arc is also 120) for every
  *     n not divisible by 3, and 0 (conjunction) only when 3 | n. 5 is not
  *     divisible by 3, so the SAME grand trine DOES reappear as "5H: Grand
  *     Trine" - confirmed empirically with the exact mock points from the
- *     original test. radixGrandTrineNotIn5th() correctly returns false
- *     for this input; the original test asserted true.
- *
- *  4. The Golden Yod's own describe-block test filtered by matching
- *     harmonicOf against the original three ids and expected zero matches
- *     for the reason above - same fix, opposite polarity, applied there
- *     too.
+ *     original test. radixGrandTrineNotIn5th()'s own logic was already
+ *     correct; only its doc comment's premise (and the original test's
+ *     expected value) was wrong, and both are fixed.
  *
  * Everything not touched by this note (the n=1 pass-through, the harmonic
  * range/filter/group helpers, the HARMONIC_MEANINGS coverage, the edge
@@ -106,16 +105,17 @@ test('Harmonic patterns are prefixed with "NH:"', () => {
   });
 });
 
-test('A quintile-family triple (0, 144, 288) is not a Yod and folds to conjunction, not a trine, at 5H', () => {
-  // See file header items 1 and 3. This mock chart is not a Yod by
-  // detectYod()'s own definition, has no radix Grand Trine either, and
-  // multiplying by 5 sends all three points to the same longitude (a
-  // conjunction), which none of the Tier-1 detectors report as a pattern
-  // (Grand Trine needs 120deg separation, Stellium needs 4+ points).
+test('A Golden Yod (0, 144, 288) folds to conjunction, not a Grand Trine, at 5H', () => {
+  // See file header items 1 and 2. This mock chart IS a real Golden Yod
+  // (quintile/biquintile), not a classical (quincunx/sextile) one, and has
+  // no radix Grand Trine either. Multiplying by 5 sends all three points
+  // to the same longitude (a conjunction), which none of the Tier-1
+  // detectors report as a pattern on their own (Grand Trine needs 120deg
+  // separation, Stellium needs 4+ points).
   const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 144), mockPoint('Venus', 'Venus', 288)];
 
   const radixPatterns = detectPatterns(points);
-  if (radixPatterns.some(p => p.name.includes('Yod'))) throw new Error('did not expect a radix Yod for this configuration');
+  if (!radixPatterns.some(p => p.name === 'Golden Yod')) throw new Error('expected a radix Golden Yod for this configuration');
   if (radixPatterns.some(p => p.name.includes('Grand Trine'))) throw new Error('did not expect a radix Grand Trine');
 
   const harmonic5Patterns = detectHarmonicPatterns(points, 5);
@@ -189,28 +189,27 @@ test('groupHarmonicPatternsByN organizes by harmonic', () => {
 // HARMONIC VALIDATION HELPERS
 // ============================================================================
 
-test('isGoldenYodIn5thHarmonic: a real classical Yod never appears as a 5H Grand Trine (see file header item 2)', () => {
-  // A genuine Yod, confirmed against detectYod(): Sun=0, Moon=60 (sextile
-  // to Sun), Mars=210 (quincunx to both). At H5 its two 150deg legs become
-  // (150*5) mod 360 = 30deg, not 120deg, for any rotation of this same
-  // shape - proven arithmetically, not just for this one example. So this
-  // function can never return true for output detectYod() actually
-  // produces; asserting false here is the honest, currently-correct
-  // behaviour, not a gap in coverage.
+test('isGoldenYodIn5thHarmonic: true for a real Golden Yod (its 3 points collapse to conjunction at H5)', () => {
+  const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 144), mockPoint('Venus', 'Venus', 288)];
+  if (!isGoldenYodIn5thHarmonic(points)) throw new Error('expected true');
+});
+
+test('isGoldenYodIn5thHarmonic: false for a classical (quincunx/sextile) Yod', () => {
+  // A genuine classical Yod, confirmed against detectYod(): Sun=0, Moon=60
+  // (sextile), Mars=210 (quincunx to both). This is a DIFFERENT pattern
+  // from a Golden Yod (see file header item 1), and even on its own
+  // arithmetic terms cannot collapse to conjunction at H5: its two 150deg
+  // legs become (150*5) mod 360 = 30deg, not 0deg, for any rotation of the
+  // shape.
   const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60), mockPoint('Mars', 'Mars', 210)];
   const radixPatterns = detectPatterns(points);
-  if (!radixPatterns.some(p => p.name === 'Yod')) throw new Error('expected a real radix Yod for this configuration');
-  const harmonic5Patterns = detectHarmonicPatterns(points, 5);
-  if (isGoldenYodIn5thHarmonic(radixPatterns, harmonic5Patterns)) {
-    throw new Error('expected false: a classical Yod cannot become a 5H Grand Trine under this recast');
-  }
+  if (!radixPatterns.some(p => p.name === 'Yod')) throw new Error('expected a real classical radix Yod for this configuration');
+  if (isGoldenYodIn5thHarmonic(points)) throw new Error('expected false: a classical Yod is not a Golden Yod');
 });
 
 test('isGoldenYodIn5thHarmonic returns false when there is no yod at all', () => {
   const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60), mockPoint('Venus', 'Venus', 120)];
-  const radixPatterns = detectPatterns(points);
-  const harmonic5Patterns = detectHarmonicPatterns(points, 5);
-  if (isGoldenYodIn5thHarmonic(radixPatterns, harmonic5Patterns)) throw new Error('expected false');
+  if (isGoldenYodIn5thHarmonic(points)) throw new Error('expected false');
 });
 
 test('radixGrandTrineNotIn5th returns true when there is no radix grand trine', () => {

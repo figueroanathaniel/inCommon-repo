@@ -337,6 +337,52 @@ export function detectYod(points: PointData[]): ChartPattern[] {
 }
 
 /**
+ * Golden Yod: 1 quintile (72°) + 2 biquintile (144°); the fifth-harmonic
+ * counterpart to the classical Yod above, and NOT a variant of it -
+ * confirmed against fifth-harmonic literature (e.g. Augurine's "Golden
+ * Yod": "Two planets sit 72 degrees apart with a third planet 144 degrees
+ * from each of them"). Two planets a quintile apart, both biquintile from
+ * a third, forming an isosceles triangle whose apex is the biquintile
+ * point. ASPECT_ORBS already carried 'quintile' and 'biquintile' entries
+ * with no detector using either; this was the missing one.
+ */
+export function detectGoldenYod(points: PointData[]): ChartPattern[] {
+  const results: ChartPattern[] = [];
+  const orbQuintile = getOrb('quintile');
+  const orbBiquintile = getOrb('biquintile');
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      for (let k = 0; k < points.length; k++) {
+        if (k === i || k === j) continue;
+
+        const p1 = points[i], p2 = points[j], apex = points[k];
+
+        const q = hasAspect(p1, p2, 72, orbQuintile);
+        const b1 = hasAspect(p1, apex, 144, orbBiquintile);
+        const b2 = hasAspect(p2, apex, 144, orbBiquintile);
+
+        if (q.matched && b1.matched && b2.matched) {
+          results.push({
+            name: 'Golden Yod',
+            planets: [p1.id, p2.id, apex.id],
+            apex: apex.id,
+            aspectChain: [
+              { a: p1.id, aspect: 'quintile', b: p2.id, orb: q.actualOrb },
+              { a: p1.id, aspect: 'biquintile', b: apex.id, orb: b1.actualOrb },
+              { a: p2.id, aspect: 'biquintile', b: apex.id, orb: b2.actualOrb }
+            ],
+            tier: 1,
+            description: 'Two planets a quintile apart, both biquintile to a third; a fifth-harmonic signature of focused creative craft and inventive pattern-making.'
+          });
+        }
+      }
+    }
+  }
+  return results;
+}
+
+/**
  * Mystic Rectangle: 2 sextiles, 2 trines (4 planets in rectangle)
  */
 export function detectMysticRectangle(points: PointData[]): ChartPattern[] {
@@ -422,13 +468,38 @@ export function detectStellium(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Boomerang: T-Square with 1 planet sextile to both opposite planets
+ * Boomerang: a Yod (2 quincunx + 1 sextile) plus a 4th planet in exact
+ * opposition to the Yod's apex.
+ *
+ * PREVIOUSLY built on a T-Square (2 opposed planets + 1 square to both)
+ * plus a 4th planet required to be sextile to BOTH opposed planets. That
+ * is geometrically impossible: if p1 and p2 are exactly opposite, the
+ * positions sextile to p1 are p1+/-60, and the positions sextile to p2
+ * (=p1+180) are p1+120/p1-120 - two pairs that never coincide, orb or no
+ * orb. Confirmed by exhaustive search before this file was rewritten: the
+ * old implementation could never match any chart, ever, despite being
+ * surfaced in forecast copy as a real pattern.
+ *
+ * The actual astrological Boomerang (confirmed against published
+ * definitions, e.g. Astrology Weekly's "Yods and Boomerangs": "a boomerang
+ * is an extension of a yod... there's a fourth planet involved that
+ * opposes... the apex planet") extends a YOD, not a T-Square: the fourth
+ * planet only needs to oppose the Yod's apex, nothing more. That is always
+ * geometrically achievable and does not depend on the base pair being an
+ * exact opposition at all.
+ *
+ * `apex` on the returned pattern names the RELEASE planet (opposite the
+ * Yod's own apex), not the Yod's tension point: it is the new, notable
+ * addition a Boomerang has that a plain Yod does not, and forecast copy
+ * (headlines.ts, explainer.ts, practical.ts) already calls it the
+ * "handle"/"escape route"/"outlet" - {apex} in those templates resolves to
+ * this planet.
  */
 export function detectBoomerang(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
-  const orbSquare = getOrb('square');
-  const orbOpposite = getOrb('opposite');
+  const orbQuincunx = getOrb('quincunx');
   const orbSextile = getOrb('sextile');
+  const orbOpposite = getOrb('opposite');
 
   for (let i = 0; i < points.length; i++) {
     for (let j = i + 1; j < points.length; j++) {
@@ -437,34 +508,32 @@ export function detectBoomerang(points: PointData[]): ChartPattern[] {
 
         const p1 = points[i], p2 = points[j], apex = points[k];
 
-        const opp = hasAspect(p1, p2, 180, orbOpposite);
-        const sq1 = hasAspect(p1, apex, 90, orbSquare);
-        const sq2 = hasAspect(p2, apex, 90, orbSquare);
+        const q1 = hasAspect(p1, apex, 150, orbQuincunx);
+        const q2 = hasAspect(p2, apex, 150, orbQuincunx);
+        const sx = hasAspect(p1, p2, 60, orbSextile);
 
-        if (!opp.matched || !sq1.matched || !sq2.matched) continue;
+        if (!q1.matched || !q2.matched || !sx.matched) continue;
 
-        // Check for 4th planet sextile to both
+        // Check for a 4th planet opposite the Yod's apex
         for (let l = 0; l < points.length; l++) {
           if (l === i || l === j || l === k) continue;
 
-          const boomerang = points[l];
-          const sx1 = hasAspect(p1, boomerang, 60, orbSextile);
-          const sx2 = hasAspect(p2, boomerang, 60, orbSextile);
+          const release = points[l];
+          const opp = hasAspect(apex, release, 180, orbOpposite);
 
-          if (sx1.matched && sx2.matched) {
+          if (opp.matched) {
             results.push({
               name: 'Boomerang',
-              planets: [p1.id, p2.id, apex.id, boomerang.id],
-              apex: boomerang.id,
+              planets: [p1.id, p2.id, apex.id, release.id],
+              apex: release.id,
               aspectChain: [
-                { a: p1.id, aspect: 'opposite', b: p2.id, orb: opp.actualOrb },
-                { a: p1.id, aspect: 'square', b: apex.id, orb: sq1.actualOrb },
-                { a: p2.id, aspect: 'square', b: apex.id, orb: sq2.actualOrb },
-                { a: p1.id, aspect: 'sextile', b: boomerang.id, orb: sx1.actualOrb },
-                { a: p2.id, aspect: 'sextile', b: boomerang.id, orb: sx2.actualOrb }
+                { a: p1.id, aspect: 'quincunx', b: apex.id, orb: q1.actualOrb },
+                { a: p2.id, aspect: 'quincunx', b: apex.id, orb: q2.actualOrb },
+                { a: p1.id, aspect: 'sextile', b: p2.id, orb: sx.actualOrb },
+                { a: apex.id, aspect: 'opposite', b: release.id, orb: opp.actualOrb }
               ],
               tier: 1,
-              description: 'T-Square with sextile resolution planet; reflects back T-square energy, demands active expression through the resolution planet.'
+              description: 'A Yod with a fourth planet opposite the apex; releases the quincunx pressure outward, offering a focus and an outlet the Yod alone lacks.'
             });
           }
         }
@@ -585,6 +654,7 @@ export function detectPatterns(
     detectGrandCross(filtered),
     detectKite(filtered),
     detectYod(filtered),
+    detectGoldenYod(filtered),
     detectMysticRectangle(filtered),
     detectBoomerang(filtered),
     detectCradle(filtered),
