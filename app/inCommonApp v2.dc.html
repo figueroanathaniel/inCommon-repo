@@ -175,16 +175,6 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-composite.js"></script>
 <script src="./hd-circle.js"></script>
 <script src="./analytics.js"></script>
-<!-- Extension modules: synastry news, Sky Wire, localization (Prompts A, B, C) -->
-<script src="./forecast/newsEngine.js"></script>
-<script src="./forecast/news/synastryTemplates.js"></script>
-<script src="./forecast/news/multiChart.js"></script>
-<script src="./forecast/news/skyWire.js"></script>
-<script src="./forecast/news/lint.js"></script>
-<script src="./forecast/feedBuilder.js"></script>
-<script src="./i18n/index.js"></script>
-<script src="./i18n/en.js"></script>
-<script src="./i18n/es.js"></script>
 </helmet>
 <div data-app-root="1" style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:18px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));color:var(--tx);font-family:var(--fu);position:relative;width:100%;height:100dvh;overflow:hidden;background:var(--bg);{{ themeAppVars }}">
 <!-- TWO LOBES, TWO CLOCKS. As one element the whole sky slid together and
@@ -1628,7 +1618,7 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ synShareCardGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ac2-hi);border-radius:999px;font:700 12px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ synShareCardLabel }}</button>
     </sc-if>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -1684,7 +1674,12 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;gap:3px">
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
-                <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                </sc-if>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
+                  <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -1696,6 +1691,36 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
     </div>
+    <sc-if value="{{ synCellOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:flex;align-items:flex-end">
+        <div style="width:100%;background:var(--sf);border-top:1px solid var(--bd);border-radius:18px 18px 0 0;padding:20px 16px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+              <div style="font:600 14px var(--fu);color:var(--tx)">Contact details</div>
+              <div style="font:400 13px/1.5 var(--fb);color:var(--dim)">{{ synCellDetail.head }}</div>
+            </div>
+            <button onClick="{{ synCellClose }}" style="all:unset;cursor:pointer;flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:600 16px var(--fu);color:var(--dim);margin:-4px -4px 0 0">×</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;font:400 13px/1.6 var(--fb);color:var(--tx)">
+            <div><strong>Aspect:</strong> {{ synCellDetail.asp }}</div>
+            <div><strong>Orb:</strong> {{ synCellDetail.orb.toFixed(1) }}°</div>
+            <sc-if value="{{ synCellDetail.hasCta }}" hint-placeholder-val="{{ false }}">
+              <div style="color:var(--ac2-hi);font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase">{{ synCellDetail.cta }}</div>
+            </sc-if>
+            <div style="border-top:1px solid var(--bd);padding-top:8px;display:flex;flex-direction:column;gap:6px">
+              <sc-for list="{{ synCellDetail.lines }}" as="l" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                  </sc-if>
+                  <div>{{ l.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
       <sc-for list="{{ synElRows }}" as="e" hint-placeholder-count="4">
@@ -5571,7 +5596,7 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ synCanShareCard }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ synShareCardGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ac2-hi);border-radius:999px;font:700 12px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ synShareCardLabel }}</button>
     </sc-if>
-    <button onClick="{{ synClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
+    <button onClick="{{ synSwitchGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--dim)">{{ synSwitchLabel }}</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start">
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
@@ -5627,7 +5652,12 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;gap:3px">
               <span title="{{ r.name }}" style="flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--ac)">{{ r.glyph }}</span>
               <sc-for list="{{ r.cells }}" as="cl" hint-placeholder-count="7">
-                <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ cl.go }}" title="{{ cl.lab }}" style="all:unset;cursor:pointer;flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }};transition:var(--motion);border:1px solid transparent" onMouseEnter="this.style.opacity='0.8'" onMouseLeave="this.style.opacity='1'">{{ cl.g }}</button>
+                </sc-if>
+                <sc-if value="{{ cl.clickable }}" hint-placeholder-val="{{ true }}">
+                  <span title="{{ cl.lab }}" style="flex:1 1 0;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:{{ cl.bg }};font:400 14px var(--fb);color:{{ cl.c }}">{{ cl.g }}</span>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -5639,6 +5669,36 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
     </div>
+    <sc-if value="{{ synCellOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center">
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:28px 24px;max-width:480px;max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+              <div style="font:600 16px var(--fu);color:var(--tx)">Contact details</div>
+              <div style="font:400 14px/1.5 var(--fb);color:var(--tx)">{{ synCellDetail.head }}</div>
+            </div>
+            <button onClick="{{ synCellClose }}" style="all:unset;cursor:pointer;flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font:600 18px var(--fu);color:var(--dim);margin:-8px -8px 0 0">×</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;font:400 14px/1.6 var(--fb);color:var(--tx)">
+            <div><strong>Aspect:</strong> {{ synCellDetail.asp }}</div>
+            <div><strong>Orb:</strong> {{ synCellDetail.orb.toFixed(1) }}°</div>
+            <sc-if value="{{ synCellDetail.hasCta }}" hint-placeholder-val="{{ false }}">
+              <div style="color:var(--ac2-hi);font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;margin-top:4px">{{ synCellDetail.cta }}</div>
+            </sc-if>
+            <div style="border-top:1px solid var(--bd);padding-top:10px;display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ synCellDetail.lines }}" as="l" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                  </sc-if>
+                  <div>{{ l.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:18px 20px">
       <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The blend</span>
       <sc-for list="{{ synElRows }}" as="e" hint-placeholder-count="4">
@@ -14957,7 +15017,8 @@ class Component extends DCLogic {
       /* The composite is absent rather than empty in every closed state. */
       cxShow: false, cxGroups: [], cxPrecision: '', cxPrecC: 'var(--dim)', cxAbsent: '',
       synCanShareCard: false, synShareCardLabel: '', synShareCardGo: () => {},
-      synClear: () => this.setState({ synWith: null }) };
+      synCellOpen: null, synCellClose: () => this.setState({ synCellOpen: null }),
+      synSwitchGo: () => this.setState({ synPick: true, synWith: null }) };
     if (!PM || !me || !st.ready) return { ...off, synSolo: true };
     const manual = this.synManualPartner();
     const friends = this.friends();
@@ -15055,18 +15116,35 @@ class Component extends DCLogic {
            whichever layer the reader is standing in. */
         H('What it comes down to', this.synCloseLine(pr, A.first, B.first))
       ];
+      const planetMeaning = (pn) => {
+        const pm = this.PL_MEAN[pn] || 'its own business';
+        return pn + ' (' + pm + ')';
+      };
+      const aspectMeaning = D.note || 'the angle between them';
       const soco = this.dpSocoBlocks({
-        strengths: [easy
-          ? 'This one arrives without effort, which also makes it the part of you two most likely to go unnoticed and unthanked.'
-          : 'Friction between two charts is what keeps a pair interested past the first year. Said out loud it reads as range. Left silent it reads as incompatibility.'],
-        opportunities: ['One concrete move: name this out loud the next time it is actually happening. A shared word for a pattern is most of what makes the pattern workable.'],
-        challenges: [easy
-          ? 'Easy contacts get spent rather than used. The risk is coasting on this instead of pointing it at something you both want.'
-          : 'The difficulty is that ' + D.note + '. It will not resolve on its own, and it does not have to.'],
+        strengths: [
+          easy
+            ? 'This one arrives without effort, which also makes it the part of you two most likely to go unnoticed and unthanked.'
+            : 'Friction between two charts is what keeps a pair interested past the first year. Said out loud it reads as range. Left silent it reads as incompatibility.',
+          'The contact: ' + planetMeaning(pr.a.name) + ' in a ' + a + ' to ' + planetMeaning(pr.b.name) + ' means ' + aspectMeaning + '.'
+        ],
+        opportunities: [
+          'One concrete move: name this out loud the next time it is actually happening. A shared word for a pattern is most of what makes the pattern workable.',
+          'How ' + pr.a.name + ' and ' + pr.b.name + ' can work together: ' + (easy ? 'Let this contact do its own work without forcing it toward a purpose. Its gift is in the ease itself.' : 'The tension here is productive. It builds skill and depth when you both work with it rather than against it.')
+        ],
+        challenges: [
+          easy
+            ? 'Easy contacts get spent rather than used. The risk is coasting on this instead of pointing it at something you both want.'
+            : 'The difficulty is that ' + aspectMeaning + '. It will not resolve on its own, and it does not have to.',
+          'Where the friction lives: ' + (easy ? 'In the tendency to assume this part of you two needs no work.' : 'In the resistance when ' + pr.a.name + ' (in ' + A.first + ') meets ' + pr.b.name + ' (in ' + B.first + '). Neither will give naturally.')
+        ],
         /* The single remaining nod in the whole synastry surface. It is an
            observation about how charts get misused between two people, not an
            instruction to the reader about their own authority. */
-        obstacles: ['A contact explains a tendency. It has never settled which of you was right about Tuesday.']
+        obstacles: [
+          'A contact explains a tendency. It has never settled which of you was right about Tuesday.',
+          'What this contact is not: A predictor of whether you should be together, a measure of compatibility, or a ceiling on what you can build.'
+        ]
       });
       return { head: A.first + '\u2019s ' + pr.a.name + ' ' + D.v + ' ' + B.first + '\u2019s ' + pr.b.name,
         cta: sweet ? 'the tender one' : '', hasCta: sweet,
@@ -15076,12 +15154,19 @@ class Component extends DCLogic {
     });
     const cell = (rn, cn) => {
       const hit = pairs.filter(pr => pr.a.name === rn && pr.b.name === cn).sort((x, y) => x.orb - y.orb)[0];
-      if (!hit) return { g: '\u00b7', c: 'rgba(238,240,248,.26)', bg: 'transparent', lab: 'no contact within orb' };
+      if (!hit) return { g: '\u00b7', c: 'rgba(238,240,248,.26)', bg: 'transparent', lab: 'no contact within orb', clickable: false };
       const D = this.SYN_ASP[hit.asp];
       const c = D.k === 'f' ? 'var(--warn)' : hit.asp === 'conjunct' ? 'var(--ac2-hi)' : 'var(--ac)';
       const bg = D.k === 'f' ? 'rgba(224,141,125,.12)' : hit.asp === 'conjunct' ? 'rgba(139,92,246,.16)' : 'rgba(47,255,143,.1)';
+      const cellKey = rn + '|' + hit.asp + '|' + cn;
       return { g: D.g, c: c, bg: bg,
-        lab: A.first + ' ' + rn + ' ' + this.aspName(hit.asp) + ' ' + B.first + ' ' + cn + ', orb ' + hit.orb.toFixed(1) + '\u00b0' };
+        lab: A.first + ' ' + rn + ' ' + this.aspName(hit.asp) + ' ' + B.first + ' ' + cn + ', orb ' + hit.orb.toFixed(1) + '\u00b0',
+        clickable: true,
+        go: () => {
+          const relevantContact = ranked.find(r => r.a.name === rn && r.asp === hit.asp && r.b.name === cn);
+          this.setState({ synCellOpen: { rn: rn, cn: cn, asp: hit.asp, orb: hit.orb, contact: relevantContact || hit } });
+        }
+      };
     };
     const glyphOf = (chart, n) => { const r = chart.find(x => x.name === n); return r ? r.glyph : n.slice(0, 2); };
     const cols = this.SYN_GRID.map(n => ({ name: B.first + '\u2019s ' + n, glyph: glyphOf(cB, n) }));
@@ -15223,11 +15308,11 @@ class Component extends DCLogic {
          loudest contacts, and stops there. Everything it names is already on
          this screen; nothing that made it is. */
       synCanShareCard: true,
-      synShareCardLabel: 'Share this reading as a card',
+      synShareCardLabel: ‘Share this reading’,
       synShareCardGo: () => this.synCardShare({
         a: A.first, b: B.first,
         pairs: pairs.length, warm: warm, edge: edge, oneSided: oneSided,
-        top: ranked.slice(0, 3).map(pr => A.first + '’s ' + pr.a.name + ' ' + this.aspName(pr.asp) + ' ' + B.first + '’s ' + pr.b.name)
+        top: ranked.slice(0, 3).map(pr => A.first + ‘ ‘ + pr.a.name + ‘ ‘ + this.aspName(pr.asp) + ‘ ‘ + B.first + ‘ ‘ + pr.b.name)
       }),
       synCountLine: pairs.length
         ? pairs.length + ' contacts sit within orb: ' + warm + ' of the easy kind, ' + edge + ' that ask something.'
@@ -15249,7 +15334,14 @@ class Component extends DCLogic {
           ' channels, together or apart. Those are counted rather than listed: thirty rows saying nothing happened is not a reading, and the count is here so the lists above are read against the whole board.'
         : '',
       synSwitchLabel: 'Read with someone else',
-      synFooter: 'Drawn on your device from two birth dates. Nothing about ' + B.first + ' is stored in ' + A.first + '\u2019s profile, and either of you can switch Shared Guidance off in Settings, which removes this page again.' };
+      synFooter: 'Drawn on your device from two birth dates. Nothing about ' + B.first + ' is stored in ' + A.first + '\u2019s profile, and either of you can switch Shared Guidance off in Settings, which removes this page again.',
+      synCellOpen: st.synCellOpen || null,
+      synCellClose: () => this.setState({ synCellOpen: null }),
+      synCellDetail: st.synCellOpen ? (() => {
+        const cell = st.synCellOpen;
+        const matchingContact = ranked.find(r => r.a.name === cell.rn && r.asp === cell.asp && r.b.name === cell.cn);
+        return matchingContact || cell.contact;
+      })() : null };
   }
 
   /* ---- Circle ---------------------------------------------------------------
