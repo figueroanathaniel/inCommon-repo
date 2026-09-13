@@ -7,6 +7,27 @@ shells live inside it, chosen by viewport width in `shellVals()` off
 and up. **Do not create phone / tablet / 9:16 / desktop forks.** 820px is the
 only breakpoint that changes the component tree.
 
+## Ephemeris architecture (V1.0.0)
+**Dual-backend ephemeris system** with graceful fallback. Modules:
+- `ephemeris-points.js` — Centralized point registry (17 points, single source of truth)
+- `ephemeris-backend-current.js` — Fallback: existing simplified ephemeris (Kepler + analytical)
+- `ephemeris-backend-swiss.js` — Primary: Swiss Ephemeris WASM (if `npm install swisseph-wasm` run)
+- `ephemeris-router.js` — Orchestrator: selects backend, handles fallback transparently
+- `ephemeris-integration.js` — Migration helper: eases integration into Component lifecycle
+- `ephemeris-cache.js` — Optional in-memory memoization (existing, unchanged)
+
+**Architecture**: Swiss WASM (if available) → fallback to current if unavailable.
+Graceful degradation: if WASM fails to load, app auto-switches to current ephemeris.
+Initialize in `Component.componentDidMount()`; clean up in `componentWillUnmount()`.
+
+**Layering rule**: Basic chart = category 'basic' + nodes + angles (if timed).
+Expanded adds asteroids + centaur. No duplication: expanded-only items link back to basic.
+
+**No Swiss dependency at install**: optional. App works with current ephemeris alone.
+To add Swiss: `npm install swisseph-wasm` (v0.1.0+, GPL-3.0).
+
+See `app/EPHEMERIS-ARCHITECTURE.md` and `app/INTEGRATION-GUIDE.md` for full docs.
+
 ## Colour rules that are not negotiable
 Measured against the app's own surfaces, not guessed:
 

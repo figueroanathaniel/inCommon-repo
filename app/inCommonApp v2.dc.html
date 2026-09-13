@@ -16,6 +16,13 @@ window.__resources = Object.assign(window.__resources || {}, {
 });
 </script>
 <script src="./support.js"></script>
+<!-- Ephemeris system: dual-backend (Swiss WASM + fallback) with optional memoization.
+     V1.0.0. Modules load in background; app works with or without Swiss installed. -->
+<script src="./ephemeris-points.js"></script>
+<script src="./ephemeris-backend-current.js"></script>
+<script src="./ephemeris-backend-swiss.js"></script>
+<script src="./ephemeris-router.js"></script>
+<script src="./ephemeris-integration.js"></script>
 <!-- THE ONE STYLESHEET, AND IT LIVES IN THE HEAD RATHER THAN IN THE HELMET.
 
      It was declared in <helmet> with the title and the icons, and the runtime
@@ -8647,6 +8654,12 @@ class Component extends DCLogic {
   componentDidMount() {
     this.pruneDefaultProfile();
     window.__incommonApp = this;
+    /* Initialize ephemeris router (V1.0.0): dual-backend system (Swiss WASM + fallback).
+       Loads in background; app is interactive before WASM initializes. */
+    const EI = typeof window !== 'undefined' && window.EphemerisIntegration;
+    if (EI) {
+      this.ephIntegration = EI.init(this);
+    }
     /* Analytics, if it was ever switched on. The module writes nothing while
        it is off, so this costs a read of one flag on a device that declined.
        pagehide as well as unmount, because an installed app is closed by being
@@ -8754,6 +8767,11 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
+    /* Clean up ephemeris router and WASM instance */
+    if (this.ephIntegration) {
+      this.ephIntegration.close();
+      this.ephIntegration = null;
+    }
     this.skyStop();
     if (this._trapObs) { this._trapObs.disconnect(); this._trapObs = null; }
     this._trapQueued = false;
