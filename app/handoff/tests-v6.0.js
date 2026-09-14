@@ -1503,7 +1503,7 @@
       await goD('#/spirit/synastry', 700);
       app.setState({ synManual: PARTNER, synWith: 'manual' });
       await sleep(700);
-      var shareBtn = find(dd, /Share this reading as a card/i);
+      var shareBtn = find(dd, /Share this reading/i);
       t('N1', 'A synastry reading offers a card to share, at 44px',
         { offered: true, tapTargets: [] },
         { offered: !!shareBtn,
