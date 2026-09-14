@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.3  |  built 2026-09-13  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.3  |  built 2026-09-14  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26861,7 +26861,19 @@ class Component extends DCLogic {
   lonOf(name, t) {
     const C = typeof window !== 'undefined' && window.EphemerisCache;
     if (!C) return this.lonRaw(name, t);
-    if (!this._ephWired) { C.source((n, tt) => this.lonRaw(n, tt)); this._ephWired = true; }
+    /* The wired flag lives ON THE CACHE OBJECT, not on `this`. A component
+       instance property survives a hot-swap of the Logic class no more
+       reliably than it survives a page's own module loader re-executing
+       ephemeris-cache.js's UMD factory (both replace the object this flag
+       needs to describe): either one leaves a NEW EphemerisCache with a
+       null compute() while an OLD instance's `this._ephWired` still reads
+       true, so get() short-circuits to null forever and every chart with
+       no cached hit before that point renders empty. Confirmed live: a
+       fresh page load already showed _ephWired true against a report() of
+       all-zero counters, meaning the object that set the flag was not the
+       object being asked for a position. Keying the flag on C itself ties
+       it to the exact object whose compute() it is actually reporting on. */
+    if (!C._wired) { C.source((n, tt) => this.lonRaw(n, tt)); C._wired = true; }
     return C.get(name, t);
   }
   lonRaw(name, t) {
