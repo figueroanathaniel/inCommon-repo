@@ -99,6 +99,43 @@ const LAYERS = {
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
     'oki-api.js', 'oki-post-processor.js', 'oki-prompt-builder.js', 'oki-voice-v144.js',
     'sw.js',
+
+    /* THE DUAL-BACKEND EPHEMERIS SYSTEM (V1.0.0), unwired like the Oki
+       modules above rather than mechanics like ephemeris-cache.js just
+       above THAT. The shipped app never calls into any of these six: it
+       computes positions through its own lonOf()/chartAt()/fullChart()
+       methods and its own hand-ported EXPANDED_REGISTRY, entirely inside
+       app/inCommonApp v2.dc.html, and ephemeris-cache.js (mechanics,
+       genuinely wired) memoizes THOSE calls, not these. Nothing here is
+       reachable from the running app.
+       They would otherwise read as mechanics by shape (ephemeris in,
+       structured positions out, no authored prose in five of the six),
+       but ephemeris-points.js carries sixteen one or two sentence
+       `reference` fields ("Your evolutionary path. Where you're meant to
+       grow.") on top of its id/sweId/backend/accuracy facts, the same mix
+       of fact and gloss pointRegistry.ts (the LIVE registry, outside this
+       gate's reach in app/ephemeris/) carries in its own tooltip and
+       reference fields. Classifying the six as mechanics would mean
+       either moving that prose to PROSE one entry at a time, which is
+       the quietly-growing-content-store shape this gate exists to catch,
+       or splitting the file the way hd-atlas was split out of
+       hd-composite for exactly this reason. Neither is owed to code
+       nothing calls. Shell, "outside the boundary, listed so the
+       manifest is complete," is what a dormant system actually is. */
+    'ephemeris-points.js',
+    'ephemeris-backend-current.js',
+    'ephemeris-backend-swiss.js',
+    'ephemeris-router.js',
+    'ephemeris-integration.js',
+    /* Doubly so: self.onmessage exists, but computeAll() at the bottom is
+       a stub returning [] with "TODO: Import actual computeAll from
+       engine". This is the one file of the six with no UMD wrapper and no
+       resolvable exported global, because nothing in the app ever does
+       `new Worker('ephemeris-worker.js')` to reach it. It does not
+       contradict "No Web Worker exists anywhere in this app" (see "The
+       expanded wheel" above): that claim is about the app that ships,
+       and this cannot run inside it as written. */
+    'ephemeris-worker.js',
   ],
   vendored: [
     'support.js',
