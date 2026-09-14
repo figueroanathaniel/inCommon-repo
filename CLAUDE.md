@@ -707,6 +707,43 @@ own testing, comfortably inside the 150ms budget on the main thread, the
 same way `computeAll()`'s own header already argues for the ~97-point spec
 module it mirrors.
 
+## The maximize button opens a portal that is not a portal
+The ⛶ button, the focus trap, all three dismiss paths, the backdrop and the
+wheel's fixed sizing were already built in the pass above. What was missing
+was two panels: the Aspects grid and the narrow-width tab bar that the brief
+called for as "Points | Aspects | Houses" below 900px.
+
+**The Aspects panel reads the same rich pass the wheel's own lines already
+draw**, `natalAspects(true, {rich, minorAspects, minorScale})`, so the grid
+and the wheel can never disagree about which contacts exist. It renders as a
+row of small chip cards rather than a table, per the brief's own "horizontally
+scrollable": a vertical list here would just be a second points table wearing
+different columns.
+
+**`.chartx-grid` uses named grid-template-areas now, not implicit row
+placement.** The houses, points and aspects panels used to fall into rows in
+DOM order; below 900px all three now share ONE named area, `content`, and
+`chartExpandVals()`'s own `panelDisplay()` is what decides which of the three
+is actually `display:flex` at a time. That is the tab switch: the other two
+panels are still in the DOM, just not painted. Grid areas were chosen
+specifically because DOM order would otherwise decide which panel a reader
+saw first if two ever ended up visible at once, which is exactly the kind of
+markup order dependency this pass was trying not to introduce alongside brand
+new markup.
+
+**Three deviations from the brief, and codebase convention won each time.**
+The brief named a bare `chart.expanded` localStorage key; every key in this
+app is `incommon.`-namespaced, so it is `incommon.chart.expanded`. The brief
+asked for a portal (`createPortal` or equivalent); there is no portal
+anywhere in this codebase, it relies on `position:fixed;inset:0` for
+full-viewport stacking, already verified across every viewport this session
+tested, and retrofitting one real DOM portal into a buildless, hooks-free
+runtime for one dialog would be the kind of one-off abstraction CLAUDE.md
+elsewhere warns against. And the brief asked for body scroll lock while open;
+`html,body{overflow:hidden}` is already permanent and global in this app's one
+stylesheet, so toggling it per-dialog would be dead code layered on top of a
+rule that never turns off.
+
 ## Mechanics and interpretation, and which way the arrow points
 Two layers. **Mechanics** takes the ephemeris and a birth record and returns
 structured data: gate numbers, line numbers, centre states, channel
