@@ -596,6 +596,117 @@ minute" would hand the solver a step function to find a crossing in.
 missing, `lonOf()` is exactly `lonRaw()`. A performance memo must never be able
 to stop the app booting.
 
+## The expanded wheel: 96 points, computed inline, no worker
+The maximize button on the chart card (⛶) already existed; this built what it
+opens. `chartExpandGo` was already forcing `chartMode: 'expanded'`, and the
+overlay already drew the SAME wheel the small card does and read a table from
+`fullChart(true)` - what was missing was the data. `EXTRA` carried five
+points (Chiron, Ceres, Pallas, Juno, Vesta); `EXPANDED_REGISTRY` carries all
+eighty from `app/ephemeris/pointRegistry.ts`, ported by hand rather than
+loaded as a module, because browsers do not run TypeScript and this app has
+no bundler. `expandedLonAt()` is the same hand-port of
+`app/ephemeris/engine.ts` and `cometSolver.ts`, both already checked against
+real test vectors by `tools/check-ephemeris-engine.js`: same constants,
+same Kepler solve, copied rather than re-derived so the two could not
+silently disagree. Basic mode is untouched - `chartAt()`, `PLNS` and
+`fullChart(false)` never see any of this.
+
+**Twenty-nine of the eighty compute for real; the rest say so honestly.**
+Chiron and the four asteroids already came from `window.MinorBodies`. New:
+Eris and Sedna (full 3D Keplerian, `TNO_3D`), the eight planetary nodes
+(Standish/JPL mean elements), Lilith (mean) and Selena, the three named
+comets (Halley/Hale-Bopp/Hyakutake, mundane only), Vertex/Antivertex, Part of
+Spirit, the Aries Point, and the Sun/Moon midpoint. The other fifty-one
+asteroids, centaurs, TNOs and Hamburg School hypotheticals have no orbital
+elements sourced anywhere in this codebase and stay `status: 'unavailable'`
+with a real reason (`UNCOMPUTED_WHY`), by the same rule engine.ts's own file
+header states: a missing position is honest, an invented one is not.
+
+**Ring 1 and ring 2 are a stagger band, not a distance from centre.** Both
+sit inside the sign boundary, where the small card's glyphs already lived;
+ring 1 (planets, both nodes, Chiron, the four main asteroids, Lilith,
+Selena) staggers near that boundary at the original size, ring 2 (everything
+else this wheel draws) staggers in a smaller band further toward the centre,
+in a smaller glyph, so eighty points does not compete with the sixteen core
+ones for the same rim space. `RING1_IDS` is the membership list.
+
+**Comets are the one category excluded from the wheel by default.**
+`fullChart()` computes and lists them unconditionally - the table and the
+seven sub-tables below it always carry all three - but `placedRows` (which
+feeds `wheelPlanets`/`wheelLabels`, the SVG) drops `category === 'comet'`
+unless `chartExpandShowComets` is on. One state flag, checked in one place,
+rather than a second copy of the point list.
+
+**Category colour is a fixed hue, not a themed one**, the same reasoning
+`--ac`/`--crisis` already rest on: asteroid amber and centaur teal
+(`--cat-ast`/`--cat-cen`, declared beside `--crisis-lo` in all three token
+roots), comet orange (`--cat-com`), TNO reusing `--ac2` (violet already
+meant "expanded" on this wheel), node/hypothetical reusing `--dim`. Chart
+glyphs are `check-purple-text.js`'s own standing exemption from the
+never-as-text rule, so this needed no new carve-out.
+
+**The expanded aspect table is a different table, not a scaled copy of the
+basic one.** `EXPANDED_ASPECTS`/`EXPANDED_ORBS` add quincunx, semisextile,
+semisquare and sesquisquare to the five majors, at the wider orbs the brief
+asked for; `natalAspects(expanded, opts)` only reaches that table when
+`opts.rich` is true, which is exactly the maximize overlay and the small
+"Expanded Chart" pill (both share `chartMode`), never the basic grid.
+`opts.minorScale` halves the orb for any pair touching a point outside
+{body, angle} - the codebase's existing precedent for this (the `patterns.ts`
+work under `app/aspects/`) halves minor-point orbs the same way, for the same
+reason: an asteroid trine should need to work harder for its orb than a Sun
+trine does. **`ASP_COLOR` needed the four new keys before any of this could
+render**: the aspect detail panel and `wheelAspects` both index it as
+`ASP_COLOR[x.asp][0]` with no fallback, and a missing key there is not a
+blank line, it is `Cannot read properties of undefined (reading '0')` on the
+very first click - caught by testing the actual click, not by reading the
+diff. `aspectLegend` reads `Object.keys(this.ASP_COLOR)` for the row list
+under the wheel, so it had to be told to stay at the original five keys
+outside expanded mode, or the basic chart's own legend would start
+advertising aspect lines it can never draw.
+
+**One tooltip builder, not two.** `pointTooltip(r, houseLabel)` is what both
+`wheelPlanets`' SVG `<title>` and every points-table row's `title` attribute
+call: name, glyph, DMS position, house, then the two SYMBOLISM lines
+(tooltip → the point's own meaning, reference → "Used in reference to"). An
+unavailable point never reaches the position formatter; it returns "n/a: no
+ephemeris" instead. That reads as an em dash in most people's idea of the
+phrase and is written with a colon on purpose: CLAUDE.md's zero-em-dash rule
+applies to a tooltip exactly as it applies to a sentence, and no exception
+was made for one just because the brief that asked for this row happened to
+write the phrase with one.
+
+**The points table's Speed column needed the actual formula re-evaluated at
+each half-day sample, not the natal instant reused twice.** `vertexOf()`
+used to always read `natalDate()` internally regardless of what `t` it was
+handed, so asking it for a position a half day either side returned the same
+number twice and reported zero motion for Vertex and Antivertex. It now
+takes an explicit `t` that defaults to the natal instant. `partOfSpirit` and
+`sunmoonMidpoint` had the matching version of the same bug one level up:
+`expandedSpeedAt()` was reusing one `ctx.sun`/`ctx.moon` computed once for
+the natal instant, so a formula built entirely from `ctx` also read as
+motionless no matter how fast the Moon was actually moving. Both are fixed
+the same way: recompute what the half-day offset should have changed, not
+just the parameter that happens to vary for most other points.
+
+**The seven sub-tables below the main one are a plain browsable reference**,
+the same shape the Library's rooms already are (see the dream registry's
+"browsable now" precedent above): independent of the main table's own
+search/sort/group state, closed by default so the panel opens tidy at
+ninety-six rows, each one a `{category, open, toggle, rows}` built once in
+`chartExpandVals()` from the same `allRows` the main table already computed
+- never a second read of the chart.
+
+**No Web Worker exists anywhere in this app** (`engine.ts`'s own file header
+already says so: "There is no Web Worker wiring anywhere in this app"), so
+the acceptance criterion asking for async worker computation is not met
+literally. What is true instead, measured rather than assumed: a full
+`fullChart(true)` plus the rich `natalAspects()` pass over all ninety-six
+points and roughly two hundred aspects took 20ms end to end in this session's
+own testing, comfortably inside the 150ms budget on the main thread, the
+same way `computeAll()`'s own header already argues for the ~97-point spec
+module it mirrors.
+
 ## Mechanics and interpretation, and which way the arrow points
 Two layers. **Mechanics** takes the ephemeris and a birth record and returns
 structured data: gate numbers, line numbers, centre states, channel
