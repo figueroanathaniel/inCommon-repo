@@ -165,6 +165,8 @@ const ALLOW = [
     why: 'G9b is named for the thing it asserts is absent. A suite has to be able to say what it removed.' },
   { term: 'compatibility score', path: 'app/inCommonApp v2.dc.html',
     why: 'The WHERE THE NUMBER WAS comment explains why the ring is gone. Removing the explanation is how it gets added back.' },
+  { term: 'compatibility score', path: 'ARCHIVE-REPORT.md',
+    why: 'The design table names it in a "No compatibility score" row: the row documents the feature is absent, the same shape the tests-v6.0.js and app.dc.html overrides above are already reasoned from. Banning the phrase here would ban the table for saying the app does not have one.' },
 
   { term: 'Jovian', path: 'app/people-library.js',
     why: 'One comment citing the research file by path. A citation is not a claim of affiliation, and a path that cannot be written is a citation that goes missing.' },
