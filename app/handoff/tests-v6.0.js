@@ -1212,6 +1212,12 @@
       var said = await waitSaid('polite', 1200);
       t('G6c', 'A chart redraw is announced through the polite region (heard: "' + said + '")',
         true, /chart redrawn/i.test(said));
+      /* Put the mode back. This toggle is the only state this phase changes
+         that a later row also reads: G9's aspect-colour legend is gated to
+         five keys in basic mode and nine in expanded (see CLAUDE.md, "the
+         expanded aspect table"), and leaving chartMode flipped here read as
+         G9 failing on a build that was never wrong. */
+      wp.__incommonApp.setState({ chartMode: mode0 });
       await sleep(2100);
 
       /* ---- G11: the charts describe themselves ---- */
