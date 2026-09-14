@@ -744,6 +744,72 @@ elsewhere warns against. And the brief asked for body scroll lock while open;
 stylesheet, so toggling it per-dialog would be dead code layered on top of a
 rule that never turns off.
 
+## The Aspects grid filters, and a bug it walked into on the way in
+Tracing "filter by category involved" back to its source field surfaced a
+defect that predates this pass: `CAT_LABEL`, `CAT_COLOR` and the Points
+table's own `catOrder` all keyed the ten core planets as `'planet'`, but
+`fullChart()` has always stamped them `category:'body'` (`x.name.indexOf
+('Node') !== -1 ? 'node' : 'body'`). Grouping the table by category filtered
+`sorted` for `r.category === 'planet'`, which no row has ever carried, so
+the "Planets & Nodes" section silently returned zero rows and the Sun
+through Pluto simply never appeared in Group mode. The North and South
+Node were unaffected by coincidence, since their own category really is
+`'node'`. `CAT_COLOR`'s `'planet'` key had the same fault but no visible
+symptom, because its call sites already fall back to the same green a
+correct lookup would have returned. All three now key on `'body'`, matching
+what the rows actually carry.
+
+**Filter chips are two independent groups, OR'd inside each and AND'd
+between them.** An aspect matches the category filter if EITHER end of the
+pair carries the selected category, since an aspect belongs to both bodies
+it connects, never to one alone. Both chip lists are built from what is
+actually present in `asps` rather than a fixed nine-entry menu, so a chart
+with no comet contacts never offers a Comets chip that would filter to
+nothing.
+
+**The row a reader clicks and the pair the wheel highlights read the same
+array by construction, not by convention.** `chartExpandAspSel` stores the
+clicked row's `id`, which is its index into `asps` as `chartExpandVals()`
+builds it; the wheel's own `wheelPlanets` computation calls
+`natalAspects(expanded, {...})` with the identical arguments (rich mode,
+same minor-aspect and minor-scale flags) to get an array that is
+positionally identical, and resolves the same index against it. Two
+separately-computed arrays staying in lockstep is not fragile here because
+`natalAspects()` is a pure function of chart state: same inputs, same
+output, every time. Filtering the grid's rendered rows never touches `id`,
+so toggling a chip cannot point a live highlight at a different pair than
+the one a reader actually clicked. The highlight is gated on
+`chartExpandOpen`, because the small card's own "Expanded Chart" pill also
+sets `chartMode:'expanded'` without opening this dialog, and a stale
+selection leaking into that view would highlight a pair nobody clicked.
+
+**"Exact" is one degree, stated rather than assumed.** The tradition does
+not fix a single number for it, and `EXPANDED_ORBS` itself runs 2 to 10
+depending on the aspect, so this figure is a stated choice for the grid's
+own dot marker, not a value read off any existing table.
+
+**Measured, not assumed, per CLAUDE.md's own standing rule for this
+number.** `fullChart(true)` costs about 8.5ms cold and 0.3ms once its
+`_fcStamp` memo is warm; `natalAspects(true, {rich:true, ...})` costs about
+3.5ms over 199 pairs; the filter-chip and exact-flag passes added by this
+work are one more O(n) walk over that same array and do not move the
+total measurably. The full `chartExpandVals()` call, table, houses, chips
+and all, measured under 8ms warm. No Web Worker was added for this: none
+exists anywhere in this app (see "The expanded wheel" above), the total
+is nowhere near the 150ms budget that precedent already argues from, and
+`postMessage` would add a serialization cost to a computation that is
+already cheaper than the round trip.
+
+**`EXTENDED-POINTS-REFERENCE.md` is generated now, not hand-typed.** It
+carried a header claiming to be auto-generated while reading "98 points"
+and "81+ expanded" against a registry that has held 97 and 80 for as long
+as `integration.test.ts` has asserted the count. `tools/
+build-extended-points-doc.js` requires `ephemeris/pointRegistry.ts`
+directly, the same way `check-point-registry.js` does, and writes every
+count, category grouping and one-line symbolism from what the registry
+actually exports. Re-run it after any registry change; the file is not
+meant to be edited by hand again.
+
 ## Mechanics and interpretation, and which way the arrow points
 Two layers. **Mechanics** takes the ephemeris and a birth record and returns
 structured data: gate numbers, line numbers, centre states, channel
@@ -2299,7 +2365,7 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds twenty-four scripts. Eighteen are gates and are worth running
+`tools/` holds twenty-five scripts. Eighteen are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -2307,9 +2373,11 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`.
-Four generate:
+Five generate:
 `build-bundle.js`, `build-icons.js`,
-`build-ui-icons.js`, `build-gazetteer.js`. `check-deployed.js` compares what
+`build-ui-icons.js`, `build-gazetteer.js`, `build-extended-points-doc.js`
+(`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
+doc's own counts can never drift from the registry's). `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
 

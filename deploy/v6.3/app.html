@@ -20434,13 +20434,26 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
         <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div style="display:flex;gap:8px;padding:8px 10px">
+        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
+          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
+          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
+            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
           <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" title="{{ a.nameA }} {{ a.aspLabel }} {{ a.nameB }}, orb {{ a.orb }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:120px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);font:400 11px var(--fu);color:var(--tx)">
+            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
               <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
+              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
               <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
               <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
+              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
               <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
+              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
             </button>
           </sc-for>
         </div>
@@ -24498,13 +24511,26 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
         <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div style="display:flex;gap:8px;padding:8px 10px">
+        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
+          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
+          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
+            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
           <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" title="{{ a.nameA }} {{ a.aspLabel }} {{ a.nameB }}, orb {{ a.orb }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:120px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);font:400 11px var(--fu);color:var(--tx)">
+            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
               <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
+              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
               <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
               <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
+              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
               <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
+              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
             </button>
           </sc-for>
         </div>
@@ -26695,14 +26721,14 @@ class Component extends DCLogic {
   // both rings by default (see wheelPlanets/wheelLabels): they show in the
   // side panel only, unless chartExpandShowComets is on.
   RING1_IDS = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena'];
-  CAT_LABEL = { planet: 'Planets & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  CAT_LABEL = { body: 'Planets & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
   // reuse --dim (already the app's own neutral), so only asteroid/centaur/
   // comet needed new tokens (--cat-ast/--cat-cen/--cat-com, declared beside
   // --crisis-lo in all three token roots).
-  CAT_COLOR = { planet: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)' };
+  CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)' };
 
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'no orbital elements sourced for this body';
@@ -27708,8 +27734,8 @@ class Component extends DCLogic {
     const st = this.state;
     const base = {
       chartExpandOpen: !!st.chartExpandOpen,
-      chartExpandGo: () => this.setState({ chartExpandOpen: true, chartMode: 'expanded', openPlanet: null, aspSel: null }),
-      chartExpandClose: () => this.setState({ chartExpandOpen: false }),
+      chartExpandGo: () => this.setState({ chartExpandOpen: true, chartMode: 'expanded', openPlanet: null, aspSel: null, chartExpandAspSel: null }),
+      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null }),
       chartExpandSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
     };
     if (!st.chartExpandOpen) return base;
@@ -27765,7 +27791,7 @@ class Component extends DCLogic {
       chartExpandSortDir: st.chartExpandSortBy === field && st.chartExpandSortDir === 'asc' ? 'desc' : 'asc'
     });
 
-    const catOrder = ['planet', 'angle'].concat(this.SUBTABLE_CATS);
+    const catOrder = ['body', 'angle'].concat(this.SUBTABLE_CATS);
     const grouped = !st.chartExpandGroup ? [] : catOrder.map(cat => ({
       category: cat, label: this.CAT_LABEL[cat], rows: sorted.filter(r => r.category === cat)
     })).filter(g => g.rows.length);
@@ -27792,12 +27818,59 @@ class Component extends DCLogic {
     // a row of small cards, not a tall table, since a vertical list here
     // would just be a second points table with different columns.
     const asps = this.natalAspects(true, { rich: true, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true });
-    const aspectRows = asps.map((x, i) => ({
-      id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name,
-      aspLabel: this.aspName(x.asp), orb: x.orb.toFixed(1) + '°',
-      color: (this.ASP_COLOR[x.asp] || ['var(--dim)'])[0],
-      go: () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: x.a.name, aspSel: null })
-    }));
+    // EXACT_ORB: the conventional astrological sense of "exact" - a contact
+    // tight enough to read as live rather than merely in range. One degree
+    // is the common floor across the tradition's own orb tables
+    // (EXPANDED_ORBS run 2 to 10 depending on the aspect), not a figure
+    // invented for this grid.
+    const EXACT_ORB = 1;
+    // id is the row's own index into `asps`, fixed regardless of any filter
+    // applied below: chartExpandAspSel stores this id, never a post-filter
+    // position, so toggling a filter chip can never silently point the
+    // wheel highlight at a different pair than the one that was clicked.
+    const aspectRowsAll = asps.map((x, i) => {
+      const exact = x.orb <= EXACT_ORB, aspLabel = this.aspName(x.asp);
+      return {
+        id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name,
+        asp: x.asp, aspLabel: aspLabel, orb: x.orb.toFixed(1) + '°',
+        exact: exact, exactMark: exact ? '●' : '',
+        tip: x.a.name + ' ' + aspLabel + ' ' + x.b.name + ', orb ' + x.orb.toFixed(1) + '°' + (exact ? ', exact' : ''),
+        catA: x.a.category, catB: x.b.category,
+        color: (this.ASP_COLOR[x.asp] || ['var(--dim)'])[0],
+        on: st.chartExpandAspSel === i ? 'true' : 'false',
+        ring: st.chartExpandAspSel === i ? '0 0 0 2px var(--ac) inset' : 'none',
+        // Highlights the pair on the wheel; a second click on the same row
+        // clears it rather than toggling something else, per the brief.
+        go: () => this.setState({ chartExpandAspSel: st.chartExpandAspSel === i ? null : i })
+      };
+    });
+    // Filter chips: aspect type and category involvement, both multi-select
+    // and OR'd within their own group (an empty selection filters nothing,
+    // so the grid opens showing everything). "Category involvement" means
+    // EITHER end of the pair carries that category, since an aspect belongs
+    // to both bodies it connects, not to one of them.
+    const aspTypeSel = st.chartExpandAspTypeSel || [];
+    const aspCatSel = st.chartExpandAspCatSel || [];
+    const typesPresent = [];
+    asps.forEach(x => { if (typesPresent.indexOf(x.asp) === -1) typesPresent.push(x.asp); });
+    const catsPresent = [];
+    asps.forEach(x => [x.a.category, x.b.category].forEach(c => { if (c && catsPresent.indexOf(c) === -1) catsPresent.push(c); }));
+    const aspectRows = aspectRowsAll.filter(r =>
+      (aspTypeSel.length === 0 || aspTypeSel.indexOf(r.asp) !== -1) &&
+      (aspCatSel.length === 0 || aspCatSel.indexOf(r.catA) !== -1 || aspCatSel.indexOf(r.catB) !== -1));
+    const chipStyle = on => on
+      ? { c: 'var(--ac)', bg: 'rgba(47,255,143,.16)', bd: 'var(--ac)' }
+      : { c: 'var(--dim)', bg: 'transparent', bd: 'var(--bd)' };
+    const aspTypeChips = typesPresent.map(nm => {
+      const sel = aspTypeSel.indexOf(nm) !== -1, style = chipStyle(sel);
+      return { id: nm, label: this.aspName(nm), on: sel ? 'true' : 'false', c: style.c, bg: style.bg, bd: style.bd,
+        go: () => this.setState({ chartExpandAspTypeSel: sel ? aspTypeSel.filter(x => x !== nm) : aspTypeSel.concat(nm) }) };
+    });
+    const aspCatChips = catsPresent.map(cat => {
+      const sel = aspCatSel.indexOf(cat) !== -1, style = chipStyle(sel);
+      return { id: cat, label: this.CAT_LABEL[cat] || cat, on: sel ? 'true' : 'false', c: style.c, bg: style.bg, bd: style.bd,
+        go: () => this.setState({ chartExpandAspCatSel: sel ? aspCatSel.filter(x => x !== cat) : aspCatSel.concat(cat) }) };
+    });
 
     // Below 900px (this.chartx-grid's own breakpoint), Houses/Points/Aspects
     // become tabs instead of a stack: three panels shown at once is how a
@@ -27833,7 +27906,10 @@ class Component extends DCLogic {
       chartExpandMinorAspectsMark: st.chartExpandShowMinorAspects !== false ? '✓' : '',
       chartExpandMinorAspectsGo: () => this.setState({ chartExpandShowMinorAspects: st.chartExpandShowMinorAspects === false }),
       chartExpandAspectRows: aspectRows,
-      chartExpandAspectCount: aspectRows.length + (aspectRows.length === 1 ? ' aspect' : ' aspects'),
+      chartExpandAspectCount: aspectRows.length + (aspectRows.length === 1 ? ' aspect' : ' aspects') +
+        (aspectRows.length !== aspectRowsAll.length ? ' of ' + aspectRowsAll.length : ''),
+      chartExpandAspTypeChips: aspTypeChips,
+      chartExpandAspCatChips: aspCatChips,
       chartExpandTabs: [
         { id: 'points', label: 'Points', on: tab === 'points' ? 'true' : 'false', c: tab === 'points' ? 'var(--ac)' : 'var(--dim)', go: tabGo('points') },
         { id: 'aspects', label: 'Aspects', on: tab === 'aspects' ? 'true' : 'false', c: tab === 'aspects' ? 'var(--ac)' : 'var(--dim)', go: tabGo('aspects') },
@@ -34537,7 +34613,7 @@ class Component extends DCLogic {
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false,
-      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false });
+      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
   /* G15: arrow keys move and select, Home and End jump to the ends. Space
@@ -35189,18 +35265,30 @@ class Component extends DCLogic {
                   stroke: col[0], dash: col[1], w: col[2], op: st.aspSel === i ? .9 : .32,
                   go: () => this.setState({ aspSel: i }) };
               }),
-              wheelPlanets: placedRows.map(r => {
-                const rad = radiusFor[r.name], minor = r.ring === 2, cr = minor ? 13 : 19;
-                const pt = P(r.lon, rad), t1 = P(r.lon, 266), t2 = P(r.lon, rad + cr), dl = P(r.lon, rad - 30);
-                const on = st.placeSel === r.name;
-                return { glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
+              wheelPlanets: (() => {
+                // The Aspects grid's row-click highlight reaches the wheel through
+                // this pair of names, never through a second selection channel:
+                // chartExpandAspSel is an index into THIS SAME asps array (built
+                // with the identical natalAspects(expanded, {...}) call
+                // chartExpandVals() makes for its own grid), so the row a reader
+                // clicked and the pair of glyphs that light up here can never
+                // drift apart. Gated on chartExpandOpen so the small card's own
+                // "Expanded Chart" pill, which also sets chartMode:'expanded',
+                // never inherits a stale highlight from a closed modal.
+                const aspSelRow = (st.chartExpandOpen && st.chartExpandAspSel != null) ? asps[st.chartExpandAspSel] : null;
+                return placedRows.map(r => {
+                  const rad = radiusFor[r.name], minor = r.ring === 2, cr = minor ? 13 : 19;
+                  const pt = P(r.lon, rad), t1 = P(r.lon, 266), t2 = P(r.lon, rad + cr), dl = P(r.lon, rad - 30);
+                  const on = st.placeSel === r.name || (aspSelRow && (r.name === aspSelRow.a.name || r.name === aspSelRow.b.name));
+                  return { glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
                   c: this.CAT_COLOR[r.category] || '#2fff8f',
                   bg: on ? 'rgba(47,255,143,.24)' : '#15141b', sw: on ? 2.2 : 1.2,
                   tx1: t1.x.toFixed(1), ty1: t1.y.toFixed(1), tx2: t2.x.toFixed(1), ty2: t2.y.toFixed(1),
                   dx: dl.x.toFixed(1), dy: dl.y.toFixed(1), degLabel: Math.floor(r.deg) + '\u00b0',
                   tip: this.pointTooltip(r, 'House ' + houseOf(r)),
                   go: () => openPlanet(r.name) };
-              }),
+                });
+              })(),
               chartFeatures: (() => {
                 const T = (t, x) => ({ ...this.tagLine(t, x), hasTag: true });
                 // SIGN_LONG and HOUSE_LONG each hold two or three sentences. Splice only

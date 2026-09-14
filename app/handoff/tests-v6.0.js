@@ -2352,6 +2352,51 @@
           crisis: helpInk.some(function (c) { return /229,\s*83,\s*77/.test(c); }) });
       app.setState({ dtSearch: false, dtQuery: '' });
       await sleep(250);
+
+      /* ---- N40 to N40b: the maximize overlay's own smoke, and its tooltips ----
+         The overlay's controls, dismissal paths and layout were driven by hand
+         across three viewports when they were built; nothing in this suite had
+         driven the ⛶ control itself, or checked that a sampled point's tooltip
+         actually carries the registry's own symbolism rather than a blank
+         string a missing wire would still let the row render with. */
+      onStep('new surfaces: the maximize chart overlay');
+      app.setState({ tab: 'spirit', spiritView: 'astrology', chartExpandOpen: false, chartExpandAspSel: null });
+      await sleep(400);
+      var expandBtn = dd.querySelector('[aria-label="Expand chart"]');
+      if (expandBtn) expandBtn.click();
+      await sleep(500);
+      var dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      var dlgOpen = !!dlg;
+      var closeBtn = dlg ? dlg.querySelector('[aria-label="Close expanded chart"]') : null;
+      if (closeBtn) closeBtn.click();
+      await sleep(350);
+      var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      t('N40', 'The maximize control opens the expanded chart overlay and the close control dismisses it',
+        { opened: true, closed: true },
+        { opened: dlgOpen, closed: dlgClosedNow });
+
+      /* Ten registry ids, evenly spread rather than the first ten, so the
+         sample crosses asteroids, centaurs, TNOs, nodes, hypotheticals,
+         comets and derived points rather than staying inside one category.
+         Reopened for this row since N40 just closed it. */
+      if (expandBtn) expandBtn.click();
+      await sleep(500);
+      dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      var sample = app.EXPANDED_REGISTRY.filter(function (_, i) { return i % 8 === 0; }).slice(0, 10);
+      var rowsNow = app.fullChart(true);
+      var titleButtons = dlg ? [].slice.call(dlg.querySelectorAll('button[title]')) : [];
+      var mismatched = sample.filter(function (reg) {
+        var row = rowsNow.filter(function (r) { return r.id === reg.id; })[0];
+        if (!row) return true;
+        var btn = titleButtons.filter(function (b) { return b.getAttribute('title').indexOf(row.name) !== -1; })[0];
+        var title = btn ? btn.getAttribute('title') : app.pointTooltip(row, '');
+        return row.lon == null ? title.indexOf('no ephemeris') === -1 : title.indexOf(reg.tooltip) === -1;
+      }).map(function (reg) { return reg.id; });
+      t('N40b', 'A sample of ten expanded-registry points each render their own symbolism, or their own honest absence, in the rendered tooltip',
+        { sampled: 10, mismatched: [] },
+        { sampled: sample.length, mismatched: mismatched });
+      app.setState({ chartExpandOpen: false, chartExpandAspSel: null });
+      await sleep(250);
     } catch (e) {
       t('N-ERR', 'New surfaces harness failure: ' + (e && e.message), 'no error', String(e && e.message));
     } finally {
