@@ -55,6 +55,7 @@ a{color:#2fff8f;text-decoration:none}a:hover{color:#7dffb9}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes veilIn{from{opacity:0}to{opacity:1}}
+@keyframes chartxScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 html{scroll-behavior:smooth}
 html,body{max-width:100%;overflow-x:hidden}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
@@ -62,9 +63,19 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
 .syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
-.chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr;gap:0;width:92vw;height:88vh;max-width:1400px}
+.chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr auto;grid-template-areas:"houses wheel points" "aspects aspects aspects";gap:0;width:92vw;height:90vh;max-width:1400px;animation:chartxScale .2s ease-out}
 .chartx-row:hover{background:rgba(47,255,143,.08)}
-@media (max-width:900px){.chartx-grid{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;width:96vw;height:92vh}.chartx-panel-left{max-height:110px}.chartx-panel-right{max-height:38vh}}
+.chartx-panel-left{grid-area:houses}
+.chartx-panel-center{grid-area:wheel;width:min(60vh,60vw);height:min(60vh,60vw);margin:auto;justify-self:center;align-self:center}
+.chartx-panel-right{grid-area:points}
+.chartx-panel-aspects{grid-area:aspects;overflow-x:auto;overflow-y:hidden}
+.chartx-tabbar{display:none}
+@media (max-width:900px){
+  .chartx-grid{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"wheel" "tabbar" "content";width:96vw;height:92vh}
+  .chartx-panel-center{width:min(60vh,60vw,90vw);height:min(60vh,60vw,90vw)}
+  .chartx-panel-left,.chartx-panel-right,.chartx-panel-aspects{grid-area:content;max-height:none;overflow-x:auto}
+  .chartx-tabbar{display:flex;grid-area:tabbar}
+}
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
 input[type="date"]{color-scheme:dark}
@@ -3795,9 +3806,9 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;animation:veilIn .18s ease">
+  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
     <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto">
+      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
         <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
         <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
           <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
@@ -3844,7 +3855,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
       </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
         <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
           <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
           <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
@@ -3917,6 +3928,24 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-for>
           </div>
+        </div>
+      </div>
+      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
+        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
+        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
+        <div style="display:flex;gap:8px;padding:8px 10px">
+          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
+            <button onClick="{{ a.go }}" title="{{ a.nameA }} {{ a.aspLabel }} {{ a.nameB }}, orb {{ a.orb }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:120px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);font:400 11px var(--fu);color:var(--tx)">
+              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
+              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
+              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
+              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
+            </button>
+          </sc-for>
         </div>
       </div>
     </div>
@@ -7841,9 +7870,9 @@ input[type="date"]{color-scheme:dark}
   </div>
 </main>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;animation:veilIn .18s ease">
+  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
     <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto">
+      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
         <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
         <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
           <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
@@ -7890,7 +7919,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
       </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
         <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
           <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
           <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
@@ -7963,6 +7992,24 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-for>
           </div>
+        </div>
+      </div>
+      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
+        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
+        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
+        <div style="display:flex;gap:8px;padding:8px 10px">
+          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
+            <button onClick="{{ a.go }}" title="{{ a.nameA }} {{ a.aspLabel }} {{ a.nameB }}, orb {{ a.orb }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:120px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);font:400 11px var(--fu);color:var(--tx)">
+              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
+              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
+              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
+              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
+            </button>
+          </sc-for>
         </div>
       </div>
     </div>
@@ -8997,6 +9044,15 @@ class Component extends DCLogic {
   componentDidMount() {
     this.pruneDefaultProfile();
     window.__incommonApp = this;
+    // Restore the expanded chart overlay across a reload. chartExpandGo
+    // always sets chartMode alongside chartExpandOpen, so the restore does
+    // too, or a reload would reopen the overlay over the basic wheel
+    // instead of the one it was actually showing.
+    try {
+      if (localStorage.getItem('incommon.chart.expanded') === '1') {
+        this.setState({ chartExpandOpen: true, chartMode: 'expanded' });
+      }
+    } catch (e) {}
     /* Initialize ephemeris router (V1.0.0): dual-backend system (Swiss WASM + fallback).
        Loads in background; app is interactive before WASM initializes. */
     const EI = typeof window !== 'undefined' && window.EphemerisIntegration;
@@ -9095,6 +9151,7 @@ class Component extends DCLogic {
     this.skySync();
     this.syncSectionToTab();
     this.syncAtlasItem();
+    this.syncChartExpandPersist();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -11232,6 +11289,30 @@ class Component extends DCLogic {
       };
     }).filter(s => s.count);
 
+    // The aspects grid: the SAME rich aspect pass the wheel's own lines use
+    // (identical options), so the grid and the wheel can never disagree
+    // about which contacts exist. "Horizontally scrollable" per the brief -
+    // a row of small cards, not a tall table, since a vertical list here
+    // would just be a second points table with different columns.
+    const asps = this.natalAspects(true, { rich: true, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true });
+    const aspectRows = asps.map((x, i) => ({
+      id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name,
+      aspLabel: this.aspName(x.asp), orb: x.orb.toFixed(1) + '°',
+      color: (this.ASP_COLOR[x.asp] || ['var(--dim)'])[0],
+      go: () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: x.a.name, aspSel: null })
+    }));
+
+    // Below 900px (this.chartx-grid's own breakpoint), Houses/Points/Aspects
+    // become tabs instead of a stack: three panels shown at once is how a
+    // table with a Speed and a Status column stopped being readable on a
+    // phone. dtW is the same tracked width syncSectionToTab and friends
+    // already read; window.innerWidth is the fallback for the first render
+    // before it is set.
+    const narrow = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 900;
+    const tab = st.chartExpandTab || 'points';
+    const tabGo = t => () => this.setState({ chartExpandTab: t });
+    const panelDisplay = key => (!narrow || tab === key) ? 'flex' : 'none';
+
     return {
       ...base,
       chartExpandHouses: houses,
@@ -11253,7 +11334,18 @@ class Component extends DCLogic {
       chartExpandCometsGo: () => this.setState({ chartExpandShowComets: !st.chartExpandShowComets }),
       chartExpandShowMinorAspects: st.chartExpandShowMinorAspects !== false,
       chartExpandMinorAspectsMark: st.chartExpandShowMinorAspects !== false ? '✓' : '',
-      chartExpandMinorAspectsGo: () => this.setState({ chartExpandShowMinorAspects: st.chartExpandShowMinorAspects === false })
+      chartExpandMinorAspectsGo: () => this.setState({ chartExpandShowMinorAspects: st.chartExpandShowMinorAspects === false }),
+      chartExpandAspectRows: aspectRows,
+      chartExpandAspectCount: aspectRows.length + (aspectRows.length === 1 ? ' aspect' : ' aspects'),
+      chartExpandTabs: [
+        { id: 'points', label: 'Points', on: tab === 'points' ? 'true' : 'false', c: tab === 'points' ? 'var(--ac)' : 'var(--dim)', go: tabGo('points') },
+        { id: 'aspects', label: 'Aspects', on: tab === 'aspects' ? 'true' : 'false', c: tab === 'aspects' ? 'var(--ac)' : 'var(--dim)', go: tabGo('aspects') },
+        { id: 'houses', label: 'Houses', on: tab === 'houses' ? 'true' : 'false', c: tab === 'houses' ? 'var(--ac)' : 'var(--dim)', go: tabGo('houses') }
+      ],
+      chartExpandTabBarDisplay: narrow ? 'flex' : 'none',
+      chartExpandHousesDisplay: panelDisplay('houses'),
+      chartExpandPointsDisplay: panelDisplay('points'),
+      chartExpandAspectsDisplay: panelDisplay('aspects')
     };
   }
   // 360° -> screen. The Ascendant sits at the left edge (9 o'clock) and
@@ -17845,6 +17937,24 @@ class Component extends DCLogic {
        rather than composed here so a screen reader hears the same sentence the
        form prints, and a lookup reached by keyboard announces identically. */
     if (prev.geoNetSay !== st.geoNetSay && st.geoNetSay) this.speak(st.geoNetSay, 'polite');
+  }
+  /* Persists the expanded-chart overlay's open/closed state across a
+     reload. Snapshot-diffed the same way announceChanges() is, rather than
+     read off a prevState the DC runtime's componentDidUpdate() does not
+     receive.
+
+     Body scroll lock is NOT toggled here: html,body already carries
+     overflow:hidden unconditionally (see the global CSS rule near the top
+     of this file), because nothing in this app ever scrolls the page
+     itself, modal open or not - every scrollable region, including this
+     overlay's own three panels, is an inner container with its own
+     overflow-y. There is no "unlocked" state to lock away from, so a
+     toggle here would set a property nothing reads. */
+  syncChartExpandPersist() {
+    const open = !!this.state.chartExpandOpen;
+    if (this._chartExpandPrevOpen === open) return;
+    this._chartExpandPrevOpen = open;
+    try { localStorage.setItem('incommon.chart.expanded', open ? '1' : '0'); } catch (e) {}
   }
 
   /* G1: a button, not an anchor. An href fragment would be written into
