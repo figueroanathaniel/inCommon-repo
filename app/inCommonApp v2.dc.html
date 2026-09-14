@@ -3847,15 +3847,15 @@ input[type="date"]{color-scheme:dark}
       <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
         <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
           <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
             Group
           </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
             Comets on wheel
           </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
             Minor aspects
           </button>
@@ -3874,7 +3874,7 @@ input[type="date"]{color-scheme:dark}
             <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
               <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
               <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                   <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                   <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                   <span style="text-align:center">{{ r.house }}</span>
@@ -3887,7 +3887,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                 <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                 <span style="text-align:center">{{ r.house }}</span>
@@ -3900,14 +3900,14 @@ input[type="date"]{color-scheme:dark}
           <div style="border-top:1px solid var(--bd);margin-top:6px">
             <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
               <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
+                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
                   <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
                   <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
                   <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
                 </button>
                 <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
                   <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:36px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                       <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                       <span style="text-align:center">{{ r.house }}</span>
@@ -7893,15 +7893,15 @@ input[type="date"]{color-scheme:dark}
       <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
         <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
           <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
             Group
           </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
             Comets on wheel
           </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;flex:none;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
+          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
             <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
             Minor aspects
           </button>
@@ -7920,7 +7920,7 @@ input[type="date"]{color-scheme:dark}
             <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
               <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
               <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                   <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                   <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                   <span style="text-align:center">{{ r.house }}</span>
@@ -7933,7 +7933,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                 <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                 <span style="text-align:center">{{ r.house }}</span>
@@ -7946,14 +7946,14 @@ input[type="date"]{color-scheme:dark}
           <div style="border-top:1px solid var(--bd);margin-top:6px">
             <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
               <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:38px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
+                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
                   <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
                   <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
                   <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
                 </button>
                 <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
                   <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:36px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
+                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
                       <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
                       <span style="text-align:center">{{ r.house }}</span>
