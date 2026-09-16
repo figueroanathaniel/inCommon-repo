@@ -565,9 +565,11 @@ const CHIRON_JPL = [
   tTrue("E9", "the stated accuracy is not better than the measured worst case",
     c.accuracyDeg >= worst);
   const appSrcE = fs.readFileSync(path.join(repo, "app", "inCommonApp v2.dc.html"), "utf8");
-  tTrue("E10", "and the app withholds a degree symbol from every unpinned body",
-    appSrcE.indexOf("DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta']") > -1 &&
-    appSrcE.indexOf('plHasSabian: !!sb && this.degreeSafe(name)') > -1);
+  /* The expanded chart addresses these five by registry id as well as by name,
+     so both spellings have to be withheld or one route prints the symbol. */
+  tTrue("E10", "and the app withholds a degree symbol from every unpinned body, by name and by registry id",
+    appSrcE.indexOf("DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta', 'chiron', 'ceres', 'pallas', 'juno', 'vesta']") > -1 &&
+    appSrcE.indexOf('plHasSabian: !!sb && this.degreeSafe(rk)') > -1);
   tTrue("E11", "the retired single anchor model is gone from the app, so one body has one answer",
     appSrcE.indexOf("chironEl()") === -1 && appSrcE.indexOf("CHIRON_EL") === -1);
 })();

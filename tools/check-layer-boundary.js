@@ -65,6 +65,7 @@ const LAYERS = {
   mechanics: [
     'incommon-core.js',            /* the shared core both the app and the Node suites execute */
     'minor-bodies-ephemeris.js',   /* the ephemeris itself */
+    'minor-body-elements.js',      /* JPL Horizons elements for the expanded chart, each with its measured worst case */
     'ephemeris-cache.js',      /* in memory memo, positions only, never persisted */
     'arc-solver.js',               /* bisects a longitude function the caller supplies */
     'birth-time.js',               /* known / unknown / unanswered, and the offset for the birth date */
@@ -187,7 +188,7 @@ const PROSE = [
 
 /* ---------- module surface ---------- */
 
-const EPHEMERIS_GLOBALS = ['MinorBodies', 'MinorBodiesEphemeris'];
+const EPHEMERIS_GLOBALS = ['MinorBodies', 'MinorBodiesEphemeris', 'MinorBodyElements'];
 /* A proxy for "calls no ephemeris": spherical trigonometry and Julian day
    arithmetic. An interpretation module has no business with either. */
 const ORBITAL_MARKERS = [/\bMath\.atan2\s*\(/, /\bMath\.asin\s*\(/, /\bjulian/i, /\b2451545\b/, /\bobliquity\b/i];

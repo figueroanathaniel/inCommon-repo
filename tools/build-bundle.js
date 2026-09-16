@@ -74,6 +74,8 @@ const MODULES = [
   'sabian-symbols.js',
   'sabian-symbols-data.js',
   'minor-bodies-ephemeris.js',
+  /* The expanded chart's fetched elements. Reads nothing above it. */
+  'minor-body-elements.js',
   'placement-content.js',
   'numerology-content.js',
   'today-integration.js',

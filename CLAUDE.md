@@ -611,16 +611,19 @@ same Kepler solve, copied rather than re-derived so the two could not
 silently disagree. Basic mode is untouched - `chartAt()`, `PLNS` and
 `fullChart(false)` never see any of this.
 
-**Twenty-nine of the eighty compute for real; the rest say so honestly.**
-Chiron and the four asteroids already came from `window.MinorBodies`. New:
-Eris and Sedna (full 3D Keplerian, `TNO_3D`), the eight planetary nodes
-(Standish/JPL mean elements), Lilith (mean) and Selena, the three named
-comets (Halley/Hale-Bopp/Hyakutake, mundane only), Vertex/Antivertex, Part of
-Spirit, the Aries Point, and the Sun/Moon midpoint. The other fifty-one
-asteroids, centaurs, TNOs and Hamburg School hypotheticals have no orbital
-elements sourced anywhere in this codebase and stay `status: 'unavailable'`
-with a real reason (`UNCOMPUTED_WHY`), by the same rule engine.ts's own file
-header states: a missing position is honest, an invented one is not.
+**Seventy-nine of the eighty compute; the one that does not says why.**
+Chiron and the four asteroids come from `window.MinorBodies`. The eight
+planetary nodes (Standish/JPL mean elements), Lilith (mean) and Selena, the
+three named comets (Halley/Hale-Bopp/Hyakutake, mundane only), Vertex and
+Antivertex, Part of Spirit, the Aries Point and the Sun/Moon midpoint are
+formulas inside the app. The other fifty-one (asteroids, centaurs, TNOs,
+Eris and Sedna, and the eight Hamburg hypotheticals) come from
+`minor-body-elements.js`: see "The expanded chart's bodies are fetched"
+below. Lilith (osculating) is the one left `status: 'unavailable'`, with its
+own reason (`LILITH_OSC_WHY`) rather than a generic one, by the rule
+engine.ts's own header states: a missing position is honest, an invented one
+is not. Vertex, Antivertex and Part of Spirit also stay unavailable without
+a birth time, and say that.
 
 **Ring 1 and ring 2 are a stagger band, not a distance from centre.** Both
 sit inside the sign boundary, where the small card's glyphs already lived;
@@ -706,6 +709,74 @@ points and roughly two hundred aspects took 20ms end to end in this session's
 own testing, comfortably inside the 150ms budget on the main thread, the
 same way `computeAll()`'s own header already argues for the ~97-point spec
 module it mirrors.
+
+## The expanded chart's bodies are fetched, and every one is measured
+Fifty-one of the eighty expanded points shipped with no orbital elements, so
+the table read "n/a: no ephemeris" and, worse, clicking any expanded point
+opened a blank page: `placementVals()` handed `PlacementContent.build()` a
+body it had no entry for, `build()` returned null, and the page switched
+itself off. Even the twenty-nine that had positions drew nothing on click.
+Both halves were fixed, and the rule for each is worth keeping.
+
+**Positions: `minor-body-elements.js`, generated, never typed.**
+`tools/fetch-minor-body-elements.js` asks NASA JPL Horizons for heliocentric
+osculating elements (J2000 ecliptic) every year from 1900 to 2100 and for
+Horizons' own geocentric apparent longitude every 181 days, then keeps, per
+body, the widest epoch spacing whose worst case against those references
+stays within 0.1 degree: twenty years for the Kuiper belt, one year for the
+near Earth asteroids, two for the main belt. The module solves Kepler from
+the NEAREST epoch, which is why this works: an osculating set is exact at its
+epoch and drifts only by what the planets do in the gap. Worst case over all
+48 real bodies is 0.128 degree (Apollo); most main belt bodies are under 0.07.
+The reduction (Meeus Sun, light time, precession, nutation, aberration) was
+measured to 0.001 degree against the Swiss Ephemeris on the hypotheticals, so
+the table is limited by elements, not arithmetic.
+
+**The fetcher checks the name Horizons returns.** A mistyped designation is
+a real, different asteroid and would look exactly right. It caught one on its
+first run: Atlantis is 1198, and 2791 is Paradise.
+
+**The hypotheticals are not fetched**, because they do not exist. Their
+elements are the Witte/Sieggruen set refined by James Neely, as the Swiss
+Ephemeris carries them (epoch and equinox J1900), and their references were
+taken from swisseph-wasm. Their pages say they are not bodies.
+
+**`tools/check-minor-body-elements.js` re-measures every recorded worst case**
+against `tools/fixtures/minor-bodies-horizons.json` (22,624 positions), holds
+every body under a 0.2 degree ceiling, asserts real bodies return null
+outside the span they were measured over, and accounts for all 80 registry
+ids: app formula, this module, or declared unavailable with the sentence the
+page shows. Nudging one Hygiea epoch by 0.3 degree turns it red.
+
+**Degree symbols are earned by that number.** `degreeSafe()` lets a fetched
+body name a degree when its measured worst case is at or under
+`DEGREE_SAFE_WORST` (0.2). The comets do not: one osculating set each,
+unmeasured across a lifetime. Chiron and the four `MinorBodies` asteroids are
+withheld by name AND by registry id, because the expanded chart addresses
+them by id and a name-only list let `pallas` through.
+
+**Readings: 75 entries in `placement-content.js`, keyed by registry id.**
+Same fields and grammar as the 21 core bodies, because the same composer
+reads them. `keyFor()` resolves the five ids that already had entries under
+plain names; `label` is what a sentence says. The definition carries the
+origin (myth, discovery, how the point is defined), because a minor point
+without its origin is a keyword with nothing under it. The comet entries say
+they are mundane on the page, and Hylonome's role names reaching someone
+before any reading.
+
+**A registry point is addressed by id, never by name.** Two points are named
+Cupido (asteroid 763 and the Hamburg hypothetical). `pointKey(r)` is
+`r.id || r.name` and every route into a placement page, the wheel's stagger
+map, its labels, the highlight and the search rows use it. `pointLabel(r)`
+adds "(Hamburg)" for the hypotheticals. `radiusFor` keyed by name was how the
+labels of every expanded point silently vanished off the wheel mid-change.
+
+**Two outer ring points are not aspected to each other.** With every body
+placed, asteroid to hypothetical and centaur to TNO pairs were 393 of 708
+contacts on the sample chart and tripled the overlay's render. A minor body is
+read by what it touches among the planets, lights, nodes, angles and ring 1.
+`stelliums()` counts the core and ring 1 only, for the same reason: with
+eighty points placed every sign holds three of something.
 
 ## The maximize button opens a portal that is not a portal
 The ⛶ button, the focus trap, all three dismiss paths, the backdrop and the
@@ -2365,17 +2436,18 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds twenty-five scripts. Eighteen are gates and are worth running
+`tools/` holds twenty-seven scripts. Nineteen are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
-`check-registry-integration.js`.
-Five generate:
+`check-registry-integration.js`, `check-minor-body-elements.js`.
+Six generate:
 `build-bundle.js`, `build-icons.js`,
-`build-ui-icons.js`, `build-gazetteer.js`, `build-extended-points-doc.js`
+`build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
+(needs network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
 doc's own counts can never drift from the registry's). `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position

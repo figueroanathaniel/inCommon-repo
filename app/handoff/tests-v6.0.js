@@ -2394,7 +2394,11 @@
       var mismatched = sample.filter(function (reg) {
         var row = rowsNow.filter(function (r) { return r.id === reg.id; })[0];
         if (!row) return true;
-        var btn = titleButtons.filter(function (b) { return b.getAttribute('title').indexOf(row.name) !== -1; })[0];
+        /* Matched by name AND glyph: the asteroid Cupido and the Hamburg Cupido
+           share a name, and once both are drawn a bare name finds whichever
+           row happens to come first. */
+        var head = row.lon == null ? row.name + ' ·' : row.name + ' (' + row.glyph + ')';
+        var btn = titleButtons.filter(function (b) { return b.getAttribute('title').indexOf(head) === 0; })[0];
         var title = btn ? btn.getAttribute('title') : app.pointTooltip(row, '');
         return row.lon == null ? title.indexOf('no ephemeris') === -1 : title.indexOf(reg.tooltip) === -1;
       }).map(function (reg) { return reg.id; });

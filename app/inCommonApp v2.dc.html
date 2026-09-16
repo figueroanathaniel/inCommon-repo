@@ -153,6 +153,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./sabian-symbols.js"></script>
 <script src="./sabian-symbols-data.js"></script>
 <script src="./minor-bodies-ephemeris.js"></script>
+<script src="./minor-body-elements.js"></script>
 <script src="./placement-content.js"></script>
 <script src="./numerology-content.js"></script>
 <script src="./today-integration.js"></script>
@@ -9249,6 +9250,10 @@ class Component extends DCLogic {
     return '/' + tab;
   }
   bodyFromSlug(sl) {
+    // Registry ids first: two registry points share the name Cupido, and an
+    // address has to name exactly one of them.
+    const reg = this.EXPANDED_REGISTRY.find(r => this.slug(r.id) === sl);
+    if (reg) return reg.id;
     const PC = window.PlacementContent;
     const names = PC && PC.bodies ? Object.keys(PC.bodies) : [];
     return names.find(n => this.slug(n) === sl) || null;
@@ -10121,14 +10126,15 @@ class Component extends DCLogic {
   // The id/name/glyph/category/tooltip/reference fields are copied verbatim
   // from that registry so the two cannot silently disagree; expandedLonOf()
   // below is the plain-JS port of app/ephemeris/engine.ts's computation
-  // layer, ported the same way and for the same reason. Most of these 80
-  // points have no orbital elements sourced anywhere in this codebase and
-  // stay honestly 'unavailable' (see engine.ts's own file header on why a
-  // missing position beats an invented one); expandedLonOf() computes real
-  // positions for the ones that do: Chiron, Ceres/Pallas/Juno/Vesta (via
-  // window.MinorBodies), Eris, Sedna, the eight planetary nodes, Lilith
-  // (mean), Selena, the Aries Point, Vertex/Antivertex, Part of
-  // Fortune/Spirit, the Sun/Moon midpoint, and the three named comets.
+  // layer, ported the same way and for the same reason. Seventy nine of the
+  // 80 compute: Chiron and Ceres/Pallas/Juno/Vesta through window.MinorBodies,
+  // the asteroids, centaurs, TNOs and Hamburg hypotheticals through
+  // window.MinorBodyElements (JPL Horizons elements, each with a measured
+  // worst case), and the nodes, Lilith (mean), Selena, the Aries Point,
+  // Vertex/Antivertex, Part of Spirit, the Sun/Moon midpoint and the three
+  // comets by formula here. Lilith (osculating) stays 'unavailable' and says
+  // why (see engine.ts's own file header on why a missing position beats an
+  // invented one).
   EXPANDED_REGISTRY = [
     // ---- ASTEROIDS ----
     { id: 'ceres', name: 'Ceres', glyph: '⚳', category: 'asteroid', tooltip: 'nurturing, motherhood, grief, harvest, parenting', reference: 'food, attachment, how you nurture' },
@@ -10235,6 +10241,12 @@ class Component extends DCLogic {
 
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'no orbital elements sourced for this body';
+  /* The reasons a registry point is not drawn, one per cause, so the page can
+     say which one it is rather than a generic absence. LILITH_OSC_WHY is
+     asserted word for word by tools/check-minor-body-elements.js. */
+  ELEMENTS_MISSING_WHY = 'minor-body-elements.js did not load, so the orbital elements for this body are not available';
+  OUT_OF_SPAN_WHY = 'this birth date is outside 1900 to 2100, the span its orbital elements were measured over';
+  LILITH_OSC_WHY = 'the osculating apogee moves up to thirty degrees either side of the mean within a month, and needs a lunar theory this build does not carry';
   PL_LONG = {
     Sun: 'Your core identity, vitality, and conscious will: the part of you that wants to be someone in particular.',
     Moon: 'Feeling, memory, and what actually soothes you. The private weather underneath the public day.',
@@ -10706,12 +10718,41 @@ class Component extends DCLogic {
 
      This is the gate the next body passes through too: measure it, record the
      worst case, and let that decide what it is allowed to say. */
-  DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta'];
-  degreeSafe(name) { return this.DEGREE_SAFE_EXCEPT.indexOf(name) === -1; }
-  bodyAccuracyNote(name) {
-    if (this.degreeSafe(name)) return '';
+  DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta', 'chiron', 'ceres', 'pallas', 'juno', 'vesta'];
+  /* The fetched bodies earn a degree by measurement: a worst case against JPL
+     Horizons (or the Swiss Ephemeris, for the hypotheticals) at or under a
+     fifth of a degree. check-minor-body-elements.js holds every body to the
+     same ceiling. The comets are one osculating set each, unmeasured across a
+     lifetime, so they do not. */
+  DEGREE_SAFE_WORST = 0.2;
+  COMET_IDS = ['halley', 'halebopp', 'hyakutake'];
+  degreeSafe(name) {
+    if (this.DEGREE_SAFE_EXCEPT.indexOf(name) !== -1 || this.COMET_IDS.indexOf(name) !== -1) return false;
+    const ME = window.MinorBodyElements;
+    if (ME && ME.has(name)) return ME.worstDeg(name) <= this.DEGREE_SAFE_WORST;
+    return true;
+  }
+  /* Where a fetched body's position comes from and how good it is, in one
+     sentence, whether or not it keeps its degree. */
+  bodySourceNote(key, name) {
+    const ME = window.MinorBodyElements;
+    if (!ME || !ME.has(key)) return '';
+    const w = ME.worstDeg(key), fig = w < 0.01 ? 'under a hundredth' : 'about ' + w.toFixed(2);
+    if (ME.source(key) === 'JPL Horizons') {
+      return name + ' is computed from NASA JPL Horizons orbital elements for minor planet ' + ME.designation(key) +
+        ', checked against Horizons’ own positions every six months from 1900 to 2100. Its worst case is ' + fig + ' of a degree.';
+    }
+    return name + ' does not exist as a body in the sky. It is one of the Hamburg School’s eight hypothetical points, placed by the orbit Witte and Sieggrün defined for it, and computed here to within ' + fig + ' of a degree of the Swiss Ephemeris.';
+  }
+  bodyAccuracyNote(key, label) {
+    if (this.degreeSafe(key)) return '';
+    const name = label || key;
+    if (this.COMET_IDS.indexOf(key) !== -1) {
+      return 'A comet’s orbit is changed by every pass near a planet, and this position comes from a single set of elements, so the sign is worth reading and the exact degree is not. No degree symbol is shown for it.';
+    }
     const MBE = window.MinorBodiesEphemeris;
-    const st = MBE && MBE.status ? MBE.status().find(x => x.body === name) : null;
+    const mbeName = { chiron: 'Chiron', ceres: 'Ceres', pallas: 'Pallas', juno: 'Juno', vesta: 'Vesta' }[key] || key;
+    const st = MBE && MBE.status ? MBE.status().find(x => x.body === mbeName) : null;
     if (st && st.accuracyDeg) {
       return name + ' is computed from fitted orbital elements and is good to about ' +
         st.accuracyDeg + ' of a degree, so the sign and the aspects hold and the exact degree is not claimed. No degree symbol is shown for it.';
@@ -10949,7 +10990,14 @@ class Component extends DCLogic {
         const lon = this.lonRaw(nm, t);
         return lon == null ? { lon: null, status: 'unavailable', note: this.UNCOMPUTED_WHY } : { lon, status: 'ok' };
       }
-      case 'eris': case 'sedna': return { lon: this.tno3DLonOf(reg.id, t), status: 'ok' };
+      case 'eris': case 'sedna': {
+        // Horizons elements when the module is here (worst case 0.03 degree),
+        // the single epoch set otherwise, so a missing module costs accuracy
+        // rather than the two bodies.
+        const ME = window.MinorBodyElements, lon = ME && ME.has(reg.id) ? ME.lon(reg.id, t) : null;
+        return { lon: lon != null ? lon : this.tno3DLonOf(reg.id, t), status: 'ok' };
+      }
+      case 'lilithOsc': return { lon: null, status: 'unavailable', note: this.LILITH_OSC_WHY };
       case 'mercuryNode': return { lon: this.planetaryNodeOf('Mercury', t), status: 'fixed' };
       case 'venusNode': return { lon: this.planetaryNodeOf('Venus', t), status: 'fixed' };
       case 'marsNode': return { lon: this.planetaryNodeOf('Mars', t), status: 'fixed' };
@@ -10981,8 +11029,16 @@ class Component extends DCLogic {
         let diff = moon - sun; if (diff > 180) diff -= 360; if (diff < -180) diff += 360;
         return { lon: this.norm360(sun + diff / 2), status: 'fixed' };
       }
-      default:
-        return { lon: null, status: 'unavailable', note: this.UNCOMPUTED_WHY };
+      default: {
+        // Asteroids, centaurs, TNOs and the Hamburg hypotheticals: fetched
+        // elements, each with its own measured worst case (see
+        // minor-body-elements.js and tools/check-minor-body-elements.js).
+        const ME = window.MinorBodyElements;
+        if (!ME) return { lon: null, status: 'unavailable', note: this.ELEMENTS_MISSING_WHY };
+        if (!ME.has(reg.id)) return { lon: null, status: 'unavailable', note: this.UNCOMPUTED_WHY };
+        const lon = ME.lon(reg.id, t);
+        return lon == null ? { lon: null, status: 'unavailable', note: this.OUT_OF_SPAN_WHY } : { lon, status: 'ok' };
+      }
     }
   }
   // Central-difference speed (deg/day), same half-day step engine.ts's
@@ -11199,6 +11255,13 @@ class Component extends DCLogic {
       // each other, exactly like the basic grid, even while every other
       // expanded computation keeps running underneath.
       if (opts.rich && opts.minorAspects === false && (a.group === 'extra' || b.group === 'extra')) return;
+      // Two outer ring points are not read against each other. A minor body
+      // is read by what it touches among the planets, the lights, the nodes,
+      // the angles and the inner ring. With every registry point placed,
+      // asteroid to hypothetical and centaur to TNO pairs were 393 of 708
+      // contacts on a sample chart: a grid of them buries the ones the
+      // tradition actually reads, and cost the overlay three times its render.
+      if (a.group === 'extra' && b.group === 'extra' && a.ring === 2 && b.ring === 2) return;
       let d = Math.abs(this.norm360(a.lon - b.lon)); if (d > 180) d = 360 - d;
       const scale = Math.min(scaleOf(a), scaleOf(b));
       table.forEach(([ang, nm]) => {
@@ -11209,7 +11272,10 @@ class Component extends DCLogic {
     return out.sort((x, y) => x.orb - y.orb);
   }
   stelliums(expanded) {
-    const rows = this.placed(expanded).filter(r => r.group !== 'angle'), asc = this.ascendant(), sun = rows[0];
+    // A gathering is counted in the planets, nodes and the inner ring. With
+    // eighty minor points placed, every sign holds three of something, and a
+    // stellium found everywhere is a stellium found nowhere.
+    const rows = this.placed(expanded).filter(r => r.group !== 'angle' && (r.group !== 'extra' || r.ring === 1)), asc = this.ascendant(), sun = rows[0];
     const bySign = {}, byHouse = {};
     rows.forEach(r => {
       (bySign[r.sign] = bySign[r.sign] || []).push(r.name);
@@ -11273,7 +11339,7 @@ class Component extends DCLogic {
         catColor: this.CAT_COLOR[r.category] || 'var(--ac)',
         tip: this.pointTooltip(r, h ? 'House ' + h : ''),
         known: known, dim: known ? '1' : '.55',
-        go: known ? () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: r.name, aspSel: null }) : () => {}
+        go: () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: r.id || r.name, aspSel: null })
       };
     });
 
@@ -11963,7 +12029,10 @@ class Component extends DCLogic {
       chan: chan || null, partner: chan ? (chan[0] === sunGate.gate ? chan[1] : chan[0]) : null,
       hits: tr.personal.slice(0, 4), pyV: pyV, pmV: pmV, pdV: pdV, lp: lp, age: this.numerology().age };
   }
-  bodyEnergy(n) { const PC = window.PlacementContent; return PC && PC.bodies[n] ? PC.bodies[n].energy : 'its own business'; }
+  bodyEnergy(n) {
+    const PC = window.PlacementContent, k = PC && PC.keyFor ? PC.keyFor(n) : n;
+    return PC && PC.bodies[k] ? PC.bodies[k].energy : 'its own business';
+  }
   numEssence(v) { const NC = window.NumerologyContent; return NC ? NC.essence(v) : (this.NUM_MEANING[v] || ''); }
   dpOpen(sel) { return () => this.setState({ dpSel: sel }); }
   dailyAstroGroups(d) {
@@ -18195,30 +18264,39 @@ class Component extends DCLogic {
   // Placement detail page: one body, read in layers. Content comes from
   // placement-content.js; position, house, degree and Sabian address are this
   // profile's own chart.
+  /* A registry row is addressed by its id and a core row by its name, because
+     two registry points share the name Cupido. The label is what the reader
+     sees, and it tells the two apart. */
+  pointKey(r) { return r.id || r.name; }
+  pointLabel(r) { return r.category === 'hypothetical' ? r.name + ' (Hamburg)' : r.name; }
   placementVals() {
-    const st = this.state, PC = window.PlacementContent, name = st.placeSel;
+    const st = this.state, PC = window.PlacementContent, sel = st.placeSel;
     const on = st.tab === 'spirit' && st.spiritView === 'placement';
-    if (!on || !PC || !name) return { spiritPlacement: false };
-    const all = this.fullChart(true), r = all.find(x => x.name === name);
-    const names = all.map(x => x.name), i = Math.max(0, names.indexOf(name));
-    const prev = names[(i - 1 + names.length) % names.length], next = names[(i + 1) % names.length];
+    if (!on || !PC || !sel) return { spiritPlacement: false };
+    const all = this.fullChart(true), key = x => this.pointKey(x);
+    const r = all.find(x => key(x) === sel) || all.find(x => x.name === sel);
+    const i = Math.max(0, all.indexOf(r));
+    const prevR = all[(i - 1 + all.length) % all.length], nextR = all[(i + 1) % all.length];
     const goTo = n => () => this.setState({ placeSel: n });
-    const nav = { plPrevLabel: '\u2190 ' + prev, plNextLabel: next + ' \u2192', plPrevGo: goTo(prev), plNextGo: goTo(next),
+    const nav = { plPrevLabel: '\u2190 ' + this.pointLabel(prevR), plNextLabel: this.pointLabel(nextR) + ' \u2192',
+      plPrevGo: goTo(key(prevR)), plNextGo: goTo(key(nextR)),
       plBack: () => this.setState({ spiritView: 'astrology', placeSel: null }) };
     if (!r) return { spiritPlacement: false };
-    const b = PC.bodies[name] || {};
+    const rk = key(r), name = this.pointLabel(r), ck = PC.keyFor ? PC.keyFor(rk) : r.name;
+    const b = PC.bodies[ck] || {};
     if (r.uncomputed || r.lon == null) {
       return { spiritPlacement: true, ...nav, plName: name.toUpperCase(), plGlyph: r.glyph || b.glyph || '',
         plSummary: name + ': position not drawn', plUncomputed: true, plComputed: false,
         plWhyLines: [
-          { text: 'Better to say this plainly than to print a number that cannot be stood behind. ' + name + ' needs an ephemeris this offline build does not carry, so no position appears here. Supply one and this page fills in alongside the rest.' },
+          { text: 'Better to say this plainly than to print a number that cannot be stood behind. No position appears for ' + name + ' because ' + (r.note || 'this build carries no ephemeris for it') + '.' },
           { text: b.definition || '' },
-          { text: b.role || '' }
+          { text: b.role || '' },
+          { text: r.reference ? 'Astrologers read it in reference to ' + r.reference + '.' : '' }
         ].filter(x => x.text) };
     }
     const asc = this.ascendant(), house = this.houseOf(r.lon, all[0], asc);
     const S = window.SabianSymbols, sb = S ? S.at(r.lon) : null;
-    const c = PC.build({ body: name, sign: r.sign, deg: r.deg, house: house });
+    const c = PC.build({ body: ck, sign: r.sign, deg: r.deg, house: house });
     if (!c) return { spiritPlacement: false };
     const min = String(Math.floor((r.deg % 1) * 60)).padStart(2, '0');
     // The tag chips are gone from this page. Each section opens with a paragraph in
@@ -18230,13 +18308,13 @@ class Component extends DCLogic {
     // Contacts. The angles sit in the natal set now, so the Ascendant reads its
     // own aspects and its own transits exactly as a planet does.
     const edgeOf = k => (this.ASP_COLOR[k] || ['#7d9bff'])[0];
-    const plAspects = this.natalAspects(true).filter(x => x.a.name === name || x.b.name === name).slice(0, 8).map(x => {
-      const o = x.a.name === name ? x.b : x.a, k = String(x.asp).toLowerCase();
+    const plAspects = this.natalAspects(true).filter(x => key(x.a) === rk || key(x.b) === rk).slice(0, 8).map(x => {
+      const o = key(x.a) === rk ? x.b : x.a, k = String(x.asp).toLowerCase(), oName = this.pointLabel(o);
       return { glyph: o.glyph, edge: edgeOf(k),
-        title: name + ' ' + this.aspName(k) + ' ' + o.name,
+        title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0',
-        text: 'Read as ' + (this.ASP_MEAN[k] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(name) + '; on the other, ' + this.bodyEnergy(o.name) + '. Two functions of you that are permanently in the same conversation, and like most long conversations, its tone is set by how it is handled rather than by how it began.',
-        cta: 'See ' + o.name + ' \u2192', go: () => this.setState({ placeSel: o.name, aspSel: null }) };
+        text: 'Read as ' + (this.ASP_MEAN[k] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(rk) + '; on the other, ' + this.bodyEnergy(key(o)) + '. Two functions of you that are permanently in the same conversation, and like most long conversations, its tone is set by how it is handled rather than by how it began.',
+        cta: 'See ' + oName + ' \u2192', go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
       ? 'Orbs used here: 8\u00b0 for a conjunction or opposition, 6\u00b0 trine, 4\u00b0 square, 3\u00b0 sextile. Those numbers are a convention, not a law: astrologers argue about them constantly, and a contact does not switch off at the edge. Angle-to-angle pairs are left out, since geometry fixes those rather than your birth.'
@@ -18270,7 +18348,7 @@ class Component extends DCLogic {
       plSections: [
         [c.house, 'Start with the room rather than the planet. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
         [c.signInHouse, r.sign + ' sits over this house, which sets the manner the room is handled in. The house is the subject and the sign is the accent: you do not choose an accent, and you generally cannot hear your own.'],
-        [c.planet, 'Now the body itself, before it is placed anywhere. ' + name + ' means roughly the same thing in every chart ever drawn; what differs is where it lands and what condition it is in. Learning the plain meaning first prevents a great many clever misreadings.'],
+        [c.planet, (this.bodySourceNote(rk, name) ? this.bodySourceNote(rk, name) + ' ' : '') + 'Now the body itself, before it is placed anywhere. ' + name + ' means roughly the same thing in every chart ever drawn; what differs is where it lands and what condition it is in. Learning the plain meaning first prevents a great many clever misreadings.'],
         [c.planetInHouse, 'Put the two together: ' + name + ' operating in the ' + ordH + ' house. This is the sentence most people are looking for when they open a chart, and it is worth saying that it describes a tendency, not an appointment. Tendencies bend, and regularly do.'],
         [c.planetInSign, name + ' in ' + r.sign + ' is the same function wearing a different temperament. If the house says where and the sign says how, this is the how: the style that shows up whether or not the situation called for it.']
       ].map(x => sec(x[0], x[1])),
@@ -18285,9 +18363,9 @@ class Component extends DCLogic {
         ['Opportunities', c.working.opportunities], ['Obstacles', c.working.obstacles]]
         .map(([label, items]) => ({ label: label, items: items.map(t => ({ t: t })) })),
       plDegree: sec(c.degree, 'The last layer, and the one to hold most loosely. A single degree is a fine-grained claim, and fine-grained claims depend on a birth time being right to the minute. Read it as a prompt worth sitting with, not as a finding.'),
-      plHasSabian: !!sb && this.degreeSafe(name),
-      plNoSabian: !!sb && !this.degreeSafe(name),
-      plNoSabianWhy: this.bodyAccuracyNote(name),
+      plHasSabian: !!sb && this.degreeSafe(rk),
+      plNoSabian: !!sb && !this.degreeSafe(rk),
+      plNoSabianWhy: this.bodyAccuracyNote(rk, name),
       plSabian: sb ? (sb.symbol ? '\u201C' + sb.symbol + '\u201D' : sb.keyword + ': the phase of this degree; this build does not carry the 1925 wording.') : '',
       plSabianMeta: sb ? (sb.verified ? 'Sabian symbol \u00b7 ' + sb.address : 'Degree phase \u00b7 ' + sb.address) : '',
       plLexLabel: sb ? 'View ' + sb.address + ' in the Sabian Lexicon \u2192' : '',
@@ -18661,12 +18739,17 @@ class Component extends DCLogic {
                 let gap = prev ? Math.abs(this.norm360(x.r.lon - prev.r.lon)) : 99;
                 if (gap > 180) gap = 360 - gap;
                 run = (prev && gap < 9) ? run + 1 : 0;
-                out[x.r.name] = base - (run % levels) * step;
+                out[this.pointKey(x.r)] = base - (run % levels) * step;
               });
               return out;
             };
+            // Ring 2 carries about seventy points once every registry body is
+            // placed, so nearly every neighbour falls inside the gap and the run
+            // cycles through the levels. Four levels puts two glyphs on the same
+            // radius about twenty degrees apart, which is the width of a three
+            // letter label at that radius; three put them on top of each other.
             const radiusFor = { ...stagger(placedRows.filter(r => r.ring === 1), 234, 40, 3),
-              ...stagger(placedRows.filter(r => r.ring === 2), 132, 26, 3) };
+              ...stagger(placedRows.filter(r => r.ring === 2), 136, 20, 4) };
             // Clicking a body anywhere in the chart now opens its own placement
             // page rather than an inline accordion.
             const openPlanet = n => this.setState({ spiritView: 'placement', placeSel: n, aspSel: null });
@@ -18725,12 +18808,13 @@ class Component extends DCLogic {
                     c: '#7d9bff', f: '600 13px Karla,sans-serif', go: () => openPlanet(nm) });
                 });
                 placedRows.forEach(r => {
-                  const rad = radiusFor[r.name], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
+                  const key = this.pointKey(r), label = this.pointLabel(r);
+                  const rad = radiusFor[key], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
                   const minor = r.ring === 2;
-                  out.push({ hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: r.name, cur: 'pointer', ls: 'normal',
-                    c: this.CAT_COLOR[r.category] || '#2fff8f', f: (minor ? '400 13px' : '400 19px') + ' Georgia,serif', go: () => openPlanet(r.name) });
-                  out.push({ hit: '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: r.name + ' degree', cur: 'pointer', ls: 'normal',
-                    c: '#7c7889', f: (minor ? '400 9px' : '400 11px') + ' Karla,sans-serif', go: () => openPlanet(r.name) });
+                  out.push({ hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
+                    c: this.CAT_COLOR[r.category] || '#2fff8f', f: (minor ? '400 13px' : '400 19px') + ' Georgia,serif', go: () => openPlanet(key) });
+                  out.push({ hit: '44px', l: pc(dl.x), t: pc(dl.y), text: Math.floor(r.deg) + '\u00b0', aria: label + ' degree', cur: 'pointer', ls: 'normal',
+                    c: '#7c7889', f: (minor ? '400 9px' : '400 11px') + ' Karla,sans-serif', go: () => openPlanet(key) });
                 });
                 out.push({ hit: '0px', l: '50%', t: '49%', text: prof ? prof.name : '', aria: 'Chart owner', cur: 'default', ls: 'normal',
                   c: '#eef0f8', f: '400 22px Georgia,serif', go: noop });
@@ -18780,16 +18864,16 @@ class Component extends DCLogic {
                 // never inherits a stale highlight from a closed modal.
                 const aspSelRow = (st.chartExpandOpen && st.chartExpandAspSel != null) ? asps[st.chartExpandAspSel] : null;
                 return placedRows.map(r => {
-                  const rad = radiusFor[r.name], minor = r.ring === 2, cr = minor ? 13 : 19;
+                  const key = this.pointKey(r), rad = radiusFor[key], minor = r.ring === 2, cr = minor ? 13 : 19;
                   const pt = P(r.lon, rad), t1 = P(r.lon, 266), t2 = P(r.lon, rad + cr), dl = P(r.lon, rad - 30);
-                  const on = st.placeSel === r.name || (aspSelRow && (r.name === aspSelRow.a.name || r.name === aspSelRow.b.name));
+                  const on = st.placeSel === key || (aspSelRow && (key === (aspSelRow.a.id || aspSelRow.a.name) || key === (aspSelRow.b.id || aspSelRow.b.name)));
                   return { glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
                   c: this.CAT_COLOR[r.category] || '#2fff8f',
                   bg: on ? 'rgba(47,255,143,.24)' : '#15141b', sw: on ? 2.2 : 1.2,
                   tx1: t1.x.toFixed(1), ty1: t1.y.toFixed(1), tx2: t2.x.toFixed(1), ty2: t2.y.toFixed(1),
                   dx: dl.x.toFixed(1), dy: dl.y.toFixed(1), degLabel: Math.floor(r.deg) + '\u00b0',
                   tip: this.pointTooltip(r, 'House ' + houseOf(r)),
-                  go: () => openPlanet(r.name) };
+                  go: () => openPlanet(key) };
                 });
               })(),
               chartFeatures: (() => {
@@ -20025,8 +20109,8 @@ class Component extends DCLogic {
       push('Your placements', this.searchRank(q, chart.map(r => ({
         glyph: r.glyph, title: r.name + ' in ' + r.sign, keys: r.name + ' ' + r.sign,
         sub: Math.floor(r.deg) + '° ' + r.sign + ' · open the full placement',
-        target: { dt: { tab: 'spirit', spiritView: 'placement', placeSel: r.name },
-          vt: { tab: 'spirit', spiritView: 'placement', placeSel: r.name }, sec: 1 } })), 8));
+        target: { dt: { tab: 'spirit', spiritView: 'placement', placeSel: r.id || r.name },
+          vt: { tab: 'spirit', spiritView: 'placement', placeSel: r.id || r.name }, sec: 1 } })), 8));
     }
 
     const NC = window.NumerologyContent;

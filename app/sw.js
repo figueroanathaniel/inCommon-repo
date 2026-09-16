@@ -49,7 +49,7 @@ var PRECACHE = [
   './incommon-core.js', './safety-router.js', './oki-prompt-builder.js',
   './oki-post-processor.js', './oki-api.js', './practice-library.js', './memory-store.js',
   './profile-manager.js', './placement-content.js', './numerology-content.js', './angel-numbers.js', './animal-symbolism.js',
-  './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js',
+  './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js', './minor-body-elements.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
   './birth-time.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',
   './people-library.js', './pair-cache.js', './analytics.js',
