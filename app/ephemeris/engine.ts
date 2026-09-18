@@ -81,6 +81,7 @@ export interface ComputeOpts {
    *  Moon - Sun) regardless, which is a documented simplification, not the
    *  classical rule, and is only useful for callers that want one formula
    *  for every chart. */
+  /* Applies to BOTH lots: they are mirror images and reverse together. */
   partOfFortuneNightChart?: 'reverse' | 'same';
   isNightChart?: boolean;
   logErrors?: boolean;
@@ -437,13 +438,22 @@ export function computePartOfFortune(
   return norm360(useNightFormula ? ascLon + sunLon - moonLon : ascLon + moonLon - sunLon);
 }
 
-/** Part of Spirit: one formula for every chart, day or night. This is a
- *  deliberate simplification against the classical rule (which reverses
- *  Part of Spirit's formula the same way Part of Fortune's is reversed,
- *  swapping which of the two Part of Fortune formulas each one mirrors);
- *  Asc + Sun - Moon is used for both a day and a night birth here. */
-export function computePartOfSpirit(ascLon: number, sunLon: number, moonLon: number): number {
-  return norm360(ascLon + sunLon - moonLon);
+/**
+ * Part of Spirit. The exact mirror of Part of Fortune, and it reverses on
+ * sect for the same reason: day is Asc + Sun - Moon, night is Asc + Moon -
+ * Sun. This used to be one formula for both, the day one, which handed a
+ * night birth the night Part of Fortune under Spirit's name. It was kept as
+ * a declared simplification while nothing else in the build had any sect
+ * logic at all; the app has it now, so the two would only drift.
+ * nightMode takes the same two values Part of Fortune's does, so a caller
+ * that wants the old behaviour asks for it by name rather than by accident.
+ */
+export function computePartOfSpirit(
+  ascLon: number, sunLon: number, moonLon: number,
+  isNightChart: boolean = false, nightMode: 'reverse' | 'same' = 'reverse'
+): number {
+  const useNightFormula = isNightChart && nightMode === 'reverse';
+  return norm360(useNightFormula ? ascLon + moonLon - sunLon : ascLon + sunLon - moonLon);
 }
 
 /** Midpoint along the SHORTER arc between two longitudes. Averaging the
@@ -647,7 +657,7 @@ export function computeAll(jd: number, lat: number, lon: number, angles: Angles,
           pd.status = 'fixed';
           break;
         case 'partOfSpirit':
-          pd.lon = computePartOfSpirit(angles.asc, sun.lon, moon.lon);
+          pd.lon = computePartOfSpirit(angles.asc, sun.lon, moon.lon, isNight, opts.partOfFortuneNightChart);
           pd.status = 'fixed';
           break;
         case 'ariesPoint': pd.lon = computeAriesPoint(); pd.status = 'fixed'; break;
