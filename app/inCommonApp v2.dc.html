@@ -7107,28 +7107,6 @@ class Component extends DCLogic {
   // module they show as uncomputed rather than as a guess.
   EXTRA = [['South Node', '☋'], ['Black Moon Lilith', '⚸'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
-  PL_LONG = {
-    Sun: 'Your core identity, vitality, and conscious will: the part of you that wants to be someone in particular.',
-    Moon: 'Feeling, memory, and what actually soothes you. The private weather underneath the public day.',
-    Mercury: 'Thought and speech: how you take information in, sort it, and hand it back to other people.',
-    Venus: 'Affection and value: what draws you, what you find beautiful, and what you think things are worth.',
-    Mars: 'Drive, appetite, and anger. How you start, how you fight, and what you do when blocked.',
-    Jupiter: 'Growth, belief, and appetite for more. Where you are generous, and where you overreach.',
-    Saturn: 'Limit, time, and discipline. The place that asks for real work and gives nothing away free.',
-    Uranus: 'Disruption and difference: where you break the pattern, and where you cannot be made ordinary.',
-    Neptune: 'Longing and dissolution: imagination, devotion, escape, and the difficulty of seeing clearly.',
-    Pluto: 'Power and transformation. What is buried, what is compulsive, and what survives being destroyed.',
-    'North Node': 'The unfamiliar direction: the growth edge that never feels natural and matters anyway.',
-    'South Node': 'The inherited pattern: innate talent, and the comfortable groove you retreat into under pressure.',
-    Chiron: 'The wound that does not fully close, and the competence you build because of it.',
-    Ceres: 'Nurture, harvest, and loss: how you feed others and how you grieve what is taken.',
-    Pallas: 'Strategic wisdom: pattern recognition, craft, and intelligence applied to a problem.',
-    Juno: 'Committed partnership: what you need in a bond, and what you tolerate to keep one.',
-    Vesta: 'Devotion and focus. The sacred flame you tend, and what you set aside to tend it.',
-    'Black Moon Lilith': 'The appetite or refusal you were asked to leave out, and what it costs to keep leaving it out.',
-    'Part of Fortune': 'Where ease is available without having been earned first. Arithmetic on the Ascendant, Sun and Moon rather than a body in the sky.',
-    Vertex: 'A minor western point, not a fifth angle. Read it for encounters that arrived feeling arranged rather than chosen.'
-  };
   SIGN_LONG = {
     Aries: 'Direct, initiating, impatient. Acts first and understands afterwards; courage is native, restraint is learned.',
     Taurus: 'Steady, sensory, unhurried. Trusts what can be touched and will not be rushed into anything.',
@@ -7728,7 +7706,6 @@ class Component extends DCLogic {
     square: 'friction that asks for a choice instead of a balance',
     trine: 'unusual ease, which can also pass by unused',
     opposite: 'a pull between two needs that both have a claim' };
-  SYS_CHIP = { ASTROLOGY: ['#2fff8f', 'rgba(var(--atmc),.32)'], 'HUMAN DESIGN': ['#b79bff', 'rgba(139,92,246,.16)'], NUMEROLOGY: ['#7d9bff', 'rgba(125,155,255,.16)'] };
   fmtPos(p) { return Math.floor(p.deg) + '\u00b0 ' + p.sign; }
   gateCenter(g) { const c = this.HD_CHANNELS.find(x => x[0] === g || x[1] === g); return c ? (c[0] === g ? c[2] : c[3]) : null; }
   centerTheme(name) { const c = this.HD_CENTERS.find(x => x[0] === name); return c ? c[1] : 'its own function'; }
@@ -12479,12 +12456,19 @@ class Component extends DCLogic {
                   const R = this.retroScan(), out = [];
                   const now = RP.filter(p => p.phase === 'retro'), pre = RP.filter(p => p.phase === 'pre'), post = RP.filter(p => p.phase === 'post');
                   if (now.length) {
-                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today. Nothing is moving backwards in fact: from where we stand on a moving Earth, ' + (now.length === 1 ? 'it appears' : 'they appear') + ' to slow, halt, and walk back through the zodiac for a season.'));
+                    out.push(plain(nameList(now.map(p => p.name)) + (now.length === 1 ? ' is' : ' are') + ' retrograde today.'));
                   } else {
                     out.push(plain('Nothing is retrograde today. Mercury through Pluto are all in direct motion, which the tradition reads as a season for building forward rather than reviewing.'));
                   }
                   if (pre.length) out.push(plain(nameList(pre.map(p => p.name)) + (pre.length === 1 ? ' has' : ' have') + ' entered the pre-shadow, still moving forward, but already inside the stretch of sky ' + (pre.length === 1 ? 'it' : 'they') + ' will cover three times before this is finished. That is why ' + (pre.length === 1 ? 'it appears' : 'they appear') + ' here before the retrograde proper begins.'));
                   if (post.length) out.push(plain(nameList(post.map(p => p.name)) + ' turned forward again and ' + (post.length === 1 ? 'is' : 'are') + ' clearing the post-retrograde shadow, retracing the same degrees for the third and last time.'));
+                  /* The mechanism, stated once and in full. The eclipse panel already
+                     does this with ECL_DOCTRINE; RETRO_DOCTRINE is its sibling and was
+                     written but never reached a screen, so the panel explained the
+                     appearance in passing and never said what the tradition reads into
+                     it. The line above used to carry half of this sentence, which is
+                     why it is now trimmed to who rather than who and why. */
+                  out.push(plain(this.RETRO_DOCTRINE));
                   if (RP.length) out.push(plain('Open any of them below for where it stands, what it usually asks for, and how it meets your own chart.'));
                   else if (R.coming[0]) out.push(plain('Next to turn: ' + R.coming[0].name + ', around ' + this.fmtDay(R.coming[0].from) + '. It will appear here as soon as it enters its pre-shadow.'));
                   return out;

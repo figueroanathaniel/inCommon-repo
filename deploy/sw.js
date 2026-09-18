@@ -3,7 +3,7 @@
  * page itself, the install pieces, and the web fonts. Cache first, so a launch
  * with no signal is indistinguishable from a launch with one.
  */
-var CACHE = 'incommon-v5.6';
+var CACHE = 'incommon-v5.7';
 var PRECACHE = [
   './', './index.html', './manifest.json',
   './icon-192.png', './icon-512.png', './splash.png'
