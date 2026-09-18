@@ -492,12 +492,29 @@ whose content WAS that literal. And `app/gazetteer-world.js` was never touched:
 Planeta Rica is a town in Colombia and a reader born there has to be able to
 find it.
 
-**"Dwarf Astral Bodies" is the one label where the rename fights the field.**
-Dwarf planet is a formal IAU classification, and it sits in `CAT_LABEL` beside
-asteroid, centaur, comet and TNO, which are formal classifications too and were
-all kept. It is the odd one out by construction. It is written this way because
-the instruction was the word everywhere; if it should read "Dwarf Planets"
-again, that is one string in `CAT_LABEL` and nothing else depends on it.
+**Astronomy keeps its own words, and that is a ruled exception.** Dwarf planet
+and minor planet are formal classifications, from the IAU and the Minor Planet
+Center, and they sit in `CAT_LABEL` and in the source notes beside asteroid,
+centaur, comet and TNO, which are formal classifications too and were never in
+scope. Renaming those two and not the other four made them the odd ones out.
+Six sites carry them and none is app vocabulary:
+
+| Where | What it says |
+|---|---|
+| `CAT_LABEL` | TNOs & Dwarf Planets |
+| `placement-content.js` Eris, Haumea, Makemake | "The dwarf planet, found in ..." |
+| `placement-content.js` TNO section comment | "trans-Neptunian objects and dwarf planets" |
+| `pointRegistry.ts` the `tno` category | same |
+| `bodySourceNote()` | "orbital elements for minor planet 10 Hygiea" |
+
+Two sentences beyond the labels were plainly false after a blanket swap and are
+corrected rather than exempted, because they are claims about the solar system.
+Eris "led astronomers to redefine what a planet is", which is the 2006
+definition and the entire reason that body is famous; and Sedna "never comes
+near the planets", where the word means the eight and nothing else would carry
+the sentence. **The test for this class: if the sentence would still be true
+with the word changed, it is vocabulary and the rename applies. If it becomes
+false, astronomy owns the word.**
 
 **Reports, records and the historical docs were left alone**, which is the same
 rule the version-in-a-filename section states: a record of what was written on
@@ -2517,12 +2534,24 @@ that a later change is most likely to break:
   bundle, so the thing you upload is `deploy/v6.2/`. A host pointed at
   `deploy/` itself, or at the repo root, serves a directory with no page in
   it: the deploy succeeds and the link is broken, which is a failure with no
-  error anywhere in it. Three files say which folder, and they must agree:
-  `publish` in `netlify.toml`, `BUNDLE` in `tools/build-bundle.js`, and
-  `LOCAL` in `tools/check-deployed.js`. Both tools pointed at
-  `deploy/index.html` for as long as the bundle sat there and silently stopped
-  working when it moved: the build refused to run and the deploy check refused
-  to compare, and neither said anything a build log would show.
+  error anywhere in it. **The folder is named ONCE, in `BUNDLE` at the top of
+  `tools/build-bundle.js`, and everything else is generated from it or reads it
+  from there.** `netlify.toml` is written by the build, the same way the two
+  `_redirects` already were, and `check-deployed.js` parses `BUNDLE` out of the
+  builder rather than declaring its own copy.
+
+  It used to be three hand written constants with comments asking whoever
+  changed one to change the others, and both copies drifted. `check-deployed`
+  sat on v6.2 while the builder wrote v6.3, so the deploy check compared the
+  live site against a bundle nothing had written in a week. `netlify.toml` sat
+  on v6.2 too, so a git connected deploy served the previous bundle while a
+  dragged repository served the current one: the same repository, two different
+  sites, both deploys succeeding, nothing anywhere reporting it. A comment
+  asking a human to keep two constants in step is the thing that drifts. Both
+  tools also pointed at `deploy/index.html` for as long as the bundle sat
+  there and silently stopped working when it moved: the build refused to run
+  and the deploy check refused to compare, and neither said anything a build
+  log would show.
 - **The bundle folder carries its own serving rules.** `_redirects` resolves
   every path to `index.html`, because the router is the hash and the server
   never sees it, so without that line every address but the bare one is a 404.

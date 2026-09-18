@@ -25,7 +25,7 @@ export type Category =
   | 'node'       // North, South, lunar points, planetary nodes
   | 'asteroid'   // Belt asteroids + love/shadow group (EXPANDED-only)
   | 'centaur'    // Centaurs, chironic bodies (EXPANDED-only)
-  | 'tno'        // Transneptunian objects & dwarf astral bodies (EXPANDED-only)
+  | 'tno'        // Transneptunian objects & dwarf planets (EXPANDED-only)
   | 'comet'      // Halley, Hale-Bopp, Hyakutake (EXPANDED-only, mundane only)
   | 'hypothetical' // Hamburg School TNPs (EXPANDED-only)
   | 'derived';   // Computed points: Vertex, Antivertex, etc. (EXPANDED-only)

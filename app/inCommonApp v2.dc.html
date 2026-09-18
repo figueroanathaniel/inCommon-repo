@@ -10240,7 +10240,12 @@ class Component extends DCLogic {
   // both rings by default (see wheelBodies/wheelLabels): they show in the
   // side panel only, unless chartExpandShowComets is on.
   RING1_IDS = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena'];
-  CAT_LABEL = { body: 'Astral Bodies & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Astral Bodies', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
+  /* Dwarf Planets is a sanctioned exception to the astral body rename, decided
+     by the owner. It is a formal IAU classification, and it sits here beside
+     asteroid, centaur, comet and TNO, which are formal classifications too and
+     were all kept. Renaming this one and not those four made it the odd one
+     out. Do not sweep it. */
+  CAT_LABEL = { body: 'Astral Bodies & Nodes', angle: 'Angles', asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets', comet: 'Comets (Mundane)', node: 'Nodes & Lunar Points', hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints' };
   // Fixed hues, not themed, the same way --ac/--ac2/--crisis are fixed: a
   // category colour has to mean the same thing under every identity. TNO
   // reuses --ac2 (violet) rather than a fourth new token, node/hypothetical
@@ -10776,7 +10781,7 @@ class Component extends DCLogic {
     if (!ME || !ME.has(key)) return '';
     const w = ME.worstDeg(key), fig = w < 0.01 ? 'under a hundredth' : 'about ' + w.toFixed(2);
     if (ME.source(key) === 'JPL Horizons') {
-      return name + ' is computed from NASA JPL Horizons orbital elements for minor astral body ' + ME.designation(key) +
+      return name + ' is computed from NASA JPL Horizons orbital elements for minor planet ' + ME.designation(key) +
         ', checked against Horizons’ own positions every six months from 1900 to 2100. Its worst case is ' + fig + ' of a degree.';
     }
     return name + ' does not exist as a body in the sky. It is one of the Hamburg School’s eight hypothetical points, placed by the orbit Witte and Sieggrün defined for it, and computed here to within ' + fig + ' of a degree of the Swiss Ephemeris.';
