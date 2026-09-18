@@ -2738,7 +2738,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Astropedia</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">{{ apIntro }}</div>
     </div>
-    <sc-for list="{{ apSecs }}" as="sec" hint-placeholder-count="11">
+    <sc-for list="{{ apSecs }}" as="sec" hint-placeholder-count="13">
       <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px;transition:border-color .3s ease">
         <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
           <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
@@ -6455,7 +6455,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Astropedia</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">{{ apIntro }}</div>
     </div>
-    <sc-for list="{{ apSecs }}" as="sec" hint-placeholder-count="11">
+    <sc-for list="{{ apSecs }}" as="sec" hint-placeholder-count="13">
       <div style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px;transition:border-color .3s ease">
         <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
           <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
@@ -14524,8 +14524,8 @@ class Component extends DCLogic {
         row('POSSIBILITY', 'In men: ' + s.male), row('POSSIBILITY', 'In women: ' + s.female)] }));
     if (key === 'houses') return A.HOUSES.map(h => ({
       head: ord(h.n) + ' House \u00b7 ' + h.name, hasSub: true, sub: h.area + ' \u00b7 ' + h.sign + ' by nature',
-      rows: [plain(h.text), row('TRADITIONAL', 'A planet here: ' + h.planets), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
-    if (key === 'planets') return A.PLANETS.map(p => ({
+      rows: [plain(h.text), row('TRADITIONAL', 'An astral body here: ' + h.bodies), row('TRADITIONAL', 'The sign here: ' + h.signs)] }));
+    if (key === 'bodies') return A.ASTRAL_BODIES.map(p => ({
       head: p.glyph + '\uFE0E  ' + p.name, hasSub: true, sub: 'rhythm: ' + p.rhythm,
       rows: [plain(p.text), row('TRADITIONAL', 'In a sign: ' + p.sign), row('TRADITIONAL', 'In a house: ' + p.house),
         row('TRADITIONAL', 'In aspect: ' + p.aspect),
@@ -14536,6 +14536,10 @@ class Component extends DCLogic {
       head: a.name + ' \u00b7 ' + a.angle, hasSub: false, sub: '', rows: [row('TRADITIONAL', a.text)] }))
       .concat([{ head: 'Orbs', hasSub: true, sub: 'the range within which the conversation stays audible',
         rows: [plain(A.ORBS.what), plain(A.ORBS.how), row('POSSIBILITY', A.ORBS.custom)] }]);
+    if (key === 'concepts') return A.CONCEPTS.map(c => ({
+      head: c.name, hasSub: false, sub: '', rows: [row('TRADITIONAL', c.text)] }));
+    if (key === 'techniques') return A.TECHNIQUES.map(c => ({
+      head: c.name, hasSub: false, sub: '', rows: [row('TRADITIONAL', c.text)] }));
     if (key === 'chart') return [
       { head: 'What it is', hasSub: false, sub: '', rows: [plain(A.CHART.what), plain(A.CHART.wheel)] },
       { head: 'The four angles', hasSub: false, sub: '', rows: A.CHART.angles.map(([n, t]) => plain(n + ': ' + t)) }
@@ -14560,8 +14564,9 @@ class Component extends DCLogic {
     if (!(this.curTab() === 'library' && st.libView === 'astropedia')) return { libAstropedia: false };
     const A = this.AP();
     if (!A) return { libAstropedia: false };
-    const counts = { signs: '12', houses: '12', planets: '10', points: '7', aspects: '5 and orbs',
-      chart: '7 steps', sabian: '360 images', stellium: '', transits: '', synastry: '', example: '8 steps' };
+    const counts = { signs: '12', houses: '12', bodies: '10', points: '10', aspects: '5 and orbs',
+      concepts: '17', chart: '7 steps', sabian: '360 images', stellium: '', transits: '',
+      techniques: '4', synastry: '', example: '8 steps' };
     return { libAstropedia: true,
       apIntro: A.INTRO.what + ' ' + A.INTRO.how,
       apFoot: A.INTRO.caution,
@@ -20213,15 +20218,21 @@ class Component extends DCLogic {
       (AP.HOUSES || []).forEach(h => ap.push({ glyph: '⌂', title: 'House ' + h.n + ' · ' + h.name,
         sub: h.area, keys: 'house ' + h.n + ' ' + h.sign, body: h.text,
         target: this.searchLib('astropedia', { apSec: 'houses' }) }));
-      (AP.PLANETS || []).forEach(p => ap.push({ glyph: p.glyph, title: p.name,
-        sub: 'planet · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'planet', body: p.text,
-        target: this.searchLib('astropedia', { apSec: 'planets' }) }));
+      (AP.ASTRAL_BODIES || []).forEach(p => ap.push({ glyph: p.glyph, title: p.name,
+        sub: 'astral body · ' + p.rhythm + ' · at home in ' + p.dignity, keys: 'astral body', body: p.text,
+        target: this.searchLib('astropedia', { apSec: 'bodies' }) }));
       (AP.POINTS || []).forEach(p => { if (!p || !p.name) return;
         ap.push({ glyph: p.glyph || '✦', title: p.name, sub: 'point · ' + cut(p.text, 62),
           keys: 'point asteroid', body: p.text, target: this.searchLib('astropedia', { apSec: 'points' }) }); });
       (AP.ASPECTS || []).forEach(a => ap.push({ glyph: '∠', title: a.name,
         sub: 'aspect · ' + a.angle, keys: 'aspect', body: a.text,
         target: this.searchLib('astropedia', { apSec: 'aspects' }) }));
+      (AP.CONCEPTS || []).forEach(c => ap.push({ glyph: '◇', title: c.name,
+        sub: 'concept · ' + cut(c.text, 62), keys: 'concept', body: c.text,
+        target: this.searchLib('astropedia', { apSec: 'concepts' }) }));
+      (AP.TECHNIQUES || []).forEach(c => ap.push({ glyph: '◴', title: c.name,
+        sub: 'technique · ' + cut(c.text, 62), keys: 'technique', body: c.text,
+        target: this.searchLib('astropedia', { apSec: 'techniques' }) }));
       push('Astrology reference', this.searchRank(q, ap, 8));
     }
 
