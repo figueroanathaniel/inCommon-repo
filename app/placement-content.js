@@ -1,11 +1,11 @@
 /* placement-content.js. Modular content engine for placement detail pages. V1.0.0
 
    WHY MODULAR: a placement is astral body × sign × house × degree. Enumerated, that is
-   21 × 12 × 12 × 30 = ~90,000 texts. Nobody writes those, and text generated to
+   24 × 12 × 12 × 30 = ~104,000 texts. Nobody writes those, and text generated to
    fill that grid reads like filler. So this file holds SIX layers of real written
    material and composes them per request:
 
-     1 bodies   21 entries. What the body is, its role, its gifts and shadows
+     1 bodies   24 entries. What the body is, its role, its gifts and shadows
      2 signs    12 entries. Definition, manner of operating, what it demands
      3 houses   12 entries. Arena, definition, what it asks of whoever lands there
      4 dignity  the traditional rulership/exaltation/detriment/fall table
@@ -174,7 +174,34 @@
       verb: 'rests on', gifts: ['build a private base that actually holds', 'know where you are from without romance'],
       shadows: ['keep the foundation unexamined', 'confuse the family\u2019s ground with your own'],
       growth: ['furnish the private life as carefully as the public one'],
-      blocks: ['a house you left but never fully moved out of'] }
+      blocks: ['a house you left but never fully moved out of'] },
+    /* Three points rather than bodies. Lilith is the empty focus of the Moon's
+       orbit, and the other two are arithmetic on positions already in the chart,
+       so none of them appears in the dignity table: a point has no sign it rules
+       and no sign it is exiled from. They are here because a placement page is
+       built from this layer, and a body the engine does not know renders a blank
+       page rather than a modest one. */
+    'Black Moon Lilith': { glyph: '⚸', kind: 'point', energy: 'the disowned appetite and the refusal to apologize',
+      definition: 'Black Moon Lilith is the mean lunar apogee: the far focus of the Moon’s orbit, the point where nothing sits. Read as what you were asked to leave out of the acceptable version of yourself.',
+      role: 'Lilith shows where you were told not to look, what you refuse to soften, and the cost of having complied for a while.',
+      verb: 'refuses through', gifts: ['name the thing nobody in the room will name', 'stop performing agreeableness on demand', 'want something without building a case for it'],
+      shadows: ['turn refusal into the whole personality', 'punish a person for a pattern that predates them', 'go underground with an appetite until it distorts'],
+      growth: ['let the disowned part speak in a sentence rather than an eruption', 'ask for it plainly once before assuming the answer'],
+      blocks: ['a rule about acceptable wanting absorbed before you could weigh it', 'shame that arrives faster than the want does'] },
+    'Part of Fortune': { glyph: '⊗', kind: 'point', energy: 'unearned ease and where it is available',
+      definition: 'The Part of Fortune is calculated, not observed: Ascendant plus Moon minus Sun by day, the reverse by night. The oldest of the Arabic Parts and the only one most modern charts still carry.',
+      role: 'The Part of Fortune shows where things tend to go well without having been forced, which is also why it is easy to overlook.',
+      verb: 'eases through', gifts: ['find the door that happens to be open', 'accept a good turn without auditing it', 'work where the work is not uphill'],
+      shadows: ['wait at this door rather than build another', 'mistake ease for a mandate', 'discount what came without struggle'],
+      growth: ['spend the ease on something that needed the help', 'notice the luck out loud, which is most of what keeps it'],
+      blocks: ['a belief that only the hard way counts', 'ease taken as proof the thing was small'] },
+    'Vertex': { glyph: 'Vx', kind: 'point', energy: 'encounters that arrive already arranged',
+      definition: 'The Vertex is where the ecliptic meets the prime vertical in the west. It has no classical pedigree; it is a twentieth century addition that stayed because contacts to it read as meetings that felt appointed.',
+      role: 'The Vertex shows where other people and events seem to arrive on a schedule you did not set. Read it for conjunctions, and lightly.',
+      verb: 'meets through', gifts: ['recognise a turning point while it is happening', 'take an unplanned meeting seriously'],
+      shadows: ['read every coincidence as instruction', 'wait for the appointed thing instead of choosing'],
+      growth: ['treat the encounter as an opening rather than a verdict'],
+      blocks: ['a story about fate that removes your own move from the account'] }
   };
 
   /* ---- LAYER 2: signs -----------------------------------------------------

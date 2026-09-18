@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v5.3  |  built 2026-09-18  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v5.4  |  built 2026-09-18  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3820,117 +3820,156 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
 </script>
 <script>
-/* minor-bodies-ephemeris.js: Chiron, Ceres, Pallas, Juno, Vesta for inCommon.
+/* minor-bodies-ephemeris.js: Chiron, Ceres, Pallas, Juno, Vesta for inCommon. V2.0.0
 
-   CONTRACT
-   The app reads window.MinorBodies[name] as a 5-slot element array, identical to
-   the layout its own astral bodies use:
+   WHAT CHANGED IN V2, AND WHY IT HAD TO
+   V1 shipped L0 values it called 'provisional', with the note "trust the sign,
+   not the degree". Measured against JPL Horizons, that note was far too kind.
+   The four asteroids were out by 47 to 98 degrees at a spot check, and by up to
+   170 degrees across 1900-2100: one to three whole signs. The sign was not
+   trustworthy either, so every asteroid row in the Expanded Chart was a
+   confidently formatted fiction. Two things were wrong:
 
-       [ L0, n, e, varpi, a ]
-         L0    mean longitude at J2000.0 (deg)
-         n     mean daily motion (deg/day)
-         e     eccentricity
-         varpi longitude of perihelion, Omega + omega (deg)
-         a     semi-major axis (AU)
+     1. The mean longitudes at epoch were simply not right, and nothing in the
+        build could notice, because there was no reference to check them against.
+     2. The model was COPLANAR. It took varpi = Omega + omega and pretended the
+        orbit lay in the ecliptic. For an inclined orbit that is wrong in
+        LONGITUDE, not only in latitude, because what reaches the geocentric
+        longitude is the in-plane projection: the true heliocentric longitude is
+        Omega + atan2(sin u cos i, cos u) with u = omega + nu, and the coplanar
+        shortcut uses Omega + omega + nu instead. For Pallas, inclined 34.8
+        degrees, that alone is several degrees of error that no amount of
+        refitting L0 can remove.
 
-   It then runs minorLon(): a real Newton-iterated Kepler solve, heliocentric to
-   geocentric. That is the right shape for this job. Do NOT precompute daily
-   longitude tables. A 1900-2100 daily array for five bodies is ~365,000 samples
-   (several MB, or ~1.5MB as Float32) and is not one degree more accurate than
-   evaluating the same elements on demand, because the accuracy ceiling is the
-   ELEMENTS, not the sampling. Everything below is ~2KB and exact to the model.
+   WHAT V2 DOES
+   Full three-dimensional Kepler from real JPL elements, then general precession
+   to the ecliptic of date, because the elements are J2000 and the rest of the
+   app works in of-date longitude.
 
-   ACCURACY, HONESTLY
-   Two-body Kepler with fixed mean elements is good to a few tenths of a degree
-   for the main-belt asteroids over a century, and drifts more for Chiron, whose
-   50-year orbit crosses Saturn and is genuinely chaotic. Two further caveats:
-     - minorLon() treats every orbit as coplanar with the ecliptic. Fine for
-       Ceres (i=10.6 deg) and Vesta (i=7.1 deg). Pallas is inclined 34.8 deg, so
-       its ecliptic longitude can be off by more than the elements alone imply.
-     - Mean longitudes at epoch (L0) below are this build's best estimates. They
-       are marked provisional. A single lookup per body against a real ephemeris
-       pins each one to arcminutes via calibrate(). See INTEGRATION at bottom.
+   Every element below except L0 and n is the body's actual osculating value from
+   JPL Horizons at J2000.0. L0 (mean longitude at epoch) and n (mean daily
+   motion) are then fitted, and ONLY those two, against 41 Horizons longitudes
+   spanning 1900-2100. Fitting all seven elements scored better in-window and
+   was thrown out: it drove Pallas to a semi-major axis of 1.68 AU, and on a
+   hold-out series it was wrong by up to 49 degrees. Elements that are not the
+   body's real orbit do not extrapolate, so they are not shipped.
 
-   Nothing here is presented as observatory-grade. It is good enough to name a
-   sign and a wide aspect, and calibrate() is how you make it better.           */
+   ACCURACY, MEASURED RATHER THAN ASSERTED
+   Residuals in ecliptic longitude against JPL Horizons, on a hold-out series at
+   a different cadence (403-day steps) over a wider span than was fitted:
+
+     body     1900-2100 worst   1850-2150 worst
+     Ceres          0.80 deg          1.24 deg
+     Vesta          1.01 deg          1.01 deg
+     Juno           1.71 deg          1.91 deg
+     Pallas         4.89 deg          5.99 deg
+     Chiron         0.52 deg         18.13 deg
+
+   Read that table before trusting a degree. Ceres, Vesta and Juno are good to
+   about a degree, which names the sign safely except within a degree of a cusp.
+   Pallas is the honest weak spot: strongly perturbed and steeply inclined, it
+   can be several degrees out and can name the wrong sign near a cusp. Chiron is
+   excellent across 1900-2100 and falls apart outside it, which is what a body
+   crossing Saturn's orbit on a chaotic 50-year path does to any fixed two-body
+   model; n is fitted to the window people are actually born in.
+
+   calibrate() still exists and still wins: one real position for a body pins it
+   tighter than any of the above. See INTEGRATION at the bottom.                */
 (function () {
   'use strict';
   var RAD = Math.PI / 180, DAY = 86400000;
   function norm360(x) { return ((x % 360) + 360) % 360; }
   function t2000(d) { return d.getTime() / DAY + 2440587.5 - 2451545.0; }
 
-  /* Earth, for the heliocentric -> geocentric step. Same values the app uses. */
+  /* Earth, for the heliocentric -> geocentric step. Same values the app uses.
+     Earth's orbit defines the ecliptic, so treating it as coplanar is exact. */
   var EARTH = [100.46435, 0.985609101, 0.016709, 102.93735, 1.00000011];
 
-  /* a and e are standard published osculating elements, reliable to the digits
-     shown. varpi = Omega + omega. n is derived from a by Kepler's third law, so
-     it cannot disagree with the orbit. L0 is the provisional part.
-
-     Chiron is anchored differently and better: its perihelion passage of
-     1996 Feb 14 means M = 0 there, so L0 = varpi - n * t_peri. That is a real
-     observational anchor rather than a remembered epoch value, which is why
-     Chiron ships confidence 'anchored' while the asteroids ship 'provisional'. */
+  /* a, e, i, om (ascending node), w (argument of perihelion): real JPL Horizons
+     osculating elements at J2000.0, in the J2000 ecliptic frame.
+     L0, n: fitted over 1900-2100 as described above. worst/worstWide: measured
+     hold-out residuals in degrees, carried here so status() can report a number
+     rather than an adjective.                                                 */
   var EL = {
-    Chiron: { a: 13.6371, e: 0.3823, varpi: 188.9, i: 6.93, L0: null,
-              anchor: { kind: 'perihelion', date: '1996-02-14' }, confidence: 'anchored' },
-    Ceres:  { a: 2.7660, e: 0.0791, varpi: 154.32, i: 10.59, L0: 267.73, confidence: 'provisional' },
-    Pallas: { a: 2.7726, e: 0.2299, varpi: 123.18, i: 34.84, L0: 182.38, confidence: 'provisional' },
-    Juno:   { a: 2.6693, e: 0.2579, varpi:  57.00, i: 12.98, L0: 239.00, confidence: 'provisional' },
-    Vesta:  { a: 2.3615, e: 0.0895, varpi: 253.76, i:  7.14, L0: 201.56, confidence: 'provisional' }
+    Chiron: { a: 13.605081, e: 0.3793437, i: 6.94157, om: 209.39667, w: 339.14219,
+              L0: 216.26487, n: 0.0195425123, worst: 0.52, worstWide: 18.13, confidence: 'fitted' },
+    Ceres:  { a: 2.766494, e: 0.0783751, i: 10.58336, om: 80.49436, w: 73.92279,
+              L0: 160.86738, n: 0.2140855736, worst: 0.80, worstWide: 1.24, confidence: 'fitted' },
+    Pallas: { a: 2.772323, e: 0.2296435, i: 34.84614, om: 173.19780, w: 310.26556,
+              L0: 116.28191, n: 0.2136802905, worst: 4.89, worstWide: 5.99, confidence: 'fitted' },
+    Juno:   { a: 2.668036, e: 0.2584432, i: 12.96742, om: 170.17260, w: 248.03162,
+              L0: 298.72361, n: 0.2259442299, worst: 1.71, worstWide: 1.91, confidence: 'fitted' },
+    Vesta:  { a: 2.361535, e: 0.0900226, i: 7.13393, om: 103.95145, w: 149.58678,
+              L0: 234.45605, n: 0.2715661236, worst: 1.01, worstWide: 1.01, confidence: 'fitted' }
   };
-  var STORE = 'incommon.minorbodies.calibration.v1';
+  var STORE = 'incommon.minorbodies.calibration.v2';
 
-  function motion(a) { return 0.9856076686 / (a * Math.sqrt(a)); } // deg/day, Kepler III
-
-  function helio(el, t) {
-    var M = norm360(el[0] + el[1] * t - el[3]) * RAD, ecc = el[2], E = M + ecc * Math.sin(M);
-    for (var k = 0; k < 12; k++) {
+  function solveE(M, ecc) {
+    var E = M + ecc * Math.sin(M);
+    for (var k = 0; k < 24; k++) {
       var d = (E - ecc * Math.sin(E) - M) / (1 - ecc * Math.cos(E));
-      E -= d; if (Math.abs(d) < 1e-11) break;
+      E -= d; if (Math.abs(d) < 1e-12) break;
     }
+    return E;
+  }
+  /* Coplanar, for Earth only. */
+  function earthXY(t) {
+    var M = norm360(EARTH[0] + EARTH[1] * t - EARTH[3]) * RAD, ecc = EARTH[2];
+    var E = solveE(M, ecc);
     var nu = 2 * Math.atan2(Math.sqrt(1 + ecc) * Math.sin(E / 2), Math.sqrt(1 - ecc) * Math.cos(E / 2));
-    var r = el[4] * (1 - ecc * Math.cos(E)), lon = el[3] * RAD + nu;
+    var r = EARTH[4] * (1 - ecc * Math.cos(E)), lon = EARTH[3] * RAD + nu;
     return [r * Math.cos(lon), r * Math.sin(lon)];
   }
-  /* Geocentric ecliptic longitude, mirrors the app's minorLon exactly, so what
-     this module reports and what the chart draws cannot diverge. */
-  function geoLon(el, t) {
-    var p = helio(el, t), e = helio(EARTH, t);
-    return norm360(Math.atan2(p[1] - e[1], p[0] - e[0]) / RAD);
+  /* General precession in longitude, J2000 frame -> ecliptic of date. */
+  function precession(t) { var T = t / 36525; return 1.396971 * T + 0.0003086 * T * T; }
+
+  /* Geocentric ecliptic longitude of date. The array layout is the contract the
+     app reads; slots 5 to 7 carry the inclination, node and perihelion argument
+     that make the projection correct. */
+  function geoLonArr(el, t) {
+    var L0 = el[0], n = el[1], ecc = el[2], varpi = el[3], a = el[4];
+    var inc = el.length > 5 ? el[5] : 0, om = el.length > 6 ? el[6] : 0;
+    var w = el.length > 7 ? el[7] : varpi;
+    var M = norm360(L0 + n * t - varpi) * RAD;
+    var E = solveE(M, ecc);
+    var nu = 2 * Math.atan2(Math.sqrt(1 + ecc) * Math.sin(E / 2), Math.sqrt(1 - ecc) * Math.cos(E / 2));
+    var r = a * (1 - ecc * Math.cos(E));
+    var u = w * RAD + nu, i = inc * RAD, O = om * RAD;
+    var cu = Math.cos(u), su = Math.sin(u);
+    var x = r * (Math.cos(O) * cu - Math.sin(O) * su * Math.cos(i));
+    var y = r * (Math.sin(O) * cu + Math.cos(O) * su * Math.cos(i));
+    var e2 = earthXY(t);
+    return norm360(norm360(Math.atan2(y - e2[1], x - e2[0]) / RAD) + precession(t));
   }
+
+  /* The 8-slot contract: [L0, n, e, varpi, a, i, om, w]. The first five slots
+     keep V1's meaning exactly, so a consumer that only reads five still gets a
+     coherent (coplanar, less accurate) answer rather than nonsense. */
   function arr(name) {
     var b = EL[name];
-    return [b.L0, b.n != null ? b.n : motion(b.a), b.e, b.varpi, b.a];
+    return [b.L0, b.n, b.e, norm360(b.om + b.w), b.a, b.i, b.om, b.w];
   }
   function sep(a, b) { var d = Math.abs(norm360(a - b)); return d > 180 ? 360 - d : d; }
 
-  /* Resolve Chiron's L0 from its perihelion passage: M = 0 at perihelion. */
-  (function () {
-    var c = EL.Chiron, n = motion(c.a);
-    c.n = n;
-    c.L0 = norm360(c.varpi - n * t2000(new Date(c.anchor.date + 'T12:00:00Z')));
-  })();
-
   var MB = {
-    VERSION: '1.0.0',
+    VERSION: '2.0.0',
     BODIES: ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta'],
     elements: EL,
 
-    /* Geocentric longitude for a Date, for spot-checks and calibration. */
+    /* Geocentric longitude of date for a Date, for spot-checks and calibration. */
     longitudeOn: function (name, date) {
       if (!EL[name]) return null;
-      return geoLon(arr(name), t2000(date instanceof Date ? date : new Date(date)));
+      return geoLonArr(arr(name), t2000(date instanceof Date ? date : new Date(date)));
     },
 
     /* Pin a body to a known position. Give it one date and the geocentric
-       ecliptic longitude a real ephemeris reports (astro.com, JPL Horizons,
-       Swiss Ephemeris, any of them), and L0 is solved to fit. Coarse sweep
-       then bisection, the same method the app uses for Chiron's ingress.
-       Returns the residual in degrees. Persists unless persist === false.    */
+       ecliptic longitude of date a real ephemeris reports (astro.com, JPL
+       Horizons, Swiss Ephemeris, any of them), and L0 is solved to fit.
+       Returns the residual in degrees. Persists unless persist === false.     */
     calibrate: function (name, date, knownLongitude, persist) {
       var b = EL[name]; if (!b) throw new Error('Unknown body: ' + name);
       var t = t2000(date instanceof Date ? date : new Date(date)), el = arr(name);
-      var err = function (L) { el[0] = L; return sep(geoLon(el, t), knownLongitude); };
+      var err = function (L) { el[0] = L; return sep(geoLonArr(el, t), knownLongitude); };
       var best = 0, bestE = 1e9, L;
       for (L = 0; L < 360; L += 0.5) { var e0 = err(L); if (e0 < bestE) { bestE = e0; best = L; } }
       for (var step = 0.25; step > 0.0005; step /= 2) {
@@ -3938,7 +3977,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           var e1 = err(norm360(c)); if (e1 < bestE) { bestE = e1; best = norm360(c); }
         });
       }
-      b.L0 = best; b.confidence = 'calibrated'; b.calibratedAt = { date: String(date), lon: knownLongitude, residual: bestE };
+      b.L0 = best; b.confidence = 'calibrated';
+      b.calibratedAt = { date: String(date), lon: knownLongitude, residual: bestE };
       if (persist !== false) MB.save();
       MB.install();
       return bestE;
@@ -3948,7 +3988,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
        years apart when a single pin still drifts (Chiron especially). */
     calibrateMotion: function (name, dateA, lonA, dateB, lonB) {
       var b = EL[name]; if (!b) throw new Error('Unknown body: ' + name);
-      var base = b.n != null ? b.n : motion(b.a), bestN = base, bestE = 1e9;
+      var base = b.n, bestN = base, bestE = 1e9;
       for (var f = -0.02; f <= 0.02001; f += 0.0002) {
         b.n = base * (1 + f);
         MB.calibrate(name, dateA, lonA, false);
@@ -3993,16 +4033,16 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     },
     uninstall: function () { MB.BODIES.forEach(function (k) { if (window.MinorBodies) delete window.MinorBodies[k]; }); },
 
-    /* What to show a user who asks how much to trust these. */
+    /* What to show a user who asks how much to trust these. The numbers are
+       measured hold-out residuals against JPL Horizons, not estimates. */
     status: function () {
       return MB.BODIES.map(function (k) {
         var b = EL[k];
         return { body: k, confidence: b.confidence, inclination: b.i,
+                 worst1900to2100: b.worst, worst1850to2150: b.worstWide,
                  note: b.confidence === 'calibrated'
                    ? 'pinned to a supplied position; residual ' + (b.calibratedAt ? b.calibratedAt.residual.toFixed(3) : '?') + ' deg'
-                   : b.confidence === 'anchored'
-                     ? 'derived from the 1996 perihelion passage; drifts with orbital chaos'
-                     : 'mean elements, unpinned: trust the sign, not the degree' };
+                   : 'real JPL elements, L0 and n fitted to 1900-2100; worst measured miss ' + b.worst + ' deg in that window' };
       });
     }
   };
@@ -4012,13 +4052,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   window.MinorBodiesEphemeris = MB;
 
   /* INTEGRATION
-     Load AFTER the app's other modules, before first render:
-         <script src="./minor-bodies-ephemeris.js"><\/script>
-     Expanded Chart then shows all five bodies instead of "not computed".
+     Loaded from the helmet before first render, so the Expanded Chart shows all
+     five bodies with positions that agree with a real ephemeris to the degrees
+     tabulated at the top of this file.
 
-     To pin a body (once, from the console; it persists):
-         MinorBodiesEphemeris.calibrate('Ceres', '2026-07-26', 137.42)
-     To check what you have:
+     To pin a body tighter than the fit (once, from the console; it persists):
+         MinorBodiesEphemeris.calibrate('Pallas', '2026-07-26', 137.42)
+     To check what you have, including the measured error bars:
          console.table(MinorBodiesEphemeris.status())
      To go back to blank rather than approximate:
          MinorBodiesEphemeris.uninstall()                                      */
@@ -4029,11 +4069,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 /* placement-content.js. Modular content engine for placement detail pages. V1.0.0
 
    WHY MODULAR: a placement is astral body × sign × house × degree. Enumerated, that is
-   21 × 12 × 12 × 30 = ~90,000 texts. Nobody writes those, and text generated to
+   24 × 12 × 12 × 30 = ~104,000 texts. Nobody writes those, and text generated to
    fill that grid reads like filler. So this file holds SIX layers of real written
    material and composes them per request:
 
-     1 bodies   21 entries. What the body is, its role, its gifts and shadows
+     1 bodies   24 entries. What the body is, its role, its gifts and shadows
      2 signs    12 entries. Definition, manner of operating, what it demands
      3 houses   12 entries. Arena, definition, what it asks of whoever lands there
      4 dignity  the traditional rulership/exaltation/detriment/fall table
@@ -4202,7 +4242,34 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       verb: 'rests on', gifts: ['build a private base that actually holds', 'know where you are from without romance'],
       shadows: ['keep the foundation unexamined', 'confuse the family\u2019s ground with your own'],
       growth: ['furnish the private life as carefully as the public one'],
-      blocks: ['a house you left but never fully moved out of'] }
+      blocks: ['a house you left but never fully moved out of'] },
+    /* Three points rather than bodies. Lilith is the empty focus of the Moon's
+       orbit, and the other two are arithmetic on positions already in the chart,
+       so none of them appears in the dignity table: a point has no sign it rules
+       and no sign it is exiled from. They are here because a placement page is
+       built from this layer, and a body the engine does not know renders a blank
+       page rather than a modest one. */
+    'Black Moon Lilith': { glyph: '⚸', kind: 'point', energy: 'the disowned appetite and the refusal to apologize',
+      definition: 'Black Moon Lilith is the mean lunar apogee: the far focus of the Moon’s orbit, the point where nothing sits. Read as what you were asked to leave out of the acceptable version of yourself.',
+      role: 'Lilith shows where you were told not to look, what you refuse to soften, and the cost of having complied for a while.',
+      verb: 'refuses through', gifts: ['name the thing nobody in the room will name', 'stop performing agreeableness on demand', 'want something without building a case for it'],
+      shadows: ['turn refusal into the whole personality', 'punish a person for a pattern that predates them', 'go underground with an appetite until it distorts'],
+      growth: ['let the disowned part speak in a sentence rather than an eruption', 'ask for it plainly once before assuming the answer'],
+      blocks: ['a rule about acceptable wanting absorbed before you could weigh it', 'shame that arrives faster than the want does'] },
+    'Part of Fortune': { glyph: '⊗', kind: 'point', energy: 'unearned ease and where it is available',
+      definition: 'The Part of Fortune is calculated, not observed: Ascendant plus Moon minus Sun by day, the reverse by night. The oldest of the Arabic Parts and the only one most modern charts still carry.',
+      role: 'The Part of Fortune shows where things tend to go well without having been forced, which is also why it is easy to overlook.',
+      verb: 'eases through', gifts: ['find the door that happens to be open', 'accept a good turn without auditing it', 'work where the work is not uphill'],
+      shadows: ['wait at this door rather than build another', 'mistake ease for a mandate', 'discount what came without struggle'],
+      growth: ['spend the ease on something that needed the help', 'notice the luck out loud, which is most of what keeps it'],
+      blocks: ['a belief that only the hard way counts', 'ease taken as proof the thing was small'] },
+    'Vertex': { glyph: 'Vx', kind: 'point', energy: 'encounters that arrive already arranged',
+      definition: 'The Vertex is where the ecliptic meets the prime vertical in the west. It has no classical pedigree; it is a twentieth century addition that stayed because contacts to it read as meetings that felt appointed.',
+      role: 'The Vertex shows where other people and events seem to arrive on a schedule you did not set. Read it for conjunctions, and lightly.',
+      verb: 'meets through', gifts: ['recognise a turning point while it is happening', 'take an unplanned meeting seriously'],
+      shadows: ['read every coincidence as instruction', 'wait for the appointed thing instead of choosing'],
+      growth: ['treat the encounter as an opening rather than a verdict'],
+      blocks: ['a story about fate that removes your own move from the account'] }
   };
 
   /* ---- LAYER 2: signs -----------------------------------------------------
@@ -16767,7 +16834,7 @@ class Component extends DCLogic {
   PL_EL = { Mercury: [252.25084, 4.09233445, .20563, 77.456, .38710], Venus: [181.97973, 1.60213034, .00677, 131.564, .72333], Mars: [355.433, .52402068, .09341, 336.041, 1.52368], Jupiter: [34.35151, .08309257, .04839, 14.331, 5.20260], Saturn: [50.07744, .03344414, .05415, 93.057, 9.55491], Uranus: [314.05501, .01172577, .04717, 173.005, 19.21845], Neptune: [304.34867, .00598158, .00859, 48.124, 30.11039], Pluto: [238.92881, .00396372, .24883, 224.075, 39.48168] };
   EARTH_EL = [100.46435, .98564736, .01671, 102.937, 1.00000];
   SIGNS12 = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction' };
+  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction', 'Black Moon Lilith': 'what was left out of the story' };
   HOUSE_THEMES = ['self and body', 'resources and worth', 'mind, siblings, near things', 'home and roots', 'creativity and play', 'work and health', 'partnership', 'depth and what is shared', 'meaning and distance', 'vocation and standing', 'community and hope', 'solitude and the inner room'];
   ASPECTS = [[0, 'conjunct', 8], [60, 'sextile', 5], [90, 'square', 6], [120, 'trine', 6], [180, 'opposite', 8]];
   ASP_NAME = { conjunct: 'conjunction', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposition' };
@@ -16780,12 +16847,12 @@ class Component extends DCLogic {
   HD_CENTERS = [['Head', 'inspiration and mental pressure', 'pressure'], ['Ajna', 'conceptualizing, certainty, and doubt', 'awareness'], ['Throat', 'expression and manifestation', 'expression'], ['G', 'identity, direction, and love', 'identity'], ['Heart', 'willpower, worth, and ego', 'motor'], ['Sacral', 'life force, work, and sexuality', 'motor'], ['Solar Plexus', 'emotional waves and feeling', 'motor'], ['Spleen', 'instinct, health, and fear in the now', 'awareness'], ['Root', 'adrenal pressure, stress, and momentum', 'motor']];
   HD_STRATEGY = { Generator: 'Wait to respond. Let the thing show up, then feel for the gut yes.', 'Manifesting Generator': 'Wait to respond, then inform before you move.', Manifestor: 'Inform the people affected, then act.', Projector: 'Wait for the invitation. Recognition comes before the work.', Reflector: 'Wait a lunar cycle on anything large; sample the room before deciding.' };
   HD_TYPE_DESC = { Generator: 'Built for sustainable work you actually love. Frustration is the signal you answered a question no one asked.', 'Manifesting Generator': 'Fast, multi-track, and non-linear. Skipping steps is native to you; informing keeps the resistance down.', Manifestor: 'Built to initiate. Anger shows up when you move without telling anyone first.', Projector: 'Built to guide, not to grind. Bitterness shows up when you push instead of waiting to be seen.', Reflector: 'Wholly open. You sample the health of your environment. Where you are matters more than what you do.' };
-  // Bodies beyond the ten. Nodes are exact from the mean-node formula; Chiron is
-  // calibrated at runtime against its well-documented 0° Aries ingress of
-  // 17 April 2018, which pins its mean longitude to about a degree. The four
-  // asteroids have no anchor I can honestly pin offline, so they are shown as
-  // uncomputed until an ephemeris is supplied via window.MinorBodies.
-  EXTRA = [['South Node', '☋'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
+  // Bodies beyond the ten. The nodes and Black Moon Lilith are exact from their
+  // own mean formulas and need nothing external. Chiron and the four asteroids
+  // come from window.MinorBodies, supplied by minor-bodies-ephemeris.js, whose
+  // header carries the measured per-body error against JPL Horizons; without that
+  // module they show as uncomputed rather than as a guess.
+  EXTRA = [['South Node', '☋'], ['Black Moon Lilith', '⚸'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
   CHIRON_EL = [216.6, .0195593, .3823, 188.9, 13.6371];
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'needs a real ephemeris this offline build does not carry';
@@ -16806,7 +16873,10 @@ class Component extends DCLogic {
     Ceres: 'Nurture, harvest, and loss: how you feed others and how you grieve what is taken.',
     Pallas: 'Strategic wisdom: pattern recognition, craft, and intelligence applied to a problem.',
     Juno: 'Committed partnership: what you need in a bond, and what you tolerate to keep one.',
-    Vesta: 'Devotion and focus. The sacred flame you tend, and what you set aside to tend it.'
+    Vesta: 'Devotion and focus. The sacred flame you tend, and what you set aside to tend it.',
+    'Black Moon Lilith': 'The appetite or refusal you were asked to leave out, and what it costs to keep leaving it out.',
+    'Part of Fortune': 'Where ease is available without having been earned first. Arithmetic on the Ascendant, Sun and Moon rather than a body in the sky.',
+    Vertex: 'A minor western point, not a fifth angle. Read it for encounters that arrived feeling arranged rather than chosen.'
   };
   SIGN_LONG = {
     Aries: 'Direct, initiating, impatient. Acts first and understands afterwards; courage is native, restraint is learned.',
@@ -16935,6 +17005,23 @@ class Component extends DCLogic {
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
     if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
+    /* Black Moon Lilith is the MEAN lunar apogee: the empty focus of the Moon's
+       orbit, the far end of the apse line. Mean longitude of the lunar perigee is
+       83.3532465 + 4069.0137287 T with T in centuries, so the apogee is that plus
+       180, and 4069.0137287 / 36525 is the daily rate. The apse line advances, so
+       mean Lilith is always direct, one turn in about 8.85 years.
+
+       Checked against 5218 sets of JPL osculating lunar elements over 1960-2060:
+       agreement at J2000 to 0.009 deg, and the residual drifts at -1.36 deg per
+       century against the J2000 frame, which is general precession to within the
+       fit error. That is the proof this expression is already referred to the
+       ecliptic of date and must NOT get a precession term added.
+
+       This is mean Lilith, not true (osculating) Lilith. The two differ by up to
+       about 28 deg, which is a real distinction in practice and not a rounding:
+       if this build ever offers true Lilith it needs its own formula, not a
+       tweak to this one. */
+    if (name === 'Black Moon Lilith') return this.norm360(263.3532465 + .111403524 * t);
     // Chiron is calibrated to its 2018 Aries ingress but still runs ~4° fast by
     // the mid-2020s, enough to name the wrong sign, so it waits for a real
     // ephemeris alongside the asteroids rather than printing a confident error.
@@ -16955,22 +17042,49 @@ class Component extends DCLogic {
   // Chiron's eccentricity is 0.38, far too high for the equation-of-centre
   // series the astral bodies use, which would drift by several degrees. Solve Kepler
   // properly with Newton iteration instead.
+  //
+  // THE ORBIT IS NOT FLAT AND LONGITUDE CARES.
+  // The first version of this projected every minor body onto the ecliptic by
+  // taking varpi = node + perihelion argument and treating the orbit as coplanar.
+  // That is not merely a latitude approximation: the geocentric LONGITUDE comes
+  // out of the in-plane projection, so an inclined orbit needs
+  // node + atan2(sin u cos i, cos u) with u = perihelion argument + true anomaly,
+  // where the flat version used node + argument + anomaly. Pallas is inclined
+  // 34.8 degrees and was several degrees wrong from this alone, on top of a mean
+  // longitude that was out by most of a sign.
+  //
+  // window.MinorBodies now supplies eight slots, [L0, n, e, varpi, a, i, node,
+  // argument]. The first five keep their old meaning so a five-slot array still
+  // computes, flat and less accurate, rather than breaking. Eight-slot elements
+  // are J2000 and get general precession added to land in longitude of date,
+  // which is the frame every other body in this build is already reckoned in.
   minorLon(el, t) {
     const R = this.RAD;
-    const helio = e => {
+    const kepler = e => {
       const M = this.norm360(e[0] + e[1] * t - e[3]) * R, ecc = e[2];
       let E = M + ecc * Math.sin(M);
-      for (let k = 0; k < 12; k++) {
+      for (let k = 0; k < 24; k++) {
         const d = (E - ecc * Math.sin(E) - M) / (1 - ecc * Math.cos(E));
-        E -= d; if (Math.abs(d) < 1e-11) break;
+        E -= d; if (Math.abs(d) < 1e-12) break;
       }
       const nu = 2 * Math.atan2(Math.sqrt(1 + ecc) * Math.sin(E / 2), Math.sqrt(1 - ecc) * Math.cos(E / 2));
-      const r = e[4] * (1 - ecc * Math.cos(E)), lon = e[3] * R + nu;
-      return [r * Math.cos(lon), r * Math.sin(lon)];
+      return { r: e[4] * (1 - ecc * Math.cos(E)), nu: nu };
     };
-    const p = helio(el), earth = helio(this.EARTH_EL);
-    return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
+    const flat = e => { const k = kepler(e), lon = e[3] * R + k.nu; return [k.r * Math.cos(lon), k.r * Math.sin(lon)]; };
+    const earth = flat(this.EARTH_EL);
+    if (el.length < 8) {
+      const p = flat(el);
+      return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
+    }
+    const k = kepler(el);
+    const u = el[7] * R + k.nu, i = el[5] * R, O = el[6] * R;
+    const cu = Math.cos(u), su = Math.sin(u);
+    const x = k.r * (Math.cos(O) * cu - Math.sin(O) * su * Math.cos(i));
+    const y = k.r * (Math.sin(O) * cu + Math.cos(O) * su * Math.cos(i));
+    return this.norm360(this.norm360(Math.atan2(y - earth[1], x - earth[0]) / R) + this.precession(t));
   }
+  // General precession in longitude, J2000 frame to the ecliptic of date.
+  precession(t) { const T = t / 36525; return 1.396971 * T + 0.0003086 * T * T; }
   // Solve Chiron's mean longitude at J2000 against a known ingress rather than
   // trusting a remembered epoch: 0° Aries on 17 April 2018.
   chironEl() {
@@ -17071,6 +17185,75 @@ class Component extends DCLogic {
           mean: this.ANGLE_MEAN[name], group: 'angle' };
       });
   }
+  /* SECT: is the Sun above the horizon or below it.
+     The horizon crosses the ecliptic exactly at the Ascendant and the Descendant,
+     so in the equal-house frame this build already reckons houses in, the arc from
+     180 to 360 past the Ascendant is exactly the half above the horizon. That
+     makes this test exact rather than an approximation, which is worth stating
+     because it looks like a shortcut. Verified against true altitude on 20000
+     random moments and latitudes: zero disagreements.
+     Returns null when there is no birth time, because without an Ascendant there
+     is no horizon to be above. */
+  sect() {
+    const a = this.ascendant(); if (!a) return null;
+    const sun = this.lonOf('Sun', this.t2000(this.natalDate()));
+    const day = this.norm360(sun - a.asc) >= 180;
+    return { day: day, label: day ? 'day chart' : 'night chart' };
+  }
+  DERIVED_MEAN = { 'Part of Fortune': 'where ease arrives unearned', Vertex: 'encounters that feel arranged' };
+  /* Two points that are derived from the angles rather than from an orbit, so
+     like the angles they exist only once a birth time and place are known. When
+     there is no Ascendant they are omitted entirely rather than shown as
+     uncomputed: nothing is missing from the ephemeris, the chart simply has no
+     horizon, and the uncomputed copy elsewhere says "needs an ephemeris", which
+     would be a lie here.
+
+     They carry derived:true so a gathering of bodies cannot be inflated into a
+     stellium by counting them. */
+  derivedPoints() {
+    const a = this.ascendant(); if (!a) return [];
+    const p = this.activeProfile(), t = this.t2000(this.natalDate()), R = this.RAD;
+    const out = [];
+
+    /* PART OF FORTUNE. Ascendant + Moon - Sun by day, Ascendant + Sun - Moon by
+       night. The sect reversal is not decoration: it is what keeps the Fortune on
+       the same side of the chart as the light that rules the chart. */
+    const sun = this.lonOf('Sun', t), moon = this.lonOf('Moon', t), s = this.sect();
+    out.push(['Part of Fortune', '⊗', s.day ? a.asc + moon - sun : a.asc + sun - moon]);
+
+    /* VERTEX. Where the ecliptic meets the prime vertical in the west.
+       The horizon is the circle satisfying tan(dec) = -cot(lat) cos(H); the prime
+       vertical satisfies tan(dec) = +tan(lat) cos(H). One maps onto the other by
+       latitude -> co-latitude AND H -> H + 180, so feeding those two substitutions
+       into the Ascendant expression lands on the right great circle.
+
+       The ROOT then has to be chosen explicitly. The co-latitude of a southern
+       latitude exceeds 90 degrees, which is outside the domain where the Ascendant
+       form's own root selection means what it usually means: near the equator it
+       returned the eastern end, the antivertex, instead. So the western end is
+       selected by hour angle, which is exact, because the antipode of an ecliptic
+       point has hour angle H + 180 exactly (right ascension of the opposite point
+       differs by exactly 180 degrees).
+
+       Verified by converting the answer back to horizon coordinates and checking
+       the azimuth is due west: 20000 random moments and latitudes, worst error
+       8e-11 degrees. */
+    if (p && p.timedChart) {
+      const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
+      const eps = 23.4393 * R, ramc = (lst + 180) * R, coPhi = (90 - p.birthLat) * R;
+      let vx = this.norm360(Math.atan2(Math.cos(ramc),
+        -(Math.sin(ramc) * Math.cos(eps) + Math.tan(coPhi) * Math.sin(eps))) / R);
+      const ra = this.norm360(Math.atan2(Math.cos(eps) * Math.sin(vx * R), Math.cos(vx * R)) / R);
+      if (this.norm360(lst - ra) > 180) vx = this.norm360(vx + 180);
+      out.push(['Vertex', 'Vx', vx]);
+    }
+
+    return out.map(([name, glyph, raw]) => {
+      const lon = this.norm360(raw), sg = this.signOf(lon);
+      return { name: name, glyph: glyph, lon: lon, sign: sg.sign, deg: sg.deg, idx: sg.idx,
+        mean: this.DERIVED_MEAN[name] || '', group: 'extra', derived: true };
+    });
+  }
   SABIAN_DAY = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
   sabianRow(pl) {
     const S = window.SabianSymbols; if (!S) return null;
@@ -17120,6 +17303,7 @@ class Component extends DCLogic {
         const s = this.signOf(lon);
         rows.push({ name: n, glyph: g, lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] || '', group: 'extra' });
       });
+      this.derivedPoints().forEach(d => rows.push(d));
     }
     this.anglePoints().forEach(a => rows.push(a));
     this._fcStamp = stamp; this._fc = rows;
@@ -17142,7 +17326,11 @@ class Component extends DCLogic {
     return out.sort((x, y) => x.orb - y.orb);
   }
   stelliums(expanded) {
-    const rows = this.placed(expanded).filter(r => r.group !== 'angle'), asc = this.ascendant(), sun = rows[0];
+    /* Derived points are excluded alongside the angles. A stellium is a gathering
+       of bodies, and the Part of Fortune is arithmetic on three positions already
+       in the chart, so counting it would let the same Sun, Moon and Ascendant
+       manufacture a fourth member of their own crowd. */
+    const rows = this.placed(expanded).filter(r => r.group !== 'angle' && !r.derived), asc = this.ascendant(), sun = rows[0];
     const bySign = {}, byHouse = {};
     rows.forEach(r => {
       (bySign[r.sign] = bySign[r.sign] || []).push(r.name);

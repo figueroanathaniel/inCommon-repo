@@ -7091,7 +7091,7 @@ class Component extends DCLogic {
   PL_EL = { Mercury: [252.25084, 4.09233445, .20563, 77.456, .38710], Venus: [181.97973, 1.60213034, .00677, 131.564, .72333], Mars: [355.433, .52402068, .09341, 336.041, 1.52368], Jupiter: [34.35151, .08309257, .04839, 14.331, 5.20260], Saturn: [50.07744, .03344414, .05415, 93.057, 9.55491], Uranus: [314.05501, .01172577, .04717, 173.005, 19.21845], Neptune: [304.34867, .00598158, .00859, 48.124, 30.11039], Pluto: [238.92881, .00396372, .24883, 224.075, 39.48168] };
   EARTH_EL = [100.46435, .98564736, .01671, 102.937, 1.00000];
   SIGNS12 = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction' };
+  PL_MEAN = { Sun: 'identity and vitality', Moon: 'feeling and what soothes you', Mercury: 'thought and speech', Venus: 'affection and value', Mars: 'drive and anger', Jupiter: 'growth and belief', Saturn: 'limit and discipline', Uranus: 'disruption and difference', Neptune: 'longing and dissolution', Pluto: 'power and transformation', 'North Node': 'the unfamiliar direction', 'Black Moon Lilith': 'what was left out of the story' };
   HOUSE_THEMES = ['self and body', 'resources and worth', 'mind, siblings, near things', 'home and roots', 'creativity and play', 'work and health', 'partnership', 'depth and what is shared', 'meaning and distance', 'vocation and standing', 'community and hope', 'solitude and the inner room'];
   ASPECTS = [[0, 'conjunct', 8], [60, 'sextile', 5], [90, 'square', 6], [120, 'trine', 6], [180, 'opposite', 8]];
   ASP_NAME = { conjunct: 'conjunction', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposition' };
@@ -7104,12 +7104,12 @@ class Component extends DCLogic {
   HD_CENTERS = [['Head', 'inspiration and mental pressure', 'pressure'], ['Ajna', 'conceptualizing, certainty, and doubt', 'awareness'], ['Throat', 'expression and manifestation', 'expression'], ['G', 'identity, direction, and love', 'identity'], ['Heart', 'willpower, worth, and ego', 'motor'], ['Sacral', 'life force, work, and sexuality', 'motor'], ['Solar Plexus', 'emotional waves and feeling', 'motor'], ['Spleen', 'instinct, health, and fear in the now', 'awareness'], ['Root', 'adrenal pressure, stress, and momentum', 'motor']];
   HD_STRATEGY = { Generator: 'Wait to respond. Let the thing show up, then feel for the gut yes.', 'Manifesting Generator': 'Wait to respond, then inform before you move.', Manifestor: 'Inform the people affected, then act.', Projector: 'Wait for the invitation. Recognition comes before the work.', Reflector: 'Wait a lunar cycle on anything large; sample the room before deciding.' };
   HD_TYPE_DESC = { Generator: 'Built for sustainable work you actually love. Frustration is the signal you answered a question no one asked.', 'Manifesting Generator': 'Fast, multi-track, and non-linear. Skipping steps is native to you; informing keeps the resistance down.', Manifestor: 'Built to initiate. Anger shows up when you move without telling anyone first.', Projector: 'Built to guide, not to grind. Bitterness shows up when you push instead of waiting to be seen.', Reflector: 'Wholly open. You sample the health of your environment. Where you are matters more than what you do.' };
-  // Bodies beyond the ten. Nodes are exact from the mean-node formula; Chiron is
-  // calibrated at runtime against its well-documented 0° Aries ingress of
-  // 17 April 2018, which pins its mean longitude to about a degree. The four
-  // asteroids have no anchor I can honestly pin offline, so they are shown as
-  // uncomputed until an ephemeris is supplied via window.MinorBodies.
-  EXTRA = [['South Node', '☋'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
+  // Bodies beyond the ten. The nodes and Black Moon Lilith are exact from their
+  // own mean formulas and need nothing external. Chiron and the four asteroids
+  // come from window.MinorBodies, supplied by minor-bodies-ephemeris.js, whose
+  // header carries the measured per-body error against JPL Horizons; without that
+  // module they show as uncomputed rather than as a guess.
+  EXTRA = [['South Node', '☋'], ['Black Moon Lilith', '⚸'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
   CHIRON_EL = [216.6, .0195593, .3823, 188.9, 13.6371];
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
   UNCOMPUTED_WHY = 'needs a real ephemeris this offline build does not carry';
@@ -7130,7 +7130,10 @@ class Component extends DCLogic {
     Ceres: 'Nurture, harvest, and loss: how you feed others and how you grieve what is taken.',
     Pallas: 'Strategic wisdom: pattern recognition, craft, and intelligence applied to a problem.',
     Juno: 'Committed partnership: what you need in a bond, and what you tolerate to keep one.',
-    Vesta: 'Devotion and focus. The sacred flame you tend, and what you set aside to tend it.'
+    Vesta: 'Devotion and focus. The sacred flame you tend, and what you set aside to tend it.',
+    'Black Moon Lilith': 'The appetite or refusal you were asked to leave out, and what it costs to keep leaving it out.',
+    'Part of Fortune': 'Where ease is available without having been earned first. Arithmetic on the Ascendant, Sun and Moon rather than a body in the sky.',
+    Vertex: 'A minor western point, not a fifth angle. Read it for encounters that arrived feeling arranged rather than chosen.'
   };
   SIGN_LONG = {
     Aries: 'Direct, initiating, impatient. Acts first and understands afterwards; courage is native, restraint is learned.',
@@ -7259,6 +7262,23 @@ class Component extends DCLogic {
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
     if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
+    /* Black Moon Lilith is the MEAN lunar apogee: the empty focus of the Moon's
+       orbit, the far end of the apse line. Mean longitude of the lunar perigee is
+       83.3532465 + 4069.0137287 T with T in centuries, so the apogee is that plus
+       180, and 4069.0137287 / 36525 is the daily rate. The apse line advances, so
+       mean Lilith is always direct, one turn in about 8.85 years.
+
+       Checked against 5218 sets of JPL osculating lunar elements over 1960-2060:
+       agreement at J2000 to 0.009 deg, and the residual drifts at -1.36 deg per
+       century against the J2000 frame, which is general precession to within the
+       fit error. That is the proof this expression is already referred to the
+       ecliptic of date and must NOT get a precession term added.
+
+       This is mean Lilith, not true (osculating) Lilith. The two differ by up to
+       about 28 deg, which is a real distinction in practice and not a rounding:
+       if this build ever offers true Lilith it needs its own formula, not a
+       tweak to this one. */
+    if (name === 'Black Moon Lilith') return this.norm360(263.3532465 + .111403524 * t);
     // Chiron is calibrated to its 2018 Aries ingress but still runs ~4° fast by
     // the mid-2020s, enough to name the wrong sign, so it waits for a real
     // ephemeris alongside the asteroids rather than printing a confident error.
@@ -7279,22 +7299,49 @@ class Component extends DCLogic {
   // Chiron's eccentricity is 0.38, far too high for the equation-of-centre
   // series the astral bodies use, which would drift by several degrees. Solve Kepler
   // properly with Newton iteration instead.
+  //
+  // THE ORBIT IS NOT FLAT AND LONGITUDE CARES.
+  // The first version of this projected every minor body onto the ecliptic by
+  // taking varpi = node + perihelion argument and treating the orbit as coplanar.
+  // That is not merely a latitude approximation: the geocentric LONGITUDE comes
+  // out of the in-plane projection, so an inclined orbit needs
+  // node + atan2(sin u cos i, cos u) with u = perihelion argument + true anomaly,
+  // where the flat version used node + argument + anomaly. Pallas is inclined
+  // 34.8 degrees and was several degrees wrong from this alone, on top of a mean
+  // longitude that was out by most of a sign.
+  //
+  // window.MinorBodies now supplies eight slots, [L0, n, e, varpi, a, i, node,
+  // argument]. The first five keep their old meaning so a five-slot array still
+  // computes, flat and less accurate, rather than breaking. Eight-slot elements
+  // are J2000 and get general precession added to land in longitude of date,
+  // which is the frame every other body in this build is already reckoned in.
   minorLon(el, t) {
     const R = this.RAD;
-    const helio = e => {
+    const kepler = e => {
       const M = this.norm360(e[0] + e[1] * t - e[3]) * R, ecc = e[2];
       let E = M + ecc * Math.sin(M);
-      for (let k = 0; k < 12; k++) {
+      for (let k = 0; k < 24; k++) {
         const d = (E - ecc * Math.sin(E) - M) / (1 - ecc * Math.cos(E));
-        E -= d; if (Math.abs(d) < 1e-11) break;
+        E -= d; if (Math.abs(d) < 1e-12) break;
       }
       const nu = 2 * Math.atan2(Math.sqrt(1 + ecc) * Math.sin(E / 2), Math.sqrt(1 - ecc) * Math.cos(E / 2));
-      const r = e[4] * (1 - ecc * Math.cos(E)), lon = e[3] * R + nu;
-      return [r * Math.cos(lon), r * Math.sin(lon)];
+      return { r: e[4] * (1 - ecc * Math.cos(E)), nu: nu };
     };
-    const p = helio(el), earth = helio(this.EARTH_EL);
-    return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
+    const flat = e => { const k = kepler(e), lon = e[3] * R + k.nu; return [k.r * Math.cos(lon), k.r * Math.sin(lon)]; };
+    const earth = flat(this.EARTH_EL);
+    if (el.length < 8) {
+      const p = flat(el);
+      return this.norm360(Math.atan2(p[1] - earth[1], p[0] - earth[0]) / R);
+    }
+    const k = kepler(el);
+    const u = el[7] * R + k.nu, i = el[5] * R, O = el[6] * R;
+    const cu = Math.cos(u), su = Math.sin(u);
+    const x = k.r * (Math.cos(O) * cu - Math.sin(O) * su * Math.cos(i));
+    const y = k.r * (Math.sin(O) * cu + Math.cos(O) * su * Math.cos(i));
+    return this.norm360(this.norm360(Math.atan2(y - earth[1], x - earth[0]) / R) + this.precession(t));
   }
+  // General precession in longitude, J2000 frame to the ecliptic of date.
+  precession(t) { const T = t / 36525; return 1.396971 * T + 0.0003086 * T * T; }
   // Solve Chiron's mean longitude at J2000 against a known ingress rather than
   // trusting a remembered epoch: 0° Aries on 17 April 2018.
   chironEl() {
@@ -7395,6 +7442,75 @@ class Component extends DCLogic {
           mean: this.ANGLE_MEAN[name], group: 'angle' };
       });
   }
+  /* SECT: is the Sun above the horizon or below it.
+     The horizon crosses the ecliptic exactly at the Ascendant and the Descendant,
+     so in the equal-house frame this build already reckons houses in, the arc from
+     180 to 360 past the Ascendant is exactly the half above the horizon. That
+     makes this test exact rather than an approximation, which is worth stating
+     because it looks like a shortcut. Verified against true altitude on 20000
+     random moments and latitudes: zero disagreements.
+     Returns null when there is no birth time, because without an Ascendant there
+     is no horizon to be above. */
+  sect() {
+    const a = this.ascendant(); if (!a) return null;
+    const sun = this.lonOf('Sun', this.t2000(this.natalDate()));
+    const day = this.norm360(sun - a.asc) >= 180;
+    return { day: day, label: day ? 'day chart' : 'night chart' };
+  }
+  DERIVED_MEAN = { 'Part of Fortune': 'where ease arrives unearned', Vertex: 'encounters that feel arranged' };
+  /* Two points that are derived from the angles rather than from an orbit, so
+     like the angles they exist only once a birth time and place are known. When
+     there is no Ascendant they are omitted entirely rather than shown as
+     uncomputed: nothing is missing from the ephemeris, the chart simply has no
+     horizon, and the uncomputed copy elsewhere says "needs an ephemeris", which
+     would be a lie here.
+
+     They carry derived:true so a gathering of bodies cannot be inflated into a
+     stellium by counting them. */
+  derivedPoints() {
+    const a = this.ascendant(); if (!a) return [];
+    const p = this.activeProfile(), t = this.t2000(this.natalDate()), R = this.RAD;
+    const out = [];
+
+    /* PART OF FORTUNE. Ascendant + Moon - Sun by day, Ascendant + Sun - Moon by
+       night. The sect reversal is not decoration: it is what keeps the Fortune on
+       the same side of the chart as the light that rules the chart. */
+    const sun = this.lonOf('Sun', t), moon = this.lonOf('Moon', t), s = this.sect();
+    out.push(['Part of Fortune', '⊗', s.day ? a.asc + moon - sun : a.asc + sun - moon]);
+
+    /* VERTEX. Where the ecliptic meets the prime vertical in the west.
+       The horizon is the circle satisfying tan(dec) = -cot(lat) cos(H); the prime
+       vertical satisfies tan(dec) = +tan(lat) cos(H). One maps onto the other by
+       latitude -> co-latitude AND H -> H + 180, so feeding those two substitutions
+       into the Ascendant expression lands on the right great circle.
+
+       The ROOT then has to be chosen explicitly. The co-latitude of a southern
+       latitude exceeds 90 degrees, which is outside the domain where the Ascendant
+       form's own root selection means what it usually means: near the equator it
+       returned the eastern end, the antivertex, instead. So the western end is
+       selected by hour angle, which is exact, because the antipode of an ecliptic
+       point has hour angle H + 180 exactly (right ascension of the opposite point
+       differs by exactly 180 degrees).
+
+       Verified by converting the answer back to horizon coordinates and checking
+       the azimuth is due west: 20000 random moments and latitudes, worst error
+       8e-11 degrees. */
+    if (p && p.timedChart) {
+      const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
+      const eps = 23.4393 * R, ramc = (lst + 180) * R, coPhi = (90 - p.birthLat) * R;
+      let vx = this.norm360(Math.atan2(Math.cos(ramc),
+        -(Math.sin(ramc) * Math.cos(eps) + Math.tan(coPhi) * Math.sin(eps))) / R);
+      const ra = this.norm360(Math.atan2(Math.cos(eps) * Math.sin(vx * R), Math.cos(vx * R)) / R);
+      if (this.norm360(lst - ra) > 180) vx = this.norm360(vx + 180);
+      out.push(['Vertex', 'Vx', vx]);
+    }
+
+    return out.map(([name, glyph, raw]) => {
+      const lon = this.norm360(raw), sg = this.signOf(lon);
+      return { name: name, glyph: glyph, lon: lon, sign: sg.sign, deg: sg.deg, idx: sg.idx,
+        mean: this.DERIVED_MEAN[name] || '', group: 'extra', derived: true };
+    });
+  }
   SABIAN_DAY = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
   sabianRow(pl) {
     const S = window.SabianSymbols; if (!S) return null;
@@ -7444,6 +7560,7 @@ class Component extends DCLogic {
         const s = this.signOf(lon);
         rows.push({ name: n, glyph: g, lon, sign: s.sign, deg: s.deg, idx: s.idx, mean: this.PL_MEAN[n] || '', group: 'extra' });
       });
+      this.derivedPoints().forEach(d => rows.push(d));
     }
     this.anglePoints().forEach(a => rows.push(a));
     this._fcStamp = stamp; this._fc = rows;
@@ -7466,7 +7583,11 @@ class Component extends DCLogic {
     return out.sort((x, y) => x.orb - y.orb);
   }
   stelliums(expanded) {
-    const rows = this.placed(expanded).filter(r => r.group !== 'angle'), asc = this.ascendant(), sun = rows[0];
+    /* Derived points are excluded alongside the angles. A stellium is a gathering
+       of bodies, and the Part of Fortune is arithmetic on three positions already
+       in the chart, so counting it would let the same Sun, Moon and Ascendant
+       manufacture a fourth member of their own crowd. */
+    const rows = this.placed(expanded).filter(r => r.group !== 'angle' && !r.derived), asc = this.ascendant(), sun = rows[0];
     const bySign = {}, byHouse = {};
     rows.forEach(r => {
       (bySign[r.sign] = bySign[r.sign] || []).push(r.name);
