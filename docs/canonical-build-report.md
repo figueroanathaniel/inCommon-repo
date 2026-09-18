@@ -413,7 +413,7 @@ stylesheet leaves the page blank until it arrives.
    a release, not on every save, and give it a quiet tab.
 
 4. **Chart interiors are exempt from the 44px rule** by design, marked
-   `data-chart`. Planet glyphs and house numbers are chart, not chrome.
+   `data-chart`. Astral Body glyphs and house numbers are chart, not chrome.
 
 5. **Stella conversation history** persists through the memory store as wired
    in the previous pass. Long-run retention across many sessions has not been
@@ -457,7 +457,7 @@ and Human Design electromagnetics. Two decisions worth keeping:
    many loose contacts outscore a chart with a few tight ones.
 2. **Weight is a product.** `synWeight` multiplies the two bodies' personal
    weights and applies an orb factor, so Sun/Moon/Venus contacts rank above an
-   outer planet that happens to be within a degree.
+   outer astral body that happens to be within a degree.
 
 The grid carries `data-chart="synastry"`, which is the documented exemption
 from the 44px floor: 49 cells cannot each be a touch target. The cells are

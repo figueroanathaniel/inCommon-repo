@@ -2,7 +2,7 @@
 
    CONTRACT
    The app reads window.MinorBodies[name] as a 5-slot element array, identical to
-   the layout its own planets use:
+   the layout its own astral bodies use:
 
        [ L0, n, e, varpi, a ]
          L0    mean longitude at J2000.0 (deg)

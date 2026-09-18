@@ -492,7 +492,7 @@
       if (!calc || !S || !Array.isArray(calc.natal)) return [];
       return calc.natal.map(function (pl) {
         var s = S.at(pl.lon);
-        return { planet: pl.name, glyph: pl.glyph, degree: s.degree, sign: s.sign, degreeInSign: s.degreeInSign,
+        return { astralBody: pl.name, glyph: pl.glyph, degree: s.degree, sign: s.sign, degreeInSign: s.degreeInSign,
           address: s.address, symbol: s.symbol, keyword: s.keyword, verified: s.verified };
       });
     },

@@ -201,7 +201,7 @@ three before believing it works.
 
 ## 8. THE ENGINES
 
-**`incommon-core.js`**: chart reckoning. `fullChart()` = planets + EXTRA (nodes,
+**`incommon-core.js`**: chart reckoning. `fullChart()` = astral bodies + EXTRA (nodes,
 Chiron, asteroids) + `anglePoints()`. Angles (Ascendant, Midheaven, Descendant,
 IC) exist only when birth time AND place are known.
 
@@ -219,8 +219,8 @@ coarser step can miss a whole retrograde. Cached per calendar day (~9,600 `lonOf
 calls on first open, then free). `openStart`/`openEnd` mark runs touching a
 window edge so the UI never prints a station date it cannot actually see.
 
-**Placement pages.** Every planet, asteroid, node and angle has a page with:
-House, Sign in House, Planet, Planet in House, Planet in Sign, Dignity
+**Placement pages.** Every astral body, asteroid, node and angle has a page with:
+House, Sign in House, Astral Body, Astral Body in House, Astral Body in Sign, Dignity
 (conditional), Synthesis, Strengths/Challenges/Opportunities/Obstacles, Degree
 Analysis, Sabian Symbol, **Aspects to this point** (tightest first, capped at 8),
 **Transits here now** (tighter orbs than natal: 4/4/3/3/2 against 8/8/6/4/3,
@@ -233,9 +233,9 @@ triplicity sequence without saying so.
 **Houses.** Clickable from two surfaces: 30-degree wedge `<path>` on the wheel
 (inside `[data-chart]`), and the twelve list rows (buttons, 44px). Content comes
 from `PlacementContent`, never from new prose, so a house can never contradict a
-planet page. Empty houses name the cusp ruler, say where that ruler sits, and
+astral body page. Empty houses name the cusp ruler, say where that ruler sits, and
 state the traditional reading that an empty house is handled without a resident
-planet insisting on it.
+astral body insisting on it.
 
 **Today's Alignment: three modes.** `alignMode` is `today` | `shuffle` |
 `custom`. The three system lines above Together always report the real day; only
@@ -263,7 +263,7 @@ combination, so a state is reproducible and different states diverge.
 **Synastry.** Summary ring 24 to 94 is a **ratio** of harmonious to frictional
 contact weight, not a running total, so a busy chart cannot score high just for
 being busy. Weight is the **product** of the two bodies' personal weights times
-an orb factor, which keeps Sun/Moon/Venus contacts above an outer planet that
+an orb factor, which keeps Sun/Moon/Venus contacts above an outer astral body that
 happens to sit close. Six named contacts, 7x7 aspect grid, element blend, Life
 Path pairing, HD electromagnetics. Voice is celebratory and addressed to two
 people at once. The caveat under the ring is load bearing: a number is a

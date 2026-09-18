@@ -1,7 +1,7 @@
 /* astropedia.js: inCommon astrological reference. V1.0.0
    Pure reference. Nothing here reads or writes a profile, and nothing here knows
    anyone's birth moment. It is the language, not the reading: the twelve signs,
-   the twelve houses, the planets, the points, the aspects, and how a chart is
+   the twelve houses, the astral bodies, the points, the aspects, and how a chart is
    read. Gendered descriptions are tendencies the tradition reports, never rules
    about people, and the app presents them under a POSSIBILITY tag.
    Voice: organic and scholarly. No em dashes.
@@ -15,7 +15,7 @@
   var SECTIONS = [
     ['signs', 'The Twelve Signs'],
     ['houses', 'The Twelve Houses'],
-    ['planets', 'The Planets'],
+    ['bodies', 'The Astral Bodies'],
     ['points', 'The Asteroids and Points'],
     ['aspects', 'Aspects'],
     ['chart', 'The Birth Chart'],
@@ -27,7 +27,7 @@
   ];
 
   var INTRO = {
-    what: 'Astropedia is a reference, not a reading. It holds the language the tradition speaks in: the signs as atmospheres, the houses as rooms, the planets as guests, and the aspects as the conversation between them.',
+    what: 'Astropedia is a reference, not a reading. It holds the language the tradition speaks in: the signs as atmospheres, the houses as rooms, the astral bodies as guests, and the aspects as the conversation between them.',
     how: 'Read it beside your own chart. Nothing here knows your birth moment, so nothing here can tell you who you are. It can only teach you to hear what your chart is saying.',
     caution: 'None of this has been shown to work by any means outside the tradition itself. It is a language for noticing, and it earns its keep only where it describes something you can check against your own life.'
   };
@@ -163,45 +163,45 @@
   var HOUSES = [
     { n: 1, name: 'The House of Self', sign: 'Aries', area: 'appearance, arrival, the body as messenger',
       text: 'The First House is the threshold. It is the face you present before you have chosen to speak. It belongs to Aries by nature, and so it carries the mark of emergence, of self-assertion, of the body as the first thing anyone reads.',
-      planets: 'A planet here is worn in public. It colors how you are met before you have said anything.',
+      bodies: 'An astral body here is worn in public. It colors how you are met before you have said anything.',
       signs: 'The sign on this cusp is the Ascendant, and it sets the atmosphere of the whole chart.' },
     { n: 2, name: 'The House of Substance', sign: 'Taurus', area: 'resources, worth, what is held',
       text: 'The Second House is the storehouse. It holds what is yours: money, possessions, talents, and the quieter matter of what you believe you are worth. Taurus by nature, it measures value by what can be kept.',
-      planets: 'A planet here shapes how you earn, spend, and value.', signs: 'The sign here reveals the manner of holding: generous, cautious, restless, or exacting.' },
+      bodies: 'An astral body here shapes how you earn, spend, and value.', signs: 'The sign here reveals the manner of holding: generous, cautious, restless, or exacting.' },
     { n: 3, name: 'The House of Speech', sign: 'Gemini', area: 'language, siblings, the near world',
       text: 'The Third House is the street you grew up on. It governs speech, learning, letters, short journeys, and brothers and sisters. Gemini by nature, it is the mind at its most immediate.',
-      planets: 'A planet here speaks. It enters your language and your daily traffic.', signs: 'The sign here colors how you think out loud.' },
+      bodies: 'An astral body here speaks. It enters your language and your daily traffic.', signs: 'The sign here colors how you think out loud.' },
     { n: 4, name: 'The House of Foundations', sign: 'Cancer', area: 'home, lineage, the root',
       text: 'The Fourth House is the floor beneath the house. It holds family, ancestry, the place you come from, and the private self no visitor sees. Cancer by nature, it keeps what was felt early.',
-      planets: 'A planet here works underground. It shapes the interior and the inheritance.', signs: 'The sign here describes the emotional weather of home.' },
+      bodies: 'An astral body here works underground. It shapes the interior and the inheritance.', signs: 'The sign here describes the emotional weather of home.' },
     { n: 5, name: 'The House of Play', sign: 'Leo', area: 'creation, romance, children, delight',
       text: 'The Fifth House is where something is made for the joy of making it. It governs love affairs, children, performance, and play. Leo by nature, it is the self spilling over into what it creates.',
-      planets: 'A planet here wants to be expressed and enjoyed.', signs: 'The sign here reveals what delight looks like for you.' },
+      bodies: 'An astral body here wants to be expressed and enjoyed.', signs: 'The sign here reveals what delight looks like for you.' },
     { n: 6, name: 'The House of Daily Work', sign: 'Virgo', area: 'labor, habit, health, service',
       text: 'The Sixth House is the ordinary day. It governs work as it is actually done, the body as it is actually kept, routine, and service. Virgo by nature, it is small repeated acts becoming a life.',
-      planets: 'A planet here shows up in your habits and in your health.', signs: 'The sign here colors your relationship to duty.' },
+      bodies: 'An astral body here shows up in your habits and in your health.', signs: 'The sign here colors your relationship to duty.' },
     { n: 7, name: 'The House of the Other', sign: 'Libra', area: 'partnership, contracts, the mirror',
       text: 'The Seventh House is the person across from you. It governs marriage, partnership, agreements, and open opposition. Libra by nature, it reveals what you meet in another and cannot see in yourself.',
-      planets: 'A planet here arrives through other people.', signs: 'The sign here describes who you are drawn to and how you meet them.' },
+      bodies: 'An astral body here arrives through other people.', signs: 'The sign here describes who you are drawn to and how you meet them.' },
     { n: 8, name: 'The House of Passage', sign: 'Scorpio', area: 'death, intimacy, shared resources, transformation',
       text: 'The Eighth House is the door you go through and do not come back the same. It governs deep intimacy, inheritance, debt, other people\u2019s money, and endings that remake you. Scorpio by nature, it deals in what cannot be kept.',
-      planets: 'A planet here goes through change and takes you with it.', signs: 'The sign here reveals how you handle surrender and shared power.' },
+      bodies: 'An astral body here goes through change and takes you with it.', signs: 'The sign here reveals how you handle surrender and shared power.' },
     { n: 9, name: 'The House of the Horizon', sign: 'Sagittarius', area: 'belief, distance, study, meaning',
       text: 'The Ninth House is the far view. It governs philosophy, faith, higher study, long journeys, and the frameworks you make sense of things with. Sagittarius by nature, it is the search itself.',
-      planets: 'A planet here becomes part of what you believe.', signs: 'The sign here reveals the shape of your seeking.' },
+      bodies: 'An astral body here becomes part of what you believe.', signs: 'The sign here reveals the shape of your seeking.' },
     { n: 10, name: 'The House of the Path', sign: 'Capricorn', area: 'vocation, reputation, standing',
       text: 'The Tenth House is the top of the chart, the most public point. It governs vocation, authority, reputation, and what you are recognized for. Capricorn by nature, it is built rather than granted.',
-      planets: 'A planet here becomes visible as your role in the world.', signs: 'The sign on this cusp is the Midheaven, the direction of the path.' },
+      bodies: 'An astral body here becomes visible as your role in the world.', signs: 'The sign on this cusp is the Midheaven, the direction of the path.' },
     { n: 11, name: 'The House of the Many', sign: 'Aquarius', area: 'friendship, community, hopes',
       text: 'The Eleventh House is the circle you choose. It governs friends, allies, groups, and the future you are working toward with others. Aquarius by nature, it belongs to the many rather than the one.',
-      planets: 'A planet here arrives through community and shared aims.', signs: 'The sign here reveals what kind of company you keep.' },
+      bodies: 'An astral body here arrives through community and shared aims.', signs: 'The sign here reveals what kind of company you keep.' },
     { n: 12, name: 'The House of Dissolution', sign: 'Pisces', area: 'solitude, the unseen, release',
       text: 'The Twelfth House is the room with no lamp. It governs solitude, dreams, what is hidden from you as much as from others, and what must be released. Pisces by nature, it has no clear edges.',
-      planets: 'A planet here works out of sight, often felt before it is understood.', signs: 'The sign here reveals what you meet in the dark and in retreat.' }
+      bodies: 'An astral body here works out of sight, often felt before it is understood.', signs: 'The sign here reveals what you meet in the dark and in retreat.' }
   ];
 
-  /* ---------- the planets ---------- */
-  var PLANETS = [
+  /* ---------- the astral bodies ---------- */
+  var ASTRAL_BODIES = [
     { name: 'Sun', glyph: '\u2609', rhythm: 'one turn of the year', dignity: 'Leo', detriment: 'Aquarius', exaltation: 'Aries', fall: 'Libra',
       text: 'The Sun is the heart of the chart. It does not orbit; it holds the center. It reveals what you are becoming, what you cannot help but express, and what warms you from within.',
       sign: 'The sign shows the manner of shining.', house: 'The house shows the room the light falls in.', aspect: 'Aspects to the Sun touch identity itself, which is why they are felt as personal.' },
@@ -247,14 +247,14 @@
 
   /* ---------- aspects ---------- */
   var ASPECTS = [
-    { name: 'Conjunction', angle: '0 degrees', text: 'Two planets dwell in the same breath. Their qualities merge, for better or deeper. They cannot be separated in the reading.' },
+    { name: 'Conjunction', angle: '0 degrees', text: 'Two astral bodies dwell in the same breath. Their qualities merge, for better or deeper. They cannot be separated in the reading.' },
     { name: 'Sextile', angle: '60 degrees', text: 'An opening. A door that invites but does not compel. Opportunity, if you choose to walk through it.' },
     { name: 'Square', angle: '90 degrees', text: 'Tension that builds. Two forces pulling in different directions, each necessary, each demanding integration.' },
     { name: 'Trine', angle: '120 degrees', text: 'Flow. What comes easily, perhaps too easily. The gift that risks being taken for granted.' },
     { name: 'Opposition', angle: '180 degrees', text: 'The mirror. The other that completes and confronts. Relationship as teacher.' }
   ];
   var ORBS = {
-    what: 'An aspect is rarely exact. The orb is the range within which the conversation between two planets remains audible.',
+    what: 'An aspect is rarely exact. The orb is the range within which the conversation between two astral bodies remains audible.',
     how: 'The closer the two stand to the exact angle, the louder the exchange. Within a degree or two it is unmistakable. Toward the edge of the orb it is a murmur you may only recognize afterward.',
     custom: 'The tradition allows wider orbs for the Sun and Moon and narrower ones for the slower bodies, and honest readers disagree about the exact limits.'
   };
@@ -262,7 +262,7 @@
   /* ---------- the birth chart ---------- */
   var CHART = {
     what: 'A map of the sky at your first breath. Not a fate, but a field of possibilities.',
-    wheel: 'Read the wheel as a building. The houses are rooms, the signs are the atmosphere in each room, and the planets are the guests who arrived and stayed.',
+    wheel: 'Read the wheel as a building. The houses are rooms, the signs are the atmosphere in each room, and the astral bodies are the guests who arrived and stayed.',
     angles: [
       ['Ascendant', 'The mask. The eastern horizon at your first breath, and the way you are met before you speak.'],
       ['Descendant', 'The mirror. The point opposite the Ascendant, where you meet the other.'],
@@ -273,8 +273,8 @@
       ['Find the Ascendant', 'This is where the chart begins. It sits at the left edge of the wheel and sets the atmosphere for everything else.'],
       ['Follow the houses', 'They move counterclockwise from the Ascendant, one room at a time, twelve in all.'],
       ['Notice the signs on each cusp', 'The sign at the edge of a house colors what happens inside it.'],
-      ['Find the planets', 'They are the actors. Note which house holds each one, and which sign it dwells in.'],
-      ['Notice the aspects', 'The lines across the wheel reveal which planets are in conversation, and in what tone.'],
+      ['Find the astral bodies', 'They are the actors. Note which house holds each one, and which sign it dwells in.'],
+      ['Notice the aspects', 'The lines across the wheel reveal which astral bodies are in conversation, and in what tone.'],
       ['Weigh the emphasis', 'Look for a gathering: several bodies in one sign or one house. The chart leans there.'],
       ['Synthesize', 'Ask what story emerges. A chart that does not sound like a life you recognize has been read too literally.']
     ]
@@ -287,13 +287,13 @@
   };
 
   var STELLIUM = {
-    what: 'A gathering. Three or more planets in the same sign or house, concentrating their conversation in one room. The chart leans here. The life returns here, again and again, until what is concentrated is understood.',
+    what: 'A gathering. Three or more astral bodies in the same sign or house, concentrating their conversation in one room. The chart leans here. The life returns here, again and again, until what is concentrated is understood.',
     read: 'Notice which house holds the gathering. That is where the energy pools. Notice the sign; that is the quality of the pool. The stellium does not demand; it invites attention.',
     caution: 'Concentration is not destiny. It may mean this is where you carry the most force and the least perspective. Your own record is the test.'
   };
 
   var TRANSITS = {
-    personal: 'The moving planets touching your natal chart. A conversation between what is now and what was then.',
+    personal: 'The moving astral bodies touching your natal chart. A conversation between what is now and what was then.',
     sky: 'The patterns in the sky themselves, independent of your chart. The weather that falls on everyone.',
     read: 'A transit does not cause; it reveals. It opens a window. What you see through it depends on where you stand.',
     timing: 'The swift bodies pass in hours or days. The slow ones stay for months and are better read as a season than an event.'
@@ -301,7 +301,7 @@
 
   var SYNASTRY = {
     what: 'The comparison of two charts. Not compatibility in the simple sense, but the map of what happens when two fields of possibility meet.',
-    read: 'Look first at where your planets fall in their houses. Then where theirs fall in yours. The aspects between your planets reveal the nature of the conversation.',
+    read: 'Look first at where your astral bodies fall in their houses. Then where theirs fall in yours. The aspects between your astral bodies reveal the nature of the conversation.',
     caution: 'Two charts cannot tell you whether to stay. They can tell you what you keep running into, which is more useful and less flattering.'
   };
 
@@ -325,7 +325,7 @@
       ['Find the Ascendant', 'Libra rising. This person is met as even, courteous, and difficult to provoke on first meeting.'],
       ['Follow the houses', 'From Libra the rooms run counterclockwise, which places Capricorn on the fourth: home, lineage, the private foundation.'],
       ['Read the signs on the cusps', 'Cancer sits on the Midheaven, so the public path carries a protective, caretaking quality even though the interior is Capricorn.'],
-      ['Find the planets', 'Three bodies gather in the fourth house. The chart is weighted toward family, inheritance, and the foundation the person is standing on.'],
+      ['Find the astral bodies', 'Three bodies gather in the fourth house. The chart is weighted toward family, inheritance, and the foundation the person is standing on.'],
       ['Read the aspects', 'Sun conjunct Saturn says identity and duty arrived together. Mars in the seventh, square that gathering, says other people press on it.'],
       ['Notice the gathering', 'The Capricorn stellium in the fourth is the loudest feature. Whatever else is true, life keeps returning to home and obligation.'],
       ['Weigh what is missing', 'Only one water placement and no fire below the horizon. Ease is not the theme; endurance is.'],
@@ -335,7 +335,7 @@
 
   function signByName(n) { for (var i = 0; i < SIGNS.length; i++) { if (SIGNS[i].name === n) return SIGNS[i]; } return null; }
   function house(n) { return HOUSES[n - 1] || null; }
-  function planet(n) { for (var i = 0; i < PLANETS.length; i++) { if (PLANETS[i].name === n) return PLANETS[i]; } return null; }
+  function astralBody(n) { for (var i = 0; i < ASTRAL_BODIES.length; i++) { if (ASTRAL_BODIES[i].name === n) return ASTRAL_BODIES[i]; } return null; }
   function point(n) { for (var i = 0; i < POINTS.length; i++) { if (POINTS[i].name === n) return POINTS[i]; } return null; }
   function aspect(n) {
     var k = String(n || '').toLowerCase();
@@ -345,7 +345,7 @@
   }
 
   return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES,
-    PLANETS: PLANETS, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CHART: CHART, SABIAN: SABIAN,
+    ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
-    sign: signByName, house: house, planet: planet, point: point, aspect: aspect };
+    sign: signByName, house: house, astralBody: astralBody, point: point, aspect: aspect };
 }));

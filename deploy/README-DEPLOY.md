@@ -200,7 +200,7 @@ removed above.
   where that ruler lives, every one of your bodies inside it read one by one, the
   opposing house on its axis, and a testable framing. Empty houses are handled
   properly rather than left blank: they hand off to their ruler. All content is
-  assembled from PlacementContent, so a house never contradicts a planet page.
+  assembled from PlacementContent, so a house never contradicts an astral body page.
 - **New: Retrograde, under Stellium in Chart Features.** Current, recently
   finished, and upcoming retrogrades for Mercury through Pluto, computed from the
   same ephemeris as the wheel, with station degrees, dates, per-body traditional

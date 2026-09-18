@@ -23,8 +23,8 @@ input, variable, parameter.
 Preferred: reveals, shows, speaks, suggests, indicates, points toward, unfolds, emerges, arises,
 dwells in, resides, belongs to, carries the quality of, bears the mark of, holds the memory of.
 
-Scientific: "The algorithm computes planetary positions from the user's birth data."
-Organic: "The chart reveals where each planet dwelt at the moment of your first breath, drawn from
+Scientific: "The algorithm computes astral body positions from the user's birth data."
+Organic: "The chart reveals where each astral body dwelt at the moment of your first breath, drawn from
 the place and hour of your arrival."
 
 No em dashes anywhere. Use a comma, a colon, or a full stop.

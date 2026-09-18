@@ -13,7 +13,7 @@
   var INTRO = {
     what: 'Human Design is a synthesis. It takes a birth moment and draws a diagram, the Bodygraph, which it reads as a map of how a person is built to make decisions and spend energy.',
     history: 'The system was published by Ra Uru Hu, born Alan Krakower, after an experience he reported on Ibiza in January 1987. It combines the 64 hexagrams of the I Ching, the ten Sephirot of the Kabbalistic Tree of Life, the seven-chakra system, Western astrology, and a reading of the neutrino as a carrier of information.',
-    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the planets about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
+    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the astral bodies about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
     caution: 'None of this has been demonstrated by any mechanism outside the system itself. It is a language for noticing, and it is at its most useful where it describes something you can check.'
   };
 
