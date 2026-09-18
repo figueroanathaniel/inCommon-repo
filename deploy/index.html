@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v5.5  |  built 2026-09-18  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v5.6  |  built 2026-09-18  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16519,10 +16519,6 @@ class Component extends DCLogic {
   /* Personal information is covered on screen until it is asked for. Nothing is
      encrypted by this: it is a shoulder-surfing courtesy, and it says so. */
   maskPI(v) { return String(v || '').replace(/[A-Za-z0-9]/g, '*'); }
-  maskTail(v) {
-    const t = String(v || ''), i = t.indexOf(' \u00b7 ');
-    return i === -1 ? this.maskPI(t) : t.slice(0, i + 3) + this.maskPI(t.slice(i + 3));
-  }
   /* The first profile made is the one that opens, and the placeholder the
      bootstrap leaves behind is cleared the moment a real profile exists. */
   pruneDefaultProfile() {
@@ -16929,9 +16925,7 @@ class Component extends DCLogic {
   // header carries the measured per-body error against JPL Horizons; without that
   // module they show as uncomputed rather than as a guess.
   EXTRA = [['South Node', '☋'], ['Black Moon Lilith', '⚸'], ['Chiron', '⚷'], ['Ceres', '⚳'], ['Pallas', '⚴'], ['Juno', '⚵'], ['Vesta', '⚶']];
-  CHIRON_EL = [216.6, .0195593, .3823, 188.9, 13.6371];
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
-  UNCOMPUTED_WHY = 'needs a real ephemeris this offline build does not carry';
   PL_LONG = {
     Sun: 'Your core identity, vitality, and conscious will: the part of you that wants to be someone in particular.',
     Moon: 'Feeling, memory, and what actually soothes you. The private weather underneath the public day.',
@@ -17161,22 +17155,6 @@ class Component extends DCLogic {
   }
   // General precession in longitude, J2000 frame to the ecliptic of date.
   precession(t) { const T = t / 36525; return 1.396971 * T + 0.0003086 * T * T; }
-  // Solve Chiron's mean longitude at J2000 against a known ingress rather than
-  // trusting a remembered epoch: 0° Aries on 17 April 2018.
-  chironEl() {
-    if (this._chEl) return this._chEl;
-    const tA = this.t2000(new Date(Date.UTC(2018, 3, 17, 12, 0)));
-    const el = this.CHIRON_EL.slice();
-    const err = L0 => { el[0] = L0; let d = Math.abs(this.norm360(this.minorLon(el, tA))); return d > 180 ? 360 - d : d; };
-    let best = 0, bestE = 1e9;
-    for (let L = 0; L < 360; L += 1) { const e = err(L); if (e < bestE) { bestE = e; best = L; } }
-    for (let step = .5; step > .002; step /= 2) {
-      [best - step, best + step].forEach(L => { const e = err(L); if (e < bestE) { bestE = e; best = L; } });
-    }
-    el[0] = best;
-    this._chEl = el;
-    return el;
-  }
   signOf(lon) { const l = this.norm360(lon), i = Math.floor(l / 30); return { sign: this.SIGNS12[i], deg: l - i * 30, idx: i }; }
   natalDateFor(p) {
     const dob = (p && p.birthDate) || this.DOB;
@@ -17329,18 +17307,6 @@ class Component extends DCLogic {
       return { name: name, glyph: glyph, lon: lon, sign: sg.sign, deg: sg.deg, idx: sg.idx,
         mean: this.DERIVED_MEAN[name] || '', group: 'extra', derived: true };
     });
-  }
-  SABIAN_DAY = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
-  sabianRow(pl) {
-    const S = window.SabianSymbols; if (!S) return null;
-    const r = S.at(pl.lon);
-    return { astralBody: pl.name, glyph: pl.glyph, address: r.address, sign: r.sign, degreeInSign: r.degreeInSign,
-      symbol: r.symbol, keyword: r.keyword, verified: !!r.verified };
-  }
-  sabianAll() { return this.chartAt(this.natalDate()).map(p => this.sabianRow(p)).filter(Boolean); }
-  sabianToday() {
-    const natal = this.chartAt(this.natalDate()), want = this.SABIAN_DAY[new Date().getDay()];
-    return this.sabianRow(natal.find(x => x.name === want) || natal[0]);
   }
   artNum(n) { return /^(8|11|18|8\d)$/.test(String(n)) ? 'an' : 'a'; }
   numReduce(n) { n = Math.abs(+n || 0); while (n > 9) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
@@ -17869,15 +17835,6 @@ class Component extends DCLogic {
   dsaltHash(salt) {
     return this.dcacheGet(this._dsaltCache, salt + '|' + this.dident(), () => this.shash(salt + '|' + this.dident()));
   }
-  dblockPerm(block, salt, n) {
-    const a = []; for (let i = 0; i < n; i++) a.push(i);
-    let h = this.shash(block + '|' + salt + '|' + this.dident());
-    for (let i = n - 1; i > 0; i--) {
-      h = (Math.imul(h, 1664525) + 1013904223) >>> 0;
-      const j = h % (i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
-    }
-    return a;
-  }
   /* Cycling beats sampling. Hashing the date picked independently every day, so
      a four-variant slot came back round in four days on average and sometimes
      in two; several slots landing together made a reading four days old read
@@ -17984,7 +17941,6 @@ class Component extends DCLogic {
     if (n < 2) return 0;
     return ((this.dfigOrd(date, fig, figOf) + Math.abs(+fig || 0)) % n + n) % n;
   }
-  dhash(salt) { return this.dhashOn(this.horoNow(), salt); }
   /* Hashing the date alone still let two days in a row draw the same variant
      about a sixth of the time, which is exactly the thing being fixed. So the
      previous day is hashed too and a collision is rotated away from: adjacent
@@ -18766,9 +18722,6 @@ class Component extends DCLogic {
   }
   addDays(d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
   fmtDay(d) { return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
-  fmtMonth(d) { return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); }
-  weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
-  personalWeek(pyV, d) { return this.numReduce(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
   isRetro(name, date) { const t = this.t2000(date); return this.norm360(this.lonOf(name, t + 1) - this.lonOf(name, t)) > 180; }
   // Retrograde motion, computed from the same ephemeris the wheel is drawn from.
@@ -18933,19 +18886,6 @@ class Component extends DCLogic {
     };
     return this._rt;
   }
-  lunationsAhead(from, days) {
-    const out = []; let prev = null;
-    for (let i = 0; i <= days; i++) {
-      const dt = this.addDays(from, i), t = this.t2000(dt);
-      const el = this.norm360(this.lonOf('Moon', t) - this.lonOf('Sun', t));
-      if (prev != null) {
-        if (el < prev) out.push({ kind: 'New Moon', date: dt });
-        else if (prev < 180 && el >= 180) out.push({ kind: 'Full Moon', date: dt });
-      }
-      prev = el;
-    }
-    return out;
-  }
   /* ECLIPSES. A lunation only eclipses when it happens near a lunar node, the point
      where the Moon's path crosses the Sun's. The two ecliptic limits are standard:
      a New Moon inside about 18.5 degrees of the node axis covers the Sun somewhere
@@ -19091,29 +19031,6 @@ class Component extends DCLogic {
       if (Math.abs(list[i].r.n) <= this.ECL_NEAR || hits.length) return { ...list[i].e, rel: list[i].r, hits: hits };
     }
     return null;
-  }
-  aspGroup(h, whenText, tail) {
-    const T = (t, x) => this.tagLine(t, x), k = String(h.asp).toLowerCase(), a = this.aspName(k), f = q => this.fmtPos(q);
-    return { hasHead: true, head: 'Transiting ' + h.a.name + ' ' + a + ' to your natal ' + h.b.name + (tail ? ' \u00b7 ' + tail : ''),
-      cta: h.b.name + ' \u2192', go: this.dpOpen({ kind: 'astral body', name: h.b.name }), lines: [
-        T('CALCULATED', h.a.name + ' at ' + f(h.a) + ' ' + whenText + ', ' + a + ' to your natal ' + h.b.name + ' at ' + f(h.b) + ', orb ' + h.orb.toFixed(1) + '\u00b0.'),
-        T('TRADITIONAL', 'In astrology a ' + a + ' between ' + h.a.name + ' and ' + h.b.name + ' is read as ' + (this.ASP_MEAN[k] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(h.a.name) + '. On the other sits ' + this.bodyEnergy(h.b.name) + '.'),
-        T('POSSIBILITY', 'You may notice this as ' + (this.ASP_POSS[k] || 'a contact you feel before you can name it') + '.')
-      ] };
-  }
-  gateRuns(from, days) {
-    const runs = [];
-    for (let i = 0; i < days; i++) {
-      const dt = this.addDays(from, i), g = this.gateOf(this.sunOn(dt).lon), last = runs[runs.length - 1];
-      if (last && last.gate === g.gate) last.to = dt;
-      else runs.push({ gate: g.gate, line: g.line, from: dt, to: dt });
-    }
-    return runs;
-  }
-  runLabel(r) { return r.from.getTime() === r.to.getTime() ? 'on ' + this.fmtDay(r.from) : this.fmtDay(r.from) + ' to ' + this.fmtDay(r.to); }
-  chanFor(gate, natalSet) {
-    const c = this.HD_CHANNELS.find(x => (x[0] === gate && natalSet.has(x[1])) || (x[1] === gate && natalSet.has(x[0])));
-    return c ? { c: c, partner: c[0] === gate ? c[1] : c[0] } : null;
   }
   /* ---------- archive ---------- */
   ARC_LABEL = { alignment: 'ALIGNMENT', journal: 'JOURNAL', stella_conversation: 'CONVERSATION' };
