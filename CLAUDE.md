@@ -457,6 +457,54 @@ rule nobody is reading. And it refuses to report green when it cannot see: too
 few files walked, the app not reached, fewer than twenty label positions found,
 or no mark found inside `docs/reference/` where they are known to be.
 
+## Planet is astral body, and where it is not
+The owner asked for the word replaced, and it is, everywhere a reader can see
+it. This section exists because the terminology test three sections above would
+have KEPT it: planet is the field's own word rather than anyone's brand, so by
+that test a private substitute costs comprehension and buys nothing. The test
+was applied, it argued for keeping, and the owner decided otherwise. That is
+the owner's call and it is recorded here rather than argued again.
+
+**The rename was classified by position, never by guessing.** A space is fatal
+in an identifier and harmless in a sentence, so the two cases cannot share one
+substitution. Every byte of every source file was marked CODE, STRING, COMMENT
+or TEXT, and the word was replaced according to where it stood: identifiers
+became camelCase (`wheelPlanets` to `wheelBodies`, `openPlanet` to `openBody`,
+`planetInSign` to `astralBodyInSign`, `planet1`/`planet2` to `body1`/`body2`),
+and prose became "astral body", article aware, so "a planet" became "an astral
+body" rather than "a astral body".
+
+**Template placeholders are identifiers wearing quotes.** `{planet1}` inside a
+catalog string is the key of the params object the substituting code passes, so
+it had to move with the identifier or every headline would render the brace.
+341 of them, across `app/i18n/` and `app/forecast/`, and the i18n suite's
+placeholder parity row (L5/I5) is what proves the two halves still agree. The
+one miss the first pass made was the other shape of the same thing: a bare
+`'planet'` inside a string, in the test fixture's expected-placeholder list,
+which is a name rather than a sentence and had to become `'body'`.
+
+**Three places keep the old word on purpose, and each is a decision.**
+`planetary` is a different word from planet and was left, which keeps
+`planetaryNodeOf`, the eight `planetary nodes` and one reader-facing
+"planetary placements" as they were. `'planet'` survives as a quoted literal
+in the CAT_COLOR paragraph above, because that paragraph is the record of a bug
+whose content WAS that literal. And `app/gazetteer-world.js` was never touched:
+Planeta Rica is a town in Colombia and a reader born there has to be able to
+find it.
+
+**"Dwarf Astral Bodies" is the one label where the rename fights the field.**
+Dwarf planet is a formal IAU classification, and it sits in `CAT_LABEL` beside
+asteroid, centaur, comet and TNO, which are formal classifications too and were
+all kept. It is the odd one out by construction. It is written this way because
+the instruction was the word everywhere; if it should read "Dwarf Planets"
+again, that is one string in `CAT_LABEL` and nothing else depends on it.
+
+**Reports, records and the historical docs were left alone**, which is the same
+rule the version-in-a-filename section states: a record of what was written on
+a date is not a pointer to be maintained. The ~20 report `.md` files at the repo
+root, `docs/`, `verification/` and `data-contracts/` all still say planet, and
+that is correct.
+
 ## Circles, and the Ground one stands on
 `hd-circle.js` holds two things. **Between** is the two person overlay under its
 inCommon name and delegates to `hd-composite.js`: there is not a second engine,
@@ -631,7 +679,7 @@ a birth time, and say that.
 
 **Ring 1 and ring 2 are a stagger band, not a distance from centre.** Both
 sit inside the sign boundary, where the small card's glyphs already lived;
-ring 1 (planets, both nodes, Chiron, the four main asteroids, Lilith,
+ring 1 (the ten bodies, both nodes, Chiron, the four main asteroids, Lilith,
 Selena) staggers near that boundary at the original size, ring 2 (everything
 else this wheel draws) staggers in a smaller band further toward the centre,
 in a smaller glyph, so eighty points does not compete with the sixteen core
@@ -640,7 +688,7 @@ ones for the same rim space. `RING1_IDS` is the membership list.
 **Comets are the one category excluded from the wheel by default.**
 `fullChart()` computes and lists them unconditionally - the table and the
 seven sub-tables below it always carry all three - but `placedRows` (which
-feeds `wheelPlanets`/`wheelLabels`, the SVG) drops `category === 'comet'`
+feeds `wheelBodies`/`wheelLabels`, the SVG) drops `category === 'comet'`
 unless `chartExpandShowComets` is on. One state flag, checked in one place,
 rather than a second copy of the point list.
 
@@ -673,7 +721,7 @@ outside expanded mode, or the basic chart's own legend would start
 advertising aspect lines it can never draw.
 
 **One tooltip builder, not two.** `pointTooltip(r, houseLabel)` is what both
-`wheelPlanets`' SVG `<title>` and every points-table row's `title` attribute
+`wheelBodies`' SVG `<title>` and every points-table row's `title` attribute
 call: name, glyph, DMS position, house, then the two SYMBOLISM lines
 (tooltip → the point's own meaning, reference → "Used in reference to"). An
 unavailable point never reaches the position formatter; it returns "n/a: no
@@ -730,7 +778,8 @@ body, the widest epoch spacing whose worst case against those references
 stays within 0.1 degree: twenty years for the Kuiper belt, one year for the
 near Earth asteroids, two for the main belt. The module solves Kepler from
 the NEAREST epoch, which is why this works: an osculating set is exact at its
-epoch and drifts only by what the planets do in the gap. Worst case over all
+epoch and drifts only by what the planets do in the gap. (The perturbers are
+the planets: this is a fact about the solar system rather than app vocabulary.) Worst case over all
 52 real bodies is 0.128 degree (Apollo); 47 of the 52 are under 0.07.
 
 **Ceres, Pallas, Juno and Vesta were the last four real bodies not fetched, and
@@ -826,7 +875,7 @@ labels of every expanded point silently vanished off the wheel mid-change.
 **Two outer ring points are not aspected to each other.** With every body
 placed, asteroid to hypothetical and centaur to TNO pairs were 393 of 708
 contacts on the sample chart and tripled the overlay's render. A minor body is
-read by what it touches among the planets, lights, nodes, angles and ring 1.
+read by what it touches among the astral bodies, lights, nodes, angles and ring 1.
 `stelliums()` counts the core and ring 1 only, for the same reason: with
 eighty points placed every sign holds three of something.
 
@@ -870,11 +919,11 @@ rule that never turns off.
 ## The Aspects grid filters, and a bug it walked into on the way in
 Tracing "filter by category involved" back to its source field surfaced a
 defect that predates this pass: `CAT_LABEL`, `CAT_COLOR` and the Points
-table's own `catOrder` all keyed the ten core planets as `'planet'`, but
+table's own `catOrder` all keyed the ten core bodies as `'planet'`, but
 `fullChart()` has always stamped them `category:'body'` (`x.name.indexOf
 ('Node') !== -1 ? 'node' : 'body'`). Grouping the table by category filtered
 `sorted` for `r.category === 'planet'`, which no row has ever carried, so
-the "Planets & Nodes" section silently returned zero rows and the Sun
+the "Astral Bodies & Nodes" section silently returned zero rows and the Sun
 through Pluto simply never appeared in Group mode. The North and South
 Node were unaffected by coincidence, since their own category really is
 `'node'`. `CAT_COLOR`'s `'planet'` key had the same fault but no visible
@@ -893,7 +942,7 @@ nothing.
 **The row a reader clicks and the pair the wheel highlights read the same
 array by construction, not by convention.** `chartExpandAspSel` stores the
 clicked row's `id`, which is its index into `asps` as `chartExpandVals()`
-builds it; the wheel's own `wheelPlanets` computation calls
+builds it; the wheel's own `wheelBodies` computation calls
 `natalAspects(expanded, {...})` with the identical arguments (rich mode,
 same minor-aspect and minor-scale flags) to get an array that is
 positionally identical, and resolves the same index against it. Two
@@ -2532,9 +2581,9 @@ BOTH ends of an opposition; that is geometrically impossible (confirmed by
 exhaustive search), so it could never match any chart, ever, despite being
 surfaced in forecast copy as a pattern the app claims to detect. Checked
 against a published definition (Astrology Weekly's "Yods and Boomerangs": a
-Boomerang is a Yod plus a fourth planet opposing the apex, nothing more),
+Boomerang is a Yod plus a fourth body opposing the apex, nothing more),
 `detectBoomerang()` was rewritten to that actual shape, which is always
-achievable. `apex` on the returned pattern now names the release planet
+achievable. `apex` on the returned pattern now names the release body
 (opposite the Yod's own apex), since that is the notable addition a
 Boomerang has over a plain Yod, and `app/forecast/content/{headlines,explainer}.ts`
 were corrected from "T-Square with an escape route" to "Yod with an escape
@@ -2546,7 +2595,7 @@ patterns by name containing "Yod", which only ever matched the classical
 because no detector for one existed anywhere in this codebase.
 `patterns.ts`'s `ASPECT_ORBS` already carried `'quintile'` and `'biquintile'`
 entries with nothing using either: `detectGoldenYod()` (a quintile [72°]
-between two planets, both biquintile [144°] from a third - checked against
+between two bodies, both biquintile [144°] from a third - checked against
 fifth-harmonic literature, and a genuinely different pattern from the
 classical Yod, not a variant of it) is the missing detector, added to
 Tier 1. And "becomes a Grand Trine at H5" was never the real fifth-harmonic

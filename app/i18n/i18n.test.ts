@@ -28,9 +28,9 @@ const fixtureCatalog: LocaleCatalog = {
     'simple-key': 'Simple translation',
     'with-placeholder': 'Hello {name}, today is {day}.',
     'multi-variant': [
-      'First variant with {planet}',
-      'Second variant with {planet}',
-      'Third variant with {planet}'
+      'First variant with {body}',
+      'Second variant with {body}',
+      'Third variant with {body}'
     ]
   },
   metadata: {
@@ -43,7 +43,7 @@ const fixtureCatalog: LocaleCatalog = {
 const expectedPlaceholders: Record<string, string[]> = {
   'simple-key': [],
   'with-placeholder': ['name', 'day'],
-  'multi-variant': ['planet']
+  'multi-variant': ['body']
 };
 
 // ============================================================================

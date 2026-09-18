@@ -40,7 +40,7 @@ export interface MonthCell {
 }
 
 export interface RetrogradePeriod {
-  planet: string;
+  body: string;
   startDate: string;
   endDate: string;
   isRetrograde: boolean;

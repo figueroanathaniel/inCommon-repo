@@ -29,7 +29,7 @@
  * disagree with the chart the app already draws.
  *
  * HONESTY ABOUT COVERAGE. Of the registry's 97 points, this file computes
- * a real position for the ten planets, both lunar nodes, the four angles
+ * a real position for the ten astral bodies, both lunar nodes, the four angles
  * (given, not derived here), Chiron and four asteroids (fitted elements,
  * ported), two more asteroids/TNOs with real cited elements (Eris,
  * Sedna), the eight planetary nodes (published J2000 mean elements), the
@@ -97,9 +97,9 @@ function t2000(jd: number): number { return jd - 2451545.0; }
 
 /**
  * Solve Kepler's equation M = E - e sin E for E, by Newton-Raphson.
- * Shared by every body below: planets, minor bodies, Eris and Sedna all
+ * Shared by every body below: astral bodies, minor bodies, Eris and Sedna all
  * go through this one function, so a fix here fixes all of them at once
- * rather than needing to be repeated per body the way the old planet
+ * rather than needing to be repeated per body the way the old astral body
  * formula (a truncated equation-of-centre series) and the old minor-body
  * formula (this same Newton solve) used to disagree in method.
  */
@@ -351,14 +351,14 @@ export function lunarNode(jd: number): { northNode: number; southNode: number } 
 }
 
 // ============================================================================
-// 5. PLANETARY NODES (ascending node longitude, per planet)
+// 5. PLANETARY NODES (ascending node longitude, per astral body)
 // ============================================================================
 
 /**
  * J2000.0 mean longitude of ascending node (degrees) and its centennial
- * rate (degrees/Julian century), for the eight non-Earth planets.
+ * rate (degrees/Julian century), for the eight non-Earth astral bodies.
  * Source: Standish/JPL "Keplerian elements for approximate positions of
- * the major planets" (mean ecliptic and equinox of J2000), retrieved
+ * the major astral bodies" (mean ecliptic and equinox of J2000), retrieved
  * 2026-09-13. This is a standard reference table, not a fit: the rate is
  * how fast a slowly precessing plane actually moves, not a free
  * parameter chosen to match anything.
@@ -375,17 +375,17 @@ const PLANET_NODE: Record<string, { om0: number; rateCentury: number }> = {
 };
 
 /**
- * 5. planetaryNodes: the ascending node of each planet named, as a
+ * 5. planetaryNodes: the ascending node of each astral body named, as a
  * slowly-precessing mean element (centennial rate applied), not a daily
- * ephemeris position: a planet's node moves a few arcminutes a year at
+ * ephemeris position: an astral body's node moves a few arcminutes a year at
  * most, so computing it once per chart (as the brief asks) rather than
  * per render costs nothing and loses nothing.
  */
-export function planetaryNodes(jd: number, planetIds: number[]): Record<number, number> {
+export function planetaryNodes(jd: number, bodyIds: number[]): Record<number, number> {
   const t = t2000(jd);
   const centuries = t / 36525;
   const out: Record<number, number> = {};
-  for (const id of planetIds) {
+  for (const id of bodyIds) {
     const name = BODY_BY_ID[id];
     const el = name ? PLANET_NODE[name] : undefined;
     if (el) out[id] = norm360(el.om0 + el.rateCentury * centuries);

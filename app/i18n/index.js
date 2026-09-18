@@ -39,7 +39,7 @@
 
   /**
    * Fill placeholders in a template string.
-   * Example: fillPlaceholders('Mercury sextile {planet2} at {time}', { planet2: 'Venus', time: '2pm' })
+   * Example: fillPlaceholders('Mercury sextile {body2} at {time}', { body2: 'Venus', time: '2pm' })
    */
   function fillPlaceholders(template, placeholders) {
     if (!placeholders || Object.keys(placeholders).length === 0) return template;
@@ -175,7 +175,7 @@
 
     /* Overflow is capped at a fixed ceiling rather than at
        expectedPlaceholders[key].length: that array names placeholder
-       VARIABLES ('planet', 'day', ...), a count with no relationship to
+       VARIABLES ('body', 'day', ...), a count with no relationship to
        how many flavor-text variants a key may carry. Tying the two
        together flagged every real three-variant template (a placeholder
        list of one name reads as "at most one variant") as overflowing. */

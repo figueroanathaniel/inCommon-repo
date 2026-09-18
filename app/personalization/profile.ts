@@ -160,11 +160,11 @@ export function onboardingCompleted(): boolean {
 }
 
 /**
- * Get weight for a planet or topic
+ * Get weight for an astral body or topic
  */
-export function getWeight(planetOrTopic: string): number {
+export function getWeight(bodyOrTopic: string): number {
   const profile = loadProfile();
-  return profile.weights[planetOrTopic.toLowerCase()] ?? 1.0;
+  return profile.weights[bodyOrTopic.toLowerCase()] ?? 1.0;
 }
 
 /**

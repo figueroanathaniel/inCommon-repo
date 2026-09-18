@@ -1,6 +1,6 @@
 /*! ephemeris/cometElements.ts: Osculating orbital elements for major comets.
  *
- * Data source: JPL Horizons System / Minor Planet Center
+ * Data source: JPL Horizons System / Minor Astral Body Center
  * Retrieved: 2026-09 (sample computation epoch)
  * Reference: Meeus, Astronomical Algorithms, Ch. 35
  *
@@ -15,7 +15,7 @@
  *
  * Citation format:
  * - JPL Horizons: "Horizons System, NASA Jet Propulsion Laboratory"
- * - MPC: "Minor Planet Center, International Astronomical Union"
+ * - MPC: "Minor Astral Body Center, International Astronomical Union"
  */
 
 export interface CometElements {

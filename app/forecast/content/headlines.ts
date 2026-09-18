@@ -20,9 +20,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'conjunction',
     templates: [
-      '{planet1} and {planet2} meet at {time}. Same frequency. Watch for {theme}.',
-      'Merger alert: {planet1} {planet2} {time}. Two energies speaking the same language today.',
-      '{planet1} conjunct {planet2} {time}. They\'re not arguing. They\'re aligned.',
+      '{body1} and {body2} meet at {time}. Same frequency. Watch for {theme}.',
+      'Merger alert: {body1} {body2} {time}. Two energies speaking the same language today.',
+      '{body1} conjunct {body2} {time}. They\'re not arguing. They\'re aligned.',
     ]
   },
 
@@ -31,9 +31,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'sextile',
     templates: [
-      '{planet1} sextile {planet2}, {time}: diplomacy gets a green light — use it before your inbox ruins your mood.',
-      'A sextile is luck showing up. {planet1} to {planet2}, {time}. {theme} is easy today if you ask for it.',
-      '{time}: {planet1} and {planet2} are friends. This is the hour to start {theme}.',
+      '{body1} sextile {body2}, {time}: diplomacy gets a green light — use it before your inbox ruins your mood.',
+      'A sextile is luck showing up. {body1} to {body2}, {time}. {theme} is easy today if you ask for it.',
+      '{time}: {body1} and {body2} are friends. This is the hour to start {theme}.',
     ]
   },
 
@@ -42,9 +42,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'square',
     templates: [
-      '{planet1} square {planet2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
-      'Two planets at odds: {planet1} {planet2} {time}. Expect the resistance. It\'s trying to teach you something.',
-      'Hard aspect alert, {time}: {planet1} and {planet2} want different things. Channel it into {theme}.',
+      '{body1} square {body2} {time}. Translation: friction. The kind that sharpens or stalls. Which depends on you.',
+      'Two astral bodies at odds: {body1} {body2} {time}. Expect the resistance. It\'s trying to teach you something.',
+      'Hard aspect alert, {time}: {body1} and {body2} want different things. Channel it into {theme}.',
     ]
   },
 
@@ -53,9 +53,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'trine',
     templates: [
-      'A gift lands {time}: {planet1} trine {planet2}. {theme} flows. Don\'t waste it on autopilot.',
-      '{time}, {planet1} and {planet2} are in conversation. The air is clear for {theme}.',
-      'Rare ease: {planet1} trine {planet2}, {time}. This is what "favor of the planets" looks like.',
+      'A gift lands {time}: {body1} trine {body2}. {theme} flows. Don\'t waste it on autopilot.',
+      '{time}, {body1} and {body2} are in conversation. The air is clear for {theme}.',
+      'Rare ease: {body1} trine {body2}, {time}. This is what "favor of the astral bodies" looks like.',
     ]
   },
 
@@ -64,9 +64,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'opposite',
     templates: [
-      '{planet1} opposite {planet2}, {time}. Tension, but also clarity. You\'re seeing both sides.',
-      'Two poles {time}: {planet1} {planet2}. One wants to lead, the other to reflect. Balance is today\'s work.',
-      'Mirror time {time}: {planet1} opposite {planet2}. Who else\'s perspective are you avoiding?',
+      '{body1} opposite {body2}, {time}. Tension, but also clarity. You\'re seeing both sides.',
+      'Two poles {time}: {body1} {body2}. One wants to lead, the other to reflect. Balance is today\'s work.',
+      'Mirror time {time}: {body1} opposite {body2}. Who else\'s perspective are you avoiding?',
     ]
   },
 
@@ -79,9 +79,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'station-retrograde',
     templates: [
-      '{planet} stations retrograde today. The reversal begins. {theme} pauses to ask for a re-think.',
-      'Lookback time: {planet} turns retrograde {time}. Expect echoes from the past to ask for an edit.',
-      '{time}: {planet} backtracks. This is not erasure. It\'s revision.',
+      '{body} stations retrograde today. The reversal begins. {theme} pauses to ask for a re-think.',
+      'Lookback time: {body} turns retrograde {time}. Expect echoes from the past to ask for an edit.',
+      '{time}: {body} backtracks. This is not erasure. It\'s revision.',
     ]
   },
 
@@ -90,9 +90,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'station-direct',
     templates: [
-      '{planet} stations direct {time}. Forward motion resumes. Whatever paused can move again.',
-      'The pause lifts {time}: {planet} direct. Clear skies ahead for {theme}.',
-      '{time}: {planet} turns forward. The loop has made its point. What did you learn?',
+      '{body} stations direct {time}. Forward motion resumes. Whatever paused can move again.',
+      'The pause lifts {time}: {body} direct. Clear skies ahead for {theme}.',
+      '{time}: {body} turns forward. The loop has made its point. What did you learn?',
     ]
   },
 
@@ -101,9 +101,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'transit',
     type: 'ingress',
     templates: [
-      '{planet} enters {sign} {time}. New chapter for {theme}. The air changes color.',
-      'A shift happens {time}: {planet} into {sign}. Different questions. Different answers.',
-      '{time}: {planet} moves house. {theme} shifts gears.',
+      '{body} enters {sign} {time}. New chapter for {theme}. The air changes color.',
+      'A shift happens {time}: {body} into {sign}. Different questions. Different answers.',
+      '{time}: {body} moves house. {theme} shifts gears.',
     ]
   },
 
@@ -116,9 +116,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Grand Trine',
     templates: [
-      'A Grand Trine is live today {planets}. Three planets in harmony. Talent made visible.',
-      'Rare symmetry: Grand Trine {planets}. The gifts are real. The work is yours.',
-      '{planets} form a Grand Trine. Luck showed up. Use it before tomorrow.',
+      'A Grand Trine is live today {bodies}. Three astral bodies in harmony. Talent made visible.',
+      'Rare symmetry: Grand Trine {bodies}. The gifts are real. The work is yours.',
+      '{bodies} form a Grand Trine. Luck showed up. Use it before tomorrow.',
     ]
   },
 
@@ -127,9 +127,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'T-Square',
     templates: [
-      'A T-Square is live {planets}. Two planets pulling opposite ways. A third caught between. Resolution is the day\'s theme.',
-      'Tension architecture: T-Square {planets}. The empty leg (opposite the apex) is where release lives. Find it.',
-      '{planets} form a T-Square. Friction. Growth. Same thing today.',
+      'A T-Square is live {bodies}. Two astral bodies pulling opposite ways. A third caught between. Resolution is the day\'s theme.',
+      'Tension architecture: T-Square {bodies}. The empty leg (opposite the apex) is where release lives. Find it.',
+      '{bodies} form a T-Square. Friction. Growth. Same thing today.',
     ]
   },
 
@@ -138,9 +138,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Yod',
     templates: [
-      'A Yod is active {planets}. Call it a "Finger of God" or a spiritual assignment. Either way: attention required.',
-      'Yod alert {planets}. The universe is pointing. What is it pointing at?',
-      '{planets}: Yod configuration. An unusual demand for precision. This is your craft hour.',
+      'A Yod is active {bodies}. Call it a "Finger of God" or a spiritual assignment. Either way: attention required.',
+      'Yod alert {bodies}. The universe is pointing. What is it pointing at?',
+      '{bodies}: Yod configuration. An unusual demand for precision. This is your craft hour.',
     ]
   },
 
@@ -149,9 +149,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Grand Cross',
     templates: [
-      'A Grand Cross: {planets}. Four planets in tension on all sides. No easy exit. That\'s the point.',
-      'Heavy day: Grand Cross {planets}. All the pressures at once. Channel it into mastery.',
-      '{planets} form a Grand Cross. This is what "no way out but through" looks like in the sky.',
+      'A Grand Cross: {bodies}. Four astral bodies in tension on all sides. No easy exit. That\'s the point.',
+      'Heavy day: Grand Cross {bodies}. All the pressures at once. Channel it into mastery.',
+      '{bodies} form a Grand Cross. This is what "no way out but through" looks like in the sky.',
     ]
   },
 
@@ -160,9 +160,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Kite',
     templates: [
-      'A Kite pattern lives today {planets}. Three in harmony, one pointing the way. Direction matters.',
-      'Kite {planets}: Grand Trine with a tail. The tail (apex) is where the talent gets directed today.',
-      '{planets} fly a Kite configuration. Talent meets purpose. Which wins?',
+      'A Kite pattern lives today {bodies}. Three in harmony, one pointing the way. Direction matters.',
+      'Kite {bodies}: Grand Trine with a tail. The tail (apex) is where the talent gets directed today.',
+      '{bodies} fly a Kite configuration. Talent meets purpose. Which wins?',
     ]
   },
 
@@ -171,9 +171,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Boomerang',
     templates: [
-      'A Boomerang pattern: {planets}. Tension wants out. A resolution planet says "throw me". Do it.',
-      'Boomerang {planets}: a Yod with an escape route. The escape route is {apex}.',
-      '{planets} form a Boomerang. The tension reflects back to its solution. Pay attention.',
+      'A Boomerang pattern: {bodies}. Tension wants out. A resolution astral body says "throw me". Do it.',
+      'Boomerang {bodies}: a Yod with an escape route. The escape route is {apex}.',
+      '{bodies} form a Boomerang. The tension reflects back to its solution. Pay attention.',
     ]
   },
 
@@ -182,9 +182,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Stellium',
     templates: [
-      'A Stellium in {sign}: {planets}. Concentrated power. Laser focus. Obsession territory.',
-      'Four+ planets in {sign}. That\'s a Stellium. Today\'s intensity is not an accident.',
-      '{planets} cluster in {sign}. Stellium energy. One theme dominates. Lean into it.',
+      'A Stellium in {sign}: {bodies}. Concentrated power. Laser focus. Obsession territory.',
+      'Four+ astral bodies in {sign}. That\'s a Stellium. Today\'s intensity is not an accident.',
+      '{bodies} cluster in {sign}. Stellium energy. One theme dominates. Lean into it.',
     ]
   },
 
@@ -197,9 +197,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'pattern',
     type: 'Thor\'s Hammer',
     templates: [
-      'A Thor\'s Hammer is live {planets}. Two planets squeezing a third. Pressure breeds precision.',
-      'Hard rectangle energy: {planets}. Squeeze and release. Today you choose what gets released.',
-      '{planets}: Thor\'s Hammer configuration. Minor aspects, real tension. Unorthodox but active.',
+      'A Thor\'s Hammer is live {bodies}. Two astral bodies squeezing a third. Pressure breeds precision.',
+      'Hard rectangle energy: {bodies}. Squeeze and release. Today you choose what gets released.',
+      '{bodies}: Thor\'s Hammer configuration. Minor aspects, real tension. Unorthodox but active.',
     ]
   },
 
@@ -212,9 +212,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'harmonic',
     type: '5H: Grand Trine',
     templates: [
-      '5H lens bonus: {planets} form a Grand Trine in the quintile family. Yesterday\'s hidden golden yod is today\'s loud talent.',
-      'The 5th harmonic reveals a Grand Trine {planets}. Skill was always there. Today it files for permits.',
-      '5H view: {planets} in perfect trine. The creative family is speaking. Listen.',
+      '5H lens bonus: {bodies} form a Grand Trine in the quintile family. Yesterday\'s hidden golden yod is today\'s loud talent.',
+      'The 5th harmonic reveals a Grand Trine {bodies}. Skill was always there. Today it files for permits.',
+      '5H view: {bodies} in perfect trine. The creative family is speaking. Listen.',
     ]
   },
 
@@ -223,9 +223,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'harmonic',
     type: '7H: Stellium',
     templates: [
-      '7th harmonic view: {planets} are tightly grouped. Septile family energy. Fated work. Compulsion made visible.',
-      '5H lens: {planets} cluster in the septile family. Destiny is pointing. Follow or resist — both have consequences.',
-      'The 7th harmonic reveals a Stellium {planets}. Fate\'s concentration. Pay attention.',
+      '7th harmonic view: {bodies} are tightly grouped. Septile family energy. Fated work. Compulsion made visible.',
+      '5H lens: {bodies} cluster in the septile family. Destiny is pointing. Follow or resist — both have consequences.',
+      'The 7th harmonic reveals a Stellium {bodies}. Fate\'s concentration. Pay attention.',
     ]
   },
 
@@ -238,9 +238,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'degree-lore',
     type: 'anaretic 29°',
     templates: [
-      '{planet} sits at 29°. The final degree. The end is pressing. Something wants completion.',
-      'Anaretic heat: {planet} at 29°. Emergency energy. Not all emergencies are crises.',
-      '{planet} in the 29th degree. The pressure cooker is on. What\'s ready to transform?',
+      '{body} sits at 29°. The final degree. The end is pressing. Something wants completion.',
+      'Anaretic heat: {body} at 29°. Emergency energy. Not all emergencies are crises.',
+      '{body} in the 29th degree. The pressure cooker is on. What\'s ready to transform?',
     ]
   },
 
@@ -249,9 +249,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'degree-lore',
     type: '15°',
     templates: [
-      '{planet} at 15°. The midpoint of the sign. Maximum sign intensity. Full flavor.',
-      '15° marking: {planet} at full expression. The sign\'s core is showing.',
-      '{planet} at the 15° critical degree. Potency is peaked.',
+      '{body} at 15°. The midpoint of the sign. Maximum sign intensity. Full flavor.',
+      '15° marking: {body} at full expression. The sign\'s core is showing.',
+      '{body} at the 15° critical degree. Potency is peaked.',
     ]
   },
 
@@ -260,9 +260,9 @@ export const HEADLINE_TEMPLATES: HeadlineTemplate[] = [
     category: 'degree-lore',
     type: '22°',
     templates: [
-      '{planet} at 22° in a fixed sign. Traditional marker for intensity. Deep work lives here.',
+      '{body} at 22° in a fixed sign. Traditional marker for intensity. Deep work lives here.',
       '22° in {sign}. Fixed-sign pressure point. A boundary that knows itself.',
-      '{planet} at 22°. The Sabian symbol holds a secret. Which one?',
+      '{body} at 22°. The Sabian symbol holds a secret. Which one?',
     ]
   },
 ];
@@ -284,7 +284,7 @@ export function pickHeadline(templates: string[]): string {
 
 /**
  * Fill a headline template with values
- * Example: "{planet1} sextile {planet2}, {time}: diplomacy gets a green light"
+ * Example: "{body1} sextile {body2}, {time}: diplomacy gets a green light"
  *          → "Mercury sextile Venus, 2:14 PM: diplomacy gets a green light"
  */
 export function fillHeadline(template: string, values: Record<string, string>): string {

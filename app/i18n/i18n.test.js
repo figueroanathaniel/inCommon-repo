@@ -23,9 +23,9 @@ const fixtureCatalog = {
     'simple-key': 'Simple translation',
     'with-placeholder': 'Hello {name}, today is {day}.',
     'multi-variant': [
-      'First variant with {planet}',
-      'Second variant with {planet}',
-      'Third variant with {planet}'
+      'First variant with {body}',
+      'Second variant with {body}',
+      'Third variant with {body}'
     ]
   },
   metadata: { allowPartial: false, missingKeys: [], violations: [] }
@@ -34,7 +34,7 @@ const fixtureCatalog = {
 const expectedPlaceholders = {
   'simple-key': [],
   'with-placeholder': ['name', 'day'],
-  'multi-variant': ['planet']
+  'multi-variant': ['body']
 };
 
 function test_I1_localeSwitch() {

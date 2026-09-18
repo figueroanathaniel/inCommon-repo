@@ -243,7 +243,7 @@ test('Sun/Moon midpoint: takes the shorter arc across the 0/360 seam', () => {
   if (!approx(mid, 0, 1e-9) && !approx(mid, 360, 1e-9)) throw new Error('got ' + mid + ', expected 0 (or 360)');
 });
 
-test('planetaryNodes returns a value for every requested planet', () => {
+test('planetaryNodes returns a value for every requested astral body', () => {
   const nodes = planetaryNodes(2461041.5, [2, 3, 4, 5, 6, 7, 8, 9]);
   for (const id of [2, 3, 4, 5, 6, 7, 8, 9]) {
     if (nodes[id] === undefined) throw new Error('missing node for body id ' + id);

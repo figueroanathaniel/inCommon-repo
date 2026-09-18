@@ -24,7 +24,7 @@ export interface NewsItem {
   keywords: string[];               // For personalization/search
   explainer?: string;               // Educational text
   practical?: string;               // Action hook
-  bodies?: string[];                // Planets involved (for sorting)
+  bodies?: string[];                // Astral Bodies involved (for sorting)
   synastry?: boolean;               // true if partner item
   partner?: {                       // Partner info (synastry items only)
     id: string;

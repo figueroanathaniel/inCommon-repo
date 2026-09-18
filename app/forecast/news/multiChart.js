@@ -42,18 +42,18 @@
     var templates = ST.synastryTemplatesFor(contact.aspect);
     var template = ST.pickSynastryTemplate(templates);
     var headline = ST.fillSynastryTemplate(
-      template, contact.movingPlanet, contact.partnerPlanet, partner.name, contact.aspect
+      template, contact.movingBody, contact.partnerBody, partner.name, contact.aspect
     );
 
     var body = buildSynastryBody(contact);
 
     var id = NE.generateNewsId(
-      'synastry-' + contact.aspect, [contact.movingPlanet, contact.partnerPlanet], date
+      'synastry-' + contact.aspect, [contact.movingBody, contact.partnerBody], date
     );
 
     var keywords = [
-      contact.movingPlanet.toLowerCase(),
-      contact.partnerPlanet.toLowerCase(),
+      contact.movingBody.toLowerCase(),
+      contact.partnerBody.toLowerCase(),
       contact.aspect,
       'synastry',
       partner.id
@@ -71,7 +71,7 @@
       keywords: keywords,
       synastry: true,
       partner: { id: partner.id, name: partner.name },
-      bodies: [contact.movingPlanet, contact.partnerPlanet]
+      bodies: [contact.movingBody, contact.partnerBody]
     };
   }
 
@@ -80,10 +80,10 @@
    * explainer (behind tap to expand), and a sentence about weather, not verdict.
    */
   function buildSynastryBody(contact) {
-    var movingPlanet = contact.movingPlanet, partnerPlanet = contact.partnerPlanet,
+    var movingBody = contact.movingBody, partnerBody = contact.partnerBody,
         aspect = contact.aspect, orb = contact.orb;
 
-    var calculatedLine = movingPlanet + ' is ' + aspect.toLowerCase() + ' their ' + partnerPlanet + ' within ' + orb.toFixed(2) + '°.';
+    var calculatedLine = movingBody + ' is ' + aspect.toLowerCase() + ' their ' + partnerBody + ' within ' + orb.toFixed(2) + '°.';
     var explainer = getAspectExplainer(aspect);
     var weatherLine = 'A contact between two charts is weather over the pair, never a verdict on it.';
 
@@ -92,11 +92,11 @@
 
   function getAspectExplainer(aspect) {
     var explainers = {
-      conjunction: 'A conjunction is when two planets occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these planets represent are amplified when together, for better and for worse.',
+      conjunction: 'A conjunction is when two astral bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these astral bodies represent are amplified when together, for better and for worse.',
       sextile: 'A sextile (60 degrees) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
-      square: 'A square (90 degrees) is tension in geometric form. Between you, these planets want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+      square: 'A square (90 degrees) is tension in geometric form. Between you, these astral bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
       trine: 'A trine (120 degrees) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
-      opposite: 'An opposition (180 degrees) is two planets facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+      opposite: 'An opposition (180 degrees) is two astral bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
     };
     return explainers[aspect] || 'A contact between your charts.';
   }
@@ -111,7 +111,7 @@
 
     for (var i = 0; i < contacts.length; i++) {
       var contact = contacts[i];
-      var isPersonal = !!(options.personalPointIds && options.personalPointIds.indexOf(contact.movingPlanet) !== -1);
+      var isPersonal = !!(options.personalPointIds && options.personalPointIds.indexOf(contact.movingBody) !== -1);
 
       var item = buildSynastryItem({
         contact: contact,

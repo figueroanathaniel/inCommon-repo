@@ -10,7 +10,7 @@
  *
  * Rules held here:
  *   - qualities only, never identifiers. The passage never repeats the gate
- *     number, planet name, degree, or personal day already listed above it,
+ *     number, astral body name, degree, or personal day already listed above it,
  *     so it cannot collapse into a second summary of the same rows.
  *   - invitational language only: may, might, one possibility, you could.
  *   - no diagnosis, no prediction, no fate, no invented personal context.

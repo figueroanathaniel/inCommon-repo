@@ -26,7 +26,7 @@
  *    own 1 AU, so the heliocentric and geocentric longitudes differ by
  *    several degrees there, not a rounding error. This file now also
  *    computes Earth's own heliocentric position (same coplanar Keplerian
- *    model the app already uses for the planets, from ephemeris/engine.ts)
+ *    model the app already uses for the astral bodies, from ephemeris/engine.ts)
  *    and returns the geocentric difference.
  */
 
@@ -100,7 +100,7 @@ function orbitToEcliptic(r: number, v: number, incDeg: number, nodeDeg: number, 
   return [x, y, z];
 }
 
-/** Earth's heliocentric position via the same coplanar model the planets use. */
+/** Earth's heliocentric position via the same coplanar model the astral bodies use. */
 function earthHeliocentric(jd: number): [number, number, number] {
   const t = jd - 2451545.0;
   const M = (((EARTH_L0 + EARTH_N * t - EARTH_VARPI) % 360 + 360) % 360) * DEG_TO_RAD;
