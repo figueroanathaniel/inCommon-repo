@@ -38,7 +38,12 @@ function die(m) { console.error('check-minor-body-elements: ' + m); process.exit
 
 const CEILING_DEG = 0.2;
 /* Computed inside the app itself, not by this module. */
-const APP_COMPUTED = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena',
+/* Chiron alone of the five now: Ceres, Pallas, Juno and Vesta are fetched, so
+ * this module owns them and the accounting below must see them once, not
+ * twice. The app still falls back to window.MinorBodies for all five when
+ * this module is missing, which the accounting deliberately cannot see: what
+ * it checks is who supplies a body when everything is present. */
+const APP_COMPUTED = ['chiron', 'lilithMean', 'selena',
   'mercuryNode', 'venusNode', 'marsNode', 'jupiterNode', 'saturnNode', 'uranusNode', 'neptuneNode', 'plutoNode',
   'ariesPoint', 'halley', 'halebopp', 'hyakutake', 'vertex', 'antivertex',
   'partOfFortune', 'partOfSpirit', 'sunmoonMidpoint'];

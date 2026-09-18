@@ -37,7 +37,8 @@
  * with the Moshier ephemeris). Without it, the ones already in the fixture file
  * are kept, so a refetch of the real bodies does not need Swiss installed.
  *
- * Usage: node tools/fetch-minor-body-elements.js [--cache DIR] [--refresh] [--swiss-refs FILE]
+ * Usage: node tools/fetch-minor-body-elements.js [--cache DIR] [--refresh]
+ *        [--swiss-refs FILE] [--only id,id]
  * Needs network. Nothing in the app fetches at runtime: this is a generator.
  */
 'use strict';
@@ -53,6 +54,13 @@ const args = process.argv.slice(2);
 const argVal = k => { const i = args.indexOf(k); return i === -1 ? null : args[i + 1]; };
 const CACHE = argVal('--cache') || path.join(os.tmpdir(), 'incommon-horizons-cache');
 const REFRESH = args.indexOf('--refresh') !== -1;
+/* --only id,id restricts the fetch and MERGES the result into what is already
+   generated, so adding a body does not rewrite the other fifty one's recorded
+   worst cases. Horizons revises its orbit solutions, so a full refetch moves
+   numbers that nothing in this change touched, and a diff nobody can read is a
+   diff nobody checks. Without it every body is fetched and DATA is rebuilt
+   whole, which is the original behaviour. */
+const ONLY = (argVal('--only') || '').split(',').map(s => s.trim()).filter(Boolean);
 
 const FIRST_YEAR = 1900, LAST_YEAR = 2100, RAW_STEP_YEARS = 1, REF_STEP_DAYS = 181;
 /* Spacings tried, widest first. A body keeps the widest one whose worst case
@@ -65,6 +73,18 @@ const SWISS_REFS = argVal('--swiss-refs');
 
 /* registry id -> [Horizons small-body number, the name Horizons must return] */
 const BODIES = {
+  /* The four classical asteroids. They were the only real bodies on the
+     expanded wheel NOT fetched: they sat on minor-bodies-ephemeris.js's single
+     epoch coplanar model with mean longitudes its own header called
+     provisional, and measured against these very references they were wrong by
+     an RMS of 35 to 110 degrees, worst 169, flat across every window from
+     1980-2010 to 1900-2100. That is a wrong phase rather than drift, so they
+     are fetched like everything else now. Chiron is not here: it is genuinely
+     chaotic, Saturn and Uranus keep perturbing it, and the fitted single epoch
+     set in minor-bodies-ephemeris.js measures 0.3 degrees over 1980-2010,
+     which is what a fit against real positions buys. */
+  ceres: [1, 'Ceres'], pallas: [2, 'Pallas'], juno: [3, 'Juno'], vesta: [4, 'Vesta'],
+
   hygiea: [10, 'Hygiea'], astraea: [5, 'Astraea'], iris: [7, 'Iris'], flora: [8, 'Flora'],
   metis: [9, 'Metis'], hebe: [6, 'Hebe'], pandora: [55, 'Pandora'], psyche: [16, 'Psyche'],
   proserpina: [26, 'Proserpina'], eros: [433, 'Eros'], amor: [1221, 'Amor'], cupido_astr: [763, 'Cupido'],
@@ -179,7 +199,20 @@ async function build() {
   if (SWISS_REFS) fixtures.swiss = JSON.parse(fs.readFileSync(SWISS_REFS, 'utf8'));
   const ME = require(OUT_MODULE);
   const DATA = {}, report = [];
+  if (ONLY.length) {
+    /* Seed from the generated block, parsed rather than re-derived, so every
+       body this run does not touch is re-serialised from its own bytes. */
+    const src = fs.readFileSync(OUT_MODULE, 'utf8');
+    const a = src.indexOf('  var DATA = '), b = src.indexOf('  /* END GENERATED */');
+    if (a === -1 || b === -1) throw new Error('generated markers not found in ' + OUT_MODULE);
+    const inner = src.slice(src.indexOf('{', a), src.lastIndexOf('}', b) + 1);
+    Object.assign(DATA, JSON.parse(inner.replace(/^\s*([A-Za-z0-9_]+):/gm, '"$1":')));
+    const unknown = ONLY.filter(k => !BODIES[k] && !HYPOTHETICALS[k]);
+    if (unknown.length) throw new Error('--only names bodies this generator does not know: ' + unknown.join(', '));
+  }
+  const want = id => !ONLY.length || ONLY.indexOf(id) !== -1;
   for (const [id, [num, expect]] of Object.entries(BODIES)) {
+    if (!want(id)) continue;
     const got = await fetchBody(id, num, expect);
     const all = got.epochs.map(e => [fix(e.jd - 2451545, 1), sig(e.a, 8), fix(e.e, 7), fix(e.i, 5), fix(e.om, 5), fix(e.w, 5), fix(e.M, 5)]);
     let chosen = null, best = null;
@@ -198,6 +231,7 @@ async function build() {
     report.push(id.padEnd(13) + (chosen.step + 'y').padStart(4) + '  ' + String(chosen.rows.length).padStart(3) + ' epochs  worst ' + chosen.w.toFixed(3) + '  ' + got.name);
   }
   for (const [id, [name, M0, a, e, w, om, i]] of Object.entries(HYPOTHETICALS)) {
+    if (!want(id)) continue;
     const b = { n: name, num: 'hypothetical', src: HYPOTHETICAL_SOURCE, eq: 'J1900', step: null, w: 0, span: null,
       rows: [[T_J1900, a, e, i, om, w, M0]] };
     const refs = fixtures.swiss[id];
@@ -206,7 +240,7 @@ async function build() {
     DATA[id] = b;
     report.push(id.padEnd(13) + '   -    1 epoch   worst ' + b.w.toFixed(3) + '  ' + name + ' (hypothetical)');
   }
-  for (const k of Object.keys(fixtures.swiss)) if (!HYPOTHETICALS[k]) delete fixtures.swiss[k];
+  if (!ONLY.length) for (const k of Object.keys(fixtures.swiss)) if (!HYPOTHETICALS[k]) delete fixtures.swiss[k];
   writeData(DATA);
   fs.mkdirSync(path.dirname(OUT_FIX), { recursive: true });
   fixtures.note = 'Reference positions for tools/check-minor-body-elements.js. horizons: JPL Horizons geocentric apparent ecliptic longitude of date (QUANTITIES 31, UT), every ' + REF_STEP_DAYS + ' days ' + FIRST_YEAR + ' to ' + LAST_YEAR + '. swiss: Swiss Ephemeris (swisseph-wasm, Moshier) apparent longitude for the Hamburg hypotheticals at the same instants. [t, lon], t = JD - 2451545 in UT.';

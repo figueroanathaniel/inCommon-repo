@@ -10694,13 +10694,30 @@ class Component extends DCLogic {
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
     if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
-    /* Chiron and the asteroids come from minor-bodies-ephemeris.js, which
-       supplies elements through window.MinorBodies. Chiron's are fitted against
-       81 JPL Horizons positions across 1900 to 2060 and measure 0.92 degrees at
-       worst, so it names a sign and an aspect and is not allowed to name a
-       degree: see degreeSafe(). The asteroids are still unpinned mean elements
-       and say so. A body with no supplier returns null rather than a guess. */
+    /* Chiron and the four asteroids. Chiron's elements are fitted against 81
+       JPL Horizons positions across 1900 to 2060 and measure 0.92 degrees at
+       worst, so it names a sign and an aspect and not a degree: see
+       degreeSafe(). It is not fetched, because a fifty year orbit that Saturn
+       and Uranus keep perturbing is chaotic and a fit against real positions is
+       the better answer for it.
+
+       The four asteroids ARE fetched, and they are the reason this comment
+       changed. They sat on minor-bodies-ephemeris.js's single epoch coplanar
+       model with mean longitudes that module's own header called provisional,
+       and measured against JPL Horizons they were wrong by an RMS of 35 to 110
+       degrees, worst 169. Flat across every window from 1980-2010 to
+       1900-2100, so a wrong phase rather than drift: a reader's Ceres could be
+       in the opposite sign and nothing in the build could tell. They come from
+       minor-body-elements.js first now, where they measure 0.032 to 0.058
+       degrees, and fall back to window.MinorBodies only when that module is
+       missing, which is the same order eris and sedna already use. The
+       fallback's own elements are fitted now too, so a missing module costs
+       accuracy rather than the four bodies.
+
+       A body with no supplier returns null rather than a guess. */
     if (this.ASTEROIDS.indexOf(name) !== -1 || name === 'Chiron') {
+      const ME = window.MinorBodyElements, id = name.toLowerCase();
+      if (ME && ME.has(id)) { const lon = ME.lon(id, t); if (lon != null) return lon; }
       const supplied = window.MinorBodies && window.MinorBodies[name];
       return supplied ? this.minorLon(supplied, t) : null;
     }
@@ -10728,7 +10745,13 @@ class Component extends DCLogic {
 
      This is the gate the next body passes through too: measure it, record the
      worst case, and let that decide what it is allowed to say. */
-  DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta', 'chiron', 'ceres', 'pallas', 'juno', 'vesta'];
+  /* Chiron alone, under both spellings, because the expanded chart addresses a
+     point by id and the natal wheel by name and a name only list let pallas
+     through once. The four asteroids were on this list and have come off it:
+     they are fetched now and measure 0.058 degrees at worst, so they earn the
+     degree the way every other fetched body does, by measurement rather than by
+     being absent from a list. */
+  DEGREE_SAFE_EXCEPT = ['Chiron', 'chiron'];
   /* The fetched bodies earn a degree by measurement: a worst case against JPL
      Horizons (or the Swiss Ephemeris, for the hypotheticals) at or under a
      fifth of a degree. check-minor-body-elements.js holds every body to the
@@ -10739,8 +10762,12 @@ class Component extends DCLogic {
   degreeSafe(name) {
     if (this.DEGREE_SAFE_EXCEPT.indexOf(name) !== -1 || this.COMET_IDS.indexOf(name) !== -1) return false;
     const ME = window.MinorBodyElements;
-    if (ME && ME.has(name)) return ME.worstDeg(name) <= this.DEGREE_SAFE_WORST;
-    return true;
+    /* The wheel asks by name and the expanded table by id, and the measurement
+       is filed under the id, so a name is lowered before the lookup or a
+       measured body would silently fall through to the permissive default. */
+    if (!ME) return true;
+    const key = ME.has(name) ? name : (ME.has(String(name).toLowerCase()) ? String(name).toLowerCase() : null);
+    return key == null ? true : ME.worstDeg(key) <= this.DEGREE_SAFE_WORST;
   }
   /* Where a fetched body's position comes from and how good it is, in one
      sentence, whether or not it keeps its degree. */
@@ -10764,8 +10791,20 @@ class Component extends DCLogic {
     const mbeName = { chiron: 'Chiron', ceres: 'Ceres', pallas: 'Pallas', juno: 'Juno', vesta: 'Vesta' }[key] || key;
     const st = MBE && MBE.status ? MBE.status().find(x => x.body === mbeName) : null;
     if (st && st.accuracyDeg) {
-      return name + ' is computed from fitted orbital elements and is good to about ' +
-        st.accuracyDeg + ' of a degree, so the sign and the aspects hold and the exact degree is not claimed. No degree symbol is shown for it.';
+      /* The figure decides the sentence, because the five bodies this reaches
+         are no longer within an order of magnitude of each other: Chiron is
+         fitted to 0.92 of a degree and Pallas, on the fallback elements, to
+         29.6, and one sentence claiming the sign holds would be true of the
+         first and plainly false of the second. A degree is withheld from all of
+         them either way. */
+      const w = st.accuracyDeg, fig = w < 1 ? 'about ' + w + ' of a degree' : 'about ' + w + ' degrees';
+      const claim = w <= 1
+        ? ', so the sign and the aspects hold and the exact degree is not claimed'
+        : w <= 3
+          ? ', so an aspect at ordinary orb holds and the sign can be wrong within a few degrees of a cusp'
+          : ', which is wide enough that the sign itself is not safe to read. It is shown so the point is not silently absent, and nothing here is built on it';
+      return name + ' is computed from fitted orbital elements and is good to ' + fig + claim +
+        '. No degree symbol is shown for it.';
     }
     return name + ' is computed from unpinned mean elements, so the sign is worth reading and the exact degree is not. No degree symbol is shown for it.';
   }

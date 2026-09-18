@@ -9,12 +9,12 @@ only breakpoint that changes the component tree.
 
 ## Ephemeris architecture (V1.0.0)
 **Dual-backend ephemeris system** with graceful fallback. Modules:
-- `ephemeris-points.js` — Centralized point registry (17 points, single source of truth)
-- `ephemeris-backend-current.js` — Fallback: existing simplified ephemeris (Kepler + analytical)
-- `ephemeris-backend-swiss.js` — Primary: Swiss Ephemeris WASM (if `npm install swisseph-wasm` run)
-- `ephemeris-router.js` — Orchestrator: selects backend, handles fallback transparently
-- `ephemeris-integration.js` — Migration helper: eases integration into Component lifecycle
-- `ephemeris-cache.js` — Optional in-memory memoization (existing, unchanged)
+- `ephemeris-points.js`: centralized point registry (17 points, single source of truth)
+- `ephemeris-backend-current.js`: the fallback, existing simplified ephemeris (Kepler + analytical)
+- `ephemeris-backend-swiss.js`: the primary, Swiss Ephemeris WASM (if `npm install swisseph-wasm` run)
+- `ephemeris-router.js`: the orchestrator. Selects backend, handles fallback transparently
+- `ephemeris-integration.js`: the migration helper. Eases integration into Component lifecycle
+- `ephemeris-cache.js`: optional in-memory memoization (existing, unchanged)
 
 **Architecture**: Swiss WASM (if available) → fallback to current if unavailable.
 Graceful degradation: if WASM fails to load, app auto-switches to current ephemeris.
@@ -583,10 +583,14 @@ benchmark that printed only the wins would have hidden this, so
 `bench-ephemeris.js` prints the loss too.
 
 **Chiron and the four asteroids are never cached, and that is correctness.**
-They read `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
+They can reach `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
 uninstalls and recalibrates, so their answer is not a function of `t` alone.
 Cache a null taken before install and the Expanded Chart says "not computed"
 for the rest of the session. The bench drives that case rather than asserting it.
+The four asteroids now read `minor-body-elements.js` FIRST, which is static
+generated data and is a pure function of `t`, so they could be cached on that
+path. They are not, because the fallback is still there behind them and a cache
+that is only sometimes safe is a cache nobody can reason about.
 
 **Nothing is rounded on the way in.** `designT()` bisects `lonOf` to an
 arcsecond through `arc-solver.js`, and Prompt 3's "rounded to the nearest
@@ -727,7 +731,44 @@ stays within 0.1 degree: twenty years for the Kuiper belt, one year for the
 near Earth asteroids, two for the main belt. The module solves Kepler from
 the NEAREST epoch, which is why this works: an osculating set is exact at its
 epoch and drifts only by what the planets do in the gap. Worst case over all
-48 real bodies is 0.128 degree (Apollo); most main belt bodies are under 0.07.
+52 real bodies is 0.128 degree (Apollo); 47 of the 52 are under 0.07.
+
+**Ceres, Pallas, Juno and Vesta were the last four real bodies not fetched, and
+they were wrong by up to 169 degrees.** They sat on
+`minor-bodies-ephemeris.js`'s single epoch coplanar model with mean longitudes
+that module's own header called provisional while claiming "a few tenths of a
+degree", which was never measured and was wrong by two orders of magnitude.
+Against 404 Horizons apparent longitudes from 1900 to 2100 the shipped elements
+measured an RMS of 35 to 110 degrees, flat across every window from 1980-2010 to
+1900-2100, so a wrong phase rather than drift: a reader's Ceres could be in the
+opposite sign and nothing in the build could tell. They are fetched now, at
+0.032 to 0.058 degree, and they earn their degree symbol by that measurement.
+Chiron is deliberately NOT fetched: a fifty year orbit that Saturn and Uranus
+keep perturbing is chaotic, and the fitted single epoch set measures 0.3 degrees
+across 1980-2010, which is what fitting against real positions buys.
+
+**The fetcher merges now, and that is what made a four body change reviewable.**
+`--only id,id` fetches just those and seeds `DATA` from the generated block
+already on disk, so the other 56 entries are re-serialised from their own bytes.
+Horizons revises its orbit solutions, so a full refetch moves recorded worst
+cases that the change never touched, and a diff nobody can read is a diff nobody
+checks. Verified on the run that added the four: 56 of 56 pre-existing entries
+byte identical, in the module and in the fixtures both.
+
+**The fallback is fitted too, and it says what it is worth.** A missing
+`minor-body-elements.js` should cost accuracy rather than the four bodies, which
+is the order eris and sedna already use, so the elements behind it were fitted by
+the method the Chiron block states: `a` published and held, `n` from it by Kepler
+III, only `L0`, `e` and `varpi` free, half the references held out of the fit.
+That takes 169 degrees to 9.1 (Ceres), 164 to 29.6 (Pallas), 153 to 7.9 (Juno)
+and 71 to 2.3 (Vesta), and no further, because the limit is secular perturbation
+rather than geometry: projecting the orbits in three dimensions was tried and
+measured and moved Pallas only to 18.6. So `accuracyDeg` is per body and
+`bodyAccuracyNote()` picks its sentence from the number, because one sentence
+saying the sign holds is true of Chiron at 0.92 and plainly false of Pallas at
+29.6. More epochs would fix it properly, and more epochs is exactly what
+`minor-body-elements.js` already is: a fallback does not need a second copy of
+the thing it falls back from.
 The reduction (Meeus Sun, light time, precession, nutation, aberration) was
 measured to 0.001 degree against the Swiss Ephemeris on the hypotheticals, so
 the table is limited by elements, not arithmetic.
@@ -742,18 +783,29 @@ Ephemeris carries them (epoch and equinox J1900), and their references were
 taken from swisseph-wasm. Their pages say they are not bodies.
 
 **`tools/check-minor-body-elements.js` re-measures every recorded worst case**
-against `tools/fixtures/minor-bodies-horizons.json` (22,624 positions), holds
+against `tools/fixtures/minor-bodies-horizons.json` (24,240 positions), holds
 every body under a 0.2 degree ceiling, asserts real bodies return null
-outside the span they were measured over, and accounts for all 80 registry
+outside the span they were measured over, and accounts for all 81 registry
 ids: app formula, this module, or declared unavailable with the sentence the
-page shows. Nudging one Hygiea epoch by 0.3 degree turns it red.
+page shows. Nudging one Hygiea epoch by 0.3 degree turns it red. The count is
+81 rather than 80 because Part of Fortune joined the app's expanded registry,
+and each id must be accounted for exactly ONCE, which is why moving the four
+asteroids into this module also took them out of `APP_COMPUTED`.
 
 **Degree symbols are earned by that number.** `degreeSafe()` lets a fetched
 body name a degree when its measured worst case is at or under
 `DEGREE_SAFE_WORST` (0.2). The comets do not: one osculating set each,
-unmeasured across a lifetime. Chiron and the four `MinorBodies` asteroids are
-withheld by name AND by registry id, because the expanded chart addresses
-them by id and a name-only list let `pallas` through.
+unmeasured across a lifetime. **Chiron is the only body left on
+`DEGREE_SAFE_EXCEPT`**, under both spellings, because the expanded chart
+addresses a point by id and the wheel by name and a name only list let `pallas`
+through once. The four asteroids came off that list when they were fetched:
+they earn the degree the way every other fetched body does, by measurement, and
+`degreeSafe()` lowercases a name before asking so the measurement actually
+governs rather than the lookup missing and falling through to the permissive
+default. Group E's row for this asserted a copy of the old list and went red the
+day the list was right; it asserts the RULE now, derived from the elements
+rather than typed, so adding a body with a nine degree fit and forgetting the
+list fails it.
 
 **Readings: 75 entries in `placement-content.js`, keyed by registry id.**
 Same fields and grammar as the 21 core bodies, because the same composer
