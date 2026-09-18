@@ -9886,6 +9886,8 @@ class Component extends DCLogic {
       const t = A.TYPES[k];
       return { head: k, hasSub: true, sub: t.pct + ' of people', rows: [
         row('TRADITIONAL', t.def), row('TRADITIONAL', 'Strategy: ' + t.strategy), row('TRADITIONAL', 'Authority: ' + t.authority),
+        row('TRADITIONAL', 'Aura: ' + t.aura), row('TRADITIONAL', 'Signature: ' + t.signature),
+        row('TRADITIONAL', 'Not-self theme: ' + t.notSelf),
         row('POSSIBILITY', 'In men: ' + t.male), row('POSSIBILITY', 'In women: ' + t.female),
         plain('Strengths: ' + t.strengths), plain('Challenges: ' + t.challenges),
         plain('Opportunities: ' + t.opportunities), plain('Obstacles: ' + t.obstacles)
@@ -9920,6 +9922,17 @@ class Component extends DCLogic {
       return [{ head: 'All ' + keys.length + ' channels', hasSub: true, sub: 'gate pair, name, theme',
         rows: keys.map(k => { const c = A.CHANNELS[k]; return plain(k + ' \u00b7 ' + c[0] + '. ' + c[1] + '. ' + c[2]); }) }];
     }
+    if (key === 'circuitry') return A.CIRCUITS.map(c => ({ head: c.name, hasSub: true, sub: c.keynote,
+      rows: [row('TRADITIONAL', c.text), plain(c.sub)] }));
+    if (key === 'definition') return A.DEFINITION.map(d => ({ head: d.name, hasSub: false, sub: '',
+      rows: [row('TRADITIONAL', d.text)] }));
+    if (key === 'cross') return [
+      { head: 'What it is', hasSub: false, sub: '', rows: [row('CALCULATED', A.CROSS.what)] },
+      { head: 'How it is read', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.CROSS.how)] },
+      { head: 'The three angles', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.CROSS.angles)] },
+      { head: 'A caution', hasSub: false, sub: '', rows: [row('POSSIBILITY', A.CROSS.caution)] }
+    ];
+    if (key === 'terms') return A.TERMS.map(t => ({ head: t.name, hasSub: false, sub: '', rows: [plain(t.text)] }));
     if (key === 'strategies') return A.STRATEGIES.map(st => ({ head: st.name, hasSub: true, sub: st.who, rows: [
       row('TRADITIONAL', 'When: ' + st.when), row('TRADITIONAL', 'Correct timing: ' + st.recognize), row('POSSIBILITY', 'Ignored: ' + st.ignored)
     ] }));
@@ -10019,7 +10032,8 @@ class Component extends DCLogic {
     const A = this.A();
     if (!A) return { libAtlas: false };
     const counts = { types: '5', lines: '6', profiles: '12', centers: '9', gates: '64', channels: '36',
-      strategies: '4', authorities: '7', open: '9', example: '8 steps', intro: '' };
+      circuitry: '3', definition: '5', cross: '192 of them', strategies: '4', authorities: '7',
+      open: '9', terms: '16', example: '8 steps', intro: '' };
     return { libAtlas: true,
       atlasBack: () => this.setState({ libView: null, atlasSec: null }),
       atlasSecs: A.SECTIONS.map(([k, title]) => ({
