@@ -6,3 +6,7 @@
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# playwright, installed for browser verification only
+node_modules/
+package-lock.json

@@ -2697,7 +2697,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">A reference for the whole system, not a reading of anybody. It knows nothing of your birth moment. Use it to learn how to read a chart, including your own.</div>
     </div>
-    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="11">
+    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="15">
       <div id="{{ sec.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px">
         <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
           <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
@@ -6414,7 +6414,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">A reference for the whole system, not a reading of anybody. It knows nothing of your birth moment. Use it to learn how to read a chart, including your own.</div>
     </div>
-    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="11">
+    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="15">
       <div id="{{ sec.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px">
         <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
           <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
@@ -11330,8 +11330,9 @@ class Component extends DCLogic {
         id: r.id || r.name, name: r.name, glyph: r.glyph || '',
         lon: known ? r.lon : null,
         pos: known ? (this.dmsOf(r.deg) + ' ' + r.sign) : 'n/a: no ephemeris',
-        house: h ? String(h) : '—',
-        speed: r.speed != null ? (r.speed >= 0 ? '+' : '') + r.speed.toFixed(2) + '°/d' : '—',
+        house: h ? String(h) : 'n/a',
+        houseN: h || 99,
+        speed: r.speed != null ? (r.speed >= 0 ? '+' : '') + r.speed.toFixed(2) + '°/d' : 'n/a',
         retro: r.retro ? 'R' : '',
         status: r.status || 'unavailable',
         statusLabel: known ? (r.status === 'fixed' ? 'formula' : 'ok') : 'n/a: no ephemeris',
@@ -11350,7 +11351,7 @@ class Component extends DCLogic {
     const sorted = filtered.slice().sort((a, b) => {
       let c;
       if (sortBy === 'name') c = a.name.localeCompare(b.name);
-      else if (sortBy === 'house') c = (a.house === '—' ? 99 : +a.house) - (b.house === '—' ? 99 : +b.house);
+      else if (sortBy === 'house') c = a.houseN - b.houseN;
       else c = (a.lon == null ? 999 : a.lon) - (b.lon == null ? 999 : b.lon);
       return c * dir;
     });
@@ -14448,7 +14449,9 @@ class Component extends DCLogic {
     if (key === 'types') return Object.keys(A.TYPES).map(k => {
       const t = A.TYPES[k];
       return { id: k, head: k, hasSub: true, sub: t.pct + ' of people', rows: [
-        row('TRADITIONAL', t.def), row('TRADITIONAL', 'Strategy: ' + t.strategy), row('TRADITIONAL', 'Authority: ' + t.authority),
+        row('TRADITIONAL', t.def), row('TRADITIONAL', 'Aura: ' + t.aura),
+        row('TRADITIONAL', 'Strategy: ' + t.strategy), row('TRADITIONAL', 'Authority: ' + t.authority),
+        row('TRADITIONAL', 'Signature: ' + t.signature), row('TRADITIONAL', 'Not-self theme: ' + t.notSelf),
         row('POSSIBILITY', 'In men: ' + t.male), row('POSSIBILITY', 'In women: ' + t.female),
         plain('Strengths: ' + t.strengths), plain('Challenges: ' + t.challenges),
         plain('Opportunities: ' + t.opportunities), plain('Obstacles: ' + t.obstacles)
@@ -14483,6 +14486,18 @@ class Component extends DCLogic {
       return [{ head: 'All ' + keys.length + ' channels', hasSub: true, sub: 'gate pair, name, theme',
         rows: keys.map(k => { const c = A.CHANNELS[k]; return { ...plain(k + ' \u00b7 ' + c[0] + '. ' + c[1] + '. ' + c[2]), id: k }; }) }];
     }
+    if (key === 'circuitry') return (A.CIRCUITS || []).map(c => ({
+      id: c.name, head: c.name, hasSub: true, sub: c.keynote, rows: [
+        row('TRADITIONAL', c.text), plain(c.sub)
+      ] }));
+    if (key === 'definition') return (A.DEFINITION || []).map(d => ({
+      id: d.name, head: d.name, hasSub: false, sub: '', rows: [row('TRADITIONAL', d.text)] }));
+    if (key === 'cross') return A.CROSS ? [
+      { id: 'what', head: 'What it is', hasSub: false, sub: '', rows: [row('CALCULATED', A.CROSS.what)] },
+      { id: 'how', head: 'How it is read', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.CROSS.how)] },
+      { id: 'angles', head: 'The three angles', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.CROSS.angles)] },
+      { id: 'caution', head: 'How far to take it', hasSub: false, sub: '', rows: [row('POSSIBILITY', A.CROSS.caution)] }
+    ] : [];
     if (key === 'strategies') return A.STRATEGIES.map(st => ({ id: st.name, head: st.name, hasSub: true, sub: st.who, rows: [
       row('TRADITIONAL', 'When: ' + st.when), row('TRADITIONAL', 'Correct timing: ' + st.recognize), row('POSSIBILITY', 'Ignored: ' + st.ignored)
     ] }));
@@ -14495,6 +14510,9 @@ class Component extends DCLogic {
         plain('Defined means consistent: ' + c.defined), plain('Undefined means variable: ' + c.open), row('POSSIBILITY', c.wisdom)
       ] };
     });
+    if (key === 'terms') return [{ head: 'The vocabulary a reading uses', hasSub: true,
+      sub: 'the words this app says without stopping to define them',
+      rows: (A.TERMS || []).map(t => ({ ...plain(t.name + ': ' + t.text), id: t.name })) }];
     if (key === 'example') {
       const e = A.EXAMPLE;
       return [{ head: 'The example chart', hasSub: true, sub: 'not yours, and not anybody\u2019s',
@@ -14584,7 +14602,8 @@ class Component extends DCLogic {
     const A = this.A();
     if (!A) return { libAtlas: false };
     const counts = { types: '5', lines: '6', profiles: '12', centers: '9', gates: '64', channels: '36',
-      strategies: '4', authorities: '7', open: '9', example: '8 steps', intro: '' };
+      circuitry: '3', definition: '5', cross: '192 of them', strategies: '4', authorities: '7',
+      open: '9', terms: '16', example: '8 steps', intro: '' };
     /* Every block and row carries an anchor, so Learn from Atlas, the chart
        popup and the search bar can land on the entry itself rather than the
        top of its section. The entry asked for wears an edge so the eye finds
@@ -20206,6 +20225,15 @@ class Component extends DCLogic {
         sub: 'authority · ' + cut(a.how, 62), keys: 'authority', body: a.follow, target: to('authorities', a.name) }));
       (AT.STRATEGIES || []).forEach(s => hd.push({ glyph: '△', title: s.name,
         sub: 'strategy · ' + s.who, keys: 'strategy', body: s.recognize, target: to('strategies', s.name) }));
+      (AT.CIRCUITS || []).forEach(c => hd.push({ glyph: '∴', title: c.name,
+        sub: 'circuitry · ' + c.keynote, keys: 'circuit circuitry', body: c.text, target: to('circuitry', c.name) }));
+      (AT.DEFINITION || []).forEach(d => hd.push({ glyph: '≡', title: d.name,
+        sub: 'definition · ' + cut(d.text, 58), keys: 'definition split', body: d.text, target: to('definition', d.name) }));
+      if (AT.CROSS) hd.push({ glyph: '☩', title: 'The Incarnation Cross',
+        sub: 'the four gates of the two Suns and the two Earths', keys: 'incarnation cross',
+        body: AT.CROSS.what + ' ' + AT.CROSS.how, target: to('cross', 'what') });
+      (AT.TERMS || []).forEach(t => hd.push({ glyph: '○', title: t.name,
+        sub: 'term · ' + cut(t.text, 60), keys: 'term glossary', body: t.text, target: to('terms', t.name) }));
       push('Human Design', this.searchRank(q, hd, 8));
     }
 
