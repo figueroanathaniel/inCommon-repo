@@ -9852,6 +9852,7 @@ class Component extends DCLogic {
       head: a.name + ' \u00b7 ' + a.angle, hasSub: false, sub: '', rows: [row('TRADITIONAL', a.text)] }))
       .concat([{ head: 'Orbs', hasSub: true, sub: 'the range within which the conversation stays audible',
         rows: [plain(A.ORBS.what), plain(A.ORBS.how), row('POSSIBILITY', A.ORBS.custom)] }]);
+    if (key === 'concepts') return A.CONCEPTS.map(c => ({ head: c.name, hasSub: false, sub: '', rows: [plain(c.text)] }));
     if (key === 'chart') return [
       { head: 'What it is', hasSub: false, sub: '', rows: [plain(A.CHART.what), plain(A.CHART.wheel)] },
       { head: 'The four angles', hasSub: false, sub: '', rows: A.CHART.angles.map(([n, t]) => plain(n + ': ' + t)) }
@@ -9864,6 +9865,7 @@ class Component extends DCLogic {
     if (key === 'transits') return [{ head: 'Personal transits', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.TRANSITS.personal)] },
       { head: 'Sky transits', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.TRANSITS.sky)] },
       { head: 'How to read them', hasSub: false, sub: '', rows: [plain(A.TRANSITS.read), plain(A.TRANSITS.timing)] }];
+    if (key === 'techniques') return A.TECHNIQUES.map(t => ({ head: t.name, hasSub: false, sub: '', rows: [plain(t.text)] }));
     if (key === 'synastry') return [{ head: 'What it is', hasSub: false, sub: '', rows: [row('TRADITIONAL', A.SYNASTRY.what)] },
       { head: 'How to read it', hasSub: false, sub: '', rows: [plain(A.SYNASTRY.read), row('POSSIBILITY', A.SYNASTRY.caution)] }];
     if (key === 'example') return [{ head: 'The example chart', hasSub: true, sub: 'nobody\u2019s chart, drawn for practice',
@@ -9876,8 +9878,9 @@ class Component extends DCLogic {
     if (!(this.curTab() === 'library' && st.libView === 'astropedia')) return { libAstropedia: false };
     const A = this.AP();
     if (!A) return { libAstropedia: false };
-    const counts = { signs: '12', houses: '12', bodies: '10', points: '7', aspects: '5 and orbs',
-      chart: '7 steps', sabian: '360 images', stellium: '', transits: '', synastry: '', example: '8 steps' };
+    const counts = { signs: '12', houses: '12', bodies: '10', points: '10', aspects: '5 and orbs',
+      concepts: '17', chart: '7 steps', sabian: '360 images', stellium: '', transits: '', techniques: '4',
+      synastry: '', example: '8 steps' };
     return { libAstropedia: true,
       apIntro: A.INTRO.what + ' ' + A.INTRO.how,
       apFoot: A.INTRO.caution,
