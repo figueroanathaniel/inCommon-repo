@@ -48,9 +48,25 @@ const repo = path.resolve(__dirname, '..');
    the cover while a mangled app sat on the CDN would be the same convincing
    nothing the version stamp was.
 
-   Keep the folder in step with BUNDLE in build-bundle.js, which is what wrote
-   the files being compared. */
-const BUNDLE = path.join(repo, 'deploy', 'v6.2');
+   The folder is READ OUT of build-bundle.js rather than declared again here.
+   This used to be its own constant with a comment asking whoever changed one to
+   change the other, and it drifted exactly the way that kind of comment always
+   does: the builder moved to v6.3 and this stayed on v6.2, so the deploy check
+   was comparing the live site against a bundle nothing had written since the
+   11th. That is the same silent failure CLAUDE.md already records from when
+   both tools pointed at deploy/index.html, and a green run against the wrong
+   folder is the convincing nothing this whole script exists to prevent. */
+const BUNDLE = (() => {
+  const src = fs.readFileSync(path.join(__dirname, 'build-bundle.js'), 'utf8');
+  const m = /const BUNDLE = path\.join\(repo, 'deploy', '([^']+)'\)/.exec(src);
+  if (!m) {
+    console.error('check-deployed: cannot read BUNDLE out of build-bundle.js.');
+    console.error('  That constant is the one place the bundle folder is named. If its shape');
+    console.error('  changed, change this reader with it rather than declaring the folder twice.');
+    process.exit(1);
+  }
+  return path.join(repo, 'deploy', m[1]);
+})();
 const PAGES = [
   { what: 'cover', file: 'index.html' },
   { what: 'app', file: 'app.html' }
