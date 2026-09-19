@@ -9,7 +9,7 @@
  *
  *  1. (0, 144, 288) is a genuine GOLDEN YOD, not "not a Yod at all" as an
  *     earlier pass of this file claimed. Checked against fifth-harmonic
- *     literature: a Golden Yod is a quintile (72deg) between two planets
+ *     literature: a Golden Yod is a quintile (72deg) between two astral bodies
  *     with a third biquintile (144deg) from each - Sun-Venus is |288-0|
  *     folding to 72, and Moon is 144 from both. It is a DIFFERENT pattern
  *     from the classical (quincunx/sextile) Yod, not a variant of it, and
@@ -128,7 +128,7 @@ test('An exact Grand Trine DOES reappear as "5H: Grand Trine" (5 is not divisibl
   // (120*n) mod 360, which stays a trine (120 or its 240 short-arc
   // complement) for any n not a multiple of 3, and only collapses to a
   // conjunction when 3 | n. n=5 is not a multiple of 3, so the same three
-  // planets that form a radix Grand Trine also form one at H5 - verified
+  // astral bodies that form a radix Grand Trine also form one at H5 - verified
   // against the live detector, not assumed from harmonic-family folklore.
   const points = [mockPoint('Sun', 'Sun', 10), mockPoint('Moon', 'Moon', 130), mockPoint('Venus', 'Venus', 250)];
 
@@ -139,7 +139,7 @@ test('An exact Grand Trine DOES reappear as "5H: Grand Trine" (5 is not divisibl
   const h5Trines = harmonic5Patterns.filter(p =>
     p.name.includes('Grand Trine') && p.harmonicOf.slice().sort().join(',') === ['Sun', 'Moon', 'Venus'].sort().join(',')
   );
-  if (h5Trines.length === 0) throw new Error('expected the same three planets to also register as "5H: Grand Trine"');
+  if (h5Trines.length === 0) throw new Error('expected the same three astral bodies to also register as "5H: Grand Trine"');
 });
 
 test('Tier 2 patterns OFF by default in harmonics', () => {

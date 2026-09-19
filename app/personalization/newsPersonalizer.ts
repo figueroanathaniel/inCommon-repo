@@ -39,16 +39,16 @@ function applyNatalTouchWeight(
   // Check if item has natal-touch info in keywords
   if (item.keywords && item.keywords.includes('natal-touch')) {
     // Extract touched point from headline or use fallback
-    // For this implementation, we look at all mentioned planets and apply avg weight
-    const mentionedPlanets = Object.keys(profile.weights).filter(p =>
+    // For this implementation, we look at all mentioned astral bodies and apply avg weight
+    const mentionedBodies = Object.keys(profile.weights).filter(p =>
       item.headline.toLowerCase().includes(p.toLowerCase())
     );
 
-    if (mentionedPlanets.length > 0) {
-      const avgWeight = mentionedPlanets.reduce(
+    if (mentionedBodies.length > 0) {
+      const avgWeight = mentionedBodies.reduce(
         (sum, p) => sum + profile.weights[p],
         0
-      ) / mentionedPlanets.length;
+      ) / mentionedBodies.length;
 
       // Base natal-touch bonus is 10 (from scoring); multiply by weight
       bonus = 10 * (avgWeight - 1.0); // Delta from 1.0
@@ -81,7 +81,7 @@ function applyTopicBonus(item: NewsItem, profile: PersonalizationProfile): numbe
         }
       }
 
-      // Check if keyword is a planet
+      // Check if keyword is an astral body
       if (profile.weights[keywordLower] !== undefined) {
         const weight = profile.weights[keywordLower];
         if (weight > 1.0) {
@@ -95,7 +95,7 @@ function applyTopicBonus(item: NewsItem, profile: PersonalizationProfile): numbe
 }
 
 /**
- * Determine if item is deselected (all keyword planets have weight ≤0.7)
+ * Determine if item is deselected (all keyword astral bodies have weight ≤0.7)
  */
 function isDeselected(item: NewsItem, profile: PersonalizationProfile): boolean {
   if (!item.keywords || item.keywords.length === 0) return false;

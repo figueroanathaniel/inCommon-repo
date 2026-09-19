@@ -27,14 +27,14 @@ export interface PartnerChart {
   birthDate: Date;
   birthTime?: string;
   birthPlace?: string;
-  planets: Record<string, number>;  // planet name => longitude
+  bodies: Record<string, number>;  // astral body name => longitude
   points: Record<string, number>;   // ASC, MC, etc.
 }
 
 export interface SynastryContact {
-  movingPlanet: string;        // Your planet
+  movingBody: string;        // Your astral body
   aspect: string;              // conjunction, sextile, square, trine, opposite
-  partnerPlanet: string;       // Their planet
+  partnerBody: string;       // Their astral body
   orb: number;                 // Degrees of separation
   isExact: boolean;            // orb < 0.5
   yourLongitude: number;
@@ -46,7 +46,7 @@ export interface SynastryContact {
 export interface SynastryItemInput {
   contact: SynastryContact;
   partner: { id: string; name: string };
-  isPersonalTouch: boolean;    // Your planet or point touched
+  isPersonalTouch: boolean;    // Your astral body or point touched
   hasNatalTouch?: boolean;     // Touches their natal point
   isRare?: boolean;
   date: Date;
@@ -84,8 +84,8 @@ export function buildSynastryItem(input: SynastryItemInput): NewsItem {
   const template = pickSynastryTemplate(templates);
   const headline = fillSynastryTemplate(
     template,
-    contact.movingPlanet,
-    contact.partnerPlanet,
+    contact.movingBody,
+    contact.partnerBody,
     partner.name,
     contact.aspect
   );
@@ -96,14 +96,14 @@ export function buildSynastryItem(input: SynastryItemInput): NewsItem {
   // Generate stable ID
   const id = generateNewsId(
     `synastry-${contact.aspect}`,
-    [contact.movingPlanet, contact.partnerPlanet],
+    [contact.movingBody, contact.partnerBody],
     date
   );
 
   // Keywords for personalization
   const keywords = [
-    contact.movingPlanet.toLowerCase(),
-    contact.partnerPlanet.toLowerCase(),
+    contact.movingBody.toLowerCase(),
+    contact.partnerBody.toLowerCase(),
     contact.aspect,
     'synastry',
     partner.id
@@ -124,7 +124,7 @@ export function buildSynastryItem(input: SynastryItemInput): NewsItem {
       id: partner.id,
       name: partner.name
     },
-    bodies: [contact.movingPlanet, contact.partnerPlanet]
+    bodies: [contact.movingBody, contact.partnerBody]
   };
 }
 
@@ -135,9 +135,9 @@ export function buildSynastryItem(input: SynastryItemInput): NewsItem {
  * Part 3: Sentence about weather, not verdict
  */
 function buildSynastryBody(contact: SynastryContact, partnerName: string): string {
-  const { movingPlanet, partnerPlanet, aspect, orb } = contact;
+  const { movingBody, partnerBody, aspect, orb } = contact;
 
-  const calculatedLine = `${movingPlanet} is ${aspect.toLowerCase()} their ${partnerPlanet} within ${orb.toFixed(2)}°.`;
+  const calculatedLine = `${movingBody} is ${aspect.toLowerCase()} their ${partnerBody} within ${orb.toFixed(2)}°.`;
 
   const explainer = getAspectExplainer(aspect);
 
@@ -152,11 +152,11 @@ function buildSynastryBody(contact: SynastryContact, partnerName: string): strin
  */
 function getAspectExplainer(aspect: string): string {
   const explainers: Record<string, string> = {
-    conjunction: 'A conjunction is when two planets occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these planets represent are amplified when together, for better and for worse.',
+    conjunction: 'A conjunction is when two astral bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these astral bodies represent are amplified when together, for better and for worse.',
     sextile: 'A sextile (60°) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
-    square: 'A square (90°) is tension in geometric form. Between you, these planets want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+    square: 'A square (90°) is tension in geometric form. Between you, these astral bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
     trine: 'A trine (120°) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
-    opposite: 'An opposition (180°) is two planets facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+    opposite: 'An opposition (180°) is two astral bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
   };
 
   return explainers[aspect] || 'A contact between your charts.';
@@ -182,7 +182,7 @@ export function buildSynastryItems(
 
   for (const contact of contacts) {
     // Skip if below importance threshold
-    const isPersonal = options?.personalPointIds?.includes(contact.movingPlanet) ?? false;
+    const isPersonal = options?.personalPointIds?.includes(contact.movingBody) ?? false;
 
     // Build the item
     const item = buildSynastryItem({

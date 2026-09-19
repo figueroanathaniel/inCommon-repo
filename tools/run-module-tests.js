@@ -565,10 +565,35 @@ const CHIRON_JPL = [
   tTrue("E9", "the stated accuracy is not better than the measured worst case",
     c.accuracyDeg >= worst);
   const appSrcE = fs.readFileSync(path.join(repo, "app", "inCommonApp v2.dc.html"), "utf8");
-  /* The expanded chart addresses these five by registry id as well as by name,
-     so both spellings have to be withheld or one route prints the symbol. */
-  tTrue("E10", "and the app withholds a degree symbol from every unpinned body, by name and by registry id",
-    appSrcE.indexOf("DEGREE_SAFE_EXCEPT = ['Chiron', 'Ceres', 'Pallas', 'Juno', 'Vesta', 'chiron', 'ceres', 'pallas', 'juno', 'vesta']") > -1 &&
+  /* E10 USED TO ASSERT A COPY OF THE LIST and went red the day the list was
+     right, because Ceres, Pallas, Juno and Vesta came off it: they are fetched
+     now and measure under a tenth of a degree, so they earn the symbol the way
+     every other fetched body does. A test that names the members cannot tell a
+     correct change from a regression. What is asserted instead is the rule, and
+     it is derived from the data rather than typed: any body this module still
+     supplies whose measured accuracy is worse than the app's ceiling must be
+     barred under BOTH spellings, because the wheel asks by name and the
+     expanded table asks by registry id and one route would otherwise print it.
+     Adding a body here with a nine degree fit and forgetting the list turns
+     this red, which the literal version could never have done. */
+  const barred = (appSrcE.match(/DEGREE_SAFE_EXCEPT = \[([^\]]*)\]/) || [, ''])[1]
+    .split(',').map(x => x.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  const ceiling = parseFloat((appSrcE.match(/DEGREE_SAFE_WORST = ([\d.]+)/) || [, '0'])[1]);
+  const MEids = (() => { try { return require(path.join(repo, 'app', 'minor-body-elements.js')).ids(); } catch (e) { return []; } })();
+  const mustBar = MBE.BODIES.filter(b => {
+    if (MEids.indexOf(b.toLowerCase()) !== -1) return false;     /* fetched, so measured elsewhere */
+    const a = MBE.elements[b].accuracyDeg;
+    return a == null || a > ceiling;
+  });
+  const missing = [];
+  mustBar.forEach(b => {
+    if (barred.indexOf(b) === -1) missing.push(b);
+    if (barred.indexOf(b.toLowerCase()) === -1) missing.push(b.toLowerCase());
+  });
+  tTrue("E10", "every body this module supplies that has not earned a degree is barred under both spellings",
+    ceiling > 0 && mustBar.length > 0 && missing.length === 0);
+  tTrue("E10b", "and the decision is made by measurement, through the one gate the Sabian panel reads",
+    /ME\.worstDeg\(key\) <= this\.DEGREE_SAFE_WORST/.test(appSrcE) &&
     appSrcE.indexOf('plHasSabian: !!sb && this.degreeSafe(rk)') > -1);
   tTrue("E11", "the retired single anchor model is gone from the app, so one body has one answer",
     appSrcE.indexOf("chironEl()") === -1 && appSrcE.indexOf("CHIRON_EL") === -1);

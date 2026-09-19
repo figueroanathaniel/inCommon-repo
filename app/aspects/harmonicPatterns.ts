@@ -36,7 +36,7 @@ export function detectHarmonicPatterns(
     // Radix view; use standard detection
     return detectPatterns(radixPoints, config).map(p => ({
       ...p,
-      harmonicOf: p.planets,
+      harmonicOf: p.bodies,
       harmonicN: 1
     }));
   }
@@ -61,7 +61,7 @@ export function detectHarmonicPatterns(
   // Map back to original point IDs and prefix names
   return patterns.map(p => {
     // Find which original points these harmonicPoints correspond to
-    const originalIds = p.planets.map(id => {
+    const originalIds = p.bodies.map(id => {
       const hPoint = harmonicPoints.find(hp => hp.id === id);
       return hPoint ? radixPoints.find(rp => rp.id === hPoint.id)?.id || id : id;
     });
@@ -69,7 +69,7 @@ export function detectHarmonicPatterns(
     return {
       ...p,
       name: `${harmonicN}H: ${p.name}`,
-      planets: originalIds,
+      bodies: originalIds,
       harmonicOf: originalIds,
       harmonicN
     };
@@ -141,7 +141,7 @@ export function groupHarmonicPatternsByN(
 
 /**
  * Verify a radix pattern appears in expected harmonics. Generic lookup:
- * finds a harmonic-N pattern claiming the exact same planet set as a given
+ * finds a harmonic-N pattern claiming the exact same astral body set as a given
  * radix pattern.
  */
 export function patternAppearanceInHarmonic(
@@ -150,14 +150,14 @@ export function patternAppearanceInHarmonic(
   allHarmonicPatterns: HarmonicPattern[]
 ): HarmonicPattern | undefined {
   return allHarmonicPatterns.find(p => {
-    const samePoints = p.harmonicOf.sort().join(',') === radixPattern.planets.sort().join(',');
+    const samePoints = p.harmonicOf.sort().join(',') === radixPattern.bodies.sort().join(',');
     return p.harmonicN === targetHarmonic && samePoints;
   });
 }
 
 /**
  * Test case helper: verify that a radix Golden Yod (patterns.ts's
- * detectGoldenYod: a quintile [72°] between two planets, both biquintile
+ * detectGoldenYod: a quintile [72°] between two astral bodies, both biquintile
  * [144°] from a third) collapses to a genuine conjunction at the 5th
  * harmonic.
  *
@@ -184,7 +184,7 @@ export function isGoldenYodIn5thHarmonic(radixPoints: PointData[]): boolean {
   if (goldenYods.length === 0) return false;
 
   return goldenYods.some(yod => {
-    const members = radixPoints.filter(p => yod.planets.includes(p.id) && p.status === 'ok');
+    const members = radixPoints.filter(p => yod.bodies.includes(p.id) && p.status === 'ok');
     if (members.length < 2) return false;
 
     const h5 = recastHarmonicMemoized(members, 5);
@@ -226,6 +226,6 @@ export function radixGrandTrineNotIn5th(
 
   return grandTrines.every(gt => {
     const in5H = patternAppearanceInHarmonic(gt, 5, allHarmonicPatterns);
-    return !in5H; // Should NOT find a 5H: Grand Trine for the same planets
+    return !in5H; // Should NOT find a 5H: Grand Trine for the same astral bodies
   });
 }

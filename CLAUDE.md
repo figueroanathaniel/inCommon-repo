@@ -9,12 +9,12 @@ only breakpoint that changes the component tree.
 
 ## Ephemeris architecture (V1.0.0)
 **Dual-backend ephemeris system** with graceful fallback. Modules:
-- `ephemeris-points.js` — Centralized point registry (17 points, single source of truth)
-- `ephemeris-backend-current.js` — Fallback: existing simplified ephemeris (Kepler + analytical)
-- `ephemeris-backend-swiss.js` — Primary: Swiss Ephemeris WASM (if `npm install swisseph-wasm` run)
-- `ephemeris-router.js` — Orchestrator: selects backend, handles fallback transparently
-- `ephemeris-integration.js` — Migration helper: eases integration into Component lifecycle
-- `ephemeris-cache.js` — Optional in-memory memoization (existing, unchanged)
+- `ephemeris-points.js`: centralized point registry (17 points, single source of truth)
+- `ephemeris-backend-current.js`: the fallback, existing simplified ephemeris (Kepler + analytical)
+- `ephemeris-backend-swiss.js`: the primary, Swiss Ephemeris WASM (if `npm install swisseph-wasm` run)
+- `ephemeris-router.js`: the orchestrator. Selects backend, handles fallback transparently
+- `ephemeris-integration.js`: the migration helper. Eases integration into Component lifecycle
+- `ephemeris-cache.js`: optional in-memory memoization (existing, unchanged)
 
 **Architecture**: Swiss WASM (if available) → fallback to current if unavailable.
 Graceful degradation: if WASM fails to load, app auto-switches to current ephemeris.
@@ -457,6 +457,71 @@ rule nobody is reading. And it refuses to report green when it cannot see: too
 few files walked, the app not reached, fewer than twenty label positions found,
 or no mark found inside `docs/reference/` where they are known to be.
 
+## Planet is astral body, and where it is not
+The owner asked for the word replaced, and it is, everywhere a reader can see
+it. This section exists because the terminology test three sections above would
+have KEPT it: planet is the field's own word rather than anyone's brand, so by
+that test a private substitute costs comprehension and buys nothing. The test
+was applied, it argued for keeping, and the owner decided otherwise. That is
+the owner's call and it is recorded here rather than argued again.
+
+**The rename was classified by position, never by guessing.** A space is fatal
+in an identifier and harmless in a sentence, so the two cases cannot share one
+substitution. Every byte of every source file was marked CODE, STRING, COMMENT
+or TEXT, and the word was replaced according to where it stood: identifiers
+became camelCase (`wheelPlanets` to `wheelBodies`, `openPlanet` to `openBody`,
+`planetInSign` to `astralBodyInSign`, `planet1`/`planet2` to `body1`/`body2`),
+and prose became "astral body", article aware, so "a planet" became "an astral
+body" rather than "a astral body".
+
+**Template placeholders are identifiers wearing quotes.** `{planet1}` inside a
+catalog string is the key of the params object the substituting code passes, so
+it had to move with the identifier or every headline would render the brace.
+341 of them, across `app/i18n/` and `app/forecast/`, and the i18n suite's
+placeholder parity row (L5/I5) is what proves the two halves still agree. The
+one miss the first pass made was the other shape of the same thing: a bare
+`'planet'` inside a string, in the test fixture's expected-placeholder list,
+which is a name rather than a sentence and had to become `'body'`.
+
+**Three places keep the old word on purpose, and each is a decision.**
+`planetary` is a different word from planet and was left, which keeps
+`planetaryNodeOf`, the eight `planetary nodes` and one reader-facing
+"planetary placements" as they were. `'planet'` survives as a quoted literal
+in the CAT_COLOR paragraph above, because that paragraph is the record of a bug
+whose content WAS that literal. And `app/gazetteer-world.js` was never touched:
+Planeta Rica is a town in Colombia and a reader born there has to be able to
+find it.
+
+**Astronomy keeps its own words, and that is a ruled exception.** Dwarf planet
+and minor planet are formal classifications, from the IAU and the Minor Planet
+Center, and they sit in `CAT_LABEL` and in the source notes beside asteroid,
+centaur, comet and TNO, which are formal classifications too and were never in
+scope. Renaming those two and not the other four made them the odd ones out.
+Six sites carry them and none is app vocabulary:
+
+| Where | What it says |
+|---|---|
+| `CAT_LABEL` | TNOs & Dwarf Planets |
+| `placement-content.js` Eris, Haumea, Makemake | "The dwarf planet, found in ..." |
+| `placement-content.js` TNO section comment | "trans-Neptunian objects and dwarf planets" |
+| `pointRegistry.ts` the `tno` category | same |
+| `bodySourceNote()` | "orbital elements for minor planet 10 Hygiea" |
+
+Two sentences beyond the labels were plainly false after a blanket swap and are
+corrected rather than exempted, because they are claims about the solar system.
+Eris "led astronomers to redefine what a planet is", which is the 2006
+definition and the entire reason that body is famous; and Sedna "never comes
+near the planets", where the word means the eight and nothing else would carry
+the sentence. **The test for this class: if the sentence would still be true
+with the word changed, it is vocabulary and the rename applies. If it becomes
+false, astronomy owns the word.**
+
+**Reports, records and the historical docs were left alone**, which is the same
+rule the version-in-a-filename section states: a record of what was written on
+a date is not a pointer to be maintained. The ~20 report `.md` files at the repo
+root, `docs/`, `verification/` and `data-contracts/` all still say planet, and
+that is correct.
+
 ## Circles, and the Ground one stands on
 `hd-circle.js` holds two things. **Between** is the two person overlay under its
 inCommon name and delegates to `hd-composite.js`: there is not a second engine,
@@ -583,10 +648,14 @@ benchmark that printed only the wins would have hidden this, so
 `bench-ephemeris.js` prints the loss too.
 
 **Chiron and the four asteroids are never cached, and that is correctness.**
-They read `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
+They can reach `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
 uninstalls and recalibrates, so their answer is not a function of `t` alone.
 Cache a null taken before install and the Expanded Chart says "not computed"
 for the rest of the session. The bench drives that case rather than asserting it.
+The four asteroids now read `minor-body-elements.js` FIRST, which is static
+generated data and is a pure function of `t`, so they could be cached on that
+path. They are not, because the fallback is still there behind them and a cache
+that is only sometimes safe is a cache nobody can reason about.
 
 **Nothing is rounded on the way in.** `designT()` bisects `lonOf` to an
 arcsecond through `arc-solver.js`, and Prompt 3's "rounded to the nearest
@@ -627,7 +696,7 @@ a birth time, and say that.
 
 **Ring 1 and ring 2 are a stagger band, not a distance from centre.** Both
 sit inside the sign boundary, where the small card's glyphs already lived;
-ring 1 (planets, both nodes, Chiron, the four main asteroids, Lilith,
+ring 1 (the ten bodies, both nodes, Chiron, the four main asteroids, Lilith,
 Selena) staggers near that boundary at the original size, ring 2 (everything
 else this wheel draws) staggers in a smaller band further toward the centre,
 in a smaller glyph, so eighty points does not compete with the sixteen core
@@ -636,7 +705,7 @@ ones for the same rim space. `RING1_IDS` is the membership list.
 **Comets are the one category excluded from the wheel by default.**
 `fullChart()` computes and lists them unconditionally - the table and the
 seven sub-tables below it always carry all three - but `placedRows` (which
-feeds `wheelPlanets`/`wheelLabels`, the SVG) drops `category === 'comet'`
+feeds `wheelBodies`/`wheelLabels`, the SVG) drops `category === 'comet'`
 unless `chartExpandShowComets` is on. One state flag, checked in one place,
 rather than a second copy of the point list.
 
@@ -669,7 +738,7 @@ outside expanded mode, or the basic chart's own legend would start
 advertising aspect lines it can never draw.
 
 **One tooltip builder, not two.** `pointTooltip(r, houseLabel)` is what both
-`wheelPlanets`' SVG `<title>` and every points-table row's `title` attribute
+`wheelBodies`' SVG `<title>` and every points-table row's `title` attribute
 call: name, glyph, DMS position, house, then the two SYMBOLISM lines
 (tooltip → the point's own meaning, reference → "Used in reference to"). An
 unavailable point never reaches the position formatter; it returns "n/a: no
@@ -726,8 +795,46 @@ body, the widest epoch spacing whose worst case against those references
 stays within 0.1 degree: twenty years for the Kuiper belt, one year for the
 near Earth asteroids, two for the main belt. The module solves Kepler from
 the NEAREST epoch, which is why this works: an osculating set is exact at its
-epoch and drifts only by what the planets do in the gap. Worst case over all
-48 real bodies is 0.128 degree (Apollo); most main belt bodies are under 0.07.
+epoch and drifts only by what the planets do in the gap. (The perturbers are
+the planets: this is a fact about the solar system rather than app vocabulary.) Worst case over all
+52 real bodies is 0.128 degree (Apollo); 47 of the 52 are under 0.07.
+
+**Ceres, Pallas, Juno and Vesta were the last four real bodies not fetched, and
+they were wrong by up to 169 degrees.** They sat on
+`minor-bodies-ephemeris.js`'s single epoch coplanar model with mean longitudes
+that module's own header called provisional while claiming "a few tenths of a
+degree", which was never measured and was wrong by two orders of magnitude.
+Against 404 Horizons apparent longitudes from 1900 to 2100 the shipped elements
+measured an RMS of 35 to 110 degrees, flat across every window from 1980-2010 to
+1900-2100, so a wrong phase rather than drift: a reader's Ceres could be in the
+opposite sign and nothing in the build could tell. They are fetched now, at
+0.032 to 0.058 degree, and they earn their degree symbol by that measurement.
+Chiron is deliberately NOT fetched: a fifty year orbit that Saturn and Uranus
+keep perturbing is chaotic, and the fitted single epoch set measures 0.3 degrees
+across 1980-2010, which is what fitting against real positions buys.
+
+**The fetcher merges now, and that is what made a four body change reviewable.**
+`--only id,id` fetches just those and seeds `DATA` from the generated block
+already on disk, so the other 56 entries are re-serialised from their own bytes.
+Horizons revises its orbit solutions, so a full refetch moves recorded worst
+cases that the change never touched, and a diff nobody can read is a diff nobody
+checks. Verified on the run that added the four: 56 of 56 pre-existing entries
+byte identical, in the module and in the fixtures both.
+
+**The fallback is fitted too, and it says what it is worth.** A missing
+`minor-body-elements.js` should cost accuracy rather than the four bodies, which
+is the order eris and sedna already use, so the elements behind it were fitted by
+the method the Chiron block states: `a` published and held, `n` from it by Kepler
+III, only `L0`, `e` and `varpi` free, half the references held out of the fit.
+That takes 169 degrees to 9.1 (Ceres), 164 to 29.6 (Pallas), 153 to 7.9 (Juno)
+and 71 to 2.3 (Vesta), and no further, because the limit is secular perturbation
+rather than geometry: projecting the orbits in three dimensions was tried and
+measured and moved Pallas only to 18.6. So `accuracyDeg` is per body and
+`bodyAccuracyNote()` picks its sentence from the number, because one sentence
+saying the sign holds is true of Chiron at 0.92 and plainly false of Pallas at
+29.6. More epochs would fix it properly, and more epochs is exactly what
+`minor-body-elements.js` already is: a fallback does not need a second copy of
+the thing it falls back from.
 The reduction (Meeus Sun, light time, precession, nutation, aberration) was
 measured to 0.001 degree against the Swiss Ephemeris on the hypotheticals, so
 the table is limited by elements, not arithmetic.
@@ -742,18 +849,29 @@ Ephemeris carries them (epoch and equinox J1900), and their references were
 taken from swisseph-wasm. Their pages say they are not bodies.
 
 **`tools/check-minor-body-elements.js` re-measures every recorded worst case**
-against `tools/fixtures/minor-bodies-horizons.json` (22,624 positions), holds
+against `tools/fixtures/minor-bodies-horizons.json` (24,240 positions), holds
 every body under a 0.2 degree ceiling, asserts real bodies return null
-outside the span they were measured over, and accounts for all 80 registry
+outside the span they were measured over, and accounts for all 81 registry
 ids: app formula, this module, or declared unavailable with the sentence the
-page shows. Nudging one Hygiea epoch by 0.3 degree turns it red.
+page shows. Nudging one Hygiea epoch by 0.3 degree turns it red. The count is
+81 rather than 80 because Part of Fortune joined the app's expanded registry,
+and each id must be accounted for exactly ONCE, which is why moving the four
+asteroids into this module also took them out of `APP_COMPUTED`.
 
 **Degree symbols are earned by that number.** `degreeSafe()` lets a fetched
 body name a degree when its measured worst case is at or under
 `DEGREE_SAFE_WORST` (0.2). The comets do not: one osculating set each,
-unmeasured across a lifetime. Chiron and the four `MinorBodies` asteroids are
-withheld by name AND by registry id, because the expanded chart addresses
-them by id and a name-only list let `pallas` through.
+unmeasured across a lifetime. **Chiron is the only body left on
+`DEGREE_SAFE_EXCEPT`**, under both spellings, because the expanded chart
+addresses a point by id and the wheel by name and a name only list let `pallas`
+through once. The four asteroids came off that list when they were fetched:
+they earn the degree the way every other fetched body does, by measurement, and
+`degreeSafe()` lowercases a name before asking so the measurement actually
+governs rather than the lookup missing and falling through to the permissive
+default. Group E's row for this asserted a copy of the old list and went red the
+day the list was right; it asserts the RULE now, derived from the elements
+rather than typed, so adding a body with a nine degree fit and forgetting the
+list fails it.
 
 **Readings: 75 entries in `placement-content.js`, keyed by registry id.**
 Same fields and grammar as the 21 core bodies, because the same composer
@@ -774,7 +892,7 @@ labels of every expanded point silently vanished off the wheel mid-change.
 **Two outer ring points are not aspected to each other.** With every body
 placed, asteroid to hypothetical and centaur to TNO pairs were 393 of 708
 contacts on the sample chart and tripled the overlay's render. A minor body is
-read by what it touches among the planets, lights, nodes, angles and ring 1.
+read by what it touches among the astral bodies, lights, nodes, angles and ring 1.
 `stelliums()` counts the core and ring 1 only, for the same reason: with
 eighty points placed every sign holds three of something.
 
@@ -818,11 +936,11 @@ rule that never turns off.
 ## The Aspects grid filters, and a bug it walked into on the way in
 Tracing "filter by category involved" back to its source field surfaced a
 defect that predates this pass: `CAT_LABEL`, `CAT_COLOR` and the Points
-table's own `catOrder` all keyed the ten core planets as `'planet'`, but
+table's own `catOrder` all keyed the ten core bodies as `'planet'`, but
 `fullChart()` has always stamped them `category:'body'` (`x.name.indexOf
 ('Node') !== -1 ? 'node' : 'body'`). Grouping the table by category filtered
 `sorted` for `r.category === 'planet'`, which no row has ever carried, so
-the "Planets & Nodes" section silently returned zero rows and the Sun
+the "Astral Bodies & Nodes" section silently returned zero rows and the Sun
 through Pluto simply never appeared in Group mode. The North and South
 Node were unaffected by coincidence, since their own category really is
 `'node'`. `CAT_COLOR`'s `'planet'` key had the same fault but no visible
@@ -841,7 +959,7 @@ nothing.
 **The row a reader clicks and the pair the wheel highlights read the same
 array by construction, not by convention.** `chartExpandAspSel` stores the
 clicked row's `id`, which is its index into `asps` as `chartExpandVals()`
-builds it; the wheel's own `wheelPlanets` computation calls
+builds it; the wheel's own `wheelBodies` computation calls
 `natalAspects(expanded, {...})` with the identical arguments (rich mode,
 same minor-aspect and minor-scale flags) to get an array that is
 positionally identical, and resolves the same index against it. Two
@@ -2416,12 +2534,24 @@ that a later change is most likely to break:
   bundle, so the thing you upload is `deploy/v6.2/`. A host pointed at
   `deploy/` itself, or at the repo root, serves a directory with no page in
   it: the deploy succeeds and the link is broken, which is a failure with no
-  error anywhere in it. Three files say which folder, and they must agree:
-  `publish` in `netlify.toml`, `BUNDLE` in `tools/build-bundle.js`, and
-  `LOCAL` in `tools/check-deployed.js`. Both tools pointed at
-  `deploy/index.html` for as long as the bundle sat there and silently stopped
-  working when it moved: the build refused to run and the deploy check refused
-  to compare, and neither said anything a build log would show.
+  error anywhere in it. **The folder is named ONCE, in `BUNDLE` at the top of
+  `tools/build-bundle.js`, and everything else is generated from it or reads it
+  from there.** `netlify.toml` is written by the build, the same way the two
+  `_redirects` already were, and `check-deployed.js` parses `BUNDLE` out of the
+  builder rather than declaring its own copy.
+
+  It used to be three hand written constants with comments asking whoever
+  changed one to change the others, and both copies drifted. `check-deployed`
+  sat on v6.2 while the builder wrote v6.3, so the deploy check compared the
+  live site against a bundle nothing had written in a week. `netlify.toml` sat
+  on v6.2 too, so a git connected deploy served the previous bundle while a
+  dragged repository served the current one: the same repository, two different
+  sites, both deploys succeeding, nothing anywhere reporting it. A comment
+  asking a human to keep two constants in step is the thing that drifts. Both
+  tools also pointed at `deploy/index.html` for as long as the bundle sat
+  there and silently stopped working when it moved: the build refused to run
+  and the deploy check refused to compare, and neither said anything a build
+  log would show.
 - **The bundle folder carries its own serving rules.** `_redirects` resolves
   every path to `index.html`, because the router is the hash and the server
   never sees it, so without that line every address but the bare one is a 404.
@@ -2480,9 +2610,9 @@ BOTH ends of an opposition; that is geometrically impossible (confirmed by
 exhaustive search), so it could never match any chart, ever, despite being
 surfaced in forecast copy as a pattern the app claims to detect. Checked
 against a published definition (Astrology Weekly's "Yods and Boomerangs": a
-Boomerang is a Yod plus a fourth planet opposing the apex, nothing more),
+Boomerang is a Yod plus a fourth body opposing the apex, nothing more),
 `detectBoomerang()` was rewritten to that actual shape, which is always
-achievable. `apex` on the returned pattern now names the release planet
+achievable. `apex` on the returned pattern now names the release body
 (opposite the Yod's own apex), since that is the notable addition a
 Boomerang has over a plain Yod, and `app/forecast/content/{headlines,explainer}.ts`
 were corrected from "T-Square with an escape route" to "Yod with an escape
@@ -2494,7 +2624,7 @@ patterns by name containing "Yod", which only ever matched the classical
 because no detector for one existed anywhere in this codebase.
 `patterns.ts`'s `ASPECT_ORBS` already carried `'quintile'` and `'biquintile'`
 entries with nothing using either: `detectGoldenYod()` (a quintile [72°]
-between two planets, both biquintile [144°] from a third - checked against
+between two bodies, both biquintile [144°] from a third - checked against
 fifth-harmonic literature, and a genuinely different pattern from the
 classical Yod, not a variant of it) is the missing detector, added to
 Tier 1. And "becomes a Grand Trine at H5" was never the real fifth-harmonic

@@ -21,7 +21,7 @@
 
 export type Category =
   | 'angle'      // ASC, MC, IC, DC
-  | 'body'       // Sun, Moon, planets
+  | 'body'       // Sun, Moon, astral bodies
   | 'node'       // North, South, lunar points, planetary nodes
   | 'asteroid'   // Belt asteroids + love/shadow group (EXPANDED-only)
   | 'centaur'    // Centaurs, chironic bodies (EXPANDED-only)
@@ -109,7 +109,7 @@ export const BASIC_REGISTRY: PointDef[] = [
     reference: 'emotional nature, instinct, security, family'
   },
 
-  // Planets
+  // Astral Bodies
   {
     id: 'mercury',
     name: 'Mercury',
@@ -204,6 +204,13 @@ export const BASIC_REGISTRY: PointDef[] = [
   },
 
   // Essential Point (now BASIC)
+  // The one BASIC_REGISTRY point the app draws in the EXPANDED chart rather
+  // than on the basic wheel. It is also the only basic entry whose category is
+  // 'derived' rather than body, node or angle, and the layering rule reads the
+  // category, which is how it went uncomputed in the app for as long as it did:
+  // a glyph, a tooltip and a reference with no arithmetic behind them. It needs
+  // an Ascendant, and the basic wheel has to draw for an untimed birth too, so
+  // expanded is where it belongs whatever this array says.
   {
     id: 'partOfFortune',
     name: 'Part of Fortune',
@@ -925,11 +932,18 @@ export const EXPANDED_REGISTRY: PointDef[] = [
     tooltip: 'self-directed fate, personal agency',
     reference: 'your own doors, self-made fate'
   },
-  // Computed as ASC + Sun - Moon. The classical Part of Spirit reverses
-  // Part of Fortune's day/night formula (swapping which luminary is added
-  // and which is subtracted depending on a day or night birth); this
-  // build does not apply that correction and uses one formula for both,
-  // a simplification worth knowing about rather than a claim it isn't one.
+  // The two lots, and both of them reverse on sect. Fortune is ASC + Moon -
+  // Sun by day and ASC + Sun - Moon by night; Spirit is the mirror of that.
+  // Spirit shipped computed as ASC + Sun - Moon for every chart, which is its
+  // day formula alone, so a night birth was handed the night Part of Fortune
+  // under Spirit's name. That was recorded here as a known simplification
+  // rather than missed, and adding Fortune is what made it worth closing:
+  // there is no sect free Fortune worth having, because without sect it is
+  // only Spirit's mirror and half of all readers would be given the other
+  // one's number. Sect is a fact about the birth chart, so it is computed
+  // once from the Sun against the Ascendant and carried, never recomputed per
+  // instant: a birth within half a degree of sunrise would otherwise flip it
+  // across a speed sample and report both lots moving 180 degrees a day.
   {
     id: 'partOfSpirit',
     name: 'Part of Spirit',

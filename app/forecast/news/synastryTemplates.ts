@@ -1,13 +1,13 @@
 /*! forecast/news/synastryTemplates.ts
  * Headlines for synastry items (two-person contacts)
  * Structure mirrors transit templates, keyed for localization
- * Format: {planet1} is {aspect} their {planet2}, {name}. Headline text.
+ * Format: {body1} is {aspect} their {body2}, {name}. Headline text.
  */
 
 export interface SynastryTemplate {
   id: string;
   type: string;  // aspect name
-  templates: string[];  // {planet1} {aspect} their {planet2}, {name}
+  templates: string[];  // {body1} {aspect} their {body2}, {name}
 }
 
 export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
@@ -19,9 +19,9 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-conjunction',
     type: 'conjunction',
     templates: [
-      '{planet1} and their {planet2} meet today. Same frequency between you.',
-      'A merger: your {planet1} conjunct their {planet2}, {name}. Two energies aligned.',
-      'Your {planet1} finds their {planet2} today. You\'re speaking the same language.',
+      '{body1} and their {body2} meet today. Same frequency between you.',
+      'A merger: your {body1} conjunct their {body2}, {name}. Two energies aligned.',
+      'Your {body1} finds their {body2} today. You\'re speaking the same language.',
     ]
   },
 
@@ -29,9 +29,9 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-sextile',
     type: 'sextile',
     templates: [
-      'Your {planet1} sextile their {planet2} today, {name}. Diplomacy gets a green light.',
-      'A sextile between you two: your {planet1} to their {planet2}. Easy conversation.',
-      'Your {planet1} and their {planet2} are friends today. Lean on it.',
+      'Your {body1} sextile their {body2} today, {name}. Diplomacy gets a green light.',
+      'A sextile between you two: your {body1} to their {body2}. Easy conversation.',
+      'Your {body1} and their {body2} are friends today. Lean on it.',
     ]
   },
 
@@ -39,9 +39,9 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-square',
     type: 'square',
     templates: [
-      'Your {planet1} square their {planet2}, {name}. Friction between you. Channel it.',
-      'A hard angle: your {planet1} and their {planet2} want different things today.',
-      'Your {planet1} meets resistance in their {planet2}. That\'s the work of the day.',
+      'Your {body1} square their {body2}, {name}. Friction between you. Channel it.',
+      'A hard angle: your {body1} and their {body2} want different things today.',
+      'Your {body1} meets resistance in their {body2}. That\'s the work of the day.',
     ]
   },
 
@@ -49,9 +49,9 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-trine',
     type: 'trine',
     templates: [
-      'A gift between you: your {planet1} trine their {planet2}, {name}. It flows.',
-      'Your {planet1} and their {planet2} are in conversation. The air is clear.',
-      'Rare ease between you today: your {planet1} trine their {planet2}. Use it.',
+      'A gift between you: your {body1} trine their {body2}, {name}. It flows.',
+      'Your {body1} and their {body2} are in conversation. The air is clear.',
+      'Rare ease between you today: your {body1} trine their {body2}. Use it.',
     ]
   },
 
@@ -59,9 +59,9 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-opposite',
     type: 'opposite',
     templates: [
-      'Your {planet1} opposite their {planet2}, {name}. You\'re seeing both sides.',
-      'Two poles between you: your {planet1} and their {planet2}. Balance is today\'s work.',
-      'Mirror moment: your {planet1} opposite their {planet2}. Who is the other seeing?',
+      'Your {body1} opposite their {body2}, {name}. You\'re seeing both sides.',
+      'Two poles between you: your {body1} and their {body2}. Balance is today\'s work.',
+      'Mirror moment: your {body1} opposite their {body2}. Who is the other seeing?',
     ]
   },
 
@@ -73,8 +73,8 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-station-retrograde',
     type: 'station-retrograde',
     templates: [
-      'Their {planet} stations retrograde today, {name}. What reverses between you.',
-      'Lookback time: a pause in their {planet}. This may echo in what you share.',
+      'Their {body} stations retrograde today, {name}. What reverses between you.',
+      'Lookback time: a pause in their {body}. This may echo in what you share.',
     ]
   },
 
@@ -82,8 +82,8 @@ export const SYNASTRY_TEMPLATES: SynastryTemplate[] = [
     id: 'synastry-station-direct',
     type: 'station-direct',
     templates: [
-      'Their {planet} stations direct today, {name}. Forward motion resumes between you.',
-      'The pause lifts: their {planet} direct. What was held returns.',
+      'Their {body} stations direct today, {name}. Forward motion resumes between you.',
+      'The pause lifts: their {body} direct. What was held returns.',
     ]
   },
 ];
@@ -105,19 +105,19 @@ export function pickSynastryTemplate(templates: string[]): string {
 
 /**
  * Fill a synastry template with values
- * Example: "{planet1} trine their {planet2}, {name}"
+ * Example: "{body1} trine their {body2}, {name}"
  *          => "Venus trine their Moon, Lucia"
  */
 export function fillSynastryTemplate(
   template: string,
-  planet1: string,
-  planet2: string,
+  body1: string,
+  body2: string,
   partnerName: string,
   aspect: string
 ): string {
   let result = template;
-  result = result.replace(/\{planet1\}/g, planet1);
-  result = result.replace(/\{planet2\}/g, planet2);
+  result = result.replace(/\{body1\}/g, body1);
+  result = result.replace(/\{body2\}/g, body2);
   result = result.replace(/\{name\}/g, partnerName);
   result = result.replace(/\{aspect\}/g, aspect);
   return result;

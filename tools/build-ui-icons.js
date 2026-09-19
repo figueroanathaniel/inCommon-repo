@@ -118,7 +118,7 @@ const ICONS = {
   /* THE SUBJECTS. Each of these marks a body of material rather than a screen,
      so each says what its material is, in the same two moves.
 
-     A note on what is NOT here. The planet glyphs stay exactly as they are.
+     A note on what is NOT here. The astral body glyphs stay exactly as they are.
      The Sun beside a placement is not an icon, it is the astronomical symbol
      for the Sun, and it has meant that in every ephemeris ever printed. To
      redraw it would be to invent notation and quietly break the reader's

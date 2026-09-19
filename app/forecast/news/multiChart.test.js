@@ -19,14 +19,14 @@ const mockPartner = {
   birthDate: new Date('1995-06-15'),
   birthTime: '14:30',
   birthPlace: 'Brooklyn, NY',
-  planets: { Sun: 84.5, Moon: 167.3, Venus: 65.2 },
+  bodies: { Sun: 84.5, Moon: 167.3, Venus: 65.2 },
   points: { ASC: 120.0, MC: 210.0 }
 };
 
 const mockContact = {
-  movingPlanet: 'Venus',
+  movingBody: 'Venus',
   aspect: 'trine',
-  partnerPlanet: 'Moon',
+  partnerBody: 'Moon',
   orb: 0.3,
   isExact: true,
   yourLongitude: 65.2,
@@ -35,7 +35,7 @@ const mockContact = {
 
 function test_A1_basicItemCreation() {
   const item = buildSynastryItem({ contact: mockContact, partner: mockPartner, isPersonalTouch: false, date: new Date() });
-  if (!item.headline.includes('Venus') || !item.headline.includes('Lucia')) throw new Error('A1: Headline missing planet or partner name');
+  if (!item.headline.includes('Venus') || !item.headline.includes('Lucia')) throw new Error('A1: Headline missing astral body or partner name');
   if (item.category !== 'transit') throw new Error('A1: Synastry item category should be "transit"');
   if (item.synastry !== true) throw new Error('A1: synastry flag should be true');
 }

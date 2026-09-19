@@ -179,7 +179,7 @@
 
   /* Whether the birth fell inside that zone's daylight saving, asked the only
      way that holds everywhere: against the lowest offset that zone reached in
-     the same year. A hemisphere assumption would be wrong for half the planet,
+     the same year. A hemisphere assumption would be wrong for half the astral body,
      and a fixed one hour assumption is wrong for Lord Howe Island. */
   function isDst(tz, at) {
     if (!tz || tz === 'manual' || !at) return null;

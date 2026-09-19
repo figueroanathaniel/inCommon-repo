@@ -66,7 +66,7 @@
     t('D1', 'fmtToday computes real weekday (2026-07-19 is a Sunday)', 'Sunday · July 19, 2026', core.fmtToday(new Date(2026, 6, 19)));
     t('D2', 'fmtShort', 'Jul 19', core.fmtShort(new Date(2026, 6, 19)));
     // birth-time visibility (audit: exact/approx/unknown must change behavior)
-    t('V1', 'Unknown time suppresses angle-dependent rows, keeps signs+numerology', { rising: 'suppressed', humanDesign: 'suppressed', planetsBySign: 'ok', numerology: 'ok', hasNote: true }, (function (v) { return { rising: v.rising, humanDesign: v.humanDesign, planetsBySign: v.planetsBySign, numerology: v.numerology, hasNote: !!v.note }; })(core.deriveVisibility('unknown')));
+    t('V1', 'Unknown time suppresses angle-dependent rows, keeps signs+numerology', { rising: 'suppressed', humanDesign: 'suppressed', astralBodiesBySign: 'ok', numerology: 'ok', hasNote: true }, (function (v) { return { rising: v.rising, humanDesign: v.humanDesign, astralBodiesBySign: v.astralBodiesBySign, numerology: v.numerology, hasNote: !!v.note }; })(core.deriveVisibility('unknown')));
     t('V2', 'Approximate time renders as window', 'window', core.deriveVisibility('approx').rising);
     t('V3', 'Exact time — no caveat note', { rising: 'ok', note: null }, (function (v) { return { rising: v.rising, note: v.note }; })(core.deriveVisibility('exact')));
     // persistence guard (audit B1)

@@ -192,9 +192,39 @@ test('Part of Fortune: nightMode "same" keeps the day formula at night', () => {
   if (!approx(pof, (15 + 195 - 75 + 360) % 360, 1e-9)) throw new Error('got ' + pof);
 });
 
-test('Part of Spirit: always Asc + Sun - Moon', () => {
+test('Part of Spirit: day formula is Asc + Sun - Moon', () => {
   const pos = computePartOfSpirit(15, 75, 195);
   if (!approx(pos, (15 + 75 - 195 + 360) % 360, 1e-9)) throw new Error('got ' + pos);
+});
+
+test('Part of Spirit: night reverses it, which is what makes it Fortune\'s mirror', () => {
+  const pos = computePartOfSpirit(15, 75, 195, true);
+  if (!approx(pos, (15 + 195 - 75 + 360) % 360, 1e-9)) throw new Error('got ' + pos);
+});
+
+test('Part of Spirit: nightMode "same" keeps the day formula at night', () => {
+  const pos = computePartOfSpirit(15, 75, 195, true, 'same');
+  if (!approx(pos, (15 + 75 - 195 + 360) % 360, 1e-9)) throw new Error('got ' + pos);
+});
+
+/* The two lots are reflections of each other in the Ascendant, in EVERY
+   chart, which is the property a sect mistake in either one breaks. Fortune
+   is Asc + (Moon - Sun) and Spirit is Asc - (Moon - Sun) by day, and both
+   swap at night, so the two are always the same distance either side of the
+   Ascendant. Asserting the relation rather than two numbers is what catches
+   one of them being reversed and the other not. */
+test('the two lots stay equidistant from the Ascendant, day and night', () => {
+  const norm = (x: number) => ((x % 360) + 360) % 360;
+  for (const night of [false, true]) {
+    for (const [asc, sun, moon] of [[15, 75, 195], [300, 12, 350], [0, 0, 180], [123.4, 210.7, 44.2]]) {
+      const f = computePartOfFortune(asc, moon, sun, night);
+      const sp = computePartOfSpirit(asc, sun, moon, night);
+      if (!approx(norm(f - asc), norm(asc - sp), 1e-9)) {
+        throw new Error('night=' + night + ' asc=' + asc + ': fortune is ' + norm(f - asc) +
+          ' past the Ascendant but spirit is ' + norm(asc - sp) + ' before it');
+      }
+    }
+  }
 });
 
 test('Sun/Moon midpoint: ordinary case (both arcs agree at 40 degrees apart)', () => {
@@ -213,7 +243,7 @@ test('Sun/Moon midpoint: takes the shorter arc across the 0/360 seam', () => {
   if (!approx(mid, 0, 1e-9) && !approx(mid, 360, 1e-9)) throw new Error('got ' + mid + ', expected 0 (or 360)');
 });
 
-test('planetaryNodes returns a value for every requested planet', () => {
+test('planetaryNodes returns a value for every requested astral body', () => {
   const nodes = planetaryNodes(2461041.5, [2, 3, 4, 5, 6, 7, 8, 9]);
   for (const id of [2, 3, 4, 5, 6, 7, 8, 9]) {
     if (nodes[id] === undefined) throw new Error('missing node for body id ' + id);

@@ -15,7 +15,7 @@ export const MONTH_MOODS = {
   ],
 
   transit: [
-    'A month of motion. The planets were busy moving you from place to place.',
+    'A month of motion. The astral bodies were busy moving you from place to place.',
     'Transits led the month. Change, not rest, was the theme.',
     'The sky was in transit. A month of passage and gradual turning.'
   ],

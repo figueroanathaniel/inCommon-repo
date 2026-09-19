@@ -241,7 +241,7 @@ console.log('  ' + compared + ' cached reads compared against uncached, 0 differ
 console.log('  ' + MUTABLE.length + ' window.MinorBodies bodies, none cacheable, pre-install null does not survive');
 console.log('  nothing persisted, ceiling of ' + cache.MAX_ENTRIES + ' holds and clears wholesale');
 console.log('');
-console.log('  one lonRaw call, planet branch                 ' + us(perCall));
+console.log('  one lonRaw call, astral body branch                 ' + us(perCall));
 console.log('  transitWindows walk, 1986 calls               ' + ms(perWalk));
 console.log('    the same walk, cached                       ' + ms(perWalkCached) +
             '   (' + (100 * (perWalk - perWalkCached) / perWalk).toFixed(0) + '% faster)');

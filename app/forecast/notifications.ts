@@ -196,7 +196,7 @@ export function buildStationDigest(items: NewsItem[]): NewsItem | null {
 
   // Build merged body
   const headlines = stations.map(s => `• ${s.headline}`).join('\n');
-  const body = `Two planets change direction today — here's the 60-second version:\n\n${headlines}`;
+  const body = `Two astral bodies change direction today — here's the 60-second version:\n\n${headlines}`;
 
   return {
     id: `digest_${Date.now()}`,

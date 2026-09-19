@@ -50,7 +50,7 @@ if (!expanded.length) die('expandedPoints() returned no points; refusing to writ
 // never appear among the added eighty.
 const CATEGORY_ORDER = ['asteroid', 'centaur', 'tno', 'node', 'comet', 'hypothetical', 'derived'];
 const CATEGORY_TITLE = {
-  asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Planets',
+  asteroid: 'Asteroids', centaur: 'Centaurs', tno: 'TNOs & Dwarf Astral Bodies',
   node: 'Nodes & Lunar Points', comet: 'Comets (Mundane)',
   hypothetical: 'Hypotheticals (TNPs)', derived: 'Derived & Midpoints'
 };

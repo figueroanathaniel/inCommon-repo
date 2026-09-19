@@ -72,7 +72,7 @@ export function getCatalog(): LocaleCatalog {
 
 /**
  * Translate a key with placeholder substitution
- * Example: t('transit-conjunction', { planet1: 'Sun', planet2: 'Moon', time: '3pm' })
+ * Example: t('transit-conjunction', { body1: 'Sun', body2: 'Moon', time: '3pm' })
  */
 export function t(key: string, placeholders?: PlaceholderMap): string {
   const entry = activeCatalog.strings[key];
@@ -97,7 +97,7 @@ export function t(key: string, placeholders?: PlaceholderMap): string {
 
 /**
  * Pick a variant and translate
- * Example: pickVariant('transit-conjunction', 0, { planet1: 'Sun', ... })
+ * Example: pickVariant('transit-conjunction', 0, { body1: 'Sun', ... })
  * Returns the variant at the given index with placeholders filled
  */
 export function pickVariant(
@@ -130,7 +130,7 @@ export function pickVariant(
 
 /**
  * Fill placeholders in a template string
- * Example: "Mercury sextile {planet2} at {time}" with { planet2: 'Venus', time: '2pm' }
+ * Example: "Mercury sextile {body2} at {time}" with { body2: 'Venus', time: '2pm' }
  */
 export function fillPlaceholders(template: string, placeholders?: PlaceholderMap): string {
   if (!placeholders || Object.keys(placeholders).length === 0) {

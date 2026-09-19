@@ -13,7 +13,7 @@
   var INTRO = {
     what: 'Human Design is a synthesis. It takes a birth moment and draws a diagram, which inCommon calls the wiring and the field calls a bodygraph, and reads it as a map of how a person is built to make decisions and spend energy.',
     history: 'The system was published by Ra Uru Hu, born Alan Krakower, after an experience he reported on Ibiza in January 1987. It combines the 64 hexagrams of the I Ching, the ten Sephirot of the Kabbalistic Tree of Life, the seven-chakra system, Western astrology, and a reading of the neutrino as a carrier of information.',
-    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the planets about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
+    method: 'Two charts are cast. The Personality chart uses the birth moment. The Design chart uses the position of the astral bodies about 88 degrees of solar arc earlier, roughly 88 to 90 days before birth. Both are laid over the same nine centers, and the pattern of what connects decides type, authority, and profile.',
     caution: 'None of this has been demonstrated by any mechanism outside the system itself. It is a language for noticing, and it is at its most useful where it describes something you can check.'
   };
 
@@ -21,6 +21,9 @@
   var TYPES = {
     Manifestor: {
       pct: 'about 9 percent',
+      aura: 'Closed and repelling. The tradition means that descriptively rather than unkindly: people cannot read a Manifestor from outside, so they tend to invent a reading and then respond to their own invention.',
+      signature: 'Peace. The feeling reported when a Manifestor has informed, moved, and met no unnecessary resistance.',
+      notSelf: 'Anger. Read as the signal of having moved without informing, or of having been managed.',
       def: 'A motor center connected to a defined Throat. That wiring is read as the capacity to initiate: to act first and let the world respond.',
       strategy: 'Inform before acting. Say what you are about to do before you do it, to the people it will land on.',
       authority: 'Varies by chart: emotional, splenic, or ego.',
@@ -33,6 +36,9 @@
     },
     Generator: {
       pct: 'about 37 percent',
+      aura: 'Open and enveloping. People come closer than they meant to and stay longer than they planned, which is why a Generator is so often asked for things.',
+      signature: 'Satisfaction. The feeling reported at the end of work that was genuinely responded to rather than chased.',
+      notSelf: 'Frustration. Read as the signal of having initiated instead of responded, or of having said yes without the energy for it.',
       def: 'A defined Sacral center without a motor-to-Throat connection. The system reads the Sacral response, not the mind, as the reliable guide to action.',
       strategy: 'Wait to respond. Let something enter your world and notice whether there is energy for it.',
       authority: 'Sacral, or emotional when the Solar Plexus is defined.',
@@ -45,6 +51,9 @@
     },
     'Manifesting Generator': {
       pct: 'about 11 percent',
+      aura: 'Open and enveloping with a forward edge. People are drawn in and then find the Manifesting Generator already three steps ahead of the conversation.',
+      signature: 'Satisfaction and peace together, which is why both the response and the informing have to be present for either to arrive.',
+      notSelf: 'Frustration and anger together. Read as the signal of having skipped the response, the informing, or both.',
       def: 'A defined Sacral plus a motor-to-Throat connection. A hybrid: response first, then the capacity to act on it quickly.',
       strategy: 'Wait to respond, then inform. The response comes first; telling people comes second.',
       authority: 'Sacral, or emotional when the Solar Plexus is defined.',
@@ -57,6 +66,9 @@
     },
     Projector: {
       pct: 'about 22 percent',
+      aura: 'Focused and penetrating, aimed at one person at a time. It is felt as being seen, and occasionally as being seen rather too accurately.',
+      signature: 'Success. Not status, in the tradition’s sense, but the recognition of having guided something correctly.',
+      notSelf: 'Bitterness. Read as the signal of having entered without invitation, or of having gone unrecognized for too long.',
       def: 'No defined Sacral. A non-energy type, read as built to see and guide the energy of others rather than to generate it.',
       strategy: 'Wait for the invitation. Wait to be recognized for the thing you actually are, then enter.',
       authority: 'Various: self-projected, splenic, mental, or ego.',
@@ -69,6 +81,9 @@
     },
     Reflector: {
       pct: 'about 1 percent',
+      aura: 'Sampling and resistant. A Reflector takes the room in and gives very little fixed back, which is what makes the read on a community possible.',
+      signature: 'Surprise. The delight of a cycle that turned out differently than expected, in a place that suited them.',
+      notSelf: 'Disappointment. Read as the signal of a wrong environment, or of having been hurried into deciding.',
       def: 'No defined centers at all. Entirely open, and read as sampling the environment rather than holding a fixed nature.',
       strategy: 'Wait a lunar cycle, about 28 days, before a major decision.',
       authority: 'Lunar: the cycle itself is the authority.',
@@ -416,6 +431,63 @@
     absent: 'Nothing here is missing from either of you. If this reads as a gap, whose idea was it that it should be there?'
   };
 
+  /* ---------- definition ----------
+     How the defined centers link up, which the tradition treats as a structural
+     fact about how a person's energy moves and how they need other people. */
+  var DEFINITION = [
+    { name: 'Single Definition', text: 'Every defined center is connected to every other defined center in one unbroken piece. The tradition reads this as self-contained: energy moves through the whole definition without needing anything from outside to close a gap, which is read as independence, and sometimes as a difficulty noticing that other people work differently.' },
+    { name: 'Split Definition', text: 'Two separate groups of defined centers with no channel joining them. The tradition reads a split as a built-in search: the person is looking, often without naming it, for whatever bridges the gap, and other people who carry the bridging gates are felt strongly. The advice given is to let the bridge be many people and situations rather than one person appointed to complete you.' },
+    { name: 'Triple Split Definition', text: 'Three separate groups. Read as busier than a single split and slower to settle, because there are more gaps and more ways to be affected. The tradition suggests such a person needs varied contact and enough time, and tends to do badly under pressure to decide quickly.' },
+    { name: 'Quadruple Split Definition', text: 'Four separate groups, which requires a lot of definition in the first place. Read as needing a great deal of variety and being unusually hard to condition, since there is no single dominant flow to be pushed around.' },
+    { name: 'No Definition', text: 'No channel is defined anywhere, which is the Reflector. There is nothing fixed to connect, so the whole chart is read as sampling whatever is present. The tradition treats environment, not effort, as the decisive factor.' }
+  ];
+
+  /* ---------- the incarnation cross ---------- */
+  var CROSS = {
+    what: 'The Incarnation Cross is the four gates held by the Sun and the Earth in both charts: the Personality Sun and Earth from the birth moment, and the Design Sun and Earth from about 88 degrees of solar arc earlier. Four gates, always in two opposing pairs.',
+    how: 'The tradition reads the cross as the backdrop of a life rather than an instruction inside it. Type says how you engage, authority says how you decide, profile says the role you play, and the cross is the theme all of that is playing out against. There are 192 of them, named in the form Right Angle Cross of Planning, Left Angle Cross of Confrontation, Juxtaposition Cross of Formulization.',
+    angles: 'The angle comes from the profile. Right Angle crosses are read as a personal life, where the story is mostly your own. Left Angle crosses are read as transpersonal, where other people are the medium the theme works through. The Juxtaposition Cross, from the 4/1 profile, is read as a fixed destiny with little room to swerve.',
+    caution: 'A cross is the broadest thing in the system and the easiest to over-read. It is better used as a description of the weather a life happens in than as a job title.'
+  };
+
+  /* ---------- circuitry ---------- */
+  var CIRCUITS = [
+    { name: 'Individual Circuitry', keynote: 'mutation, and the melancholy that carries it',
+      text: 'Individual channels are read as mutative: they arrive as something nobody asked for and cannot be reasoned into arriving on time. The tradition attaches melancholy to this circuitry, not as a disorder but as the pressure that precedes a mutation, and it holds that the mutation is only useful if it is expressed rather than sat on. Its gift to others is empowerment; its difficulty is that it cannot be scheduled.',
+      sub: 'Sub-circuits: Knowing, Centering, and Integration.' },
+    { name: 'Tribal Circuitry', keynote: 'support, and the bargain that makes it work',
+      text: 'Tribal channels are read as the machinery of keeping people alive together: resources, touch, loyalty, agreements, who is owed what. The tradition treats the bargain as the honest core of it rather than something to be embarrassed about, and reads tribal pressure as the source of most of what gets called obligation. Its gift is support; its difficulty is that it works by deal rather than by principle.',
+      sub: 'Sub-circuits: Ego and Defense.' },
+    { name: 'Collective Circuitry', keynote: 'sharing, and the pattern nobody owns',
+      text: 'Collective channels are read as the sharing circuitry: experience gathered and passed on so that the group does not have to learn it again. The tradition splits it into the logical stream, which is about patterns that repeat and can be tested, and the abstract stream, which is about experience that only makes sense looking back. Its gift is sharing; its difficulty is that it is impersonal, and a person can be used by it without being cared for.',
+      sub: 'Sub-circuits: Understanding, the logical half, and Sensing, the abstract half.' }
+  ];
+
+  /* ---------- further terms ----------
+     The vocabulary a reading uses without stopping to define it. Several of these
+     appear in this build's own generated text, which is the strongest argument for
+     defining them here: a page that says 'electromagnetic' or 'your design crystal'
+     and never says what it means is asking to be taken on faith. */
+  var TERMS = [
+    { name: 'The Wiring', text: 'The diagram itself, which the field calls a bodygraph: nine centers, 36 channels and 64 gates, with the Personality activations printed in black on one side and the Design activations in red on the other. Everything the system says is read off this one picture.' },
+    { name: 'Aura', text: 'The field the tradition says a person projects and is met through, before anything is said. It is fixed by type, not by manner or intention, which is why the system treats it as mechanical rather than psychological. Each type entry names its own.' },
+    { name: 'Signature', text: 'The feeling reported when a person is living in their own design: peace, satisfaction, success or surprise, by type. Used as a check rather than a goal, since it cannot be performed on purpose.' },
+    { name: 'Not-Self Theme', text: 'The feeling reported when a person is off their own design: anger, frustration, bitterness or disappointment, by type. The tradition treats it as early information rather than failure, which is the whole reason it is worth naming.' },
+    { name: 'Conditioning', text: 'What the tradition says happens where a center is undefined: the openness is filled in by whoever is nearby, and their consistency gets mistaken for your own. Not framed as harm being done to you, but as the ordinary mechanics of being open.' },
+    { name: 'Deconditioning', text: 'The process of living by type and authority long enough to tell your own definition from what was filled in. The tradition puts it at roughly seven years and warns that it is uncomfortable in the middle, which is the part most often left out.' },
+    { name: 'Hanging Gate', text: 'A gate that is defined while the gate at the other end of its channel is not, leaving half a channel open. The tradition reads a hanging gate as where you are most reliably drawn to other people, because anyone carrying the other gate completes the circuit on contact.' },
+    { name: 'Electromagnetic Connection', text: 'When one person holds one gate of a channel and the other holds its pair, completing a channel neither could complete alone. Described as the most magnetic thing available between two charts, with the standing caution that magnetism is not compatibility. The circuit closes with anyone who happens to hold the other gate.' },
+    { name: 'Dominance', text: 'When one person has a channel fully defined and the other has neither of its gates. The defined one broadcasts and the open one receives, so the tradition reads it as the defined person setting the terms in that area without either of them deciding to.' },
+    { name: 'Compromise', text: 'When one person has a channel fully defined and the other holds only one of its gates. Read as workable but uneven: the half-defined person keeps meeting their own gate in someone else’s fixed circuitry.' },
+    { name: 'Companionship', text: 'When both people have the same channel fully defined. Read as easy recognition and, over time, as a shared blind spot, since neither has any distance on what they both hold fixed.' },
+    { name: 'Emotional Wave', text: 'The Solar Plexus does not give a clear answer in the moment; the tradition says it moves in a wave and that clarity comes from riding it out rather than reading any single point on it. This is why emotional authority is advice about time before it is advice about feeling.' },
+    { name: 'Variables and the Four Arrows', text: 'The four arrows at the top and bottom of a bodygraph, read as Determination and Environment below, Motivation and Perspective above. They are the system’s advanced layer, covering how a person is said to take in food and information, and where they function best. This build names them and does not compute them.' },
+    { name: 'Color, Tone and Base', text: 'Gate and line are the first two layers of the system’s address for a position; color, tone and base are the three finer ones beneath them, and they are what the Variables are derived from. Ra Uru Hu’s full notation is gate.line.color.tone.base. This build reads to gate and line only.' },
+    { name: 'Design and Personality Crystals', text: 'The system’s own cosmology: a Personality crystal said to carry who you think you are, a Design crystal said to carry the body and its genetics, and a magnetic monopole holding the two together and pulling them along one trajectory. This is the frame the red and black activations come from, and it is metaphysics rather than mechanics.' },
+    { name: 'Transits', text: 'The moving activations of the day laid over a fixed bodygraph, temporarily defining gates and sometimes channels that are not natally defined. The tradition reads a transit as borrowed rather than yours: the useful question is whether a theme leaves when the day does.' }
+  ];
+
+
   var SECTIONS = [
     ['intro', 'What Human Design is'],
     ['types', 'The five types'],
@@ -424,9 +496,13 @@
     ['centers', 'The nine centers'],
     ['gates', 'The 64 gates'],
     ['channels', 'The 36 channels'],
+    ['circuitry', 'The three circuits'],
+    ['definition', 'Definition'],
+    ['cross', 'The Incarnation Cross'],
     ['strategies', 'Strategies'],
     ['authorities', 'Authorities'],
     ['open', 'Defined and undefined'],
+    ['terms', 'Further terms'],
     ['example', 'An example bodygraph']
   ];
 
@@ -469,6 +545,7 @@
   return { VERSION: VERSION, INTRO: INTRO, TYPES: TYPES, LINES: LINES, PROFILES: PROFILES,
     CENTERS: CENTERS, AUTHORITIES: AUTHORITIES, STRATEGIES: STRATEGIES, CHANNELS: CHANNELS,
     GATES: GATES, EXAMPLE: EXAMPLE, SECTIONS: SECTIONS,
+    DEFINITION: DEFINITION, CROSS: CROSS, CIRCUITS: CIRCUITS, TERMS: TERMS,
     CONNECTION_TRADITION: CONNECTION_TRADITION, CONNECTION_ASK: CONNECTION_ASK,
     layers: layers,
     centerOf: centerOf, gateName: gateName, channel: channel, channelKey: channelKey,

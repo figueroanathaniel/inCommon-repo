@@ -14,42 +14,42 @@
       // ---- TRANSIT: Aspects (Headlines) ----
 
       'transit-conjunction': [
-        '{planet1} y {planet2} se encuentran a las {time}. La misma frecuencia. Observa el cambio hacia {theme}.',
-        'Alerta de fusión: {planet1} {planet2} {time}. Dos energías hablando el mismo idioma hoy.',
-        '{planet1} en conjunción con {planet2} {time}. No están discutiendo. Están alineados.'
+        '{body1} y {body2} se encuentran a las {time}. La misma frecuencia. Observa el cambio hacia {theme}.',
+        'Alerta de fusión: {body1} {body2} {time}. Dos energías hablando el mismo idioma hoy.',
+        '{body1} en conjunción con {body2} {time}. No están discutiendo. Están alineados.'
       ],
 
       'transit-sextile': [
-        '{planet1} sextil a {planet2}, {time}: la diplomacia recibe luz verde. Úsala antes de que tu bandeja arruine tu día.',
-        'Un sextil es la suerte mostrándose. {planet1} hacia {planet2}, {time}. {theme} es fácil hoy si lo pides.',
-        '{time}: {planet1} y {planet2} son amigos. Esta es la hora para comenzar {theme}.'
+        '{body1} sextil a {body2}, {time}: la diplomacia recibe luz verde. Úsala antes de que tu bandeja arruine tu día.',
+        'Un sextil es la suerte mostrándose. {body1} hacia {body2}, {time}. {theme} es fácil hoy si lo pides.',
+        '{time}: {body1} y {body2} son amigos. Esta es la hora para comenzar {theme}.'
       ],
 
       'transit-trine': [
-        'Un regalo llega {time}: {planet1} trino con {planet2}. {theme} fluye. No lo desperdicies en piloto automático.',
-        '{time}, {planet1} y {planet2} están en conversación. El aire es claro para {theme}.',
-        'Facilidad rara: {planet1} trino con {planet2}, {time}. Esto es lo que se ve cuando los planetas están a tu favor.'
+        'Un regalo llega {time}: {body1} trino con {body2}. {theme} fluye. No lo desperdicies en piloto automático.',
+        '{time}, {body1} y {body2} están en conversación. El aire es claro para {theme}.',
+        'Facilidad rara: {body1} trino con {body2}, {time}. Esto es lo que se ve cuando los cuerpos astrales están a tu favor.'
       ],
 
       // ---- SYNASTRY: Aspects (Headlines) ----
 
       'synastry-conjunction': [
-        '{planet1} y su {planet2} se encuentran hoy. La misma frecuencia entre ustedes.',
-        'Una fusión: tu {planet1} en conjunción con su {planet2}, {name}. Dos energías alineadas.',
-        'Tu {planet1} encuentra su {planet2} hoy. Están hablando el mismo idioma.'
+        '{body1} y su {body2} se encuentran hoy. La misma frecuencia entre ustedes.',
+        'Una fusión: tu {body1} en conjunción con su {body2}, {name}. Dos energías alineadas.',
+        'Tu {body1} encuentra su {body2} hoy. Están hablando el mismo idioma.'
       ],
 
       'synastry-trine': [
-        'Un regalo entre ustedes: tu {planet1} trino con su {planet2}, {name}. Fluye.',
-        'Tu {planet1} y su {planet2} están en conversación. El aire es claro.',
-        'Facilidad rara entre ustedes hoy: tu {planet1} trino con su {planet2}. Úsalo.'
+        'Un regalo entre ustedes: tu {body1} trino con su {body2}, {name}. Fluye.',
+        'Tu {body1} y su {body2} están en conversación. El aire es claro.',
+        'Facilidad rara entre ustedes hoy: tu {body1} trino con su {body2}. Úsalo.'
       ],
 
       // ---- EXPLAINERS: Aspects ----
 
-      'explainer-conjunction': 'Una conjunción es cuando dos planetas ocupan el mismo grado. Están "fusionados". Las energías que estos planetas representan hablan al unísono hoy, amplificadas, urgentes, enfocadas. Las conjunciones son poderosas pero indiferenciadas; el contexto importa enormemente.',
+      'explainer-conjunction': 'Una conjunción es cuando dos cuerpos astrales ocupan el mismo grado. Están "fusionados". Las energías que estos cuerpos astrales representan hablan al unísono hoy, amplificadas, urgentes, enfocadas. Las conjunciones son poderosas pero indiferenciadas; el contexto importa enormemente.',
 
-      'explainer-trine': 'Un trino (120°) es armonía. Dos planetas en este ángulo fluyen juntos naturalmente. Los trinos no exigen esfuerzo; recompensan lo que ya está en movimiento. El riesgo: darlos por sentado. Un trino es un regalo, no un pase libre. Úsalo o piérdelo.',
+      'explainer-trine': 'Un trino (120°) es armonía. Dos cuerpos astrales en este ángulo fluyen juntos naturalmente. Los trinos no exigen esfuerzo; recompensan lo que ya está en movimiento. El riesgo: darlos por sentado. Un trino es un regalo, no un pase libre. Úsalo o piérdelo.',
 
       // ---- UTILITY STRINGS ----
 

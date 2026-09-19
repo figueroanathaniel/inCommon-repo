@@ -21,8 +21,8 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'conjunction',
     variants: [
-      'Journal: These two energies are speaking as one today. Which takes the lead? Which follows? Write the conversation between {planet1} and {planet2}.',
-      'Action: Start a project that combines both {planet1} and {planet2} themes. One meeting, one decision, one commitment that honors both.',
+      'Journal: These two energies are speaking as one today. Which takes the lead? Which follows? Write the conversation between {body1} and {body2}.',
+      'Action: Start a project that combines both {body1} and {body2} themes. One meeting, one decision, one commitment that honors both.',
       'Conversation: Ask someone close: "What do I do when these two parts of me want the same thing?" Listen for clarity.'
     ]
   },
@@ -32,7 +32,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'sextile',
     variants: [
-      'Action: Do the thing you\'ve been delaying. {planet1} and {planet2} are holding the door open. Walk through.',
+      'Action: Do the thing you\'ve been delaying. {body1} and {body2} are holding the door open. Walk through.',
       'Journal: What does "easy" feel like to you today? Write about it without analyzing.',
       'Conversation: Tell someone you trust: "I need your help with {theme}." The moment you ask, the door opens wider.'
     ]
@@ -43,7 +43,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'square',
     variants: [
-      'Journal: What are these two planets pushing me to choose? Write both sides. Then write which one you\'re leaning toward and why.',
+      'Journal: What are these two astral bodies pushing me to choose? Write both sides. Then write which one you\'re leaning toward and why.',
       'Action: Stop avoiding the friction. Have the conversation, make the decision, adjust the plan. Pressure breaks when you push back.',
       'Conversation: Ask a mentor or trusted friend: "What\'s one pressure point in my life right now?" Their perspective might clarify your path.'
     ]
@@ -55,7 +55,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     type: 'trine',
     variants: [
       'Action: Don\'t wait for tomorrow. Do the easiest version of what you\'ve been planning today. Momentum counts.',
-      'Journal: What gifts do {planet1} and {planet2} bring you? Write three specific ways you could use them this week.',
+      'Journal: What gifts do {body1} and {body2} bring you? Write three specific ways you could use them this week.',
       'Conversation: Tell someone you admire: "I\'ve noticed you do {theme} well. Can you show me how?" Ask for the model.'
     ]
   },
@@ -65,7 +65,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'opposite',
     variants: [
-      'Journal: Write from both sides. "This situation wants..." (one planet). Then: "...but this situation also needs..." (other planet). What\'s the integration?',
+      'Journal: Write from both sides. "This situation wants..." (one astral body). Then: "...but this situation also needs..." (other astral body). What\'s the integration?',
       'Action: Seek out someone who thinks the opposite way from you on this issue. Genuinely listen. You\'re not trying to win.',
       'Conversation: Ask yourself in the mirror: "What am I not seeing?" Then listen like you\'re talking to someone else.'
     ]
@@ -91,7 +91,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'ingress',
     variants: [
-      'Journal: {planet} just shifted into {sign}. How does your approach to {theme} need to change? Write the "new season" version.',
+      'Journal: {body} just shifted into {sign}. How does your approach to {theme} need to change? Write the "new season" version.',
       'Action: Start fresh with one thing in the {theme} domain. New method, new tone, new energy. Let {sign} show you how.',
       'Conversation: Tell someone close: "{theme} is entering a new chapter for me. Here\'s what I\'m noticing change..." Let them reflect it back.'
     ]
@@ -118,7 +118,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     type: 'T-Square',
     variants: [
       'Action: Identify the empty leg of this T-Square (opposite the apex). That\'s your release valve. Point your effort there.',
-      'Journal: Write the conversation between the two planets pulling you. Let them argue on paper. The resolution is in {theme}.',
+      'Journal: Write the conversation between the two astral bodies pulling you. Let them argue on paper. The resolution is in {theme}.',
       'Conversation: Find someone who handles similar tension well. Ask: "How do you turn this kind of pressure into motion?"'
     ]
   },
@@ -239,7 +239,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'degree-lore',
     type: 'anaretic 29°',
     variants: [
-      'Action: What\'s this planet asking you to finish? One thing gets closure today. Do it.',
+      'Action: What\'s this astral body asking you to finish? One thing gets closure today. Do it.',
       'Journal: "This urgency is about..." Finish. Then write what comes after the ending.',
       'Conversation: Ask someone: "What do you think I\'m running out of time to do?" The answer might surprise you.'
     ]

@@ -20,7 +20,7 @@
  *     ->  does that loop paint the field as text  ->  is that site inside a
  *         [data-chart], which the rule allows
  *
- * The chart step matters. The natal wheel paints planet glyphs #8b5cf6
+ * The chart step matters. The natal wheel paints astral body glyphs #8b5cf6
  * through exactly this path, and that is permitted: charts are the documented
  * exemption. A gate that cannot tell a wheel glyph from a card icon is a gate
  * that gets switched off.

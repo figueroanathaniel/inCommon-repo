@@ -57,7 +57,7 @@ The registry holds **97 points** in total: the **17** basic points every chart a
 | Echeclus | Ech | erupting secrets, broken silence, revelation |
 | Damocles | Dam | sword overhead, collapse under privilege |
 
-## TNOs & Dwarf Planets (10)
+## TNOs & Dwarf Astral Bodies (10)
 
 | Point | Glyph | Symbolism |
 |---|---|---|

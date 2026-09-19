@@ -25,7 +25,7 @@ const mockPartner: PartnerChart = {
   birthDate: new Date('1995-06-15'),
   birthTime: '14:30',
   birthPlace: 'Brooklyn, NY',
-  planets: {
+  bodies: {
     Sun: 84.5,
     Moon: 167.3,
     Venus: 65.2
@@ -37,9 +37,9 @@ const mockPartner: PartnerChart = {
 };
 
 const mockContact: SynastryContact = {
-  movingPlanet: 'Venus',
+  movingBody: 'Venus',
   aspect: 'trine',
-  partnerPlanet: 'Moon',
+  partnerBody: 'Moon',
   orb: 0.3,
   isExact: true,
   yourLongitude: 65.2,
@@ -63,7 +63,7 @@ export function test_A1_basicItemCreation(): void {
   });
 
   if (!item.headline.includes('Venus') || !item.headline.includes('Lucia')) {
-    throw new Error('A1: Headline missing planet or partner name');
+    throw new Error('A1: Headline missing astral body or partner name');
   }
 
   if (item.category !== 'transit') {

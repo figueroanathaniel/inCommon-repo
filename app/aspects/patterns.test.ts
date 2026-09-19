@@ -36,7 +36,7 @@
  *     to one end of an opposition and the positions sextile to the other
  *     end never coincide. Checked against published definitions (Astrology
  *     Weekly's "Yods and Boomerangs": a Boomerang is a Yod plus a fourth
- *     planet opposite the apex, nothing more), detectBoomerang() was
+ *     astral body opposite the apex, nothing more), detectBoomerang() was
  *     rewritten in patterns.ts to that actual shape, which is always
  *     achievable. The tests below exercise the fixed detector.
  *
@@ -48,7 +48,7 @@
  *  6. detectGoldenYod() is new: ASPECT_ORBS already carried 'quintile' and
  *     'biquintile' entries with no detector using either. A Golden Yod
  *     (checked against fifth-harmonic literature) is a quintile [72°]
- *     between two planets, both biquintile [144°] from a third - a
+ *     between two astral bodies, both biquintile [144°] from a third - a
  *     distinct pattern from the classical (quincunx/sextile) Yod above,
  *     not a variant of it.
  *
@@ -83,12 +83,12 @@ function test(name: string, fn: () => void) { tests.push(Object.assign(fn, { tes
 // GRAND TRINE
 // ============================================================================
 
-test('Grand Trine: true positive, 3 planets 120 apart', () => {
+test('Grand Trine: true positive, 3 astral bodies 120 apart', () => {
   const points = [mockPoint('Sun', 'Sun', 10), mockPoint('Moon', 'Moon', 130), mockPoint('Venus', 'Venus', 250)];
   const patterns = detectGrandTrine(points);
   if (patterns.length !== 1) throw new Error('expected 1, got ' + patterns.length);
   if (patterns[0].name !== 'Grand Trine') throw new Error('name = ' + patterns[0].name);
-  if (JSON.stringify(patterns[0].planets) !== JSON.stringify(['Sun', 'Moon', 'Venus'])) throw new Error('planets mismatch');
+  if (JSON.stringify(patterns[0].bodies) !== JSON.stringify(['Sun', 'Moon', 'Venus'])) throw new Error('astral bodies mismatch');
   if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
   if (!patterns[0].description.includes('harmonious')) throw new Error('description missing "harmonious"');
 });
@@ -134,7 +134,7 @@ test('T-Square: true positive, 2 opposite + 1 square to both', () => {
   if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
 });
 
-test('T-Square: release point is opposite the apex, between the two opposed planets', () => {
+test('T-Square: release point is opposite the apex, between the two opposed astral bodies', () => {
   const points = [mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 180), mockPoint('Mars', 'Mars', 90)];
   const patterns = detectTSquare(points);
   if (patterns.length !== 1) throw new Error('expected 1 pattern');
@@ -167,7 +167,7 @@ test('Grand Cross: true positive, 2 oppositions + 4 squares', () => {
   const patterns = detectGrandCross(points);
   if (patterns.length !== 1) throw new Error('expected 1, got ' + patterns.length);
   if (patterns[0].name !== 'Grand Cross') throw new Error('name = ' + patterns[0].name);
-  if (patterns[0].planets.length !== 4) throw new Error('planets.length = ' + patterns[0].planets.length);
+  if (patterns[0].bodies.length !== 4) throw new Error('astral bodies.length = ' + patterns[0].bodies.length);
   if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
   // The original Jest test asserted the description contains "tension",
   // which it never has (verified against the live text: "intense
@@ -235,7 +235,7 @@ test('Yod: true negative, no quincunx pair', () => {
 // GOLDEN YOD
 //
 // A distinct pattern from the classical Yod above, not a variant of it: a
-// quintile (72°) between two planets, both biquintile (144°) from a third.
+// quintile (72°) between two astral bodies, both biquintile (144°) from a third.
 // No detector for this existed before this pass (ASPECT_ORBS already had
 // 'quintile'/'biquintile' entries with nothing using them).
 // ============================================================================
@@ -283,12 +283,12 @@ test('Mystic Rectangle: true negative, wrong aspect configuration', () => {
 //
 // Rebuilt to the actual astrological shape (see the file header and
 // detectBoomerang()'s own comment in patterns.ts): a Yod plus a fourth
-// planet in exact opposition to the Yod's apex. The old T-Square-based
+// astral body in exact opposition to the Yod's apex. The old T-Square-based
 // version required a fourth point sextile to BOTH ends of an opposition,
 // which is geometrically impossible and could never match any input.
 // ============================================================================
 
-test('Boomerang: true positive, Yod + 4th planet opposite the apex', () => {
+test('Boomerang: true positive, Yod + 4th astral body opposite the apex', () => {
   // Sun=0, Moon=60 (sextile), Mars=210 (apex: quincunx to both - |210-0|
   // folds to 150, |210-60|=150). Venus=30 is exactly opposite Mars (210).
   const points = [
@@ -298,13 +298,13 @@ test('Boomerang: true positive, Yod + 4th planet opposite the apex', () => {
   const patterns = detectBoomerang(points);
   if (patterns.length !== 1) throw new Error('expected 1, got ' + patterns.length);
   if (patterns[0].name !== 'Boomerang') throw new Error('name = ' + patterns[0].name);
-  // apex names the release planet (Venus, opposite the Yod's apex Mars),
+  // apex names the release astral body (Venus, opposite the Yod's apex Mars),
   // not the Yod's own tension point - see detectBoomerang()'s own comment.
   if (patterns[0].apex !== 'Venus') throw new Error('apex = ' + patterns[0].apex);
   if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
 });
 
-test('Boomerang: true negative, real Yod but no planet opposite the apex', () => {
+test('Boomerang: true negative, real Yod but no astral body opposite the apex', () => {
   const points = [
     mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60),
     mockPoint('Mars', 'Mars', 210), mockPoint('Venus', 'Venus', 100)
@@ -370,7 +370,7 @@ test('Talent Triangle: true negative, wrong configuration', () => {
 // STELLIUM
 // ============================================================================
 
-test('Stellium: true positive, 4+ planets in same sign', () => {
+test('Stellium: true positive, 4+ astral bodies in same sign', () => {
   const points = [
     mockPoint('Sun', 'Sun', 5), mockPoint('Moon', 'Moon', 12), mockPoint('Venus', 'Venus', 20),
     mockPoint('Mars', 'Mars', 25), mockPoint('Mercury', 'Mercury', 8)
@@ -378,16 +378,16 @@ test('Stellium: true positive, 4+ planets in same sign', () => {
   const patterns = detectStellium(points);
   if (!(patterns.length > 0)) throw new Error('expected at least 1 pattern');
   if (!patterns[0].name.includes('Stellium')) throw new Error('name = ' + patterns[0].name);
-  if (!(patterns[0].planets.length >= 4)) throw new Error('planets.length = ' + patterns[0].planets.length);
+  if (!(patterns[0].bodies.length >= 4)) throw new Error('astral bodies.length = ' + patterns[0].bodies.length);
   if (patterns[0].tier !== 1) throw new Error('tier = ' + patterns[0].tier);
 });
 
-test('Stellium: true negative, only 3 planets in sign', () => {
+test('Stellium: true negative, only 3 astral bodies in sign', () => {
   const points = [mockPoint('Sun', 'Sun', 5), mockPoint('Moon', 'Moon', 12), mockPoint('Venus', 'Venus', 20)];
   if (detectStellium(points).length !== 0) throw new Error('expected 0 patterns');
 });
 
-test('Stellium: true negative, 4 planets across different signs', () => {
+test('Stellium: true negative, 4 astral bodies across different signs', () => {
   const points = [
     mockPoint('Sun', 'Sun', 5), mockPoint('Moon', 'Moon', 65),
     mockPoint('Venus', 'Venus', 125), mockPoint('Mars', 'Mars', 185)
@@ -444,7 +444,7 @@ test('Full chart: detectPatterns runs without error on an 11-point chart', () =>
   if (!Array.isArray(patterns)) throw new Error('expected an array');
   patterns.forEach(p => {
     if (!p.name) throw new Error('pattern missing name');
-    if (!(p.planets.length >= 2)) throw new Error('pattern has fewer than 2 planets');
+    if (!(p.bodies.length >= 2)) throw new Error('pattern has fewer than 2 astral bodies');
     if (![1, 2, 3].includes(p.tier)) throw new Error('tier = ' + p.tier);
     if (typeof p.description !== 'string' || p.description.length === 0) throw new Error('missing description');
   });
@@ -483,7 +483,7 @@ test('Edge case: wraparound at 0/360 still finds Grand Trine', () => {
   if (!detectPatterns(points).some(p => p.name === 'Grand Trine')) throw new Error('expected Grand Trine across the 0/360 seam');
 });
 
-test('Edge case: one point can belong to multiple patterns, none over-claims planets', () => {
+test('Edge case: one point can belong to multiple patterns, none over-claims astral bodies', () => {
   const points = [
     mockPoint('Sun', 'Sun', 0), mockPoint('Moon', 'Moon', 60), mockPoint('Venus', 'Venus', 120),
     mockPoint('Mars', 'Mars', 180), mockPoint('Jupiter', 'Jupiter', 240), mockPoint('Saturn', 'Saturn', 300)
@@ -491,7 +491,7 @@ test('Edge case: one point can belong to multiple patterns, none over-claims pla
   const patterns = detectPatterns(points);
   if (!(patterns.length > 0)) throw new Error('expected at least 1 pattern');
   patterns.forEach(p => {
-    if (!(p.planets.length <= points.length)) throw new Error('pattern claims more planets than exist');
+    if (!(p.bodies.length <= points.length)) throw new Error('pattern claims more astral bodies than exist');
   });
 });
 

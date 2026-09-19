@@ -38,9 +38,15 @@ function die(m) { console.error('check-minor-body-elements: ' + m); process.exit
 
 const CEILING_DEG = 0.2;
 /* Computed inside the app itself, not by this module. */
-const APP_COMPUTED = ['chiron', 'ceres', 'pallas', 'juno', 'vesta', 'lilithMean', 'selena',
+/* Chiron alone of the five now: Ceres, Pallas, Juno and Vesta are fetched, so
+ * this module owns them and the accounting below must see them once, not
+ * twice. The app still falls back to window.MinorBodies for all five when
+ * this module is missing, which the accounting deliberately cannot see: what
+ * it checks is who supplies a body when everything is present. */
+const APP_COMPUTED = ['chiron', 'lilithMean', 'selena',
   'mercuryNode', 'venusNode', 'marsNode', 'jupiterNode', 'saturnNode', 'uranusNode', 'neptuneNode', 'plutoNode',
-  'ariesPoint', 'halley', 'halebopp', 'hyakutake', 'vertex', 'antivertex', 'partOfSpirit', 'sunmoonMidpoint'];
+  'ariesPoint', 'halley', 'halebopp', 'hyakutake', 'vertex', 'antivertex',
+  'partOfFortune', 'partOfSpirit', 'sunmoonMidpoint'];
 /* Declared absent, each with the reason the page gives. */
 const UNAVAILABLE = {
   lilithOsc: 'the osculating apogee moves up to thirty degrees either side of the mean within a month, and needs a lunar theory this build does not carry'
@@ -95,7 +101,7 @@ const app = fs.readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'u
 const reg = app.slice(app.indexOf('  EXPANDED_REGISTRY = ['), app.indexOf('  RING1_IDS = '));
 const ids = [];
 reg.replace(/\{ id: '([A-Za-z0-9_]+)'/g, (m, id) => { ids.push(id); return m; });
-if (ids.length !== 80) fail.push('found ' + ids.length + ' registry ids in the app, expected 80');
+if (ids.length !== 81) fail.push('found ' + ids.length + ' registry ids in the app, expected 81');
 for (const id of ids) {
   const n = [APP_COMPUTED.indexOf(id) !== -1, ME.has(id), !!UNAVAILABLE[id]].filter(Boolean).length;
   if (n !== 1) fail.push(id + ': accounted for ' + n + ' times (app formula, this module, declared unavailable)');

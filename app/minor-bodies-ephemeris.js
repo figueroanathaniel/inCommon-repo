@@ -2,7 +2,7 @@
 
    CONTRACT
    The app reads window.MinorBodies[name] as a 5-slot element array, identical to
-   the layout its own planets use:
+   the layout its own astral bodies use:
 
        [ L0, n, e, varpi, a ]
          L0    mean longitude at J2000.0 (deg)
@@ -18,19 +18,44 @@
    evaluating the same elements on demand, because the accuracy ceiling is the
    ELEMENTS, not the sampling. Everything below is ~2KB and exact to the model.
 
-   ACCURACY, HONESTLY
-   Two-body Kepler with fixed mean elements is good to a few tenths of a degree
-   for the main-belt asteroids over a century, and drifts more for Chiron, whose
-   50-year orbit crosses Saturn and is genuinely chaotic. Two further caveats:
-     - minorLon() treats every orbit as coplanar with the ecliptic. Fine for
-       Ceres (i=10.6 deg) and Vesta (i=7.1 deg). Pallas is inclined 34.8 deg, so
-       its ecliptic longitude can be off by more than the elements alone imply.
-     - Mean longitudes at epoch (L0) below are this build's best estimates. They
-       are marked provisional. A single lookup per body against a real ephemeris
-       pins each one to arcminutes via calibrate(). See INTEGRATION at bottom.
+   THIS MODULE IS THE FALLBACK NOW, NOT THE SUPPLIER
+   minor-body-elements.js carries Ceres, Pallas, Juno and Vesta as fetched JPL
+   Horizons elements at several epochs each, measured at 0.032 to 0.058 degrees
+   worst case, and the app reads that first. What is here is what the app falls
+   back to when that module is missing, which is the same order eris and sedna
+   already use: a missing module should cost accuracy, not the four bodies.
 
-   Nothing here is presented as observatory-grade. It is good enough to name a
-   sign and a wide aspect, and calibrate() is how you make it better.           */
+   ACCURACY, MEASURED
+   The paragraph that used to sit here claimed a few tenths of a degree for the
+   main belt asteroids over a century. That was never measured and it was wrong
+   by two orders of magnitude. Against 404 JPL Horizons apparent longitudes
+   every 181 days from 1900 to 2100, the elements this module shipped with
+   measured an RMS of 35 to 110 degrees and a worst case of 169. Flat across
+   every window, 1980-2010 as much as 1900-2100, so it was a wrong phase rather
+   than drift: L0 was simply wrong, which the old paragraph did admit by calling
+   it provisional without ever saying how provisional.
+
+   They are fitted now, by the method the Chiron block below states, and every
+   figure in the table is measured against those 404 positions with half of them
+   held out of the fit. What a single epoch two body model can actually do for a
+   main belt asteroid across two centuries is this, and no more:
+
+       Ceres    RMS 2.98   worst  9.09      Juno   RMS 1.02   worst  7.94
+       Pallas   RMS 6.47   worst 29.59      Vesta  RMS 0.41   worst  2.33
+
+   So the sign is safe for Vesta and NOT safe for the other three, and none of
+   the four may name a degree. accuracyDeg carries each body's own number and
+   the app reads it rather than assuming a shared one.
+
+   Two things bound that and neither is worth fixing here. minorLon() treats
+   every orbit as coplanar with the ecliptic, which is a longitude error rather
+   than only a latitude one and is why Pallas at 34.8 degrees of inclination is
+   the worst of the four; projecting it in three dimensions was tried and
+   measured, and it moved Pallas from 29.6 to 18.6 degrees, still nowhere near
+   useful, because the error is secular perturbation rather than geometry. And
+   more epochs would fix it properly, which is precisely what
+   minor-body-elements.js already is. A fallback does not need a second copy of
+   the thing it falls back from; it needs to be honest about what it is.        */
 (function () {
   'use strict';
   var RAD = Math.PI / 180, DAY = 86400000;
@@ -78,10 +103,31 @@
               fit: { source: 'JPL Horizons 2060 Chiron, ObsEcLon at 500@399',
                      samples: 81, span: '1900-2060', rms: 0.559, worst: 0.923,
                      retrieved: '2026-08-27', free: ['L0', 'e', 'varpi'], held: ['a', 'n'] } },
-    Ceres:  { a: 2.7660, e: 0.0791, varpi: 154.32, i: 10.59, L0: 267.73, confidence: 'provisional' },
-    Pallas: { a: 2.7726, e: 0.2299, varpi: 123.18, i: 34.84, L0: 182.38, confidence: 'provisional' },
-    Juno:   { a: 2.6693, e: 0.2579, varpi:  57.00, i: 12.98, L0: 239.00, confidence: 'provisional' },
-    Vesta:  { a: 2.3615, e: 0.0895, varpi: 253.76, i:  7.14, L0: 201.56, confidence: 'provisional' }
+    /* Fitted the same way Chiron is: a is the published semi-major axis and n
+       comes from it by Kepler III, both held, and only L0, e and varpi are
+       free. Fitted on 202 of the 404 references, with the other 202 held out;
+       the holdout worst case equals the full worst case for all four, which is
+       what says the fit generalised rather than bent to its own samples. */
+    Ceres:  { a: 2.7660, e: 0.072932, varpi: 153.75091, i: 10.59, L0: 160.76983,
+              confidence: 'fitted', accuracyDeg: 9.09,
+              fit: { source: 'JPL Horizons 1 Ceres, ObsEcLon at 500@399',
+                     samples: 404, span: '1900-2100', rms: 2.980, worst: 9.091, holdoutWorst: 9.091,
+                     retrieved: '2026-09-18', free: ['L0', 'e', 'varpi'], held: ['a', 'n'] } },
+    Pallas: { a: 2.7726, e: 0.234472, varpi: 126.07013, i: 34.84, L0: 116.51419,
+              confidence: 'fitted', accuracyDeg: 29.59,
+              fit: { source: 'JPL Horizons 2 Pallas, ObsEcLon at 500@399',
+                     samples: 404, span: '1900-2100', rms: 6.472, worst: 29.586, holdoutWorst: 29.586,
+                     retrieved: '2026-09-18', free: ['L0', 'e', 'varpi'], held: ['a', 'n'] } },
+    Juno:   { a: 2.6693, e: 0.256067, varpi:  57.41474, i: 12.98, L0: 298.71199,
+              confidence: 'fitted', accuracyDeg: 7.94,
+              fit: { source: 'JPL Horizons 3 Juno, ObsEcLon at 500@399',
+                     samples: 404, span: '1900-2100', rms: 1.024, worst: 7.944, holdoutWorst: 7.944,
+                     retrieved: '2026-09-18', free: ['L0', 'e', 'varpi'], held: ['a', 'n'] } },
+    Vesta:  { a: 2.3615, e: 0.089627, varpi: 254.73792, i:  7.14, L0: 234.40188,
+              confidence: 'fitted', accuracyDeg: 2.33,
+              fit: { source: 'JPL Horizons 4 Vesta, ObsEcLon at 500@399',
+                     samples: 404, span: '1900-2100', rms: 0.414, worst: 2.326, holdoutWorst: 2.326,
+                     retrieved: '2026-09-18', free: ['L0', 'e', 'varpi'], held: ['a', 'n'] } }
   };
   var STORE = 'incommon.minorbodies.calibration.v1';
 

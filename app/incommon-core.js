@@ -135,7 +135,7 @@
       moonDegree: U ? 'suppressed' : 'ok',
       humanDesign: U ? 'suppressed' : W ? 'window' : 'ok',
       sabian: U ? 'suppressed' : W ? 'window' : 'ok',
-      planetsBySign: 'ok', numerology: 'ok',
+      astralBodiesBySign: 'ok', numerology: 'ok',
       note: U ? 'Birth time unknown. Rising, houses, Moon degree, Human Design, and Sabian degrees are suppressed rather than guessed.'
         : W ? 'Birth time approximate. Angle-dependent results shown as a range; verify time to narrow.' : null
     };
