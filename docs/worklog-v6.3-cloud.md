@@ -130,3 +130,5 @@ weakened in either pass, and should not be.
 4. `app/memory-store.js` is dormant: not in the module list, reads a legacy
    consent key, sees nothing since the migration moved that key. Revisit or
    remove; build nothing on it.
+
+Recorded 21 September, gate maintenance. check-competitor-surface fired on the scaffolding copy at verification/handoff/calculation-fixtures.json; the canonical fixture in data-contracts was already ALLOWed with reason, because its input string is the assertion. The override was extended to the copy's path rather than the fixture renamed, and the push at 2142782 briefly stood over the red gate until this commit closed it.

@@ -140,6 +140,8 @@ const ALLOW = [
     why: 'Penta-di-Casinca (Corsica) and Lancusi-Penta-Bolano (Campania) are real towns. A reader born in one has to be able to find it.' },
   { term: 'WA', path: 'data-contracts/calculation-fixtures.json',
     why: 'The TZ1 fixture reads "Seattle WA" with no comma, so it falls outside the address-position exemption. It is a calculation contract and its input string is the assertion: editing it to please this gate would change what the fixture tests.' },
+  { term: 'WA', path: 'verification/handoff/calculation-fixtures.json',
+    why: 'Scaffolding copy of data-contracts/calculation-fixtures.json, byte-identical, kept until the integration harness rewrite retires it. Same string, same adjudication: the fixture input is the assertion, and editing it to please this gate would change what the fixture tests.' },
 
   { term: '*', path: 'docs/reference/',
     why: 'The competitive research folder. Its job is to name the marks and record what they reach. A gate that fails here fails on its own evidence base.' },
