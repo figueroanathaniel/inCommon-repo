@@ -156,3 +156,94 @@ Open item 1 of the previous list is struck by this entry. The list now reads:
 3. memory-store.js is dormant; revisit or remove.
 4. The integration harness rewrite, which this entry schedules as the next
    move.
+
+## The integration harness rewrite, recorded 21 September
+
+Item 4 above is done. Full account in `docs/integration-harness-design.md`,
+written before any test code changed, per the standing rule that
+verification precedes the build. Summary:
+
+The V1.2 integration phase drove a retired single-blob prototype
+(`window.__incommon`, `?test=1` namespaced storage) that no longer exists;
+every one of its twelve `IT*` rows was asserting facts about a program that
+doesn't run. Rewritten to cover the actual risk this app carries now:
+consent gating, the deletion outbox, PIN gating and profile switching in
+`incommon-cloud.js`, the one file this build lets move data off the device.
+
+No new test seam was added. `window.__incommonApp`, `ProfileManager`,
+`InCommonCore` and `InCommonCloud` are already unconditional globals, and
+`InCommonCloud` already carried `_setConfigForTests` / `_setClientForTests`
+for exactly this purpose. Pure consent/outbox logic moved to Node
+(`tools/run-module-tests.js`, group K, 12/12) against a hand-built
+ProfileManager fixture and a fake Supabase query builder; the browser phase
+(`app/handoff/tests.js`, `verification/Test Runner V1.2.dc.html`) boots the
+real app in a live iframe, the same pattern `handoff/tests-v6.0.js` already
+uses, and drives the real ProfileManager through the real InCommonCloud —
+proving the actual wiring, which the Node fixture cannot. 53/53 in the
+browser: 43 pure, 10 integration.
+
+**A real bug came out of the first honest run.** `incommon-cloud.js`'s
+`factory()` never actually closed over the UMD wrapper's `root` parameter —
+it is a separate function expression, evaluated where it is written, not
+inside the wrapper's body — so every `root.*` reference (PIN recovery's
+session flag, and `lib()`, which `init()` needs to find the vendored
+Supabase client) threw `ReferenceError`, silently caught by the module's own
+try/catches. PIN recovery has done nothing since it shipped, and `init()`
+itself would have thrown the instant anything called it, which would have
+hit step 4 above the moment it started. Confirmed with an isolated two-line
+Node repro before touching anything. This pass's own instruction was not to
+touch the cloud module; asked whether a one-line scoping fix counted, and
+the answer was yes. Fixed: `var root = typeof self !== 'undefined' ? self :
+this;`, the one line now added at the top of `factory()`, identical to the
+outer wrapper's own definition. Nothing that already worked touched `root`
+(`push`, `inspect`, the outbox all read `cfg`/`client`/`session`), so group
+K stayed 12/12 before and after, and this is the only line changed in
+`incommon-cloud.js` — everything else about the module, including the
+open items below, is untouched.
+
+**A second, smaller bug was in profile-manager.js, not the cloud module**:
+`pinHash()` was a private closure function, called internally by
+`setProfilePin`/`verifyProfilePin` but never exposed on the `PM` object
+`incommon-cloud.js`'s `completePinRecovery()` expects (`pm.pinHash(pin,
+profileId)`, documented in that function's own comment). Added `pinHash:
+pinHash` to the `PM` object literal. profile-manager.js is not the cloud
+module, so this one was not a judgment call.
+
+**Scaffolding retired in the same pass, one commit**: `verification/
+incommon-core.js` and `verification/handoff/tests.js` (byte-identical
+copies of the `app/` originals, existed only for the offline single-file
+runner), `verification/handoff/calculation-fixtures.json` (byte-identical
+copy of `data-contracts/calculation-fixtures.json`; the runner now fetches
+the canonical path directly), and the two `inCommon Test Runner V1.2
+(offline …).html` standalone bundles, whose only reason to exist was
+exercising the retired prototype's integration phase offline. The
+`check-competitor-surface.js` override for the scaffolding fixture copy
+(added during the closing-sequence pass, "kept until the integration harness
+rewrite retires it") is removed with it: 14 override entries now, all
+justified, none stale. `verification/Test Runner V1.2.dc.html` itself is
+kept, same filename — it names the core module suite's own version, not the
+app's, and CLAUDE.md's rule against unnecessary renames applies. Its target
+pointer to the real app (`../app/inCommonApp v2.dc.html`, no `?test=1`) is
+now the actual file content, not a locally-carried edit reverted by `git
+checkout`.
+
+Verification for this pass: `run-tests-node` 43/43, `run-module-tests`
+318/318 (306 + group K's 12), the full `check-*.js` loop green (excluding
+`check-deployed.js`, which compares against the live site and is unrelated
+to this pass), `run-fixtures` and `build-bundle --check` both clean,
+`check-layer-boundary` green at 2,166 literals (unchanged; nothing here
+moved a module across the boundary). The browser phase ran to completion
+twice, once finding the two real bugs above and once confirming the fix
+(53/53), against a fresh server (a stale `Cache-Control: max-age=3600`
+response cached from earlier in this same debugging session masked the fix
+on first re-check; not a build issue, recorded here so the next person
+doesn't lose an hour to it the way this pass nearly did).
+
+Open items, in order, unchanged by this pass except as struck above:
+1. Step 4 of the cloud build: sign-in surface, InCommonCloud.inspect()
+   against a real session, the first consent-gated sync, PIN recovery
+   through the account email. This item can now actually be built on: PIN
+   recovery and init()'s Supabase-client detection both work for the first
+   time.
+2. The consent-language pass.
+3. memory-store.js is dormant; revisit or remove.
