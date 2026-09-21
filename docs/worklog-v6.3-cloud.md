@@ -198,8 +198,13 @@ this;`, the one line now added at the top of `factory()`, identical to the
 outer wrapper's own definition. Nothing that already worked touched `root`
 (`push`, `inspect`, the outbox all read `cfg`/`client`/`session`), so group
 K stayed 12/12 before and after, and this is the only line changed in
-`incommon-cloud.js` — everything else about the module, including the
-open items below, is untouched.
+`incommon-cloud.js`. That is not the same claim as "no behavior changed,"
+and should not be summarized that way: `lib()` and `init()` go from
+throwing the instant anything calls them to actually running, and PIN
+recovery goes from silently doing nothing to silently doing nothing no
+longer. That is the intended, correct change, and the entry below re-proves
+the property that change puts within reach for the first time — unsigned-in
+stays inert — rather than assuming it from the fact that nothing else moved.
 
 **A second, smaller bug was in profile-manager.js, not the cloud module**:
 `pinHash()` was a private closure function, called internally by
@@ -248,6 +253,7 @@ Open items, in order, unchanged by this pass except as struck above:
 2. The consent-language pass.
 3. memory-store.js is dormant; revisit or remove.
 
+<<<<<<< HEAD
 ## Step 4 built, and the PIN-recovery gap the walk found, recorded 23 September
 
 Step 4 is done: the sign-in surface, `InCommonCloud.inspect()` rendered as
@@ -352,3 +358,74 @@ Open item 3 of the previous list is struck by this entry. The list now
 reads:
 1. The consent-language pass.
 2. memory-store.js is dormant; revisit or remove.
+=======
+## Re-verification, and re-proving unsigned-in inertness, same day
+
+Follow-up to the entry above, same 21 September. Two things were owed and
+had not been done yet: a full re-run of every gate after the `root` fix
+(the entry above ran the gates before the fix; the browser confirmation ran
+after, but the Node gate loop, `run-fixtures`, `build-bundle --check` and
+`check-layer-boundary` had not been re-run against the post-fix tree as a
+single pass), and a proper accounting of whether `root` was the only leak
+rather than the one this session happened to trip over.
+
+**Full re-run, post-fix.** `run-tests-node` 43/43, `run-module-tests`
+321/321 (see below for the +3), the full `check-*.js` loop green, `run-
+fixtures` and `build-bundle --check` clean, `check-layer-boundary` green at
+2,166 literals, unchanged. Also confirmed directly in a real browser, not
+assumed from the Node repro: `window.supabase.createClient` now resolves
+inside `lib()`, and a real `InCommonCloud.init()` call returns a working api
+and moves `status().mode` from `'off'` to `'local'` — the first time that
+path has ever completed anywhere. No network request beyond the same-origin
+vendored script, nothing left in localStorage.
+
+**Every other identifier `factory()` touches, checked against the wrapper's
+scope.** Full account in `docs/integration-harness-design.md`. Two passes:
+a static read of all 38 names `factory()` declares against every free
+reference in its body (parameters, real JS built-ins, or those 38 — nothing
+else), and a dynamic trace, a `vm` context whose global object is a `Proxy`
+recording every name that falls through to it, driven through every
+exported method including paths this harness does not otherwise exercise
+(`pullAll`, `signUp`/`signIn`/`signOut`, the real `onAuthStateChange`
+callback firing, the real `pm.subscribe` callback firing for both event
+types, and the real debounce timer actually elapsing). One name was caught,
+`module`, in the *outer* wrapper's own `typeof module === 'object'` UMD
+guard, which is deliberate and correct. Nothing else. `root` was the only
+leak; the fix was not widened.
+
+**The property most worth re-proving was the module's own header claim**:
+"if this module is absent, inert, or unsigned-in, the app is exactly the
+offline-first program it was yesterday." Before the fix, "unsigned-in" was
+unreachable through `init()` at all, so that clause had never actually been
+checked, only assumed true because nothing could reach the code that would
+disprove it. Checked now, against the real path, in both harnesses:
+
+- `tools/run-module-tests.js` K12-K14 (group K is now 15/15): a second,
+  isolated instance of the module in its own `vm` context with a fake
+  `self.supabase.createClient`, driven through the real `init()` rather
+  than the test-seam bypass. `init()` returns a working api, `status().mode`
+  reads `'local'` (K12). Unsigned, `push()` refuses before the fake client
+  is ever touched (K13), and letting the real 1200ms debounce timer actually
+  fire produces the same zero (K14) — proof that nothing downstream of a
+  live ProfileManager event reaches the client while unsigned, not only
+  that `push()` guards its own entry.
+- `verification/Test Runner V1.2.dc.html` IT1c/IT1d (integration is now
+  55/55, 12 IT rows): a real `init()` call against the real vendored
+  `window.supabase`, unsigned, in its own throwaway iframe — separate from
+  the one IT2-IT9 share, because `init()` wires `pm.subscribe()` with no
+  unsubscribe, and running this against the same ProfileManager instance
+  would leave every later profile/memory write in the main flow also
+  scheduling a debounced push against whatever fake client happens to be
+  active several steps later. Returns a working api (IT1c);
+  `performance.getEntriesByType('resource')` shows nothing reaching
+  Supabase or the fake test URL, checked again after `push()` and after the
+  real debounce fires (IT1d) — the same network-timeline evidence IT1b
+  already uses for "before `init()` is ever called," now applied to "after
+  a real `init()` call, still unsigned."
+
+Totals after this entry: `run-tests-node` 43/43 (unchanged), `run-module-
+tests` 321/321, browser phase 55/55 (43 pure + 12 integration). Committed
+separately from the fix itself, since the fix landed first and this is the
+re-proof the fix's own commit message should have carried instead of "zero
+behavioral change."
+>>>>>>> 9a2209d (re-prove unsigned-in inertness through the real init() path, not the bypass)

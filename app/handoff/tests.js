@@ -18,7 +18,7 @@
   else { root.InCommonTests = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var INTEGRATION_IDS = ['IT1', 'IT1b', 'IT2', 'IT3', 'IT4', 'IT5', 'IT6', 'IT7', 'IT8', 'IT9'];
+  var INTEGRATION_IDS = ['IT1', 'IT1b', 'IT1c', 'IT1d', 'IT2', 'IT3', 'IT4', 'IT5', 'IT6', 'IT7', 'IT8', 'IT9'];
 
   function mkPush(list) {
     return function (id, name, expected, actual) {
@@ -221,6 +221,56 @@
       }
     } catch (e3) {}
     t('IT1b', 'no request to Supabase leaves the device: only the same-origin vendored client script is loaded', null, netHit);
+
+    /* IT1c/IT1d: the REAL init()->lib() path, unsigned-in, in its own
+       throwaway iframe. IT1/IT1b prove the app never calls init() today
+       (no sign-in surface yet); that is a true but narrow claim, and before
+       the root fix it was the ONLY reachable state, because init() threw
+       the instant it called lib(). Now that init() actually runs, the
+       module's own header claim ("if this module is absent, inert, or
+       unsigned-in, the app is exactly the offline-first program it was
+       yesterday") gets its unsigned-in branch checked directly, against the
+       real vendored window.supabase, not a fake one. This is a behavioral
+       change from before the fix (lib()/init() now do something instead of
+       throwing); the point of these two rows is to confirm that something
+       is the correct inert nothing. A separate iframe on purpose: init()
+       wires opts.pm.subscribe() with no unsubscribe, permanently, so
+       running this against the SAME ProfileManager instance IT2-IT9 use
+       would leave every later profile/memory write in this file also
+       scheduling a debounced push against whatever fake client happens to
+       be active several steps later, contaminating call logs those steps
+       already assert against precisely. */
+    onStep('IT1c/IT1d: a real init() call, unsigned-in, stays inert');
+    var f0 = null;
+    try {
+      f0 = await bootFrame(doc, url);
+      var win0 = f0.contentWindow;
+      var ok0 = await waitReady(win0, 15000);
+      if (!ok0) {
+        t('IT-ERR', 'Integration harness failure: the init()-check iframe never reached [data-app-header]', 'ready', 'timed out');
+      } else {
+        var initRes = win0.InCommonCloud.init({ url: 'https://it-verify.invalid', anonKey: 'it-verify-fake-anon-key', core: win0.InCommonCore, pm: win0.ProfileManager, storage: win0.localStorage });
+        t('IT1c', 'a real init() call (not the test-seam bypass) resolves the real vendored window.supabase and returns a working api, unsigned-in', { gotApi: true, mode: 'local' }, {
+          gotApi: !!initRes, mode: win0.InCommonCloud.status().mode
+        });
+        await win0.InCommonCloud.push();
+        win0.InCommonCloud.schedule();
+        await sleep(1500); // the real 1200ms debounce, let it actually fire
+        var netHit0 = null;
+        try {
+          var entries0 = win0.performance.getEntriesByType('resource') || [];
+          for (var nj = 0; nj < entries0.length; nj++) {
+            var nm0 = entries0[nj].name.toLowerCase();
+            if ((nm0.indexOf('supabase') !== -1 || nm0.indexOf('it-verify.invalid') !== -1) && entries0[nj].name.indexOf(win0.location.origin) !== 0) { netHit0 = entries0[nj].name; break; }
+          }
+        } catch (eNet) {}
+        t('IT1d', 'unsigned-in, no request leaves the device through the real init() path either, even across push() and a live debounce actually firing', null, netHit0);
+      }
+    } catch (eInit) {
+      t('IT-ERR', 'Integration harness failure (init check): ' + (eInit && eInit.message), 'no error', String(eInit && eInit.message));
+    } finally {
+      if (f0 && f0.parentNode) f0.parentNode.removeChild(f0);
+    }
 
     onStep('IT2: the seam already exists, unconditionally');
     t('IT2', 'window.__incommonApp, ProfileManager, InCommonCore and InCommonCloud are all present without a test flag', { app: true, pm: true, core: true, cloud: true }, {

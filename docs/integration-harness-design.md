@@ -199,10 +199,74 @@ counted as "touching the cloud module" under this pass's own instruction not
 to. Asked; the answer was to fix it. The fix is one line, added at the top of
 `factory()`: `var root = typeof self !== 'undefined' ? self : this;` —
 identical to the outer wrapper's own definition, now actually in scope where
-it is used. Nothing that already worked touched `root` (`push`, `inspect`,
-the outbox, `_setConfigForTests`/`_setClientForTests` all read `cfg`/`client`/
-`session`, never `root`), so `run-module-tests.js`'s group K stayed 12/12
-before and after, and this is the only line changed in `incommon-cloud.js`.
+it is used.
+
+**This is not "zero behavioral change," and it should not be described that
+way.** `run-module-tests.js`'s group K stayed 12/12 before and after because
+nothing already *working* — `push`, `inspect`, the outbox, the two test
+hooks — ever touched `root`; that much really is unchanged. But `lib()` and
+`init()` themselves go from "throws the instant anything calls them" to
+"actually run," and PIN recovery goes from "silently does nothing" to
+"silently does nothing" no longer. That is a real behavioral change, the
+correct and intended one, and it deserves to be stated as exactly that
+rather than folded into a claim of no change.
+
+**Every other identifier `factory()` touches was checked against the
+wrapper's scope, so this is known to be the only leak rather than assumed.**
+Two passes, not one. Static: `factory()` declares 38 names at its own top
+level (`root` now among them, plus 5 more constants and 32 functions); every
+other free reference in its body resolves to one of those, to a function
+parameter, or to a real JS built-in (`JSON`, `Promise`, `Date`, `Array`,
+`Object`, `String`, `setTimeout`, `clearTimeout`) — genuine ECMAScript/host
+globals, unaffected by the `self`/`this` confusion that broke `root`. The
+other parameter the outer wrapper offers, `factory` itself, is never
+referenced inside factory's own body. Dynamic, to catch anything the manual
+read missed: the file loaded in a `vm` context whose global object is a
+`Proxy` recording every name that falls through to it, then every exported
+method driven through a full cycle — including paths the harness itself
+does not exercise (`pullAll()`, `signUp`/`signIn`/`signOut`,
+`onSessionChange`, the `auth.onAuthStateChange` callback actually firing,
+the `pm.subscribe` callback firing for both event types, `init()`, and the
+real 1200ms debounce timer actually elapsing). One name got caught:
+`module`, referenced once, in the *outer* wrapper's own
+`typeof module === 'object'` UMD branch guard — deliberate, never throws on
+an undeclared name by design, and correctly resolves the browser branch.
+Nothing else. `root` was the only leak; the fix was not widened to cover
+anything beyond it.
+
+**The property that most needed re-proving after the fix is exactly the one
+the module's own header states: "if this module is absent, inert, or
+unsigned-in, the app is exactly the offline-first program it was
+yesterday."** Before the fix, "unsigned-in" was unreachable through `init()`
+at all — calling it just threw — so that clause had never actually been
+checked, only assumed true because nothing could reach the code that would
+disprove it. It is reachable now, so it is checked now, in both harnesses,
+against the real path rather than the test-seam bypass:
+
+- **Node, `run-module-tests.js` group K12-K14.** A second, fully isolated
+  instance of the module, loaded in its own `vm` context where `self` is a
+  plain object carrying a fake `.supabase.createClient` (plus `setTimeout`/
+  `clearTimeout`, which a `vm` context does not provide for free the way it
+  provides `JSON`/`Promise`/`Date`). `init()` called for real: it resolves
+  the fake vendored client and returns a working api, `status().mode` reads
+  `'local'` (K12). Unsigned, `push()` refuses before the client is ever
+  touched — not one recorded call (K13) — and letting the real debounce
+  timer fire produces the same zero (K14), so this is not merely "`push()`
+  guards itself," it is "nothing downstream of a live ProfileManager event
+  ever reaches the client while unsigned."
+- **Browser, `verification/Test Runner V1.2.dc.html` IT1c/IT1d.** Its own
+  throwaway iframe, separate from the one IT2-IT9 share, because `init()`
+  wires `pm.subscribe()` with no unsubscribe: running this against the same
+  ProfileManager instance the rest of the flow uses would leave every later
+  profile/memory write also scheduling a debounced push against whatever
+  fake client happens to be active several steps later, corrupting call
+  logs those steps already assert against precisely. A real `init()` call
+  against the real vendored `window.supabase` returns a working api,
+  unsigned (IT1c); `performance.getEntriesByType('resource')` shows nothing
+  reaching Supabase or the fake test URL, checked again after `push()` and
+  after the real debounce fires (IT1d) — the same network-timeline evidence
+  IT1b already uses for "before `init()` is ever called," now applied to
+  "after a real `init()` call, still unsigned."
 
 ## What this phase deliberately does not do
 

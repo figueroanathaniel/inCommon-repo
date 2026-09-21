@@ -35,6 +35,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const vm = require('vm');
 
 const repo = path.resolve(__dirname, '..');
 const quiet = process.argv.indexOf('--quiet') !== -1;
@@ -1304,7 +1305,8 @@ function fakePM(profiles, consents, pairs) {
     _store: function () { return { profiles: profiles, activeId: profiles[0] && profiles[0].id, defaultId: profiles[0] && profiles[0].id, pairs: pairs || [] }; },
     listProfiles: function () { return profiles; },
     getConsents: function (pid) { return consents[pid] || {}; },
-    getMemory: function (opts) { return profiles.filter(p => p.id === opts.profileId).reduce((a, p) => a.concat(p.memories || []), []); }
+    getMemory: function (opts) { return profiles.filter(p => p.id === opts.profileId).reduce((a, p) => a.concat(p.memories || []), []); },
+    subscribe: function () {}
   };
 }
 /* A fake Supabase query builder: chainable the way the real client is
@@ -1412,6 +1414,61 @@ async function runCloudTests() {
   t('K11', 'a second push of unchanged content sends zero memories upserts: the hash cache skips it', {
     ok: resF2.ok, memoriesUpserted: callsF2.filter(c => c.table === 'memories' && c.op === 'upsert').length
   }, { ok: true, memoriesUpserted: 0 });
+
+  /* ---- K12-K14: the REAL init()->lib() path, unsigned-in stays inert.
+     K1-K11 drive the module through _setConfigForTests/_setClientForTests
+     on purpose (the design note explains why: under Node's CommonJS wrapper,
+     `root` resolves to this module's own private exports object, never
+     globalThis, so lib() could never find a `self.supabase` there). That
+     bypass proves the module's own logic but never actually called init().
+     Before the root fix, init() would have thrown the instant it called
+     lib() — the "unsigned-in" branch of the module's own header claim
+     ("if this module is absent, inert, or unsigned-in, the app is exactly
+     the offline-first program it was yesterday") was UNREACHABLE through
+     init() at all, so it had never been checked, only assumed. Now that
+     init() actually runs, that claim gets its own proof: a second, isolated
+     instance of the module, loaded in a vm context where `self` is a plain
+     object carrying `.supabase`, driven through the real init() rather than
+     the test-seam bypass. This is a behavioral change from before the fix
+     (lib()/init() now do something instead of throwing), and the point of
+     these three rows is to confirm that something is the correct inert
+     nothing, not to reassert "nothing changed." */
+  function loadIsolatedCloud(supabaseLib) {
+    var src = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
+    /* setTimeout/clearTimeout are host globals, not ECMAScript intrinsics:
+       a vm context does not get them for free the way it gets JSON/Promise/
+       Date, so schedule()'s real debounce needs them threaded through
+       explicitly or K14 would be testing a ReferenceError, not the module. */
+    var selfStub = { supabase: supabaseLib, setTimeout: setTimeout, clearTimeout: clearTimeout };
+    selfStub.self = selfStub; // self === self, the way a real Window is
+    var ctx = vm.createContext(selfStub);
+    vm.runInContext(src, ctx, { filename: 'incommon-cloud.js (isolated K12-K14 instance)' });
+    return selfStub.InCommonCloud;
+  }
+  var initCalls = [];
+  var initClient = {
+    from: function (table) { initCalls.push({ table: table }); return fakeClient([]).from(table); },
+    auth: { onAuthStateChange: function () {} }
+  };
+  var CL2 = loadIsolatedCloud({ createClient: function () { return initClient; } });
+  var pmG = fakePM([{ id: 'p1', name: 'Subject', memories: [{ id: 'm1', memoryType: 'journal', content: { t: 'x' }, consentRequired: 'journal', kept: false }] }], { p1: { journal: true } });
+  var initRes = CL2.init({ url: 'https://k12-test.invalid', anonKey: 'k12-fake-anon', core: {}, pm: pmG, storage: clStore() });
+  t('K12', 'the real init() path (not the test-seam bypass) resolves the vendored client and returns a working api, unsigned-in', {
+    gotApi: true, mode: 'local'
+  }, {
+    gotApi: !!initRes, mode: CL2.status().mode
+  });
+  var pushUnsigned = await CL2.push();
+  t('K13', 'unsigned-in, push() refuses before ever reaching the client: not a single call is recorded. flushOutbox() is not public and only runs from a successful push, so this is the only path that could reach it, and it is never taken', {
+    pushReason: 'no-session', clientCalls: 0
+  }, {
+    pushReason: pushUnsigned.reason, clientCalls: initCalls.length
+  });
+  /* schedule()'s debounce is real; let it actually fire rather than trusting
+     that push() alone covers the path a live ProfileManager event takes. */
+  CL2.schedule();
+  await new Promise(function (r) { setTimeout(r, 1500); });
+  t('K14', 'a live debounce firing unsigned-in is exactly as inert as calling push() directly: still no client call', 0, initCalls.length);
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
