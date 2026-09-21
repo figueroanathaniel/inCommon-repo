@@ -132,3 +132,27 @@ weakened in either pass, and should not be.
    remove; build nothing on it.
 
 Recorded 21 September, gate maintenance. check-competitor-surface fired on the scaffolding copy at verification/handoff/calculation-fixtures.json; the canonical fixture in data-contracts was already ALLOWed with reason, because its input string is the assertion. The override was extended to the copy's path rather than the fixture renamed, and the push at 2142782 briefly stood over the red gate until this commit closed it.
+## Closing sequence, recorded 21 September
+
+The closing sequence ran and is done. Real build, harness re-run, commit and
+push, both Netlify toggles (asset optimization off, hosting snippet removed),
+fresh deploy, and check-deployed green. The site serves the cloud build:
+cover 57,062 bytes, sha 101b75; app 11,207,031 bytes, sha 327ac5; version
+stamp incommon-v6.3 on both; script and style tag counts matching. This is
+the first clean deploy in the project's life, and it confirms the carried
+v6.2 finding is closed: nothing is injected and nothing is rewritten.
+
+Gate note: check-competitor-surface fired on the scaffolding copy of
+calculation-fixtures.json on the day of the close; the canonical fixture was
+already ALLOWed because its input string is the assertion, so the override
+was extended to the copy's path rather than the fixture renamed. Recorded in
+the gate maintenance entry above.
+
+Open item 1 of the previous list is struck by this entry. The list now reads:
+1. Step 4 of the cloud build: sign-in surface, InCommonCloud.inspect()
+   against a real session, the first consent-gated sync, PIN recovery through
+   the account email.
+2. The consent-language pass.
+3. memory-store.js is dormant; revisit or remove.
+4. The integration harness rewrite, which this entry schedules as the next
+   move.
