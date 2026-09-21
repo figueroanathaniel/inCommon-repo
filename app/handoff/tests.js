@@ -1,15 +1,24 @@
-/*! handoff/tests.js — inCommon V1.2 executable test suite (UMD).
- * Same file runs in Node (handoff/run-tests-node.js) and in the browser
+/*! handoff/tests.js — inCommon executable test suite (UMD).
+ * Same file runs in Node (tools/run-tests-node.js) and in the browser
  * (Test Runner V1.2.dc.html). Pure tests execute incommon-core.js directly;
- * integration tests (IT*) drive the real prototype in an iframe and are
- * browser-only. Assertion records: {id, name, pass, expected, actual}.
+ * integration tests (IT*) drive the real app (app/inCommonApp v2.dc.html)
+ * in an iframe and are browser-only. Assertion records:
+ * {id, name, pass, expected, actual}.
+ *
+ * The integration phase was rewritten for the v6.3 cloud architecture; see
+ * docs/integration-harness-design.md for what it covers and why. It no
+ * longer targets a retired single-blob prototype under window.__incommon:
+ * the current app already exposes window.__incommonApp, window.ProfileManager,
+ * window.InCommonCore and window.InCommonCloud unconditionally, and
+ * InCommonCloud already carries _setConfigForTests / _setClientForTests for
+ * exactly this purpose, so no new test-only seam was needed.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
   else { root.InCommonTests = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var INTEGRATION_IDS = ['IT1', 'IT2', 'IT2b', 'IT3', 'IT3b', 'IT4', 'IT5', 'IT6', 'IT7', 'IT8', 'IT9', 'IT10'];
+  var INTEGRATION_IDS = ['IT1', 'IT1b', 'IT2', 'IT3', 'IT4', 'IT5', 'IT6', 'IT7', 'IT8', 'IT9'];
 
   function mkPush(list) {
     return function (id, name, expected, actual) {
@@ -118,103 +127,201 @@
     return A;
   }
 
-  /* ------------- integration tests: drive the REAL prototype in an iframe ------------- */
-  // Requires: browser, same-origin prototype URL served with ?test=1 (namespaced storage),
-  // and the documented window.__incommon dev hook (see handoff/README-RUN-LOCALLY.md).
-  var TEST_KEYS = ['incommon_state_v1_test', 'incommon_theme_test', 'incommon_state_v1_test__tombstone'];
+  /* ------------- integration tests: drive the REAL app in an iframe -------------
+     See docs/integration-harness-design.md for the full account. Boots
+     app/inCommonApp v2.dc.html the same way handoff/tests-v6.0.js already
+     boots it for the 276-row sweep (cache-busted iframe, poll for
+     [data-app-header]), then drives window.ProfileManager and
+     window.InCommonCloud directly. Both are unconditional globals in the
+     real app already; no test-only flag or hook was added for this. */
+
+  var CL_OUTBOX_KEY = 'incommon_cloud_outbox_v2';
+  var CL_MAP_KEY = 'incommon_cloud_map_v2';
+  var CL_RECOVERY_KEY = 'incommon_pin_recovery';
+  var FIRSTRUN_KEY = 'incommon.firstrun';
+
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var FRAME_N = 0;
+  function bust(src) {
+    var h = src.indexOf('#'), base = h === -1 ? src : src.slice(0, h), hash = h === -1 ? '' : src.slice(h);
+    return base + (base.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now() + '-' + (++FRAME_N) + hash;
+  }
+  function bootFrame(doc, url) {
+    return new Promise(function (resolve) {
+      var f = doc.createElement('iframe');
+      f.setAttribute('title', 'app under integration test');
+      f.setAttribute('aria-hidden', 'true');
+      f.style.cssText = 'position:fixed;left:-9999px;top:0;width:1024px;height:900px;border:0';
+      f.src = bust(url);
+      f.onload = function () { resolve(f); };
+      doc.body.appendChild(f);
+    });
+  }
+  async function waitReady(win, ms) {
+    var until = Date.now() + (ms || 15000);
+    for (;;) {
+      try { if (win.document && win.document.querySelector('[data-app-header]')) return true; } catch (e) {}
+      if (Date.now() > until) return false;
+      await sleep(100);
+    }
+  }
+  /* A fake Supabase query builder: chainable the way the real client is
+     (.from().upsert().then(), .from().delete().eq().eq().then(),
+     .from().update().eq().then()). Every call recorded; nothing here ever
+     opens a socket, so nothing driven through it can reach the network. */
+  function fakeClient(calls) {
+    function builder(table) {
+      var b = { _eq: [] };
+      b.insert = function (row) { b._op = 'insert'; b._row = row; return b; };
+      b.upsert = function (row, opts) { b._op = 'upsert'; b._row = row; b._opts = opts; return b; };
+      b.update = function (row) { b._op = 'update'; b._row = row; return b; };
+      b.select = function () { b._op = 'select'; return b; };
+      b.delete = function () { b._op = 'delete'; return b; };
+      b.eq = function (col, val) { b._eq.push([col, val]); return b; };
+      b.then = function (resolve, reject) {
+        calls.push({ table: table, op: b._op, row: b._row, eq: b._eq.slice() });
+        return Promise.resolve({ error: null, data: [] }).then(resolve, reject);
+      };
+      return b;
+    }
+    return { from: builder };
+  }
+
   async function runIntegration(opts) {
     var A = [], t = mkPush(A);
     var doc = opts.document, url = opts.url, onStep = opts.onStep || function () {};
-    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-    TEST_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
-    var f = doc.createElement('iframe');
-    f.setAttribute('title', 'prototype under test');
-    f.style.cssText = 'position:fixed;left:-9999px;top:0;width:430px;height:900px;border:0';
-    f.src = url;
-    doc.body.appendChild(f);
-    async function hook(not) {
-      for (var i = 0; i < 800; i++) {
-        try { var w = f.contentWindow; if (w && w.__incommon && w.InCommonCore && w.__incommon !== not) return w; } catch (e) {}
-        await sleep(50);
-      }
-      throw new Error('prototype hook (__incommon) never appeared at ' + url);
-    }
-    try {
-      onStep('booting prototype iframe');
-      var w = await hook(null), inc = w.__incommon;
-      await sleep(400);
-      onStep('IT1 persistence write');
-      inc.setState({ res: 'IT-probe' });
-      await sleep(650);
-      var parsed = JSON.parse(localStorage.getItem('incommon_state_v1_test') || 'null');
-      t('IT1', 'Debounced state write lands in the namespaced test store', 'IT-probe', parsed && parsed.res);
-      t('IT2', 'App-rendered Life Path === incommon-core output for the live profile', String(w.InCommonCore.lifePath(inc.state.profile.dobISO).value), inc.numVals().numLP);
-      t('IT2b', 'Persistence object is core-built with the test namespace', 'incommon_state_v1_test', inc.ensurePersist().key);
-      onStep('IT3 birth-time modes');
-      inc.setState({ profile: Object.assign({}, inc.state.profile, { timeMode: 'unknown' }) });
-      await sleep(80);
-      t('IT3', 'timeMode unknown → Rising suppressed in UI vals AND in Stella prompt', { suppressed: true, promptSaysUnknown: true }, { suppressed: inc.visVals().risingSuppressed, promptSaysUnknown: inc.sysPrompt().indexOf('Birth time unknown') !== -1 });
-      inc.setState({ profile: Object.assign({}, inc.state.profile, { timeMode: 'approx' }) });
-      await sleep(80);
-      t('IT3b', 'timeMode approximate → window treatment', true, inc.visVals().hdWindow);
-      inc.setState({ profile: Object.assign({}, inc.state.profile, { timeMode: 'exact' }) });
-      await sleep(80);
-      onStep('IT4 scripted scope regression');
-      var sc0 = inc.state.stellaCtx;
-      inc.setState({ stellaCtx: Object.assign({}, sc0, { chart: false, transits: true }) });
-      await sleep(80);
-      var cn = inc.canned('when should I start');
-      t('IT4', 'AUDIT REPRO: start-branch with chart OFF leaks no numerology', false, /personal year|numerolog/i.test(cn.text + ' ' + cn.cites.join(' ')));
-      inc.setState({ stellaCtx: Object.assign({}, sc0, { chart: true }) });
-      await sleep(80);
-      onStep('IT5/IT6 live-reply citation checks');
-      inc.setState({ providerConsent: { asked: true, granted: true, ts: Date.now() } });
-      await sleep(80);
-      w.claude = { complete: async function () { return 'You are brave and the stars agree with you.'; } };
-      await inc.reply('what should I focus on');
-      await sleep(120);
-      var m1 = inc.state.msgs[inc.state.msgs.length - 1];
-      t('IT5', 'AUDIT REPRO: live reply without SOURCES is withheld, fallback labeled', { withheld: true, missing: true }, { withheld: !!(m1 && m1.note && /withheld/i.test(m1.note)), missing: !!(m1 && m1.note && /missing SOURCES/i.test(m1.note)) });
-      w.claude = { complete: async function () { return 'Leaning on your journal here.\nSOURCES: Journal · sightings'; } };
-      await inc.reply('what does my journal say');
-      await sleep(120);
-      var m2 = inc.state.msgs[inc.state.msgs.length - 1];
-      t('IT6', 'Live reply citing a disabled scope (journal off) is withheld', true, !!(m2 && m2.note && /disabled/i.test(m2.note)));
-      w.claude = undefined;
-      onStep('IT7 consent revoke');
-      inc.renderVals().revoke();
-      await sleep(80);
-      var evs = inc.state.consentEvents, last = evs[evs.length - 1];
-      t('IT7', 'Two-person revoke mutates state: scope off, ledger event, prompt EXCLUDED, invite reset', { duoOff: true, event: 'duo/revoke', excluded: true, invReset: true }, { duoOff: inc.state.stellaCtx.duo === false, event: last ? last.scope + '/' + last.action : 'none', excluded: inc.sysPrompt().indexOf('TWO-PERSON DATA: EXCLUDED') !== -1, invReset: inc.state.inv.step === 0 });
-      onStep('IT8 forget conversation');
-      inc.setState(function (s) { return { msgs: s.msgs.concat([{ who: 'u', text: 'probe' }, { who: 's', text: 'probe-reply', cites: [], scopes: ['chart'] }]) }; });
-      await sleep(400);
-      inc.renderVals().forgetChat();
-      await sleep(1200); // debounce is 250ms but offscreen-iframe timers may be throttled
-      var storedMsgs = (JSON.parse(localStorage.getItem('incommon_state_v1_test') || '{}').msgs || []);
-      t('IT8', 'Forget resets to greeting AND purges the persisted store', { inMemory: 1, persisted: 1 }, { inMemory: inc.state.msgs.length, persisted: storedMsgs.length });
-      onStep('IT9 pacing limit');
-      var now = Date.now();
-      inc._sends = [now, now, now, now, now, now];
-      var beforeLen = inc.state.msgs.length;
-      inc.sendText('hello there');
-      await sleep(80);
-      t('IT9', '7th message inside 60s is blocked with the pacing toast', { blocked: true, toast: true }, { blocked: inc.state.msgs.length === beforeLen, toast: /pacing/i.test(inc.state.toast || '') });
-      inc._sends = [];
-      onStep('IT10 delete → reload → verify empty');
-      inc.renderVals().delConfirm();
-      await sleep(2600);
-      var w2 = await hook(inc), inc2 = w2.__incommon;
-      await sleep(400);
-      t('IT10', 'B1 end-to-end: delete survives debounce + remount — store verifiably empty, factory state', { data: null, deleted: true, committed: false }, { data: localStorage.getItem('incommon_state_v1_test'), deleted: inc2.ensurePersist().isDeleted(), committed: !!inc2.state.profile.committed });
-    } catch (e) {
-      t('IT-ERR', 'Integration harness failure: ' + (e && e.message), 'no error', String(e && e.message));
-    } finally {
-      TEST_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e2) {} });
+    var origFirstRun;
+    try { origFirstRun = localStorage.getItem(FIRSTRUN_KEY); localStorage.setItem(FIRSTRUN_KEY, 'true'); } catch (e) {}
+
+    onStep('booting the real app');
+    var f = await bootFrame(doc, url);
+    var win = f.contentWindow;
+    var okBoot = await waitReady(win, 15000);
+    if (!okBoot) {
+      t('IT-ERR', 'Integration harness failure: the app never reached [data-app-header]', 'ready', 'timed out');
       if (f.parentNode) f.parentNode.removeChild(f);
+      try { if (origFirstRun === null) localStorage.removeItem(FIRSTRUN_KEY); else localStorage.setItem(FIRSTRUN_KEY, origFirstRun); } catch (e2) {}
+      return A;
+    }
+
+    onStep('IT1/IT1b: inert at boot');
+    t('IT1', 'InCommonCloud is inert until something calls init(): no sign-in surface exists yet (open item, step 4 of the cloud build)', 'off', win.InCommonCloud ? win.InCommonCloud.status().mode : 'missing');
+    var netHit = null;
+    try {
+      var entries = win.performance.getEntriesByType('resource') || [];
+      for (var ni = 0; ni < entries.length; ni++) {
+        var nm = entries[ni].name.toLowerCase();
+        if (nm.indexOf('supabase') !== -1 && entries[ni].name.indexOf(win.location.origin) !== 0) { netHit = entries[ni].name; break; }
+      }
+    } catch (e3) {}
+    t('IT1b', 'no request to Supabase leaves the device: only the same-origin vendored client script is loaded', null, netHit);
+
+    onStep('IT2: the seam already exists, unconditionally');
+    t('IT2', 'window.__incommonApp, ProfileManager, InCommonCore and InCommonCloud are all present without a test flag', { app: true, pm: true, core: true, cloud: true }, {
+      app: !!win.__incommonApp, pm: typeof win.ProfileManager === 'object', core: typeof win.InCommonCore === 'object', cloud: typeof win.InCommonCloud === 'object'
+    });
+
+    var PM = win.ProfileManager, CL = win.InCommonCloud;
+    var originalActiveId = PM.activeId(), originalDefaultId = PM.defaultId();
+    var originalCount = PM.count();
+    if (originalCount < 1 || originalCount + 2 > PM.MAX_PROFILES) {
+      t('IT-SKIP', 'IT3-IT9 need room for two disposable profiles on an origin that already has at least one (this origin has ' + originalCount + ' of a ' + PM.MAX_PROFILES + ' cap) — skipped rather than failed', 'skip', 'skip');
+      if (f.parentNode) f.parentNode.removeChild(f);
+      try { if (origFirstRun === null) localStorage.removeItem(FIRSTRUN_KEY); else localStorage.setItem(FIRSTRUN_KEY, origFirstRun); } catch (e4) {}
+      return A;
+    }
+
+    var p1 = null, p2 = null, calls = [];
+    try {
+      onStep('creating two disposable test profiles');
+      p1 = PM.createProfile({ name: 'IT Subject A', birthDate: '1990-01-01' });
+      p2 = PM.createProfile({ name: 'IT Subject B', birthDate: '1991-02-02' });
+      PM.setConsent('journal', true, p1.id);
+      /* mood consent stays off on purpose: these two memories must never sync. */
+      var granted = PM.addMemory({ profileId: p1.id, type: 'journal', content: { t: 'IT-granted-journal' } });
+      var ungated = PM.addMemory({ profileId: p1.id, type: 'mood', content: { t: 'IT-ungated-mood' } });
+      var kept = PM.addMemory({ profileId: p1.id, type: 'mood', content: { t: 'IT-kept-mood' }, keep: true });
+      PM.setTwoPersonConsent(p1.id, p2.id, true, p1.id);
+
+      CL._setConfigForTests({ storage: win.localStorage, pm: PM, core: win.InCommonCore, url: 'https://it-test.invalid', anonKey: 'it-test-anon-key' });
+      CL._setClientForTests(fakeClient(calls), { user: { id: 'it-test-uid' } });
+
+      onStep('IT3/IT4: consent gating, real ProfileManager through real InCommonCloud');
+      var pushRes = await CL.push();
+      var memRows = calls.filter(function (c) { return c.table === 'memories' && c.op === 'upsert' && c.row.profile_id === p1.id; });
+      var memIds = memRows.map(function (r) { return r.row.local_id; }).sort();
+      t('IT3', 'push() succeeds and the consented memory is the only one of the three included', { ok: true, ids: [granted.id] }, { ok: pushRes.ok, ids: memIds });
+      var everyCall = JSON.stringify(calls);
+      t('IT4', 'the ungated memory and the kept-but-ungated memory are both excluded, and their content reaches no recorded call', { ungatedIncluded: false, keptIncluded: false, contentLeaked: false }, {
+        ungatedIncluded: memIds.indexOf(ungated.id) !== -1, keptIncluded: memIds.indexOf(kept.id) !== -1,
+        contentLeaked: everyCall.indexOf('IT-ungated-mood') !== -1 || everyCall.indexOf('IT-kept-mood') !== -1
+      });
+
+      onStep('IT5: birth data and governance rows sync unconditionally');
+      var profileRow = calls.some(function (c) { return c.table === 'profiles' && c.op === 'upsert' && c.row.id === p1.id; });
+      var ledgerRow = calls.some(function (c) { return c.table === 'consent_events' && c.op === 'upsert' && c.row.profile_id === p1.id; });
+      var pairRow = calls.some(function (c) { return c.table === 'pairs' && c.op === 'upsert' && ((c.row.profile_a === p1.id && c.row.profile_b === p2.id) || (c.row.profile_a === p2.id && c.row.profile_b === p1.id)); });
+      t('IT5', 'the profile row, the consent ledger and the pair sync even though most consents on this profile are off', { profile: true, ledger: true, pair: true }, { profile: profileRow, ledger: ledgerRow, pair: pairRow });
+
+      onStep('IT6: the deletion outbox against a real local delete');
+      PM.deleteMemory({ profileId: p1.id, type: 'mood' });
+      var stillLocal = PM.getMemory({ profileId: p1.id, type: 'mood', respectConsent: false }).length;
+      /* InCommonCloud.init() is never called by the app yet (no sign-in surface,
+         open item step 4), so pm.subscribe() was never wired to queue this
+         delete automatically. Seed the op the real subscribe callback would
+         have written, in its documented shape, and prove the flush path. */
+      win.localStorage.setItem(CL_OUTBOX_KEY, JSON.stringify([{ op: 'del-memories', pid: p1.id, type: 'mood' }]));
+      var calls2 = [];
+      CL._setClientForTests(fakeClient(calls2), { user: { id: 'it-test-uid' } });
+      var pushRes2 = await CL.push();
+      var deleteIssued = calls2.some(function (c) { return c.table === 'memories' && c.op === 'delete' && JSON.stringify(c.eq) === JSON.stringify([['profile_id', p1.id], ['memory_type', 'mood']]); });
+      var outboxAfter = JSON.parse(win.localStorage.getItem(CL_OUTBOX_KEY) || '[]').length;
+      t('IT6', 'a real local delete drains through the outbox as a real remote delete, and is not re-uploaded by the push that flushed it', { local: 0, remoteDeleteIssued: true, outboxDrained: 0, pushOk: true }, { local: stillLocal, remoteDeleteIssued: deleteIssued, outboxDrained: outboxAfter, pushOk: pushRes2.ok });
+
+      onStep('IT7: PIN gating');
+      PM.setProfilePin(p1.id, '4242');
+      t('IT7', 'a wrong PIN is refused and the right one is accepted', { requires: true, wrong: false, right: true }, { requires: PM.requiresPin(p1.id), wrong: PM.verifyProfilePin(p1.id, '0000'), right: PM.verifyProfilePin(p1.id, '4242') });
+
+      onStep('IT8: PIN recovery sends a hash, never the PIN');
+      var calls3 = [];
+      try { win.sessionStorage.setItem(CL_RECOVERY_KEY, '1'); } catch (e5) {}
+      CL._setClientForTests(fakeClient(calls3), { user: { id: 'it-test-uid' } });
+      var recRes = await CL.completePinRecovery('4242');
+      var updateRow = calls3.filter(function (c) { return c.table === 'profiles' && c.op === 'update' && c.row && c.row.pin_hash != null; })[0];
+      var payload = updateRow ? JSON.stringify(updateRow.row) : '';
+      t('IT8', 'recovery updates a hash field, never a literal 4242, and clears the recovery session on success', { ok: true, hasHash: true, pinLeaked: false, recoveryCleared: true }, {
+        ok: recRes.ok, hasHash: !!(updateRow && typeof updateRow.row.pin_hash === 'string' && updateRow.row.pin_hash.length > 4),
+        pinLeaked: payload.indexOf('4242') !== -1, recoveryCleared: !CL.isRecoverySession()
+      });
+
+      onStep('IT9: profile switching');
+      /* createProfile() only claims activeId for the very first profile on an
+         origin, so p1 is not necessarily active yet on an origin that already
+         had one — make the starting point deterministic before asserting the
+         switch away from it. */
+      PM.setActiveProfile(p1.id);
+      var switched = null;
+      var unsub = PM.subscribe(function (name, detail) { if (name === 'profile:switched') switched = detail; });
+      PM.setActiveProfile(p2.id);
+      t('IT9', 'switching the active profile moves activeId, fires profile:switched with the right from/to, and clears the previous Oki context', { active: p2.id, event: { from: p1.id, to: p2.id }, ctxCleared: null }, {
+        active: PM.activeId(), event: switched, ctxCleared: PM._promptCache
+      });
+      if (typeof unsub === 'function') unsub();
+    } catch (e6) {
+      t('IT-ERR', 'Integration harness failure: ' + (e6 && e6.message), 'no error', String(e6 && e6.message));
+    } finally {
+      onStep('cleaning up: deleting the disposable profiles, restoring the active profile');
+      try { if (p2 && PM.count() > 1) PM.deleteProfile(p2.id, 'IT Subject B'); } catch (e7) {}
+      try { if (p1 && PM.count() > 1) PM.deleteProfile(p1.id, 'IT Subject A'); } catch (e8) {}
+      try { if (originalActiveId && PM.getProfile(originalActiveId)) PM.setActiveProfile(originalActiveId); } catch (e9) {}
+      try { if (originalDefaultId) PM.setDefaultProfile(originalDefaultId); } catch (e10) {}
+      try { win.localStorage.removeItem(CL_OUTBOX_KEY); win.localStorage.removeItem(CL_MAP_KEY); } catch (e11) {}
+      try { win.sessionStorage.removeItem(CL_RECOVERY_KEY); } catch (e12) {}
+      if (f.parentNode) f.parentNode.removeChild(f);
+      try { if (origFirstRun === null) localStorage.removeItem(FIRSTRUN_KEY); else localStorage.setItem(FIRSTRUN_KEY, origFirstRun); } catch (e13) {}
     }
     return A;
   }
 
-  return { VERSION: '1.2.0', INTEGRATION_IDS: INTEGRATION_IDS, runPure: runPure, runIntegration: runIntegration, TEST_KEYS: TEST_KEYS };
+  return { VERSION: '2.0.0', INTEGRATION_IDS: INTEGRATION_IDS, runPure: runPure, runIntegration: runIntegration };
 }));

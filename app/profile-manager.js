@@ -91,6 +91,12 @@
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
+    /* incommon-cloud.js's completePinRecovery() recomputes this digest
+       remotely (pm.pinHash(pin, profileId), the id as salt) so the PIN
+       itself never travels; it was never on this object until the
+       integration harness rewrite drove PIN recovery end to end and found
+       recovery always failing with reason 'no-pm'. */
+    pinHash: pinHash,
 
     /* ---------- store ---------- */
     _store: function () {

@@ -36,6 +36,13 @@
   else { root.InCommonCloud = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  /* The outer wrapper's `root` parameter is out of scope here: this function
+     is a separate expression, evaluated where it is WRITTEN, not inside the
+     wrapper it is passed into. Every root.* use below (lib(), the recovery
+     session flag) was silently throwing ReferenceError, caught by this
+     module's own try/catches, until the integration harness rewrite drove
+     PIN recovery end to end and found it always failing. */
+  var root = typeof self !== 'undefined' ? self : this;
   var VERSION = '2.0.0';
 
   /* Sync bookkeeping. Deliberately outside every ProfileManager key: export

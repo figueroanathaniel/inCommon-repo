@@ -49,6 +49,7 @@ globalThis.HDTopology = TOPO;
 globalThis.HDAtlas = ATLAS;
 const AN = require(path.join(repo, 'app', 'analytics.js'));
 const IC = require(path.join(repo, 'app', 'iching.js'));
+const CL = require(path.join(repo, 'app', 'incommon-cloud.js'));
 
 /* Extension suites from Prompts A, B, C */
 const MC = require(path.join(repo, 'app', 'forecast', 'news', 'multiChart.test.js'));
@@ -1278,6 +1279,141 @@ t('X18', 'the module names no storage API and never asks the clock for now',
       .filter(s => src.indexOf(s) !== -1); })(),
   []);
 
+/* ---------------------------------------------------------------- K: incommon-cloud.js
+   Consent gating and the deletion outbox, the two risks named by the
+   integration-harness redesign (docs/integration-harness-design.md). Pure
+   logic only: profile-manager.js is `window.ProfileManager = PM`, never a
+   UMD module, so it cannot be required here — a hand-built fixture carrying
+   only the four methods incommon-cloud.js actually calls stands in for it.
+   PIN recovery needs a real sessionStorage (the UMD wrapper resolves `root`
+   to this module's own private exports object under Node, never globalThis)
+   and is covered in the browser phase instead. */
+
+const OUTBOX_KEY = 'incommon_cloud_outbox_v2';
+
+function clStore() {
+  var m = {};
+  return {
+    getItem: function (k) { return k in m ? m[k] : null; },
+    setItem: function (k, v) { m[k] = String(v); },
+    removeItem: function (k) { delete m[k]; }
+  };
+}
+function fakePM(profiles, consents, pairs) {
+  return {
+    _store: function () { return { profiles: profiles, activeId: profiles[0] && profiles[0].id, defaultId: profiles[0] && profiles[0].id, pairs: pairs || [] }; },
+    listProfiles: function () { return profiles; },
+    getConsents: function (pid) { return consents[pid] || {}; },
+    getMemory: function (opts) { return profiles.filter(p => p.id === opts.profileId).reduce((a, p) => a.concat(p.memories || []), []); }
+  };
+}
+/* A fake Supabase query builder: chainable the way the real client is
+   (.from().upsert().then(), .from().delete().eq().eq().then()), every call
+   recorded, `fail(rec)` decides whether that call reports an error. */
+function fakeClient(calls, fail) {
+  function builder(table) {
+    var b = { _eq: [] };
+    b.insert = function (row) { b._op = 'insert'; b._row = row; return b; };
+    b.upsert = function (row, opts) { b._op = 'upsert'; b._row = row; b._opts = opts; return b; };
+    b.select = function () { b._op = 'select'; return b; };
+    b.delete = function () { b._op = 'delete'; return b; };
+    b.eq = function (col, val) { b._eq.push([col, val]); return b; };
+    b.then = function (resolve, reject) {
+      var rec = { table: table, op: b._op, row: b._row, opts: b._opts, eq: b._eq.slice() };
+      calls.push(rec);
+      var err = (typeof fail === 'function' && fail(rec)) ? { message: 'fake failure' } : null;
+      return Promise.resolve({ error: err, data: [] }).then(resolve, reject);
+    };
+    return b;
+  }
+  return { from: builder };
+}
+
+async function runCloudTests() {
+  /* ---- K1-K6: buildPlan, driven through push(), consent gating end to end ---- */
+  var storeA = clStore();
+  var pmA = fakePM(
+    [{ id: 'p1', name: 'Subject', memories: [
+      { id: 'm1', memoryType: 'journal', content: { t: 'granted-journal' }, consentRequired: 'journal', kept: false },
+      { id: 'm2', memoryType: 'mood', content: { t: 'SECRET-mood-never-sync' }, consentRequired: 'mood', kept: false },
+      { id: 'm3', memoryType: 'mood', content: { t: 'KEPT-but-still-local-only' }, consentRequired: 'mood', kept: true }
+    ] }],
+    { p1: { journal: true, mood: false, assessments: false, conversation: false, birthData: true, relationships: false } },
+    [{ key: 'p1::p2', a: 'p1', b: 'p2', enabled: true }]
+  );
+  storeA.setItem('incommon.consent.p1', JSON.stringify({ events: [{ id: 'journal', ts: '2026-01-01T00:00:00.000Z', granted: true }] }));
+  var callsA = [];
+  CL._setConfigForTests({ storage: storeA, pm: pmA, core: null });
+  CL._setClientForTests(fakeClient(callsA), { user: { id: 'u1' } });
+  var resA = await CL.push();
+  var memRowsA = callsA.filter(c => c.table === 'memories' && c.op === 'upsert').map(c => c.row.local_id).sort();
+  t('K1', 'push() against a fake, always-succeeding client reports ok', resA.ok, true);
+  t('K2', 'only the consented memory is pushed; the ungated and the kept-but-ungated ones are held back', memRowsA, ['m1']);
+  var everyRowA = JSON.stringify(callsA);
+  t('K3', 'content whose consent is off never appears in any recorded call, kept or not', /SECRET-mood-never-sync|KEPT-but-still-local-only/.test(everyRowA), false);
+  t('K4', 'the profile row (birth data) syncs unconditionally, even with most consents off', callsA.some(c => c.table === 'profiles' && c.op === 'upsert' && c.row.id === 'p1'), true);
+  t('K5', 'the consent ledger syncs unconditionally: it is governance, not gated content', callsA.some(c => c.table === 'consent_events' && c.op === 'upsert'), true);
+  t('K6', 'pairs sync unconditionally, the same governance reasoning as the ledger', callsA.some(c => c.table === 'pairs' && c.op === 'upsert'), true);
+
+  /* ---- K7-K9: the deletion outbox. flushOutbox() is not itself exported
+     (this pass does not touch the cloud module), so every path through it
+     is driven the same way the real app reaches it: push()'s own tail. An
+     empty pm keeps the rest of the plan trivially empty, so the only calls
+     recorded are the ones the outbox itself issues. ---- */
+  var storeB = clStore();
+  storeB.setItem(OUTBOX_KEY, JSON.stringify([{ op: 'del-profile', pid: 'gone-1' }]));
+  var callsB = [];
+  CL._setConfigForTests({ storage: storeB, pm: fakePM([], {}), core: null });
+  CL._setClientForTests(fakeClient(callsB), { user: { id: 'u1' } });
+  await CL.push();
+  t('K7', 'a queued profile deletion issues delete().eq(id, pid) against profiles', callsB.some(c => c.table === 'profiles' && c.op === 'delete' && JSON.stringify(c.eq) === JSON.stringify([['id', 'gone-1']])), true);
+  t('K7b', 'a successfully flushed op is cleared from the outbox', JSON.parse(storeB.getItem(OUTBOX_KEY) || '[]').length, 0);
+
+  var storeC = clStore();
+  storeC.setItem(OUTBOX_KEY, JSON.stringify([{ op: 'del-memories', pid: 'p1', type: 'journal' }]));
+  var callsC = [];
+  CL._setConfigForTests({ storage: storeC, pm: fakePM([], {}), core: null });
+  CL._setClientForTests(fakeClient(callsC), { user: { id: 'u1' } });
+  await CL.push();
+  t('K8', 'a queued memory-type deletion issues delete().eq(profile_id).eq(memory_type) against memories', callsC.some(c => c.table === 'memories' && c.op === 'delete' && JSON.stringify(c.eq) === JSON.stringify([['profile_id', 'p1'], ['memory_type', 'journal']])), true);
+
+  var storeD = clStore();
+  storeD.setItem(OUTBOX_KEY, JSON.stringify([{ op: 'del-profile', pid: 'p1' }]));
+  var callsD = [];
+  CL._setConfigForTests({ storage: storeD, pm: fakePM([], {}), core: null });
+  CL._setClientForTests(fakeClient(callsD, function (rec) { return rec.table === 'profiles' && rec.op === 'delete'; }), { user: { id: 'u1' } });
+  await CL.push();
+  t('K9', 'a wipe cannot be lost: a failed flush leaves the op queued for retry rather than dropping it', JSON.parse(storeD.getItem(OUTBOX_KEY) || '[]'), [{ op: 'del-profile', pid: 'p1' }]);
+
+  /* ---- K10: a wipe cannot be re-uploaded by the debounce that follows it ---- */
+  var storeE = clStore();
+  storeE.setItem(OUTBOX_KEY, JSON.stringify([{ op: 'del-memories', pid: 'p1', type: 'mood' }]));
+  var pmE = fakePM([{ id: 'p1', name: 'Subject', memories: [] }], { p1: {} });
+  var callsE = [];
+  CL._setConfigForTests({ storage: storeE, pm: pmE, core: null });
+  CL._setClientForTests(fakeClient(callsE), { user: { id: 'u1' } });
+  var resE = await CL.push();
+  t('K10', 'an ordinary push() flushes the outbox as its own tail, so a pending deletion is not re-uploaded by the next debounce', {
+    pushOk: resE.ok,
+    deleteIssued: callsE.some(c => c.table === 'memories' && c.op === 'delete'),
+    outboxDrained: JSON.parse(storeE.getItem(OUTBOX_KEY) || '[]').length
+  }, { pushOk: true, deleteIssued: true, outboxDrained: 0 });
+
+  /* ---- K11: the hash cache — a quiet week touches nothing ---- */
+  var storeF = clStore();
+  var pmF = fakePM([{ id: 'p1', name: 'Subject', memories: [{ id: 'm1', memoryType: 'journal', content: { t: 'unchanged' }, consentRequired: 'journal', kept: false }] }], { p1: { journal: true } });
+  var callsF1 = [];
+  CL._setConfigForTests({ storage: storeF, pm: pmF, core: null });
+  CL._setClientForTests(fakeClient(callsF1), { user: { id: 'u1' } });
+  await CL.push();
+  var callsF2 = [];
+  CL._setClientForTests(fakeClient(callsF2), { user: { id: 'u1' } });
+  var resF2 = await CL.push();
+  t('K11', 'a second push of unchanged content sends zero memories upserts: the hash cache skips it', {
+    ok: resF2.ok, memoriesUpserted: callsF2.filter(c => c.table === 'memories' && c.op === 'upsert').length
+  }, { ok: true, memoriesUpserted: 0 });
+}
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -1296,16 +1432,19 @@ t('X18', 'the module names no storage API and never asks the clock for now',
 
 /* ------------------------------------------------------------------ report */
 
-const pass = rows.filter(r => r.pass).length, fail = rows.length - pass;
-if (!quiet) {
-  rows.forEach(r => { if (!r.pass) console.log('  FAIL ' + r.id + '  ' + r.desc + '\n       expected ' + r.expected + '\n       actual   ' + r.actual); });
-  console.log('run-module-tests: ' + pass + '/' + rows.length + ' passed' + (fail ? ', ' + fail + ' FAILED' : ''));
-  [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
-    ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
-    ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-    ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
-    const g = rows.filter(r => r.id[0] === k);
-    if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
-  });
-}
-process.exit(fail ? 1 : 0);
+runCloudTests().then(() => {
+  const pass = rows.filter(r => r.pass).length, fail = rows.length - pass;
+  if (!quiet) {
+    rows.forEach(r => { if (!r.pass) console.log('  FAIL ' + r.id + '  ' + r.desc + '\n       expected ' + r.expected + '\n       actual   ' + r.actual); });
+    console.log('run-module-tests: ' + pass + '/' + rows.length + ' passed' + (fail ? ', ' + fail + ' FAILED' : ''));
+    [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
+      ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
+      ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
+      ['K', 'incommon-cloud.js'],
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
+      const g = rows.filter(r => r.id[0] === k);
+      if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
+    });
+  }
+  process.exit(fail ? 1 : 0);
+}).catch(e => { console.error('run-module-tests: the K section (incommon-cloud.js) threw', e); process.exit(1); });
