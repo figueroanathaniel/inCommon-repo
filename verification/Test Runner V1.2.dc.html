@@ -81,8 +81,8 @@ class Component extends DCLogic {
       if (!window.InCommonCore || !window.InCommonTests) throw new Error('incommon-core.js / handoff/tests.js failed to load');
       const [fixtures, coreTxt, testsTxt] = await Promise.all([
         fetch('../data-contracts/calculation-fixtures.json').then(r => r.json()),
-        fetch('./incommon-core.js').then(r => r.text()),
-        fetch('./handoff/tests.js').then(r => r.text())
+        fetch('../app/incommon-core.js').then(r => r.text()),
+        fetch('../app/handoff/tests.js').then(r => r.text())
       ]);
       const sha = async t => { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); };
       const hashes = { 'incommon-core.js': await sha(coreTxt), 'handoff/tests.js': await sha(testsTxt) };
