@@ -1,7 +1,7 @@
 {
   "name": "inCommon",
   "short_name": "inCommon",
-  "description": "A consent-first companion for astrology, numerology, human design, and honest reflection. Everything stays on your device.",
+  "description": "Everybody has something. A companion for astrology, numerology, human design, and honest reflection.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

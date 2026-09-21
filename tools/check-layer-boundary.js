@@ -137,11 +137,13 @@ const LAYERS = {
        expanded wheel" above): that claim is about the app that ships,
        and this cannot run inside it as written. */
     'ephemeris-worker.js',
+    'incommon-cloud.js',
   ],
   vendored: [
     'support.js',
     'react-18.3.1.production.min.js',
     'react-dom-18.3.1.production.min.js',
+    'supabase-js-2.57.1.umd.min.js',
     /* The renderer behind the cover. Vendored for the same reason React above
        it is: the cover is the first screen a visitor meets, and a landing page
        that calls a CDN hands a third party an IP address before the reader has

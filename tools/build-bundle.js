@@ -61,6 +61,7 @@ const checkOnly = process.argv.indexOf('--check') !== -1;
 
 /* The modules, in the order the helmet loads them. Several read globals set
    by earlier ones, so this order is part of the contract, not a preference. */
+const VENDORED = ['supabase-js-2.57.1.umd.min.js'];
 const MODULES = [
   /* Ephemeris architecture (V1.0.0): dual-backend system with fallback */
   'ephemeris-points.js',
@@ -117,6 +118,9 @@ const MODULES = [
   'pair-cache.js',
   'hd-composite.js',
   'analytics.js',
+  /* Consent-gated cloud sync. Loads after the store and analytics because it
+     reads both; nothing above it may call it, which is the point of the seam. */
+  'incommon-cloud.js',
   /* Extension modules: synastry news, Sky Wire, and localization (Prompts A, B, C) */
   'forecast/newsEngine.js',
   'forecast/news/synastryTemplates.js',
@@ -223,7 +227,7 @@ const report = { react: [], support: false, modules: [], lang: false, style: fal
       exactly the scripts this build knows about, each exactly once. */
 const declared = (html.match(/<script\s+src="\.\/[^"]+"><\/script>/g) || [])
   .map(t => t.replace(/^<script\s+src="\.\//, '').replace(/"><\/script>$/, ''));
-const expected = ['support.js'].concat(MODULES);
+const expected = ['support.js'].concat(VENDORED).concat(MODULES);
 
 for (const f of expected) {
   const n = declared.filter(d => d === f).length;
@@ -274,9 +278,11 @@ const reactBlocks = REACT.map(f => {
       iframe: runtime inlined alone 0, modules inlined in the helmet 6, both 5.
 
       In the outer head they are ordinary scripts, outside any template, and
-      they execute in the same relative order they are declared in. Nothing
-      about the app source changes. */
-const moduleBlocks = MODULES.map(m => {
+      they execute in the same relative order they are declared in. The
+      vendored libraries lead the list, so the head carries window.supabase
+      before any module that might reach for it. Nothing about the app source
+      changes. */
+const moduleBlocks = VENDORED.concat(MODULES).map(m => {
   report.modules.push(m);
   return block(m, read(m));
 }).join('\n');
@@ -290,7 +296,7 @@ report.support = true;
 
 /* Now remove the helmet's src tags, which the head blocks above have taken
    over. replaceOnce fails loudly if one is not where it was expected. */
-for (const m of MODULES) {
+for (const m of VENDORED.concat(MODULES)) {
   html = replaceOnce(html, '<script src="./' + m + '"></script>', '');
 }
 
@@ -330,8 +336,8 @@ report.style = Buffer.byteLength(headStyles[0], 'utf8') + ' bytes, in <head> whe
 /* 5. Refuse to ship a partial bundle. The source invariant above guarantees
       every declared tag was found and replaced; this is the arithmetic check
       on top of it. */
-if (report.modules.length !== MODULES.length) {
-  die('expected ' + MODULES.length + ' modules, inlined ' + report.modules.length);
+if (report.modules.length !== VENDORED.length + MODULES.length) {
+  die('expected ' + (VENDORED.length + MODULES.length) + ' modules, inlined ' + report.modules.length);
 }
 if (!report.style) {
   die('the helmet stylesheet was not lifted into the head; the bundle would paint unstyled');
@@ -352,12 +358,12 @@ if (survived) {
       '\n  this usually means a replacement expanded $& or $\' instead of being literal');
 }
 
-/* And the arithmetic: two React files, support.js, and every module. Counted
-   from MODULES rather than written out, because a hand written total is one
-   more thing to forget when a module is added, and the point of this check is
-   to catch exactly that. */
+/* And the arithmetic: two React files, support.js, every vendored library,
+   and every module. Counted from the lists rather than written out, because a
+   hand written total is one more thing to forget when a module is added, and
+   the point of this check is to catch exactly that. */
 const inlinedCount = report.react.length + (report.support ? 1 : 0) + report.modules.length;
-const expectCount = REACT.length + 1 + MODULES.length;
+const expectCount = REACT.length + 1 + VENDORED.length + MODULES.length;
 if (inlinedCount !== expectCount) {
   die('expected ' + expectCount + ' inlined scripts, accounted for ' + inlinedCount);
 }
@@ -608,7 +614,7 @@ console.log('  version:         ' + VERSION + '   (line 1 of the bundle, taken f
 console.log('  ' + bytes.toLocaleString() + ' bytes');
 console.log('  react inlined:   ' + report.react.join(', '));
 console.log('  support.js:      inlined');
-console.log('  modules inlined: ' + report.modules.length + ' of ' + MODULES.length);
+console.log('  modules inlined: ' + report.modules.length + ' of ' + (VENDORED.length + MODULES.length));
 console.log('  html lang="en":  ' + report.lang);
 console.log('  stylesheet:      ' + report.style);
 redirectsWritten.forEach(r => console.log('  _redirects:      ' + r.rules + ' rules at ' + r.label + ', pointing at ' + r.to + '/'));

@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "purpose": "Test vectors backing Verification Report §2. Persona is fictional. Numerology + angel-number vectors are executed directly against incommon-core.js by handoff/tests.js (see test-results-v1.2.json). Timezone/lunar/astrology blocks remain reference targets a licensed engine must reproduce before those rows move DEMO → PASS (spec §20).",
+    "persona": { "nameAtBirth": "Maya Lin Chen", "born": "1992-07-02T21:41:00", "place": "Seattle, WA", "lat": 47.6, "lon": -122.3 },
+    "build": "inCommon Prototype V1.2.dc.html", "reportVersion": "V1.2", "date": "2026-07-21"
+  },
+  "numerology": [
+    { "id": "N1", "name": "Life Path", "input": "1992-07-02", "work": "7 + 2 + (1+9+9+2=21→3) = 12 → 3", "expected": 3, "status": "PASS" },
+    { "id": "N2", "name": "Personal Year 2026", "input": "07-02 + 2026", "work": "7 + 2 + (2+0+2+6=10→1) = 10 → 1", "expected": 1, "status": "PASS" },
+    { "id": "N3", "name": "Personal Month July 2026", "input": "PY 1 + month 7", "work": "1 + 7 = 8", "expected": 8, "status": "PASS" },
+    { "id": "N4", "name": "Expression (Pythagorean, name at birth)", "input": "Maya Lin Chen", "work": "MAYA 4+1+7+1=13→4 · LIN 3+9+5=17→8 · CHEN 3+8+5+5=21→3 · 4+8+3=15→6", "expected": 6, "status": "PASS" },
+    { "id": "N5", "name": "Soul Urge (vowels, Y-as-consonant policy)", "input": "Maya Lin Chen", "work": "A+A=2 · I=9 · E=5 → 16 → 7", "expected": 7, "status": "PASS" },
+    { "id": "N6", "name": "Master preservation", "input": "29", "work": "2+9 = 11, reduction stops", "expected": 11, "status": "PASS" }
+  ],
+  "angelNumbers": [
+    { "id": "A1", "input": "1212", "work": "1+2+1+2 = 6", "expected": { "root": 6, "repeating": false }, "status": "PASS" },
+    { "id": "A2", "input": "777", "work": "21 → 3", "expected": { "root": 3, "repeating": true }, "status": "PASS" },
+    { "id": "A3", "input": "29", "work": "11 · master preserved", "expected": { "root": 11, "master": true }, "status": "PASS" }
+  ],
+  "timezone": [
+    { "id": "TZ1", "input": "1992-07-02 21:41, Seattle WA", "expected": { "iana": "America/Los_Angeles", "dst": true, "utcOffset": -7, "abbr": "PDT" }, "status": "PASS" }
+  ],
+  "lunar": [
+    { "id": "L1", "name": "Phase on 2026-07-19", "work": "new moon 2026-07-14 → age ≈ 4.8 d", "expected": { "phase": "waxing crescent", "firstQuarter": "2026-07-21" }, "status": "PASS" }
+  ],
+  "astrology_referenceValues_DEMO_NOT_VERIFIED": {
+    "note": "Reference-persona display values. NOT engine-derived. A licensed ephemeris must recompute all of these (plus houses, angles, aspects, dignities, nodes, retrogrades) against the §20 reference-chart suite before any PASS is claimed.",
+    "sanityChecked": { "sunDegreeApprox": "Sun ≈ 11° Cancer (solstice Jun 20 + 12 days)" },
+    "displayed": { "sun": "Cancer 11° H5", "moon": "Scorpio 18° H9", "rising": "Aquarius 3°", "mercury": "Cancer 28° H6", "venus": "Gemini 26° H5", "mars": "Taurus 9° H3", "jupiter": "Virgo 4° H7", "saturn": "Aquarius 17° H1", "pluto": "Scorpio 20° H9", "humanDesign": "Projector 4/6, splenic authority" }
+  }
+}

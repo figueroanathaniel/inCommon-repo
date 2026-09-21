@@ -90,7 +90,7 @@ class Component extends DCLogic {
       const pure = (await window.InCommonTests.runPure(window.InCommonCore, fixtures)).map(a => ({ ...a, kind: 'pure' }));
       this.setState({ rows: pure, itStarted: true, status: 'Booting live prototype (?test=1) for integration tests…' });
       const integ = (await window.InCommonTests.runIntegration({
-        document, url: 'inCommon%20Prototype%20V1.2.dc.html?test=1',
+        document, url: '../app/inCommonApp%20v2.dc.html?test=1',
         onStep: s => this.setState({ status: 'Integration: ' + s })
       })).map(a => ({ ...a, kind: 'integration' }));
       const all = pure.concat(integ);
@@ -101,7 +101,7 @@ class Component extends DCLogic {
         timestamp: new Date().toISOString(),
         environment: { userAgent: navigator.userAgent },
         sourceHashes: hashes, coreVersion: window.InCommonCore.VERSION,
-        prototypeUnderTest: 'inCommon Prototype V1.2.dc.html?test=1',
+        prototypeUnderTest: '../app/inCommonApp v2.dc.html?test=1',
         totals, exitCode: totals.fail ? 1 : 0, assertions: all
       };
       console.log('__TESTMETA1__' + JSON.stringify({ suite: out.suite, timestamp: out.timestamp, environment: out.environment }));
