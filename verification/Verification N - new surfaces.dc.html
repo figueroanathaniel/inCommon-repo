@@ -69,17 +69,27 @@ class Component extends DCLogic {
   SRC = '../app/inCommonApp v2.dc.html';
   /* WHAT A COMPLETE RUN LOOKS LIKE.
 
-     The suite makes 57 distinct t(N...) calls and N0 is a boot guard that only
-     fires when the app fails to load, so a healthy run emits 56. This phase has
+     The suite makes 61 distinct t(N...) calls and THREE of them are guards that
+     only fire on a failure, so a healthy run emits 58. The guards are N0 and
+     N18-0, which report that the desktop frame and the phone frame failed to
+     boot and then return immediately, and N-ERR, which is the catch block. It
+     said 57 and 56 while it counted N0 alone, so the number sat two behind the
+     rows for as long as nothing compared them. It was stale in the safe
+     direction, because short is the only way this guard fires, which is exactly
+     why nothing reported it. This phase has
      already finished GREEN AND SHORT once in this repo: 51 rows arrived, the five
      search rows at the tail never ran, and nothing on the page said so, because
      the status line only ever counted what it had been given. That is the same
      shape as the theme rows vanishing out of runSweep, where the total read 108
      instead of 134 and was green. runF and runCross both count. This one did not.
 
-     Subtract the boot guard before changing this number: a guard that reddens
-     every healthy run is a guard somebody switches off. */
-  EXPECTED = 56;
+     Re-derive rather than adjust: count the t('N calls in runNew and subtract
+     the three guards above, which are the only ones emitted conditionally. Every
+     other row fires unconditionally, so unlike the acceptance matrix, where 10b
+     and 11 turn on the shell, this number does not move with the environment.
+     Subtract the guards before changing it: a guard that reddens every healthy
+     run is a guard somebody switches off. */
+  EXPECTED = 58;
   state = { rows: [], status: 'Loading the harness\u2026', running: true };
 
   async componentDidMount() {
