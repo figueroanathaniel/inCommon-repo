@@ -2493,7 +2493,7 @@ that a later change is most likely to break:
   attribute, so a grep for script tags does not find it.
 
 - **The folder is named for the version, and the version moves once per
-  deployment.** `deploy/v6.2/` holds the bundle stamped `incommon-v6.2`, and
+  deployment.** `deploy/v6.3/` holds the bundle stamped `incommon-v6.3`, and
   those two numbers are the same number on purpose: a folder called `v1.7`
   holding a bundle stamped `v5.8` told a reader nothing. Rebuilding does not
   earn a bump. The stamp changes when a build has been deployed AND confirmed
@@ -2502,7 +2502,7 @@ that a later change is most likely to break:
   the failure `check-deployed.js` exists to catch.
 - **There are three ways this repo reaches a host and all three now work.**
   Git connected, where `netlify.toml` names the publish directory. Dragging
-  `deploy/v6.2/`, where that folder's own `_redirects` and `_headers` travel
+  `deploy/v6.3/`, where that folder's own `_redirects` and `_headers` travel
   with it. And dragging the REPOSITORY, which is the one a person actually
   does because the repo is the thing on their desktop, and which failed
   silently for as long as it was the only shape nothing covered: `publish` is
@@ -2564,7 +2564,7 @@ that a later change is most likely to break:
   On ENOSPC it now says how much room it needed and that the old bundle is
   untouched.
 - **`deploy/` is a shelf, not a site.** It holds one folder per shipped
-  bundle, so the thing you upload is `deploy/v6.2/`. A host pointed at
+  bundle, so the thing you upload is `deploy/v6.3/`. A host pointed at
   `deploy/` itself, or at the repo root, serves a directory with no page in
   it: the deploy succeeds and the link is broken, which is a failure with no
   error anywhere in it. **The folder is named ONCE, in `BUNDLE` at the top of
