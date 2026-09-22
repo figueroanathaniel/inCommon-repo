@@ -54,7 +54,7 @@
      2026-09-20. service_role must never appear in this file or anywhere else
      in the repo. */
   var PROJECT_URL = 'https://lkzcybzhjjxdqetwwdrx.supabase.co';
-  var PROJECT_ANON_KEY = '';
+  var PROJECT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxremN5Ynpoamp4ZHFldHd3ZHJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTYwMDcsImV4cCI6MjEwNTQzMjAwN30.jgsqfpPmbd2SM23R-E7KuRg3eWxsgvIhISBkhYC0mtM';
 
   /* Sync bookkeeping. Deliberately outside every ProfileManager key: export
      must not carry hashes, and deleting the app state must not orphan rows
