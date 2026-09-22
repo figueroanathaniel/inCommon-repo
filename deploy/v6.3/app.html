@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.3  |  built 2026-09-21  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.3  |  built 2026-09-22  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3790,6 +3790,12 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
+    /* incommon-cloud.js's completePinRecovery() recomputes this digest
+       remotely (pm.pinHash(pin, profileId), the id as salt) so the PIN
+       itself never travels; it was never on this object until the
+       integration harness rewrite drove PIN recovery end to end and found
+       recovery always failing with reason 'no-pm'. */
+    pinHash: pinHash,
 
     /* ---------- store ---------- */
     _store: function () {
@@ -16239,6 +16245,13 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   else { root.InCommonCloud = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  /* The outer wrapper's `root` parameter is out of scope here: this function
+     is a separate expression, evaluated where it is WRITTEN, not inside the
+     wrapper it is passed into. Every root.* use below (lib(), the recovery
+     session flag) was silently throwing ReferenceError, caught by this
+     module's own try/catches, until the integration harness rewrite drove
+     PIN recovery end to end and found it always failing. */
+  var root = typeof self !== 'undefined' ? self : this;
   var VERSION = '2.0.0';
 
   /* Sync bookkeeping. Deliberately outside every ProfileManager key: export
@@ -38659,6 +38672,7 @@ class Component extends DCLogic {
   vtStopSettle(key) {
     clearInterval(this['_vtI' + key]);
     if (key === 'T') this._vtRouteTab = null;
+    if (key === 'S') this._vtRouteSec = null;
     const off = this['_vtOff' + key];
     if (off) { this['_vtOff' + key] = null; off(); }
   }
@@ -38724,6 +38738,13 @@ class Component extends DCLogic {
     el.style.scrollSnapType = 'none';
     el.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
     this.vtSettle(el, 'y', target, 'S');
+    /* Claimed after vtSettle, for the reason vtGoTab states at its own
+       claim: vtSettle opens by resetting any settle already running, and
+       that reset is what releases this. A routed jump crosses every
+       section between here and there, and vtOnScroll reads the section
+       back out of scrollTop on each of those frames, so without this the
+       tab walks through them and the address walks with it. */
+    this._vtRouteSec = i;
     /* THE TAB IS PART OF WHERE YOU ARE, NOT A SEPARATE FACT.
 
        This set vtSec and nothing else, so a reader standing in Spirit still had
@@ -38773,7 +38794,13 @@ class Component extends DCLogic {
     const next = {};
     /* A swipe between sections moves the reader exactly as a tap does, so it
        owes curTab() the same truth. */
-    if (i !== st.vtSec) { next.vtSec = i; next.tab = (this.VT_SECTIONS[i] || [])[0] || st.tab; }
+    /* A routed jump owns the section until it lands, exactly as it owns
+       the pager tab. The sections it travels through are not places the
+       reader went, and writing them here put Today and Spirit into the
+       address, into the announcements and onto the Back stack on the way
+       to Library. E2 is the row that catches it. */
+    const routed = this._vtRouteSec != null && i !== this._vtRouteSec;
+    if (i !== st.vtSec && !routed) { next.vtSec = i; next.tab = (this.VT_SECTIONS[i] || [])[0] || st.tab; }
     if (hide !== !!st.vtHide && (down || up)) next.vtHide = hide;
     const solid = inSec > 20;
     if (solid !== !!st.vtSolid) next.vtSolid = solid;
