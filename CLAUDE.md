@@ -1888,6 +1888,34 @@ bundle run to be measuring, so a bundle H2 that reds while the source is green
 is the pane. Diff the two covers before spending a run on the difference
 between them.
 
+**A GPU-less container is a different failure mode from a starved pane, and it
+is the one this repo's own automation runs under.** The two paragraphs above
+are about a real WebGL context that is being fed frames too slowly. There is a
+third case neither covers: a machine with no GPU exposed at all, no `/dev/dri`,
+no PCI VGA or 3D device, no `nvidia-smi`. There Chromium's WebGL falls back to
+SwiftShader, a software rasterizer, and the render is correct rather than
+starved: `H2b` read 95.1 and then 97.8 percent lit against the source cover, and
+97.8 against `deploy/v6.3/index.html`, all comfortably inside the healthy band
+this section already names. What moves is the clock, not the picture. Measured
+rather than guessed at: the phase took 473.7s against the source cover and
+583.4s against the bundle once the budget was raised to let it finish, about
+2.6 and 3.2 times the 180s `runCover` is written for, not the order of
+magnitude a first guess might reach for. The phase's own `H-TIMEOUT` fires with
+every substantive row already green when the budget is left at 180s, which
+reads exactly like the litPct failure above and is not it: the buffer was full,
+the wall clock ran out. Raising the budget, served rather than written to disk,
+is enough to watch the phase actually finish under SwiftShader, and it does, at
+both ends: the source cover and the built bundle each passed all 17 substantive
+rows this way, `H16` correctly landing on `app.html` rather than the source
+filename when the bundle was the one under test.
+
+**What a SwiftShader pass cannot say anything about is the failure H1's own
+banner exists to name**: a driver that has crashed and recovered, or one the
+OS has disabled after repeated resets. Those are properties of a real driver
+under real load, and a rasterizer that never opens a hardware context cannot
+reach them either way. A green H suite from a container like this one is real
+evidence the shader compiles and paints; it is not evidence about the crash
+and recovery path, and only a machine with a GPU can speak to that.
 
 **The theme sweep measures `#/today` and nothing else.** Four identities, each
 hardened, at two widths, and every one of the 64 rows is taken on the Today
