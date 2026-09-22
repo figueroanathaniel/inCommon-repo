@@ -1734,10 +1734,26 @@
       await sleep(500);
       var rowTxt = [].slice.call(dd.querySelectorAll('[data-screen-label="Throughline"] button'))
         .map(function (b) { return txt(b); }).filter(function (x) { return /SKY/.test(x); });
+      /* Derived from the rows the model actually built, never from a list of
+         words. tlLine() writes four shapes and horoSpan() writes the same four
+         beside it, and the typed alternation here knew three of them: it
+         carried `onward`, which no shape produces, and it did not carry
+         `through`, which is exactly what a window that opened before the scan
+         did says about itself. So this went red on a correct screen, and only
+         in the months where the heaviest closed window happens to be one that
+         opened early, which is the worst way for a gate to be wrong. The range
+         is rendered from a single placeholder, so the row carries it verbatim
+         and can be matched against its own source. */
+      var skyRanges = app.tlSky(app.tlAll())
+        .map(function (r) { return String(r.range || '').replace(/\s+/g, ' ').trim(); })
+        .filter(function (x) { return x && /\d/.test(x); });
       t('N8', 'The timeline offers a Sky filter and it shows dated windows only',
         { chip: true, rows: true, allSky: true },
         { chip: !!chips[0], rows: rowTxt.length > 0,
-          allSky: rowTxt.length > 0 && rowTxt.every(function (x) { return /\b(to|onward|running)\b/.test(x); }) });
+          allSky: rowTxt.length > 0 && rowTxt.every(function (x) {
+            var n = String(x).replace(/\s+/g, ' ');
+            return skyRanges.some(function (rg) { return n.indexOf(rg) !== -1; });
+          }) });
 
       /* ---- N9 to N13: the month ahead ---- */
       onStep('new surfaces: the month ahead');

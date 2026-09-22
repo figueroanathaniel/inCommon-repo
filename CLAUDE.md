@@ -1913,6 +1913,21 @@ Journal, and N21 is the one to keep: the detector shipped with two bugs that
 each inflated a hit count without ever throwing, and an overcounting detector is
 worse than a broken one because it reads as a finding.
 
+**N8 asks the screen to match the model, not to contain a word.** It used to
+test a Sky row against a typed alternation of range words, and `tlLine()` writes
+four shapes: `F to T`, `since before F, through T`, `from F, still running past
+T`, and `since before F, and still running past T`. The list knew three of them.
+It carried `onward`, which no shape produces, and it did not carry `through`,
+which is what a window that opened before the scan did says about itself. So the
+row went red on a correct screen, and only in the months where the heaviest
+closed window happens to be one that opened early, which is the worst way for a
+gate to be wrong: right most of the time. It now reads `r.range` off the rows the
+model built and asks the rendered text to carry one verbatim, which the template
+allows because the range is a single placeholder. **Do not tighten this back into
+a word list.** Proven strictly stronger rather than assumed: rendering `from time
+to time` in place of every range passes the old alternation and turns the new row
+red.
+
 **N37 to N39 are the search bar**, and they are driven rather than read for
 the same reason: the control is clicked, the field is typed into through a real
 input event, and the row is clicked. Reading `searchAll()` would pass on a
