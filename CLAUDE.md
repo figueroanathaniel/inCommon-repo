@@ -1402,6 +1402,24 @@ rows. The row was right; the timing was the least interesting thing about it.
 takes over, so a reader who swipes mid flight still keeps their swipe. Do not
 let the scroll handler write the tab during a routed jump.
 
+**The sections had the same fault and no guard, for longer.** `vtGoSection()`
+smooth scrolls the snapped column, and `vtOnScroll` derives the section index
+back out of `scrollTop` on every frame of that travel and writes `tab` with it,
+because the section index IS the tab. So a jump to Library crossed Today and
+Spirit, and `currentPath()` followed: the address walked, the announcements
+walked, and since `_routeNav` is consumed by the first write, the ones after it
+were `pushState`, which put screens nobody visited onto the Back stack. E2 is
+the row that catches it, and it caught it on a breakpoint crossing rather than
+on a tap, because `syncSectionToTab()` reconciles by calling `vtGoSection()` the
+moment the vertical shell mounts.
+
+`_vtRouteSec` is the same claim for the column: staked in `vtGoSection()` AFTER
+`vtSettle()` (which opens by clearing any settle already running, so a claim
+staked before it is released two lines later, exactly as vtGoTab's own comment
+says), released by `vtStopSettle('S')`, and honoured in `vtOnScroll` on the
+section write alone. `vtHide` and `vtSolid` are left to update during the
+travel: they are about the header, not about where the reader is.
+
 ## The wheel boundary rule
 `hd-wheel.js` holds the gate order and the mapping, as data. A gate is 5.625
 degrees, a line is 0.9375, gate 41 opens the wheel at 302 degrees, and the tie

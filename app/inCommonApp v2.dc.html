@@ -20656,6 +20656,7 @@ class Component extends DCLogic {
   vtStopSettle(key) {
     clearInterval(this['_vtI' + key]);
     if (key === 'T') this._vtRouteTab = null;
+    if (key === 'S') this._vtRouteSec = null;
     const off = this['_vtOff' + key];
     if (off) { this['_vtOff' + key] = null; off(); }
   }
@@ -20721,6 +20722,13 @@ class Component extends DCLogic {
     el.style.scrollSnapType = 'none';
     el.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
     this.vtSettle(el, 'y', target, 'S');
+    /* Claimed after vtSettle, for the reason vtGoTab states at its own
+       claim: vtSettle opens by resetting any settle already running, and
+       that reset is what releases this. A routed jump crosses every
+       section between here and there, and vtOnScroll reads the section
+       back out of scrollTop on each of those frames, so without this the
+       tab walks through them and the address walks with it. */
+    this._vtRouteSec = i;
     /* THE TAB IS PART OF WHERE YOU ARE, NOT A SEPARATE FACT.
 
        This set vtSec and nothing else, so a reader standing in Spirit still had
@@ -20770,7 +20778,13 @@ class Component extends DCLogic {
     const next = {};
     /* A swipe between sections moves the reader exactly as a tap does, so it
        owes curTab() the same truth. */
-    if (i !== st.vtSec) { next.vtSec = i; next.tab = (this.VT_SECTIONS[i] || [])[0] || st.tab; }
+    /* A routed jump owns the section until it lands, exactly as it owns
+       the pager tab. The sections it travels through are not places the
+       reader went, and writing them here put Today and Spirit into the
+       address, into the announcements and onto the Back stack on the way
+       to Library. E2 is the row that catches it. */
+    const routed = this._vtRouteSec != null && i !== this._vtRouteSec;
+    if (i !== st.vtSec && !routed) { next.vtSec = i; next.tab = (this.VT_SECTIONS[i] || [])[0] || st.tab; }
     if (hide !== !!st.vtHide && (down || up)) next.vtHide = hide;
     const solid = inSec > 20;
     if (solid !== !!st.vtSolid) next.vtSolid = solid;
