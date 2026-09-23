@@ -3,17 +3,37 @@
     "allow": [
       "Bash(node tools/run-tests-node.js)",
       "Bash(node tools/run-fixtures.js)",
+      "Bash(node tools/run-module-tests.js)",
+      "Bash(node tools/check-*.js)",
       "Bash(node tools/check-purple-text.js)",
       "Bash(node tools/check-dead-controls.js)",
       "Bash(node tools/token-compare.js)",
+      "Bash(node tools/bench-ephemeris.js)",
       "Bash(node tools/build-ui-icons.js)",
       "Bash(node tools/build-icons.js)",
       "Bash(npx serve:*)",
       "Bash(git status)",
+      "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
+      "Bash(git show:*)",
       "Bash(grep:*)",
       "Bash(rg:*)"
+    ]
+  },
+  "autoCompactEnabled": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh",
+            "timeout": 15,
+            "statusMessage": "Running startup smoke check"
+          }
+        ]
+      }
     ]
   }
 }

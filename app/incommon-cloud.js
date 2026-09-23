@@ -45,6 +45,17 @@
   var root = typeof self !== 'undefined' ? self : this;
   var VERSION = '2.0.0';
 
+  /* The project's own url and anon key, as data rather than machinery: no
+     environment file, no build-time injection, no separate secrets module.
+     init() falls back to these when a caller does not supply its own (the
+     Node test suites always do, through _setClientForTests/_setConfigForTests,
+     so this pair is reached only by the real app). The anon key is meant to
+     ship here; RLS is the wall, proven by the two-user isolation test of
+     2026-09-20. service_role must never appear in this file or anywhere else
+     in the repo. */
+  var PROJECT_URL = 'https://lkzcybzhjjxdqetwwdrx.supabase.co';
+  var PROJECT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxremN5Ynpoamp4ZHFldHd3ZHJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NTYwMDcsImV4cCI6MjEwNTQzMjAwN30.jgsqfpPmbd2SM23R-E7KuRg3eWxsgvIhISBkhYC0mtM';
+
   /* Sync bookkeeping. Deliberately outside every ProfileManager key: export
      must not carry hashes, and deleting the app state must not orphan rows
      whose only address lived inside it. */
@@ -455,12 +466,15 @@
   /* ---------- init ---------- */
 
   function init(opts) {
-    if (!opts || !opts.url || !opts.anonKey || !opts.core || !opts.pm || !opts.storage) return null;
+    if (!opts) return null;
+    var url = opts.url || PROJECT_URL;
+    var anonKey = opts.anonKey || PROJECT_ANON_KEY;
+    if (!url || !anonKey || !opts.core || !opts.pm || !opts.storage) return null;
     if (typeof opts.pm._store !== 'function' || typeof opts.pm.getMemory !== 'function') return null;
     var l = lib();
     if (!l || typeof l.createClient !== 'function') return null; // vendored library absent: stay inert
-    cfg = { url: opts.url, anonKey: opts.anonKey, storage: opts.storage, core: opts.core, pm: opts.pm };
-    client = l.createClient(opts.url, opts.anonKey);
+    cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm };
+    client = l.createClient(url, anonKey);
 
     /* THE SEAM. Any ProfileManager event means the local record changed, and
        every change is a push candidate. Deletions are queued, not pushed, so
