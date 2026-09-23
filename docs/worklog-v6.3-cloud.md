@@ -247,3 +247,78 @@ Open items, in order, unchanged by this pass except as struck above:
    time.
 2. The consent-language pass.
 3. memory-store.js is dormant; revisit or remove.
+
+## Step 4 built, and the PIN-recovery gap the walk found, recorded 23 September
+
+Step 4 is done: the sign-in surface, `InCommonCloud.inspect()` rendered as
+the three grouped counts, Sync now, and PIN recovery, in Settings in both
+shells. `PROJECT_URL` and `PROJECT_ANON_KEY` landed in incommon-cloud.js as
+the project's own config values, exactly the decision already recorded
+above: no environment file, no build-time injection, `init()` falls back to
+them when the real app does not supply its own, and the Node test hooks
+bypass `init()` entirely so group K stayed 12/12 through the change.
+Verified before committing rather than assumed: the key decodes to role
+`anon` against the project's own ref, and `grep -r service_role` across the
+repo returns only the comment naming the forbidden term.
+
+The acceptance walk ran against the live project, not a fixture. Sign in,
+toggle Journal Entries consent through three full cycles, and the would
+sync / would stay on this device counts moved 0 to 1 and back in lockstep
+with the switch, live, through the real UI. Sync now landed the row;
+confirmed independently through the REST API rather than trusting the
+UI's own report, `memories` carried the journal entry, `profiles` carried
+the profile row, and `consent_events` carried exactly the three events the
+walk actually performed. A second account, queried with its own token, saw
+an empty `memories` and an empty `profiles`: RLS held at the database, not
+only in application code that happens to respect it. "The second account
+sees an empty world" was proven through the API rather than through the UI,
+because nothing in this pass's own scope pulls and displays remote data
+anywhere; a pull-and-display surface is a later pass, not a gap in this
+one.
+
+**The walk found a real defect, not a theoretical one.** Signed in,
+clicking "Email me a recovery code" made `isRecoverySession()` read true
+immediately, before the email was ever sent, let alone opened, because the
+check was "the flag is set" and "uid() is truthy," and a session that
+already existed satisfied the second half on its own. Anyone holding the
+account password could reset the PIN without touching the inbox at all.
+`startPinRecovery()` now clears the session synchronously, before the flag
+is set, and calls `signOut()` before sending the email, so the check can
+only pass again once a fresh sign-in actually happens through the link
+this sends. A new `isRecoveryPending()` names the state in between, flag
+set, no session yet, so the screen can tell "waiting for the email" from
+"the email was opened" instead of guessing from one boolean.
+
+Recovery moved out of the signed-in block on the strength of that fix: it
+now signs the reader out the instant it starts, so nesting it inside
+"signed in" would have made the UI vanish under its own hand the moment it
+was used. It is its own top-level state in Settings now, in both shells,
+gated on `cloudRecoveryPending` rather than on being signed in at all.
+
+**IT1's own premise went stale and was caught rather than shipped wrong.**
+It asserted `InCommonCloud` stays `off` because "no sign-in surface exists
+yet"; step 4 is that surface, so the assertion now is that `init()` runs at
+boot and reports `local`, signed into nothing. IT8b is new and permanent:
+it signs a fake session in, calls the real `startPinRecovery()`, and
+asserts the exact shape of the fix, that the session is cleared, that
+`isRecoverySession()` reads false and `isRecoveryPending()` reads true
+immediately after, not after some later poll. `fakeClient()` gained a
+minimal `auth.signOut`/`auth.signInWithOtp` stub for exactly this row;
+every other browser-phase test still reaches a session through
+`_setClientForTests`'s own argument, never through these.
+
+Full battery green: run-tests-node, run-module-tests (318/318, group K
+unchanged at 12/12), check-layer-boundary, check-purple-text,
+check-dead-controls, check-competitor-surface, check-prose-repeats,
+build-bundle --check.
+
+Two test Supabase accounts carried this walk, and a live recovery email
+actually went to one of them; both are the project owner's to delete once
+this pass is read.
+
+Open item 1 of the previous list is struck by this entry. The list now
+reads:
+1. The consent-language pass.
+2. memory-store.js is dormant; revisit or remove.
+3. The deploy: rebuild, commit, and `check-deployed`, once this pass is
+   merged.

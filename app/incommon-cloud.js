@@ -409,11 +409,30 @@
      itself never travels. */
   function startPinRecovery(email) {
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    /* Recovery must not be satisfiable by a session that already exists.
+       Before this cleared it, a signed-in browser reached isRecoverySession()
+       the instant this ran - the flag went true and uid() was already
+       truthy from the existing session, so completePinRecovery() was
+       reachable before the email was ever sent, let alone opened. Clearing
+       the session here, synchronously, before the flag is set, is what
+       makes that check trustworthy: it can only become true again once a
+       fresh sign-in actually happens, through the link this sends. */
+    session = null;
     try { root.sessionStorage.setItem(RECOVERY_FLAG, '1'); } catch (e) {}
-    return client.auth.signInWithOtp({ email: email }).then(function (res) {
+    return client.auth.signOut().catch(function () {}).then(function () {
+      return client.auth.signInWithOtp({ email: email });
+    }).then(function (res) {
       if (res.error) return { ok: false, error: res.error.message };
       return { ok: true };
     }).catch(function (e) { return { ok: false, error: e && e.message }; });
+  }
+
+  /* True from the moment startPinRecovery sends its email until the emailed
+     link is actually opened: the flag is set but no session has reached
+     this browser yet. The UI's waiting state reads this. */
+  function isRecoveryPending() {
+    try { return !!(root.sessionStorage && root.sessionStorage.getItem(RECOVERY_FLAG) === '1' && !uid()); }
+    catch (e) { return false; }
   }
 
   function isRecoverySession() {
@@ -508,6 +527,7 @@
     push: push,
     pullAll: pullAll,
     startPinRecovery: startPinRecovery,
+    isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
     completePinRecovery: completePinRecovery,
     /* inspect() reports what the plan would push, without pushing. Run it

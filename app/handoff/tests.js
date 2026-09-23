@@ -169,7 +169,7 @@
      (.from().upsert().then(), .from().delete().eq().eq().then(),
      .from().update().eq().then()). Every call recorded; nothing here ever
      opens a socket, so nothing driven through it can reach the network. */
-  function fakeClient(calls) {
+  function fakeClient(calls, authCalls) {
     function builder(table) {
       var b = { _eq: [] };
       b.insert = function (row) { b._op = 'insert'; b._row = row; return b; };
@@ -184,7 +184,13 @@
       };
       return b;
     }
-    return { from: builder };
+    /* Minimal auth stub, only for the PIN-recovery regression (IT8b): real
+       sign-in (IT3 onward) always goes through _setClientForTests' session
+       argument directly, never through these. */
+    return { from: builder, auth: {
+      signOut: function () { if (authCalls) authCalls.push('signOut'); return Promise.resolve({ error: null }); },
+      signInWithOtp: function (opts) { if (authCalls) authCalls.push('signInWithOtp:' + opts.email); return Promise.resolve({ error: null }); }
+    } };
   }
 
   async function runIntegration(opts) {
@@ -204,8 +210,8 @@
       return A;
     }
 
-    onStep('IT1/IT1b: inert at boot');
-    t('IT1', 'InCommonCloud is inert until something calls init(): no sign-in surface exists yet (open item, step 4 of the cloud build)', 'off', win.InCommonCloud ? win.InCommonCloud.status().mode : 'missing');
+    onStep('IT1/IT1b: initializes at boot, signed into nothing');
+    t('IT1', 'InCommonCloud initializes at boot now that the sign-in surface exists (step 4 of the cloud build): a real client exists and nothing is signed in', 'local', win.InCommonCloud ? win.InCommonCloud.status().mode : 'missing');
     var netHit = null;
     try {
       var entries = win.performance.getEntriesByType('resource') || [];
@@ -292,6 +298,18 @@
       t('IT8', 'recovery updates a hash field, never a literal 4242, and clears the recovery session on success', { ok: true, hasHash: true, pinLeaked: false, recoveryCleared: true }, {
         ok: recRes.ok, hasHash: !!(updateRow && typeof updateRow.row.pin_hash === 'string' && updateRow.row.pin_hash.length > 4),
         pinLeaked: payload.indexOf('4242') !== -1, recoveryCleared: !CL.isRecoverySession()
+      });
+
+      onStep('IT8b: recovery cannot be satisfied by a session that already exists');
+      var authCalls4 = [];
+      CL._setClientForTests(fakeClient([], authCalls4), { user: { id: 'already-signed-in-uid' } });
+      var wasSignedIn = CL.status().mode === 'cloud';
+      var startRes = await CL.startPinRecovery('someone@example.com');
+      t('IT8b', 'starting recovery while already signed in signs that session out immediately, so isRecoverySession reads false and isRecoveryPending reads true until the emailed link is actually opened', {
+        wasSignedIn: true, ok: true, signedOutCalled: true, recoverySessionRightAfterStart: false, pendingRightAfterStart: true
+      }, {
+        wasSignedIn: wasSignedIn, ok: startRes.ok, signedOutCalled: authCalls4.indexOf('signOut') !== -1,
+        recoverySessionRightAfterStart: CL.isRecoverySession(), pendingRightAfterStart: CL.isRecoveryPending()
       });
 
       onStep('IT9: profile switching');
