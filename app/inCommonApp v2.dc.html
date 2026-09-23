@@ -3451,7 +3451,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ cloudUnavailable }}" hint-placeholder-val="{{ false }}">
         <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--dim)">Sync is not available in this build.</div>
       </sc-if>
-      <sc-if value="{{ cloudSignedOut }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ cloudShowSignedOutForm }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:8px">
           <input value="{{ cloudEmail }}" onChange="{{ cloudEmailType }}" type="email" placeholder="Email" aria-label="Email" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
           <input value="{{ cloudPassword }}" onChange="{{ cloudPasswordType }}" type="password" placeholder="Password" aria-label="Password" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
@@ -3462,7 +3462,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:italic 400 11px/1.55 var(--fb);color:var(--dim)">What leaves this device is decided by the consent switches in Settings. Nothing leaves without them.</div>
         </div>
       </sc-if>
-      <sc-if value="{{ cloudSignedIn }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ cloudShowSignedIn }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;align-items:center;gap:10px">
             <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--tx)">Signed in as {{ cloudSignedInEmail }}</span>
@@ -3478,16 +3478,24 @@ input[type="date"]{color-scheme:dark}
             <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
           </sc-if>
           <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:10px">
-            <sc-if value="{{ cloudShowRecoveryStart }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
-            </sc-if>
-            <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:10px">
-                <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
-                <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
-              </div>
-            </sc-if>
+            <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
           </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cloudRecoveryPending }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-if value="{{ cloudShowRecoveryWaiting }}" hint-placeholder-val="{{ true }}">
+            <div style="min-height:44px;display:flex;align-items:center;font:400 12px/1.5 var(--fu);color:var(--tx)">Check your email for the sign-in link, then come back to this screen.</div>
+          </sc-if>
+          <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
+              <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
+          </sc-if>
         </div>
       </sc-if>
     </div>
@@ -7906,7 +7914,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ cloudUnavailable }}" hint-placeholder-val="{{ false }}">
         <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--dim)">Sync is not available in this build.</div>
       </sc-if>
-      <sc-if value="{{ cloudSignedOut }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ cloudShowSignedOutForm }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:8px">
           <input value="{{ cloudEmail }}" onChange="{{ cloudEmailType }}" type="email" placeholder="Email" aria-label="Email" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
           <input value="{{ cloudPassword }}" onChange="{{ cloudPasswordType }}" type="password" placeholder="Password" aria-label="Password" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
@@ -7917,7 +7925,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:italic 400 11px/1.55 var(--fb);color:var(--dim)">What leaves this device is decided by the consent switches in Settings. Nothing leaves without them.</div>
         </div>
       </sc-if>
-      <sc-if value="{{ cloudSignedIn }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ cloudShowSignedIn }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;align-items:center;gap:10px">
             <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--tx)">Signed in as {{ cloudSignedInEmail }}</span>
@@ -7933,16 +7941,24 @@ input[type="date"]{color-scheme:dark}
             <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
           </sc-if>
           <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:10px">
-            <sc-if value="{{ cloudShowRecoveryStart }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
-            </sc-if>
-            <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:10px">
-                <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
-                <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
-              </div>
-            </sc-if>
+            <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
           </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cloudRecoveryPending }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-if value="{{ cloudShowRecoveryWaiting }}" hint-placeholder-val="{{ true }}">
+            <div style="min-height:44px;display:flex;align-items:center;font:400 12px/1.5 var(--fu);color:var(--tx)">Check your email for the sign-in link, then come back to this screen.</div>
+          </sc-if>
+          <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
+              <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
+            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
+          </sc-if>
         </div>
       </sc-if>
     </div>
@@ -8794,7 +8810,7 @@ class Component extends DCLogic {
     ypCat: null, ypAll: false, ypCountry: undefined, ypPick: false, pnotes: {}, revealPI: false, memSel: null, memPin: '', memPinOK: false, memPinErr: '',
     synWith: null, synManual: null, synForm: null, circleWith: [], cardIn: null, cardOut: null, stLang: null, stTurn: 0,
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
-    cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '' };
+    cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -9530,7 +9546,7 @@ class Component extends DCLogic {
     if (!this.cloud || this.state.cloudBusy) return;
     this.setState({ cloudBusy: true });
     this.cloud.signOut().then(() => {
-      this.setState({ cloudBusy: false, cloudMsg: '', cloudEmail: '', cloudPassword: '', cloudRecoveryPin: '' });
+      this.setState({ cloudBusy: false, cloudMsg: '', cloudEmail: '', cloudPassword: '', cloudRecoveryPin: '', cloudRecoveryPending: false });
     });
   }
   cloudSyncNow() {
@@ -9542,10 +9558,16 @@ class Component extends DCLogic {
   }
   cloudStartRecovery() {
     const st = this.state;
-    if (!this.cloud || st.cloudBusy || !st.cloudEmail.trim()) return;
-    this.setState({ cloudBusy: true, cloudMsg: '' });
-    this.cloud.startPinRecovery(st.cloudEmail.trim()).then(res => {
-      this.setState({ cloudBusy: false, cloudMsg: res.ok ? 'Check your email for the sign-in link, then come back to this screen.' : (res.error || 'Could not send the email.') });
+    const email = st.cloudStatus && st.cloudStatus.email;
+    if (!this.cloud || st.cloudBusy || !email) return;
+    /* Set optimistically, before the round trip: startPinRecovery() signs
+       the current session out synchronously, so waiting for the promise to
+       resolve would flash the plain signed-out form for a moment first. */
+    this.setState({ cloudBusy: true, cloudMsg: '', cloudRecoveryPending: true });
+    this.cloud.startPinRecovery(email).then(res => {
+      /* On success cloudMsg stays empty: the waiting state's own static line
+         already says this, and showing both read as the same sentence twice. */
+      this.setState({ cloudBusy: false, cloudRecoveryPending: res.ok, cloudMsg: res.ok ? '' : (res.error || 'Could not send the email.') });
     });
   }
   cloudCompleteRecovery() {
@@ -9553,7 +9575,7 @@ class Component extends DCLogic {
     if (!this.cloud || st.cloudBusy || st.cloudRecoveryPin.length !== 4) return;
     this.setState({ cloudBusy: true, cloudMsg: '' });
     this.cloud.completePinRecovery(st.cloudRecoveryPin).then(res => {
-      this.setState({ cloudBusy: false, cloudRecoveryPin: '', cloudMsg: res.ok ? 'PIN updated.' : (res.error || 'Could not update the PIN. Start over from “Email me a recovery code.”') });
+      this.setState({ cloudBusy: false, cloudRecoveryPin: '', cloudRecoveryPending: !res.ok, cloudMsg: res.ok ? 'PIN updated.' : (res.error || 'Could not update the PIN. Start over from “Email me a recovery code.”') });
     });
   }
   gatherConsented() {
@@ -19646,12 +19668,21 @@ class Component extends DCLogic {
            InCommonCloud did not initialize. */
         const cloudOn = !!this.cloud;
         const cloudSignedIn = !!(st.cloudStatus && st.cloudStatus.mode === 'cloud');
-        const insp = (cloudOn && cloudSignedIn) ? this.cloud.inspect() : null;
+        const cloudRecoveryPending = !!st.cloudRecoveryPending;
+        const insp = (cloudOn && cloudSignedIn && !cloudRecoveryPending) ? this.cloud.inspect() : null;
         const cloudInRecovery = !!(cloudOn && this.cloud.isRecoverySession());
         return {
           cloudOn, cloudUnavailable: !cloudOn,
-          cloudSignedIn, cloudSignedOut: cloudOn && !cloudSignedIn, cloudInRecovery,
-          cloudShowRecoveryStart: cloudSignedIn && !cloudInRecovery, cloudShowRecoveryPin: cloudSignedIn && cloudInRecovery,
+          /* Starting recovery signs the current session out immediately (the
+             security fix: isRecoverySession() must not be satisfiable by a
+             session that already existed), so recovery is its own top-level
+             state, never nested inside "signed in" - it has to keep showing
+             once that sign-out lands. */
+          cloudShowSignedOutForm: cloudOn && !cloudSignedIn && !cloudRecoveryPending,
+          cloudShowSignedIn: cloudOn && cloudSignedIn && !cloudRecoveryPending,
+          cloudRecoveryPending,
+          cloudShowRecoveryWaiting: cloudRecoveryPending && !cloudInRecovery,
+          cloudShowRecoveryPin: cloudRecoveryPending && cloudInRecovery,
           cloudEmail: st.cloudEmail, cloudEmailType: e => this.cloudTypeEmail(e),
           cloudPassword: st.cloudPassword, cloudPasswordType: e => this.cloudTypePassword(e),
           cloudBusy: st.cloudBusy, cloudMsg: st.cloudMsg, cloudHasMsg: !!st.cloudMsg,
