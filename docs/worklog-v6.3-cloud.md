@@ -322,3 +322,33 @@ reads:
 2. memory-store.js is dormant; revisit or remove.
 3. The deploy: rebuild, commit, and `check-deployed`, once this pass is
    merged.
+
+## The deploy, recorded 23 September
+
+Open item 3 above is done. The PIN-recovery fix merged, the branch was
+restarted from `origin/main`, and `deploy/v6.3/app.html` and its `index.html`
+were rebuilt for real, not `--check`, so the shipped bundle actually carries
+what the previous two entries describe: the sign-in surface, `inspect()`,
+Sync now, and the corrected recovery flow. Verified before committing:
+`grep -rn service_role` on the rebuilt file returns only the comment naming
+the forbidden term, and the `InCommonCloud` markup and handlers are present.
+The commit touched exactly the two generated files, 258 insertions and 7
+deletions; nothing in `app/` or `tools/` moved.
+
+`check-deployed.js` failed on the first read right after the merge, both
+pages smaller than the build by the same 20,652 bytes and carrying the
+previous version's byte count under the same `incommon-v6.3` stamp, which is
+what a deploy still in flight looks like rather than a post-processing
+injection: the stamp agreed on both sides, only the bytes lagged. A poll
+every 15 seconds against the live site found the match on the eighth
+attempt, about two minutes after the merge. Both pages now read identical:
+cover 57,062 bytes sha 506ce4, app 11,229,465 bytes sha 950de1,
+`incommon-v6.3` on both, script and style tag counts matching.
+
+The two Supabase test accounts from the acceptance walk are still the
+project owner's to delete; nothing in this entry touches that.
+
+Open item 3 of the previous list is struck by this entry. The list now
+reads:
+1. The consent-language pass.
+2. memory-store.js is dormant; revisit or remove.
