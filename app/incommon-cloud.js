@@ -11,7 +11,11 @@
  * exactly the offline-first program it was yesterday.
  *
  * WHAT THIS MODULE NEVER DOES:
- *   1. It never touches the network without a session.
+ *   1. It never touches the network without a session, with one exception
+ *      the reader asks for by pressing a button: starting a provider sign-in
+ *      from the cover asks the project which providers are switched on and
+ *      exchanges the code the provider sends back. Neither call carries any
+ *      local state; the record only moves once the app's own client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
  *      revocation takes effect on the next push, not on the next login. Rows
@@ -43,7 +47,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.0.0';
+  var VERSION = '2.1.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -469,6 +473,69 @@
     }).catch(function (e) { return { ok: false, error: e && e.message }; });
   }
 
+  /* ---------- provider sign-in, started and finished on the cover ----------
+
+     The cover is its own page with no ProfileManager, so these three need no
+     init(). They share only the project and the browser's storage with the
+     app's client: the cover starts the flow and finishes it, supabase-js
+     writes the session to localStorage under the key it derives from the
+     project url, and the client init() makes on the app page finds it there.
+
+     PKCE, not the library's implicit default. Implicit hands the tokens back
+     after the #, and # is this app's router: a return to the app would be read
+     as an address, and a return to the cover would be forwarded to the app as
+     one. PKCE hands back ?code=, before the #, which neither page routes on.
+     The app's own client stays implicit on purpose: the email links it sends
+     would otherwise only open in the browser that asked for them. */
+  var oauthClient = null;
+  function oauthLib() {
+    if (oauthClient) return oauthClient;
+    var l = lib();
+    if (!l || typeof l.createClient !== 'function') return null;
+    oauthClient = l.createClient(PROJECT_URL, PROJECT_ANON_KEY, {
+      auth: { flowType: 'pkce', detectSessionInUrl: false, persistSession: true, autoRefreshToken: false }
+    });
+    return oauthClient;
+  }
+
+  /* Asked before redirecting, because a provider the project has not switched
+     on sends the reader to a raw JSON error page instead of a sentence. */
+  function providerEnabled(provider) {
+    var f = root && root.fetch;
+    if (typeof f !== 'function') return Promise.resolve({ ok: false, reason: 'offline' });
+    return Promise.resolve().then(function () {
+      return f(PROJECT_URL + '/auth/v1/settings', { headers: { apikey: PROJECT_ANON_KEY } });
+    }).then(function (res) {
+      if (!res || !res.ok) return { ok: false, reason: 'offline' };
+      return res.json().then(function (s) {
+        return s && s.external && s.external[provider] ? { ok: true } : { ok: false, reason: 'disabled' };
+      });
+    }).catch(function () { return { ok: false, reason: 'offline' }; });
+  }
+
+  function oauthStart(provider, redirectTo) {
+    var c = oauthLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return providerEnabled(provider).then(function (p) {
+      if (!p.ok) return p;
+      return c.auth.signInWithOAuth({ provider: provider, options: { redirectTo: redirectTo, skipBrowserRedirect: true } })
+        .then(function (res) {
+          if (res.error || !res.data || !res.data.url) return { ok: false, reason: 'error', error: res.error && res.error.message };
+          return { ok: true, url: res.data.url };
+        });
+    }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
+  }
+
+  function oauthFinish(code) {
+    var c = oauthLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return Promise.resolve().then(function () { return c.auth.exchangeCodeForSession(code); }).then(function (res) {
+      var s = res && res.data && res.data.session;
+      if (res.error || !s) return { ok: false, reason: 'error', error: res.error && res.error.message };
+      return { ok: true, email: (s.user && s.user.email) || null };
+    }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
+  }
+
   /* ---------- status ---------- */
 
   function status() {
@@ -530,6 +597,9 @@
     isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
     completePinRecovery: completePinRecovery,
+    providerEnabled: providerEnabled,
+    oauthStart: oauthStart,
+    oauthFinish: oauthFinish,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app
        plainly has data are a consent gate working as designed, and counts

@@ -472,6 +472,21 @@ for (const f of THREE_FILES) {
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 
+/* "Continue with Google" loads these two on the press, or on the return from
+   Google, rather than at load: the vendored Supabase client and the one module
+   allowed to call it. The app has both inlined, but the cover is its own page,
+   so they sit beside index.html as files. A cover that names them and a bundle
+   without them is a button that says the sign in files did not load. */
+const SIGNIN_FILES = ['supabase-js-2.57.1.umd.min.js', 'incommon-cloud.js'];
+for (const f of SIGNIN_FILES) {
+  if (cover.indexOf("'./" + f + "'") === -1) {
+    die('the cover no longer loads ./' + f + '; update SIGNIN_FILES in tools/build-bundle.js to match it');
+  }
+  const from = path.join(appDir, f);
+  if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for Continue with Google');
+  fs.copyFileSync(from, path.join(BUNDLE, f));
+}
+
 const coverOut = path.join(BUNDLE, 'index.html');
 const coverStamp = '<!-- inCommon ' + VERSION + ' cover  |  built ' +
   new Date().toISOString().slice(0, 10) + ' -->';

@@ -1433,13 +1433,14 @@ async function runCloudTests() {
      (lib()/init() now do something instead of throwing), and the point of
      these three rows is to confirm that something is the correct inert
      nothing, not to reassert "nothing changed." */
-  function loadIsolatedCloud(supabaseLib) {
+  function loadIsolatedCloud(supabaseLib, fetchFn) {
     var src = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
     /* setTimeout/clearTimeout are host globals, not ECMAScript intrinsics:
        a vm context does not get them for free the way it gets JSON/Promise/
        Date, so schedule()'s real debounce needs them threaded through
        explicitly or K14 would be testing a ReferenceError, not the module. */
     var selfStub = { supabase: supabaseLib, setTimeout: setTimeout, clearTimeout: clearTimeout };
+    if (fetchFn) selfStub.fetch = fetchFn;
     selfStub.self = selfStub; // self === self, the way a real Window is
     var ctx = vm.createContext(selfStub);
     vm.runInContext(src, ctx, { filename: 'incommon-cloud.js (isolated K12-K14 instance)' });
@@ -1469,6 +1470,68 @@ async function runCloudTests() {
   CL2.schedule();
   await new Promise(function (r) { setTimeout(r, 1500); });
   t('K14', 'a live debounce firing unsigned-in is exactly as inert as calling push() directly: still no client call', 0, initCalls.length);
+
+  /* ---- K15-K20: Continue with Google, as the cover drives it.
+     The cover has no ProfileManager, so these run without init(). What they
+     must prove is the shape that keeps the return away from the hash router
+     (PKCE, redirect handed back rather than followed), that a provider the
+     project has not switched on never reaches signInWithOAuth, and that the
+     app's own client is left on the flow its email links depend on. */
+  function oauthHarness(settings) {
+    var h = { created: [], oauth: [], exchanged: [], fetched: [] };
+    var fakeLib = { createClient: function (url, key, opts) {
+      h.created.push({ url: url, opts: opts || null });
+      return { auth: {
+        onAuthStateChange: function () {},
+        signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: { provider: a.provider, url: 'https://auth.invalid/authorize?provider=' + a.provider }, error: null }); },
+        exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); }
+      }, from: function () { return fakeClient([]).from('x'); } };
+    } };
+    var fetchFn = function (u) {
+      h.fetched.push(u);
+      if (settings === 'offline') return Promise.reject(new Error('no network'));
+      return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ external: settings }); } });
+    };
+    h.C = loadIsolatedCloud(fakeLib, fetchFn);
+    return h;
+  }
+  var gOn = oauthHarness({ email: true, google: true });
+  var startOn = await gOn.C.oauthStart('google', 'https://cover.k15.invalid/');
+  t('K15', 'oauthStart asks for a PKCE client, hands the redirect back instead of following it, and returns to the page that asked', {
+    ok: true, flowType: 'pkce', detectSessionInUrl: false, provider: 'google', redirectTo: 'https://cover.k15.invalid/', skipBrowserRedirect: true, url: true
+  }, {
+    ok: startOn.ok, flowType: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.flowType,
+    detectSessionInUrl: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.detectSessionInUrl,
+    provider: gOn.oauth[0] && gOn.oauth[0].provider, redirectTo: gOn.oauth[0] && gOn.oauth[0].options.redirectTo,
+    skipBrowserRedirect: gOn.oauth[0] && gOn.oauth[0].options.skipBrowserRedirect, url: /^https:\/\/auth\.invalid\//.test(startOn.url || '')
+  });
+  var gOff = oauthHarness({ email: true, google: false });
+  var startOff = await gOff.C.oauthStart('google', 'https://cover.k16.invalid/');
+  t('K16', 'a provider the project has not switched on is reported as disabled and never reaches signInWithOAuth', {
+    ok: false, reason: 'disabled', oauthCalls: 0, askedSettings: true
+  }, {
+    ok: startOff.ok, reason: startOff.reason, oauthCalls: gOff.oauth.length, askedSettings: /\/auth\/v1\/settings$/.test(gOff.fetched[0] || '')
+  });
+  var gNet = oauthHarness('offline');
+  var startNet = await gNet.C.oauthStart('google', 'https://cover.k17.invalid/');
+  t('K17', 'with no network the start is reported as offline, not thrown, and nothing is redirected', {
+    ok: false, reason: 'offline', oauthCalls: 0
+  }, { ok: startNet.ok, reason: startNet.reason, oauthCalls: gNet.oauth.length });
+  var finish = await gOn.C.oauthFinish('code-k18');
+  t('K18', 'oauthFinish exchanges exactly the code it was handed, on the same PKCE client, and names the account', {
+    ok: true, exchanged: ['code-k18'], email: 'reader@k18.invalid', clients: 1
+  }, { ok: finish.ok, exchanged: gOn.exchanged, email: finish.email, clients: gOn.created.length });
+  var CLnone = loadIsolatedCloud(null, function () { return Promise.reject(new Error('unused')); });
+  var noneStart = await CLnone.oauthStart('google', 'https://cover.k19.invalid/');
+  var noneFinish = await CLnone.oauthFinish('code-k19');
+  t('K19', 'with the vendored client missing both calls answer off rather than throwing', {
+    start: 'off', finish: 'off'
+  }, { start: noneStart.reason, finish: noneFinish.reason });
+  var gApp = oauthHarness({ google: true });
+  gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
+  t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
+    clients: 1, opts: null
+  }, { clients: gApp.created.length, opts: gApp.created[0] ? gApp.created[0].opts : 'none' });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */

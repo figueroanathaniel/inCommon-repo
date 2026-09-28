@@ -2595,6 +2595,96 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
+## Continue with Google, and why the code comes back to the cover
+The owner asked for Google sign in on the cover on 28 September 2026, as part of
+moving toward the Celestial Codex direction. It rides the Supabase project the
+cloud sync already uses, so there is one account system, not two. The cloud UI
+spec's "No provider sign-ins" line describes the temporary Settings surface of
+step 4 and is superseded here for the cover.
+
+**The return lands on the cover as `?code=`, and that is the whole design.**
+supabase-js defaults to the implicit flow, which hands the tokens back after the
+`#`, and `#` is this app's router: a return to the app is read as an address,
+and a return to the cover is forwarded to the app as one by the hash forward in
+its head. PKCE hands back `?code=`, before the `#`, where neither page routes.
+The cover exchanges the code, supabase-js writes the session to localStorage
+under the key it derives from the project url, the query is dropped so a reload
+cannot spend the code twice, and the reader goes on to the app, whose own client
+finds the session on load. Driven end to end in a browser with Supabase and
+Google faked: the authorize request carried an S256 challenge and the cover as
+`redirect_to`, the exchange sent the returned code with its verifier, and the
+app came up on `#/today` with `cloudStatus.mode` of `cloud`.
+
+**The app's own client stays implicit on purpose.** Its email links (sign up
+confirmation, the PIN recovery link) would only open in the browser that asked
+for them under PKCE, because the code verifier lives there. K20 asserts `init()`
+still creates the client with the library defaults.
+
+**Every Supabase call is still in `incommon-cloud.js`.** `providerEnabled()`,
+`oauthStart()` and `oauthFinish()` need no `init()`, because the cover has no
+ProfileManager, and they make their own PKCE client with `detectSessionInUrl`
+off so the exchange is explicit. The module's header rule, never touching the
+network without a session, now carries its one exception in writing: the two
+calls a reader starts by pressing the button, which carry no local state. K15 to
+K19 cover the flow, the disabled provider, no network and a missing library;
+turning the flow back to implicit reds K15, and skipping the provider check reds
+K16 and K17.
+
+**The provider is asked before the redirect.** With Google switched off in the
+project, the authorize endpoint answers with a raw JSON error page, so
+`providerEnabled()` reads the project's public auth settings first and the
+button says in a sentence that Google sign in is not switched on yet. **It is
+off today**: the project allows email only, and turning it on is the owner's
+step in the Supabase dashboard (Authentication, Providers, Google, with a
+Google Cloud OAuth client whose redirect URI is the project's
+`/auth/v1/callback`), plus every cover address in Authentication, URL
+Configuration, Redirect URLs, or Supabase sends the reader to the Site URL
+instead.
+
+**The script is plain, not part of the module, and loads nothing until asked.**
+With no WebGL the module dies at the renderer, and a way in that died with it
+would be a second failure on top of the first. The two files it needs, the
+vendored Supabase client and `incommon-cloud.js`, are loaded on the press or on
+the return, never at page load. The app address is read off the "enter here"
+link rather than written a third time, because `build-bundle.js` asserts there
+are exactly two copies of it. The build copies both files beside `index.html` as
+`SIGNIN_FILES` and refuses if the cover stops naming either one.
+
+**The return's query is read for what it means and never echoed.** Anybody can
+write a link to the cover with any `error_description` in it, and a sentence of
+theirs painted on the first screen would read as ours: a crafted "your account is
+locked, call this number" came back as the cover's own fixed sentence and
+nothing of its text. `access_denied` reads as cancelled and everything else as
+did not finish. A failed load of the two files is forgotten so the next press
+retries, and a return through the back button lets the held button go.
+
+**Two things on the cover changed that the section above states as rules.** It
+now has two controls, not one: H5 still counts one `a[href]`, because the
+Google control is a button that does not navigate by itself. And the G carries
+Google's green: the button follows Google's own dark style because its look is
+set by their branding rules, and that green is their mark rather than
+`#2fff8f`, so the rim is still the only inCommon green on the cover.
+
+**Two gaps it leaves, stated rather than hidden.** `pullAll()` has no caller, so
+signing in on a new device pushes that device's record up and brings nothing
+down. And the first run screen still says "No account, no sign-in", which a
+reader who just signed in with Google will find contradicts what they did. The
+consent language pass owns that sentence.
+
+## The phone sample banner is pinned, so every section carries its shadow
+The sample banner in the vertical shell is `position:absolute` under the header,
+deliberately outside the scroll so it is never a snap stop. Every section pads
+its top by `var(--hdr)` alone, so the banner covered the first 62 pixels of each
+page at 390 wide and 78 at 320: the date on Today, the introduction on Spirit.
+`main` had it too.
+
+Each of the five sections now opens with `data-sample-spacer`: the banner's own
+row, laid out the same way, `visibility:hidden`, `aria-hidden`, with spans where
+the banner has a button, behind the same `sampleOn`. It takes the banner's exact
+height at any width and any text size without measuring anything, measured equal
+at 320, 390 and 430. **If the banner's padding, gap, font or button box
+changes, change the spacer with it**, or the page starts short of it again.
+
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where
 the app, the modules, the doc pages and the harness were all siblings. Every
