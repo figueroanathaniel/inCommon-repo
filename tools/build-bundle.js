@@ -61,7 +61,7 @@ const checkOnly = process.argv.indexOf('--check') !== -1;
 
 /* The modules, in the order the helmet loads them. Several read globals set
    by earlier ones, so this order is part of the contract, not a preference. */
-const VENDORED = ['supabase-js-2.57.1.umd.min.js'];
+const VENDORED = ['supabase-js-2.57.1.umd.min.js', 'astronomy-engine-2.1.19.min.js'];
 const MODULES = [
   /* Ephemeris architecture (V1.0.0): dual-backend system with fallback */
   'ephemeris-points.js',

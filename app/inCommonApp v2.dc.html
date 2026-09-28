@@ -179,6 +179,13 @@ input[type="date"]{color-scheme:dark}
      its channel table from hd-atlas.js above rather than keeping a second
      copy of it. -->
 <script src="./birth-time.js"></script>
+<!-- Where the ten astral bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
+     vendored byte for byte from the npm registry tarball, because the hand
+     written series it replaced measured up to 6.5 degrees from JPL Horizons.
+     modulesReady() waits for window.Astronomy: the scripts in this helmet are
+     hoisted as async tags, so without the wait a chart drawn first would be
+     memoised from the old series for the rest of the session. -->
+<script src="./astronomy-engine-2.1.19.min.js"></script>
 <script src="./arc-solver.js"></script>
 <script src="./ephemeris-cache.js"></script>
 <script src="./hd-wheel.js"></script>
@@ -8887,7 +8894,10 @@ class Component extends DCLogic {
   curTab() { return this.state.tab ?? (this.props.defaultTab ?? 'today'); }
   effOffline() { return !this.state.online || (this.props.simulateOffline ?? false); }
   curMode() { return this.state.mode ?? (this.props.defaultMode ?? 'standard'); }
-  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols); }
+  /* window.Astronomy is here because a chart drawn before it arrives is drawn
+     from the fallback series and memoised that way. It cannot hold the splash
+     forever: boot() gives up after 50 tries and lonRaw() still answers. */
+  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols && window.Astronomy); }
   PM() { return window.ProfileManager; }
   /* Read at the call site, never cached: a module that failed to load has to
      leave the app working rather than take it down, which is why every use of
@@ -10877,6 +10887,54 @@ class Component extends DCLogic {
   }
   lonRaw(name, t) {
     const R = this.RAD;
+    /* THE TEN ASTRAL BODIES COME FROM astronomy-engine, and the series below
+       them is the fallback for a build where that file did not load.
+
+       The series was a two term Moon and a coplanar first order Kepler model
+       for everything else, and nothing ever measured it. Against 19,750 JPL
+       Horizons positions from 1900 to 2100 it was out by 1.3 degrees on the
+       Moon and up to 6.5 on Mars, which moved a Human Design Type for about
+       one birth in twelve and a defined channel for nearly two in five. The
+       library measures 0.023 degrees at worst on the Moon and under 0.006 on
+       the rest, and tools/check-astral-bodies.js holds all ten to 0.03 against
+       that same fixture. t is days from J2000 in UT, which is exactly what
+       MakeTime reads a number as. MakeTime throws on a t that is not finite,
+       where the series answers NaN, so an unparsed birth date takes the series
+       and draws nothing rather than throwing out of a render. */
+    const A = window.Astronomy;
+    if (A && Number.isFinite(t) && (name === 'Sun' || name === 'Moon' || this.PL_EL[name])) {
+      const at = tt => {
+        const time = A.MakeTime(tt);
+        if (name === 'Sun') return A.SunPosition(time).elon;
+        if (name === 'Moon') return A.EclipticGeoMoon(time).lon;
+        return A.Ecliptic(A.GeoVector(name, time, true)).elon;
+      };
+      if (['Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(name) === -1) return this.norm360(at(t));
+      /* MARS OUTWARD ARE READ OFF A FOUR DAY GRID. A library position costs 20
+         to 45us, and 155 for Pluto, whose orbit it integrates numerically;
+         transitWindows() asks for 1,986 of them in a row while the app boots,
+         which took the scan from about 10ms to over 100. Cubic interpolation
+         between library positions on a grid anchored at J2000 measures, at
+         worst over 1900 to 2100, 0.0003 degrees for Mars and 0.00003 or less
+         for the rest: ten to a hundred times under the library's own distance
+         from Horizons. Mercury and Venus measure 0.05 and 0.002 on the same
+         grid and are asked for directly, as are the Sun and the Moon.
+         Every node is a pure function of its index, so the memo cannot go
+         stale, and it clears wholesale at its ceiling like EphemerisCache. A
+         lone cold call costs four nodes; the position cache in front of lonOf
+         pays that once. Neighbours are unwrapped onto the middle node before
+         they are mixed, or a crossing of 0 Aries averages 359 and 1 into 180.
+         check-astral-bodies.js measures all six against the direct library
+         across every such crossing in its fixture. */
+      const grids = this._aeGrid || (this._aeGrid = {});
+      const G = grids[name] || (grids[name] = new Map()), h = 4, k = Math.floor(t / h), u = t / h - k;
+      if (G.size > 4000) G.clear();
+      const node = i => { let v = G.get(i); if (v === undefined) { v = at(i * h); G.set(i, v); } return v; };
+      const near = (v, ref) => v - Math.round((v - ref) / 360) * 360;
+      const p1 = node(k), p0 = near(node(k - 1), p1), p2 = near(node(k + 1), p1), p3 = near(node(k + 2), p2);
+      return this.norm360(p0 * (-u * (u - 1) * (u - 2) / 6) + p1 * ((u + 1) * (u - 1) * (u - 2) / 2)
+        + p2 * (-(u + 1) * u * (u - 2) / 2) + p3 * ((u + 1) * u * (u - 1) / 6));
+    }
     if (name === 'Sun') { const M = this.norm360(357.5291 + .98560028 * t), L = this.norm360(280.459 + .98564736 * t); return this.norm360(L + 1.915 * Math.sin(M * R) + .02 * Math.sin(2 * M * R)); }
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
@@ -10926,9 +10984,10 @@ class Component extends DCLogic {
      A Sabian symbol is a claim about ONE degree of arc. Printing one for a body
      whose position is good to about a degree is a precise statement resting on
      an imprecise number, and it reads as the most exact thing on the page
-     because it is the most specific. The ten astral bodies and both nodes are computed
-     to well inside a degree and keep their symbols; Chiron is fitted to 0.92
-     and does not; the asteroids are unpinned and do not.
+     because it is the most specific. The ten astral bodies are measured against
+     JPL Horizons to 0.03 degrees and keep their symbols (the series they came
+     from before claimed "well inside a degree" here and measured 6.5); Chiron
+     is fitted to 0.92 and does not; the asteroids are unpinned and do not.
 
      This is the gate the next body passes through too: measure it, record the
      worst case, and let that decide what it is allowed to say. */

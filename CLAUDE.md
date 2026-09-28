@@ -8,6 +8,13 @@ and up. **Do not create phone / tablet / 9:16 / desktop forks.** 820px is the
 only breakpoint that changes the component tree.
 
 ## Ephemeris architecture (V1.0.0)
+**Read this first: none of the router below supplies a position.** It is
+initialised in `componentDidMount()` and closed on unmount, and nothing between
+those two calls asks it for anything; `swisseph-wasm` has never been installed.
+Every chart comes from `lonOf()` and `lonRaw()` in the app class, and the ten
+astral bodies there come from `astronomy-engine` now: see "The ten astral bodies
+come from a library" below. The list is kept because the files still load.
+
 **Dual-backend ephemeris system** with graceful fallback. Modules:
 - `ephemeris-points.js`: centralized point registry (17 points, single source of truth)
 - `ephemeris-backend-current.js`: the fallback, existing simplified ephemeris (Kepler + analytical)
@@ -1383,6 +1390,91 @@ crossing in a window rather than the first, because Saturn and Chiron can cross
 a natal longitude three times and one date for a three pass return is a false
 statement about when something happens. Nothing calls it yet.
 
+## The ten astral bodies come from a library, and they are measured
+Until this pass the Sun, Moon and planets came from a hand written series in
+`lonRaw()`: a two term Moon and a coplanar first order Kepler model for Mercury
+to Pluto. Nothing in the build compared them with anything outside it, while the
+asteroids were held to JPL Horizons to a twentieth of a degree. Against 19,750
+Horizons positions from 1900 to 2100 the series was out by 1.3 degrees on the
+Moon, 3.9 on Venus, 6.5 on Mars and 2.9 on Pluto, and a comment beside it said
+"well inside a degree".
+
+What that changed, over 2,000 random births from 1950 to 2010, with one set of
+Human Design rules and only the positions swapped:
+
+| Changed | Share |
+|---|---|
+| Any activated gate | 74% |
+| Defined channels | 39% |
+| **Authority** | **8.8%** |
+| **Type** | **8.4%** |
+
+It is the same class of error as the 88 day design side, a third of its size,
+and it survived the same way: nineteen gates were green, because every one of
+them tested what it was pointed at and none was pointed at the foundation.
+
+**`astronomy-engine` 2.1.19 (MIT, Don Cross) is vendored** as
+`app/astronomy-engine-2.1.19.min.js`, byte for byte from the npm registry
+tarball, and named with its version the way the Supabase client is. It measures
+0.023 degrees at worst on the Moon and under 0.006 on the other nine. It is one
+browser file and needs no bundler, and needing a bundler was the reason the
+series was hand written in the first place.
+
+**`modulesReady()` waits for `window.Astronomy`.** Helmet scripts are hoisted as
+async tags, so without the wait a chart drawn before the library lands is
+memoised from the fallback for the session, the trap the minor bodies had with
+`window.MinorBodies`. The wait cannot hold the splash forever: `boot()` gives up
+after 50 tries and shows its banner, and `lonRaw()` answers from the old series,
+which is kept as the fallback for exactly that case. Verified both ways in a
+browser: a six second delay boots with the library in place, and a blocked file
+boots at about 9.6 seconds on the fallback.
+
+**Mars outward are read off a four day grid.** A library position costs 20 to
+45us, and 155 for Pluto, whose orbit it integrates numerically.
+`transitWindows()` asks for 1,986 in a row during boot and went from about 10ms
+to over 100. Cubic interpolation between library positions on a grid anchored at
+J2000 measures 0.0003 degrees at worst for Mars and 0.00003 or less for the
+rest, and the scan now takes about 6ms in a browser, less than before. Mercury
+and Venus measure 0.05 and 0.002 on the same grid and are asked for directly, as
+are the Sun and the Moon. Two things about the grid are easy to undo. Neighbours
+are unwrapped onto the middle node before they are mixed, or a crossing of 0
+Aries averages 359 and 1 into 180: this pass made that bug once, in a scratch
+test. And a lone cold call costs four nodes, which the position cache in front
+of `lonOf()` pays once. `bench-ephemeris.js` loads the same file now, so the
+ratios quoted in "The one cache that holds positions" were measured against the
+old series; run the bench rather than quoting them.
+
+**`check-astral-bodies.js` is the gate** and `fetch-astral-bodies.js` makes its
+fixture. It lifts `lonRaw()` out of the app the way `bench-ephemeris.js` does,
+loads the vendored file, and holds all ten bodies to 0.03 degrees, a thirtieth of
+a Human Design line, against every Horizons position. It also asserts that the
+old series FAILS that ceiling with the library removed, which is what proves it
+can go red; walks the grid against the library at a quarter day through all 164
+crossings of 0 Aries in the fixture; pins the vendored file's SHA-256; asserts a
+non-finite instant answers NaN; and checks the two seams that fail silently,
+`modulesReady()` and the `app/sw.js` precache. Each of those was sabotaged once
+and turned it red.
+
+**Only a finite instant reaches the library.** `MakeTime` throws on NaN, where
+the series quietly answered NaN, so a half typed partner birth date that parses
+to an invalid date would have thrown out of a render instead of drawing nothing.
+`lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
+back for all ten bodies.
+
+**`people-library.js` `STATE_VERSION` is 2.** Its own comment says the number
+moves when the arithmetic of `computed_state` changes, and the bump is what
+invalidates `pair-cache.js`, so no stored composite outlives the positions it
+was made from.
+
+**This changes existing readers' charts**, as the design side fix did: about one
+birth in twelve reads as a different Type. It is a correction rather than a
+change, and it is worth saying out loud.
+
+**The deploy bundle was not rebuilt.** `deploy/v6.3/` still carries the old
+series. Shipping this is a rebuild and a version bump once it is live, by the
+rule in "Where things live in this repository", and not something to fold into
+the change that made it.
+
 ## A routed jump owns the pager tab until it lands
 `vtGoTab()` sets `vtTab` and then smooth scrolls the pager to that page, and
 the pager's scroll handler derives `vtTab` from `scrollLeft` on every scroll
@@ -2627,25 +2719,26 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds twenty-eight scripts. Nineteen are gates and are worth running
+`tools/` holds thirty scripts. Twenty are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
-`check-registry-integration.js`, `check-minor-body-elements.js`.
-Six generate:
+`check-registry-integration.js`, `check-minor-body-elements.js`,
+`check-astral-bodies.js`.
+Seven generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
-(needs network: JPL Horizons), `build-extended-points-doc.js`
+and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
 doc's own counts can never drift from the registry's). `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
 
 `drift-check.js` is none of the three above and does not run cold the way
-the other twenty-seven do. It is the only script in `tools/` that drives a
+the other twenty-nine do. It is the only script in `tools/` that drives a
 real browser, because it exists to answer a different question:
 `check-deployed.js` asks whether the live site matches what was built, and
 this asks whether `deploy/v6.3/` itself still matches the bytes the seven
