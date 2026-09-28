@@ -1,0 +1,122 @@
+.stage {
+  position: relative;
+  width: 100%;
+  height: clamp(460px, 75vh, 780px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(139, 111, 224, 0.28), transparent 60%),
+    #05051a;
+  box-shadow: var(--shadow-lg);
+  touch-action: none;
+}
+
+.gate {
+  display: inline-block;
+  font-family: var(--font-family-monospace);
+  font-size: 0.6rem;
+  font-weight: 500;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  background: rgba(7, 7, 26, 0.85);
+  border: 1px solid currentColor;
+  user-select: none;
+}
+
+.personality { color: #f1ead8; }
+.design { color: #f07a8a; }
+.both { color: #f2d58a; }
+.off { color: #555; }
+
+.legend {
+  position: absolute;
+  left: var(--spacing-3);
+  bottom: var(--spacing-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  padding: 6px 12px;
+  background: rgba(7, 7, 26, 0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swP, .swD, .swB {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.swP { background: #f1ead8; }
+.swD { background: #e0526a; }
+.swB { background: #f2d58a; }
+
+.toggle {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: rgba(10, 9, 32, 0.72);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.toggleOn {
+  color: var(--primary);
+  border-color: rgba(217, 185, 106, 0.6);
+  box-shadow: var(--gold-glow);
+}
+
+.stage2d {
+  touch-action: auto;
+  padding: var(--spacing-12) var(--spacing-2) var(--spacing-12);
+}
+
+.fallback {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.fallbackCenters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+.fallbackCenter {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.fallbackDefined {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}

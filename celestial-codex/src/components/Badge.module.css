@@ -1,0 +1,77 @@
+@layer base {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
+    transition: background-color var(--animation-duration-fast) ease-in-out;
+    cursor: default;
+    user-select: none;
+  }
+
+  .primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border: 1px solid;
+  }
+
+  .primary:hover {
+    background-color: color-mix(in srgb, var(--primary) 80%, transparent);
+  }
+
+  .destructive {
+    background-color: color-mix(in srgb, var(--error) 15%, var(--surface));
+    color: var(--error);
+    border: 1px solid color-mix(in srgb, var(--error) 20%, var(--surface));
+  }
+
+  .destructive:hover {
+    background-color: color-mix(in srgb, var(--error) 25%, var(--surface));
+  }
+
+  .secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid;
+  }
+
+  .secondary:hover {
+    background-color: color-mix(in srgb, var(--secondary) 80%, transparent);
+  }
+
+  .outline {
+    background-color: transparent;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  .outline:hover {
+    background-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+  }
+
+  .success {
+    background-color: color-mix(in srgb, var(--success) 15%, var(--surface));
+    color: var(--success);
+    border: 1px solid color-mix(in srgb, var(--success) 20%, var(--surface));
+  }
+
+  .success:hover {
+    background-color: color-mix(in srgb, var(--success) 25%, var(--surface));
+  }
+
+  .warning {
+    background-color: color-mix(in srgb, var(--warning) 15%, var(--surface));
+    color: var(--warning);
+    border: 1px solid color-mix(in srgb, var(--warning) 20%, var(--surface));
+  }
+
+  .warning:hover {
+    background-color: color-mix(in srgb, var(--warning) 25%, var(--surface));
+  }
+}
+

@@ -1,0 +1,32 @@
+.stage {
+  position: relative;
+  width: 100%;
+  height: clamp(420px, 70vh, 740px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(59, 42, 134, 0.35), transparent 65%),
+    #03030f;
+  box-shadow: var(--shadow-lg);
+  touch-action: none;
+  cursor: grab;
+}
+
+.fallback {
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.flat {
+  height: auto;
+  aspect-ratio: 2 / 1;
+  min-height: 0;
+  touch-action: auto;
+  cursor: default;
+  padding-top: var(--spacing-12);
+  background: #03030f;
+}

@@ -1,0 +1,28 @@
+.svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.center {
+  cursor: pointer;
+}
+
+.label {
+  font-family: var(--font-family-base);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  fill: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.labelDef {
+  fill: #120f24;
+  font-weight: 600;
+}
+
+.gate {
+  font-family: var(--font-family-monospace);
+  font-size: 8px;
+  font-weight: 500;
+}

@@ -1,0 +1,125 @@
+.page {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--spacing-8) clamp(var(--spacing-4), 3vw, var(--spacing-12));
+}
+
+.skTitle {
+  height: 3rem;
+  width: 40%;
+  margin-bottom: var(--spacing-6);
+}
+
+.skBody {
+  height: 60vh;
+  width: 100%;
+  border-radius: var(--radius-lg);
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 0 0 var(--spacing-3);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--spacing-6);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-8);
+  animation: rise 0.8s ease-out both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.title {
+  font-family: var(--font-family-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1;
+  margin: 0 0 var(--spacing-3);
+}
+
+.title em,
+.onboardTitle em {
+  font-style: italic;
+  background: linear-gradient(100deg, #f5dfa0, #d9b96a 45%, #b98ce8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.signature {
+  font-family: var(--font-family-monospace);
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.tabs {
+  width: 100%;
+}
+
+.tabsList {
+  justify-content: flex-start;
+  margin-bottom: var(--spacing-8);
+}
+
+.tabsList button {
+  font-family: var(--font-family-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.tabBody {
+  animation: rise 0.5s ease-out both;
+}
+
+.onboard {
+  max-width: 640px;
+  margin: var(--spacing-8) auto;
+  text-align: center;
+}
+
+.onboardTitle {
+  font-family: var(--font-family-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  line-height: 1.05;
+  margin: 0 0 var(--spacing-4);
+}
+
+.onboardLede {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+  margin: 0 0 var(--spacing-8);
+}
+
+.onboardCard {
+  padding: var(--spacing-8);
+}
+
+.dialog {
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.lazy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  min-height: 420px;
+  font-family: var(--font-family-display);
+  font-style: italic;
+  color: var(--muted-foreground);
+}

@@ -1,0 +1,56 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--animation-duration-fast);
+}
+
+.chipOn {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--gold-soft);
+}
+
+.minor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.status,
+.statusErr {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.statusErr {
+  color: var(--warning);
+}
