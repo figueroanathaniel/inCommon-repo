@@ -1470,10 +1470,11 @@ was made from.
 birth in twelve reads as a different Type. It is a correction rather than a
 change, and it is worth saying out loud.
 
-**The deploy bundle was not rebuilt.** `deploy/v6.3/` still carries the old
-series. Shipping this is a rebuild and a version bump once it is live, by the
-rule in "Where things live in this repository", and not something to fold into
-the change that made it.
+**The deploy bundle was rebuilt in place.** `deploy/v6.3/` carries the library
+and the cover's sign in, so the deploy preview shows what the source does. There
+was no version bump, by the rule in "Where things live in this repository":
+rebuilding does not earn one, and the stamp moves when a build has been deployed
+and confirmed live. The two earlier v6.3 rebuilds made the same call.
 
 ## A routed jump owns the pager tab until it lands
 `vtGoTab()` sets `vtTab` and then smooth scrolls the pager to that page, and
