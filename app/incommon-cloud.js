@@ -12,10 +12,10 @@
  *
  * WHAT THIS MODULE NEVER DOES:
  *   1. It never touches the network without a session, with one exception
- *      the reader asks for by pressing a button: requesting an email sign in
- *      link from the cover and exchanging the code that comes back. None of those calls
- *      carries any local state; the record only moves once the app's own
- *      client exists.
+ *      the reader asks for by pressing a button: signing in, making an
+ *      account or asking for a new password on the cover, and taking the
+ *      session an emailed link brings back. None of those calls carries any
+ *      local state; the record only moves once the app's own client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
  *      revocation takes effect on the next push, not on the next login. Rows
@@ -47,7 +47,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.2.0';
+  var VERSION = '2.3.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -473,74 +473,185 @@
     }).catch(function (e) { return { ok: false, error: e && e.message }; });
   }
 
-  /* ---------- the emailed sign in link, started and finished on the cover ----------
+  /* ---------- signing in on the cover, with a password ----------
 
-     Google sign in was started here too, and was taken out on 29 September
-     2026 at the owner's request. The email link is the one way to an account.
+     An email and a password, since 29 September 2026. The emailed sign in
+     link came before it and was replaced at the owner's request, because it
+     only finished in the browser that asked for it: the PKCE code verifier
+     lives there, and an email opened on the phone, or in the mail app's own
+     browser, arrived with nothing to finish it. Google sign in was here too
+     and was taken out the same day.
 
-     The cover is its own page with no ProfileManager, so these need no
+     The cover is its own page with no ProfileManager, so none of these need
      init(). They share only the project and the browser's storage with the
-     app's client: the cover starts the flow and finishes it, supabase-js
-     writes the session to localStorage under the key it derives from the
-     project url, and the client init() makes on the app page finds it there.
+     app's client: supabase-js writes the session to localStorage under the key
+     it derives from the project url, and the client init() makes on the app
+     page finds it there.
 
-     PKCE, not the library's implicit default. Implicit hands the tokens back
-     after the #, and # is this app's router: a return to the app would be read
-     as an address, and a return to the cover would be forwarded to the app as
-     one. PKCE hands back ?code=, before the #, which neither page routes on.
-     The app's own client stays implicit on purpose: the email links it sends
-     would otherwise only open in the browser that asked for them. */
-  var oauthClient = null;
-  function oauthLib() {
-    if (oauthClient) return oauthClient;
+     THE ONE CLIENT HERE IS ON THE IMPLICIT FLOW, and that is what lets every
+     email this page causes work in any browser. A password sign in returns a
+     session at once and needs no flow at all; the two emails, confirming a new
+     address and choosing a new password, come back with the tokens after the
+     #, and tokens need no verifier. The # is the app's router, so the cover's
+     hash forward leaves a hash carrying tokens alone and the cover adopts them
+     itself (adoptSession), then drops them from the address.
+
+     It does not read the url by itself (detectSessionInUrl off), so a token
+     is taken only where the cover chose to take it. The app's own client is
+     implicit too, by the library defaults, which K20 holds. */
+  var coverClient = null;
+  function coverLib() {
+    if (coverClient) return coverClient;
     var l = lib();
     if (!l || typeof l.createClient !== 'function') return null;
-    oauthClient = l.createClient(PROJECT_URL, PROJECT_ANON_KEY, {
-      auth: { flowType: 'pkce', detectSessionInUrl: false, persistSession: true, autoRefreshToken: false }
+    coverClient = l.createClient(PROJECT_URL, PROJECT_ANON_KEY, {
+      auth: { flowType: 'implicit', detectSessionInUrl: false, persistSession: true, autoRefreshToken: false }
     });
-    return oauthClient;
+    return coverClient;
   }
 
-  /* The emailed sign in link rides the PKCE client, so it comes back to the
-     page that asked as ?code= and oauthFinish() completes it. The one cost of PKCE here is that the link has to be
-     opened in the browser that asked, because the code verifier is kept there;
-     the cover says so. A new address is signed up by the same link, which is
-     the library default and what a reader pressing "continue" expects. */
   var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  /* THE NEWSLETTER CHOICE RIDES ON THE SIGN UP, AND ONLY ON IT.
+  /* Eight, stated rather than left to the project's own floor of six. A
+     project that asks for more still refuses a shorter one, and that comes
+     back as weak. */
+  var PASSWORD_MIN = 8;
 
-     The cover asks with a box that starts ticked and can be unticked, and the
-     answer goes to Supabase as user metadata through signInWithOtp's
-     options.data, which Supabase writes only when the call creates the account.
-     So it is recorded once, at creation, as the owner asked, and a returning
-     reader who unticks it changes nothing: they already have an answer, and
-     every issue carries its own unsubscribe once a sender exists. Nothing is
-     sent to a mailing list from here. The list is read out of the project by
-     the owner (docs/NEWSLETTER-SETUP.md), which is the setup this begins.
-     Absent opts leave the call exactly as it was, so a caller that does not
-     ask records nothing. */
-  function emailStart(email, redirectTo, opts) {
+  /* Every refusal is a reason the cover can say in words. The code decides
+     first where Supabase sends one, and the message only where it does not,
+     because older projects answer with the message alone. The order matters
+     once: a new password equal to the old one is refused with a sentence that
+     also matches the weak one. */
+  function authReason(e) {
+    var m = String((e && e.message) || ''), code = String((e && e.code) || '');
+    if (e && e.status === 429 || /rate limit|too many/i.test(m) || /rate_limit/.test(code)) return 'rate';
+    if (e && (e.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(m))) return 'offline';
+    if (code === 'invalid_credentials' || /invalid login credentials/i.test(m)) return 'wrong';
+    if (code === 'email_not_confirmed' || /email not confirmed/i.test(m)) return 'unconfirmed';
+    if (code === 'user_already_exists' || code === 'email_exists' || /already registered/i.test(m)) return 'exists';
+    if (code === 'same_password' || /different from the old/i.test(m)) return 'same';
+    if (code === 'weak_password' || (e && e.name === 'AuthWeakPasswordError') || /password should/i.test(m)) return 'weak';
+    if (code === 'signup_disabled' || /signups not allowed/i.test(m)) return 'closed';
+    return 'error';
+  }
+  function authCall(run) {
+    return Promise.resolve().then(run).catch(function (e) {
+      return { error: { name: e && e.name, message: (e && e.message) || 'failed to fetch' } };
+    });
+  }
+  function refused(res) {
+    return { ok: false, reason: authReason(res.error), error: String(res.error.message || '') };
+  }
+
+  function passwordSignIn(email, password) {
     var addr = String(email || '').trim();
     if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
-    var c = oauthLib();
+    if (!password) return Promise.resolve({ ok: false, reason: 'nopassword' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return authCall(function () {
+      return c.auth.signInWithPassword({ email: addr, password: String(password) });
+    }).then(function (res) {
+      if (res && res.error) return refused(res);
+      var s = res && res.data && res.data.session;
+      if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
+      return { ok: true, email: (s.user && s.user.email) || addr };
+    });
+  }
+
+  /* THE NEWSLETTER CHOICE RIDES ON THE SIGN UP, AND ONLY ON IT.
+
+     The cover asks with a box that starts ticked and can be unticked, shown
+     only while an account is being made, and the answer goes to Supabase as
+     user metadata through signUp's options.data, which Supabase writes only
+     when the call creates the account. So it is recorded once, at creation,
+     as the owner asked. Nothing is sent to a mailing list from here: the list
+     is read out of the project by the owner (docs/NEWSLETTER-SETUP.md). Absent
+     opts leave the call without it, so a caller that does not ask records
+     nothing.
+
+     Three answers, because Supabase gives three. With email confirmation on,
+     which is the project default, a new address gets a link and no session
+     (confirm). With it off, the session comes back at once (signedIn). And an
+     address that already has a confirmed account is answered, deliberately,
+     like a new one, so the address cannot be tested for an account by
+     anybody: the only tell is a user with no identities, which is reported
+     as exists so the reader is sent to sign in rather than told to check an
+     email that will never come. */
+  function passwordSignUp(email, password, redirectTo, opts) {
+    var addr = String(email || '').trim();
+    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+    if (String(password || '').length < PASSWORD_MIN) return Promise.resolve({ ok: false, reason: 'short' });
+    var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
     var options = { emailRedirectTo: redirectTo };
     if (opts && typeof opts.newsletter === 'boolean') {
       options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
-    return Promise.resolve().then(function () {
-      return c.auth.signInWithOtp({ email: addr, options: options });
+    return authCall(function () {
+      return c.auth.signUp({ email: addr, password: String(password), options: options });
     }).then(function (res) {
-      if (!res || !res.error) return { ok: true };
-      var e = res.error, m = String(e.message || '');
-      if (e.status === 429 || /rate limit/i.test(m)) return { ok: false, reason: 'rate' };
-      if (e.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(m)) return { ok: false, reason: 'offline' };
-      return { ok: false, reason: 'error', error: m };
-    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+      if (res && res.error) return refused(res);
+      var d = (res && res.data) || {};
+      if (d.session) return { ok: true, signedIn: true, email: (d.session.user && d.session.user.email) || addr };
+      if (d.user && Array.isArray(d.user.identities) && d.user.identities.length === 0) return { ok: false, reason: 'exists' };
+      return { ok: true, confirm: true, email: addr };
+    });
   }
 
+  /* The reset email comes back to the page that asked, with the tokens after
+     the # and type=recovery, which the cover adopts and then asks for the new
+     password. Supabase answers the same whether or not the address has an
+     account, and so does the cover. */
+  function passwordResetStart(email, redirectTo) {
+    var addr = String(email || '').trim();
+    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return authCall(function () {
+      return c.auth.resetPasswordForEmail(addr, { redirectTo: redirectTo });
+    }).then(function (res) {
+      return res && res.error ? refused(res) : { ok: true };
+    });
+  }
+
+  /* Tokens from an emailed link, read off the cover's hash by the cover. They
+     are checked with the server by setSession before anything is stored, so a
+     hand written hash signs nobody in, and the address named is the server's,
+     never the url's. */
+  function adoptSession(accessToken, refreshToken) {
+    if (!accessToken || !refreshToken) return Promise.resolve({ ok: false, reason: 'error', error: 'no tokens' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return authCall(function () {
+      return c.auth.setSession({ access_token: String(accessToken), refresh_token: String(refreshToken) });
+    }).then(function (res) {
+      if (res && res.error) return refused(res);
+      var s = res && res.data && res.data.session;
+      if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
+      return { ok: true, email: (s.user && s.user.email) || null };
+    });
+  }
+
+  /* The new password, once a recovery link has been adopted. It needs the
+     session adoptSession just stored, and nothing else: no old password,
+     because not knowing it is the whole reason the reader is here. */
+  function passwordSet(password) {
+    if (String(password || '').length < PASSWORD_MIN) return Promise.resolve({ ok: false, reason: 'short' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return authCall(function () {
+      return c.auth.updateUser({ password: String(password) });
+    }).then(function (res) {
+      return res && res.error ? refused(res) : { ok: true };
+    });
+  }
+
+  /* A sign in link sent before the password came in returns as ?code=, and
+     this finishes it for as long as one is still in somebody's inbox. It
+     works on this client because the code verifier the PKCE client stored
+     sits under the same key, and the exchange reads it from there. */
   function oauthFinish(code) {
-    var c = oauthLib();
+    var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
     return Promise.resolve().then(function () { return c.auth.exchangeCodeForSession(code); }).then(function (res) {
       var s = res && res.data && res.data.session;
@@ -709,7 +820,11 @@
     isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
     completePinRecovery: completePinRecovery,
-    emailStart: emailStart,
+    passwordSignIn: passwordSignIn,
+    passwordSignUp: passwordSignUp,
+    passwordResetStart: passwordResetStart,
+    adoptSession: adoptSession,
+    passwordSet: passwordSet,
     oauthFinish: oauthFinish,
     oracleRead: oracleRead,
     billingStatus: billingStatus,

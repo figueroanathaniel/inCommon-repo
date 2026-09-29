@@ -70,9 +70,27 @@ Read the time limit note under The knobs before you do.
 
 1. Sign in at platform.kimi.ai (Moonshot AI's platform; platform.moonshot.ai
    goes to the same place).
-2. Add a balance under Billing. The smallest top up is $1, which is about a
-   hundred standard readings.
+2. Add a balance under Billing: **$10, not $1.** The money is not spent any
+   faster, but Kimi sets its limits by how much has been put in over the life
+   of the account, and $1 buys the lowest tier (below).
 3. Create a key under API Keys, and copy it.
+
+**Why $10.** At the time of writing, Kimi's tiers go by the total ever added:
+
+| Total added | Readings at once | Requests a minute | Tokens a day |
+|---|---|---|---|
+| $1 | 1 | 3 | 1.5 million |
+| $10 | 15 | 100 | no limit |
+| $20 | 40 | 100 | no limit |
+
+The key is shared by every reader of the app, so at $1 Kimi writes **one
+reading at a time for everybody**, and a second reader who asks while it is
+writing is turned away. The page waits that out for about a minute and a half,
+saying the Oracle is busy with another reading, before it gives up and says it
+is resting. At $10 fifteen readings can be written at once, which is plenty at
+inCommon's size. The $10 stays in the balance and is spent a cent or so a
+reading, like any other top up. Check the current table on the Rate Limits
+page of platform.kimi.ai, because it changes.
 
 The key goes into Supabase in step 3, and nowhere else. **Never put it in the
 repository**: the repository is public, and a key in it would be found and
@@ -106,13 +124,20 @@ watches a `supabase/` folder and can open preview branches that are billed.
 
 ### 4. Try it
 
-Sign in on the cover with your email, open The Oracle and press Consult the
-Oracle. A standard reading takes about half a minute. Go to another tab and
+Sign in on the cover with your email and password (choose Create an account
+the first time), open The Oracle and press Consult the Oracle. A standard
+reading takes about half a minute. Go to another tab and
 back: the reading is there at once, because it is the stored one.
 
 To try In-Depth before Stripe is set up, add your own address to
 `LUMINARY_ADMIN_EMAILS` (below). It reads in depth without a subscription,
 which is how the Codex's admin role passed its paywall.
+
+While a reading is being written the page says so, and it keeps saying so if
+the page is reloaded or opened in a second tab: it asks again every ten seconds
+and the stored reading appears when it is done. If it says the Oracle is busy
+with another reading, Kimi is writing someone else's and the balance is on the
+$1 tier (step 1).
 
 If it says the Oracle is silent for now, open the function's Logs in the
 dashboard. No function named `oracle` at all means step 3 did not finish. The

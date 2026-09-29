@@ -1543,96 +1543,152 @@ async function runCloudTests() {
   await new Promise(function (r) { setTimeout(r, 1500); });
   t('K14', 'a live debounce firing unsigned-in is exactly as inert as calling push() directly: still no client call', 0, initCalls.length);
 
-  /* ---- K15-K20: the emailed sign in link, as the cover drives it.
+  /* ---- K15-K25, K35-K37: signing in on the cover, with a password.
      The cover has no ProfileManager, so these run without init(). What they
-     must prove is the shape that keeps the return away from the hash router
-     (a PKCE client that does not read the url by itself), that Google sign in
-     is gone from the module since the owner took it out on 29 September 2026,
-     and that the app's own client is left on the flow its email links depend
-     on. K17 was Google's offline start and went with it. */
-  function oauthHarness(settings, otpError) {
-    var h = { created: [], oauth: [], exchanged: [], fetched: [], otp: [] };
-    var fakeLib = { createClient: function (url, key, opts) {
-      h.created.push({ url: url, opts: opts || null });
+     must prove is the shape that lets every email the cover causes work in any
+     browser (one client on the implicit flow that does not read the url by
+     itself), that the emailed sign in link is gone since the owner replaced it
+     on 29 September 2026, as Google sign in went the same day, that every
+     refusal comes back as a reason rather than a throw, and that the app's own
+     client is left on the library defaults. K17 was Google's offline start and
+     went with it. */
+  function oauthHarness(opts) {
+    opts = opts || {};
+    var h = { created: [], oauth: [], exchanged: [], otp: [], pw: [], up: [], reset: [], set: [], upd: [] };
+    var answer = function (k, ok) { return Promise.resolve(opts[k] ? { data: {}, error: opts[k] } : ok); };
+    var fakeLib = { createClient: function (url, key, o) {
+      h.created.push({ url: url, opts: o || null });
       return { auth: {
         onAuthStateChange: function () {},
-        signInWithOtp: function (a) { h.otp.push(a); return Promise.resolve({ data: {}, error: otpError || null }); },
-        signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: { provider: a.provider, url: 'https://auth.invalid/authorize?provider=' + a.provider }, error: null }); },
-        exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); }
+        signInWithOtp: function (a) { h.otp.push(a); return Promise.resolve({ data: {}, error: null }); },
+        signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: {}, error: null }); },
+        exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); },
+        signInWithPassword: function (a) { h.pw.push(a); return answer('pwError', { data: { session: { user: { email: a.email } } }, error: null }); },
+        signUp: function (a) {
+          h.up.push(a);
+          var d = opts.upData || { user: { email: a.email, identities: [{ id: 'i1' }] }, session: null };
+          return answer('upError', { data: d, error: null });
+        },
+        resetPasswordForEmail: function (e, o) { h.reset.push({ email: e, opts: o }); return answer('resetError', { data: {}, error: null }); },
+        setSession: function (t) { h.set.push(t); return answer('setError', { data: { session: { user: { email: 'server@k36.invalid' } } }, error: null }); },
+        updateUser: function (u) { h.upd.push(u); return answer('updError', { data: { user: {} }, error: null }); }
       }, from: function () { return fakeClient([]).from('x'); } };
     } };
-    var fetchFn = function (u) {
-      h.fetched.push(u);
-      if (settings === 'offline') return Promise.reject(new Error('no network'));
-      return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ external: settings }); } });
-    };
-    h.C = loadIsolatedCloud(fakeLib, fetchFn);
+    h.C = loadIsolatedCloud(fakeLib, function () { return Promise.reject(new Error('no network in the test')); });
     return h;
   }
-  var gOn = oauthHarness({ email: true });
-  var mailOn = await gOn.C.emailStart('reader@k15.invalid', 'https://cover.k15.invalid/');
-  t('K15', 'the emailed link is asked for on a PKCE client that does not read the url, sent back to the page that asked', {
-    ok: true, flowType: 'pkce', detectSessionInUrl: false, redirectTo: 'https://cover.k15.invalid/'
+  var gOn = oauthHarness();
+  var inOk = await gOn.C.passwordSignIn('  reader@k15.invalid ', 'correct horse');
+  var auth0 = gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth;
+  t('K15', 'the cover signs in on one client on the implicit flow that does not read the url and keeps the session, with the trimmed address and the password', {
+    ok: true, email: 'reader@k15.invalid', flowType: 'implicit', detectSessionInUrl: false, persistSession: true, sent: { email: 'reader@k15.invalid', password: 'correct horse' }
   }, {
-    ok: mailOn.ok, flowType: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.flowType,
-    detectSessionInUrl: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.detectSessionInUrl,
-    redirectTo: gOn.otp[0] && gOn.otp[0].options && gOn.otp[0].options.emailRedirectTo
+    ok: inOk.ok, email: inOk.email, flowType: auth0 && auth0.flowType, detectSessionInUrl: auth0 && auth0.detectSessionInUrl,
+    persistSession: auth0 && auth0.persistSession, sent: gOn.pw[0] || null
   });
   t('K16', 'Google sign in is gone from the module: no provider start and no provider check, and nothing reaches signInWithOAuth', {
     oauthStart: 'undefined', providerEnabled: 'undefined', oauthCalls: 0
   }, { oauthStart: typeof gOn.C.oauthStart, providerEnabled: typeof gOn.C.providerEnabled, oauthCalls: gOn.oauth.length });
   var finish = await gOn.C.oauthFinish('code-k18');
-  t('K18', 'oauthFinish exchanges exactly the code it was handed, on the same PKCE client, and names the account', {
+  t('K18', 'oauthFinish still exchanges exactly the code it was handed, for a link sent before the password, on the same client, and names the account', {
     ok: true, exchanged: ['code-k18'], email: 'reader@k18.invalid', clients: 1
   }, { ok: finish.ok, exchanged: gOn.exchanged, email: finish.email, clients: gOn.created.length });
   var CLnone = loadIsolatedCloud(null, function () { return Promise.reject(new Error('unused')); });
-  var noneMail = await CLnone.emailStart('reader@k19.invalid', 'https://cover.k19.invalid/');
-  var noneFinish = await CLnone.oauthFinish('code-k19');
+  var none = await Promise.all([
+    CLnone.passwordSignIn('reader@k19.invalid', 'correct horse'), CLnone.passwordSignUp('reader@k19.invalid', 'correct horse', 'https://cover.k19.invalid/'),
+    CLnone.passwordResetStart('reader@k19.invalid', 'https://cover.k19.invalid/'), CLnone.adoptSession('at', 'rt'),
+    CLnone.passwordSet('correct horse'), CLnone.oauthFinish('code-k19')]);
   t('K19', 'with the vendored client missing every cover call answers off rather than throwing', {
-    email: 'off', finish: 'off'
-  }, { email: noneMail.reason, finish: noneFinish.reason });
-  var gApp = oauthHarness({ email: true });
+    reasons: ['off', 'off', 'off', 'off', 'off', 'off']
+  }, { reasons: none.map(function (r) { return r.reason; }) });
+  var gApp = oauthHarness();
   gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
   t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
     clients: 1, opts: null
   }, { clients: gApp.created.length, opts: gApp.created[0] ? gApp.created[0].opts : 'none' });
 
-  /* ---- K21-K23: Continue with email, the magic link, on the same PKCE client
-     so the link comes back as ?code= and the path K18 proves completes it. */
-  var gMail = oauthHarness({ email: true });
-  var mailOk = await gMail.C.emailStart('  reader@k21.invalid ', 'https://cover.k21.invalid/');
-  t('K21', 'emailStart asks the PKCE client for a link to the trimmed address, sent back to the page that asked', {
-    ok: true, flowType: 'pkce', calls: 1, email: 'reader@k21.invalid', emailRedirectTo: 'https://cover.k21.invalid/'
+  var gUp = oauthHarness();
+  var upNew = await gUp.C.passwordSignUp(' reader@k21.invalid', 'correct horse', 'https://cover.k21.invalid/');
+  t('K21', 'the emailed sign in link is gone: making an account sends the address, the password and the page to confirm back to, and answers confirm when no session comes back', {
+    emailStart: 'undefined', otpCalls: 0, ok: true, confirm: true, email: 'reader@k21.invalid', password: 'correct horse', emailRedirectTo: 'https://cover.k21.invalid/'
   }, {
-    ok: mailOk.ok, flowType: gMail.created[0] && gMail.created[0].opts && gMail.created[0].opts.auth.flowType, calls: gMail.otp.length,
-    email: gMail.otp[0] && gMail.otp[0].email, emailRedirectTo: gMail.otp[0] && gMail.otp[0].options.emailRedirectTo
+    emailStart: typeof gUp.C.emailStart, otpCalls: gUp.otp.length + gOn.otp.length, ok: upNew.ok, confirm: !!upNew.confirm,
+    email: gUp.up[0] && gUp.up[0].email, password: gUp.up[0] && gUp.up[0].password, emailRedirectTo: gUp.up[0] && gUp.up[0].options.emailRedirectTo
   });
-  var gRate = oauthHarness({ email: true }, { status: 429, message: 'email rate limit exceeded' });
-  var mailRate = await gRate.C.emailStart('reader@k22.invalid', 'https://cover.k22.invalid/');
-  t('K22', 'the project\'s email rate limit is reported as rate, so the cover can say to try later rather than that something broke', {
-    ok: false, reason: 'rate'
-  }, { ok: mailRate.ok, reason: mailRate.reason });
-  var gBad = oauthHarness({ email: true });
-  var mailBad = await gBad.C.emailStart('not an address', 'https://cover.k23.invalid/');
-  t('K23', 'an address that is not one is refused before anything is sent', {
-    ok: false, reason: 'invalid', calls: 0
-  }, { ok: mailBad.ok, reason: mailBad.reason, calls: gBad.otp.length });
+  var refusals = {};
+  var cases = [
+    ['wrong', { status: 400, code: 'invalid_credentials', message: 'Invalid login credentials' }],
+    ['unconfirmed', { status: 400, code: 'email_not_confirmed', message: 'Email not confirmed' }],
+    ['rate', { status: 429, code: 'over_request_rate_limit', message: 'Request rate limit reached' }],
+    ['offline', { name: 'AuthRetryableFetchError', message: 'Failed to fetch' }],
+    ['oldWrong', { status: 400, message: 'Invalid login credentials' }]
+  ];
+  for (var ci = 0; ci < cases.length; ci++) {
+    var gc = oauthHarness({ pwError: cases[ci][1] });
+    refusals[cases[ci][0]] = (await gc.C.passwordSignIn('reader@k22.invalid', 'correct horse')).reason;
+  }
+  refusals.weak = (await oauthHarness({ upError: { status: 422, code: 'weak_password', message: 'Password should contain at least one character of each' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason;
+  refusals.closed = (await oauthHarness({ upError: { status: 422, code: 'signup_disabled', message: 'Signups not allowed for this instance' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason;
+  refusals.same = (await oauthHarness({ updError: { status: 422, code: 'same_password', message: 'New password should be different from the old password.' } }).C.passwordSet('correct horse')).reason;
+  refusals.mailRate = (await oauthHarness({ resetError: { status: 429, code: 'over_email_send_rate_limit', message: 'email rate limit exceeded' } }).C.passwordResetStart('reader@k22.invalid', 'https://cover.k22.invalid/')).reason;
+  var thrower = loadIsolatedCloud({ createClient: function () { return { auth: { signInWithPassword: function () { throw new Error('Failed to fetch'); } } }; } });
+  refusals.thrown = (await thrower.passwordSignIn('reader@k22.invalid', 'correct horse')).reason;
+  t('K22', 'every refusal comes back as a reason the cover can say, by the code where there is one and the message where there is not, and the same password is not read as a weak one', {
+    wrong: 'wrong', unconfirmed: 'unconfirmed', rate: 'rate', offline: 'offline', oldWrong: 'wrong', weak: 'weak', closed: 'closed', same: 'same', mailRate: 'rate', thrown: 'offline'
+  }, refusals);
+  var gBad = oauthHarness();
+  var bad = await Promise.all([
+    gBad.C.passwordSignIn('not an address', 'correct horse'), gBad.C.passwordSignUp('not an address', 'correct horse', 'x'),
+    gBad.C.passwordResetStart('not an address', 'x'), gBad.C.passwordSignIn('reader@k23.invalid', ''),
+    gBad.C.passwordSignUp('reader@k23.invalid', 'seven77', 'x'), gBad.C.passwordSet('seven77')]);
+  t('K23', 'an address that is not one, an empty password, and a new password under eight characters are refused before anything is sent', {
+    reasons: ['invalid', 'invalid', 'invalid', 'nopassword', 'short', 'short'], calls: 0
+  }, { reasons: bad.map(function (r) { return r.reason; }), calls: gBad.pw.length + gBad.up.length + gBad.reset.length + gBad.upd.length });
 
   /* ---- K24-K25: the newsletter choice rides on the sign up as user metadata,
-     both ways, and a caller that does not ask records nothing. */
-  var gNewsIn = oauthHarness({ email: true }), gNewsOut = oauthHarness({ email: true });
-  await gNewsIn.C.emailStart('reader@k24.invalid', 'https://cover.k24.invalid/', { newsletter: true });
-  await gNewsOut.C.emailStart('reader@k24.invalid', 'https://cover.k24.invalid/', { newsletter: false });
-  var dIn = gNewsIn.otp[0] && gNewsIn.otp[0].options.data, dOut = gNewsOut.otp[0] && gNewsOut.otp[0].options.data;
-  t('K24', 'the newsletter box is sent with the sign up as user metadata, ticked and unticked alike, with where and when it was decided', {
-    inChoice: true, outChoice: false, source: 'cover-signup', dated: true, redirectKept: 'https://cover.k24.invalid/'
+     both ways, a sign in carries nothing, and a caller that does not ask
+     records nothing. */
+  var gNewsIn = oauthHarness(), gNewsOut = oauthHarness();
+  await gNewsIn.C.passwordSignUp('reader@k24.invalid', 'correct horse', 'https://cover.k24.invalid/', { newsletter: true });
+  await gNewsOut.C.passwordSignUp('reader@k24.invalid', 'correct horse', 'https://cover.k24.invalid/', { newsletter: false });
+  var dIn = gNewsIn.up[0] && gNewsIn.up[0].options.data, dOut = gNewsOut.up[0] && gNewsOut.up[0].options.data;
+  t('K24', 'the newsletter box is sent with the sign up as user metadata, ticked and unticked alike, with where and when it was decided, and a sign in carries no options at all', {
+    inChoice: true, outChoice: false, source: 'cover-signup', dated: true, redirectKept: 'https://cover.k24.invalid/', signInKeys: ['email', 'password']
   }, {
     inChoice: dIn ? dIn.newsletter : 'none', outChoice: dOut ? dOut.newsletter : 'none', source: dIn ? dIn.newsletter_source : 'none',
-    dated: !!(dIn && !isNaN(Date.parse(dIn.newsletter_decided_at))), redirectKept: gNewsIn.otp[0] && gNewsIn.otp[0].options.emailRedirectTo
+    dated: !!(dIn && !isNaN(Date.parse(dIn.newsletter_decided_at))), redirectKept: gNewsIn.up[0] && gNewsIn.up[0].options.emailRedirectTo,
+    signInKeys: gOn.pw[0] ? Object.keys(gOn.pw[0]).sort() : 'none'
   });
-  t('K25', 'a sign in that is not asked about the newsletter records nothing about it', {
+  t('K25', 'a sign up that is not asked about the newsletter records nothing about it', {
     data: 'none'
-  }, { data: gMail.otp[0] && gMail.otp[0].options.data ? 'present' : 'none' });
+  }, { data: gUp.up[0] && gUp.up[0].options.data ? 'present' : 'none' });
+  var gHas = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [] }, session: null } });
+  var upHas = await gHas.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
+  var gAuto = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [{ id: 'i1' }] }, session: { user: { email: 'reader@k35.invalid' } } } });
+  var upAuto = await gAuto.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
+  t('K35', 'an address that already has an account (a user with no identities) is reported as exists rather than told to check an email that will not come, and a project with confirmation off signs in at once', {
+    exists: { ok: false, reason: 'exists' }, auto: { ok: true, signedIn: true, confirm: false }
+  }, {
+    exists: { ok: upHas.ok, reason: upHas.reason }, auto: { ok: upAuto.ok, signedIn: !!upAuto.signedIn, confirm: !!upAuto.confirm }
+  });
+  var gRec = oauthHarness();
+  var resetOk = await gRec.C.passwordResetStart(' reader@k36.invalid ', 'https://cover.k36.invalid/');
+  var adopted = await gRec.C.adoptSession('at-k36', 'rt-k36');
+  var saved = await gRec.C.passwordSet('a new one, long');
+  t('K36', 'a new password: the reset email returns to the page that asked, the tokens it brings are handed to the server to check, the address named is the server\'s, and the password is set on that session', {
+    reset: true, resetTo: { email: 'reader@k36.invalid', redirectTo: 'https://cover.k36.invalid/' },
+    adopted: { ok: true, email: 'server@k36.invalid' }, tokens: [{ access_token: 'at-k36', refresh_token: 'rt-k36' }],
+    saved: true, updates: [{ password: 'a new one, long' }], clients: 1
+  }, {
+    reset: resetOk.ok, resetTo: gRec.reset[0] && { email: gRec.reset[0].email, redirectTo: gRec.reset[0].opts.redirectTo },
+    adopted: { ok: adopted.ok, email: adopted.email }, tokens: gRec.set, saved: saved.ok, updates: gRec.upd, clients: gRec.created.length
+  });
+  var gHalf = oauthHarness(), gExp = oauthHarness({ setError: { status: 403, code: 'session_expired', message: 'Session from session_id claim in JWT does not exist' } });
+  var half = await gHalf.C.adoptSession('at-only', '');
+  var expired = await gExp.C.adoptSession('at-k37', 'rt-k37');
+  t('K37', 'a hash missing a token is refused without asking the server, and tokens the server refuses sign nobody in', {
+    half: 'error', halfCalls: 0, expired: { ok: false, reason: 'error' }
+  }, { half: half.reason, halfCalls: gHalf.set.length, expired: { ok: expired.ok, reason: expired.reason } });
 
   /* ---- K26-K29: the Oracle is asked through this module, with a session,
      and every failure comes back as a reason rather than a throw. */
