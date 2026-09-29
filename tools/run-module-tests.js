@@ -84,6 +84,25 @@ t('B13', 'an unknown time is drawn for noon and says so', (() => {
   const i = BT.instant({ birthDate: '1992-07-02', timeUnknown: true });
   return [i.assumed, i.assumedTime, i.date.toISOString()];
 })(), [true, '12:00', '1992-07-02T12:00:00.000Z']);
+t('B13b', 'the placeholder noon is noon where the reader was born, as the note says and the Codex drew it', [
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'Asia/Tokyo' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'Pacific/Honolulu' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timezone: 'America/Chicago' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-01-02', timeUnknown: true, timezone: 'America/Chicago' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'manual', tzOffset: 5.5 }).date.toISOString()
+], ['1992-07-02T03:00:00.000Z', '1992-07-02T22:00:00.000Z', '1992-07-02T17:00:00.000Z', '1992-01-02T18:00:00.000Z', '1992-07-02T06:30:00.000Z']);
+/* The rows above check the offset. This one checks the instant it produces,
+   because a correct offset of 5.5 was subtracted as whole hours for as long as
+   only the offset was checked: every birth in India, Nepal, Iran,
+   Afghanistan, Newfoundland and central Australia was drawn 30 or 45 minutes
+   early, which is seven to eleven degrees of Ascendant. */
+t('B13c', 'a half and three quarter hour zone move the instant by the whole offset, minutes included', [
+  BT.instant({ birthDate: '1992-07-02', birthTime: '10:00', timezone: 'Asia/Kolkata' }).date.toISOString(),
+  BT.instant({ birthDate: '1990-06-15', birthTime: '12:00', timezone: 'Asia/Kathmandu' }).date.toISOString(),
+  BT.instant({ birthDate: '1998-07-15', birthTime: '12:00', timezone: 'America/St_Johns' }).date.toISOString(),
+  BT.instant({ birthDate: '2005-01-15', birthTime: '12:00', timezone: 'Pacific/Chatham' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', birthTime: '10:00', timezone: 'manual', tzOffset: 9.5 }).date.toISOString()
+], ['1992-07-02T04:30:00.000Z', '1990-06-15T06:15:00.000Z', '1998-07-15T14:30:00.000Z', '2005-01-14T22:15:00.000Z', '1992-07-02T00:30:00.000Z']);
 t('B14', 'an unanswered time is not treated as a declared unknown', BT.availability({ birthDate: '1992-07-02' }).timeState, 'unanswered');
 t('B15', 'nothing time dependent is claimed without a time and a place', BT.availability({ birthDate: '1992-07-02', timeUnknown: true }).unavailable.length, BT.TIME_DEPENDENT.length);
 t('B16', 'a time with no coordinates is still not a timed chart', BT.availability({ birthDate: '1992-07-02', birthTime: '09:00' }).timed, false);
@@ -381,6 +400,46 @@ if (!hdLine) {
 
 /* ------------------------------------------------------- W: the wheel edges */
 
+/* ------------------------------------------------ U: master numbers kept
+   The owner asked on 29 September 2026 for 11, 22 and 33 to be kept wherever a
+   number is read, not only in the Life Path and the Personal Year. The methods
+   live in the app class, so they are lifted out of the app the way
+   check-astral-bodies lifts lonRaw(), and run against InCommonCore. */
+(() => {
+  const CORE = require(path.join(repo, 'app', 'incommon-core.js'));
+  const one = re => { const m = re.exec(appSrc); return m ? m[0] : ''; };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const src = 'class U {\n' + one(/  numReduce\(n\)[^\n]*/) + '\n' + one(/  NUM_MASTERS = [^\n]*/) + '\n' +
+    one(/  numKeep\(n\)[^\n]*/) + '\n' + method('numerology') + '\n' + method('personalDay') + '\n' +
+    one(/  personalWeek\([^\n]*/) + '\n' + one(/  weekNo\([^\n]*/) + '\n}';
+  let X = null;
+  try { X = vm.runInNewContext('(' + src + ')', { window: { InCommonCore: CORE }, Date: Date, Math: Math, String: String, isNaN: isNaN }); } catch (e) { X = null; }
+  tTrue('U1', 'the numerology methods lift out of the app and compile', typeof X === 'function');
+  if (typeof X !== 'function') return;
+  const x = new X();
+  t('U2', 'numKeep stops at 11, 22 and 33 and reduces everything else', [29, 22, 33, 44, 38, 99].map(v => x.numKeep(v)).join(','), '11,22,33,8,11,9');
+  x.dob = () => '1985-11-29';
+  const a = x.numerology();
+  t('U3', 'a birth month and day of 11 and 29 keep 11 as the cycles and the first pinnacle keeps 22', [a.rm, a.rd, a.pinnacles[0][0], a.pinnacles[2][0]].join(','), '11,11,22,11');
+  t('U4', 'challenges are differences of fully reduced parts, never of a kept master', [a.challenge].concat(a.subs).join(','), '3,0,3');
+  x.dob = () => '1978-02-22';
+  const b = x.numerology();
+  t('U5', 'a birth day of 22 keeps 22 as the Productive cycle', b.cycles[1][1], 22);
+  const seen = new Set();
+  for (let k = 0; k < 400; k++) {
+    const d = new Date(2026, 0, 1 + k), py = CORE.personalYear('1985-11-29', d.getFullYear()).value;
+    seen.add(x.personalDay(py, d));
+  }
+  tTrue('U6', 'the Personal Day reaches 11, 22 and 33 across a year and never another number over 9',
+    seen.has(11) && seen.has(22) && seen.has(33) && [...seen].every(v => v <= 9 || v === 11 || v === 22 || v === 33));
+  tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
+})();
+
 const WH = require(path.join(repo, 'app', 'hd-wheel.js'));
 
 /* The app keeps its own literal as a fallback. This sweeps both at every
@@ -567,33 +626,46 @@ const CHIRON_JPL = [
   tTrue("E9", "the stated accuracy is not better than the measured worst case",
     c.accuracyDeg >= worst);
   const appSrcE = fs.readFileSync(path.join(repo, "app", "inCommonApp v2.dc.html"), "utf8");
-  /* E10 USED TO ASSERT A COPY OF THE LIST and went red the day the list was
-     right, because Ceres, Pallas, Juno and Vesta came off it: they are fetched
-     now and measure under a tenth of a degree, so they earn the symbol the way
-     every other fetched body does. A test that names the members cannot tell a
-     correct change from a regression. What is asserted instead is the rule, and
-     it is derived from the data rather than typed: any body this module still
-     supplies whose measured accuracy is worse than the app's ceiling must be
-     barred under BOTH spellings, because the wheel asks by name and the
-     expanded table asks by registry id and one route would otherwise print it.
-     Adding a body here with a nine degree fit and forgetting the list turns
-     this red, which the literal version could never have done. */
-  const barred = (appSrcE.match(/DEGREE_SAFE_EXCEPT = \[([^\]]*)\]/) || [, ''])[1]
-    .split(',').map(x => x.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  /* E10 USED TO ASSERT A COPY OF THE LIST, and then a rule over the list, and
+     both went red on a correct change: first when the four asteroids came off
+     it, and then when Chiron was fetched and there was no list left. What is
+     asserted now is the behaviour, run on the app's own degreeSafe() lifted
+     out of it: with the fetched elements present, every body this fallback
+     module also supplies names a degree exactly when its fetched worst case is
+     inside the ceiling; with them missing, every one whose fitted accuracy is
+     worse than the ceiling withholds it, under both spellings, because the
+     wheel asks by name and the expanded table by registry id. A body added to
+     either module with a nine degree fit turns this red on the route that
+     would print it. */
   const ceiling = parseFloat((appSrcE.match(/DEGREE_SAFE_WORST = ([\d.]+)/) || [, '0'])[1]);
-  const MEids = (() => { try { return require(path.join(repo, 'app', 'minor-body-elements.js')).ids(); } catch (e) { return []; } })();
-  const mustBar = MBE.BODIES.filter(b => {
-    if (MEids.indexOf(b.toLowerCase()) !== -1) return false;     /* fetched, so measured elsewhere */
-    const a = MBE.elements[b].accuracyDeg;
-    return a == null || a > ceiling;
-  });
-  const missing = [];
-  mustBar.forEach(b => {
-    if (barred.indexOf(b) === -1) missing.push(b);
-    if (barred.indexOf(b.toLowerCase()) === -1) missing.push(b.toLowerCase());
-  });
-  tTrue("E10", "every body this module supplies that has not earned a degree is barred under both spellings",
-    ceiling > 0 && mustBar.length > 0 && missing.length === 0);
+  const MEmod = (() => { try { return require(path.join(repo, 'app', 'minor-body-elements.js')); } catch (e) { return null; } })();
+  const dsSrc = (() => {
+    const i = appSrcE.indexOf('\n  degreeSafe(name) {');
+    return i === -1 ? '' : appSrcE.slice(i, appSrcE.indexOf('\n  }\n', i) + 4);
+  })();
+  const liftDS = (win) => {
+    try {
+      const K = vm.runInNewContext('(class { COMET_IDS = ["halley", "halebopp", "hyakutake"]; DEGREE_SAFE_WORST = ' + ceiling + ';' + dsSrc + '})', { window: win, String: String, Object: Object });
+      return new K();
+    } catch (e) { return null; }
+  };
+  const withME = liftDS({ MinorBodyElements: MEmod, MinorBodiesEphemeris: MBE });
+  const withoutME = liftDS({ MinorBodiesEphemeris: MBE });
+  const wrongWith = [], wrongWithout = [];
+  let barredWithout = 0;
+  MBE.BODIES.forEach(b => [b, b.toLowerCase()].forEach(nm => {
+    const id = b.toLowerCase();
+    if (withME && MEmod && MEmod.has(id) && withME.degreeSafe(nm) !== (MEmod.worstDeg(id) <= ceiling)) wrongWith.push(nm);
+    const fit = MBE.elements[b].accuracyDeg, should = fit != null && fit <= ceiling;
+    if (withoutME && withoutME.degreeSafe(nm) !== should) wrongWithout.push(nm);
+    if (!should) barredWithout++;
+  }));
+  tTrue("E10", "a fallback body names a degree by its measurement, fetched or fitted, under both spellings" +
+    (wrongWith.length || wrongWithout.length ? ' (wrong with elements: ' + wrongWith.join(',') + '; without: ' + wrongWithout.join(',') + ')' : ''),
+    ceiling > 0 && !!withME && !!withoutME && barredWithout > 0 && wrongWith.length === 0 && wrongWithout.length === 0);
+  tTrue("E10c", "Chiron, now fetched, earns its degree, and on the fitted fallback it does not",
+    !!withME && !!withoutME && withME.degreeSafe('Chiron') === true && withME.degreeSafe('chiron') === true &&
+    withoutME.degreeSafe('Chiron') === false && withoutME.degreeSafe('chiron') === false && MEmod.worstDeg('chiron') < 0.1);
   tTrue("E10b", "and the decision is made by measurement, through the one gate the Sabian panel reads",
     /ME\.worstDeg\(key\) <= this\.DEGREE_SAFE_WORST/.test(appSrcE) &&
     appSrcE.indexOf('plHasSabian: !!sb && this.degreeSafe(rk)') > -1);
@@ -1471,12 +1543,13 @@ async function runCloudTests() {
   await new Promise(function (r) { setTimeout(r, 1500); });
   t('K14', 'a live debounce firing unsigned-in is exactly as inert as calling push() directly: still no client call', 0, initCalls.length);
 
-  /* ---- K15-K20: Continue with Google, as the cover drives it.
+  /* ---- K15-K20: the emailed sign in link, as the cover drives it.
      The cover has no ProfileManager, so these run without init(). What they
      must prove is the shape that keeps the return away from the hash router
-     (PKCE, redirect handed back rather than followed), that a provider the
-     project has not switched on never reaches signInWithOAuth, and that the
-     app's own client is left on the flow its email links depend on. */
+     (a PKCE client that does not read the url by itself), that Google sign in
+     is gone from the module since the owner took it out on 29 September 2026,
+     and that the app's own client is left on the flow its email links depend
+     on. K17 was Google's offline start and went with it. */
   function oauthHarness(settings, otpError) {
     var h = { created: [], oauth: [], exchanged: [], fetched: [], otp: [] };
     var fakeLib = { createClient: function (url, key, opts) {
@@ -1496,40 +1569,29 @@ async function runCloudTests() {
     h.C = loadIsolatedCloud(fakeLib, fetchFn);
     return h;
   }
-  var gOn = oauthHarness({ email: true, google: true });
-  var startOn = await gOn.C.oauthStart('google', 'https://cover.k15.invalid/');
-  t('K15', 'oauthStart asks for a PKCE client, hands the redirect back instead of following it, and returns to the page that asked', {
-    ok: true, flowType: 'pkce', detectSessionInUrl: false, provider: 'google', redirectTo: 'https://cover.k15.invalid/', skipBrowserRedirect: true, url: true
+  var gOn = oauthHarness({ email: true });
+  var mailOn = await gOn.C.emailStart('reader@k15.invalid', 'https://cover.k15.invalid/');
+  t('K15', 'the emailed link is asked for on a PKCE client that does not read the url, sent back to the page that asked', {
+    ok: true, flowType: 'pkce', detectSessionInUrl: false, redirectTo: 'https://cover.k15.invalid/'
   }, {
-    ok: startOn.ok, flowType: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.flowType,
+    ok: mailOn.ok, flowType: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.flowType,
     detectSessionInUrl: gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth.detectSessionInUrl,
-    provider: gOn.oauth[0] && gOn.oauth[0].provider, redirectTo: gOn.oauth[0] && gOn.oauth[0].options.redirectTo,
-    skipBrowserRedirect: gOn.oauth[0] && gOn.oauth[0].options.skipBrowserRedirect, url: /^https:\/\/auth\.invalid\//.test(startOn.url || '')
+    redirectTo: gOn.otp[0] && gOn.otp[0].options && gOn.otp[0].options.emailRedirectTo
   });
-  var gOff = oauthHarness({ email: true, google: false });
-  var startOff = await gOff.C.oauthStart('google', 'https://cover.k16.invalid/');
-  t('K16', 'a provider the project has not switched on is reported as disabled and never reaches signInWithOAuth', {
-    ok: false, reason: 'disabled', oauthCalls: 0, askedSettings: true
-  }, {
-    ok: startOff.ok, reason: startOff.reason, oauthCalls: gOff.oauth.length, askedSettings: /\/auth\/v1\/settings$/.test(gOff.fetched[0] || '')
-  });
-  var gNet = oauthHarness('offline');
-  var startNet = await gNet.C.oauthStart('google', 'https://cover.k17.invalid/');
-  t('K17', 'with no network the start is reported as offline, not thrown, and nothing is redirected', {
-    ok: false, reason: 'offline', oauthCalls: 0
-  }, { ok: startNet.ok, reason: startNet.reason, oauthCalls: gNet.oauth.length });
+  t('K16', 'Google sign in is gone from the module: no provider start and no provider check, and nothing reaches signInWithOAuth', {
+    oauthStart: 'undefined', providerEnabled: 'undefined', oauthCalls: 0
+  }, { oauthStart: typeof gOn.C.oauthStart, providerEnabled: typeof gOn.C.providerEnabled, oauthCalls: gOn.oauth.length });
   var finish = await gOn.C.oauthFinish('code-k18');
   t('K18', 'oauthFinish exchanges exactly the code it was handed, on the same PKCE client, and names the account', {
     ok: true, exchanged: ['code-k18'], email: 'reader@k18.invalid', clients: 1
   }, { ok: finish.ok, exchanged: gOn.exchanged, email: finish.email, clients: gOn.created.length });
   var CLnone = loadIsolatedCloud(null, function () { return Promise.reject(new Error('unused')); });
-  var noneStart = await CLnone.oauthStart('google', 'https://cover.k19.invalid/');
   var noneMail = await CLnone.emailStart('reader@k19.invalid', 'https://cover.k19.invalid/');
   var noneFinish = await CLnone.oauthFinish('code-k19');
   t('K19', 'with the vendored client missing every cover call answers off rather than throwing', {
-    start: 'off', email: 'off', finish: 'off'
-  }, { start: noneStart.reason, email: noneMail.reason, finish: noneFinish.reason });
-  var gApp = oauthHarness({ google: true });
+    email: 'off', finish: 'off'
+  }, { email: noneMail.reason, finish: noneFinish.reason });
+  var gApp = oauthHarness({ email: true });
   gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
   t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
     clients: 1, opts: null
@@ -1609,11 +1671,52 @@ async function runCloudTests() {
   t('K28', 'each way the function can fail is a reason the page can say in words', {
     '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error'
   }, reasons);
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var rPrem = await CO.oracleRead({ period: 'daily', depth: 'deep' });
+  t('K28b', 'an in-depth reading refused for want of Luminary comes back as premium, so the page can show the gate', {
+    ok: false, reason: 'premium'
+  }, { ok: rPrem.ok, reason: rPrem.reason });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {
     ok: false, reason: 'offline'
   }, { ok: rThrow.ok, reason: rThrow.reason });
+
+  /* ---- K30-K34: Codex Luminary is asked through this module as well, with a
+     session, and every failure is a reason. */
+  var bOut = oracleClient(function () { return { data: { status: { isPremium: true } }, error: null }; });
+  CO._setClientForTests(bOut.client, null);
+  var bNo = await CO.billingStatus();
+  t('K30', 'billing is not asked without a session', { ok: false, reason: 'signedOut', calls: 0 }, { ok: bNo.ok, reason: bNo.reason, calls: bOut.calls.length });
+  var bIn = oracleClient(function (name, opts) {
+    var a = opts.body.action;
+    if (a === 'status') return { data: { status: { isPremium: true, plan: 'annual', billingConfigured: true } }, error: null };
+    return { data: { url: 'https://stripe.k31.invalid/' + a }, error: null };
+  });
+  CO._setClientForTests(bIn.client, { user: { id: 'u1' } });
+  var st1 = await CO.billingStatus({ sync: true }), st2 = await CO.billingStatus();
+  t('K31', 'the status is asked of the billing function, with a sync only when one is asked for', {
+    fn: 'billing', action: 'status', sync1: true, sync2: false, premium: true, plan: 'annual'
+  }, { fn: bIn.calls[0].name, action: bIn.calls[0].body.action, sync1: bIn.calls[0].body.sync, sync2: bIn.calls[1].body.sync,
+    premium: st1.status && st1.status.isPremium, plan: st2.status && st2.status.plan });
+  var co1 = await CO.billingCheckout('monthly', 'https://app.k31.invalid/app.html#/oracle');
+  var po1 = await CO.billingPortal('https://app.k31.invalid/app.html#/oracle');
+  t('K32', 'a checkout and the portal each come back as the address Stripe gave, and send the plan and the return address', {
+    checkout: 'https://stripe.k31.invalid/checkout', portal: 'https://stripe.k31.invalid/portal', plan: 'monthly', returnTo: 'https://app.k31.invalid/app.html#/oracle'
+  }, { checkout: co1.url, portal: po1.url, plan: bIn.calls[2].body.plan, returnTo: bIn.calls[3].body.returnTo });
+  var bReasons = {};
+  var bCases = [['404', httpErr(404)], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['already', httpErr(409, 'ALREADY')], ['noacct', httpErr(404, 'NO_ACCOUNT')], ['401', httpErr(401, 'SIGNED_OUT')], ['500', httpErr(502, 'STRIPE')]];
+  for (var bi = 0; bi < bCases.length; bi++) {
+    var be = bCases[bi][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: be }; }).client, { user: { id: 'u1' } });
+    bReasons[bCases[bi][0]] = (await CO.billingCheckout('annual', 'https://x.invalid/')).reason;
+  }
+  t('K33', 'each way billing can fail is a reason, and a missing account is told apart from a missing function', {
+    '404': 'notSetUp', nc: 'notConfigured', already: 'already', noacct: 'noAccount', '401': 'signedOut', '500': 'error'
+  }, bReasons);
+  CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
+  var bThrow = await CO.billingPortal('https://x.invalid/');
+  t('K34', 'a thrown billing call comes back as offline', { ok: false, reason: 'offline' }, { ok: bThrow.ok, reason: bThrow.reason });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
@@ -1642,7 +1745,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'],
+      ['K', 'incommon-cloud.js'], ['U', 'master numbers'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);

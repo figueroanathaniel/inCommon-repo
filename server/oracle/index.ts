@@ -13,24 +13,53 @@
 // this week or this month, standard or in depth. This function names the
 // reader from their session, returns the reading it already wrote for that
 // period and dossier if there is one, holds everybody to a daily limit because
-// every reading costs money, and otherwise asks Claude with the Codex's own
-// instructions and schema, and returns the JSON the page renders.
+// every reading costs money, refuses an in-depth reading to anybody who is not
+// a Luminary (the Codex's paid tier), and otherwise asks Kimi with the Codex's
+// own instructions and schema, and returns the JSON the page renders.
 //
-// Secrets it reads: ANTHROPIC_API_KEY (required). ORACLE_MODEL,
-// ORACLE_DAILY_LIMIT and ORACLE_DEEP_EFFORT are optional knobs. SUPABASE_URL,
-// SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase
-// itself. The table it writes is in schema.sql beside this file.
+// WHO WRITES. Kimi, Moonshot AI's model, asked through its own API, which the
+// owner chose on 29 September 2026. It is called with fetch rather than a
+// client library: the API is one POST, and the one thing a library would add
+// is a dependency that can move under a pasted function.
+//
+// Secrets it reads: MOONSHOT_API_KEY (required). ORACLE_MODEL,
+// ORACLE_DEEP_MODEL, ORACLE_DEEP_THINKING, ORACLE_TIME_LIMIT,
+// ORACLE_DAILY_LIMIT and LUMINARY_ADMIN_EMAILS are optional knobs.
+// SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided
+// by Supabase itself. The tables it reads and writes are in schema.sql beside
+// this file.
 
-import Anthropic from "npm:@anthropic-ai/sdk";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const MODEL = Deno.env.get("ORACLE_MODEL") ?? "claude-opus-5-5";
+const KIMI = "https://api.moonshot.ai/v1/chat/completions";
+// kimi-k2.6 for both depths by default: it is the cheaper of Kimi's two
+// general models ($0.95 in, $4 out per million tokens against $3 and $15 for
+// kimi-k3) and the faster one on Kimi's own API, which is what fits an
+// in-depth reading inside Supabase's time limit on the free plan.
+const MODEL = Deno.env.get("ORACLE_MODEL") ?? "kimi-k2.6";
+const DEEP_MODEL = Deno.env.get("ORACLE_DEEP_MODEL") ?? MODEL;
+// The Codex asked for more thought before an in-depth reading than before a
+// standard one. Thinking is paid for as output and takes time, so it is off
+// by default and a knob turns it on: "on" for kimi-k2.6, or kimi-k3's own
+// levels, "low", "high" and "max". kimi-k3 cannot switch it off, so "off"
+// there means its lowest level.
+type Thinking = "off" | "on" | "low" | "high" | "max";
+const DEEP_THINKING: Thinking = (["off", "on", "low", "high", "max"] as const).find((e) => e === Deno.env.get("ORACLE_DEEP_THINKING")) ?? "off";
+// Supabase stops a function after 150 seconds on the free plan and 400 on a
+// paid one. The call to Kimi is abandoned a little before that, so the row is
+// marked and the reader told, rather than the function killed mid write.
+const TIME_LIMIT_MS = Number(Deno.env.get("ORACLE_TIME_LIMIT") ?? "140") * 1000;
 const DAILY_LIMIT = Number(Deno.env.get("ORACLE_DAILY_LIMIT") ?? "6");
-// The Codex's own effort levels: low for a standard reading, medium for an
-// in-depth one. ORACLE_DEEP_EFFORT can lower the second if in-depth readings
-// run into Supabase's time limit (docs/ORACLE-SETUP.md).
-type Effort = "low" | "medium" | "high";
-const DEEP_EFFORT: Effort = (["low", "medium", "high"] as const).find((e) => e === Deno.env.get("ORACLE_DEEP_EFFORT")) ?? "medium";
+// The owner's own addresses read in depth without a subscription, which is
+// how the Codex's admin role passed its paywall.
+const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+const ACTIVE = new Set(["active", "trialing"]);
+
+function thinkingFor(model: string, level: Thinking): Record<string, unknown> {
+  if (model.startsWith("kimi-k3")) return { reasoning_effort: level === "off" || level === "on" ? "low" : level };
+  if (model.startsWith("kimi-k2.6")) return { thinking: { type: level === "off" ? "disabled" : "enabled" } };
+  return {};
+}
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -147,6 +176,20 @@ function periodOf(period: string, localDate: string) {
   return { key: monday.toISOString().slice(0, 10), label: `Week of ${fmt(monday)} to ${fmt(sunday)}` };
 }
 
+// The model is asked for JSON against a schema. What comes back is read
+// leniently all the same, because a fence around it is not worth a failed
+// reading that was already paid for.
+function parseReading(text: string): Record<string, unknown> | null {
+  const a = text.indexOf("{"), b = text.lastIndexOf("}");
+  if (a === -1 || b <= a) return null;
+  try {
+    const v = JSON.parse(text.slice(a, b + 1));
+    return v && typeof v === "object" && !Array.isArray(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
 // A local date anywhere on Earth is within a day and a half of the server's.
 function plausibleDate(localDate: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) return false;
@@ -177,7 +220,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return reply(405, { code: "METHOD" });
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const started = Date.now();
+  const apiKey = Deno.env.get("MOONSHOT_API_KEY");
   if (!apiKey) return reply(404, { code: "NOT_SET_UP" });
 
   // Who is asking comes from their session token, never from the body.
@@ -207,6 +251,19 @@ Deno.serve(async (req) => {
   if (!["daily", "weekly", "monthly"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
   if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
+  const deep = depth === "deep";
+
+  // In depth is the Codex's Luminary reading, and it is asked for before the
+  // stored one is looked up, as the Codex did: a subscription that has lapsed
+  // does not keep reading what it paid for on another device. The row is kept
+  // current by the billing function (server/billing), from Stripe.
+  if (deep && !ADMINS.includes(String(user.email ?? "").toLowerCase())) {
+    const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
+    const end = sub.data?.current_period_end ? Date.parse(sub.data.current_period_end) : null;
+    const paid = !!sub.data && ACTIVE.has(sub.data.status) && (end === null || end > Date.now());
+    if (!paid) return reply(402, { code: "PREMIUM_REQUIRED" });
+  }
+
   const { key, label } = periodOf(period, localDate);
   // The Codex keeps one reading per person and deletes them when the birth
   // data changes. inCommon keeps several people on one device and the server
@@ -228,7 +285,6 @@ Deno.serve(async (req) => {
   const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);
   if (recent.error) { console.error("oracle: counting failed", recent.error); return reply(500, { code: "STORE" }); }
   if ((recent.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
-  const deep = depth === "deep";
 
   // Claim the key before paying for it. The partial unique index in schema.sql
   // lets only one pending or finished row exist per key, so a second press, or
@@ -245,43 +301,79 @@ Deno.serve(async (req) => {
   const release = () => mine().delete().eq("id", rowId);
   const fail = () => mine().update({ status: "failed" }).eq("id", rowId);
 
-  const anthropic = new Anthropic({ apiKey });
-  let message;
+  const model = deep ? DEEP_MODEL : MODEL;
+  const schema = deep ? DEEP_SCHEMA : SCHEMA;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
+  let status = 0, raw = "";
   try {
-    message = await anthropic.beta.messages.stream({
-      model: MODEL,
-      max_tokens: deep ? 32000 : 16000,
-      // Refused requests are re-run on the model Anthropic recommends for the
-      // refusal's category rather than coming back empty.
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: {
-        effort: deep ? DEEP_EFFORT : "low",
-        format: { type: "json_schema", schema: deep ? DEEP_SCHEMA : SCHEMA },
-      },
-      system: [{ type: "text", text: deep ? DEEP_INSTRUCTIONS : INSTRUCTIONS, cache_control: { type: "ephemeral" } }],
-      messages: [{
-        role: "user",
-        content: `Compose the ${deep ? "IN-DEPTH " : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}`,
-      }],
-    }).finalMessage();
+    const res = await fetch(KIMI, {
+      method: "POST",
+      signal: ctl.signal,
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        // The instructions go first and never change, so Kimi's context cache
+        // serves them at a sixth of the price after the first reading.
+        messages: [
+          { role: "system", content: deep ? DEEP_INSTRUCTIONS : INSTRUCTIONS },
+          { role: "user", content: `Compose the ${deep ? "IN-DEPTH " : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}` },
+        ],
+        response_format: { type: "json_schema", json_schema: { name: "horoscope", strict: true, schema } },
+        max_completion_tokens: deep ? 16000 : 8000,
+        ...thinkingFor(model, deep ? DEEP_THINKING : "off"),
+      }),
+    });
+    status = res.status;
+    raw = await res.text();
   } catch (err) {
+    if (ctl.signal.aborted) {
+      // Kimi was writing, so this was paid for and it counts.
+      await fail();
+      console.error(`oracle: Kimi had not finished after ${Math.round((Date.now() - started) / 1000)}s; see ORACLE_TIME_LIMIT in docs/ORACLE-SETUP.md`);
+      return reply(504, { code: "TIMEOUT" });
+    }
+    // Kimi could not be reached at all, so nothing was written or paid for.
+    await release();
+    console.error("oracle: Kimi could not be reached", err);
+    return reply(503, { code: "OUT_OF_CREDITS" });
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (status !== 200) {
+    let type = "";
+    try { type = String(JSON.parse(raw)?.error?.type ?? ""); } catch { /* not JSON */ }
+    console.error(`oracle: Kimi answered ${status} ${type}`, raw.slice(0, 400));
     // The Codex's two codes: a provider rate limit is RATE_LIMITED, and every
-    // other refusal or failure of the provider is OUT_OF_CREDITS.
-    if (err instanceof Anthropic.RateLimitError) { await release(); return reply(429, { code: "RATE_LIMITED" }); }
-    if (err instanceof Anthropic.AuthenticationError) { await release(); console.error("oracle: the ANTHROPIC_API_KEY secret was refused"); return reply(503, { code: "OUT_OF_CREDITS" }); }
-    if (err instanceof Anthropic.APIError && (err.status === 529 || (err.status ?? 0) >= 500 || err.status === 402 || err.status === 403)) { await release(); return reply(503, { code: "OUT_OF_CREDITS" }); }
+    // other refusal or failure of the provider is OUT_OF_CREDITS. A request
+    // Kimi turned away before writing cost nothing and is released.
+    if (status === 429 && type !== "exceeded_current_quota_error") { await release(); return reply(429, { code: "RATE_LIMITED" }); }
+    if (status === 429 || status === 401 || status === 403 || status === 404 || status >= 500) {
+      if (status === 429) console.error("oracle: the Kimi balance has run out; top it up at platform.kimi.ai");
+      if (status === 401) console.error("oracle: the MOONSHOT_API_KEY secret was refused");
+      if (status === 404) console.error(`oracle: Kimi has no model named ${model}; check ORACLE_MODEL and ORACLE_DEEP_MODEL`);
+      await release();
+      return reply(503, { code: "OUT_OF_CREDITS" });
+    }
+    if (status === 400 && /content_filter/i.test(type + raw)) { await fail(); return reply(502, { code: "REFUSED" }); }
     await fail();
-    console.error("oracle: the model call failed", err);
     return reply(500, { code: "MODEL" });
   }
 
-  if (message.stop_reason === "refusal") { await fail(); return reply(502, { code: "REFUSED" }); }
-  if (message.stop_reason === "max_tokens") { await fail(); return reply(500, { code: "TOO_LONG" }); }
-  const text = message.content.find((b: { type: string }) => b.type === "text") as { text?: string } | undefined;
-  let reading: unknown;
-  try { reading = clean(JSON.parse(text?.text ?? "")); } catch { await fail(); return reply(500, { code: "MODEL" }); }
+  let data: { model?: string; choices?: { finish_reason?: string; message?: { content?: string | null } }[] };
+  try { data = JSON.parse(raw); } catch { await fail(); return reply(500, { code: "MODEL" }); }
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason === "content_filter") { await fail(); return reply(502, { code: "REFUSED" }); }
+  if (choice?.finish_reason === "length") { await fail(); return reply(500, { code: "TOO_LONG" }); }
+  const parsed = parseReading(choice?.message?.content ?? "");
+  if (!parsed || !schema.required.every((k) => parsed[k] != null)) {
+    await fail();
+    console.error("oracle: Kimi's answer was not a whole reading", String(choice?.message?.content ?? "").slice(0, 400));
+    return reply(500, { code: "MODEL" });
+  }
+  const reading = clean(parsed);
 
-  await mine().update({ status: "done", content: reading, model: message.model }).eq("id", rowId);
+  await mine().update({ status: "done", content: reading, model: data.model ?? model }).eq("id", rowId);
   return reply(200, { reading, cached: false, periodKey: key, label });
 });

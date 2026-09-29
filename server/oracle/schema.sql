@@ -1,4 +1,7 @@
--- server/oracle/schema.sql: the one table the Oracle function writes.
+-- server/oracle/schema.sql: the two tables behind the Oracle. oracle_readings
+-- is written by the Oracle function, and subscriptions by the billing function
+-- (server/billing), which keeps each reader's Luminary subscription as Stripe
+-- reports it.
 --
 -- Run once, in the Supabase dashboard: SQL Editor, paste, Run. It is safe to
 -- run again; every statement checks before it creates.
@@ -45,3 +48,35 @@ create policy "read own oracle readings" on public.oracle_readings
 
 -- No insert, update or delete policy, on purpose. With row level security on
 -- and no policy for them, those are refused for every app user.
+
+-- ---------------------------------------------------------------------------
+-- subscriptions: one row per reader who has ever opened a checkout, the
+-- Codex's own record of a Stripe customer, ported. It holds the Stripe
+-- customer and subscription ids, the subscription's status and plan, and when
+-- the paid period ends. No card, no address, no amount: Stripe keeps those.
+--
+-- The billing function writes it with the service role, from Stripe's own
+-- answer, both when Stripe calls the webhook and when a reader's row has gone
+-- stale. The Oracle function reads it to decide whether an in-depth reading
+-- may be written. A reader may read their own row and nothing else, and
+-- nobody can make themselves a Luminary by writing one.
+
+create table if not exists public.subscriptions (
+  user_id                 uuid primary key references auth.users (id) on delete cascade,
+  stripe_customer_id      text not null unique,
+  stripe_subscription_id  text,
+  status                  text not null default 'none',
+  plan                    text check (plan in ('monthly', 'annual')),
+  current_period_end      timestamptz,
+  cancel_at_period_end    boolean not null default false,
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now()
+);
+
+alter table public.subscriptions enable row level security;
+
+drop policy if exists "read own subscription" on public.subscriptions;
+create policy "read own subscription" on public.subscriptions
+  for select to authenticated using ((select auth.uid()) = user_id);
+
+-- No insert, update or delete policy here either, for the same reason.

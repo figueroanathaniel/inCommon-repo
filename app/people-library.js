@@ -52,8 +52,12 @@
      stored records can be recognised as stale and recomputed. It is also what
      invalidates the pair cache. 2: the ten astral bodies moved from the
      hand written series to astronomy-engine, so every stored longitude and
-     every cached composite gate list was computed by arithmetic that is gone. */
-  var STATE_VERSION = 2;
+     every cached composite gate list was computed by arithmetic that is gone.
+     3: a birth with no time is drawn at noon where it happened rather than
+     noon at Greenwich, and the angles take the apparent sidereal time and the
+     true obliquity, both as the Celestial Codex did, so a stored untimed
+     longitude and a stored Ascendant are each from arithmetic that is gone. */
+  var STATE_VERSION = 3;
   var KEY = 'incommon.people.v1';
   var LEGACY_KEY = 'incommon.friends';
   var MAX_PEOPLE = 12;
@@ -157,7 +161,7 @@
     /* An unknown time has no instant. It gets the date at 00:00 UTC as its
        canonical marker and a flag, so two unknown-time records for the same
        day and place are the same record and neither pretends to a moment. */
-    var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], known ? hh - offset : 0, known ? mi : 0);
+    var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], known ? hh : 0, known ? mi : 0) - (known ? offset * 36e5 : 0);
     var lat = b.birth_lat != null ? +b.birth_lat : (b.birthLat != null ? +b.birthLat : null);
     var lon = b.birth_lon != null ? +b.birth_lon : (b.birthLon != null ? +b.birthLon : null);
     return {

@@ -74,7 +74,7 @@ This is information, not legal advice.
 
 - A switch in Settings to change the answer after sign up. Until then the
   sender's unsubscribe link is the way out.
-- Google sign ups. The Google button is hidden, and when it returns it does not
-  pass through this box, so those accounts carry no answer. Treat no answer as
-  no.
+- Google sign ups. Google sign in was taken off the cover on 29 September 2026.
+  If it ever returns it will not pass through this box, so those accounts would
+  carry no answer. Treat no answer as no.
 - Sending from the app or syncing to a sender automatically.

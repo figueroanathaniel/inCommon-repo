@@ -12,9 +12,8 @@
  *
  * WHAT THIS MODULE NEVER DOES:
  *   1. It never touches the network without a session, with one exception
- *      the reader asks for by pressing a button: starting a sign-in from the
- *      cover (asking which providers are switched on, requesting an email
- *      link) and exchanging the code that comes back. None of those calls
+ *      the reader asks for by pressing a button: requesting an email sign in
+ *      link from the cover and exchanging the code that comes back. None of those calls
  *      carries any local state; the record only moves once the app's own
  *      client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
@@ -474,9 +473,12 @@
     }).catch(function (e) { return { ok: false, error: e && e.message }; });
   }
 
-  /* ---------- provider sign-in, started and finished on the cover ----------
+  /* ---------- the emailed sign in link, started and finished on the cover ----------
 
-     The cover is its own page with no ProfileManager, so these three need no
+     Google sign in was started here too, and was taken out on 29 September
+     2026 at the owner's request. The email link is the one way to an account.
+
+     The cover is its own page with no ProfileManager, so these need no
      init(). They share only the project and the browser's storage with the
      app's client: the cover starts the flow and finishes it, supabase-js
      writes the session to localStorage under the key it derives from the
@@ -499,37 +501,8 @@
     return oauthClient;
   }
 
-  /* Asked before redirecting, because a provider the project has not switched
-     on sends the reader to a raw JSON error page instead of a sentence. */
-  function providerEnabled(provider) {
-    var f = root && root.fetch;
-    if (typeof f !== 'function') return Promise.resolve({ ok: false, reason: 'offline' });
-    return Promise.resolve().then(function () {
-      return f(PROJECT_URL + '/auth/v1/settings', { headers: { apikey: PROJECT_ANON_KEY } });
-    }).then(function (res) {
-      if (!res || !res.ok) return { ok: false, reason: 'offline' };
-      return res.json().then(function (s) {
-        return s && s.external && s.external[provider] ? { ok: true } : { ok: false, reason: 'disabled' };
-      });
-    }).catch(function () { return { ok: false, reason: 'offline' }; });
-  }
-
-  function oauthStart(provider, redirectTo) {
-    var c = oauthLib();
-    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
-    return providerEnabled(provider).then(function (p) {
-      if (!p.ok) return p;
-      return c.auth.signInWithOAuth({ provider: provider, options: { redirectTo: redirectTo, skipBrowserRedirect: true } })
-        .then(function (res) {
-          if (res.error || !res.data || !res.data.url) return { ok: false, reason: 'error', error: res.error && res.error.message };
-          return { ok: true, url: res.data.url };
-        });
-    }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
-  }
-
-  /* The emailed sign in link rides the same PKCE client, so it comes back to
-     the page that asked as ?code= and oauthFinish() completes it exactly as it
-     completes Google. The one cost of PKCE here is that the link has to be
+  /* The emailed sign in link rides the PKCE client, so it comes back to the
+     page that asked as ?code= and oauthFinish() completes it. The one cost of PKCE here is that the link has to be
      opened in the browser that asked, because the code verifier is kept there;
      the cover says so. A new address is signed up by the same link, which is
      the library default and what a reader pressing "continue" expects. */
@@ -584,8 +557,9 @@
      holds the AI key, so the key never reaches a browser. It is asked only
      with a session: the function refuses anyone it cannot name, and every
      reading it writes costs money. What travels is the dossier the app
-     composed on the device, which is chart facts and nothing else: no name,
-     no journal, no birth date, time or place.
+     composed on the device, in the Celestial Codex's format: the first name
+     and chart facts, and nothing else. No journal, no birth date, time or
+     place. From the function it goes on to Kimi, which writes the reading.
 
      Every way it can fail comes back as a reason the page can say in words,
      never as a thrown error: signed out, not set up yet (the function is not
@@ -611,6 +585,7 @@
       return oracleCode(e).then(function (code) {
         /* The code decides first, because two failures share a status: the
            daily limit and the provider's rate limit are both 429. */
+        if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
@@ -622,6 +597,55 @@
         return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };
       });
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
+  /* ---------- Codex Luminary ---------- */
+
+  /* THE PAID TIER IS ASKED THROUGH THIS MODULE TOO, and for the same reason.
+     server/billing/index.ts holds the Stripe keys and keeps each reader's
+     subscription; the page asks it three things: whether this reader is a
+     Luminary, for a Stripe Checkout address, and for the billing portal's.
+     The page never sees a card, a Stripe key or a price id, only the address
+     Stripe gives back, and the reader leaves for it and returns.
+
+     Failures come back as reasons, never throws, like the Oracle's: signed
+     out, not set up (the function is not deployed, a 404 with no code of its
+     own), notConfigured (deployed, but no Stripe key yet), already (a
+     Luminary asking to pay twice), noAccount (a portal for somebody who never
+     opened a checkout), offline, or error. */
+  function billingCall(body) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('billing', { body: body });
+    }).then(function (res) {
+      if (res && !res.error && res.data) return { ok: true, data: res.data };
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'NO_ACCOUNT') return { ok: false, reason: 'noAccount' };
+        if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
+        if (code === 'ALREADY') return { ok: false, reason: 'already' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+  function billingStatus(opts) {
+    return billingCall({ action: 'status', sync: !!(opts && opts.sync) }).then(function (r) {
+      return r.ok ? { ok: true, status: r.data.status || null } : r;
+    });
+  }
+  function billingCheckout(plan, returnTo) {
+    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo }).then(function (r) {
+      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
+    });
+  }
+  function billingPortal(returnTo) {
+    return billingCall({ action: 'portal', returnTo: returnTo }).then(function (r) {
+      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
+    });
   }
 
   /* ---------- status ---------- */
@@ -685,11 +709,12 @@
     isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
     completePinRecovery: completePinRecovery,
-    providerEnabled: providerEnabled,
-    oauthStart: oauthStart,
     emailStart: emailStart,
     oauthFinish: oauthFinish,
     oracleRead: oracleRead,
+    billingStatus: billingStatus,
+    billingCheckout: billingCheckout,
+    billingPortal: billingPortal,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app
        plainly has data are a consent gate working as designed, and counts

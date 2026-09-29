@@ -184,19 +184,9 @@
     0%, 100% { text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55); }
     50%      { text-shadow: 0 0 6px rgba(255,248,231,.85), 0 0 20px rgba(183,155,255,.78), 0 0 46px rgba(139,92,246,.78); }
   }
-  /* THE SECOND WAY IN, FOR A READER WHO WANTS AN ACCOUNT.
-     Google's own dark button rather than the cover's cream, because this is
-     the one control here whose look is set by somebody else's branding rules.
-     It sits under "enter here" and arrives with it, so the invitation is still
-     one beat, and scrollFade takes it away with the link. The G carries
-     Google's green: that is their mark rather than #2fff8f, so the rim is
-     still the only inCommon green on the cover, and the departure is recorded
-     in CLAUDE.md rather than taken quietly. */
-  /* The Send link button wears the same dark style, so the ways to an account
-     read as a pair, and neither competes with "enter here" above them. The
-     Google button is in the markup but hidden: Google sign in is not switched
-     on in the project, and a control that can only say so is not worth a
-     place on the first screen. */
+  /* THE WAY TO AN ACCOUNT. The Send link button wears a quiet dark style, so
+     it never competes with "enter here" above it. Google sign in was here, and
+     was taken out on 29 September 2026 at the owner's request; see CLAUDE.md. */
   .signin {
     pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
     min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
@@ -311,7 +301,6 @@
   <h1 class="mark">inCommon</h1>
   <div class="sub">
     <a class="enter" href="./inCommonApp%20v2.dc.html">enter here</a>
-    <button class="signin google" type="button" hidden><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
     <form id="mailform" class="mailform" hidden novalidate>
       <label class="sr" for="mailaddr">Email address, for a sign in link</label>
       <input id="mailaddr" name="email" type="email" autocomplete="email" inputmode="email" placeholder="Email for a sign in link" required>
@@ -361,23 +350,20 @@
      anchor with a real href, so with this script dead it simply navigates,
      which is the way in the cover has always had.
 
-     The Google button is in the markup and hidden, because Google sign in is
-     not switched on in the project. Its code below is intact: removing the
-     hidden attribute brings it back. Both ways come back the same way:
-     Google's return and the emailed link each land here as ?code=, and the
-     one exchange below finishes either.
+     The emailed link comes back here as ?code=, and the one exchange below
+     finishes it.
 
      A plain script rather than part of the module, for the reason the 9 second
      fallback above is one: with no WebGL the module dies at the renderer, and
      a way in that died with it would be a second failure on top of the first.
 
      Nothing is fetched until the reader asks. The two files are loaded on the
-     press, or on the return from Google, and every call to Supabase goes
+     press, or on the return from the emailed link, and every call to Supabase goes
      through incommon-cloud.js, the one module allowed to talk to it.
 
      The return comes back HERE, as ?code=, not to the app. The app's router is
      the hash and this page forwards any hash to the app, so the code is kept
-     before the #, where neither page routes on it (see oauthStart in
+     before the #, where neither page routes on it (see emailStart in
      incommon-cloud.js). Once it is exchanged the session sits in this
      browser's storage, the query is dropped so a reload cannot spend the code
      twice, and the reader goes on through the same address "enter here"
@@ -385,24 +371,20 @@
      build rewrites it and asserts there are exactly two copies of it. -->
 <script>
 (function () {
-  var btn = document.querySelector('button.google');
   var form = document.getElementById('mailform');
   var addr = document.getElementById('mailaddr');
   var skip = document.querySelector('button.skip');
   var msg = document.querySelector('.authmsg');
   var enter = document.querySelector('a.enter');
-  if (!btn || !form || !addr || !skip || !msg || !enter) return;
+  if (!form || !addr || !skip || !msg || !enter) return;
   var sendBtn = form.querySelector('button[type="submit"]');
   var busy = false, loading = null, opened = false, through = false;
   var ANYWAY = ' You can still continue without an account.';
   var WHY = {
-    disabled: 'Google sign in is not switched on for inCommon yet.' + ANYWAY,
     offline: 'There is no connection to sign in with.' + ANYWAY,
     off: 'The sign in files did not load.' + ANYWAY,
     error: 'Sign in could not start.' + ANYWAY,
     unfinished: 'Sign in did not finish. An emailed link has to be opened in the same browser that asked for it.' + ANYWAY,
-    googleUnfinished: 'Google sign in did not finish.' + ANYWAY,
-    cancelled: 'Google sign in was cancelled.' + ANYWAY,
     expired: 'That sign in link has expired or was already used. Send a new one from here.' + ANYWAY,
     sent: 'Check your email for a sign in link. Open it in this browser and it brings you straight in.',
     rate: 'Too many sign in emails have gone out in the last hour. Try again later.' + ANYWAY,
@@ -418,8 +400,8 @@
     catch (e) { return null; }
   }
   function say(text) { msg.textContent = text; }
-  function hold() { busy = true; btn.setAttribute('aria-busy', 'true'); sendBtn.setAttribute('aria-busy', 'true'); }
-  function settle() { busy = false; btn.removeAttribute('aria-busy'); sendBtn.removeAttribute('aria-busy'); }
+  function hold() { busy = true; sendBtn.setAttribute('aria-busy', 'true'); }
+  function settle() { busy = false; sendBtn.removeAttribute('aria-busy'); }
   function clean() { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
   function load(src) {
     return new Promise(function (resolve, reject) {
@@ -452,7 +434,7 @@
   var cameBy = via();
   /* Opened in another browser, the link arrives with no record of how it was
      asked for, so the unknown case speaks to both ways rather than guessing. */
-  function unfinished() { return cameBy === 'email' ? WHY.mailUnfinished : cameBy === 'google' ? WHY.googleUnfinished : WHY.unfinished; }
+  function unfinished() { return cameBy === 'email' ? WHY.mailUnfinished : WHY.unfinished; }
   if (code) {
     hold();
     say('Signing you in.');
@@ -466,14 +448,11 @@
     }, function () { clean(); settle(); open(false); say(WHY.off); });
   } else if (refused) {
     /* error_code is a fixed vocabulary, so it may choose the sentence; it is
-       still never shown. An expired email link also arrives as access_denied,
-       which is why cancelled is only said when the reader went to Google. */
+       still never shown. */
     var errCode = q.get('error_code');
     clean();
     open(false);
-    say(errCode === 'otp_expired' ? WHY.expired
-      : cameBy === 'google' && refused === 'access_denied' ? WHY.cancelled
-      : unfinished());
+    say(errCode === 'otp_expired' ? WHY.expired : unfinished());
   } else if (q.get('signin') === '1') {
     /* The app sends a signed out reader here from the Oracle. The field opens
        at once rather than waiting for a press on "enter here", and the query
@@ -483,23 +462,9 @@
     open(true);
   }
 
-  /* Back from Google's page restores this one from the back-forward cache
-     with the buttons still held, so they are let go here. */
+  /* A return through the back button restores this page from the
+     back-forward cache with the send button still held, so it is let go here. */
   addEventListener('pageshow', function (e) { if (e.persisted && !code) { settle(); say(''); } });
-
-  btn.addEventListener('click', function () {
-    if (busy) return;
-    hold();
-    via('google');
-    say('Opening Google.');
-    cloud().then(function (C) {
-      return C.oauthStart('google', here);
-    }).then(function (r) {
-      if (r.ok) { location.assign(r.url); return; }
-      settle();
-      say(WHY[r.reason] || WHY.error);
-    }, function () { settle(); say(WHY.off); });
-  });
 
   /* "enter here" opens the field rather than a form sitting on the cover
      unasked. This listener is registered before the module's, because a plain
@@ -1486,7 +1451,7 @@ const markEl = document.querySelector('.mark');
 const glyphEl = document.querySelector('.glyph');
 const enterEl = document.querySelector('a.enter');
 /* Every way in, and the line that reports on the sign in, leave together. */
-const wayEls = [enterEl, document.querySelector('button.google'), document.getElementById('mailform'),
+const wayEls = [enterEl, document.getElementById('mailform'),
   document.querySelector('button.skip'), document.querySelector('.authmsg')].filter(Boolean);
 
 /* Declared here rather than beside the click handler below, because

@@ -79,11 +79,18 @@ const BODIES = {
      provisional, and measured against these very references they were wrong by
      an RMS of 35 to 110 degrees, worst 169, flat across every window from
      1980-2010 to 1900-2100. That is a wrong phase rather than drift, so they
-     are fetched like everything else now. Chiron is not here: it is genuinely
-     chaotic, Saturn and Uranus keep perturbing it, and the fitted single epoch
-     set in minor-bodies-ephemeris.js measures 0.3 degrees over 1980-2010,
-     which is what a fit against real positions buys. */
+     are fetched like everything else now.
+
+     Chiron joined them on 29 September 2026, because the Celestial Codex asked
+     Horizons for Chiron and was right to. It was left out on the argument
+     that its orbit is chaotic, Saturn and Uranus perturbing it, and that is
+     true of a single set of elements carried across the century, which is
+     what minor-bodies-ephemeris.js fits and why that fit is worst 0.92
+     degrees. It is not true of an osculating set taken at the nearest epoch:
+     the perturbations that set misses are the ones in the gap, and the gap
+     is chosen per body by measurement like every other centaur here. */
   ceres: [1, 'Ceres'], pallas: [2, 'Pallas'], juno: [3, 'Juno'], vesta: [4, 'Vesta'],
+  chiron: [2060, 'Chiron'],
 
   hygiea: [10, 'Hygiea'], astraea: [5, 'Astraea'], iris: [7, 'Iris'], flora: [8, 'Flora'],
   metis: [9, 'Metis'], hebe: [6, 'Hebe'], pandora: [55, 'Pandora'], psyche: [16, 'Psyche'],

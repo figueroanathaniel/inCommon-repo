@@ -472,8 +472,8 @@ for (const f of THREE_FILES) {
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 
-/* "Continue with Google" loads these two on the press, or on the return from
-   Google, rather than at load: the vendored Supabase client and the one module
+/* The cover's email sign in loads these two on the press, or on the return
+   from the emailed link, rather than at load: the vendored Supabase client and the one module
    allowed to call it. The app has both inlined, but the cover is its own page,
    so they sit beside index.html as files. A cover that names them and a bundle
    without them is a button that says the sign in files did not load. */
@@ -483,7 +483,7 @@ for (const f of SIGNIN_FILES) {
     die('the cover no longer loads ./' + f + '; update SIGNIN_FILES in tools/build-bundle.js to match it');
   }
   const from = path.join(appDir, f);
-  if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for Continue with Google');
+  if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for the email sign in');
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 

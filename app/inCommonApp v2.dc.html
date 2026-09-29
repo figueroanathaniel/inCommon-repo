@@ -1107,6 +1107,10 @@ input[type="date"]{color-scheme:dark}
           <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
           <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
         </button>
+        <div style="display:flex;align-items:baseline;gap:9px;width:100%;box-sizing:border-box;padding:12px 0">
+          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
+          <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
+        </div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:9px">
@@ -3376,6 +3380,45 @@ input[type="date"]{color-scheme:dark}
           </button>
         </sc-for>
       </div>
+      <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
+          <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
+          <sc-if value="{{ orLumManageOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumManage }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12px var(--fu)">{{ orLumManageLabel }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
+          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
+              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
+                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
+                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
+                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
+                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          </sc-if>
+          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          </sc-if>
+          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
@@ -5678,6 +5721,10 @@ input[type="date"]{color-scheme:dark}
                 <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
                 <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
               </button>
+              <div style="display:flex;align-items:baseline;gap:10px;width:100%;box-sizing:border-box;padding:12px 0">
+                <span style="flex:none;width:74px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
+                <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
+              </div>
             </div>
           </div>
           <button onClick="{{ hdProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac2);border-radius:var(--rad);padding:16px 18px;width:100%">
@@ -7979,6 +8026,45 @@ input[type="date"]{color-scheme:dark}
           </button>
         </sc-for>
       </div>
+      <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
+          <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
+          <sc-if value="{{ orLumManageOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumManage }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12px var(--fu)">{{ orLumManageLabel }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
+          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
+              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
+                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
+                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
+                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
+                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          </sc-if>
+          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          </sc-if>
+          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
@@ -9603,6 +9689,9 @@ class Component extends DCLogic {
        this.cloud stays null) if the module is absent, the vendored client
        did not load, or the project is not configured yet; the app is
        exactly the offline-first program it was without this pass. */
+    this.lumReturnRead();
+    this._onPageShow = e => { if (e && e.persisted && this.state.lumBusy) this.setState({ lumBusy: null }); };
+    window.addEventListener('pageshow', this._onPageShow);
     const IC = typeof window !== 'undefined' && window.InCommonCloud;
     if (IC && window.ProfileManager && window.InCommonCore) {
       this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage }) || null;
@@ -9704,6 +9793,7 @@ class Component extends DCLogic {
     this.syncSectionToTab();
     this.syncAtlasItem();
     this.syncChartExpandPersist();
+    this.lumAuto();
     this.oracleAutoAsk();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
@@ -9720,6 +9810,8 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
+    if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
+    clearTimeout(this._lumT);
     /* Clean up ephemeris router and WASM instance */
     if (this.ephIntegration) {
       this.ephIntegration.close();
@@ -11333,12 +11425,13 @@ class Component extends DCLogic {
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
     if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
-    /* Chiron and the four asteroids. Chiron's elements are fitted against 81
-       JPL Horizons positions across 1900 to 2060 and measure 0.92 degrees at
-       worst, so it names a sign and an aspect and not a degree: see
-       degreeSafe(). It is not fetched, because a fifty year orbit that Saturn
-       and Uranus keep perturbing is chaotic and a fit against real positions is
-       the better answer for it.
+    /* Chiron and the four asteroids. Chiron is fetched from JPL Horizons now,
+       as the Celestial Codex asked Horizons for it, and measures 0.025 degrees
+       at worst against 404 of Horizons' own positions, so it names a degree:
+       see degreeSafe(). It was left out once on the argument that its orbit is
+       chaotic, which is true of the single fitted set in
+       minor-bodies-ephemeris.js (0.92 degrees, still the fallback) and not of
+       an osculating set taken at the nearest of 51 epochs.
 
        The four asteroids ARE fetched, and they are the reason this comment
        changed. They sat on minor-bodies-ephemeris.js's single epoch coplanar
@@ -11380,18 +11473,17 @@ class Component extends DCLogic {
      an imprecise number, and it reads as the most exact thing on the page
      because it is the most specific. The ten astral bodies are measured against
      JPL Horizons to 0.03 degrees and keep their symbols (the series they came
-     from before claimed "well inside a degree" here and measured 6.5); Chiron
-     is fitted to 0.92 and does not; the asteroids are unpinned and do not.
+     from before claimed "well inside a degree" here and measured 6.5). Chiron
+     and the four asteroids are fetched from Horizons and measure 0.058 degrees
+     at worst, so they keep theirs; on the fitted fallback, Chiron at 0.92 and
+     Pallas at 29.6, they do not.
 
      This is the gate the next body passes through too: measure it, record the
-     worst case, and let that decide what it is allowed to say. */
-  /* Chiron alone, under both spellings, because the expanded chart addresses a
-     point by id and the natal wheel by name and a name only list let pallas
-     through once. The four asteroids were on this list and have come off it:
-     they are fetched now and measure 0.058 degrees at worst, so they earn the
-     degree the way every other fetched body does, by measurement rather than by
-     being absent from a list. */
-  DEGREE_SAFE_EXCEPT = ['Chiron', 'chiron'];
+     worst case, and let that decide what it is allowed to say. There is no
+     list of names any more. Chiron was the last body on one, and it came off
+     when it was fetched: a list is what stays behind when a measurement moves,
+     and the fallback's own accuracy is read instead, so the same body names a
+     degree from the fetched elements and withholds it on the fitted ones. */
   /* The fetched bodies earn a degree by measurement: a worst case against JPL
      Horizons (or the Swiss Ephemeris, for the hypotheticals) at or under a
      fifth of a degree. check-minor-body-elements.js holds every body to the
@@ -11400,14 +11492,19 @@ class Component extends DCLogic {
   DEGREE_SAFE_WORST = 0.2;
   COMET_IDS = ['halley', 'halebopp', 'hyakutake'];
   degreeSafe(name) {
-    if (this.DEGREE_SAFE_EXCEPT.indexOf(name) !== -1 || this.COMET_IDS.indexOf(name) !== -1) return false;
-    const ME = window.MinorBodyElements;
+    if (this.COMET_IDS.indexOf(name) !== -1) return false;
+    const ME = window.MinorBodyElements, low = String(name).toLowerCase();
     /* The wheel asks by name and the expanded table by id, and the measurement
        is filed under the id, so a name is lowered before the lookup or a
        measured body would silently fall through to the permissive default. */
-    if (!ME) return true;
-    const key = ME.has(name) ? name : (ME.has(String(name).toLowerCase()) ? String(name).toLowerCase() : null);
-    return key == null ? true : ME.worstDeg(key) <= this.DEGREE_SAFE_WORST;
+    const key = ME ? (ME.has(name) ? name : (ME.has(low) ? low : null)) : null;
+    if (key != null) return ME.worstDeg(key) <= this.DEGREE_SAFE_WORST;
+    /* Not measured there, so if it is drawn at all it comes from the fitted
+       fallback, and the fallback states its own accuracy per body. */
+    const MBE = window.MinorBodiesEphemeris;
+    const fb = MBE && MBE.elements ? Object.keys(MBE.elements).find(b => b.toLowerCase() === low) : null;
+    if (fb) { const a = MBE.elements[fb].accuracyDeg; return a != null && a <= this.DEGREE_SAFE_WORST; }
+    return true;
   }
   /* Where a fetched body's position comes from and how good it is, in one
      sentence, whether or not it keeps its degree. */
@@ -11482,8 +11579,8 @@ class Component extends DCLogic {
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const timed = !!(p && p.hasBirthTime), tm = timed ? p.birthTime.split(':').map(Number) : [12, 0];
     const y = +m[1], mo = +m[2] - 1, d = +m[3], hh = tm[0] || 0, mi = tm[1] || 0;
-    const off = timed ? this.birthUtcOffset(p, y, mo, d, hh, mi) : 0; // local birth clock -> UT
-    return new Date(Date.UTC(y, mo, d, hh - off, mi));
+    const off = this.birthUtcOffset(p, y, mo, d, hh, mi); // local birth clock -> UT; an untimed birth is local noon
+    return new Date(Date.UTC(y, mo, d, hh, mi) - off * 36e5);
   }
   /* The offset stored on a profile is the zone's STANDARD offset: the gazetteer
      keeps -8 for America/Los_Angeles and a separate dst flag it never applies.
@@ -11509,7 +11606,7 @@ class Component extends DCLogic {
     if (!tz || tz === 'manual') return fallback;
     let off = fallback;
     for (let i = 0; i < 2; i++) {
-      const at = new Date(Date.UTC(y, mo, d, hh - off, mi));
+      const at = new Date(Date.UTC(y, mo, d, hh, mi) - off * 36e5);
       const found = this.zoneOffset(tz, at);
       if (found == null) return fallback;
       if (found === off) return off;
@@ -11533,13 +11630,36 @@ class Component extends DCLogic {
     } catch (e) { return null; }
   }
   natalDate() { return this.natalDateFor(this.activeProfile()); }
+  /* THE SIDEREAL TIME AND THE OBLIQUITY, TAKEN AS THE CELESTIAL CODEX TOOK
+     THEM. The Codex asked astronomy-engine for the apparent sidereal time,
+     which carries the nutation in right ascension, and let the obliquity move
+     with the date. inCommon used the mean sidereal time and the J2000
+     obliquity held fixed, which is up to 17 arcseconds of sidereal time and
+     10 of obliquity from the sky of the birth date, and moved the Ascendant
+     by up to about an arcminute. Apparent sidereal time belongs with the true
+     obliquity of the date, the mean one plus the nutation, and the library
+     returns both, so this takes both. The old arithmetic stays as the
+     fallback for a build where the library did not load, which is the same
+     order lonRaw() keeps. Returns the RAMC in degrees for a longitude, and
+     the obliquity in radians. */
+  skyFrame(t, lonDeg) {
+    const A = window.Astronomy;
+    if (A && isFinite(t) && typeof A.SiderealTime === 'function' && typeof A.e_tilt === 'function') {
+      try {
+        const d = new Date((t + 2451545.0 - 2440587.5) * 86400000);
+        const tilt = A.e_tilt(A.MakeTime(d));
+        return { ramc: this.norm360(A.SiderealTime(d) * 15 + lonDeg), eps: tilt.tobl * this.RAD };
+      } catch (e) { /* fall through to the mean arithmetic */ }
+    }
+    return { ramc: this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + lonDeg), eps: 23.4393 * this.RAD };
+  }
   // Ascendant and MC, only when both birth time and coordinates are known.
   ascendant() {
     const p = this.activeProfile();
     if (!p || !p.timedChart) return null;
     const R = this.RAD, t = this.t2000(this.natalDate());
-    const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
-    const eps = 23.4393 * R, phi = p.birthLat * R, ramc = lst * R;
+    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const eps = fr.eps, phi = p.birthLat * R, ramc = lst * R;
     const asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     const mc = this.norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / R);
     const s = this.signOf(asc);
@@ -11584,8 +11704,8 @@ class Component extends DCLogic {
     if (!p || !p.timedChart) return null;
     const R = this.RAD;
     if (t == null) t = this.t2000(this.natalDate());
-    const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
-    const eps = 23.4393 * R;
+    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const eps = fr.eps;
     const ramc = (lst + 180) * R, phi = (90 - p.birthLat) * R;
     const v = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     // The closed form lands on whichever of the TWO prime vertical crossings
@@ -11818,15 +11938,24 @@ class Component extends DCLogic {
   }
   artNum(n) { return /^(8|11|18|8\d)$/.test(String(n)) ? 'an' : 'a'; }
   numReduce(n) { n = Math.abs(+n || 0); while (n > 9) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
+  /* MASTER NUMBERS ARE KEPT WHEREVER A NUMBER IS READ, which the owner asked
+     for on 29 September 2026. 11, 22 and 33 stop the reduction, the same three
+     InCommonCore.reduce() has always kept for the Life Path and the Personal
+     Year, and now the Personal Day, the week, the cycles and the pinnacles keep
+     them too. numReduce() above still reduces all the way, and stays for the
+     two places arithmetic needs a single digit: a challenge is a difference,
+     and the first pinnacle ends at 36 less the Life Path's root. */
+  NUM_MASTERS = [11, 22, 33];
+  numKeep(n) { n = Math.abs(+n || 0); while (n > 9 && this.NUM_MASTERS.indexOf(n) === -1) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
   numerology() {
     const core = window.InCommonCore, dob = this.dob();
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const y = +m[1], mo = +m[2], d = +m[3];
     const lp = core ? core.lifePath(dob).value : this.numReduce(mo + d + y);
-    const rm = this.numReduce(mo), rd = this.numReduce(d), ry = this.numReduce(y);
-    const p1 = this.numReduce(rm + rd), p2 = this.numReduce(rd + ry), p3 = this.numReduce(p1 + p2), p4 = this.numReduce(rm + ry);
+    const rm = this.numKeep(mo), rd = this.numKeep(d), ry = this.numKeep(y);
+    const p1 = this.numKeep(rm + rd), p2 = this.numKeep(rd + ry), p3 = this.numKeep(p1 + p2), p4 = this.numKeep(rm + ry);
     const end1 = 36 - this.numReduce(lp);
-    const c1 = Math.abs(rm - rd), c2 = Math.abs(rd - ry);
+    const c1 = Math.abs(this.numReduce(mo) - this.numReduce(d)), c2 = Math.abs(this.numReduce(d) - this.numReduce(y));
     const age = Math.floor((Date.now() - Date.parse(dob + 'T12:00:00')) / 31557600000);
     return { lp: lp, rm: rm, rd: rd, ry: ry, age: isNaN(age) ? null : age,
       pinnacles: [[p1, '0 to ' + end1], [p2, (end1 + 1) + ' to ' + (end1 + 9)], [p3, (end1 + 10) + ' to ' + (end1 + 18)], [p4, (end1 + 19) + ' onward']],
@@ -12308,18 +12437,35 @@ class Component extends DCLogic {
     const motorThroat = defined.has('Throat') && motors.some(m => seen.has(m));
     const sacral = defined.has('Sacral');
     const type = defined.size === 0 ? 'Reflector' : sacral && motorThroat ? 'Manifesting Generator' : sacral ? 'Generator' : motorThroat ? 'Manifestor' : 'Projector';
-    const authority = defined.has('Solar Plexus') ? 'Emotional: wait out the wave; there is no truth in the now' : defined.has('Sacral') ? 'Sacral: the gut response in the moment' : defined.has('Spleen') ? 'Splenic: the quiet first instinct, spoken once' : defined.has('Heart') ? 'Ego: what you have the will and worth for' : defined.has('G') ? 'Self-projected: hear your own voice out loud' : defined.size ? 'Mental: talk it through with trusted people, in the right environment' : 'Lunar: let a full cycle pass before deciding';
+    const authority = defined.has('Solar Plexus') ? 'Emotional: wait out the wave; there is no truth in the now' : defined.has('Sacral') ? 'Sacral: the gut response in the moment' : defined.has('Spleen') ? 'Splenic: the quiet first instinct, spoken once' : defined.has('Heart') ? (defined.has('Throat') && seen.has('Heart') ? 'Ego manifested: what you have the will and worth for, said out loud and then acted on' : 'Ego projected: what you have the will and worth for, heard as you talk it through with someone you trust') : defined.has('G') ? 'Self-projected: hear your own voice out loud' : defined.size ? 'Mental: talk it through with trusted people, in the right environment' : 'Lunar: let a full cycle pass before deciding';
+    /* THE EGO SPLIT AND THE DEFINITION, AS THE CELESTIAL CODEX NAMED THEM. An
+       Ego authority is two different authorities in the tradition: manifested
+       when the Heart reaches the Throat, which is a Manifestor's, and projected
+       when it does not, which is a Projector's, and one says it and acts while
+       the other hears it said. inCommon called both Ego. And the definition,
+       how many separate pieces the defined centres fall into, is a line the
+       Codex drew and inCommon did not: it is what says whether the reader is
+       whole on their own or has a gap another person bridges. */
+    const piece = from => { const got = new Set([from]), qq = [from]; while (qq.length) { const c = qq.shift(); (adj[c] || []).forEach(n => { if (!got.has(n)) { got.add(n); qq.push(n); } }); } return got; };
+    const counted = new Set(); let parts = 0;
+    defined.forEach(c => { if (counted.has(c)) return; parts++; piece(c).forEach(x => counted.add(x)); });
+    const definition = this.HD_DEFINITION[Math.min(parts, 4)];
     const gates = [...gset].sort((a, b) => a - b).map(g => { const a = acts.find(x => x.gate === g); return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '' }; });
-    this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts };
+    this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts,
+      definition: definition, definitionParts: parts };
     return this._hd;
   }
+  HD_DEFINITION = [
+    'No Definition: every centre is open, so the chart takes its shape from the people and places around it',
+    'Single Definition: everything defined is joined in one piece',
+    'Split Definition: two separate defined areas, which a gate in somebody else can bridge',
+    'Triple Split: three separate defined areas',
+    'Quadruple Split: four separate defined areas'];
   personalDay(pyVal, when) {
     const core = window.InCommonCore, d = when || new Date();
     if (!core) return null;
     const pm = core.personalMonth(pyVal || 0, d.getMonth() + 1).value;
-    let n = pm + d.getDate(); // a personal DAY reduces all the way to 1 to 9
-    while (n > 9) n = String(n).split('').reduce((s, c) => s + +c, 0);
-    return n;
+    return this.numKeep(pm + d.getDate()); // 11, 22 and 33 are kept, as the month and year keep them
   }
   /* ---- Eastern time. One source for every "today" stamp in the app. ------- */
   estParts(d) {
@@ -13782,7 +13928,7 @@ class Component extends DCLogic {
     if (!d) return null;
     const key = 'num|' + when.toDateString() + '|' + this.dob() + '|' + this.birthName();
     if (this._numHoroKey === key && this._numHoro) return this._numHoro;
-    const EP = this.NUM_EXPECT[d.pdV] || [['something worth noticing', 'pushing it']];
+    const EP = this.NUM_EXPECT[d.pdV] || this.NUM_EXPECT[this.numReduce(d.pdV)] || [['something worth noticing', 'pushing it']];
     const E = EP[this.dfigIndex(when, EP.length, d.pdV, dt => this.dpdOf(dt))];
     const tom = this.addDays(when, 1), pdTom = this.personalDay(d.pyV, tom);
     const eom = new Date(when.getFullYear(), when.getMonth() + 1, 0);
@@ -13933,7 +14079,7 @@ class Component extends DCLogic {
   fmtDay(d) { const f = this._fmt('day', { month: 'short', day: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
   fmtMonth(d) { const f = this._fmt('month', { month: 'long', year: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); }
   weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
-  personalWeek(pyV, d) { return this.numReduce(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
+  personalWeek(pyV, d) { return this.numKeep(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
   isRetro(name, date) { const t = this.t2000(date); return this.norm360(this.lonOf(name, t + 1) - this.lonOf(name, t)) > 180; }
   // Retrograde motion, computed from the same ephemeris the wheel is drawn from.
@@ -14653,7 +14799,7 @@ class Component extends DCLogic {
     if (!A || !hd) return null;
     if (tab === 'type' || tab === 'sleep') return hd.type || null;
     if (tab === 'mood') {
-      const first = String(hd.authority || '').split(':')[0].trim().toLowerCase();
+      const first = String(hd.authority || '').split(':')[0].trim().split(/\s+/)[0].toLowerCase();
       const au = first && (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1);
       return au ? au.name : null;
     }
@@ -15079,7 +15225,7 @@ class Component extends DCLogic {
         obstacles: [s2.ignored, 'Treating strategy as a rule to obey. It is a claim about how you work, and it earns its place only by being tested against your own record.'] };
       ask = 'How do I tell the difference between responding and initiating in practice?';
     } else if (sel.kind === 'authority') {
-      const first = String(hd.authority).split(':')[0].trim().toLowerCase();
+      const first = String(hd.authority).split(':')[0].trim().split(/\s+/)[0].toLowerCase();
       const au = (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1) || A.AUTHORITIES[0];
       title = au.name; kicker = 'Inner authority'; sec = 'authorities'; item = au.name; edge = 'rgba(139,92,246,.4)';
       youKicker = 'Yours \u00b7 ' + au.name;
@@ -15611,7 +15757,7 @@ class Component extends DCLogic {
       moverQuality: this.bodyEnergy(top.a.name), natalQuality: this.bodyEnergy(top.b.name) };
     if (d.center) el.design = { theme: this.centerTheme(d.center), defined: !!d.definedCenter, channel: !!d.chan };
     if (d.pdV && d.pyV) {
-      const blend = this.reduceNum(d.pyV + d.pdV);
+      const blend = this.numKeep(d.pyV + d.pdV);
       el.numbers = { day: d.pdV, year: d.pyV, blend: blend, dayEssence: this.numEssence(d.pdV),
         yearEssence: this.numEssence(d.pyV), blendEssence: this.numEssence(blend) };
     }
@@ -15982,7 +16128,7 @@ class Component extends DCLogic {
       astrology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%223.6%22%20r%3D%222.1%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + this.fmtPos(d.sun) + ', Moon ' + this.fmtPos(d.moon) + ' (' + d.phase + '). Contacts to natal: ' +
         (d.hits.length ? d.hits.map(h => h.a.name + ' ' + this.aspName(h.asp) + ' to natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', orb ' + h.orb.toFixed(1) + ' deg').join('; ') : 'none within orb'),
       humanDesign: d.hd.type + ', authority ' + d.hd.authority + '. Sun in Gate ' + d.sunGate.gate + '.' + d.sunGate.line + ' (' + (this.GATE_NAMES[d.sunGate.gate] || '') + ') in the ' + (d.center || 'unmapped') + ' center, ' + (d.definedCenter ? 'defined' : 'undefined') + '. Moon in Gate ' + d.moonGate.gate + '.' + d.moonGate.line + '. ' + (d.chan ? 'Completes channel ' + d.chan[0] + '-' + d.chan[1] + ' with natal Gate ' + d.partner + '.' : 'No channel completed today.'),
-      numerology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M5.4%2015.8v3.4M12%2011v8.2M18.6%206.2v13%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%205.15A2.6%202.6%200%200%201%2012%209.65A2.6%202.6%200%200%201%2012%205.15Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + d.lp + ', Personal Year ' + d.pyV + ', Personal Month ' + d.pmV + ', Personal Day ' + d.pdV + '. Year plus day reduces to ' + this.reduceNum(d.pyV + d.pdV) + '.',
+      numerology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M5.4%2015.8v3.4M12%2011v8.2M18.6%206.2v13%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%205.15A2.6%202.6%200%200%201%2012%209.65A2.6%202.6%200%200%201%2012%205.15Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + d.lp + ', Personal Year ' + d.pyV + ', Personal Month ' + d.pmV + ', Personal Day ' + d.pdV + '. Year plus day reduces to ' + this.numKeep(d.pyV + d.pdV) + '.',
       integration: this.dailyTogetherText(d),
       topContact: top ? top.a.name + ' ' + this.aspName(top.asp) + ' to natal ' + top.b.name : 'none'
     };
@@ -15991,7 +16137,7 @@ class Component extends DCLogic {
     const d = this.dailyData();
     if (!d) return null;
     const top = d.hits[0], a = top ? this.aspName(top.asp) : '';
-    const sum = this.reduceNum(d.pyV + d.pdV);
+    const sum = this.numKeep(d.pyV + d.pdV);
     const segs = [
       { tag: 'CALCULATED', text: top
         ? 'Astrology: transiting ' + top.a.name + ' at ' + this.fmtPos(top.a) + ' forms a ' + a + ' to your natal ' + top.b.name + ' at ' + this.fmtPos(top.b) + ', orb ' + top.orb.toFixed(1) + ' degrees. That contact works on ' + this.bodyEnergy(top.b.name) + '.'
@@ -16971,7 +17117,7 @@ class Component extends DCLogic {
     const lpB = core && other.birthDate ? core.lifePath(other.birthDate).value : null;
     const num = [];
     if (lpA != null && lpB != null) {
-      const sum = this.reduceNum ? this.reduceNum(lpA + lpB) : null;
+      const sum = this.numKeep(lpA + lpB);
       num.push(H('The arithmetic', 'Life Path ' + lpA + ' for ' + A.first + ', Life Path ' + lpB + ' for ' + B.first + '. Each one reduces from a birth date, so you can check the working yourselves.'));
       num.push(H('What the system holds', lpA === lpB
         ? 'You both carry ' + lpA + ': ' + (this.NUM_MEANING[lpA] || 'its own theme') + '.'
@@ -17442,7 +17588,7 @@ class Component extends DCLogic {
         if (m && BT && geo.timezone && geo.timezone !== 'manual') {
           const t = (parsed && parsed.ok ? parsed.time : '12:00').split(':');
           const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-          const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+          const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
           out.push({ t: geo.timezone + ', ' + BT.offsetLabel(r.offset) + ' on that date' +
             (dst == null ? '' : dst ? ', daylight saving in effect' : ', standard time') + '.', c: 'var(--tx)' });
           if (r.ambiguous) out.push({ t: 'That local time falls inside a clock change, so it happened twice. This reading takes the first of the two.', c: 'var(--warn)' });
@@ -17498,7 +17644,7 @@ class Component extends DCLogic {
         const parsed = this.state.afTimeUnknown ? null : BT.parse(this.af('btime'), this.af('bmer') || '24');
         const t = (parsed && parsed.ok ? parsed.time : '12:00').split(':');
         const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-        const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+        const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
         notes.push({ t: BT.offsetLabel(r.offset) + ' on that date' +
           (dst == null ? '' : dst ? ', daylight saving in effect.' : ', standard time.'), c: 'var(--mut)' });
         if (r.ambiguous) notes.push({ t: 'That local time falls inside a clock change, so it happened twice. This reading takes the first of the two.', c: 'var(--warn)' });
@@ -18199,9 +18345,9 @@ class Component extends DCLogic {
      V1.6.0 took every model out of the build, and the Dream Journal still says
      in its own header that nothing there calls one. The Oracle is the owner's
      decision, taken on 29 September 2026, to bring one back for this screen
-     alone: the reading is written by Claude, through a Supabase Edge Function
-     that holds the key (server/oracle/), because a key in a public page is a
-     key anybody can spend. Everything else in the app still computes on the
+     alone: the reading is written by Kimi, Moonshot AI's model, through a
+     Supabase Edge Function that holds the key (server/oracle/), because a key
+     in a public page is a key anybody can spend. Everything else in the app still computes on the
      device, and the Dream Journal's rule still holds for the Dream Journal.
 
      IT OPERATES AS THE CELESTIAL CODEX'S ORACLE DID, which the owner asked for
@@ -18295,16 +18441,13 @@ class Component extends DCLogic {
     }); });
     /* Human Design: inCommon's chart, in the Codex's vocabulary. */
     const hd = this.hdChart(), act = (body, kind) => hd.acts.find(a => a.body === body && a.kind === kind);
-    const adj = {};
-    hd.activeChannels.forEach(c => { (adj[c[2]] = adj[c[2]] || new Set()).add(c[3]); (adj[c[3]] = adj[c[3]] || new Set()).add(c[2]); });
-    const reach = from => { const seen = new Set([from]), q = [from]; while (q.length) { const c = q.shift(); (adj[c] || new Set()).forEach(n => { if (!seen.has(n)) { seen.add(n); q.push(n); } }); } return seen; };
-    const throat = hd.defined.has('Throat') ? reach('Throat') : new Set();
+    /* The Ego split and the definition come from hdChart() now, which draws
+       them on the chart's own screen too, so the dossier and the screen
+       cannot name them differently. */
     const authWord = String(hd.authority).split(':')[0];
     const authority = { Emotional: 'Emotional (Solar Plexus)', Sacral: 'Sacral', Splenic: 'Splenic', 'Self-projected': 'Self-Projected',
-      Mental: 'Mental (Environmental)', Lunar: 'Lunar' }[authWord] || (authWord === 'Ego' ? (throat.has('Heart') ? 'Ego Manifested' : 'Ego Projected') : authWord);
-    const seen = new Set(); let parts = 0;
-    hd.defined.forEach(c => { if (seen.has(c)) return; parts++; reach(c).forEach(r => seen.add(r)); });
-    const definition = parts === 0 ? 'No Definition' : ['', 'Single Definition', 'Split Definition', 'Triple Split', 'Quadruple Split'][parts] || 'Quadruple Split';
+      Mental: 'Mental (Environmental)', Lunar: 'Lunar', 'Ego manifested': 'Ego Manifested', 'Ego projected': 'Ego Projected' }[authWord] || authWord;
+    const definition = String(hd.definition).split(':')[0];
     const pSun = act('Sun', 'personality'), dSun = act('Sun', 'design');
     const gname = g => this.GATE_NAMES[g] || '';
     const skySun = this.gateOf(sky[0].lon);
@@ -18349,7 +18492,7 @@ class Component extends DCLogic {
       [['chiron', 'Chiron'], ['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta'], ['eris', 'Eris']].forEach(([id, name]) => add(id, id, name, 'asteroid'));
       if (asc && p) {
         add('vertex', 'vertex', 'Vertex', 'point');
-        const t = this.t2000(nd), ramc = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon) * this.RAD, eps = 23.4393 * this.RAD;
+        const fr = this.skyFrame(this.t2000(nd), p.birthLon), ramc = fr.ramc * this.RAD, eps = fr.eps;
         extras.push({ key: 'eastPoint', name: 'East Point', lon: this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps))) / this.RAD), kind: 'point', retro: false });
         add('partOfFortune', 'fortune', 'Part of Fortune', 'point');
       }
@@ -18381,15 +18524,11 @@ class Component extends DCLogic {
   }
   /* The Codex's words for each way a reading can fail. Silent for now has no
      Ask again, as in the Codex; the resting and clouded answers do. */
-  ORACLE_SILENT = 'The Oracle is silent for now. Please return a little later.';
-  ORACLE_ERR = {
-    limit: 'The Oracle is silent for now. Please return a little later.',
-    silent: 'The Oracle is silent for now. Please return a little later.',
-    notSetUp: 'The Oracle is silent for now. Please return a little later.',
-    off: 'The Oracle is silent for now. Please return a little later.',
-    busy: 'The oracle is resting. Try again in a minute.',
-    pending: 'The oracle is resting. Try again in a minute.'
-  };
+  ORACLE_ERR = ((silent, resting) => ({
+    limit: silent, silent: silent, notSetUp: silent, off: silent,
+    busy: resting, pending: resting,
+    premium: 'This feature is part of Codex Luminary.'
+  }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
   oracleAsk(period, depth) {
     const slot = this.oracleSlot(period, depth), C = this.cloud;
     if (this._orBusy && this._orBusy[slot]) return;
@@ -18408,6 +18547,10 @@ class Component extends DCLogic {
         this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
       } else {
         const reason = (r && r.reason) || 'error';
+        /* The server's record of the subscription is the one that counts. The
+           page believed this reader was a Luminary and the server did not, so
+           the page stops believing it and asks billing again, with a sync. */
+        if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
         this.setState({ orBusyMap: { ...this._orBusy }, orErr: { slot, reason } });
         this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
       }
@@ -18420,6 +18563,7 @@ class Component extends DCLogic {
     const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
     if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
+    if (depth === 'deep' && !(st.lum && st.lum.isPremium)) return false;
     if (this.oracleCached(period, depth)) return false;
     if (st.orBusyMap && st.orBusyMap[slot]) return false;
     return !(st.orErr && st.orErr.slot === slot);
@@ -18450,13 +18594,118 @@ class Component extends DCLogic {
       if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
     }, 600);
   }
+  /* ---- Codex Luminary ------------------------------------------------------
+
+     THE CODEX CHARGED FOR ITS IN-DEPTH READING, AND SO DOES THIS, which the
+     owner asked for on 29 September 2026. The Codex's Luminary subscription
+     is ported whole: its two prices, $12.99 a month and $119.99 a year, its
+     Stripe Checkout and billing portal, its webhook and its lazy re-sync, in
+     server/billing/index.ts, and its words on this page. In inCommon the one
+     thing Luminary unlocks is the in-depth reading. Everything else in the app
+     stays free, which the gate says in a line of its own.
+
+     The page asks whether the reader is a Luminary the first time the Oracle
+     is opened with a session, and never on render: the phone draws every
+     section at once, and a status call per paint would be a Stripe call per
+     paint for anybody whose row has gone stale. The server decides in the
+     end, because the Oracle function checks the row itself before it writes
+     an in-depth reading, so a page that believes the wrong thing costs a
+     refusal and not a reading. */
+  LUM_PLANS = [['monthly', 'Monthly', '$12.99', 'per month', '', '$12.99/mo'], ['annual', 'Yearly', '$119.99', 'per year \u00b7 $10.00/mo', 'Save 23%', '$119.99/yr']];
+  /* Stripe sends the reader back to the address the page named, with
+     ?luminary=success or ?luminary=cancelled before the hash, the Codex's
+     ?checkout= under a name this app does not already use. It is read once and
+     dropped, so a reload cannot replay the welcome. */
+  lumReturnRead() {
+    let v = null;
+    try {
+      const q = new URLSearchParams(location.search);
+      v = q.get('luminary');
+      if (!v) return;
+      q.delete('luminary');
+      const rest = q.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    } catch (e) { return; }
+    if (v === 'success') this.setState({ lumReturn: 'success', orDepth: 'deep' });
+    else setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+  }
+  lumReturnTo() { return location.origin + location.pathname + '#/oracle'; }
+  lumAuto() {
+    const cs = this.state.cloudStatus, C = this.cloud;
+    const who = cs && cs.mode === 'cloud' ? String(cs.email || 'signed in') : null;
+    if (!who || !C || typeof C.billingStatus !== 'function') {
+      if (this._lumFor) { this._lumFor = null; clearTimeout(this._lumT); this.setState({ lum: null }); }
+      return;
+    }
+    if (this._lumFor === who) return;
+    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success') return;
+    this._lumFor = who;
+    this.lumFetch(this.state.lumReturn === 'success', 0);
+  }
+  /* After a checkout, Stripe has the subscription before the webhook has
+     told anybody, so the status is asked with a sync, and asked again a few
+     times while it still reads unpaid: the Codex's "Confirming your payment
+     with Stripe" is that wait, said on the page. */
+  lumFetch(sync, tries) {
+    const C = this.cloud;
+    if (!C || typeof C.billingStatus !== 'function') return;
+    clearTimeout(this._lumT);
+    C.billingStatus({ sync: !!sync }).then(r => {
+      const was = this.state.lum;
+      const lum = r && r.ok && r.status ? { ...r.status }
+        : { isPremium: false, billingConfigured: false, failed: r && ['notSetUp', 'notConfigured'].indexOf(r.reason) === -1 ? (r.reason || 'error') : null };
+      this.setState({ lum });
+      if (this.state.lumReturn === 'success') {
+        if (lum.isPremium) {
+          this.setState({ lumReturn: null });
+          this.toastMsg('Welcome to Codex Luminary. The whole sky is yours.');
+        } else if ((tries || 0) < 4 && !lum.failed) {
+          this._lumT = setTimeout(() => this.lumFetch(true, (tries || 0) + 1), 2500);
+        } else {
+          this.setState({ lumReturn: null });
+        }
+      }
+      if (lum.isPremium && !(was && was.isPremium)) this.speak('Codex Luminary is open.', 'polite');
+    });
+  }
+  lumBuy() {
+    const C = this.cloud;
+    if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
+    this.setState({ lumBusy: 'checkout' });
+    C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo()).then(r => {
+      if (r && r.ok) { location.href = r.url; return; }
+      this.setState({ lumBusy: null });
+      const reason = (r && r.reason) || 'error';
+      if (reason === 'already') { this.toastMsg('You already have Codex Luminary. Manage it from the billing portal.'); this.lumFetch(true, 0); return; }
+      this.toastMsg(reason === 'notConfigured' || reason === 'notSetUp' ? 'Payments are being set up. Check back soon.'
+        : reason === 'signedOut' ? 'Sign in again to continue.' : 'Checkout could not open. Please try again.');
+    });
+  }
+  lumManage() {
+    const C = this.cloud;
+    if (this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
+    this.setState({ lumBusy: 'portal' });
+    C.billingPortal(this.lumReturnTo()).then(r => {
+      if (r && r.ok) { location.href = r.url; return; }
+      this.setState({ lumBusy: null });
+      this.toastMsg(r && r.reason === 'noAccount' ? 'There is no billing account on this sign in.' : 'The billing portal could not open. Please try again.');
+    });
+  }
   oracleVals() {
     const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
-    const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth), r = hit ? hit.reading : null;
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
+    const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth);
     const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
     const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
     const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
+    /* In depth is Luminary's, as the Codex's was: until the status is in the
+       page waits, and a reader who is not a Luminary sees the gate instead of
+       any reading, a kept one included, because the Codex showed the gate in
+       its place. */
+    const lum = st.lum, canDeep = !!(lum && lum.isPremium);
+    const deepish = depth === 'deep' && signedIn && !sample && !off;
+    const lumWait = deepish && !lum, locked = deepish && !!lum && !canDeep;
+    const r = hit && !locked && !lumWait ? hit.reading : null;
     const consented = !!this.readLS(this.oracleConsentKey(), false);
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
@@ -18468,11 +18717,13 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
-    const blocked = sample || off || !!r;
+    const blocked = sample || off || !!r || locked || lumWait;
     const waiting = !blocked && !err && signedIn && consented;
+    const plan = st.lumPlan || 'annual', planRow = this.LUM_PLANS.find(x => x[0] === plan);
+    const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
     return {
       orIcon: this.uiIcon('oracle'),
-      orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth']].map(([k, label]) => ({ label, on: depth === k,
+      orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
       orPeriods: this.ORACLE_PERIODS.map(([k, label, sub]) => ({ label, sub, on: period === k,
@@ -18485,17 +18736,36 @@ class Component extends DCLogic {
       orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk(period, depth); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
-      orBusy: !r && (busy || waiting),
+      orBusy: !r && !locked && (busy || waiting || lumWait),
       orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
-      orPrivacy: 'The Oracle reads your chart the way the Celestial Codex did. Asking sends your first name, your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Anthropic, whose model Claude writes the reading. No journal entry, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. From then on the Oracle reads for you whenever you open it, and each reading is kept with your account for the period it covers.',
+      orPrivacy: 'The Oracle reads your chart the way the Celestial Codex did. Asking sends your first name, your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Moonshot AI, whose model Kimi writes the reading. No journal entry, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. From then on the Oracle reads for you whenever you open it, and each reading is kept with your account for the period it covers.',
       orAskGo: () => this.oracleAsk(period, depth),
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
-      orLoadingText: depth === 'deep'
+      orLoadingText: lumWait ? 'Checking your Luminary subscription…' : depth === 'deep'
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
+      orLumMember: deepish && canDeep && !!lum.plan,
+      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') : '',
+      orLumManageOn: !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      orLumManageLabel: st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
+      orLumManage: () => this.lumManage(),
+      orLumGate: locked,
+      orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
+      orLumPlansOn: !!(lum && lum.billingConfigured),
+      orLumPlans: this.LUM_PLANS.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
+        bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
+        c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
+      orLumBuyOn: !!(lum && lum.billingConfigured),
+      orLumCta: st.lumBusy === 'checkout' ? 'Opening secure checkout…' : 'Become a Luminary · ' + planRow[5],
+      orLumBuy: () => this.lumBuy(),
+      orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured),
+      orLumNote: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
+      orLumRetryOn: !!(lum && lum.failed),
+      orLumRetry: () => this.lumFetch(true, 0),
       orShowReading: !!r,
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
@@ -20359,7 +20629,7 @@ class Component extends DCLogic {
             aria: 'House ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
           globalTransits: tr.global.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
           personalTransits: tr.personal.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
-          hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority,
+          hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority, hdDefinition: hd.definition,
           hdTypeGo: this.hdOpen({ kind: 'type' }), hdStrategyGo: this.hdOpen({ kind: 'strategy' }), hdAuthorityGo: this.hdOpen({ kind: 'authority' }),
           hdProfileGo: this.hdOpen({ kind: 'profile' }),
           ...(() => {
@@ -20855,7 +21125,7 @@ class Component extends DCLogic {
             }
             const t = parsed.time.split(':');
             const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-            const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+            const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
             return { formTimeNoteShow: true, formTimeNoteC: r.ambiguous ? 'var(--warn)' : 'var(--ok)',
               formTimeNote: 'Read as ' + parsed.time + (BT.format12(parsed.time) ? ' (' + BT.format12(parsed.time) + ')' : '') + ' in ' + geo.timezone + ', ' +
                 BT.offsetLabel(r.offset) + ' on ' + fm.birthDate + (dst == null ? '' : dst ? ', daylight saving in effect' : ', standard time') + '.' +
