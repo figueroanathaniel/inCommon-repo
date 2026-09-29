@@ -2673,7 +2673,23 @@
 
       onStep('cover: the way out');
       var pathBefore = w.location.pathname;
+      /* TWO STEPS NOW. "enter here" opens the email sign in first, in place,
+         with "Continue without an account" under it, and it is that control
+         which runs the exit. So the first press is asserted to open the field
+         and to leave nobody anywhere, and the opened state is measured for
+         targets and contrast the way H7 and H8 measure the cover at rest:
+         with the page scrolled back to the top, because at the end of the
+         scroll the way in is hidden and neither sweep can see it. */
+      await coverScrollTo(w, 0);
       a.click();
+      await sleep(400);
+      var mf = d.getElementById('mailform'), skipBtn = d.querySelector('button.skip');
+      var firstPress = !!(mf && !mf.hidden && skipBtn && !skipBtn.hidden) &&
+        a.getAttribute('aria-expanded') === 'true' && w.location.pathname === pathBefore &&
+        (op(w, '.markwrap') === null || op(w, '.markwrap') >= 0.95);
+      var openedTargets = tapTargets(w, d);
+      var openedContrast = contrastFails(w, d, 4.5).fails;
+      if (skipBtn) skipBtn.click();
       /* POLL, DO NOT SAMPLE ONCE. A single read at a fixed offset was 700ms and
          it flaked for the same reason the scroll did: at this frame size one
          rAF step can cost 400ms, so the read can land after the exit has
@@ -2691,9 +2707,10 @@
       }
       /* preventDefault ran and the transition is running: an anchor left alone
          would already have left. */
-      t('H15', 'The link runs the exit instead of navigating at once',
-        { stillOnTheCover: true, transitionRunning: true },
-        { stillOnTheCover: stillHere, transitionRunning: fading });
+      t('H15', 'The link opens the email sign in, and continuing runs the exit instead of navigating at once',
+        { emailFirst: true, openedTargets: [], openedContrast: [], stillOnTheCover: true, transitionRunning: true },
+        { emailFirst: firstPress, openedTargets: openedTargets, openedContrast: openedContrast,
+          stillOnTheCover: stillHere, transitionRunning: fading });
 
       var landed = '';
       for (var i = 0; i < 45; i++) {

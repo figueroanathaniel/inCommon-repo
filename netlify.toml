@@ -14,11 +14,11 @@
 #
 # How the site is served is NOT restated here. The two rules that matter, every
 # path resolving to the app and must-revalidate on the three files a redeploy
-# has to reach, live beside the bundle in deploy/v6.3/_redirects and
-# deploy/v6.3/_headers, so a folder dragged onto app.netlify.com/drop is served
+# has to reach, live beside the bundle in deploy/v6.4/_redirects and
+# deploy/v6.4/_headers, so a folder dragged onto app.netlify.com/drop is served
 # exactly like a deploy from the repo. Two files declaring the same rule is two
 # files that can disagree.
 
 [build]
-  publish = "deploy/v6.3"
+  publish = "deploy/v6.4"
   command = ""
