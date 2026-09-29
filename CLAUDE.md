@@ -2674,9 +2674,20 @@ nothing was stored.
 
 **Four modes, one form.** `data-mode` on `#mailform` is `in` (email, password,
 Sign in), `up` (email, a new password of eight or more, the newsletter box,
-Create account), `forgot` (email, Send reset link) and `set` (a new password,
-Save password). A mode is a set of rows, never a second form, so the address
-typed in one survives into the next. The password field's `autocomplete` moves
+Create New Account), `forgot` (email, Send reset link) and `set` (a new password,
+Save password). A mode is a set of rows, never a second form, so what is typed
+in one survives into the next, the password included: somebody who filled in
+both fields and then pressed Create New Account has already chosen it.
+
+**Create New Account is a button, not a link**, in its own full width row under
+Sign in, named as the owner asked for it on 29 September 2026 ("i want to be
+able to click Create New Account and create a new account"). It was a small
+underlined link, which read as secondary on a form whose two jobs are signing in
+and making an account. The first press shows the newsletter box and turns the
+form's own button into Create New Account; the second press makes the account.
+It takes two because the box starts ticked, and a sign up sent before the box
+was ever on screen would record a yes nobody saw asked. Focus goes to the box
+when both fields are already filled, so the reader meets it on the way. The password field's `autocomplete` moves
 with the mode, `current-password` or `new-password`, so a password manager
 saves and fills the right thing. `Continue without an account` is hidden only in
 `set`, where the reader is signed in and the sentence would be false.
@@ -3208,7 +3219,7 @@ only.
 ## The newsletter is asked for at sign up, and can be refused there
 The owner asked on 29 September 2026 for a newsletter that signs readers up when
 their account is made, with an opt out box. The box sits under the password in
-the cover's Create an account form, "Send me the inCommon newsletter", ticked.
+the cover's Create New Account form, "Send me the inCommon newsletter", ticked.
 Its answer goes with the sign up request as user metadata (`newsletter`, `newsletter_source`,
 `newsletter_decided_at`), and Supabase writes metadata only when that request
 creates the account, so the answer is recorded once, at creation, and a
@@ -3221,8 +3232,8 @@ box that starts ticked is not consent in the EU or the UK**, and that page says
 so, because it is the owner's decision whether to start it unticked or confirm
 by email there, and it should be made knowingly.
 
-**Since the password replaced the emailed link, the box sits in Create an
-account and nowhere else**, so it is asked exactly when an account is made and
+**Since the password replaced the emailed link, the box sits in Create New
+Account and nowhere else**, so it is asked exactly when an account is made and
 a sign in carries no options at all (K24). The list reads only confirmed
 addresses, which holds only while Confirm email stays on in the project.
 

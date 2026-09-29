@@ -124,7 +124,7 @@ watches a `supabase/` folder and can open preview branches that are billed.
 
 ### 4. Try it
 
-Sign in on the cover with your email and password (choose Create an account
+Sign in on the cover with your email and password (choose Create New Account
 the first time), open The Oracle and press Consult the Oracle. A standard
 reading takes about half a minute. Go to another tab and
 back: the reading is there at once, because it is the stored one.
