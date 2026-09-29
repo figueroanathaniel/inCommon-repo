@@ -12,10 +12,11 @@
  *
  * WHAT THIS MODULE NEVER DOES:
  *   1. It never touches the network without a session, with one exception
- *      the reader asks for by pressing a button: starting a provider sign-in
- *      from the cover asks the project which providers are switched on and
- *      exchanges the code the provider sends back. Neither call carries any
- *      local state; the record only moves once the app's own client exists.
+ *      the reader asks for by pressing a button: starting a sign-in from the
+ *      cover (asking which providers are switched on, requesting an email
+ *      link) and exchanging the code that comes back. None of those calls
+ *      carries any local state; the record only moves once the app's own
+ *      client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
  *      revocation takes effect on the next push, not on the next login. Rows
@@ -526,6 +527,29 @@
     }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
   }
 
+  /* The emailed sign in link rides the same PKCE client, so it comes back to
+     the page that asked as ?code= and oauthFinish() completes it exactly as it
+     completes Google. The one cost of PKCE here is that the link has to be
+     opened in the browser that asked, because the code verifier is kept there;
+     the cover says so. A new address is signed up by the same link, which is
+     the library default and what a reader pressing "continue" expects. */
+  var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function emailStart(email, redirectTo) {
+    var addr = String(email || '').trim();
+    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+    var c = oauthLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return Promise.resolve().then(function () {
+      return c.auth.signInWithOtp({ email: addr, options: { emailRedirectTo: redirectTo } });
+    }).then(function (res) {
+      if (!res || !res.error) return { ok: true };
+      var e = res.error, m = String(e.message || '');
+      if (e.status === 429 || /rate limit/i.test(m)) return { ok: false, reason: 'rate' };
+      if (e.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(m)) return { ok: false, reason: 'offline' };
+      return { ok: false, reason: 'error', error: m };
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   function oauthFinish(code) {
     var c = oauthLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
@@ -599,6 +623,7 @@
     completePinRecovery: completePinRecovery,
     providerEnabled: providerEnabled,
     oauthStart: oauthStart,
+    emailStart: emailStart,
     oauthFinish: oauthFinish,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app

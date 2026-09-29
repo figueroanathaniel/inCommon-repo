@@ -189,16 +189,34 @@
      Google's green: that is their mark rather than #2fff8f, so the rim is
      still the only inCommon green on the cover, and the departure is recorded
      in CLAUDE.md rather than taken quietly. */
-  .google {
+  /* The email button wears the same dark style so the two ways to an account
+     read as a pair, and neither competes with "enter here" above them. */
+  .signin {
     pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
     min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
     background: #131314; border: 1px solid #8e918f; color: #e3e3e3;
     font: 500 14px/1 Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .01em;
   }
-  .google:hover { background: #1c1c1e; border-color: #b3b6b4; }
-  .google:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 3px; }
-  .google[aria-busy="true"] { cursor: progress; opacity: .7; }
-  .google svg { width: 18px; height: 18px; flex: none; display: block; }
+  .signin:hover { background: #1c1c1e; border-color: #b3b6b4; }
+  .signin:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 3px; }
+  .signin[aria-busy="true"] { cursor: progress; opacity: .7; }
+  .signin svg { width: 18px; height: 18px; flex: none; display: block; }
+  .signin[hidden], .mailform[hidden] { display: none; }
+  .mailform {
+    pointer-events: auto; display: flex; gap: 8px; width: min(88vw, 380px);
+  }
+  .mailform input {
+    flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
+    border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
+    font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .mailform input::placeholder { color: #9aa0a6; }
+  .mailform input:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .mailform .signin { padding: 0 18px; }
+  .sr {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
   .authmsg {
     min-height: 1.5em; max-width: min(88vw, 440px); text-align: center;
     font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -266,7 +284,13 @@
   <h1 class="mark">inCommon</h1>
   <div class="sub">
     <a class="enter" href="./inCommonApp%20v2.dc.html">enter here</a>
-    <button class="google" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
+    <button class="signin google" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
+    <button class="signin email" type="button" aria-expanded="false" aria-controls="mailform"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#e3e3e3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span>Continue with email</span></button>
+    <form id="mailform" class="mailform" hidden novalidate>
+      <label class="sr" for="mailaddr">Email address</label>
+      <input id="mailaddr" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+      <button class="signin" type="submit">Send link</button>
+    </form>
     <p class="authmsg" role="status" aria-live="polite"></p>
   </div>
 </div>
@@ -299,7 +323,10 @@
     }
   }, 9000);
 </script>
-<!-- CONTINUE WITH GOOGLE, STARTED AND FINISHED ON THIS PAGE.
+<!-- CONTINUE WITH GOOGLE OR EMAIL, STARTED AND FINISHED ON THIS PAGE.
+
+     Both come back the same way: Google's return and the emailed link each
+     land here as ?code=, and the one exchange below finishes either.
 
      A plain script rather than part of the module, for the reason the 9 second
      fallback above is one: with no WebGL the module dies at the renderer, and
@@ -320,21 +347,40 @@
 <script>
 (function () {
   var btn = document.querySelector('button.google');
+  var mailBtn = document.querySelector('button.email');
+  var form = document.getElementById('mailform');
+  var addr = document.getElementById('mailaddr');
   var msg = document.querySelector('.authmsg');
   var enter = document.querySelector('a.enter');
-  if (!btn || !msg || !enter) return;
+  if (!btn || !mailBtn || !form || !addr || !msg || !enter) return;
+  var sendBtn = form.querySelector('button[type="submit"]');
   var busy = false, loading = null;
+  var ANYWAY = ' Enter here works without an account.';
   var WHY = {
-    disabled: 'Google sign in is not switched on for inCommon yet. Enter here works without an account.',
-    offline: 'There is no connection to sign in with. Enter here works without an account.',
-    off: 'The sign in files did not load. Enter here works without an account.',
-    error: 'Google sign in could not start. Enter here works without an account.',
-    unfinished: 'Google sign in did not finish. Enter here works without an account.',
-    cancelled: 'Google sign in was cancelled. Enter here works without an account.'
+    disabled: 'Google sign in is not switched on for inCommon yet.' + ANYWAY,
+    offline: 'There is no connection to sign in with.' + ANYWAY,
+    off: 'The sign in files did not load.' + ANYWAY,
+    error: 'Sign in could not start.' + ANYWAY,
+    unfinished: 'Sign in did not finish. An emailed link has to be opened in the same browser that asked for it.' + ANYWAY,
+    googleUnfinished: 'Google sign in did not finish.' + ANYWAY,
+    cancelled: 'Google sign in was cancelled.' + ANYWAY,
+    expired: 'That sign in link has expired or was already used. Send a new one from here.' + ANYWAY,
+    sent: 'Check your email for a sign in link. Open it in this browser and it brings you straight in.',
+    rate: 'Too many sign in emails have gone out in the last hour. Try again later.' + ANYWAY,
+    invalid: 'That email address does not look complete.',
+    mailUnfinished: 'That sign in link did not finish. Open it in the same browser you asked from, or send a new one.' + ANYWAY
   };
+  /* Which way the reader started, so the return can speak to it. localStorage
+     rather than sessionStorage, because an emailed link usually opens in a new
+     tab, and a tab is where sessionStorage ends. */
+  var VIA = 'incommon.signin.via';
+  function via(v) {
+    try { if (v === undefined) return localStorage.getItem(VIA); if (v) localStorage.setItem(VIA, v); else localStorage.removeItem(VIA); }
+    catch (e) { return null; }
+  }
   function say(text) { msg.textContent = text; }
-  function hold() { busy = true; btn.setAttribute('aria-busy', 'true'); }
-  function settle() { busy = false; btn.removeAttribute('aria-busy'); }
+  function hold() { busy = true; btn.setAttribute('aria-busy', 'true'); sendBtn.setAttribute('aria-busy', 'true'); }
+  function settle() { busy = false; btn.removeAttribute('aria-busy'); sendBtn.removeAttribute('aria-busy'); }
   function clean() { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
   function load(src) {
     return new Promise(function (resolve, reject) {
@@ -356,6 +402,7 @@
       })
       .catch(function (e) { loading = null; throw e; }));
   }
+  var here = location.origin + location.pathname;
 
   /* The query is read for what it means and never echoed. Anybody can write a
      link to this page with any error_description in it, and a sentence of
@@ -363,35 +410,71 @@
   var q = new URLSearchParams(location.search);
   var code = q.get('code');
   var refused = q.get('error');
+  var cameBy = via();
+  /* Opened in another browser, the link arrives with no record of how it was
+     asked for, so the unknown case speaks to both ways rather than guessing. */
+  function unfinished() { return cameBy === 'email' ? WHY.mailUnfinished : cameBy === 'google' ? WHY.googleUnfinished : WHY.unfinished; }
   if (code) {
     hold();
-    say('Signing you in with Google.');
+    say('Signing you in.');
     cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
       clean();
-      if (r.ok) { location.replace(enter.getAttribute('href')); return; }
-      if (r.error && window.console) console.warn('Google sign in did not finish:', r.error);
+      if (r.ok) { via(null); location.replace(enter.getAttribute('href')); return; }
+      if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
       settle();
-      say(WHY.unfinished);
+      say(unfinished());
     }, function () { clean(); settle(); say(WHY.off); });
   } else if (refused) {
+    /* error_code is a fixed vocabulary, so it may choose the sentence; it is
+       still never shown. An expired email link also arrives as access_denied,
+       which is why cancelled is only said when the reader went to Google. */
+    var errCode = q.get('error_code');
     clean();
-    say(refused === 'access_denied' ? WHY.cancelled : WHY.unfinished);
+    say(errCode === 'otp_expired' ? WHY.expired
+      : cameBy === 'google' && refused === 'access_denied' ? WHY.cancelled
+      : unfinished());
   }
 
   /* Back from Google's page restores this one from the back-forward cache
-     with the button still held, so it is let go here. */
+     with the buttons still held, so they are let go here. */
   addEventListener('pageshow', function (e) { if (e.persisted && !code) { settle(); say(''); } });
 
   btn.addEventListener('click', function () {
     if (busy) return;
     hold();
+    via('google');
     say('Opening Google.');
     cloud().then(function (C) {
-      return C.oauthStart('google', location.origin + location.pathname);
+      return C.oauthStart('google', here);
     }).then(function (r) {
       if (r.ok) { location.assign(r.url); return; }
       settle();
       say(WHY[r.reason] || WHY.error);
+    }, function () { settle(); say(WHY.off); });
+  });
+
+  /* The email button opens the field in its place rather than beside it, so
+     the cover never shows a form nobody asked for. */
+  mailBtn.addEventListener('click', function () {
+    mailBtn.hidden = true;
+    mailBtn.setAttribute('aria-expanded', 'true');
+    form.hidden = false;
+    addr.focus();
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (busy) return;
+    hold();
+    via('email');
+    say('Sending your link.');
+    cloud().then(function (C) {
+      return C.emailStart(addr.value, here);
+    }).then(function (r) {
+      settle();
+      if (r.ok) { say(WHY.sent); return; }
+      say(WHY[r.reason] || WHY.error);
+      if (r.reason === 'invalid') addr.focus();
     }, function () { settle(); say(WHY.off); });
   });
 })();
@@ -1331,8 +1414,9 @@ setInterval(() => {
 const markEl = document.querySelector('.mark');
 const glyphEl = document.querySelector('.glyph');
 const enterEl = document.querySelector('a.enter');
-/* Both ways in, and the line that reports on the second, leave together. */
-const wayEls = [enterEl, document.querySelector('button.google'), document.querySelector('.authmsg')].filter(Boolean);
+/* Every way in, and the line that reports on the sign in, leave together. */
+const wayEls = [enterEl, document.querySelector('button.google'), document.querySelector('button.email'),
+  document.getElementById('mailform'), document.querySelector('.authmsg')].filter(Boolean);
 
 /* Declared here rather than beside the click handler below, because
    scrollFade reads it and scrollFade is called at module scope before that

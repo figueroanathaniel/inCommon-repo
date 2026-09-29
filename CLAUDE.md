@@ -2595,7 +2595,7 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
-## Continue with Google, and why the code comes back to the cover
+## Signing in on the cover: Google and email, and why the code comes back to it
 The owner asked for Google sign in on the cover on 28 September 2026, as part of
 moving toward the Celestial Codex direction. It rides the Supabase project the
 cloud sync already uses, so there is one account system, not two. The cloud UI
@@ -2641,6 +2641,29 @@ Google Cloud OAuth client whose redirect URI is the project's
 Configuration, Redirect URLs, or Supabase sends the reader to the Site URL
 instead.
 
+**Continue with email is the way in that works today.** Added the next day, when
+the owner asked for a sign in that needs no Google registration: the email
+provider is already on, on Supabase's free plan. `emailStart()` asks the same
+PKCE client for a magic link sent back to the cover, so the link returns as
+`?code=` and the one exchange that finishes Google finishes it too. The price of
+PKCE is that the link has to be opened in the browser that asked, because the
+code verifier lives there, and the screen says so rather than failing
+mysteriously. A new address is signed up by the same link. The button opens the
+field in its own place, so the cover never shows a form nobody asked for, and
+an address with no `@` and dot is refused before anything is sent. Two limits
+belong to the owner, not the code: Supabase's built in sender allows only a few
+emails an hour, so launch traffic wants a custom SMTP sender in the dashboard,
+and the cover's address has to be in Redirect URLs here as well. K21 to K23 and
+a browser drive with Supabase faked cover sending, the return in a second tab
+of the same browser landing signed in, the rate limit, a bad address, a link
+opened in another browser, and an expired one.
+
+**Which way the reader started is kept in `incommon.signin.via`**, in
+localStorage because an emailed link usually opens in a new tab and a tab is
+where sessionStorage ends. The return reads it to choose its sentence, and it is
+cleared on success. With no record, which is what a link opened in another
+browser looks like, the sentence speaks to both ways rather than guessing.
+
 **The script is plain, not part of the module, and loads nothing until asked.**
 With no WebGL the module dies at the renderer, and a way in that died with it
 would be a second failure on top of the first. The two files it needs, the
@@ -2654,13 +2677,16 @@ are exactly two copies of it. The build copies both files beside `index.html` as
 write a link to the cover with any `error_description` in it, and a sentence of
 theirs painted on the first screen would read as ours: a crafted "your account is
 locked, call this number" came back as the cover's own fixed sentence and
-nothing of its text. `access_denied` reads as cancelled and everything else as
-did not finish. A failed load of the two files is forgotten so the next press
+nothing of its text. `error_code` is a fixed vocabulary, so it may choose the
+sentence and is still never shown: `otp_expired` says the link expired or was
+used. `access_denied` reads as cancelled only when the reader went to Google,
+because an expired email link arrives as `access_denied` too, and everything
+else reads as did not finish. A failed load of the two files is forgotten so the next press
 retries, and a return through the back button lets the held button go.
 
 **Two things on the cover changed that the section above states as rules.** It
-now has two controls, not one: H5 still counts one `a[href]`, because the
-Google control is a button that does not navigate by itself. And the G carries
+now has three controls, not one: H5 still counts one `a[href]`, because the
+Google and email controls are buttons that do not navigate by themselves. And the G carries
 Google's green: the button follows Google's own dark style because its look is
 set by their branding rules, and that green is their mark rather than
 `#2fff8f`, so the rim is still the only inCommon green on the cover.
@@ -2668,7 +2694,7 @@ set by their branding rules, and that green is their mark rather than
 **Two gaps it leaves, stated rather than hidden.** `pullAll()` has no caller, so
 signing in on a new device pushes that device's record up and brings nothing
 down. And the first run screen still says "No account, no sign-in", which a
-reader who just signed in with Google will find contradicts what they did. The
+reader who just signed in will find contradicts what they did. The
 consent language pass owns that sentence.
 
 ## The phone sample banner is pinned, so every section carries its shadow

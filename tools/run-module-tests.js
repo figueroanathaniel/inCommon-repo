@@ -1477,12 +1477,13 @@ async function runCloudTests() {
      (PKCE, redirect handed back rather than followed), that a provider the
      project has not switched on never reaches signInWithOAuth, and that the
      app's own client is left on the flow its email links depend on. */
-  function oauthHarness(settings) {
-    var h = { created: [], oauth: [], exchanged: [], fetched: [] };
+  function oauthHarness(settings, otpError) {
+    var h = { created: [], oauth: [], exchanged: [], fetched: [], otp: [] };
     var fakeLib = { createClient: function (url, key, opts) {
       h.created.push({ url: url, opts: opts || null });
       return { auth: {
         onAuthStateChange: function () {},
+        signInWithOtp: function (a) { h.otp.push(a); return Promise.resolve({ data: {}, error: otpError || null }); },
         signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: { provider: a.provider, url: 'https://auth.invalid/authorize?provider=' + a.provider }, error: null }); },
         exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); }
       }, from: function () { return fakeClient([]).from('x'); } };
@@ -1523,15 +1524,37 @@ async function runCloudTests() {
   }, { ok: finish.ok, exchanged: gOn.exchanged, email: finish.email, clients: gOn.created.length });
   var CLnone = loadIsolatedCloud(null, function () { return Promise.reject(new Error('unused')); });
   var noneStart = await CLnone.oauthStart('google', 'https://cover.k19.invalid/');
+  var noneMail = await CLnone.emailStart('reader@k19.invalid', 'https://cover.k19.invalid/');
   var noneFinish = await CLnone.oauthFinish('code-k19');
-  t('K19', 'with the vendored client missing both calls answer off rather than throwing', {
-    start: 'off', finish: 'off'
-  }, { start: noneStart.reason, finish: noneFinish.reason });
+  t('K19', 'with the vendored client missing every cover call answers off rather than throwing', {
+    start: 'off', email: 'off', finish: 'off'
+  }, { start: noneStart.reason, email: noneMail.reason, finish: noneFinish.reason });
   var gApp = oauthHarness({ google: true });
   gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
   t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
     clients: 1, opts: null
   }, { clients: gApp.created.length, opts: gApp.created[0] ? gApp.created[0].opts : 'none' });
+
+  /* ---- K21-K23: Continue with email, the magic link, on the same PKCE client
+     so the link comes back as ?code= and the path K18 proves completes it. */
+  var gMail = oauthHarness({ email: true });
+  var mailOk = await gMail.C.emailStart('  reader@k21.invalid ', 'https://cover.k21.invalid/');
+  t('K21', 'emailStart asks the PKCE client for a link to the trimmed address, sent back to the page that asked', {
+    ok: true, flowType: 'pkce', calls: 1, email: 'reader@k21.invalid', emailRedirectTo: 'https://cover.k21.invalid/'
+  }, {
+    ok: mailOk.ok, flowType: gMail.created[0] && gMail.created[0].opts && gMail.created[0].opts.auth.flowType, calls: gMail.otp.length,
+    email: gMail.otp[0] && gMail.otp[0].email, emailRedirectTo: gMail.otp[0] && gMail.otp[0].options.emailRedirectTo
+  });
+  var gRate = oauthHarness({ email: true }, { status: 429, message: 'email rate limit exceeded' });
+  var mailRate = await gRate.C.emailStart('reader@k22.invalid', 'https://cover.k22.invalid/');
+  t('K22', 'the project\'s email rate limit is reported as rate, so the cover can say to try later rather than that something broke', {
+    ok: false, reason: 'rate'
+  }, { ok: mailRate.ok, reason: mailRate.reason });
+  var gBad = oauthHarness({ email: true });
+  var mailBad = await gBad.C.emailStart('not an address', 'https://cover.k23.invalid/');
+  t('K23', 'an address that is not one is refused before anything is sent', {
+    ok: false, reason: 'invalid', calls: 0
+  }, { ok: mailBad.ok, reason: mailBad.reason, calls: gBad.otp.length });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
