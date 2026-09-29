@@ -280,6 +280,13 @@ Deno.serve(async (req) => {
   const stale = new Date(Date.now() - 5 * 60e3).toISOString();
   await mine().update({ status: "failed" }).match({ user_id: user.id, status: "pending" }).lt("created_at", stale);
 
+  // Being written already, by the press before a reload, another tab or
+  // another device: say so before the limit is counted. That row is one of
+  // the ones counted, and a reader waiting on it has not asked for anything
+  // new, so the page's asking again while it waits must never read as LIMIT.
+  const writing = await mine().select("id").match({ ...same, status: "pending" }).limit(1).maybeSingle();
+  if (writing.data) return reply(409, { code: "PENDING" });
+
   // Every reading costs money, so the limit counts attempts, not successes.
   const since = new Date(Date.now() - 864e5).toISOString();
   const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);

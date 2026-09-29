@@ -2560,7 +2560,10 @@ the cover forwards it itself, in a synchronous script above the renderer,
 to a screen somebody asked for by name. It runs on document load, which is how
 a real deep link arrives. Testing it by changing the hash on an already loaded
 cover proves nothing: that is a same document navigation and the script does
-not re-run.
+not re-run. One hash is not an address and is left on the cover: one carrying
+`access_token`, `error` or `error_code`, which is how an email the cover sent
+comes back (see "Signing in on the cover"). P9 of that drive holds that a deep
+link is still forwarded.
 
 **`start_url` names the app.** It was `./`, which is the cover now, so an
 installed home screen icon would have opened the door instead of the room.
@@ -2619,108 +2622,159 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
-## Signing in on the cover: email, and why the code comes back to it
+## Signing in on the cover: a password, and why the emails come back after the #
 The owner asked for Google sign in on the cover on 28 September 2026, as part of
-moving toward the Celestial Codex direction, and for email the next day. It
-rides the Supabase project the cloud sync already uses, so there is one account
-system, not two. The cloud UI spec's "No provider sign-ins" line describes the
-temporary Settings surface of step 4 and is superseded here for the cover.
+moving toward the Celestial Codex direction, then for an emailed sign in link
+the next day, and later that day for an email and a password in place of the
+link. It rides the Supabase project the cloud sync already uses, so there is one
+account system, not two. The cloud UI spec's "No provider sign-ins" line
+describes the temporary Settings surface of step 4 and is superseded here for
+the cover.
 
 **Google is gone, not hidden.** It was hidden in v6.4 and taken out on 29
 September 2026 at the owner's request ("for now, take away the google oauth"),
 because a Google Cloud OAuth client is a setup the owner is not paying for. The
 button, its handler, its sentences, `providerEnabled()` and `oauthStart()` are
-all removed; `oauthFinish()` stays, because the email link comes back through
-the same PKCE exchange. The paragraphs below still name Google where they
-record how the exchange was designed and tested, which is what they were. To
-bring it back: a Google provider in Supabase (Authentication, Providers, with a
-Google Cloud OAuth client whose redirect URI is the project's
+all removed. To bring it back: a Google provider in Supabase (Authentication,
+Providers, with a Google Cloud OAuth client whose redirect URI is the project's
 `/auth/v1/callback`), then the button and the two functions from git history
-(commit c098bf4 and before).
+(commit c098bf4 and before). It would come back as `?code=` on a PKCE client,
+and `oauthFinish()` still finishes exactly that.
 
-**The return lands on the cover as `?code=`, and that is the whole design.**
-supabase-js defaults to the implicit flow, which hands the tokens back after the
-`#`, and `#` is this app's router: a return to the app is read as an address,
-and a return to the cover is forwarded to the app as one by the hash forward in
-its head. PKCE hands back `?code=`, before the `#`, where neither page routes.
-The cover exchanges the code, supabase-js writes the session to localStorage
-under the key it derives from the project url, the query is dropped so a reload
-cannot spend the code twice, and the reader goes on to the app, whose own client
-finds the session on load. Driven end to end in a browser with Supabase and
-Google faked: the authorize request carried an S256 challenge and the cover as
-`redirect_to`, the exchange sent the returned code with its verifier, and the
-app came up on `#/today` with `cloudStatus.mode` of `cloud`.
+**The emailed sign in link is gone too, and the reason is the one to keep.** It
+rode PKCE so that it came back to the cover as `?code=`, before the `#`, where
+neither page routes. The price of PKCE is that the code verifier lives in the
+browser that asked, so the link only finished there. People open email on the
+phone, or in a mail app's own browser, and the report was exactly that: it
+opened in a different browser and did not sign anybody in. The owner asked for a
+password instead ("replace the send link with a password entry").
 
-**The app's own client stays implicit on purpose.** Its email links (sign up
-confirmation, the PIN recovery link) would only open in the browser that asked
-for them under PKCE, because the code verifier lives there. K20 asserts `init()`
-still creates the client with the library defaults.
+**A password sign in needs no flow at all, and the two emails left use the
+implicit one.** `signInWithPassword` returns a session in its own response.
+What still sends email is confirming a new address and choosing a new password,
+and on the implicit flow both come back with the session's tokens after the
+`#`: nothing is kept in the asking browser, so they work wherever they are
+opened. So the cover has ONE client, `coverLib()`, on the implicit flow, with
+`detectSessionInUrl` off so a token is taken only where the cover chose to take
+it, and `persistSession` on, writing to the same localStorage key the app's own
+client reads. K15 asserts that shape and goes red on `pkce`.
 
-**Every Supabase call is still in `incommon-cloud.js`.** `emailStart()` and
-`oauthFinish()` need no `init()`, because the cover has no ProfileManager, and
-they make their own PKCE client with `detectSessionInUrl` off so the exchange
-is explicit. The module's header rule, never touching the network without a
-session, carries its one exception in writing: requesting an email link from
-the cover and exchanging the code that comes back, which carry no local state.
-K15 to K20 cover it: K15 the PKCE client and the link's return address, K16
-that the Google functions stay gone and nothing calls an OAuth endpoint, K18
-the exchange, K19 a missing library. Turning the flow back to implicit reds
-K15. Every cover address has to be in Authentication, URL Configuration,
-Redirect URLs, or Supabase sends the reader to the Site URL instead.
+**The `#` is the router, so the cover's hash forward leaves a token hash alone.**
+Any hash carrying `access_token`, `error` or `error_code` stays on the cover.
+Forwarded, it would arrive in the app as a route with the tokens sitting in its
+address bar. The sign in script reads it, drops it from the address with
+`replaceState` BEFORE anything is asked, and hands the tokens to
+`adoptSession()`, which calls `setSession`: supabase-js checks the access token
+with the server before it stores anything, so a hand written hash signs nobody
+in, and the address the cover then names is the server's, never the url's. A
+`type=recovery` hash opens the form in its set mode and asks for the new
+password (`passwordSet()`, `updateUser` on the adopted session); every other
+type goes on to the app signed in. P7 of the browser drive forged a token and
+nothing was stored.
 
-**Continue with email is the way in that works today.** Added the next day, when
-the owner asked for a sign in that needs no Google registration: the email
-provider is already on, on Supabase's free plan. `emailStart()` asks the same
-PKCE client for a magic link sent back to the cover, so the link returns as
-`?code=` and one exchange finishes it. The price of
-PKCE is that the link has to be opened in the browser that asked, because the
-code verifier lives there, and the screen says so rather than failing
-mysteriously. A new address is signed up by the same link. The field opens in
-place when asked for, from "enter here" since v6.4 (see below), so the cover
-never shows a form nobody asked for, and
-an address with no `@` and dot is refused before anything is sent. Two limits
-belong to the owner, not the code: Supabase's built in sender allows only a few
-emails an hour, so launch traffic wants a custom SMTP sender in the dashboard,
-and the cover's address has to be in Redirect URLs here as well. K21 to K23 and
-a browser drive with Supabase faked cover sending, the return in a second tab
-of the same browser landing signed in, the rate limit, a bad address, a link
-opened in another browser, and an expired one.
+**Four modes, one form.** `data-mode` on `#mailform` is `in` (email, password,
+Sign in), `up` (email, a new password of eight or more, the newsletter box,
+Create account), `forgot` (email, Send reset link) and `set` (a new password,
+Save password). A mode is a set of rows, never a second form, so the address
+typed in one survives into the next. The password field's `autocomplete` moves
+with the mode, `current-password` or `new-password`, so a password manager
+saves and fills the right thing. `Continue without an account` is hidden only in
+`set`, where the reader is signed in and the sentence would be false.
 
-**Which way the reader started is kept in `incommon.signin.via`**, in
-localStorage because an emailed link usually opens in a new tab and a tab is
-where sessionStorage ends. The return reads it to choose its sentence, and it is
-cleared on success. With no record, which is what a link opened in another
-browser looks like, the sentence speaks to both ways rather than guessing.
+**Three answers from a sign up, because Supabase gives three.** With Confirm
+email on, which is the project default and what the newsletter list depends on,
+a new address gets a confirmation link and no session: the cover says so, puts
+the form back on sign in with the address kept, and the link signs them in
+wherever it is opened. With it off, the session comes back at once. And an
+address that already has a confirmed account is answered like a new one, so no
+stranger can test an address for an account; the only tell is a user with no
+identities, which `passwordSignUp()` reports as `exists` so the reader is sent
+to sign in rather than told to wait for an email that will never come. K35.
+
+**Every refusal is a reason, never a throw**, chosen by Supabase's code where it
+sends one and by its message where an older project does not: `wrong`,
+`unconfirmed`, `exists`, `weak`, `same`, `closed`, `rate`, `offline`. The order
+in `authReason()` matters once: a new password equal to the old one is refused
+with a sentence that also matches the weak one, so `same` is tested first. K22
+holds all of it, and goes red if that line is removed. Eight characters is
+checked on the page before anything is sent (K23); a project that asks for more
+still refuses, and that reads as `weak`.
+
+**Readers who signed up by the emailed link have no password.** The wrong
+password sentence says so and points at Forgot password, which sets one: a
+recovery email works for an account with no password exactly as for one with
+one. This includes the owner's own account.
+
+**A link sent before the change still works.** A sign in link already in
+somebody's inbox returns as `?code=`, and `oauthFinish()` still exchanges it: the
+PKCE client stored the verifier under the same key the cover client reads, and
+the exchange does not care which flow the client was made for. K18 and P11.
+
+**Every Supabase call is still in `incommon-cloud.js`**, and none of the cover's
+needs `init()`, because the cover has no ProfileManager. The module's header
+rule, never touching the network without a session, carries its one exception
+in writing: signing in, making an account or asking for a new password on the
+cover, and taking the session an emailed link brings back, none of which
+carries local state. K15 to K25 and K35 to K37 cover the module (K17 was
+Google's and went with it); an eleven case browser drive with Supabase faked
+covers the page, including the confirmation and the reset each opened in a
+fresh browser context. Every cover address has to be in Authentication, URL
+Configuration, Redirect URLs, or Supabase sends the email's reader to the Site
+URL instead. Supabase's built in sender allows only a few emails an hour, and
+confirmation emails count, so launch traffic wants a custom SMTP sender.
 
 **The script is plain, not part of the module, and loads nothing until asked.**
 With no WebGL the module dies at the renderer, and a way in that died with it
 would be a second failure on top of the first. The two files it needs, the
-vendored Supabase client and `incommon-cloud.js`, are loaded on the press or on
-the return, never at page load. The app address is read off the "enter here"
-link rather than written a third time, because `build-bundle.js` asserts there
-are exactly two copies of it. The build copies both files beside `index.html` as
-`SIGNIN_FILES` and refuses if the cover stops naming either one.
+vendored Supabase client and `incommon-cloud.js`, are loaded on the first submit
+or on the return from an email, never at page load. The app address is read off
+the "enter here" link rather than written a third time, because
+`build-bundle.js` asserts there are exactly two copies of it. The build copies
+both files beside `index.html` as `SIGNIN_FILES` and refuses if the cover stops
+naming either one. Once signed in, the reader goes on through the link, so the
+module's exit runs, exactly as "Continue without an account" does.
 
-**The return's query is read for what it means and never echoed.** Anybody can
-write a link to the cover with any `error_description` in it, and a sentence of
-theirs painted on the first screen would read as ours: a crafted "your account is
-locked, call this number" came back as the cover's own fixed sentence and
-nothing of its text. `error_code` is a fixed vocabulary, so it may choose the
-sentence and is still never shown: `otp_expired` says the link expired or was
-used, and everything else, `access_denied` included, reads as did not finish. A failed load of the two files is forgotten so the next press
-retries, and a return through the back button lets the held button go.
+**The module is loaded as `./incommon-cloud.js?v=` its own VERSION**, and the
+build refuses a cover whose `?v=` is not the one the module declares. The
+bundle's worker serves everything but a navigation cache first, under a cache
+name that moves once per release, so a device that had loaded the module for
+the emailed link would have been handed that copy by the password cover: no
+`passwordSignIn`, and the reader told the sign in files did not load. Bump the
+module's VERSION and the cover's `?v=` together whenever the cover starts
+calling something new.
+
+**What an email brings back is read for what it means and never echoed.**
+Anybody can write a link to the cover with any `error_description` in it, and a
+sentence of theirs painted on the first screen would read as ours: a crafted
+"call this number" came back as the cover's own fixed sentence and nothing of
+its text. `error_code` is a fixed vocabulary, so it may choose the sentence and
+is still never shown: `otp_expired` says the link expired or was used, and
+everything else reads as did not finish, each pointing at the password and at
+Forgot password. It is read from the hash, where the implicit flow puts it, and
+from the query, where PKCE did. A failed load of the two files is forgotten so
+the next press retries, and a return through the back button lets the held
+button go. `incommon.signin.via`, which chose between the link's sentences, is
+read by nothing now and is removed once from any browser that still holds it.
 
 **One thing on the cover changed that the section above states as a rule.** It
 has more than one control now: H5 still counts one `a[href]`, because the
 sign in controls are buttons that do not navigate by themselves. With Google
 gone, the rim is again the only green of any kind on the cover.
 
+**Opening the form centres the title and the form as one column.** At rest the
+way in hangs below the middle so the title sits over the hole. Four rows hung
+the same way ran off the bottom of a phone, so `body.open` puts the subtitle
+back in the flow and `align-content: safe center` centres the two together; a
+screen too short for the column, a phone on its side, scrolls it. Measured
+across nine sizes from 320x568 to 1920x1080 in every mode: every control inside
+the viewport and at least 44px tall, nothing overlapping the title, the one
+exception the phone on its side, which scrolls as designed.
+
 **"enter here" is the way to signing in.**
-Decided by the owner on 29 September 2026, in v6.4. The "Continue with email"
-button is gone: the first press of "enter here" opens the email field in its
-place, with "Continue without an account" under it, so the one link on the
-cover is both doors and neither is louder than the other. Three things keep it
-from costing anybody the way in they had:
+Decided by the owner on 29 September 2026, in v6.4. The first press of "enter
+here" opens the form in its place, with "Continue without an account" under it,
+so the one link on the cover is both doors and neither is louder than the
+other. Three things keep it from costing anybody the way in they had:
 
 - **The link is still a real anchor with a real href**, untouched in the markup,
   so with the sign in script dead it navigates exactly as it always did, and the
@@ -2733,12 +2787,12 @@ from costing anybody the way in they had:
   runs while the page parses, a module after it), stops the first press with
   `stopImmediatePropagation`, and steps aside on every press after, so a second
   press of "enter here" also goes in.
-- **A return that did not finish opens the field by itself**, an expired link
-  or one opened in another browser, because what that reader needs next is a
+- **A return that did not finish opens the form by itself**, an expired link
+  or a refused one, because what that reader needs next is the password or a
   new link, one field away rather than one press away.
 
 H15 asserts both steps now, in one row so the
-phase stays at 17: the first press opens the field without leaving or starting
+phase stays at 17: the first press opens the form without leaving or starting
 the exit, the opened state passes 44px and 4.5:1 with the page at the top where
 both sweeps can see it, and "Continue without an account" runs the exit.
 
@@ -2985,8 +3039,31 @@ up, as the Codex's `requirePremium` did, so a refusal costs nothing and counts
 nothing. Every string the model returns has dashes replaced
 before it is stored, by a detector built from char codes.
 
+**The page does not say resting while a reading is on its way.** Two answers
+used to paint "The oracle is resting" over a reading that was being written.
+PENDING is the server saying a reading for this key is already being written,
+which is what a reload in the middle of one looks like, and a phone reloads a
+backgrounded tab often. RATE_LIMITED is Kimi saying it is writing another, and
+on the $1 recharge tier Kimi writes one at a time for the whole app. So while
+the reader is on the screen `oracleAsk()` waits them out (`ORACLE_WAIT`): every
+ten seconds for up to six minutes on PENDING, which outlasts the server's five
+minute release of a stuck row, and at 15, 30 and 45 seconds on RATE_LIMITED,
+with the loading panel up and a line saying which it is. Only then does it rest.
+Leaving the screen stops the waiting, and coming back asks again. The page also
+asks for one reading at a time: another slot in flight or waiting defers the
+next, which says it is waiting its turn, and the one componentDidUpdate asks
+for it once the first is answered. Driven with the function faked: W1 to W5,
+nine rows.
+
+**The server says PENDING before it counts the limit.** It used to count first,
+so asking again for the reader's sixth reading while it was being written came
+back LIMIT and read as silent for now. It looks for a pending row for the same
+key after the finished one and before the count; O38 of the fake Kimi harness
+fails on the old order. Asking again for a reading being written costs nothing:
+no row is claimed and the model is not called.
+
 **A signed out reader is sent to the cover**, `?signin=1`, which opens the
-email field at once and drops the query. The Oracle needs an account because a
+sign in form at once and drops the query. The Oracle needs an account because a
 reading is written for one person and kept with them; a sample chart is refused
 on the page before anything is sent, because the Oracle writes for one person
 and a sample is nobody.
@@ -3130,9 +3207,9 @@ only.
 
 ## The newsletter is asked for at sign up, and can be refused there
 The owner asked on 29 September 2026 for a newsletter that signs readers up when
-their account is made, with an opt out box. The box sits under the cover's email
-field, "Send me the inCommon newsletter", ticked. Its answer goes with the
-sign in request as user metadata (`newsletter`, `newsletter_source`,
+their account is made, with an opt out box. The box sits under the password in
+the cover's Create an account form, "Send me the inCommon newsletter", ticked.
+Its answer goes with the sign up request as user metadata (`newsletter`, `newsletter_source`,
 `newsletter_decided_at`), and Supabase writes metadata only when that request
 creates the account, so the answer is recorded once, at creation, and a
 returning reader who unticks it changes nothing. K24 and K25 hold the shape.
@@ -3143,6 +3220,11 @@ confirmed addresses), choosing a sender, and the rules the box lives under. **A
 box that starts ticked is not consent in the EU or the UK**, and that page says
 so, because it is the owner's decision whether to start it unticked or confirm
 by email there, and it should be made knowingly.
+
+**Since the password replaced the emailed link, the box sits in Create an
+account and nowhere else**, so it is asked exactly when an account is made and
+a sign in carries no options at all (K24). The list reads only confirmed
+addresses, which holds only while Confirm email stays on in the project.
 
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where

@@ -61,11 +61,17 @@
 
      Synchronous, and first, so a deep link never paints the cover at all.
      location.replace rather than assignment: the cover should not become a
-     back-button stop on the way to a screen the reader asked for by name. -->
+     back-button stop on the way to a screen the reader asked for by name.
+
+     One kind of hash is not an address and stays here: the one an emailed
+     link from this page comes back with, carrying a session's tokens or the
+     reason it could not. The sign in script below takes it and drops it.
+     Forwarded, it would reach the app as a route and the tokens would sit in
+     its address bar. -->
 <script>
 (function () {
   var h = location.hash;
-  if (h && h.length > 1) location.replace('./inCommonApp%20v2.dc.html' + location.search + h);
+  if (h && h.length > 1 && !/(^#|&)(access_token|error_code|error)=/.test(h)) location.replace('./inCommonApp%20v2.dc.html' + location.search + h);
 })();
 </script>
 <title>inCommon // Event Horizon</title>
@@ -184,9 +190,10 @@
     0%, 100% { text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55); }
     50%      { text-shadow: 0 0 6px rgba(255,248,231,.85), 0 0 20px rgba(183,155,255,.78), 0 0 46px rgba(139,92,246,.78); }
   }
-  /* THE WAY TO AN ACCOUNT. The Send link button wears a quiet dark style, so
-     it never competes with "enter here" above it. Google sign in was here, and
-     was taken out on 29 September 2026 at the owner's request; see CLAUDE.md. */
+  /* THE WAY TO AN ACCOUNT. The form's one button wears a quiet dark style, so
+     it never competes with "enter here" above it. An email and a password
+     since 29 September 2026; the emailed sign in link and Google sign in were
+     both here before it, and CLAUDE.md says why each went. */
   .signin {
     pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
     min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
@@ -201,17 +208,36 @@
   /* The way on without an account, once "enter here" has opened the email
      field. Quiet on purpose: it is the same door the link always was, and it
      should not read as a second, louder choice beside the one being offered. */
-  .skip {
+  .skip, .mode {
     pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
     background: none; border: 0; cursor: pointer; color: #cfd5e2;
     font: 400 13px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .02em;
     text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 0 12px rgba(5,6,10,.9);
   }
-  .skip:hover { color: #fff8e7; }
-  .skip:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .skip:hover, .mode:hover { color: #fff8e7; }
+  .skip:focus-visible, .mode:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  /* OPEN, THE TITLE AND THE WAY IN ARE ONE CENTRED COLUMN. At rest the way in
+     hangs below the middle so the title sits over the hole. A form of four
+     rows hung the same way ran off the bottom of a phone, so opening it puts
+     the subtitle back in the flow and the two are centred together, the title
+     rising by half of what opened under it. Safe centring starts at the top
+     when the column is taller than the screen, and a very short screen, a
+     phone on its side, may scroll it. */
+  body.open .markwrap { align-content: safe center; }
+  body.open .sub { position: static; margin-top: clamp(10px, 1.5vw, 26px); padding-bottom: 12px; }
+  @media (max-height: 560px) { body.open .markwrap { overflow-y: auto; } }
   .mailform {
     pointer-events: auto; display: flex; flex-wrap: wrap; gap: 8px; width: min(88vw, 380px);
   }
+  /* Which rows show is the mode, and the mode is data-mode on the form: in
+     (sign in), up (make an account), forgot (a link to choose a new password)
+     and set (choosing it). The button shares a row with the last field while
+     that field is short enough to leave room, and takes its own row, centred,
+     while an account is being made, where the password's hint needs the
+     width. */
+  .mailform [hidden] { display: none !important; }
+  .mailform .modes { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 4px; }
+  .mailform[data-mode="up"] .signin { margin: 0 auto; }
   /* The newsletter box, ticked to start with and one press to untick. It is a
      label around a native checkbox, so the whole line is the target and a
      screen reader hears a checkbox with its own name, and the violet is the
@@ -222,14 +248,16 @@
     font: 400 13px/1.35 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
   .mailform .news input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: #8b5cf6; cursor: pointer; }
-  .mailform input {
-    flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
+  .mailform .field {
+    flex: 1 1 100%; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
     border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
     font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
-  .mailform input::placeholder { color: #9aa0a6; }
-  .mailform input:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
-  .mailform .signin { padding: 0 18px; }
+  .mailform[data-mode="in"] #mailpass, .mailform[data-mode="set"] #mailpass,
+  .mailform[data-mode="forgot"] #mailaddr { flex: 1 1 0; }
+  .mailform .field::placeholder { color: #9aa0a6; }
+  .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .mailform .signin { padding: 0 18px; flex: none; }
   .sr {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
@@ -301,11 +329,18 @@
   <h1 class="mark">inCommon</h1>
   <div class="sub">
     <a class="enter" href="./inCommonApp%20v2.dc.html">enter here</a>
-    <form id="mailform" class="mailform" hidden novalidate>
-      <label class="sr" for="mailaddr">Email address, for a sign in link</label>
-      <input id="mailaddr" name="email" type="email" autocomplete="email" inputmode="email" placeholder="Email for a sign in link" required>
-      <button class="signin" type="submit">Send link</button>
-      <label class="news"><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
+    <form id="mailform" class="mailform" data-mode="in" hidden novalidate>
+      <label class="sr" for="mailaddr">Email address</label>
+      <input class="field" id="mailaddr" name="email" type="email" autocomplete="username" inputmode="email" placeholder="Email" required>
+      <label class="sr" for="mailpass">Password</label>
+      <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+      <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
+      <button class="signin" type="submit">Sign in</button>
+      <div class="modes">
+        <button class="mode" type="button" data-to="up">Create an account</button>
+        <button class="mode" type="button" data-to="forgot">Forgot password?</button>
+        <button class="mode" type="button" data-to="in" hidden>Sign in instead</button>
+      </div>
     </form>
     <button class="skip" type="button" hidden>Continue without an account</button>
     <p class="authmsg" role="status" aria-live="polite"></p>
@@ -340,65 +375,118 @@
     }
   }, 9000);
 </script>
-<!-- SIGNING IN, STARTED AND FINISHED ON THIS PAGE.
+<!-- SIGNING IN, ON THIS PAGE, WITH A PASSWORD.
 
-     "enter here" is the way to it. The first press opens the email field in
-     place, with "Continue without an account" under it, and that control is
-     the same door the link always was: it goes on through the link, so the
-     exit the module runs and the address the build rewrites are unchanged. A
-     second press of "enter here" goes on through too. The link stays a real
-     anchor with a real href, so with this script dead it simply navigates,
-     which is the way in the cover has always had.
+     "enter here" is the way to it. The first press opens the form in place,
+     with "Continue without an account" under it, and that control is the same
+     door the link always was: it goes on through the link, so the exit the
+     module runs and the address the build rewrites are unchanged. A second
+     press of "enter here" goes on through too. The link stays a real anchor
+     with a real href, so with this script dead it simply navigates, which is
+     the way in the cover has always had.
 
-     The emailed link comes back here as ?code=, and the one exchange below
-     finishes it.
+     An email and a password, since 29 September 2026. The emailed sign in
+     link it replaced finished only in the browser that asked for it, and an
+     email is often opened somewhere else: on the phone, or in a mail app's
+     own browser. The two emails left, confirming a new address and choosing
+     a new password, come back with the session's tokens after the #, which
+     need nothing kept in the browser that asked, so they work wherever they
+     are opened. The hash forward above leaves that hash here; this script
+     takes it, drops it from the address before anything else happens, and
+     has the server check it (adoptSession in incommon-cloud.js).
 
      A plain script rather than part of the module, for the reason the 9 second
      fallback above is one: with no WebGL the module dies at the renderer, and
      a way in that died with it would be a second failure on top of the first.
 
      Nothing is fetched until the reader asks. The two files are loaded on the
-     press, or on the return from the emailed link, and every call to Supabase goes
-     through incommon-cloud.js, the one module allowed to talk to it.
-
-     The return comes back HERE, as ?code=, not to the app. The app's router is
-     the hash and this page forwards any hash to the app, so the code is kept
-     before the #, where neither page routes on it (see emailStart in
-     incommon-cloud.js). Once it is exchanged the session sits in this
-     browser's storage, the query is dropped so a reload cannot spend the code
-     twice, and the reader goes on through the same address "enter here"
-     holds. That address is read off the link rather than written here: the
-     build rewrites it and asserts there are exactly two copies of it. -->
+     first submit, or on the return from an emailed link, and every call to
+     Supabase goes through incommon-cloud.js, the one module allowed to talk
+     to it. Once signed in the session sits in this browser's storage and the
+     reader goes on through the same address "enter here" holds. That address
+     is read off the link rather than written here: the build rewrites it and
+     asserts there are exactly two copies of it. -->
 <script>
 (function () {
   var form = document.getElementById('mailform');
   var addr = document.getElementById('mailaddr');
+  var pass = document.getElementById('mailpass');
   var skip = document.querySelector('button.skip');
   var msg = document.querySelector('.authmsg');
   var enter = document.querySelector('a.enter');
-  if (!form || !addr || !skip || !msg || !enter) return;
+  if (!form || !addr || !pass || !skip || !msg || !enter) return;
   var sendBtn = form.querySelector('button[type="submit"]');
-  var busy = false, loading = null, opened = false, through = false;
+  var news = form.querySelector('.news');
+  var passLabel = form.querySelector('label[for="mailpass"]');
+  var modeBtns = form.querySelectorAll('button.mode');
+  var busy = false, loading = null, opened = false, through = false, mode = 'in';
   var ANYWAY = ' You can still continue without an account.';
+  var LINK_AGAIN = ' Sign in with your password, or choose “Forgot password?” for a new link.';
   var WHY = {
     offline: 'There is no connection to sign in with.' + ANYWAY,
     off: 'The sign in files did not load.' + ANYWAY,
-    error: 'Sign in could not start.' + ANYWAY,
-    unfinished: 'Sign in did not finish. An emailed link has to be opened in the same browser that asked for it.' + ANYWAY,
-    expired: 'That sign in link has expired or was already used. Send a new one from here.' + ANYWAY,
-    sent: 'Check your email for a sign in link. Open it in this browser and it brings you straight in.',
-    rate: 'Too many sign in emails have gone out in the last hour. Try again later.' + ANYWAY,
+    error: 'Sign in could not finish.' + ANYWAY,
+    rate: 'Too many tries in a short time. Wait a few minutes and try again.' + ANYWAY,
     invalid: 'That email address does not look complete.',
-    mailUnfinished: 'That sign in link did not finish. Open it in the same browser you asked from, or send a new one.' + ANYWAY
+    nopassword: 'Enter your password.',
+    short: 'Choose a password of 8 or more characters.',
+    weak: 'That password is too easy to guess. Choose a longer one.',
+    same: 'That is the password the account already has. Choose a different one.',
+    wrong: 'That email and password do not match. If you used to sign in with an emailed link, choose “Forgot password?” to set a password.',
+    unconfirmed: 'That address is not confirmed yet. Open the link in the email sent when the account was made, in any browser, then sign in here. If it never came, choose “Create an account” with the same address to have it sent again.',
+    exists: 'That address already has an account. Sign in with its password, or choose “Forgot password?” to set one.',
+    closed: 'New accounts are not being made right now.' + ANYWAY,
+    confirm: 'Check your email for a link to confirm your address. It works in any browser, and once it is opened you can sign in here with your password.',
+    resetSent: 'If that address has an account, a link to choose a new password is on its way. It works in any browser.',
+    saved: 'Your password is saved.',
+    expired: 'That link has expired or was already used.' + LINK_AGAIN,
+    unfinished: 'That link did not finish.' + LINK_AGAIN
   };
-  /* Which way the reader started, so the return can speak to it. localStorage
-     rather than sessionStorage, because an emailed link usually opens in a new
-     tab, and a tab is where sessionStorage ends. */
-  var VIA = 'incommon.signin.via';
-  function via(v) {
-    try { if (v === undefined) return localStorage.getItem(VIA); if (v) localStorage.setItem(VIA, v); else localStorage.removeItem(VIA); }
-    catch (e) { return null; }
+  /* What each mode shows, says and asks the password manager for. A mode is
+     a set of rows, never a second form, so the address typed in one is still
+     there in the next. */
+  var MODES = {
+    in: { button: 'Sign in', busy: 'Signing you in.', pass: true, passAuto: 'current-password',
+      passLabel: 'Password', passHint: 'Password', to: ['up', 'forgot'] },
+    up: { button: 'Create account', busy: 'Making your account.', pass: true, passAuto: 'new-password',
+      passLabel: 'Choose a password, 8 or more characters', passHint: 'Choose a password, 8 or more', news: true, to: ['in'], back: 'Sign in instead' },
+    forgot: { button: 'Send reset link', busy: 'Sending the link.', pass: false, to: ['in'], back: 'Back to sign in' },
+    set: { button: 'Save password', busy: 'Saving your password.', pass: true, passAuto: 'new-password',
+      passLabel: 'New password, 8 or more characters', passHint: 'New password, 8 or more', noAddr: true, to: [] }
+  };
+  function setMode(m, focus) {
+    var d = MODES[m];
+    mode = m;
+    form.setAttribute('data-mode', m);
+    sendBtn.textContent = d.button;
+    addr.hidden = !!d.noAddr;
+    pass.hidden = passLabel.hidden = !d.pass;
+    if (d.pass) {
+      pass.setAttribute('autocomplete', d.passAuto);
+      pass.setAttribute('placeholder', d.passHint);
+      passLabel.textContent = d.passLabel;
+    }
+    news.hidden = !d.news;
+    for (var i = 0; i < modeBtns.length; i++) {
+      var b = modeBtns[i], to = b.getAttribute('data-to');
+      b.hidden = d.to.indexOf(to) === -1;
+      if (to === 'in' && d.back) b.textContent = d.back;
+    }
+    /* Signed in by a recovery link, the reader has an account in hand, so the
+       way on without one would be the wrong sentence. */
+    skip.hidden = !opened || m === 'set';
+    if (focus) (d.noAddr || (addr.value && d.pass) ? pass : addr).focus();
   }
+  for (var mi = 0; mi < modeBtns.length; mi++) {
+    modeBtns[mi].addEventListener('click', function () {
+      if (busy) return;
+      say('');
+      pass.value = '';
+      setMode(this.getAttribute('data-to'), true);
+    });
+  }
+  /* The key the emailed link used to leave, which nothing reads any more. */
+  try { localStorage.removeItem('incommon.signin.via'); } catch (e) {}
   function say(text) { msg.textContent = text; }
   function hold() { busy = true; sendBtn.setAttribute('aria-busy', 'true'); }
   function settle() { busy = false; sendBtn.removeAttribute('aria-busy'); }
@@ -413,10 +501,14 @@
     });
   }
   /* A failed load is forgotten, so the next press tries again rather than
-     failing at once on the first attempt's broken promise. */
+     failing at once on the first attempt's broken promise. The module is asked
+     for by its VERSION, because the deployed worker keeps it cache first: a
+     plain name would hand a device the copy it cached for an older cover, one
+     without the functions this one calls. build-bundle.js refuses a ?v= that
+     is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.3.0'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return window.InCommonCloud;
@@ -424,37 +516,66 @@
       .catch(function (e) { loading = null; throw e; }));
   }
   var here = location.origin + location.pathname;
+  /* In, the way "Continue without an account" goes: through the link, so the
+     module's exit runs, or the anchor navigates if the module is dead. */
+  function goIn() { through = true; enter.click(); }
 
-  /* The query is read for what it means and never echoed. Anybody can write a
-     link to this page with any error_description in it, and a sentence of
-     theirs painted on this cover would read as ours. */
+  /* What an emailed link brought back is read for what it means and never
+     echoed. Anybody can write a link to this page with any error_description
+     in it, and a sentence of theirs painted on this cover would read as ours;
+     error_code is a fixed vocabulary, so it may choose the sentence and is
+     still never shown. Tokens are dropped from the address before the server
+     is asked about them, so a reload or a copied address cannot carry them. */
   var q = new URLSearchParams(location.search);
+  var h = new URLSearchParams(location.hash.replace(/^#/, ''));
   var code = q.get('code');
-  var refused = q.get('error');
-  var cameBy = via();
-  /* Opened in another browser, the link arrives with no record of how it was
-     asked for, so the unknown case speaks to both ways rather than guessing. */
-  function unfinished() { return cameBy === 'email' ? WHY.mailUnfinished : WHY.unfinished; }
-  if (code) {
+  var tokens = h.get('access_token') ? { at: h.get('access_token'), rt: h.get('refresh_token'), kind: h.get('type') } : null;
+  var failedCode = h.get('error_code') || q.get('error_code');
+  var failed = !!(h.get('error') || failedCode || q.get('error'));
+  var returning = !!(code || tokens);
+  /* A return is what the reader came for, so its line does not wait out the
+     title's staging (body.asked), and the form opens only when something is
+     left to do: a new password to choose, or a link that did not work. */
+  if (returning || failed) document.body.classList.add('asked');
+  if (tokens) {
+    clean();
+    hold();
+    say('Signing you in.');
+    cloud().then(function (C) { return C.adoptSession(tokens.at, tokens.rt); }).then(function (r) {
+      settle();
+      if (r.ok && tokens.kind === 'recovery') {
+        /* A link to choose a new password: the reader is signed in now, and
+           the one thing left is the password itself. */
+        if (r.email) addr.value = r.email;
+        open(false);
+        setMode('set', true);
+        say(r.email ? 'Choose a new password for ' + r.email + '.' : 'Choose a new password.');
+        return;
+      }
+      if (r.ok) { location.replace(enter.getAttribute('href')); return; }
+      if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
+      open(false);
+      say(r.reason === 'offline' ? WHY.offline : WHY.unfinished);
+    }, function () { settle(); open(false); say(WHY.off); });
+  } else if (code) {
+    /* A sign in link sent before the password came in, still in somebody's
+       inbox, comes back as ?code= and is finished the way it always was. */
     hold();
     say('Signing you in.');
     cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
       clean();
-      if (r.ok) { via(null); location.replace(enter.getAttribute('href')); return; }
+      if (r.ok) { location.replace(enter.getAttribute('href')); return; }
       if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
       settle();
       open(false);
-      say(unfinished());
+      say(WHY.unfinished);
     }, function () { clean(); settle(); open(false); say(WHY.off); });
-  } else if (refused) {
-    /* error_code is a fixed vocabulary, so it may choose the sentence; it is
-       still never shown. */
-    var errCode = q.get('error_code');
+  } else if (failed) {
     clean();
     open(false);
-    say(errCode === 'otp_expired' ? WHY.expired : unfinished());
+    say(failedCode === 'otp_expired' ? WHY.expired : WHY.unfinished);
   } else if (q.get('signin') === '1') {
-    /* The app sends a signed out reader here from the Oracle. The field opens
+    /* The app sends a signed out reader here from the Oracle. The form opens
        at once rather than waiting for a press on "enter here", and the query
        is dropped so a reload is an ordinary visit. */
     clean();
@@ -463,10 +584,10 @@
   }
 
   /* A return through the back button restores this page from the
-     back-forward cache with the send button still held, so it is let go here. */
-  addEventListener('pageshow', function (e) { if (e.persisted && !code) { settle(); say(''); } });
+     back-forward cache with the button still held, so it is let go here. */
+  addEventListener('pageshow', function (e) { if (e.persisted && !returning) { settle(); say(''); } });
 
-  /* "enter here" opens the field rather than a form sitting on the cover
+  /* "enter here" opens the form rather than a form sitting on the cover
      unasked. This listener is registered before the module's, because a plain
      script runs while the page is parsed and a module runs after, so on the
      first press it can stop the exit from starting. After that it steps aside
@@ -476,10 +597,10 @@
   function open(focus) {
     if (opened) return;
     opened = true;
+    document.body.classList.add('open');
     enter.setAttribute('aria-expanded', 'true');
     form.hidden = false;
-    skip.hidden = false;
-    if (focus) addr.focus();
+    setMode(mode, focus);
   }
   enter.setAttribute('aria-controls', 'mailform');
   enter.setAttribute('aria-expanded', opened ? 'true' : 'false');
@@ -489,28 +610,30 @@
     ev.stopImmediatePropagation();
     open(true);
   });
-  skip.addEventListener('click', function () {
-    through = true;
-    enter.click();
-  });
+  skip.addEventListener('click', goIn);
 
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
+    var m = mode, d = MODES[m];
     hold();
-    via('email');
-    say('Sending your link.');
+    say(d.busy);
     cloud().then(function (C) {
-      /* The newsletter answer goes with the sign up. Supabase keeps it only
-         when this call creates the account, which is when the owner asked
-         for it to be asked. */
-      var news = document.getElementById('newsopt');
-      return C.emailStart(addr.value, here, news ? { newsletter: !!news.checked } : undefined);
+      if (m === 'in') return C.passwordSignIn(addr.value, pass.value);
+      /* The newsletter answer goes with the sign up, and only there. Supabase
+         keeps it only when this call creates the account, which is when the
+         owner asked for it to be asked. */
+      if (m === 'up') return C.passwordSignUp(addr.value, pass.value, here, { newsletter: !!document.getElementById('newsopt').checked });
+      if (m === 'forgot') return C.passwordResetStart(addr.value, here);
+      return C.passwordSet(pass.value);
     }).then(function (r) {
       settle();
-      if (r.ok) { say(WHY.sent); return; }
+      if (r.ok && r.confirm) { pass.value = ''; setMode('in', false); say(WHY.confirm); return; }
+      if (r.ok && m === 'forgot') { say(WHY.resetSent); return; }
+      if (r.ok) { pass.value = ''; say(m === 'set' ? WHY.saved : 'Signed in.'); goIn(); return; }
       say(WHY[r.reason] || WHY.error);
       if (r.reason === 'invalid') addr.focus();
+      else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
     }, function () { settle(); say(WHY.off); });
   });
 })();

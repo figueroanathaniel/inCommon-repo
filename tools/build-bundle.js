@@ -472,15 +472,28 @@ for (const f of THREE_FILES) {
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 
-/* The cover's email sign in loads these two on the press, or on the return
-   from the emailed link, rather than at load: the vendored Supabase client and the one module
+/* The cover's sign in loads these two on the first submit, or on the return
+   from an emailed link, rather than at load: the vendored Supabase client and the one module
    allowed to call it. The app has both inlined, but the cover is its own page,
    so they sit beside index.html as files. A cover that names them and a bundle
-   without them is a button that says the sign in files did not load. */
-const SIGNIN_FILES = ['supabase-js-2.57.1.umd.min.js', 'incommon-cloud.js'];
-for (const f of SIGNIN_FILES) {
-  if (cover.indexOf("'./" + f + "'") === -1) {
-    die('the cover no longer loads ./' + f + '; update SIGNIN_FILES in tools/build-bundle.js to match it');
+   without them is a button that says the sign in files did not load.
+
+   THE MODULE IS NAMED WITH ITS VERSION, because the bundle's worker keeps it
+   cache first under a cache name that moves only once per release. The cover
+   of 29 September 2026 called functions the cached copy on any device that
+   had used the emailed link did not have, and sign in would have failed there
+   with the sign in files did not load. The Supabase client carries its version
+   in its filename already; the module carries it as ?v=, and it has to be the
+   VERSION the module itself declares, or the cover asks for one copy and the
+   worker hands back another. */
+const cloudSrc = fs.readFileSync(path.join(appDir, 'incommon-cloud.js'), 'utf8');
+const cloudV = (cloudSrc.match(/var VERSION = '([^']+)'/) || [])[1];
+if (!cloudV) die('app/incommon-cloud.js does not declare a VERSION');
+const SIGNIN_FILES = [['supabase-js-2.57.1.umd.min.js', ''], ['incommon-cloud.js', '?v=' + cloudV]];
+for (const [f, q] of SIGNIN_FILES) {
+  if (cover.indexOf("'./" + f + q + "'") === -1) {
+    die('the cover no longer loads ./' + f + q + '; update SIGNIN_FILES in tools/build-bundle.js to match it' +
+      (q ? ', or the ?v= in app/cover.html to the VERSION app/incommon-cloud.js declares' : ''));
   }
   const from = path.join(appDir, f);
   if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for the email sign in');

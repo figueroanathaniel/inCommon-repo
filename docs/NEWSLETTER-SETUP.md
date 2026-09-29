@@ -6,24 +6,27 @@ steps below.
 
 ## What the app does now
 
-The cover's email sign in has a box under the address field:
+The cover's Create an account form has a box under the password:
 
 > Send me the inCommon newsletter
 
-It starts ticked, and one press unticks it. When someone sends themselves a
-sign in link, the answer goes to Supabase with the request, as user metadata on
-the account:
+It starts ticked, and one press unticks it. It shows only while an account is
+being made, never on sign in. When someone makes an account, the answer goes to
+Supabase with the request, as user metadata on the account:
 
 | Key | Value |
 |---|---|
 | `newsletter` | `true` if the box was ticked, `false` if it was unticked |
 | `newsletter_source` | `cover-signup` |
-| `newsletter_decided_at` | the moment the link was asked for, ISO 8601 |
+| `newsletter_decided_at` | the moment the account was asked for, ISO 8601 |
 
 Supabase writes that metadata only when the request creates the account. So the
-answer is recorded once, at account creation. A returning reader who unticks
-the box changes nothing, which is why every issue needs its own unsubscribe
-link (below).
+answer is recorded once, at account creation, and changing it afterwards is the
+unsubscribe link every issue needs (below).
+
+Accounts made before 29 September 2026 were made by an emailed sign in link,
+which asked the same question with the same box. Their answers are recorded the
+same way.
 
 Nothing is sent to any mailing service from the app. The list lives in your
 Supabase project until you take it out.
@@ -43,8 +46,11 @@ where (raw_user_meta_data->>'newsletter')::boolean is true
 order by created_at;
 ```
 
-`email_confirmed_at is not null` keeps only addresses that opened their link,
-so nobody is on the list because somebody else typed their address.
+`email_confirmed_at is not null` keeps only addresses that opened their
+confirmation link, so nobody is on the list because somebody else typed their
+address. That needs **Confirm email** left on in Authentication, Providers,
+Email, which is the default: with it off, Supabase marks every new address as
+confirmed the moment it is typed.
 
 Download the result as CSV and import it into the sender you choose. Do not
 make this a public view or table: `auth.users` holds every account, and the

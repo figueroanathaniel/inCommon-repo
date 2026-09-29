@@ -3437,8 +3437,8 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to consult the Oracle</div>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and nothing else.</p>
-          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and a password, and nothing else.</p>
+          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
         </div>
       </sc-if>
       <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
@@ -8083,8 +8083,8 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to consult the Oracle</div>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and nothing else.</p>
-          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and a password, and nothing else.</p>
+          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
         </div>
       </sc-if>
       <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
@@ -9812,6 +9812,7 @@ class Component extends DCLogic {
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
     clearTimeout(this._lumT);
+    Object.keys(this._orRetryT || {}).forEach(k => clearTimeout(this._orRetryT[k]));
     /* Clean up ephemeris router and WASM instance */
     if (this.ephIntegration) {
       this.ephIntegration.close();
@@ -18523,49 +18524,84 @@ class Component extends DCLogic {
     return lines.join('\n');
   }
   /* The Codex's words for each way a reading can fail. Silent for now has no
-     Ask again, as in the Codex; the resting and clouded answers do. */
+     Ask again, as in the Codex; the resting and clouded answers do. Resting is
+     said only once the page has stopped waiting (ORACLE_WAIT below). */
   ORACLE_ERR = ((silent, resting) => ({
     limit: silent, silent: silent, notSetUp: silent, off: silent,
     busy: resting, pending: resting,
     premium: 'This feature is part of Codex Luminary.'
   }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
-  oracleAsk(period, depth) {
+  /* TWO ANSWERS ARE NOT FAILURES YET, and the page used to show the resting
+     line for both over a reading that was on its way. PENDING is the server
+     saying this reading is already being written: by the press before a
+     reload, which is the common case on a phone, or by another tab or
+     device. RATE_LIMITED is Kimi saying it is writing another one, and on the
+     lowest recharge tier it writes one at a time for the whole app. So while
+     the reader is on the screen the page waits them out, keeping the loading
+     panel up with a line saying which it is: every ten seconds for up to six
+     minutes while a reading is being written (the server gives a stuck one up
+     after five), and three times at a growing interval while Kimi is busy.
+     Only then does it rest. Asking again for a reading being written costs
+     nothing: the server hands back the finished one, or says it is still
+     being written, before it counts anything or calls the model. */
+  ORACLE_WAIT = { pending: { every: [10000], tries: 36 }, busy: { every: [15000, 30000, 45000], tries: 3 } };
+  oracleAsk(period, depth, again) {
     const slot = this.oracleSlot(period, depth), C = this.cloud;
-    if (this._orBusy && this._orBusy[slot]) return;
+    const held = this._orBusy || (this._orBusy = {});
+    if (!again && held[slot]) return;
+    /* One reading at a time from this page, because Kimi may be writing one
+       at a time for everybody. Another slot in flight or waiting defers this
+       one, and the one componentDidUpdate asks for it once that is answered. */
+    if (!again && Object.keys(held).some(k => k !== slot)) { if (this.state.orErr) this.setState({ orErr: null }); return; }
     if (!C || typeof C.oracleRead !== 'function') { this.setState({ orErr: { slot, reason: 'off' } }); return; }
     const localDate = this.oracleLocalDate();
     let dossier;
-    try { dossier = this.oracleDossier(period, depth); } catch (e) { this.setState({ orErr: { slot, reason: 'error' } }); return; }
-    this._orBusy = { ...(this._orBusy || {}), [slot]: true };
-    this.setState({ orBusyMap: { ...this._orBusy }, orErr: null });
-    this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    try { dossier = this.oracleDossier(period, depth); } catch (e) { delete held[slot]; this.setState({ orBusyMap: { ...held }, orErr: { slot, reason: 'error' } }); return; }
+    held[slot] = true;
+    this._orTry = this._orTry || {};
+    this._orRetryT = this._orRetryT || {};
+    if (!again) { delete this._orTry[slot]; this.setState({ orBusyMap: { ...held }, orErr: null }); }
+    if (!again) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
     C.oracleRead({ period, depth, localDate, dossier }).then(r => {
-      delete this._orBusy[slot];
+      const waits = { ...(this.state.orWaitMap || {}) };
       if (r && r.ok && r.reading) {
+        delete held[slot]; delete this._orTry[slot]; delete waits[slot];
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
-        this.setState({ orBusyMap: { ...this._orBusy }, orErr: null, orTick: (this.state.orTick || 0) + 1 });
+        this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: null, orTick: (this.state.orTick || 0) + 1 });
         this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
-      } else {
-        const reason = (r && r.reason) || 'error';
-        /* The server's record of the subscription is the one that counts. The
-           page believed this reader was a Luminary and the server did not, so
-           the page stops believing it and asks billing again, with a sync. */
-        if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
-        this.setState({ orBusyMap: { ...this._orBusy }, orErr: { slot, reason } });
-        this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
+        return;
       }
+      const reason = (r && r.reason) || 'error';
+      const wait = this.ORACLE_WAIT[reason], n = this._orTry[slot] || 0, here = this.curTab() === 'oracle';
+      if (wait && here && n < wait.tries) {
+        this._orTry[slot] = n + 1;
+        this._orRetryT[slot] = setTimeout(() => { delete this._orRetryT[slot]; this.oracleAsk(period, depth, true); },
+          wait.every[Math.min(n, wait.every.length - 1)]);
+        if (waits[slot] !== reason) this.setState({ orWaitMap: { ...waits, [slot]: reason } });
+        return;
+      }
+      delete held[slot]; delete this._orTry[slot]; delete waits[slot];
+      /* Left the screen while waiting: nothing failed, and coming back asks
+         again, which finds the reading written or still being written. */
+      if (wait && !here) { this.setState({ orBusyMap: { ...held }, orWaitMap: waits }); return; }
+      /* The server's record of the subscription is the one that counts. The
+         page believed this reader was a Luminary and the server did not, so
+         the page stops believing it and asks billing again, with a sync. */
+      if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
+      this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: { slot, reason } });
+      this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
     });
   }
   /* Whether the page may ask for this slot now without a press: the reader is
-     signed in, the chart is theirs, they have consented once, and nothing is
-     kept, in flight or failed for it. */
+     signed in, the chart is theirs, they have consented once, nothing is kept
+     or failed for it, and no reading is in flight or waiting on this page. */
   oracleWillAsk(period, depth) {
     const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
     if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
     if (depth === 'deep' && !(st.lum && st.lum.isPremium)) return false;
     if (this.oracleCached(period, depth)) return false;
-    if (st.orBusyMap && st.orBusyMap[slot]) return false;
+    if (st.orBusyMap && Object.keys(st.orBusyMap).length) return false;
     return !(st.orErr && st.orErr.slot === slot);
   }
   /* THE CODEX ASKED WHEN THE SCREEN OPENED, and so does this. Called from the
@@ -18580,6 +18616,15 @@ class Component extends DCLogic {
       clearTimeout(this._orAutoT); this._orAutoT = null; this._orAutoFor = null;
       if (this._orSeen && this.state.orErr) this.setState({ orErr: null });
       this._orSeen = false;
+      /* A wait between two asks stops with the screen. A request actually in
+         flight is left to answer, and stops itself when it sees the screen
+         has gone. */
+      const timers = this._orRetryT || {}, stopped = Object.keys(timers);
+      if (stopped.length) {
+        const waits = { ...(this.state.orWaitMap || {}) };
+        stopped.forEach(k => { clearTimeout(timers[k]); delete timers[k]; delete this._orBusy[k]; delete this._orTry[k]; delete waits[k]; });
+        this.setState({ orBusyMap: { ...this._orBusy }, orWaitMap: waits });
+      }
       return;
     }
     this._orSeen = true;
@@ -18696,6 +18741,8 @@ class Component extends DCLogic {
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth);
     const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
+    const waitWhy = busy && st.orWaitMap ? st.orWaitMap[slot] : null;
+    const otherBusy = !busy && !!st.orBusyMap && Object.keys(st.orBusyMap).length > 0;
     const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
     const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
     /* In depth is Luminary's, as the Codex's was: until the status is in the
@@ -18744,7 +18791,11 @@ class Component extends DCLogic {
       orAskGo: () => this.oracleAsk(period, depth),
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
-      orLoadingText: lumWait ? 'Checking your Luminary subscription…' : depth === 'deep'
+      orLoadingText: lumWait ? 'Checking your Luminary subscription…'
+        : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
+        : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
+        : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
+        : depth === 'deep'
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
       orLumMember: deepish && canDeep && !!lum.plan,
