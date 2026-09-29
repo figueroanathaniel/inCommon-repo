@@ -97,6 +97,17 @@ const ICONS = {
     '<path d="' + lensAt(12, 12, 2.6) + '" ' + F + '/>' +
     '<circle cx="12" cy="17.8" r="2.1" ' + S + '/>',
 
+  /* THE ORACLE. The sky as a whole, with the lens turned on its side inside
+     it, which is the shape of an eye: a reading is the sky looked at for one
+     person. The pupil is solid and the lens is drawn open, because what is
+     seen is the reader's and the seeing is only a way of looking. It took
+     Throughline's seat in the nav, and Throughline keeps its icon in the
+     Library, where the record went. */
+  oracle:
+    '<circle cx="12" cy="12" r="8.6" ' + S + '/>' +
+    '<path d="' + lensH(12, 12, 6.4) + '" ' + S + '/>' +
+    '<circle cx="12" cy="12" r="1.9" ' + F + '/>',
+
   /* SETTINGS. Not a gear. Every control on that screen is a consent, so it is
      a switch: two positions on one track, and the filled one is the answer you
      have given. */
@@ -230,8 +241,11 @@ for (const id of Object.keys(ICONS)) {
 }
 
 /* a contact sheet, so the set can be judged together rather than one at a time */
-const sheet = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1090 200">',
-  '<rect width="1090" height="200" fill="#0b0910"/>',
+/* sized from the set, so an added icon is drawn on the sheet rather than off
+   its right edge */
+const SHEET_W = 30 + Object.keys(ICONS).length * 76 + 20;
+const sheet = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + SHEET_W + ' 200">',
+  '<rect width="' + SHEET_W + '" height="200" fill="#0b0910"/>',
   '<text x="24" y="34" fill="#8b8a95" font-family="Karla, system-ui, sans-serif" font-size="12" letter-spacing="3">INCOMMON  /  UI ICON SET</text>'];
 Object.keys(ICONS).forEach((id, i) => {
   const x = 30 + i * 76, y = 74;

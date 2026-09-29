@@ -1284,7 +1284,7 @@ t('X18', 'the module names no storage API and never asks the clock for now',
    Consent gating and the deletion outbox, the two risks named by the
    integration-harness redesign (docs/integration-harness-design.md). Pure
    logic only: profile-manager.js is `window.ProfileManager = PM`, never a
-   UMD module, so it cannot be required here — a hand-built fixture carrying
+   UMD module, so it cannot be required here: a hand-built fixture carrying
    only the four methods incommon-cloud.js actually calls stands in for it.
    PIN recovery needs a real sessionStorage (the UMD wrapper resolves `root`
    to this module's own private exports object under Node, never globalThis)
@@ -1401,7 +1401,7 @@ async function runCloudTests() {
     outboxDrained: JSON.parse(storeE.getItem(OUTBOX_KEY) || '[]').length
   }, { pushOk: true, deleteIssued: true, outboxDrained: 0 });
 
-  /* ---- K11: the hash cache — a quiet week touches nothing ---- */
+  /* ---- K11: the hash cache: a quiet week touches nothing ---- */
   var storeF = clStore();
   var pmF = fakePM([{ id: 'p1', name: 'Subject', memories: [{ id: 'm1', memoryType: 'journal', content: { t: 'unchanged' }, consentRequired: 'journal', kept: false }] }], { p1: { journal: true } });
   var callsF1 = [];
@@ -1422,7 +1422,7 @@ async function runCloudTests() {
      globalThis, so lib() could never find a `self.supabase` there). That
      bypass proves the module's own logic but never actually called init().
      Before the root fix, init() would have thrown the instant it called
-     lib() — the "unsigned-in" branch of the module's own header claim
+     lib(), the "unsigned-in" branch of the module's own header claim
      ("if this module is absent, inert, or unsigned-in, the app is exactly
      the offline-first program it was yesterday") was UNREACHABLE through
      init() at all, so it had never been checked, only assumed. Now that
@@ -1555,6 +1555,65 @@ async function runCloudTests() {
   t('K23', 'an address that is not one is refused before anything is sent', {
     ok: false, reason: 'invalid', calls: 0
   }, { ok: mailBad.ok, reason: mailBad.reason, calls: gBad.otp.length });
+
+  /* ---- K24-K25: the newsletter choice rides on the sign up as user metadata,
+     both ways, and a caller that does not ask records nothing. */
+  var gNewsIn = oauthHarness({ email: true }), gNewsOut = oauthHarness({ email: true });
+  await gNewsIn.C.emailStart('reader@k24.invalid', 'https://cover.k24.invalid/', { newsletter: true });
+  await gNewsOut.C.emailStart('reader@k24.invalid', 'https://cover.k24.invalid/', { newsletter: false });
+  var dIn = gNewsIn.otp[0] && gNewsIn.otp[0].options.data, dOut = gNewsOut.otp[0] && gNewsOut.otp[0].options.data;
+  t('K24', 'the newsletter box is sent with the sign up as user metadata, ticked and unticked alike, with where and when it was decided', {
+    inChoice: true, outChoice: false, source: 'cover-signup', dated: true, redirectKept: 'https://cover.k24.invalid/'
+  }, {
+    inChoice: dIn ? dIn.newsletter : 'none', outChoice: dOut ? dOut.newsletter : 'none', source: dIn ? dIn.newsletter_source : 'none',
+    dated: !!(dIn && !isNaN(Date.parse(dIn.newsletter_decided_at))), redirectKept: gNewsIn.otp[0] && gNewsIn.otp[0].options.emailRedirectTo
+  });
+  t('K25', 'a sign in that is not asked about the newsletter records nothing about it', {
+    data: 'none'
+  }, { data: gMail.otp[0] && gMail.otp[0].options.data ? 'present' : 'none' });
+
+  /* ---- K26-K29: the Oracle is asked through this module, with a session,
+     and every failure comes back as a reason rather than a throw. */
+  function oracleClient(respond) {
+    var calls = [];
+    return { calls: calls, client: { functions: { invoke: function (name, opts) {
+      calls.push({ name: name, body: opts && opts.body });
+      return Promise.resolve(respond(name, opts));
+    } } } };
+  }
+  function httpErr(status, code) {
+    return { name: 'FunctionsHttpError', message: 'Edge Function returned a non-2xx status code',
+      context: { status: status, json: function () { return Promise.resolve(code ? { code: code } : {}); } } };
+  }
+  var CO = loadIsolatedCloud({ createClient: function () { return {}; } });
+  var ocOut = oracleClient(function () { return { data: { reading: { title: 'x' } }, error: null }; });
+  CO._setClientForTests(ocOut.client, null);
+  var rOut = await CO.oracleRead({ period: 'daily' });
+  t('K26', 'the Oracle is not asked without a session, and says signed out rather than calling the function', {
+    ok: false, reason: 'signedOut', calls: 0
+  }, { ok: rOut.ok, reason: rOut.reason, calls: ocOut.calls.length });
+  var ocIn = oracleClient(function () { return { data: { reading: { title: 'The Tide Turns' }, cached: true, periodKey: '2026-09-29', label: 'Tuesday' }, error: null }; });
+  CO._setClientForTests(ocIn.client, { user: { id: 'u1' } });
+  var rIn = await CO.oracleRead({ period: 'daily', depth: 'standard', dossier: 'D' });
+  t('K27', 'with a session the oracle function is invoked with the request as its body, and the reading comes back', {
+    ok: true, fn: 'oracle', period: 'daily', title: 'The Tide Turns', cached: true, periodKey: '2026-09-29'
+  }, { ok: rIn.ok, fn: ocIn.calls[0] && ocIn.calls[0].name, period: ocIn.calls[0] && ocIn.calls[0].body.period,
+    title: rIn.reading && rIn.reading.title, cached: rIn.cached, periodKey: rIn.periodKey });
+  var reasons = {};
+  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['503', httpErr(503, 'BUSY')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')]];
+  for (var ci = 0; ci < cases.length; ci++) {
+    var ec = cases[ci][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: ec }; }).client, { user: { id: 'u1' } });
+    reasons[cases[ci][0]] = (await CO.oracleRead({ period: 'weekly' })).reason;
+  }
+  t('K28', 'each way the function can fail is a reason the page can say in words', {
+    '404': 'notSetUp', '429': 'limit', '503': 'busy', '401': 'signedOut', '409': 'pending', '500': 'error'
+  }, reasons);
+  CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
+  var rThrow = await CO.oracleRead({ period: 'monthly' });
+  t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {
+    ok: false, reason: 'offline'
+  }, { ok: rThrow.ok, reason: rThrow.reason });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */

@@ -164,6 +164,9 @@
     opacity: 0; transition: opacity 2800ms cubic-bezier(.4,0,.2,1) 3200ms;
   }
   body.live .sub { opacity: 1; }
+  /* Sent here to sign in (?signin=1, from the app's Oracle): the field is what
+     the reader came for, so the way in does not wait out the title's staging. */
+  body.asked .sub { transition: opacity 900ms ease 500ms; }
   .enter {
     pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px;
     padding: 0 .9em 0 1.24em;
@@ -218,8 +221,18 @@
   .skip:hover { color: #fff8e7; }
   .skip:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .mailform {
-    pointer-events: auto; display: flex; gap: 8px; width: min(88vw, 380px);
+    pointer-events: auto; display: flex; flex-wrap: wrap; gap: 8px; width: min(88vw, 380px);
   }
+  /* The newsletter box, ticked to start with and one press to untick. It is a
+     label around a native checkbox, so the whole line is the target and a
+     screen reader hears a checkbox with its own name, and the violet is the
+     cover's own rather than a new colour. */
+  .mailform .news {
+    flex-basis: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
+    min-height: 44px; cursor: pointer; color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
+    font: 400 13px/1.35 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .mailform .news input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: #8b5cf6; cursor: pointer; }
   .mailform input {
     flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
     border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
@@ -304,6 +317,7 @@
       <label class="sr" for="mailaddr">Email address, for a sign in link</label>
       <input id="mailaddr" name="email" type="email" autocomplete="email" inputmode="email" placeholder="Email for a sign in link" required>
       <button class="signin" type="submit">Send link</button>
+      <label class="news"><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
     </form>
     <button class="skip" type="button" hidden>Continue without an account</button>
     <p class="authmsg" role="status" aria-live="polite"></p>
@@ -461,6 +475,13 @@
     say(errCode === 'otp_expired' ? WHY.expired
       : cameBy === 'google' && refused === 'access_denied' ? WHY.cancelled
       : unfinished());
+  } else if (q.get('signin') === '1') {
+    /* The app sends a signed out reader here from the Oracle. The field opens
+       at once rather than waiting for a press on "enter here", and the query
+       is dropped so a reload is an ordinary visit. */
+    clean();
+    document.body.classList.add('asked');
+    open(true);
   }
 
   /* Back from Google's page restores this one from the back-forward cache
@@ -516,7 +537,11 @@
     via('email');
     say('Sending your link.');
     cloud().then(function (C) {
-      return C.emailStart(addr.value, here);
+      /* The newsletter answer goes with the sign up. Supabase keeps it only
+         when this call creates the account, which is when the owner asked
+         for it to be asked. */
+      var news = document.getElementById('newsopt');
+      return C.emailStart(addr.value, here, news ? { newsletter: !!news.checked } : undefined);
     }).then(function (r) {
       settle();
       if (r.ok) { say(WHY.sent); return; }

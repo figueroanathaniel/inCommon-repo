@@ -10,6 +10,7 @@
      incommon.p.<pid>.memories       [{ id, memory_type, content, created_at, is_private }]
      incommon.p.<pid>.throughline    manual Throughline entries
      incommon.p.<pid>.oki         conversation history
+     incommon.p.<pid>.oracle      Oracle readings kept on this device, per period
    Legacy (pre-multi-profile) keys are migrated once by migrateLegacyProfile().  */
 (function () {
   'use strict';
@@ -328,7 +329,8 @@
       this._save(s);
       /* Cascade: every scoped key for this profile is removed. */
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
-        'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts'
+        'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
+        'incommon.p.' + id + '.oracle'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
       this._emit('profile:deleted', { id: id });

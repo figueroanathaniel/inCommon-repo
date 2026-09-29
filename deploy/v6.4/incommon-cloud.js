@@ -48,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.1.0';
+  var VERSION = '2.2.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -534,13 +534,29 @@
      the cover says so. A new address is signed up by the same link, which is
      the library default and what a reader pressing "continue" expects. */
   var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  function emailStart(email, redirectTo) {
+  /* THE NEWSLETTER CHOICE RIDES ON THE SIGN UP, AND ONLY ON IT.
+
+     The cover asks with a box that starts ticked and can be unticked, and the
+     answer goes to Supabase as user metadata through signInWithOtp's
+     options.data, which Supabase writes only when the call creates the account.
+     So it is recorded once, at creation, as the owner asked, and a returning
+     reader who unticks it changes nothing: they already have an answer, and
+     every issue carries its own unsubscribe once a sender exists. Nothing is
+     sent to a mailing list from here. The list is read out of the project by
+     the owner (docs/NEWSLETTER-SETUP.md), which is the setup this begins.
+     Absent opts leave the call exactly as it was, so a caller that does not
+     ask records nothing. */
+  function emailStart(email, redirectTo, opts) {
     var addr = String(email || '').trim();
     if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = oauthLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    var options = { emailRedirectTo: redirectTo };
+    if (opts && typeof opts.newsletter === 'boolean') {
+      options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
+    }
     return Promise.resolve().then(function () {
-      return c.auth.signInWithOtp({ email: addr, options: { emailRedirectTo: redirectTo } });
+      return c.auth.signInWithOtp({ email: addr, options: options });
     }).then(function (res) {
       if (!res || !res.error) return { ok: true };
       var e = res.error, m = String(e.message || '');
@@ -558,6 +574,50 @@
       if (res.error || !s) return { ok: false, reason: 'error', error: res.error && res.error.message };
       return { ok: true, email: (s.user && s.user.email) || null };
     }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
+  }
+
+  /* ---------- the Oracle ---------- */
+
+  /* THE ORACLE IS ASKED THROUGH THE ONE MODULE ALLOWED TO TALK TO SUPABASE.
+
+     A reading is written by a server function (server/oracle/index.ts) that
+     holds the AI key, so the key never reaches a browser. It is asked only
+     with a session: the function refuses anyone it cannot name, and every
+     reading it writes costs money. What travels is the dossier the app
+     composed on the device, which is chart facts and nothing else: no name,
+     no journal, no birth date, time or place.
+
+     Every way it can fail comes back as a reason the page can say in words,
+     never as a thrown error: signed out, not set up yet (the function is not
+     deployed, which is a 404), the daily limit, the model busy, offline, or
+     an error. The server's own message is kept for the console only. */
+  function oracleCode(e) {
+    var ctx = e && e.context;
+    if (!ctx || typeof ctx.json !== 'function') return Promise.resolve(null);
+    return Promise.resolve().then(function () { return ctx.json(); })
+      .then(function (b) { return (b && b.code) || null; }, function () { return null; });
+  }
+  function oracleRead(req) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('oracle', { body: req });
+    }).then(function (res) {
+      if (res && !res.error && res.data && res.data.reading) {
+        return { ok: true, reading: res.data.reading, cached: !!res.data.cached,
+          periodKey: res.data.periodKey || null, label: res.data.label || null };
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
+        if (st === 503 || code === 'BUSY') return { ok: false, reason: 'busy' };
+        if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
 
   /* ---------- status ---------- */
@@ -625,6 +685,7 @@
     oauthStart: oauthStart,
     emailStart: emailStart,
     oauthFinish: oauthFinish,
+    oracleRead: oracleRead,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app
        plainly has data are a consent gate working as designed, and counts

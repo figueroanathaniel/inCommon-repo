@@ -397,7 +397,9 @@ exactly that reason, and the negation check stops at it.
 **Nothing here calls a model.** Every line of the analysis is computed on the
 device from the registry, which is why it works offline, why it is identical for
 the same text twice, and why the feature stays inside the V1.6.0 removal instead
-of quietly stepping back through it.
+of quietly stepping back through it. The Oracle is the one screen that calls a
+model, by the owner's decision, and it does not lend that to anything else: see
+"The Oracle took Throughline's seat" below.
 
 **The two kinds of link are never merged.** `dreamLinks()` returns `figures`, a
 dream animal that was then actually seen, and `near`, a sighting inside 48 hours
@@ -2139,7 +2141,10 @@ failure. Do not raise them to quiet a red result. If a check reports green,
 confirm it examined a plausible number of elements before believing it.
 
 ## What V1.6.0 removed
-Four things came out, and the removal phase asserts they stay out.
+Four things came out, and the removal phase asserts they stay out. One screen
+has since brought a model back on purpose, the Oracle, through a server function
+rather than through Oki, and none of what follows is undone by it: see "The
+Oracle took Throughline's seat".
 
 **Oki and the safety router are unwired, not deleted.** No module is loaded,
 no route reaches a chat, `send()` returns with a debug note. The seams to
@@ -2799,6 +2804,138 @@ the banner has a button, behind the same `sampleOn`. It takes the banner's exact
 height at any width and any text size without measuring anything, measured equal
 at 320, 390 and 430. **If the banner's padding, gap, font or button box
 changes, change the spacer with it**, or the page starts short of it again.
+
+## The Oracle took Throughline's seat, and Throughline went to the Library
+The owner asked on 29 September 2026 for Throughline to become a tab in the
+Library and for its place in the nav to go to the Celestial Codex's Oracle,
+"where the user will be able to get their full fix of what they come to find",
+in the Codex's language, and chose a reading written by a model over one
+composed on the device. That reverses the V1.6.0 stance for this screen and for
+this screen alone. It is the owner's call and it is recorded here rather than
+argued again.
+
+**Throughline is the middle Library tab.** `libSubs` is Library, Throughline,
+Archive, and `libTL` is the gate: `libSub === 'throughline'` with no room and no
+practice open. It is NOT gated on `curTab()`, the way `libList` is not, because
+the phone draws the Library section whichever section is in view. The markup is
+the old tab's, moved, with `position:relative` added to its wrapper so the "+"
+still anchors to the record rather than to the section. `/library/throughline`
+is the address, and `/throughline` is kept as an alias in `openPath()`, the same
+way `/spirit/together` is kept for Synastry. Every handler that used to write
+`tab: 'throughline'` writes the Library tab now, and the two search rows go
+through `searchLib()`.
+
+**The Oracle is `tab: 'oracle'`**, `DT_NAV` and `VT_SECTIONS` in the same seat,
+so the phone's section indices did not move and nothing that scrolls to
+Settings by index changed. Its icon is new in `build-ui-icons.js` and
+`icons.json` both, by the registry rule: the sky as a whole with the lens on its
+side, which is an eye. `oracleVals()` is spread beside `dreamVals()`, and the
+vertical shell forces `isOracle` true in `vtVals()` the way it forced
+`isThroughline`.
+
+**The words are the Codex's.** Today, the day's omen; This Week, the seven-day
+tide; This Month, the lunar chapter; Standard and In-Depth; The Stars,
+astrological weather; The Design, your energetic current; The Numbers, the
+cycle's cadence; Love & Kinship, Work & Purpose, Spirit & Body; Celestial
+Currents; Windows of Time; Shadow Work, what asks to be met; For the Journal;
+A Small Ritual, the auspicious hue, and the mantra; and its two loading lines
+and its "silent for now". The screen is drawn in tokens, with every purple
+line in `--ac2-hi` and the one action in `--ac`, like the first run.
+
+**The theme phase does not see this screen**, because it measures `#/today`
+only, so it was measured by hand with the harness's own `contrastFails()` and
+`tapTargets()` lifted out of `tests-v6.0.js` unchanged: four identities, each
+hardened and not, at 1440 and 375 wide, with a full in-depth reading on screen
+(55 elements) and with the ask panel (13). All 32 cases: no pair under 4.5:1
+and no control under 44px.
+
+**The key is never in the page.** `server/oracle/index.ts` is a Supabase Edge
+Function that holds `ANTHROPIC_API_KEY` as a secret; the app calls it through
+`incommon-cloud.js`, which is still the only module that talks to Supabase.
+`oracleRead()` answers every failure as a reason the page can say in words,
+never a throw, and K26 to K29 cover that. The function lives in `server/`, not
+`supabase/functions/`, because this repository is connected to Supabase's
+GitHub integration, which watches a `supabase/` folder and can open preview
+branches that are billed. `docs/ORACLE-SETUP.md` is the owner's setup, with
+the cost of a reading and the spend limit that bounds it.
+
+**What leaves the device is `oracleDossier()`, and it is chart facts only**:
+positions, houses and angles when the time is known, natal aspects, the Human
+Design type, authority, profile, centres, channels and activations, Life Path,
+and the sky for the period with its windows, lunations, ingresses and the
+numerology cycle. No name, no journal, no birth date, time or place. The
+positions are enough to work out roughly when somebody was born, and the screen
+says exactly that beside the button. Everything in it comes from the methods the
+rest of the app draws from, so the Oracle cannot be told about a chart the wheel
+does not show.
+
+**Nothing is asked for on render, and that is the cost control that matters.**
+The phone draws every section at once, so a reading fetched when the page
+painted would be paid for every time the app opened. A reader presses "Ask the
+Oracle". The answer is kept on the device under `incommon.p.<id>.oracle`, keyed
+by period, period key, depth and the profile's birth stamp, so a corrected
+birth time finds nothing rather than the old chart's reading; `deleteProfile()`
+cascades the key. The server keeps it too, keyed by a hash of the natal block,
+so asking again on another device costs nothing either. The period key is
+computed on both sides from the reader's local date, the same ISO week formula
+in each.
+
+**The server holds the limits the page cannot.** A daily limit per reader
+counts attempts, because a failed reading was still paid for; a row is claimed
+before the model is called, and a partial unique index lets only one pending
+or finished row exist per key, so a double press or a second tab waits rather
+than paying twice. The table is written only by the function with the service
+role; a reader may read their own rows and nothing else, so nobody can delete
+the rows the limit counts. Effort defaults to low, because the dossier already
+holds every fact and the work is writing, and because Supabase stops a function
+that runs too long: an in-depth reading is the longest thing it does. Every string the model returns has dashes replaced
+before it is stored, by a detector built from char codes.
+
+**A signed out reader is sent to the cover**, `?signin=1`, which opens the
+email field at once and drops the query. The Oracle needs an account because a
+reading is written for one person and kept with them; a sample chart is refused
+on the page before anything is sent, because the Oracle writes for one person
+and a sample is nobody.
+
+## The profile menu can log out and delete, and Settings lost the Cloud card
+The owner asked on 29 September 2026 for both in the profile icon's menu.
+
+**Log out signs out and keeps everything on the device.** `accountLogOut()`
+calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
+is `./` in the bundle and `./cover.html` in the source shell, because the app
+is `app.html` in one and the long name in the other. The line under it names the
+signed in address, or says "back to the cover" when there is none. The Settings
+button that used to say "Log out" cleared birth data, which is a different act
+wearing the same word, so it says "Clear birth data" now.
+
+**Delete this profile opens the same dialog Settings opens**, typed name and
+all, from both shells' menus. ProfileManager refuses to delete the last profile
+on a device, so for that one the dialog says what happens instead: inCommon
+starts over with a fresh profile and the birth page opens, which is what
+deleting the only profile means to the person doing it. A fresh profile is made
+and made active BEFORE the old one is deleted, so the refusal never fires.
+
+**The Cloud card is gone from both Settings screens**, replaced by a comment
+where it stood. Signing in happens on the cover now, and a second account door
+in Settings would be a second place for the two to disagree. The cloud
+vals are left in place, unrendered, so bringing the card back is a markup change
+only.
+
+## The newsletter is asked for at sign up, and can be refused there
+The owner asked on 29 September 2026 for a newsletter that signs readers up when
+their account is made, with an opt out box. The box sits under the cover's email
+field, "Send me the inCommon newsletter", ticked. Its answer goes with the
+sign in request as user metadata (`newsletter`, `newsletter_source`,
+`newsletter_decided_at`), and Supabase writes metadata only when that request
+creates the account, so the answer is recorded once, at creation, and a
+returning reader who unticks it changes nothing. K24 and K25 hold the shape.
+
+Nothing is sent to any mailing service from the app. `docs/NEWSLETTER-SETUP.md`
+is the owner's half: the query that reads the list out of `auth.users` (only
+confirmed addresses), choosing a sender, and the rules the box lives under. **A
+box that starts ticked is not consent in the EU or the UK**, and that page says
+so, because it is the owner's decision whether to start it unticked or confirm
+by email there, and it should be made knowingly.
 
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where
