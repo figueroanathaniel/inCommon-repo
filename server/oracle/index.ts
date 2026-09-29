@@ -6,16 +6,18 @@
 // So the function is kept beside the app and pasted into the dashboard (or
 // deployed with the CLI by hand), which docs/ORACLE-SETUP.md walks through.
 //
-// WHAT IT DOES. The app composes a dossier of chart facts on the device (no
-// name, no journal, no birth date, time or place) and asks for a reading for a
-// period: today, this week or this month, standard or in depth. This function
-// names the reader from their session, returns the reading it already wrote
-// for that period and chart if there is one, holds everybody to a daily limit
-// because every reading costs money, and otherwise asks Claude to write one in
-// the Celestial Codex's shape, as JSON the page renders.
+// WHAT IT DOES. It is the Celestial Codex's horoscope handler, ported. The app
+// builds the Codex's dossier on the device (the first name, the chart, the
+// sky at the period's instant, the Human Design and the numbers; no journal,
+// no birth date, time or place) and asks for a reading for a period: today,
+// this week or this month, standard or in depth. This function names the
+// reader from their session, returns the reading it already wrote for that
+// period and dossier if there is one, holds everybody to a daily limit because
+// every reading costs money, and otherwise asks Claude with the Codex's own
+// instructions and schema, and returns the JSON the page renders.
 //
 // Secrets it reads: ANTHROPIC_API_KEY (required). ORACLE_MODEL,
-// ORACLE_DAILY_LIMIT and ORACLE_EFFORT are optional knobs. SUPABASE_URL,
+// ORACLE_DAILY_LIMIT and ORACLE_DEEP_EFFORT are optional knobs. SUPABASE_URL,
 // SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase
 // itself. The table it writes is in schema.sql beside this file.
 
@@ -24,12 +26,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const MODEL = Deno.env.get("ORACLE_MODEL") ?? "claude-opus-5-5";
 const DAILY_LIMIT = Number(Deno.env.get("ORACLE_DAILY_LIMIT") ?? "6");
-// Low by default: the dossier already holds every fact the reading may use, so
-// the work is writing rather than reasoning, and a lower effort is both cheaper
-// and faster. Faster matters here, because Supabase stops a function that runs
-// too long and an in-depth reading is the longest thing it does.
+// The Codex's own effort levels: low for a standard reading, medium for an
+// in-depth one. ORACLE_DEEP_EFFORT can lower the second if in-depth readings
+// run into Supabase's time limit (docs/ORACLE-SETUP.md).
 type Effort = "low" | "medium" | "high";
-const EFFORT: Effort = (["low", "medium", "high"] as const).find((e) => e === Deno.env.get("ORACLE_EFFORT")) ?? "low";
+const DEEP_EFFORT: Effort = (["low", "medium", "high"] as const).find((e) => e === Deno.env.get("ORACLE_DEEP_EFFORT")) ?? "medium";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -94,24 +95,21 @@ const DEEP_SCHEMA = {
 };
 
 // ---------------------------------------------------------------------------
-// The voice. The Celestial Codex's own instructions, with inCommon's rules
-// added where the app has them: the dossier is the only source of fact, what
-// the chart cannot know is not guessed, and no dash of either kind is written.
+// The voice: the Celestial Codex's instructions, copied from its
+// horoscope_POST handler word for word, so the Oracle is asked exactly what the
+// Codex asked. inCommon's one rule on top of them, no dash of either kind, is
+// applied to what comes back (clean(), below) rather than written in here.
 
 const INSTRUCTIONS = `You are the Oracle of the Celestial Codex, a master astrologer, Human Design analyst, and numerologist who writes like a poet with an astronomer's precision.
-Write a deeply personalized reading in second person that genuinely synthesizes all three systems (tropical astrology transits to the natal chart, Human Design type, strategy, authority and the transiting Sun gate, and numerology personal cycles).
-Style: lush, evocative, luminous prose with vivid celestial imagery and metaphor; never generic, never cliche fortune-cookie phrasing. Ground every flourish in a concrete placement, transit, gate, or number from the dossier, naming it explicitly. Offer practical, empowering guidance.
-Rules:
-- The dossier is the only source of fact. Never invent a placement, aspect, gate, channel, date or number that is not in it. If the dossier says the birth time is unknown, do not mention houses, the Ascendant or the Midheaven.
-- Never predict death, illness, or disaster; never give medical, legal, or financial directives.
-- Never use an em dash or an en dash. Use commas, colons, or full stops. Write ranges with "to".
+Write a deeply personalized horoscope in second person that genuinely synthesizes all three systems (tropical astrology transits to the natal chart, Human Design type/strategy/authority and the transiting Sun gate, and numerology personal cycles).
+Style: lush, evocative, luminous prose with vivid celestial imagery and metaphor; never generic, never cliché fortune-cookie phrasing. Ground every flourish in a concrete placement, transit, gate, or number from the dossier, naming it explicitly. Offer practical, empowering guidance. Never predict death, illness, or disaster; never give medical, legal, or financial directives.
 Field guidance:
 - title: a poetic 3-7 word title for this period.
 - epigraph: one lyrical sentence, like an inscription on an astrolabe.
 - overview: 2 rich paragraphs (separate with a blank line) weaving all three systems.
 - stars: 1 paragraph on the astrological weather and the most important transits.
-- design: 1 paragraph applying their Human Design type, strategy, authority and the transiting Sun gate.
-- numbers: 1 paragraph on the personal year, month and day numbers in play.
+- design: 1 paragraph applying their HD type, strategy, authority and the transiting Sun gate.
+- numbers: 1 paragraph on the personal year/month/day numbers in play.
 - love, work, spirit: 3-4 sentences each.
 - ritual: a small, specific, sensory ritual to perform during this period.
 - mantra: one short affirming line.
@@ -120,48 +118,40 @@ Field guidance:
 
 const DEEP_INSTRUCTIONS = `${INSTRUCTIONS}
 
-THIS IS AN IN-DEPTH READING. Go far deeper than a standard reading, like a private session with a master astrologer.
-- Use every point the dossier gives: the bodies, the nodes, the houses and angles when they are known, the natal aspects, the Human Design gates and channels, and the numerology cycles.
-- chapters: 4-6 sections, each with a short evocative heading and 2-3 paragraphs (separate paragraphs with a blank line).
-- timing: 3-6 windows of time taken from the dated transits in the dossier, each with when (the dates as the dossier gives them) and guidance (when to act, when to wait).
-- shadowWork: 1-2 paragraphs on what this period asks to be met, framed as an invitation, never as a diagnosis of the reader.
-- journalPrompts: 3-5 questions only the reader can answer.`;
+THIS IS AN IN-DEPTH LUMINARY READING. Go far deeper than a standard horoscope, like a private session with a master astrologer.
+- Use the ENTIRE chart in the dossier: nodes, Black Moon Lilith, Chiron, Ceres, Pallas, Juno, Vesta, Eris, the Vertex, Part of Fortune, East Point, and minor aspects, alongside the planets, houses, Human Design gates/channels and numerology cycles.
+- overview: 3 rich paragraphs.
+- chapters: 5-7 chapters, each a distinct theme of the period (for example a key transit, a sensitive point being activated, a relationship theme, a vocational theme, a healing theme), each with an evocative heading and 2 substantial paragraphs (separate with a blank line) naming the exact placements and transits involved.
+- timing: 3-6 windows within the period (dates or day ranges, or phases like "the waxing half"), each with specific guidance.
+- shadowWork: one paragraph of compassionate shadow work tied to Lilith, Chiron, Pluto, or a challenging aspect in the dossier.
+- journalPrompts: 3-5 probing questions.
+- keyTransits: 4-8 items.`;
 
 // ---------------------------------------------------------------------------
-// The period, decided here rather than trusted from the page: the key is what
-// the cache and the daily limit hang on, so a page cannot mint new keys to get
-// new readings.
+// The period: the Codex's horoscopePeriod, from the local date the page sends.
+// The daily key is the date, the weekly key the Monday that starts the week,
+// the monthly key the month. The week's label says "to" where the Codex wrote
+// a dash, which is the only change.
 
-function localParts(tz: string, d: Date) {
-  const f = new Intl.DateTimeFormat("en-US", { timeZone: tz, year: "numeric", month: "numeric", day: "numeric" });
-  const p: Record<string, number> = {};
-  for (const x of f.formatToParts(d)) if (x.type !== "literal") p[x.type] = Number(x.value);
-  return { y: p.year, m: p.month, d: p.day };
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function periodOf(period: string, localDate: string) {
+  const [y, m, d] = localDate.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d, 12));
+  if (period === "daily") return { key: localDate, label: `${MONTHS[m - 1]} ${d}, ${y}` };
+  if (period === "monthly") return { key: `${y}-${String(m).padStart(2, "0")}`, label: `${MONTHS[m - 1]} ${y}` };
+  const dow = (date.getUTCDay() + 6) % 7;
+  const monday = new Date(date.getTime() - dow * 86400000);
+  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  const fmt = (x: Date) => `${MONTHS[x.getUTCMonth()].slice(0, 3)} ${x.getUTCDate()}`;
+  return { key: monday.toISOString().slice(0, 10), label: `Week of ${fmt(monday)} to ${fmt(sunday)}` };
 }
 
-function isoWeek(y: number, m: number, d: number) {
-  const t = new Date(Date.UTC(y, m - 1, d));
-  const dow = (t.getUTCDay() + 6) % 7;
-  t.setUTCDate(t.getUTCDate() - dow + 3);
-  const firstThursday = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
-  const week = 1 + Math.round(((t.getTime() - firstThursday.getTime()) / 864e5 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
-  return { year: t.getUTCFullYear(), week };
-}
-
-function periodOf(period: string, tz: string) {
-  const now = new Date();
-  const { y, m, d } = localParts(tz, now);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const noon = new Date(Date.UTC(y, m - 1, d, 12));
-  const fmt = (o: Intl.DateTimeFormatOptions, at: Date) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...o }).format(at);
-  if (period === "weekly") {
-    const w = isoWeek(y, m, d);
-    const monday = new Date(noon);
-    monday.setUTCDate(noon.getUTCDate() - ((noon.getUTCDay() + 6) % 7));
-    return { key: `${w.year}-W${pad(w.week)}`, label: "The week of " + fmt({ month: "long", day: "numeric" }, monday) };
-  }
-  if (period === "monthly") return { key: `${y}-${pad(m)}`, label: fmt({ month: "long", year: "numeric" }, noon) };
-  return { key: `${y}-${pad(m)}-${pad(d)}`, label: fmt({ weekday: "long", month: "long", day: "numeric" }, noon) };
+// A local date anywhere on Earth is within a day and a half of the server's.
+function plausibleDate(localDate: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) return false;
+  const t = Date.parse(localDate + "T12:00:00Z");
+  return Number.isFinite(t) && Math.abs(t - Date.now()) < 1.5 * 864e5;
 }
 
 async function shortHash(text: string) {
@@ -208,17 +198,20 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }
+  // The Codex's request: a period, a depth, the reader's local date, and the
+  // dossier the page built from the chart.
   const period = String(body.period ?? "");
   const depth = String(body.depth ?? "standard");
-  const natal = String(body.natal ?? "");
-  const sky = String(body.sky ?? "");
+  const localDate = String(body.localDate ?? "");
+  const dossier = String(body.dossier ?? "");
   if (!["daily", "weekly", "monthly"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
-  if (!natal || natal.length > 12000 || sky.length > 12000) return reply(400, { code: "BAD_REQUEST" });
-  let tz = String(body.tz ?? "UTC");
-  try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); } catch { tz = "UTC"; }
+  if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
-  const { key, label } = periodOf(period, tz);
-  const chartKey = await shortHash(natal);
+  const { key, label } = periodOf(period, localDate);
+  // The Codex keeps one reading per person and deletes them when the birth
+  // data changes. inCommon keeps several people on one device and the server
+  // never sees a birth, so the dossier's hash does that job.
+  const chartKey = await shortHash(dossier);
   const same = { user_id: user.id, period, period_key: key, depth, chart_key: chartKey };
 
   // Already written for this chart and period: hand it back, free.
@@ -235,6 +228,7 @@ Deno.serve(async (req) => {
   const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);
   if (recent.error) { console.error("oracle: counting failed", recent.error); return reply(500, { code: "STORE" }); }
   if ((recent.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
+  const deep = depth === "deep";
 
   // Claim the key before paying for it. The partial unique index in schema.sql
   // lets only one pending or finished row exist per key, so a second press, or
@@ -252,7 +246,6 @@ Deno.serve(async (req) => {
   const fail = () => mine().update({ status: "failed" }).eq("id", rowId);
 
   const anthropic = new Anthropic({ apiKey });
-  const deep = depth === "deep";
   let message;
   try {
     message = await anthropic.beta.messages.stream({
@@ -263,19 +256,21 @@ Deno.serve(async (req) => {
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       output_config: {
-        effort: EFFORT,
+        effort: deep ? DEEP_EFFORT : "low",
         format: { type: "json_schema", schema: deep ? DEEP_SCHEMA : SCHEMA },
       },
       system: [{ type: "text", text: deep ? DEEP_INSTRUCTIONS : INSTRUCTIONS, cache_control: { type: "ephemeral" } }],
       messages: [{
         role: "user",
-        content: `Write the ${deep ? "in-depth" : "standard"} reading for ${label} (${period}).\n\nNATAL CHART\n${natal}\n\nTHE SKY FOR THIS PERIOD\n${sky}`,
+        content: `Compose the ${deep ? "IN-DEPTH " : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}`,
       }],
     }).finalMessage();
   } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) { await release(); return reply(503, { code: "BUSY" }); }
-    if (err instanceof Anthropic.AuthenticationError) { await release(); console.error("oracle: the ANTHROPIC_API_KEY secret was refused"); return reply(500, { code: "KEY" }); }
-    if (err instanceof Anthropic.APIError && (err.status === 529 || (err.status ?? 0) >= 500)) { await release(); return reply(503, { code: "BUSY" }); }
+    // The Codex's two codes: a provider rate limit is RATE_LIMITED, and every
+    // other refusal or failure of the provider is OUT_OF_CREDITS.
+    if (err instanceof Anthropic.RateLimitError) { await release(); return reply(429, { code: "RATE_LIMITED" }); }
+    if (err instanceof Anthropic.AuthenticationError) { await release(); console.error("oracle: the ANTHROPIC_API_KEY secret was refused"); return reply(503, { code: "OUT_OF_CREDITS" }); }
+    if (err instanceof Anthropic.APIError && (err.status === 529 || (err.status ?? 0) >= 500 || err.status === 402 || err.status === 403)) { await release(); return reply(503, { code: "OUT_OF_CREDITS" }); }
     await fail();
     console.error("oracle: the model call failed", err);
     return reply(500, { code: "MODEL" });

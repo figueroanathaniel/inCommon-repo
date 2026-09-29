@@ -330,7 +330,7 @@
       /* Cascade: every scoped key for this profile is removed. */
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
-        'incommon.p.' + id + '.oracle'
+        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
       this._emit('profile:deleted', { id: id });

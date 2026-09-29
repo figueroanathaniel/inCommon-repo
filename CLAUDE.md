@@ -2846,7 +2846,7 @@ line in `--ac2-hi` and the one action in `--ac`, like the first run.
 only, so it was measured by hand with the harness's own `contrastFails()` and
 `tapTargets()` lifted out of `tests-v6.0.js` unchanged: four identities, each
 hardened and not, at 1440 and 375 wide, with a full in-depth reading on screen
-(55 elements) and with the ask panel (13). All 32 cases: no pair under 4.5:1
+(55 elements) and with the consent panel. All 32 cases: no pair under 4.5:1
 and no control under 44px.
 
 **The key is never in the page.** `server/oracle/index.ts` is a Supabase Edge
@@ -2859,26 +2859,67 @@ GitHub integration, which watches a `supabase/` folder and can open preview
 branches that are billed. `docs/ORACLE-SETUP.md` is the owner's setup, with
 the cost of a reading and the spend limit that bounds it.
 
-**What leaves the device is `oracleDossier()`, and it is chart facts only**:
-positions, houses and angles when the time is known, natal aspects, the Human
-Design type, authority, profile, centres, channels and activations, Life Path,
-and the sky for the period with its windows, lunations, ingresses and the
-numerology cycle. No name, no journal, no birth date, time or place. The
-positions are enough to work out roughly when somebody was born, and the screen
-says exactly that beside the button. Everything in it comes from the methods the
-rest of the app draws from, so the Oracle cannot be told about a chart the wheel
-does not show.
+**It operates as the Codex's Oracle did, and that was checked, not assumed.**
+The owner made it the condition of merging (29 September 2026), so the Codex's
+own code was read and run rather than recalled. The server asks with the
+Codex's `INSTRUCTIONS` and `DEEP_INSTRUCTIONS` word for word, its two JSON
+schemas key for key, its request line (`Compose the ... horoscope for
+{label}. DOSSIER:`), its period keys and labels, its instants (the day at noon
+UTC, the week at its Thursday, the month at its fifteenth) and its effort
+levels, low and medium. The page asks the moment the Oracle is open and again
+when the period or the depth changes, as the Codex's query did, shows its orb,
+line and skeleton while it waits, its drop cap, its sections in its order, and
+fails in its words: silent for now with no retry, resting and clouded over with
+Ask again. `oracleDossier()` is the Codex's `buildCosmicContext()` line for
+line, including the first name it sent. The Codex's builder was bundled with
+esbuild and run on the same births, and the dossiers compared line by line.
 
-**Nothing is asked for on render, and that is the cost control that matters.**
-The phone draws every section at once, so a reading fetched when the page
-painted would be paid for every time the app opened. A reader presses "Ask the
-Oracle". The answer is kept on the device under `incommon.p.<id>.oracle`, keyed
-by period, period key, depth and the profile's birth stamp, so a corrected
-birth time finds nothing rather than the old chart's reading; `deleteProfile()`
-cascades the key. The server keeps it too, keyed by a hash of the natal block,
-so asking again on another device costs nothing either. The period key is
-computed on both sides from the reader's local date, the same ISO week formula
-in each.
+**Where it does not, and why each one stays.** These are the whole list:
+
+- **The model is Claude.** The Codex asked an OpenAI model through its own
+  adapter. The instructions and schema are the same; the prose will not be.
+- **In-Depth is not behind a paywall.** The Codex sold it as Luminary; inCommon
+  has no billing to put it behind.
+- **The first reading waits for one press**, Consult the Oracle, beside the
+  sentence saying what is sent. The Codex kept birth data on its server from
+  sign up; inCommon promises the chart stays on the device until the reader
+  says otherwise. After that press the screen behaves as the Codex's did.
+- **The ask waits 600ms after the screen comes into view**, because the phone
+  draws every section at once and a reader scrolling past must not pay for a
+  reading they never looked at. The Codex's tabs mounted only when chosen.
+- **A daily limit of six attempts**, and a claim on the key before the model is
+  called. The Codex had neither and bounded its bill by caching alone.
+- **No dash reaches the page**, by inCommon's rule: the weekly label says "to"
+  where the Codex wrote a dash, and the server strips any the model writes.
+- **Where the two apps compute a chart differently, the dossier carries
+  inCommon's chart**, so a reading cannot contradict the wheel, the wiring or
+  the numbers page beside it. For a timed birth that comes to one arcminute of
+  Ascendant and the master numbers inCommon keeps (a Personal Month of 11
+  where the Codex reduced it to 2). An untimed birth is drawn at 12:00 UTC,
+  as `birth-time.js` rules, where the Codex used local noon. Six of the 64
+  gate names are inCommon's rather than the Codex's (2, 10, 29, 47, 61, 62).
+  And Black Moon Lilith is the mean lunar apogee: the Codex's formula is the
+  perigee, so its Lilith sat in the opposite sign for every reader, and
+  copying it would have copied that.
+
+**What leaves the device is the Codex's dossier**: the first name, positions,
+houses and aspects, the Human Design type, authority, profile, centres,
+channels and Sun gates, the numbers including the name numbers, and the sky at
+the period's instant with its transits to the chart; the in-depth dossier adds
+the Codex's advanced points, minor aspects and every activation. No journal
+entry, and no birth date, time or place. The positions are enough to work out
+roughly when somebody was born, and the consent panel says exactly that.
+
+**Asking on open is paid for once per period.** A reading is kept on the device
+under `incommon.p.<id>.oracle`, keyed by period, period key, depth and the
+profile's birth stamp, so a corrected birth time finds nothing rather than the
+old chart's reading, which is what the Codex did by deleting its readings when
+the birth data changed. The server keeps it too, keyed by a hash of the
+dossier, so opening the Oracle again, here or on another device, costs
+nothing. The consent is `incommon.p.<id>.oracleConsent`. `deleteProfile()`
+cascades both keys. `oracleAutoAsk()` runs from the one `componentDidUpdate`;
+leaving the screen forgets a failure, so coming back tries again, as the
+Codex's query did on a remount.
 
 **The server holds the limits the page cannot.** A daily limit per reader
 counts attempts, because a failed reading was still paid for; a row is claimed
@@ -2886,9 +2927,10 @@ before the model is called, and a partial unique index lets only one pending
 or finished row exist per key, so a double press or a second tab waits rather
 than paying twice. The table is written only by the function with the service
 role; a reader may read their own rows and nothing else, so nobody can delete
-the rows the limit counts. Effort defaults to low, because the dossier already
-holds every fact and the work is writing, and because Supabase stops a function
-that runs too long: an in-depth reading is the longest thing it does. Every string the model returns has dashes replaced
+the rows the limit counts. Effort is the Codex's, low for standard and medium for
+in depth; `ORACLE_DEEP_EFFORT` can lower the second, because Supabase stops a
+function that runs too long and an in-depth reading is the longest thing it
+does. Every string the model returns has dashes replaced
 before it is stored, by a detector built from char codes.
 
 **A signed out reader is sent to the cover**, `?signin=1`, which opens the

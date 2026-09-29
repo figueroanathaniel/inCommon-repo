@@ -1594,20 +1594,20 @@ async function runCloudTests() {
   }, { ok: rOut.ok, reason: rOut.reason, calls: ocOut.calls.length });
   var ocIn = oracleClient(function () { return { data: { reading: { title: 'The Tide Turns' }, cached: true, periodKey: '2026-09-29', label: 'Tuesday' }, error: null }; });
   CO._setClientForTests(ocIn.client, { user: { id: 'u1' } });
-  var rIn = await CO.oracleRead({ period: 'daily', depth: 'standard', dossier: 'D' });
+  var rIn = await CO.oracleRead({ period: 'daily', depth: 'standard', localDate: '2026-09-29', dossier: 'D' });
   t('K27', 'with a session the oracle function is invoked with the request as its body, and the reading comes back', {
     ok: true, fn: 'oracle', period: 'daily', title: 'The Tide Turns', cached: true, periodKey: '2026-09-29'
   }, { ok: rIn.ok, fn: ocIn.calls[0] && ocIn.calls[0].name, period: ocIn.calls[0] && ocIn.calls[0].body.period,
     title: rIn.reading && rIn.reading.title, cached: rIn.cached, periodKey: rIn.periodKey });
   var reasons = {};
-  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['503', httpErr(503, 'BUSY')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')]];
+  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')]];
   for (var ci = 0; ci < cases.length; ci++) {
     var ec = cases[ci][1];
     CO._setClientForTests(oracleClient(function () { return { data: null, error: ec }; }).client, { user: { id: 'u1' } });
     reasons[cases[ci][0]] = (await CO.oracleRead({ period: 'weekly' })).reason;
   }
   t('K28', 'each way the function can fail is a reason the page can say in words', {
-    '404': 'notSetUp', '429': 'limit', '503': 'busy', '401': 'signedOut', '409': 'pending', '500': 'error'
+    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error'
   }, reasons);
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });

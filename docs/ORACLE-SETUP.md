@@ -1,13 +1,19 @@
 # The Oracle: setting it up
 
-The Oracle is the nav tab that took Throughline's place. It writes a reading
-for today, this week or this month in the Celestial Codex's voice, from the
-reader's own chart. Claude writes the words. The app never holds an API key:
-it asks a Supabase Edge Function, which holds the key, and the function asks
-Claude.
+The Oracle is the nav tab that took Throughline's place. It is the Celestial
+Codex's Oracle, ported: a reading for today, this week or this month, standard
+or in depth, from the reader's own chart, asked with the Codex's own
+instructions. Claude writes the words. The app never holds an API key: it asks
+a Supabase Edge Function, which holds the key, and the function asks Claude.
 
-Until the steps below are done, the tab is there and says that the Oracle has
-not been set up yet. Nothing else in the app changes.
+It behaves as the Codex's did. The first time, a reader is told what is sent
+and presses Consult the Oracle. After that the reading is asked for the moment
+the Oracle is opened, and again when the period or the depth changes. A reading
+is kept for its period, so opening it again costs nothing.
+
+Until the steps below are done, the tab is there and says "The Oracle is silent
+for now", which is what the Codex said when it had no key. Nothing else in the
+app changes.
 
 ## What it costs
 
@@ -84,14 +90,14 @@ watches a `supabase/` folder and can open preview branches that are billed.
 
 ### 4. Try it
 
-Sign in on the cover with your email, open The Oracle, and ask for today.
-The first reading takes up to a minute or so. Ask again: the second answer
-comes back at once, because it is the stored one.
+Sign in on the cover with your email, open The Oracle and press Consult the
+Oracle. The first reading takes up to a minute or so. Go to another tab and
+back: the reading is there at once, because it is the stored one.
 
-If it says the Oracle has not been set up, the function is missing or is not
-named `oracle`. If it says the stars clouded over, open the function's Logs in
-the dashboard. A line saying the key was refused means the secret in step 3.4
-is wrong.
+If it says the Oracle is silent for now, open the function's Logs in the
+dashboard. No function named `oracle` at all means step 3 did not finish, and a
+line saying the key was refused means the secret in step 3.4 is wrong. If it
+says the stars clouded over, the Logs say why.
 
 ## The knobs
 
@@ -101,30 +107,31 @@ Set these as Edge Function secrets. Each is optional.
 |---|---|---|
 | `ORACLE_MODEL` | `claude-opus-5-5` | Which Claude model writes. `claude-sonnet-5-5` costs half. |
 | `ORACLE_DAILY_LIMIT` | `6` | Attempts per reader in any 24 hours. |
-| `ORACLE_EFFORT` | `low` | How hard the model thinks before it writes: `low`, `medium` or `high`. Higher costs more and takes longer. |
+| `ORACLE_DEEP_EFFORT` | `medium` | How hard the model thinks before an in-depth reading: `low`, `medium` or `high`. Standard readings are always `low`. These are the Codex's own levels. |
 
 **Time limit.** Supabase stops a function that runs too long. At the time of
-writing that is 150 seconds on the free plan. A standard reading at `low`
-finishes well inside it, and an in-depth one usually does. If in-depth readings
-start failing with "The stars clouded over", check the function's Logs for a
-timeout. Leave `ORACLE_EFFORT` at `low`, or move to a plan with a longer limit.
+writing that is 150 seconds on the free plan. A standard reading finishes well
+inside it. An in-depth reading at `medium` is the longest thing the function
+does; if in-depth readings start failing with "The stars clouded over", check
+the Logs for a timeout and set `ORACLE_DEEP_EFFORT` to `low`, or move to a plan
+with a longer limit.
 
 ## What is sent, and what is kept
 
-**Sent to the function, and from there to Anthropic,** is a dossier of chart
-facts:
+**Sent to the function, and from there to Anthropic,** is the Codex's dossier:
 
-- positions and aspects;
-- the Human Design type, authority, gates and channels;
-- the numerology cycle numbers;
-- the sky for the period.
+- the reader's first name, as the Codex sent it;
+- positions, houses and aspects;
+- the Human Design type, authority, profile, centres, channels and gates;
+- the numbers, including the ones taken from the birth name;
+- the sky at the period's instant, and its transits to the chart.
 
-It carries no name, no journal entry, and no birth date, time or place. The
-positions are enough to work out roughly when somebody was born, and the page
-says so before the first reading.
+It carries no journal entry, and no birth date, time or place. The positions
+are enough to work out roughly when somebody was born, and the page says all of
+this before the first reading.
 
 **Kept, in your Supabase project,** is the reading itself, the period it
-covers, and a short hash of the chart facts. The hash is how a changed chart
+covers, and a short hash of the dossier. The hash is how a changed chart
 gets a new reading instead of an old one. The chart is not kept.
 
 A reader can see their own readings and nothing else. Nobody can add, change or

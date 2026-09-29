@@ -609,10 +609,14 @@
       }
       var e = res && res.error, st = e && e.context && e.context.status;
       return oracleCode(e).then(function (code) {
+        /* The code decides first, because two failures share a status: the
+           daily limit and the provider's rate limit are both 429. */
+        if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
+        if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
-        if (st === 503 || code === 'BUSY') return { ok: false, reason: 'busy' };
+        if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };

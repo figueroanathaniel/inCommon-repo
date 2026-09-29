@@ -4290,7 +4290,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       /* Cascade: every scoped key for this profile is removed. */
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
-        'incommon.p.' + id + '.oracle'
+        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
       this._emit('profile:deleted', { id: id });
@@ -17083,10 +17083,14 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       }
       var e = res && res.error, st = e && e.context && e.context.status;
       return oracleCode(e).then(function (code) {
+        /* The code decides first, because two failures share a status: the
+           daily limit and the provider's rate limit are both 429. */
+        if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
+        if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
-        if (st === 503 || code === 'BUSY') return { ok: false, reason: 'busy' };
+        if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no reading returned' };
@@ -18531,7 +18535,7 @@ html{scroll-behavior:smooth}
 html,body{max-width:100%;overflow-x:hidden}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
-@keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}[data-dropcap]::first-letter{float:left;font-family:var(--fd);font-size:4.2rem;line-height:.85;padding:6px 10px 0 0;color:var(--ac2-hi);text-shadow:0 0 18px rgba(var(--atmc2),.5)}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
 .syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
 .chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr auto;grid-template-areas:"houses wheel points" "aspects aspects aspects";gap:0;width:92vw;height:90vh;max-width:1400px;animation:chartxScale .2s ease-out}
@@ -21869,24 +21873,27 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
         </div>
       </sc-if>
-      <sc-if value="{{ orAskable }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
-          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ orAskEyebrow }}</div>
-          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ orAskTitle }}</div>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orAskLine }}</p>
-          <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Ask the Oracle</button>
-          <p style="margin:0;font:400 11px/1.6 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Before the Oracle reads for you</div>
+          <p style="margin:0;font:400 12.5px/1.65 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:30px 20px">
-          <span aria-hidden="true" style="width:46px;height:46px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat;animation:lensBreathe 2.4s ease-in-out infinite"></span>
-          <p style="margin:0;max-width:44ch;font:italic 400 15px/1.6 var(--fb);color:var(--tx)">{{ orLoadingText }}</p>
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fd);color:var(--mut)">{{ orLoadingText }}</p>
+          <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:70%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
         </div>
       </sc-if>
       <sc-if value="{{ orErrOn }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orErrText }}</p>
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ orErrText }}</p>
           <sc-if value="{{ orErrRetry }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
           </sc-if>
@@ -21900,7 +21907,12 @@ input[type="date"]{color-scheme:dark}
             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
           </header>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orOverview }}</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+            <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ op.t }}</p>
+            </sc-for>
+          </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
             <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
@@ -21989,7 +22001,6 @@ input[type="date"]{color-scheme:dark}
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
           </div>
-          <p style="margin:0;font:400 11px/1.6 var(--fu);color:var(--mut);border-top:1px solid var(--bd);padding-top:11px">{{ orFoot }}</p>
         </article>
       </sc-if>
     </div>
@@ -26465,24 +26476,27 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
         </div>
       </sc-if>
-      <sc-if value="{{ orAskable }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
-          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ orAskEyebrow }}</div>
-          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ orAskTitle }}</div>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orAskLine }}</p>
-          <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Ask the Oracle</button>
-          <p style="margin:0;font:400 11px/1.6 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Before the Oracle reads for you</div>
+          <p style="margin:0;font:400 12.5px/1.65 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:30px 20px">
-          <span aria-hidden="true" style="width:46px;height:46px;background-color:var(--ac2-hi);-webkit-mask:{{ orIcon }} center/contain no-repeat;mask:{{ orIcon }} center/contain no-repeat;animation:lensBreathe 2.4s ease-in-out infinite"></span>
-          <p style="margin:0;max-width:44ch;font:italic 400 15px/1.6 var(--fb);color:var(--tx)">{{ orLoadingText }}</p>
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fd);color:var(--mut)">{{ orLoadingText }}</p>
+          <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:70%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
         </div>
       </sc-if>
       <sc-if value="{{ orErrOn }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orErrText }}</p>
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ orErrText }}</p>
           <sc-if value="{{ orErrRetry }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
           </sc-if>
@@ -26496,7 +26510,12 @@ input[type="date"]{color-scheme:dark}
             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
           </header>
-          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orOverview }}</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+            <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ op.t }}</p>
+            </sc-for>
+          </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
             <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
@@ -26585,7 +26604,6 @@ input[type="date"]{color-scheme:dark}
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
           </div>
-          <p style="margin:0;font:400 11px/1.6 var(--fu);color:var(--mut);border-top:1px solid var(--bd);padding-top:11px">{{ orFoot }}</p>
         </article>
       </sc-if>
     </div>
@@ -28161,6 +28179,7 @@ class Component extends DCLogic {
     this.syncSectionToTab();
     this.syncAtlasItem();
     this.syncChartExpandPersist();
+    this.oracleAutoAsk();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -36660,48 +36679,43 @@ class Component extends DCLogic {
      key anybody can spend. Everything else in the app still computes on the
      device, and the Dream Journal's rule still holds for the Dream Journal.
 
-     What leaves the device is oracleDossier(), and it is chart facts only: no
-     name, no journal, no birth date, time or place. The positions are enough
-     to work out roughly when somebody was born, and the screen says so beside
-     the button rather than in a policy nobody opens.
+     IT OPERATES AS THE CELESTIAL CODEX'S ORACLE DID, which the owner asked for
+     on 29 September 2026. The page builds the Codex's dossier on the device,
+     line for line in the Codex's format, from inCommon's own chart, so the
+     reading never contradicts the wheel or the wiring beside it. It asks the
+     moment the screen is open, and again when the period or the depth changes,
+     exactly as the Codex's query did. The server holds the Codex's
+     instructions and schema word for word.
 
-     NOTHING IS ASKED FOR ON RENDER. The phone draws every section at once, so a
-     reading fetched when the page painted would be a reading paid for every
-     time the app opened. A reader presses the button; the answer is kept on the
-     device for the period it covers, and the server keeps it too, so asking
-     again, here or on another device, costs nothing. */
+     One step is inCommon's own: the first time, the reader is told what leaves
+     the device and presses Consult the Oracle. After that the screen behaves as
+     the Codex's did. A reading is kept on the device and on the server for the
+     period it covers, so opening the screen again costs nothing. */
   ORACLE_PERIODS = [['daily', 'Today', 'the day’s omen'], ['weekly', 'This Week', 'the seven-day tide'], ['monthly', 'This Month', 'the lunar chapter']];
-  /* The same keys the function derives, from the same local date: an ISO week
-     for the week and the calendar month for the month. Computed here as well so
-     a reading already kept on the device is found without asking anybody. */
-  oraclePeriodKey(period, d) {
+  oracleLocalDate(d) {
     d = d || new Date();
-    const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate(), pad = n => String(n).padStart(2, '0');
-    if (period === 'monthly') return y + '-' + pad(m);
-    if (period === 'weekly') {
-      const t = new Date(Date.UTC(y, m - 1, day));
-      t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7) + 3);
-      const jan4 = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
-      const wk = 1 + Math.round(((t.getTime() - jan4.getTime()) / 864e5 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
-      return t.getUTCFullYear() + '-W' + pad(wk);
-    }
-    return y + '-' + pad(m) + '-' + pad(day);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
-  /* The first and last day the period covers, at local noon. */
-  oracleSpan(period, d) {
-    const now = d ? new Date(d.getTime()) : new Date();
-    now.setHours(12, 0, 0, 0);
-    if (period === 'weekly') { const from = this.addDays(now, -((now.getDay() + 6) % 7)); return { from, to: this.addDays(from, 6) }; }
-    if (period === 'monthly') { const from = new Date(now.getFullYear(), now.getMonth(), 1, 12); return { from, to: new Date(now.getFullYear(), now.getMonth() + 1, 0, 12) }; }
-    return { from: now, to: now };
+  /* The Codex's horoscopePeriod: the key the reading is kept under, and the
+     instant the sky is read at. The day at noon UTC, the week at its Thursday,
+     the month at its fifteenth. The server derives the same key. */
+  oraclePeriod(period, localDate) {
+    const [y, m, d] = localDate.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d, 12));
+    if (period === 'daily') return { key: localDate, at: date };
+    if (period === 'monthly') return { key: y + '-' + String(m).padStart(2, '0'), at: new Date(Date.UTC(y, m - 1, 15, 12)) };
+    const monday = new Date(date.getTime() - ((date.getUTCDay() + 6) % 7) * 864e5);
+    return { key: monday.toISOString().slice(0, 10), at: new Date(monday.getTime() + 3 * 864e5) };
   }
   /* Per profile, cascaded by ProfileManager.deleteProfile with the rest of the
      profile's keys. The birth stamp is in the slot, so a corrected birth time
-     finds no reading rather than the one written for the old chart. */
+     finds no reading rather than the one written for the old chart, which is
+     what the Codex did by deleting its readings when the birth data changed. */
   oracleStoreKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracle'; }
+  oracleConsentKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleConsent'; }
   oracleSlot(period, depth) {
     const p = this.activeProfile();
-    return period + '|' + this.oraclePeriodKey(period) + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
   }
   oracleCached(period, depth) {
     const all = this.readLS(this.oracleStoreKey(), {});
@@ -36715,133 +36729,153 @@ class Component extends DCLogic {
       .slice(12).forEach(x => { delete all[x]; });
     this.writeLS(k, all);
   }
-  /* THE DOSSIER. Two blocks: the natal chart, which is the same all period and
-     is what the function hashes to know when a chart changed, and the sky for
-     the period. Every figure comes from the same methods the rest of the app
-     draws from, so the Oracle cannot read a chart the wheel does not show. */
-  oracleDossier(period) {
-    const nd = this.natalDate(), asc = this.ascendant(), natal = this.chartAt(nd), angles = this.anglePoints();
-    const sun = natal[0], isNode = x => x.name.indexOf('Node') !== -1;
-    const dm = x => { const d = Math.floor(x.deg), m = Math.floor((x.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + x.sign; };
-    const house = x => asc ? ', house ' + this.houseOf(x.lon, sun, asc) : '';
-    const N = [];
-    N.push(asc ? 'Birth time: known. Houses are equal houses from the Ascendant, and the four angles are given.'
-      : 'Birth time: unknown. This chart has no houses, no Ascendant and no Midheaven.');
-    N.push('Bodies:');
-    natal.forEach(x => N.push('- ' + x.name + ' ' + dm(x) + (!isNode(x) && this.isRetro(x.name, nd) ? ', retrograde' : '') + house(x)));
-    angles.forEach(a => N.push('- ' + a.name + ' ' + dm(a)));
-    let extras = [];
-    try { extras = this.fullChart(true).filter(r => r.group === 'extra' && r.ring === 1 && r.lon != null); } catch (e) { extras = []; }
-    if (extras.length) {
-      N.push('Other points:');
-      extras.forEach(r => N.push('- ' + r.name + ' ' + dm(r) + (r.retro ? ', retrograde' : '') + house(r)));
-    }
-    const pts = natal.concat(angles);
-    const asp = this.aspectPairs(pts, pts, true)
-      .filter(x => !(isNode(x.a) && isNode(x.b)) && !(x.a.group === 'angle' && x.b.group === 'angle')).slice(0, 16);
-    if (asp.length) N.push('Natal aspects, tightest first: ' + asp.map(x => x.a.name + ' ' + this.aspName(x.asp) + ' ' + x.b.name + ' (' + x.orb.toFixed(1) + '°)').join('; ') + '.');
-    const hd = this.hdChart();
-    const sunAct = k => hd.acts.find(a => a.body === 'Sun' && a.kind === k);
-    N.push('HUMAN DESIGN');
-    const stop = t => String(t || '').trim().replace(/[.\s]+$/, '') + '.';
-    N.push('Type: ' + hd.type + '. Strategy: ' + stop(hd.strategy) + ' Authority: ' + stop(hd.authority));
-    if (sunAct('personality') && sunAct('design')) N.push('Profile: ' + sunAct('personality').line + '/' + sunAct('design').line + '.');
-    N.push('Defined centres: ' + ([...hd.defined].join(', ') || 'none, every centre is open') + '.');
-    N.push('Channels: ' + (hd.activeChannels.map(c => c[0] + '-' + c[1] + ' (' + c[2] + ' to ' + c[3] + ')').join('; ') || 'none') + '.');
-    /* hdChart() derives the South Node from the North and PLNS carries it as
-       well, so the same activation can arrive twice; it is listed once. */
-    ['personality', 'design'].forEach(k => {
-      const seen = new Set(), acts = hd.acts.filter(a => a.kind === k && !seen.has(a.body) && seen.add(a.body));
-      N.push((k === 'personality' ? 'Personality' : 'Design') + ' activations: ' + acts.map(a => a.body + ' ' + a.gate + '.' + a.line).join(', ') + '.');
-    });
-    const num = this.numerology();
-    N.push('NUMEROLOGY');
-    N.push('Life Path ' + num.lp + '. Challenge number ' + num.challenge + '.');
-
-    const span = this.oracleSpan(period), days = Math.round((span.to - span.from) / 864e5) + 1;
-    const today = new Date(); today.setHours(12, 0, 0, 0);
-    const sky = this.chartAt(today), S = [];
-    S.push('Period: ' + (days > 1 ? this.fmtDay(span.from) + ' to ' + this.fmtDay(span.to) + ', ' + span.to.getFullYear() : this.fmtDay(span.from) + ', ' + span.from.getFullYear()) + '.');
-    S.push('The sky on ' + this.fmtDay(today) + ':');
-    sky.forEach(x => S.push('- ' + x.name + ' ' + dm(x) + (!isNode(x) && this.isRetro(x.name, today) ? ', retrograde' : '')));
-    S.push('Moon phase: ' + this.moonPhase(today) + '.');
-    const sg = this.gateOf(sky[0].lon), eg = this.gateOf(sky[0].lon + 180);
-    S.push('Transiting Sun in Human Design gate ' + sg.gate + '.' + sg.line + (this.GATE_NAMES[sg.gate] ? ' (' + this.GATE_NAMES[sg.gate] + ')' : '') + ', Earth in gate ' + eg.gate + '.' + eg.line + '.');
-    const tp = this.aspectPairs(sky, pts, false).slice(0, 10);
-    if (tp.length) S.push('Transits to the natal chart on ' + this.fmtDay(today) + ', tightest first: ' + tp.map(x => 'transiting ' + x.a.name + ' ' + this.aspName(x.asp) + ' natal ' + x.b.name + ' (' + x.orb.toFixed(1) + '°)').join('; ') + '.');
-    if (days > 1) {
-      const runs = this.gateRuns(span.from, days);
-      S.push('The Sun walks these gates: ' + runs.map(r => r.gate + (this.GATE_NAMES[r.gate] ? ' ' + this.GATE_NAMES[r.gate] : '') + ' (' + this.runLabel(r) + ')').join('; ') + '.');
-      const lun = this.lunationsAhead(this.addDays(span.from, -1), days);
-      if (lun.length) S.push('Lunations: ' + lun.map(l => l.kind + ' on ' + this.fmtDay(l.date)).join('; ') + '.');
-      /* Ingresses and stations, found by walking the days, because a sign
-         change or a station is the kind of date a reading hangs a week on. */
-      const moves = [];
-      natal.slice(0, 10).forEach(b => {
-        if (b.name === 'Moon') return;
-        let prevSign = null, prevRetro = null;
-        for (let i = 0; i < days; i++) {
-          const dt = this.addDays(span.from, i), t = this.t2000(dt), sgn = this.signOf(this.lonOf(b.name, t)).sign;
-          const rx = b.name === 'Sun' ? false : this.isRetro(b.name, dt);
-          if (prevSign && sgn !== prevSign) moves.push(b.name + ' enters ' + sgn + ' on ' + this.fmtDay(dt));
-          if (prevRetro !== null && rx !== prevRetro) moves.push(b.name + ' stations ' + (rx ? 'retrograde' : 'direct') + ' around ' + this.fmtDay(dt));
-          prevSign = sgn; prevRetro = rx;
-        }
-      });
-      if (moves.length) S.push('Ingresses and stations: ' + moves.join('; ') + '.');
-      /* The fast movers' exact contacts with the natal chart inside the period,
-         each on the day it is closest. */
-      const best = {};
-      ['Sun', 'Mercury', 'Venus', 'Mars'].forEach(mv => {
-        for (let i = 0; i < days; i++) {
-          const dt = this.addDays(span.from, i), lon = this.lonOf(mv, this.t2000(dt));
-          pts.forEach(q => {
-            let d = Math.abs(this.norm360(lon - q.lon)); if (d > 180) d = 360 - d;
-            this.ASPECTS.forEach(([ang, nm]) => {
-              const off = Math.abs(d - ang), k = mv + '|' + nm + '|' + q.name;
-              if (off <= 1 && (!best[k] || off < best[k].off)) best[k] = { off, dt, text: 'transiting ' + mv + ' ' + this.aspName(nm) + ' natal ' + q.name };
-            });
-          });
-        }
-      });
-      const exact = Object.keys(best).map(k => best[k]).sort((a, b) => a.dt - b.dt).slice(0, 14);
-      if (exact.length) S.push('Exact contacts from the faster bodies: ' + exact.map(x => x.text + ' on ' + this.fmtDay(x.dt)).join('; ') + '.');
-    }
-    const wins = this.transitWindows().filter(w => w.from <= span.to && w.to >= span.from)
-      .sort((a, b) => b.weight - a.weight).slice(0, 8);
-    if (wins.length) S.push('Slow transit windows in play: ' + wins.map(w => w.label + ', ' + w.range + ', closest on ' + this.fmtDay(w.exact)).join('; ') + '.');
-    const core = window.InCommonCore;
-    if (core) {
-      const py = core.personalYear(this.dob(), today.getFullYear()).value, pm = core.personalMonth(py, today.getMonth() + 1).value;
-      let line = 'Personal Year ' + py + '. Personal Month ' + pm + '.';
-      if (period === 'daily') line += ' Personal Day ' + this.personalDay(py, today) + '.';
-      if (period === 'weekly') line += ' Personal Days this week: ' + Array.from({ length: 7 }, (_, i) => { const dt = this.addDays(span.from, i); return this.fmtDay(dt) + ' ' + this.personalDay(py, dt); }).join(', ') + '.';
-      S.push(line);
-    }
-    if (num.curPin != null) S.push('Current Pinnacle ' + num.pinnacles[num.curPin][0] + '. Current Cycle: ' + num.cycles[num.curCycle][0] + ' ' + num.cycles[num.curCycle][1] + '.');
-    return { natal: N.join('\n'), sky: S.join('\n') };
+  /* THE DOSSIER, IN THE CODEX'S FORMAT. buildCosmicContext() in the Codex, line
+     for line: the same headings, the same order, the same aspect orbs and
+     transit tolerances, the same keys where it wrote keys. What fills it is
+     inCommon's: the positions are the same library the Codex used, and the
+     Human Design and the numbers are the ones inCommon's own pages show, named
+     in the Codex's words. */
+  ORACLE_KEY = { Sun: 'sun', Moon: 'moon', Mercury: 'mercury', Venus: 'venus', Mars: 'mars', Jupiter: 'jupiter', Saturn: 'saturn',
+    Uranus: 'uranus', Neptune: 'neptune', Pluto: 'pluto', 'North Node': 'northNode', 'South Node': 'southNode', Earth: 'earth' };
+  ORACLE_MAJOR = [['conjunction', 0, 8], ['sextile', 60, 5], ['square', 90, 7], ['trine', 120, 7], ['opposition', 180, 8]];
+  ORACLE_ALL = [['conjunction', 0, 8], ['semisextile', 30, 2], ['semisquare', 45, 2], ['sextile', 60, 5], ['quintile', 72, 1.5],
+    ['square', 90, 7], ['trine', 120, 7], ['sesquiquadrate', 135, 2], ['quincunx', 150, 3], ['opposition', 180, 8]];
+  ORACLE_STRATEGY = { Generator: 'Wait to Respond', 'Manifesting Generator': 'Wait to Respond, then Inform', Manifestor: 'Inform Before Acting',
+    Projector: 'Wait for the Invitation', Reflector: 'Wait a Lunar Cycle' };
+  ORACLE_PROFILE = ['', 'Investigator', 'Hermit', 'Martyr', 'Opportunist', 'Heretic', 'Role Model'];
+  ORACLE_CENTER = { Head: 'head', Ajna: 'ajna', Throat: 'throat', G: 'g', Heart: 'heart', Sacral: 'sacral', Spleen: 'spleen', 'Solar Plexus': 'solarPlexus', Root: 'root' };
+  oracleAspect(lonA, lonB, table, scale) {
+    let diff = Math.abs(this.norm360(lonA - lonB)); if (diff > 180) diff = 360 - diff;
+    for (const [type, angle, orb] of table) { const off = Math.abs(diff - angle); if (off <= orb * scale) return { type, orb: off }; }
+    return null;
   }
+  oracleDossier(period, depth) {
+    const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
+    const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
+    const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
+    const house = lon => asc ? Math.floor(this.norm360(lon - asc.asc) / 30) + 1 : null;
+    const eleven = date => this.chartAt(date).filter(x => x.name !== 'South Node').map(x => ({
+      key: this.ORACLE_KEY[x.name], name: x.name, lon: x.lon, sign: x.sign, kind: x.name === 'North Node' ? 'node' : 'planet',
+      retro: x.name === 'Sun' || x.name === 'Moon' || x.name === 'North Node' ? false : this.isRetro(x.name, date) }));
+    const natal = eleven(nd), sky = eleven(at);
+    const aspects = [];
+    for (let i = 0; i < natal.length; i++) for (let j = i + 1; j < natal.length; j++) {
+      const a = this.oracleAspect(natal[i].lon, natal[j].lon, this.ORACLE_MAJOR, 1);
+      if (a) aspects.push(natal[i].key + ' ' + a.type + ' ' + natal[j].key);
+    }
+    const transits = [];
+    sky.forEach(t => { if (t.key === 'northNode') return; natal.forEach(n => {
+      const a = this.oracleAspect(t.lon, n.lon, this.ORACLE_MAJOR, 0.35);
+      if (a) transits.push('Transiting ' + t.name + ' ' + a.type + ' natal ' + n.name + ' (orb ' + a.orb.toFixed(1) + '°)');
+    }); });
+    /* Human Design: inCommon's chart, in the Codex's vocabulary. */
+    const hd = this.hdChart(), act = (body, kind) => hd.acts.find(a => a.body === body && a.kind === kind);
+    const adj = {};
+    hd.activeChannels.forEach(c => { (adj[c[2]] = adj[c[2]] || new Set()).add(c[3]); (adj[c[3]] = adj[c[3]] || new Set()).add(c[2]); });
+    const reach = from => { const seen = new Set([from]), q = [from]; while (q.length) { const c = q.shift(); (adj[c] || new Set()).forEach(n => { if (!seen.has(n)) { seen.add(n); q.push(n); } }); } return seen; };
+    const throat = hd.defined.has('Throat') ? reach('Throat') : new Set();
+    const authWord = String(hd.authority).split(':')[0];
+    const authority = { Emotional: 'Emotional (Solar Plexus)', Sacral: 'Sacral', Splenic: 'Splenic', 'Self-projected': 'Self-Projected',
+      Mental: 'Mental (Environmental)', Lunar: 'Lunar' }[authWord] || (authWord === 'Ego' ? (throat.has('Heart') ? 'Ego Manifested' : 'Ego Projected') : authWord);
+    const seen = new Set(); let parts = 0;
+    hd.defined.forEach(c => { if (seen.has(c)) return; parts++; reach(c).forEach(r => seen.add(r)); });
+    const definition = parts === 0 ? 'No Definition' : ['', 'Single Definition', 'Split Definition', 'Triple Split', 'Quadruple Split'][parts] || 'Quadruple Split';
+    const pSun = act('Sun', 'personality'), dSun = act('Sun', 'design');
+    const gname = g => this.GATE_NAMES[g] || '';
+    const skySun = this.gateOf(sky[0].lon);
+    /* The numbers: inCommon's own, at the period's instant as the Codex took them. */
+    const core = window.InCommonCore, NC = window.NumerologyContent, dob = this.dob();
+    const lp = this.numerology().lp, nm = NC ? NC.fromName(this.birthName()) : null;
+    const py = core ? core.personalYear(dob, at.getFullYear()).value : null;
+    const pm = core && py != null ? core.personalMonth(py, at.getMonth() + 1).value : null;
+    const pd = py != null ? this.personalDay(py, at) : null;
+    const bday = core ? core.birthday(dob).value : null;
+    const first = String(this.birthName() || '').trim().split(/\s+/)[0] ||
+      (p && p.name && p.name !== 'Default Profile' ? String(p.name).trim().split(/\s+/)[0] : '');
+    const numParts = ['Life Path ' + lp];
+    if (nm) numParts.push('Expression ' + nm.expression, 'Soul Urge ' + nm.soulUrge, 'Personality ' + nm.personality);
+    numParts.push('Birthday ' + bday, 'Personal Year ' + py, 'Personal Month ' + pm, 'Personal Day ' + pd);
+    const lines = [];
+    if (first) lines.push('NAME: ' + first);
+    lines.push('NATAL PLACEMENTS: ' + natal.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
+    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) : 'Birth time unknown: no ascendant or houses.');
+    lines.push('KEY NATAL ASPECTS: ' + aspects.slice(0, 12).join(', '));
+    lines.push('CURRENT SKY: ' + sky.map(x => x.name + ' in ' + x.sign + (x.retro ? ' Rx' : '')).join(', '));
+    lines.push('ACTIVE TRANSITS TO NATAL: ' + (transits.length ? transits.join('; ') : 'none exact'));
+    lines.push('HUMAN DESIGN: ' + hd.type + '; Strategy: ' + (this.ORACLE_STRATEGY[hd.type] || '') + '; Authority: ' + authority +
+      '; Profile ' + pSun.line + '/' + dSun.line + ' ' + this.ORACLE_PROFILE[pSun.line] + ' / ' + this.ORACLE_PROFILE[dSun.line] + '; ' + definition +
+      '; Defined centers: ' + ([...hd.defined].map(c => this.ORACLE_CENTER[c] || c).join(', ') || 'none') +
+      '; Channels: ' + (hd.activeChannels.map(c => c[0] + '-' + c[1]).join(', ') || 'none') +
+      '; Personality Sun gate ' + pSun.gate + ' (' + gname(pSun.gate) + '), Design Sun gate ' + dSun.gate + ' (' + gname(dSun.gate) + ')');
+    lines.push('CURRENT TRANSITING SUN GATE: ' + skySun.gate + '.' + skySun.line + ' (' + gname(skySun.gate) + ')');
+    lines.push('NUMEROLOGY: ' + numParts.join('; '));
+    if (depth === 'deep') {
+      /* The Codex's advanced chart: the South Node, Black Moon Lilith, the
+         bodies it fetched from Horizons, and the three sensitive points, in its
+         order, from inCommon's expanded chart (which is measured against
+         Horizons too). */
+      let rows = [];
+      try { rows = this.fullChart(true); } catch (e) { rows = []; }
+      const row = id => rows.find(r => r.id === id && r.lon != null);
+      const nn = natal.find(x => x.key === 'northNode');
+      const extras = [{ key: 'southNode', name: 'South Node', lon: this.norm360(nn.lon + 180), kind: 'node', retro: false }];
+      const add = (id, key, name, kind) => { const r = row(id); if (r) extras.push({ key, name, lon: r.lon, kind, retro: kind === 'asteroid' && !!r.retro }); };
+      add('lilithMean', 'lilith', 'Black Moon Lilith', 'point');
+      [['chiron', 'Chiron'], ['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta'], ['eris', 'Eris']].forEach(([id, name]) => add(id, id, name, 'asteroid'));
+      if (asc && p) {
+        add('vertex', 'vertex', 'Vertex', 'point');
+        const t = this.t2000(nd), ramc = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon) * this.RAD, eps = 23.4393 * this.RAD;
+        extras.push({ key: 'eastPoint', name: 'East Point', lon: this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps))) / this.RAD), kind: 'point', retro: false });
+        add('partOfFortune', 'fortune', 'Part of Fortune', 'point');
+      }
+      const all = natal.concat(extras), minor = [];
+      for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+        const a = all[i], b = all[j];
+        if ((a.key === 'northNode' && b.key === 'southNode') || (a.key === 'southNode' && b.key === 'northNode')) continue;
+        const asp = this.oracleAspect(a.lon, b.lon, this.ORACLE_ALL, a.kind === 'planet' && b.kind === 'planet' ? 1 : 0.6);
+        if (asp) minor.push(a.key + ' ' + asp.type + ' ' + b.key + ' (' + asp.orb.toFixed(1) + '°)');
+      }
+      const deepTransits = [];
+      sky.forEach(t => { if (t.key === 'northNode') return; extras.forEach(n => {
+        const a = this.oracleAspect(t.lon, n.lon, this.ORACLE_MAJOR, 0.3);
+        if (a) deepTransits.push('Transiting ' + t.name + ' ' + a.type + ' natal ' + n.name + ' (orb ' + a.orb.toFixed(1) + '°)');
+      }); });
+      const ORDER = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+      const acts = [];
+      ['personality', 'design'].forEach(kind => ORDER.forEach(body => { const a = act(body, kind); if (a) acts.push((kind === 'design' ? 'D' : 'P') + '-' + this.ORACLE_KEY[body] + ' ' + a.gate + '.' + a.line); }));
+      const letters = String(this.birthName() || '').toUpperCase().replace(/[^A-Z]/g, '').split('');
+      const present = new Set(letters.map(c => ((c.charCodeAt(0) - 65) % 9) + 1));
+      const keep = n => { while (n > 9 && n !== 11 && n !== 22 && n !== 33) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; };
+      lines.push('ADVANCED NATAL POINTS: ' + extras.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
+      lines.push('ALL NATAL ASPECTS INCL. MINOR: ' + minor.join(', '));
+      lines.push('TRANSITS TO ADVANCED POINTS: ' + (deepTransits.join('; ') || 'none exact'));
+      lines.push('HD ACTIVATIONS: ' + acts.join(', '));
+      if (nm) lines.push('NUMEROLOGY EXTRA: Maturity ' + keep(lp + nm.expression) + '; Karmic lessons ' + ([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !present.has(n)).join(', ') || 'none'));
+    }
+    return lines.join('\n');
+  }
+  /* The Codex's words for each way a reading can fail. Silent for now has no
+     Ask again, as in the Codex; the resting and clouded answers do. */
+  ORACLE_SILENT = 'The Oracle is silent for now. Please return a little later.';
   ORACLE_ERR = {
     limit: 'The Oracle is silent for now. Please return a little later.',
-    busy: 'The heavens are crowded just now. Please ask again in a minute.',
-    pending: 'The Oracle is still writing this one. Ask again in a minute and it will be here.',
-    notSetUp: 'The Oracle has not been set up for this copy of inCommon yet.',
-    offline: 'The Oracle cannot be reached without a connection. Please ask again once you are back online.',
-    signedOut: 'Your sign in has lapsed, so the Oracle cannot tell who is asking. Sign in again to ask.',
-    off: 'The Oracle cannot be reached from this copy of the app.'
+    silent: 'The Oracle is silent for now. Please return a little later.',
+    notSetUp: 'The Oracle is silent for now. Please return a little later.',
+    off: 'The Oracle is silent for now. Please return a little later.',
+    busy: 'The oracle is resting. Try again in a minute.',
+    pending: 'The oracle is resting. Try again in a minute.'
   };
   oracleAsk(period, depth) {
     const slot = this.oracleSlot(period, depth), C = this.cloud;
     if (this._orBusy && this._orBusy[slot]) return;
     if (!C || typeof C.oracleRead !== 'function') { this.setState({ orErr: { slot, reason: 'off' } }); return; }
+    const localDate = this.oracleLocalDate();
     let dossier;
-    try { dossier = this.oracleDossier(period); } catch (e) { this.setState({ orErr: { slot, reason: 'error' } }); return; }
-    let tz = 'UTC';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+    try { dossier = this.oracleDossier(period, depth); } catch (e) { this.setState({ orErr: { slot, reason: 'error' } }); return; }
     this._orBusy = { ...(this._orBusy || {}), [slot]: true };
     this.setState({ orBusyMap: { ...this._orBusy }, orErr: null });
     this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
-    C.oracleRead({ period, depth, tz, natal: dossier.natal, sky: dossier.sky }).then(r => {
+    C.oracleRead({ period, depth, localDate, dossier }).then(r => {
       delete this._orBusy[slot];
       if (r && r.ok && r.reading) {
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
@@ -36854,24 +36888,63 @@ class Component extends DCLogic {
       }
     });
   }
+  /* Whether the page may ask for this slot now without a press: the reader is
+     signed in, the chart is theirs, they have consented once, and nothing is
+     kept, in flight or failed for it. */
+  oracleWillAsk(period, depth) {
+    const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
+    if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
+    if (!this.readLS(this.oracleConsentKey(), false)) return false;
+    if (this.oracleCached(period, depth)) return false;
+    if (st.orBusyMap && st.orBusyMap[slot]) return false;
+    return !(st.orErr && st.orErr.slot === slot);
+  }
+  /* THE CODEX ASKED WHEN THE SCREEN OPENED, and so does this. Called from the
+     one componentDidUpdate. The phone draws every section at once and the tab
+     follows the section in view, so a reader scrolling past the Oracle would
+     otherwise pay for a reading they never stopped to look at: the ask waits
+     until the screen has been in view for 600ms. Leaving the screen forgets a
+     failure, so coming back tries again, as the Codex's query did on a
+     remount. */
+  oracleAutoAsk() {
+    if (this.curTab() !== 'oracle' || !this.state.ready) {
+      clearTimeout(this._orAutoT); this._orAutoT = null; this._orAutoFor = null;
+      if (this._orSeen && this.state.orErr) this.setState({ orErr: null });
+      this._orSeen = false;
+      return;
+    }
+    this._orSeen = true;
+    const period = this.state.orPeriod || 'daily', depth = this.state.orDepth || 'standard';
+    const want = period + '|' + depth;
+    if (this._orAutoFor === want || !this.oracleWillAsk(period, depth)) return;
+    this._orAutoFor = want;
+    clearTimeout(this._orAutoT);
+    this._orAutoT = setTimeout(() => {
+      this._orAutoT = null; this._orAutoFor = null;
+      const st = this.state;
+      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
+    }, 600);
+  }
   oracleVals() {
     const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
     const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth), r = hit ? hit.reading : null;
-    const P = this.ORACLE_PERIODS.find(x => x[0] === period) || this.ORACLE_PERIODS[0];
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
     const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
     const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
+    const consented = !!this.readLS(this.oracleConsentKey(), false);
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
+    const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
     const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
     const chapters = r ? list(r.chapters).filter(c => c && str(c.heading)) : [];
     const timing = r ? list(r.timing).filter(t => t && str(t.when)) : [];
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
+    const ov = r ? paras(r.overview) : [];
     const blocked = sample || off || !!r;
-    const sky = { daily: 'today', weekly: 'this week', monthly: 'this month' }[period];
+    const waiting = !blocked && !err && signedIn && consented;
     return {
       orIcon: this.uiIcon('oracle'),
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth']].map(([k, label]) => ({ label, on: depth === k,
@@ -36883,17 +36956,15 @@ class Component extends DCLogic {
       orSample: !r && sample,
       orOff: !r && !sample && off,
       orNeedSignIn: !blocked && !busy && !signedIn,
-      orAskable: !blocked && !busy && !err && signedIn,
-      orBusy: !r && busy,
+      orConsent: !blocked && !busy && !err && signedIn && !consented,
+      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk(period, depth); },
+      /* The Codex showed its loading panel from the moment it asked; the
+         600ms wait before asking shows the same panel. */
+      orBusy: !r && (busy || waiting),
       orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
-      orErrRetry: !!err && ['limit', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
-      orAskEyebrow: P[1] + ' · ' + P[2],
-      orAskTitle: depth === 'deep' ? 'An in-depth reading, written for your chart' : 'A reading, written for your chart',
-      orAskLine: depth === 'deep'
-        ? 'The in-depth reading goes through every point of your chart, with chapters, windows of time, shadow work and questions for the journal. It takes up to a minute to write.'
-        : 'The Oracle reads your stars, your design and your numbers against the sky ' + sky + ', and writes the three as one reading.',
-      orPrivacy: 'Asking sends your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Anthropic, whose model Claude writes the reading. No name, journal, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. The reading is kept with your account, so asking again costs nothing.',
+      orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
+      orPrivacy: 'The Oracle reads your chart the way the Celestial Codex did. Asking sends your first name, your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Anthropic, whose model Claude writes the reading. No journal entry, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. From then on the Oracle reads for you whenever you open it, and each reading is kept with your account for the period it covers.',
       orAskGo: () => this.oracleAsk(period, depth),
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
@@ -36901,14 +36972,14 @@ class Component extends DCLogic {
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
       orShowReading: !!r,
-      orAria: r ? 'The Oracle, ' + (str(hit.label) || P[1]) + ': ' + str(r.title) : '',
-      orLabel: r ? (str(hit.label) || P[1]) : '',
+      orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
+      orLabel: r ? str(hit.label) : '',
       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
-      orOverview: r ? str(r.overview) : '',
+      orOvFirst: ov[0] || '', orOvRest: ov.slice(1).map(t => ({ t })),
       orTriple: r ? [['☉ The Stars', 'Astrological weather', r.stars], ['◈ The Design', 'Your energetic current', r.design], ['∞ The Numbers', 'The cycle’s cadence', r.numbers]]
         .map(([eyebrow, title, body]) => ({ eyebrow, title, body: str(body) })) : [],
       orHasChapters: chapters.length > 0,
-      orChapters: chapters.map((c, i) => ({ num: ROMAN[i] || String(i + 1), heading: str(c.heading), body: str(c.body) })),
+      orChapters: chapters.map((c, i) => ({ num: ROMAN[i] || String(i + 1), heading: str(c.heading), body: paras(c.body).join('\n\n') })),
       orHasTiming: timing.length > 0,
       orTiming: timing.map(t => ({ when: str(t.when), guidance: str(t.guidance) })),
       orHasShadow: !!(r && str(r.shadowWork)), orShadow: r ? str(r.shadowWork) : '',
@@ -36917,8 +36988,7 @@ class Component extends DCLogic {
         .map(([g, t, v]) => ({ g, t, v: str(v) })) : [],
       orHasTransits: transits.length > 0,
       orTransits: transits.map(t => ({ transit: str(t.transit), meaning: str(t.meaning) })),
-      orRitual: r ? str(r.ritual) : '', orHue: r ? str(r.auspiciousColor) : '', orMantra: r ? str(r.mantra) : '',
-      orFoot: 'Written by Claude, from your chart and the sky ' + sky + '. It is a reading, not a forecast of fact, and it stays the same until the period turns.'
+      orRitual: r ? str(r.ritual) : '', orHue: r ? str(r.auspiciousColor) : '', orMantra: r ? str(r.mantra) : ''
     };
   }
   monthVals() {
