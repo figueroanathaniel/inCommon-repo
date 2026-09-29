@@ -481,7 +481,7 @@
       await go('#/today', 700);
       var todayHasAlign = /Today.s Alignment/.test(txt(doc.querySelector('[data-screen-label="Today"]')));
       var elsewhere = [];
-      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/spirit/angel-numbers', '#/library/practices', '#/throughline'];
+      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/spirit/angel-numbers', '#/library/practices', '#/library/throughline', '#/oracle'];
       for (var oi = 0; oi < others.length; oi++) {
         await go(others[oi], 520);
         var scr = qa('[data-screen-label]').filter(function (s) { return s.getBoundingClientRect().height > 0; });
@@ -540,7 +540,7 @@
       var deadButtons = [], deadLinks = [];
       var screens = ['#/today', '#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology',
         '#/spirit/angel-numbers', '#/spirit/daily', '#/spirit/synastry', '#/library/practices',
-        '#/library/sabian-lexicon', '#/throughline', '#/settings'];
+        '#/library/sabian-lexicon', '#/library/throughline', '#/oracle', '#/settings'];
       for (var si = 0; si < screens.length; si++) {
         await go(screens[si], 520);
         qa('button').forEach(function (b) {
@@ -606,7 +606,7 @@
       onStep('fix 4: routes');
       var routes = ['#/today', '#/spirit', '#/spirit/daily', '#/spirit/astrology', '#/spirit/human-design',
         '#/spirit/numerology', '#/spirit/angel-numbers', '#/spirit/synastry', '#/library',
-        '#/library/practices', '#/library/sabian-lexicon', '#/throughline', '#/settings'];
+        '#/library/practices', '#/library/sabian-lexicon', '#/library/throughline', '#/throughline', '#/oracle', '#/settings'];
       var routeResults = {}, routeExpect = {};
       for (var ri = 0; ri < routes.length; ri++) {
         var r = routes[ri];
@@ -719,7 +719,7 @@
 
       /* ---- Fix 5c: twenty navigations, no drift ---- */
       onStep('fix 5: navigation endurance');
-      var loop = ['#/today', '#/spirit/astrology', '#/spirit/synastry', '#/library/practices', '#/throughline'];
+      var loop = ['#/today', '#/spirit/astrology', '#/spirit/synastry', '#/library/practices', '#/oracle'];
       var t0 = Date.now();
       for (var n = 0; n < 20; n++) { await go(loop[n % loop.length], 210); }
       var elapsed = Date.now() - t0;
@@ -736,7 +736,7 @@
 
 
       /* ---- nav active state ---- */
-      await go('#/throughline', 600);
+      await go('#/oracle', 600);
       var current = qa('[data-app-nav] button').filter(function (b) { return b.getAttribute('aria-current') === 'true' || b.getAttribute('aria-current') === 'page'; });
       t('F5e', 'The navigation marks exactly one item current', 1, current.length);
 
@@ -1392,7 +1392,7 @@
          catch. The row asserts what the heading SAYS as well as that there is
          exactly one of it. */
       var routes = [['#/today', 'Today'], ['#/spirit', 'Spirit'], ['#/library/practices', 'Library'],
-        ['#/throughline', 'Throughline'], ['#/settings', 'Settings']];
+        ['#/oracle', 'The Oracle'], ['#/settings', 'Settings']];
       var h1Bad = [];
       for (var ri = 0; ri < routes.length; ri++) {
         await goD(routes[ri][0], 640);
@@ -1731,7 +1731,7 @@
           dated: !!stamped && /\d/.test(stamped.underRange || '') });
 
       onStep('new surfaces: the Sky filter');
-      await goD('#/throughline', 700);
+      await goD('#/library/throughline', 700);
       var chips = [].slice.call(dd.querySelectorAll('[role="radio"]')).filter(function (b) { return /^Sky$/i.test(txt(b)); });
       if (chips[0]) chips[0].click();
       await sleep(500);

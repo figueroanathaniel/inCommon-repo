@@ -168,7 +168,7 @@
     if (!tz || tz === 'manual') return { offset: fb, source: 'stored', ambiguous: false };
     var off = fb, found = null;
     for (var i = 0; i < 2; i++) {
-      var at = new Date(Date.UTC(y, mo, d, hh - off, mi));
+      var at = new Date(Date.UTC(y, mo, d, hh, mi) - off * 36e5);
       found = zoneOffset(tz, at);
       if (found == null) return { offset: fb, source: 'stored', ambiguous: false };
       if (found === off) return { offset: off, source: 'zone', ambiguous: false };
@@ -179,7 +179,7 @@
 
   /* Whether the birth fell inside that zone's daylight saving, asked the only
      way that holds everywhere: against the lowest offset that zone reached in
-     the same year. A hemisphere assumption would be wrong for half the astral body,
+     the same year. A hemisphere assumption would be wrong for half the world,
      and a fixed one hour assumption is wrong for Lord Howe Island. */
   function isDst(tz, at) {
     if (!tz || tz === 'manual' || !at) return null;
@@ -212,14 +212,22 @@
     var known = state === TIME_STATE.KNOWN;
     var t = known ? norm(b.birthTime || b.time).split(':') : [ASSUMED_HOUR, ASSUMED_MIN];
     var y = +m[1], mo = +m[2] - 1, d = +m[3], hh = +t[0] || 0, mi = +t[1] || 0;
-    /* An assumed hour is a placeholder in local time and is not worth resolving
-       a historical offset for: the hour itself is the error, and an offset
-       applied to a guess dresses the guess up as arithmetic. */
-    var r = known
-      ? utcOffsetFor(b.timezone, y, mo, d, hh, mi, b.tzOffset)
-      : { offset: 0, source: 'none', ambiguous: false };
+    /* THE PLACEHOLDER IS NOON WHERE THE READER WAS BORN, which is what the
+       note below has always said and what the Celestial Codex drew. This used
+       to take noon at Greenwich instead, on the argument that an offset
+       applied to a guess dresses the guess up as arithmetic. The argument was
+       about the wrong error. Noon local is the middle of the day the reader
+       was actually born in, so no body can be further out than half a day of
+       its own motion; noon at Greenwich is the middle of somebody else's day,
+       and for a birth in Tokyo or Honolulu it sits nine or ten hours off
+       centre, which is up to five degrees more of Moon on one side. The zone
+       is asked for the offset exactly as a known time asks, and a birth with
+       no zone falls back to Greenwich, which is the only noon there is to
+       take. */
+    var r = utcOffsetFor(b.timezone, y, mo, d, hh, mi, b.tzOffset);
+    if (!known && (r.offset == null || !isFinite(r.offset))) r = { offset: 0, source: 'none', ambiguous: false };
     return {
-      date: new Date(Date.UTC(y, mo, d, hh - r.offset, mi)),
+      date: new Date(Date.UTC(y, mo, d, hh, mi) - r.offset * 36e5),
       timeState: state, timeKnown: known, assumed: !known,
       assumedTime: known ? '' : pad2(ASSUMED_HOUR) + ':' + pad2(ASSUMED_MIN),
       offset: r.offset, offsetSource: r.source, ambiguous: r.ambiguous,

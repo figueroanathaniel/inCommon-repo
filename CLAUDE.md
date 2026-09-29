@@ -397,7 +397,9 @@ exactly that reason, and the negation check stops at it.
 **Nothing here calls a model.** Every line of the analysis is computed on the
 device from the registry, which is why it works offline, why it is identical for
 the same text twice, and why the feature stays inside the V1.6.0 removal instead
-of quietly stepping back through it.
+of quietly stepping back through it. The Oracle is the one screen that calls a
+model, by the owner's decision, and it does not lend that to anything else: see
+"The Oracle took Throughline's seat" below.
 
 **The two kinds of link are never merged.** `dreamLinks()` returns `figures`, a
 dream animal that was then actually seen, and `near`, a sighting inside 48 hours
@@ -659,9 +661,9 @@ They can reach `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
 uninstalls and recalibrates, so their answer is not a function of `t` alone.
 Cache a null taken before install and the Expanded Chart says "not computed"
 for the rest of the session. The bench drives that case rather than asserting it.
-The four asteroids now read `minor-body-elements.js` FIRST, which is static
-generated data and is a pure function of `t`, so they could be cached on that
-path. They are not, because the fallback is still there behind them and a cache
+All five now read `minor-body-elements.js` FIRST (the asteroids since their
+fetch, Chiron since 29 September 2026), which is static generated data and is a
+pure function of `t`, so they could be cached on that path. They are not, because the fallback is still there behind them and a cache
 that is only sometimes safe is a cache nobody can reason about.
 
 **Nothing is rounded on the way in.** `designT()` bisects `lonOf` to an
@@ -816,9 +818,13 @@ measured an RMS of 35 to 110 degrees, flat across every window from 1980-2010 to
 1900-2100, so a wrong phase rather than drift: a reader's Ceres could be in the
 opposite sign and nothing in the build could tell. They are fetched now, at
 0.032 to 0.058 degree, and they earn their degree symbol by that measurement.
-Chiron is deliberately NOT fetched: a fifty year orbit that Saturn and Uranus
-keep perturbing is chaotic, and the fitted single epoch set measures 0.3 degrees
-across 1980-2010, which is what fitting against real positions buys.
+Chiron was left out here on the argument that a fifty year orbit Saturn and
+Uranus keep perturbing is chaotic. That is true of one set of elements carried
+across the century, which is what the fitted fallback is (0.92 degrees at
+worst), and not of an osculating set taken at the nearest epoch, which is what
+this module does for every centaur. **Chiron is fetched now**, since 29
+September 2026, when the Celestial Codex was found asking Horizons for it: 51
+epochs four years apart, 0.025 degrees at worst against 404 references.
 
 **The fetcher merges now, and that is what made a four body change reviewable.**
 `--only id,id` fetches just those and seeds `DATA` from the generated block
@@ -868,17 +874,19 @@ asteroids into this module also took them out of `APP_COMPUTED`.
 **Degree symbols are earned by that number.** `degreeSafe()` lets a fetched
 body name a degree when its measured worst case is at or under
 `DEGREE_SAFE_WORST` (0.2). The comets do not: one osculating set each,
-unmeasured across a lifetime. **Chiron is the only body left on
-`DEGREE_SAFE_EXCEPT`**, under both spellings, because the expanded chart
-addresses a point by id and the wheel by name and a name only list let `pallas`
-through once. The four asteroids came off that list when they were fetched:
-they earn the degree the way every other fetched body does, by measurement, and
-`degreeSafe()` lowercases a name before asking so the measurement actually
-governs rather than the lookup missing and falling through to the permissive
-default. Group E's row for this asserted a copy of the old list and went red the
-day the list was right; it asserts the RULE now, derived from the elements
-rather than typed, so adding a body with a nine degree fit and forgetting the
-list fails it.
+unmeasured across a lifetime. **There is no list of names any more.**
+`DEGREE_SAFE_EXCEPT` held the four asteroids, then Chiron alone, and went when
+Chiron was fetched: a list is what stays behind when a measurement moves. A
+body this module does not carry, which for Chiron and the four asteroids means
+the fitted fallback is drawing it, is judged by the fallback's own
+`accuracyDeg`, so the same body names a degree from the fetched elements and
+withholds it on the fitted ones. `degreeSafe()` lowercases a name before asking,
+because the expanded chart addresses a point by id and the wheel by name, and a
+name only lookup once let `pallas` through. Group E's row asserted a copy of the
+list, then a rule over the list, and went red on a correct change both times;
+E10 now runs the app's own `degreeSafe()`, lifted out of it, with the fetched
+elements present and with them missing, under both spellings, and E10c names
+Chiron. Making the fallback branch permissive turns both red.
 
 **Readings: 75 entries in `placement-content.js`, keyed by registry id.**
 Same fields and grammar as the 21 core bodies, because the same composer
@@ -1165,11 +1173,17 @@ because those are genuinely mean over the interval for a body Saturn and Uranus
 keep perturbing.
 
 **Accuracy decides which claims a body has earned.** At 0.92 degrees Chiron can
-name a sign and an aspect and cannot name a degree, so `degreeSafe()` withholds
-the Sabian symbol from it and from the four asteroids, and the page says why
-rather than leaving a gap. Group E asserts the reference positions, the worst
-case, that `a` was held, that Kepler still holds, and that the dead model stays
-dead. Measure the body, record the worst case, let that decide what it may say.
+name a sign and an aspect and cannot name a degree, so on this fit
+`degreeSafe()` withholds the Sabian symbol, and the page says why rather than
+leaving a gap. Group E asserts the reference positions, the worst case, that `a`
+was held, that Kepler still holds, and that the dead model stays dead. Measure
+the body, record the worst case, let that decide what it may say.
+
+**This fit is the fallback now.** Since 29 September 2026 Chiron comes from
+`minor-body-elements.js` first, fetched from Horizons at 51 epochs and
+measured at 0.025 degrees, so it names its degree like any fetched body (see
+"Where the Codex computed better"). This fit draws Chiron only when that module
+is missing, and the rule above still governs it there.
 
 ## The Book of Changes
 
@@ -1323,10 +1337,15 @@ Britain stayed on summer time, the years Portugal ran on central European time,
 the five years Russia kept daylight saving permanently, the Sydney games
 starting it early, China's brief experiment with it, and three zones whose
 offset is not a whole number of hours. If a future change starts reading a
-stored standard offset again, every summer row goes red at once.
+stored standard offset again, every summer row goes red at once. **Those rows
+check the offset, and an offset can be right while the instant is wrong**: all
+three fractional zones read 5.5, 5.75 and 13.75 correctly while `Date.UTC`
+dropped the fraction on the way to the instant. B13c checks the instant.
 
 **The assumption is returned, never hidden.** A chart with no time is still
-drawn, for 12:00 noon local, because a solar chart is worth having. What is not
+drawn, for 12:00 noon local, because a solar chart is worth having. (Until 29
+September 2026 the sentence said local and the arithmetic took Greenwich; B13b
+holds them together now.) What is not
 allowed is drawing it quietly: `availability()` names what cannot be computed,
 `birthTimeVals()` puts that sentence above the wheel and the bodygraph in both
 shells, and the list is the point of it. A wheel with no house numbers and no
@@ -1461,7 +1480,8 @@ to an invalid date would have thrown out of a render instead of drawing nothing.
 `lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
 back for all ten bodies.
 
-**`people-library.js` `STATE_VERSION` is 2.** Its own comment says the number
+**`people-library.js` `STATE_VERSION` was 2 for this, and is 3 since the
+Codex comparison changed untimed noon and the angles.** Its own comment says the number
 moves when the arithmetic of `computed_state` changes, and the bump is what
 invalidates `pair-cache.js`, so no stored composite outlives the positions it
 was made from.
@@ -2139,7 +2159,10 @@ failure. Do not raise them to quiet a red result. If a check reports green,
 confirm it examined a plausible number of elements before believing it.
 
 ## What V1.6.0 removed
-Four things came out, and the removal phase asserts they stay out.
+Four things came out, and the removal phase asserts they stay out. One screen
+has since brought a model back on purpose, the Oracle, through a server function
+rather than through Oki, and none of what follows is undone by it: see "The
+Oracle took Throughline's seat".
 
 **Oki and the safety router are unwired, not deleted.** No module is loaded,
 no route reaches a chat, `send()` returns with a debug note. The seams to
@@ -2596,12 +2619,24 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
-## Signing in on the cover: Google and email, and why the code comes back to it
+## Signing in on the cover: email, and why the code comes back to it
 The owner asked for Google sign in on the cover on 28 September 2026, as part of
-moving toward the Celestial Codex direction. It rides the Supabase project the
-cloud sync already uses, so there is one account system, not two. The cloud UI
-spec's "No provider sign-ins" line describes the temporary Settings surface of
-step 4 and is superseded here for the cover.
+moving toward the Celestial Codex direction, and for email the next day. It
+rides the Supabase project the cloud sync already uses, so there is one account
+system, not two. The cloud UI spec's "No provider sign-ins" line describes the
+temporary Settings surface of step 4 and is superseded here for the cover.
+
+**Google is gone, not hidden.** It was hidden in v6.4 and taken out on 29
+September 2026 at the owner's request ("for now, take away the google oauth"),
+because a Google Cloud OAuth client is a setup the owner is not paying for. The
+button, its handler, its sentences, `providerEnabled()` and `oauthStart()` are
+all removed; `oauthFinish()` stays, because the email link comes back through
+the same PKCE exchange. The paragraphs below still name Google where they
+record how the exchange was designed and tested, which is what they were. To
+bring it back: a Google provider in Supabase (Authentication, Providers, with a
+Google Cloud OAuth client whose redirect URI is the project's
+`/auth/v1/callback`), then the button and the two functions from git history
+(commit c098bf4 and before).
 
 **The return lands on the cover as `?code=`, and that is the whole design.**
 supabase-js defaults to the implicit flow, which hands the tokens back after the
@@ -2621,32 +2656,23 @@ confirmation, the PIN recovery link) would only open in the browser that asked
 for them under PKCE, because the code verifier lives there. K20 asserts `init()`
 still creates the client with the library defaults.
 
-**Every Supabase call is still in `incommon-cloud.js`.** `providerEnabled()`,
-`oauthStart()` and `oauthFinish()` need no `init()`, because the cover has no
-ProfileManager, and they make their own PKCE client with `detectSessionInUrl`
-off so the exchange is explicit. The module's header rule, never touching the
-network without a session, now carries its one exception in writing: the two
-calls a reader starts by pressing the button, which carry no local state. K15 to
-K19 cover the flow, the disabled provider, no network and a missing library;
-turning the flow back to implicit reds K15, and skipping the provider check reds
-K16 and K17.
-
-**The provider is asked before the redirect.** With Google switched off in the
-project, the authorize endpoint answers with a raw JSON error page, so
-`providerEnabled()` reads the project's public auth settings first and the
-button says in a sentence that Google sign in is not switched on yet. **It is
-off today**: the project allows email only, and turning it on is the owner's
-step in the Supabase dashboard (Authentication, Providers, Google, with a
-Google Cloud OAuth client whose redirect URI is the project's
-`/auth/v1/callback`), plus every cover address in Authentication, URL
-Configuration, Redirect URLs, or Supabase sends the reader to the Site URL
-instead.
+**Every Supabase call is still in `incommon-cloud.js`.** `emailStart()` and
+`oauthFinish()` need no `init()`, because the cover has no ProfileManager, and
+they make their own PKCE client with `detectSessionInUrl` off so the exchange
+is explicit. The module's header rule, never touching the network without a
+session, carries its one exception in writing: requesting an email link from
+the cover and exchanging the code that comes back, which carry no local state.
+K15 to K20 cover it: K15 the PKCE client and the link's return address, K16
+that the Google functions stay gone and nothing calls an OAuth endpoint, K18
+the exchange, K19 a missing library. Turning the flow back to implicit reds
+K15. Every cover address has to be in Authentication, URL Configuration,
+Redirect URLs, or Supabase sends the reader to the Site URL instead.
 
 **Continue with email is the way in that works today.** Added the next day, when
 the owner asked for a sign in that needs no Google registration: the email
 provider is already on, on Supabase's free plan. `emailStart()` asks the same
 PKCE client for a magic link sent back to the cover, so the link returns as
-`?code=` and the one exchange that finishes Google finishes it too. The price of
+`?code=` and one exchange finishes it. The price of
 PKCE is that the link has to be opened in the browser that asked, because the
 code verifier lives there, and the screen says so rather than failing
 mysteriously. A new address is signed up by the same link. The field opens in
@@ -2681,19 +2707,15 @@ theirs painted on the first screen would read as ours: a crafted "your account i
 locked, call this number" came back as the cover's own fixed sentence and
 nothing of its text. `error_code` is a fixed vocabulary, so it may choose the
 sentence and is still never shown: `otp_expired` says the link expired or was
-used. `access_denied` reads as cancelled only when the reader went to Google,
-because an expired email link arrives as `access_denied` too, and everything
-else reads as did not finish. A failed load of the two files is forgotten so the next press
+used, and everything else, `access_denied` included, reads as did not finish. A failed load of the two files is forgotten so the next press
 retries, and a return through the back button lets the held button go.
 
-**Two things on the cover changed that the section above states as rules.** It
+**One thing on the cover changed that the section above states as a rule.** It
 has more than one control now: H5 still counts one `a[href]`, because the
-sign in controls are buttons that do not navigate by themselves. And the G carries
-Google's green: the button follows Google's own dark style because its look is
-set by their branding rules, and that green is their mark rather than
-`#2fff8f`, so the rim is still the only inCommon green on the cover.
+sign in controls are buttons that do not navigate by themselves. With Google
+gone, the rim is again the only green of any kind on the cover.
 
-**"enter here" is the way to signing in, and the Google button is hidden.**
+**"enter here" is the way to signing in.**
 Decided by the owner on 29 September 2026, in v6.4. The "Continue with email"
 button is gone: the first press of "enter here" opens the email field in its
 place, with "Continue without an account" under it, so the one link on the
@@ -2715,10 +2737,7 @@ from costing anybody the way in they had:
   or one opened in another browser, because what that reader needs next is a
   new link, one field away rather than one press away.
 
-Google is hidden with the `hidden` attribute and its code is intact: Google sign
-in is not switched on in the project, the owner is not setting it up, and a
-button that can only say so is not worth a place on the first screen. Removing
-the attribute brings it back. H15 asserts both steps now, in one row so the
+H15 asserts both steps now, in one row so the
 phase stays at 17: the first press opens the field without leaving or starting
 the exit, the opened state passes 44px and 4.5:1 with the page at the top where
 both sweeps can see it, and "Continue without an account" runs the exit.
@@ -2799,6 +2818,331 @@ the banner has a button, behind the same `sampleOn`. It takes the banner's exact
 height at any width and any text size without measuring anything, measured equal
 at 320, 390 and 430. **If the banner's padding, gap, font or button box
 changes, change the spacer with it**, or the page starts short of it again.
+
+## The Oracle took Throughline's seat, and Throughline went to the Library
+The owner asked on 29 September 2026 for Throughline to become a tab in the
+Library and for its place in the nav to go to the Celestial Codex's Oracle,
+"where the user will be able to get their full fix of what they come to find",
+in the Codex's language, and chose a reading written by a model over one
+composed on the device. That reverses the V1.6.0 stance for this screen and for
+this screen alone. It is the owner's call and it is recorded here rather than
+argued again.
+
+**Throughline is the middle Library tab.** `libSubs` is Library, Throughline,
+Archive, and `libTL` is the gate: `libSub === 'throughline'` with no room and no
+practice open. It is NOT gated on `curTab()`, the way `libList` is not, because
+the phone draws the Library section whichever section is in view. The markup is
+the old tab's, moved, with `position:relative` added to its wrapper so the "+"
+still anchors to the record rather than to the section. `/library/throughline`
+is the address, and `/throughline` is kept as an alias in `openPath()`, the same
+way `/spirit/together` is kept for Synastry. Every handler that used to write
+`tab: 'throughline'` writes the Library tab now, and the two search rows go
+through `searchLib()`.
+
+**The Oracle is `tab: 'oracle'`**, `DT_NAV` and `VT_SECTIONS` in the same seat,
+so the phone's section indices did not move and nothing that scrolls to
+Settings by index changed. Its icon is new in `build-ui-icons.js` and
+`icons.json` both, by the registry rule: the sky as a whole with the lens on its
+side, which is an eye. `oracleVals()` is spread beside `dreamVals()`, and the
+vertical shell forces `isOracle` true in `vtVals()` the way it forced
+`isThroughline`.
+
+**The words are the Codex's.** Today, the day's omen; This Week, the seven-day
+tide; This Month, the lunar chapter; Standard and In-Depth; The Stars,
+astrological weather; The Design, your energetic current; The Numbers, the
+cycle's cadence; Love & Kinship, Work & Purpose, Spirit & Body; Celestial
+Currents; Windows of Time; Shadow Work, what asks to be met; For the Journal;
+A Small Ritual, the auspicious hue, and the mantra; and its two loading lines
+and its "silent for now". The screen is drawn in tokens, with every purple
+line in `--ac2-hi` and the one action in `--ac`, like the first run.
+
+**The theme phase does not see this screen**, because it measures `#/today`
+only, so it was measured by hand with the harness's own `contrastFails()` and
+`tapTargets()` lifted out of `tests-v6.0.js` unchanged: four identities, each
+hardened and not, at 1440 and 375 wide, with a full in-depth reading on screen
+(55 elements) and with the consent panel. All 32 cases: no pair under 4.5:1
+and no control under 44px.
+
+**The key is never in the page.** `server/oracle/index.ts` is a Supabase Edge
+Function that holds `MOONSHOT_API_KEY` as a secret; the app calls it through
+`incommon-cloud.js`, which is still the only module that talks to Supabase.
+`oracleRead()` answers every failure as a reason the page can say in words,
+never a throw, and K26 to K29 cover that, K28b the Luminary refusal. The
+function lives in `server/`, not `supabase/functions/`, because this repository
+is connected to Supabase's GitHub integration, which watches a `supabase/`
+folder and can open preview branches that are billed. `docs/ORACLE-SETUP.md` is
+the owner's setup, with the cost of a reading and the prepaid balance that
+bounds it.
+
+**Kimi writes the readings**, Moonshot AI's model, which the owner chose on 29
+September 2026 in place of Claude. It is asked with `fetch`, not a client
+library: the API is one POST to `api.moonshot.ai/v1/chat/completions`, and a
+library would be a dependency that can move under a function pasted into a
+dashboard. The Codex's schema goes as a strict `json_schema` named
+`horoscope`, the instructions as the system message (first and unchanging, so
+Kimi's cache serves them at a sixth of the price), the dossier as the user
+message. What comes back is read leniently, from the first `{` to the last
+`}`, because a code fence around a paid reading is not worth failing it, and
+then held to the schema's required keys, because half a page is worse than an
+error.
+
+**`kimi-k2.6` with thinking off is the default for both depths, and the reason
+is the clock.** Supabase stops a function at 150 seconds on the free plan.
+Kimi's own API writes `kimi-k2.6` at about 70 tokens a second and `kimi-k3` at
+40 to 60, and an in-depth reading is several thousand tokens. The Codex asked
+for more thought before an in-depth reading; that is `ORACLE_DEEP_THINKING`,
+off by default, `on` for `kimi-k2.6` or `kimi-k3`'s own `low`, `high` and
+`max` (it cannot be switched off there, so off means low). The function
+abandons the call at `ORACLE_TIME_LIMIT` (140 seconds) and says TIMEOUT rather
+than being killed mid write with a pending row. Measured speeds are from
+Artificial Analysis, not from this build, which has never called Kimi.
+
+**Kimi's failures map onto the Codex's two codes.** A rate limit or an
+overloaded engine is RATE_LIMITED; an empty balance
+(`exceeded_current_quota_error`, also a 429, so the type decides), a refused
+key, a model name Kimi does not have, a server error or no connection at all is
+OUT_OF_CREDITS, silent for now, and the row is released because nothing was
+written. A content filter is REFUSED and a reading cut off at the token limit
+is TOO_LONG; both count, because Kimi wrote and was paid. The function was run
+under Node against a fake Kimi and a fake Supabase (auth and PostgREST in
+memory) for 37 cases, request shape, every error path, the timeout, the daily
+limit and the knobs, and typechecked strict against the real Supabase types.
+
+**It operates as the Codex's Oracle did, and that was checked, not assumed.**
+The owner made it the condition of merging (29 September 2026), so the Codex's
+own code was read and run rather than recalled. The server asks with the
+Codex's `INSTRUCTIONS` and `DEEP_INSTRUCTIONS` word for word, its two JSON
+schemas key for key, its request line (`Compose the ... horoscope for
+{label}. DOSSIER:`), its period keys and labels, its instants (the day at noon
+UTC, the week at its Thursday, the month at its fifteenth). The page asks the moment the Oracle is open and again
+when the period or the depth changes, as the Codex's query did, shows its orb,
+line and skeleton while it waits, its drop cap, its sections in its order, and
+fails in its words: silent for now with no retry, resting and clouded over with
+Ask again. `oracleDossier()` is the Codex's `buildCosmicContext()` line for
+line, including the first name it sent. The Codex's builder was bundled with
+esbuild and run on the same births, and the dossiers compared line by line.
+
+**Where it does not, and why each one stays.** These are the whole list:
+
+- **The model is Kimi.** The Codex asked an OpenAI model through its own
+  adapter. The instructions and schema are the same; the prose will not be.
+  Nor is the extra thought the Codex asked for before an in-depth reading,
+  which is off by default here for the time limit above.
+- **The first reading waits for one press**, Consult the Oracle, beside the
+  sentence saying what is sent. The Codex kept birth data on its server from
+  sign up; inCommon promises the chart stays on the device until the reader
+  says otherwise. After that press the screen behaves as the Codex's did.
+- **The ask waits 600ms after the screen comes into view**, because the phone
+  draws every section at once and a reader scrolling past must not pay for a
+  reading they never looked at. The Codex's tabs mounted only when chosen.
+- **A daily limit of six attempts**, and a claim on the key before the model is
+  called. The Codex had neither and bounded its bill by caching alone.
+- **No dash reaches the page**, by inCommon's rule: the weekly label says "to"
+  where the Codex wrote a dash, and the server strips any the model writes.
+- **Where the two apps compute a chart differently, the dossier carries
+  inCommon's chart**, so a reading cannot contradict the wheel, the wiring or
+  the numbers page beside it. Where the Codex computed better, inCommon took
+  its method (see "Where the Codex computed better, inCommon took its
+  method"), so what is left is where inCommon is right or the two are choices:
+  the master numbers inCommon keeps in every personal cycle (a Personal Month
+  or Day of 11 where the Codex reduced it to 2), the Ascendant to within
+  arcseconds (inCommon pairs the apparent sidereal time with the true
+  obliquity where the Codex took the mean one), six of the 64 gate names (2,
+  10, 29, 47, 61, 62), and Black Moon Lilith, which is the mean lunar apogee
+  here: the Codex's formula is the perigee, so its Lilith sat in the opposite
+  sign for every reader, and copying it would have copied that. Run against
+  the Codex's own builder on two births after these changes, 115 of 138
+  dossier lines are identical and every difference is one of those.
+
+**What leaves the device is the Codex's dossier**: the first name, positions,
+houses and aspects, the Human Design type, authority, profile, centres,
+channels and Sun gates, the numbers including the name numbers, and the sky at
+the period's instant with its transits to the chart; the in-depth dossier adds
+the Codex's advanced points, minor aspects and every activation. No journal
+entry, and no birth date, time or place. The positions are enough to work out
+roughly when somebody was born, and the consent panel says exactly that.
+
+**Asking on open is paid for once per period.** A reading is kept on the device
+under `incommon.p.<id>.oracle`, keyed by period, period key, depth and the
+profile's birth stamp, so a corrected birth time finds nothing rather than the
+old chart's reading, which is what the Codex did by deleting its readings when
+the birth data changed. The server keeps it too, keyed by a hash of the
+dossier, so opening the Oracle again, here or on another device, costs
+nothing. The consent is `incommon.p.<id>.oracleConsent`. `deleteProfile()`
+cascades both keys. `oracleAutoAsk()` runs from the one `componentDidUpdate`;
+leaving the screen forgets a failure, so coming back tries again, as the
+Codex's query did on a remount.
+
+**The server holds the limits the page cannot.** A daily limit per reader
+counts attempts, because a failed reading was still paid for; a row is claimed
+before the model is called, and a partial unique index lets only one pending
+or finished row exist per key, so a double press or a second tab waits rather
+than paying twice. The table is written only by the function with the service
+role; a reader may read their own rows and nothing else, so nobody can delete
+the rows the limit counts. An in-depth reading is refused with
+PREMIUM_REQUIRED before any of this, and before the stored reading is looked
+up, as the Codex's `requirePremium` did, so a refusal costs nothing and counts
+nothing. Every string the model returns has dashes replaced
+before it is stored, by a detector built from char codes.
+
+**A signed out reader is sent to the cover**, `?signin=1`, which opens the
+email field at once and drops the query. The Oracle needs an account because a
+reading is written for one person and kept with them; a sample chart is refused
+on the page before anything is sent, because the Oracle writes for one person
+and a sample is nobody.
+
+## In depth is Codex Luminary, and Stripe takes the payment
+The owner asked on 29 September 2026 to charge for the advanced readings with
+the Stripe payment the Celestial Codex had. The Codex's Luminary is ported
+whole: $12.99 a month or $119.99 a year, Stripe Checkout, the billing portal,
+the webhook, the lazy re-sync (a row is asked of Stripe again when it is not
+active, past its paid period, or six hours old, so it comes right with no
+webhook at all), admin addresses that pass without paying, and the Codex's
+words on the gate. In inCommon Luminary unlocks the in-depth reading and
+nothing else; the gate says in a line of its own that every chart, the wiring,
+the numbers and standard readings stay free. `docs/LUMINARY-SETUP.md` is the
+owner's half.
+
+**One function, `server/billing/index.ts`, does the four jobs the Codex had four
+handlers for**: status, checkout and portal for the page, and Stripe's webhook,
+told apart by the `stripe-signature` header. One copy of the code that reads
+Stripe's answer, rather than a webhook function and a billing function that can
+drift. That is why it is deployed with **JWT verification off**: Stripe cannot
+send a Supabase token. Readers are still named by `auth.getUser()` and refused
+without one, and a webhook is believed only when `constructEventAsync` checks
+its signature with the Web Crypto provider, because Deno has no Node crypto.
+
+**inCommon's own lookup keys**, `incommon_luminary_monthly` and `_annual`, not
+the Codex's, so pointing it at the Stripe account the Codex used can never pick
+up or re-price the Codex's product. The first checkout makes the product
+("Codex Luminary") and both prices.
+
+**The paywall is the Oracle function, not the page.** The page's gate is
+courtesy; `server/oracle` reads `subscriptions` itself and answers 402
+PREMIUM_REQUIRED before it looks up a stored reading, as the Codex's
+`requirePremium` did. When the page believed the reader paid and the server
+did not, the page drops its belief, asks billing again with a sync, and shows
+the gate. The table is written only by the billing function with the service
+role, so nobody makes themselves a Luminary by writing a row.
+
+**The page asks billing once, when the Oracle is first opened with a session**
+(`lumAuto()`, from the one `componentDidUpdate`), never on render: the phone
+draws every section at once, and a status per paint would be a Stripe call per
+paint for anybody whose row has gone stale. Stripe returns the reader to the
+page's own address with `?luminary=success` or `cancelled` before the hash;
+`lumReturnRead()` drops it at mount, lands on In-Depth, and asks with a sync up
+to five times while it still reads unpaid, which is the Codex's "Confirming
+your payment with Stripe". A `pageshow` from the back-forward cache lets a held
+checkout button go.
+
+**Driven, not read.** 42 rows in a browser, both shells, against a faked
+Supabase and Stripe: the gate in place of a reading, no in-depth call while
+locked, the plan and price on the button, the checkout request and the
+navigation to Stripe, the return confirming and welcoming, the member line and
+the portal, a cancelled checkout, billing not deployed, and the server
+refusing a page that believed it was paid. The gate and the member line
+measured by hand in all 32 theme cases (four identities, hardened and not, two
+widths): no pair under 4.5:1 and no control under 44px. The function was run
+under Node against a fake Stripe for 25 cases, webhook signatures included,
+and typechecked strict against `stripe@17`. K30 to K34 hold the cloud calls.
+
+## Master numbers are kept wherever a number is read
+The owner asked on 29 September 2026 for "the rest of the master numbers".
+`InCommonCore.reduce()` always kept 11, 22 and 33 for the Life Path, the
+Birthday, the name numbers, the Personal Year and the Personal Month; the app
+class reduced the Personal Day, the Personal Week, the pinnacles, the cycles
+and the year and day blend all the way to one digit. `numKeep()` keeps the
+three now, everywhere a number is read. `numReduce()` stays for the two places
+arithmetic needs a single digit: a challenge is a difference of fully reduced
+parts, and the first pinnacle ends at 36 less the Life Path's root. Content
+lookups fall back to the root where a table has no master entry. 44 and the
+other doubled numbers are not masters in the tradition these tables come from
+(nor in the Codex), so they reduce. U1 to U7 lift the methods out of the app
+and hold all of it.
+
+## Where the Codex computed better, inCommon took its method
+The owner asked on 29 September 2026 for the same attention paid to where the
+Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
+things, each measured:
+
+- **The sidereal time and the obliquity.** The Codex took the apparent sidereal
+  time from astronomy-engine and an obliquity that moves with the date;
+  inCommon took the mean sidereal time and the J2000 obliquity, held fixed.
+  `skyFrame()` asks the library for the apparent sidereal time and the true
+  obliquity (the pair that belongs together) for the Ascendant, the Midheaven,
+  the Vertex and the East Point, with the old arithmetic as the fallback.
+  Over 20,000 random births the Ascendant moves 0.22 arcminutes on average and
+  2.5 at worst, at 60 degrees of latitude; no sign changes, and the whole
+  degree changes for 50 of them.
+- **Noon for a birth with no time is local noon.** `availability()` has always
+  said "12:00 noon local"; `instant()` drew noon at Greenwich. The Codex drew
+  local noon, which is the middle of the day the reader was born in, so no body
+  can be off by more than half a day of its motion. B13b.
+- **A half hour zone keeps its half hour.** Found while testing the one above,
+  and the Codex had it right: `Date.UTC(y, mo, d, hh - offset, mi)` truncates a
+  fractional hour, so every birth in India, Nepal, Iran, Afghanistan,
+  Newfoundland and central Australia was drawn 30 or 45 minutes early, seven to
+  eleven degrees of Ascendant. The offset is subtracted in milliseconds now, at
+  all eight sites that did it (`birth-time.js`, `people-library.js`, and the
+  app's fallback path and daylight saving probes). The thirty two zone rows checked the offset and never the
+  instant, which is how it survived; B13c checks the instant, and both rows go
+  red on the old code.
+- **Chiron is fetched from Horizons**, as the Codex asked Horizons for it: 51
+  epochs four years apart, 0.025 degrees at worst against 404 references,
+  where the fitted set in `minor-bodies-ephemeris.js` (still the fallback) is
+  0.92. See the corrected sections on the expanded chart's bodies and on
+  Chiron below.
+- **Ego authority is two authorities, and the definition is named.** The Codex
+  said Ego Manifested (the Heart reaches the Throat) or Ego Projected, where
+  inCommon said Ego; and it named the definition, Single, Split, Triple Split,
+  Quadruple Split or none, which inCommon did not show. `hdChart()` carries
+  both now, the wiring's card shows a Definition row in both shells, and the
+  Oracle's dossier reads them from the chart rather than working them out a
+  second time. The lookups that match an authority to its atlas entry match on
+  the first word, so "Ego manifested" still finds "Ego (Heart)".
+
+`people-library.js` `STATE_VERSION` went to 3 for the first three, which
+invalidates every stored pair.
+
+## The profile menu can log out and delete, and Settings lost the Cloud card
+The owner asked on 29 September 2026 for both in the profile icon's menu.
+
+**Log out signs out and keeps everything on the device.** `accountLogOut()`
+calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
+is `./` in the bundle and `./cover.html` in the source shell, because the app
+is `app.html` in one and the long name in the other. The line under it names the
+signed in address, or says "back to the cover" when there is none. The Settings
+button that used to say "Log out" cleared birth data, which is a different act
+wearing the same word, so it says "Clear birth data" now.
+
+**Delete this profile opens the same dialog Settings opens**, typed name and
+all, from both shells' menus. ProfileManager refuses to delete the last profile
+on a device, so for that one the dialog says what happens instead: inCommon
+starts over with a fresh profile and the birth page opens, which is what
+deleting the only profile means to the person doing it. A fresh profile is made
+and made active BEFORE the old one is deleted, so the refusal never fires.
+
+**The Cloud card is gone from both Settings screens**, replaced by a comment
+where it stood. Signing in happens on the cover now, and a second account door
+in Settings would be a second place for the two to disagree. The cloud
+vals are left in place, unrendered, so bringing the card back is a markup change
+only.
+
+## The newsletter is asked for at sign up, and can be refused there
+The owner asked on 29 September 2026 for a newsletter that signs readers up when
+their account is made, with an opt out box. The box sits under the cover's email
+field, "Send me the inCommon newsletter", ticked. Its answer goes with the
+sign in request as user metadata (`newsletter`, `newsletter_source`,
+`newsletter_decided_at`), and Supabase writes metadata only when that request
+creates the account, so the answer is recorded once, at creation, and a
+returning reader who unticks it changes nothing. K24 and K25 hold the shape.
+
+Nothing is sent to any mailing service from the app. `docs/NEWSLETTER-SETUP.md`
+is the owner's half: the query that reads the list out of `auth.users` (only
+confirmed addresses), choosing a sender, and the rules the box lives under. **A
+box that starts ticked is not consent in the EU or the UK**, and that page says
+so, because it is the owner's decision whether to start it unticked or confirm
+by email there, and it should be made knowingly.
 
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where

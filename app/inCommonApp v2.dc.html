@@ -60,7 +60,7 @@ html{scroll-behavior:smooth}
 html,body{max-width:100%;overflow-x:hidden}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
-@keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}[data-dropcap]::first-letter{float:left;font-family:var(--fd);font-size:4.2rem;line-height:.85;padding:6px 10px 0 0;color:var(--ac2-hi);text-shadow:0 0 18px rgba(var(--atmc2),.5)}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
 .syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
 .chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr auto;grid-template-areas:"houses wheel points" "aspects aspects aspects";gap:0;width:92vw;height:90vh;max-width:1400px;animation:chartxScale .2s ease-out}
@@ -1107,6 +1107,10 @@ input[type="date"]{color-scheme:dark}
           <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
           <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
         </button>
+        <div style="display:flex;align-items:baseline;gap:9px;width:100%;box-sizing:border-box;padding:12px 0">
+          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
+          <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
+        </div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:9px">
@@ -2590,6 +2594,59 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 10.5px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:11px">Everything here is kept on this device, for {{ actName }} only. Deleting moves an item to Deleted Memories in Settings, where it stays recoverable for seven days.</div>
       </div>
     </sc-if>
+    <sc-if value="{{ libTL }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Throughline" style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+        <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
+          <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
+            <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:10px 18px 92px">
+          <div style="position:relative;padding-left:22px">
+            <div style="position:absolute;left:5px;top:6px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(47,255,143,.09))"></div>
+            <sc-if value="{{ pyLine }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;margin-bottom:16px">
+                <span style="position:absolute;left:-22px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px rgba(47,255,143,.2)"></span>
+                <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ pyLine }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tlSampleOn }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-bottom:12px;background:rgba(139,92,246,.13);border:1px solid var(--ac2-hi);border-radius:10px;padding:9px 13px;font:400 11px/1.5 var(--fu);color:var(--ac2-hi)">{{ tlSampleNote }}</div>
+            </sc-if>
+            <sc-for list="{{ tlEntries }}" as="e" hint-placeholder-count="4">
+              <div style="position:relative;margin-bottom:11px;animation:fadeUp .22s ease">
+                <span style="position:absolute;left:-19px;top:15px;width:7px;height:7px;border-radius:50%;background:{{ e.dot }}"></span>
+                <button onClick="{{ e.toggle }}" aria-expanded="{{ e.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;background:var(--sf);border:1px solid {{ e.bdC }};border-radius:var(--rad);padding:12px 14px">
+                  <div style="display:flex;align-items:baseline;gap:8px">
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
+                  </div>
+                  <div style="font:400 15.5px/1.35 var(--fd);margin-top:2px">{{ e.title }}</div>
+                  <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx);margin-top:6px;animation:fadeUp .2s ease">{{ e.body }}</div>
+                  </sc-if>
+                  <sc-if value="{{ e.closed }}" hint-placeholder-val="{{ true }}">
+                    <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.preview }}</div>
+                  </sc-if>
+                  <sc-if value="{{ e.underShow }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 10.5px/1.6 var(--fu);color:var(--blue);margin-top:7px;border-top:1px solid var(--bd);padding-top:7px">{{ e.under }}</div>
+                  </sc-if>
+                </button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ tlEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment with the + below.</div>
+            </sc-if>
+          </div>
+        </div>
+        <button onClick="{{ addGo }}" aria-label="Mark a moment" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:18px;bottom:14px;width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--onac);display:flex;align-items:center;justify-content:center;font:400 27px/1 var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:8" style-active="transform:scale(.94)">+</button>
+        </div>
+        </sc-if>
+      </div>
+    </sc-if>
     <sc-if value="{{ libList }}" hint-placeholder-val="{{ true }}">
       <div style="flex:none;padding:12px 18px 4px">
         <input value="{{ q }}" onChange="{{ typeQ }}" placeholder="Search practices. Try 'no' or 'sleep'…" aria-label="Search practices" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
@@ -3300,68 +3357,223 @@ input[type="date"]{color-scheme:dark}
 
   </div>
 </section>
-<section data-vt-sec="Throughline" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Throughline" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<section data-vt-sec="The Oracle" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="The Oracle" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
-    <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">Throughline</h1>
-    <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">What actually happened, in your own hand.</div>
+    <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">The Oracle</h1>
+    <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">The heavens, read for you alone.</div>
   </div>
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
-<sc-if value="{{ isThroughline }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Throughline" style="flex:1;min-height:0;display:flex;flex-direction:column">
-    <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
-      <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
-        <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
-      </sc-for>
-    </div>
-    <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
-    <div style="flex:1;min-height:0;display:flex;flex-direction:column">
-    <div style="flex:1;min-height:0;overflow-y:auto;padding:10px 18px 92px">
-      <div style="position:relative;padding-left:22px">
-        <div style="position:absolute;left:5px;top:6px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(47,255,143,.09))"></div>
-        <sc-if value="{{ pyLine }}" hint-placeholder-val="{{ false }}">
-          <div style="position:relative;margin-bottom:16px">
-            <span style="position:absolute;left:-22px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px rgba(47,255,143,.2)"></span>
-            <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ pyLine }}</div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ tlSampleOn }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-bottom:12px;background:rgba(139,92,246,.13);border:1px solid var(--ac2-hi);border-radius:10px;padding:9px 13px;font:400 11px/1.5 var(--fu);color:var(--ac2-hi)">{{ tlSampleNote }}</div>
-        </sc-if>
-        <sc-for list="{{ tlEntries }}" as="e" hint-placeholder-count="4">
-          <div style="position:relative;margin-bottom:11px;animation:fadeUp .22s ease">
-            <span style="position:absolute;left:-19px;top:15px;width:7px;height:7px;border-radius:50%;background:{{ e.dot }}"></span>
-            <button onClick="{{ e.toggle }}" aria-expanded="{{ e.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;background:var(--sf);border:1px solid {{ e.bdC }};border-radius:var(--rad);padding:12px 14px">
-              <div style="display:flex;align-items:baseline;gap:8px">
-                <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
-                <span style="flex:1"></span>
-                <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
-              </div>
-              <div style="font:400 15.5px/1.35 var(--fd);margin-top:2px">{{ e.title }}</div>
-              <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
-                <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx);margin-top:6px;animation:fadeUp .2s ease">{{ e.body }}</div>
-              </sc-if>
-              <sc-if value="{{ e.closed }}" hint-placeholder-val="{{ true }}">
-                <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.preview }}</div>
-              </sc-if>
-              <sc-if value="{{ e.underShow }}" hint-placeholder-val="{{ false }}">
-                <div style="font:600 10.5px/1.6 var(--fu);color:var(--blue);margin-top:7px;border-top:1px solid var(--bd);padding-top:7px">{{ e.under }}</div>
-              </sc-if>
-            </button>
-          </div>
+<sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:6px 18px 28px;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
+        <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
+          <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
-        <sc-if value="{{ tlEmpty }}" hint-placeholder-val="{{ false }}">
-          <div style="font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment with the + below.</div>
-        </sc-if>
       </div>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+          <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
+            <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
+            <span style="font:italic 400 11.5px/1.3 var(--fb);color:var(--mut)">{{ pr.sub }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
+          <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
+          <sc-if value="{{ orLumManageOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumManage }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12px var(--fu)">{{ orLumManageLabel }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
+          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
+              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
+                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
+                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
+                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
+                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          </sc-if>
+          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          </sc-if>
+          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">It reads your chart, not a sample</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">The chart on screen is a sample until you give your own birth date. The Oracle writes for one person, so it waits for yours.</p>
+          <button onClick="{{ orUseMine }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Give my birth date</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orOff }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">The Oracle is consulted through inCommon&#8217;s server, and this copy of the app cannot reach it. Everything else here works on this device as it always has.</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orNeedSignIn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to consult the Oracle</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and nothing else.</p>
+          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Before the Oracle reads for you</div>
+          <p style="margin:0;font:400 12.5px/1.65 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fd);color:var(--mut)">{{ orLoadingText }}</p>
+          <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:70%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orErrOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ orErrText }}</p>
+          <sc-if value="{{ orErrRetry }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orShowReading }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ orAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ orLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+            <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ op.t }}</p>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+            <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ tp.title }}</div>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ tp.body }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ orHasChapters }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <sc-for list="{{ orChapters }}" as="ch" hint-placeholder-count="4">
+                <section style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:14px">
+                  <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                  <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ ch.heading }}</h3>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ ch.body }}</p>
+                </section>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orHasTiming }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Windows of Time</div>
+              <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">When to act, when to wait</div>
+              <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ orTiming }}" as="tm" hint-placeholder-count="3">
+                  <li style="display:flex;flex-direction:column;gap:2px;border-left:2px solid var(--ac2);padding-left:11px">
+                    <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
+                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                  </li>
+                </sc-for>
+              </ol>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orHasShadow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">What asks to be met</div>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orShadow }}</p>
+              </div>
+              <sc-if value="{{ orHasPrompts }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                  <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Questions to sit with</div>
+                  <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ orPrompts }}" as="q" hint-placeholder-count="3">
+                      <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ q.t }}</li>
+                    </sc-for>
+                  </ul>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+            <sc-for list="{{ orRealms }}" as="rm" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                <h4 style="margin:0;font:400 20px/1.25 var(--fd);color:var(--tx)">{{ rm.t }}</h4>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ rm.v }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ orHasTransits }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Celestial Currents</div>
+              <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Key transits</div>
+              <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ orTransits }}" as="tr" hint-placeholder-count="3">
+                  <li style="display:flex;flex-direction:column;gap:2px">
+                    <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
+                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orRitual }}</p>
+              <p style="margin:0;font:400 12.5px var(--fu);color:var(--mut)">Auspicious hue &#183; <em style="font:italic 400 14px var(--fb);color:var(--tx)">{{ orHue }}</em></p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+              <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+              <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
+            </div>
+          </div>
+        </article>
+      </sc-if>
     </div>
-    <button onClick="{{ addGo }}" aria-label="Mark a moment" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:18px;bottom:14px;width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--onac);display:flex;align-items:center;justify-content:center;font:400 27px/1 var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:8" style-active="transform:scale(.94)">+</button>
-    </div>
-    </sc-if>
   </div>
 </sc-if>
-
-
   </div>
 </section>
 <section data-vt-sec="Settings" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Settings" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
@@ -3571,62 +3783,10 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="display:flex;flex-direction:column;gap:2px">
-        <div style="font:400 19px var(--fd);color:var(--tx)">Cloud</div>
-        <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">A temporary surface, while sync is being proven. It will change.</div>
-      </div>
-      <sc-if value="{{ cloudUnavailable }}" hint-placeholder-val="{{ false }}">
-        <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--dim)">Sync is not available in this build.</div>
-      </sc-if>
-      <sc-if value="{{ cloudShowSignedOutForm }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <input value="{{ cloudEmail }}" onChange="{{ cloudEmailType }}" type="email" placeholder="Email" aria-label="Email" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-          <input value="{{ cloudPassword }}" onChange="{{ cloudPasswordType }}" type="password" placeholder="Password" aria-label="Password" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-          <button onClick="{{ cloudSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudSignInLabel }}</button>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-          <div style="font:italic 400 11px/1.55 var(--fb);color:var(--dim)">What leaves this device is decided by the consent switches in Settings. Nothing leaves without them.</div>
-        </div>
-      </sc-if>
-      <sc-if value="{{ cloudShowSignedIn }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--tx)">Signed in as {{ cloudSignedInEmail }}</span>
-            <button onClick="{{ cloudSignOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 9px;font:600 11px var(--fu);color:var(--dim)">Sign out</button>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine1 }}</div>
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine2 }}</div>
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine3 }}</div>
-          </div>
-          <button onClick="{{ cloudSyncNowGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudSyncNowLabel }}</button>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-          <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:10px">
-            <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
-          </div>
-        </div>
-      </sc-if>
-      <sc-if value="{{ cloudRecoveryPending }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <sc-if value="{{ cloudShowRecoveryWaiting }}" hint-placeholder-val="{{ true }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 12px/1.5 var(--fu);color:var(--tx)">Check your email for the sign-in link, then come back to this screen.</div>
-          </sc-if>
-          <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;align-items:center;gap:10px">
-              <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
-              <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
-            </div>
-          </sc-if>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-        </div>
-      </sc-if>
-    </div>
+    <!-- The Cloud card that stood here (email and password sign in, Sync now,
+         a recovery code) was removed on the owner's word in v6.5: signing in
+         lives on the cover and signing out in the profile menu. The cloud
+         module and its vals are untouched. -->
     <div style="display:flex;flex-direction:column;gap:8px">
       <button onClick="{{ exportGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ exportLabel }}</button>
       <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
@@ -3635,7 +3795,7 @@ input[type="date"]{color-scheme:dark}
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Birth data</div>
-      <button onClick="{{ logOutGo }}" aria-label="Log out and clear your birth data" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(224,141,125,.45);background:rgba(224,141,125,.08);font:700 13px var(--fu);color:var(--warn)">Log Out</button>
+      <button onClick="{{ logOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(224,141,125,.45);background:rgba(224,141,125,.08);font:700 13px var(--fu);color:var(--warn)">Clear birth data</button>
       <span style="font:400 10px/1.5 var(--fu);color:var(--dim)">Clears your birth date, time and place and returns you to the birth screen. Your journal, your saved people, your readings and every setting stay exactly where they are.</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
@@ -4337,6 +4497,17 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Change your picture</span>
         <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">→</span>
       </button>
+      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
+           The cloud cannot bring a record back down to a device yet (pullAll
+           has no caller), so clearing anything here would be permanent. The
+           reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
+      </button>
+      <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
+      </button>
       <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Stay with&nbsp;{{ actName }}</button>
     </div>
   </div>
@@ -4553,6 +4724,9 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" aria-label="Confirm delete" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--warn)">Delete {{ formName }} permanently?</div>
       <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">All journals, moods, conversations, and the charts drawn for them will be erased. This cannot be undone.</div>
+      <sc-if value="{{ delSolo }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">It is the only profile on this device, so inCommon starts over with a fresh one and the birth page opens.</div>
+      </sc-if>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Type the name to confirm.</div>
       <input value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
@@ -5547,6 +5721,10 @@ input[type="date"]{color-scheme:dark}
                 <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
                 <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
               </button>
+              <div style="display:flex;align-items:baseline;gap:10px;width:100%;box-sizing:border-box;padding:12px 0">
+                <span style="flex:none;width:74px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
+                <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
+              </div>
             </div>
           </div>
           <button onClick="{{ hdProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac2);border-radius:var(--rad);padding:16px 18px;width:100%">
@@ -6364,6 +6542,59 @@ input[type="date"]{color-scheme:dark}
           <div style="border:1.5px dashed var(--bd);border-radius:12px;padding:20px;font:italic 400 13px/1.6 var(--fb);color:var(--dim);text-align:center">{{ arcEmptyText }}</div>
         </sc-if>
         <div style="font:400 10.5px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:11px">Everything here is kept on this device, for {{ actName }} only. Deleting moves an item to Deleted Memories in Settings, where it stays recoverable for seven days.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ libTL }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Throughline" style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+        <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
+          <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
+            <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:10px 18px 92px">
+          <div style="position:relative;padding-left:22px">
+            <div style="position:absolute;left:5px;top:6px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(47,255,143,.09))"></div>
+            <sc-if value="{{ pyLine }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;margin-bottom:16px">
+                <span style="position:absolute;left:-22px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px rgba(47,255,143,.2)"></span>
+                <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ pyLine }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tlSampleOn }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-bottom:12px;background:rgba(139,92,246,.13);border:1px solid var(--ac2-hi);border-radius:10px;padding:9px 13px;font:400 11px/1.5 var(--fu);color:var(--ac2-hi)">{{ tlSampleNote }}</div>
+            </sc-if>
+            <sc-for list="{{ tlEntries }}" as="e" hint-placeholder-count="4">
+              <div style="position:relative;margin-bottom:11px;animation:fadeUp .22s ease">
+                <span style="position:absolute;left:-19px;top:15px;width:7px;height:7px;border-radius:50%;background:{{ e.dot }}"></span>
+                <button onClick="{{ e.toggle }}" aria-expanded="{{ e.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;background:var(--sf);border:1px solid {{ e.bdC }};border-radius:var(--rad);padding:12px 14px">
+                  <div style="display:flex;align-items:baseline;gap:8px">
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
+                    <span style="flex:1"></span>
+                    <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
+                  </div>
+                  <div style="font:400 15.5px/1.35 var(--fd);margin-top:2px">{{ e.title }}</div>
+                  <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx);margin-top:6px;animation:fadeUp .2s ease">{{ e.body }}</div>
+                  </sc-if>
+                  <sc-if value="{{ e.closed }}" hint-placeholder-val="{{ true }}">
+                    <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.preview }}</div>
+                  </sc-if>
+                  <sc-if value="{{ e.underShow }}" hint-placeholder-val="{{ false }}">
+                    <div style="font:600 10.5px/1.6 var(--fu);color:var(--blue);margin-top:7px;border-top:1px solid var(--bd);padding-top:7px">{{ e.under }}</div>
+                  </sc-if>
+                </button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ tlEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment with the + below.</div>
+            </sc-if>
+          </div>
+        </div>
+        <button onClick="{{ addGo }}" aria-label="Mark a moment" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:18px;bottom:14px;width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--onac);display:flex;align-items:center;justify-content:center;font:400 27px/1 var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:8" style-active="transform:scale(.94)">+</button>
+        </div>
+        </sc-if>
       </div>
     </sc-if>
     <sc-if value="{{ libList }}" hint-placeholder-val="{{ true }}">
@@ -7779,57 +8010,214 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 
 
-<sc-if value="{{ isThroughline }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Throughline" style="flex:1;min-height:0;display:flex;flex-direction:column">
-    <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
-      <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
-        <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
-      </sc-for>
-    </div>
-    <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
-    <div style="flex:1;min-height:0;display:flex;flex-direction:column">
-    <div style="flex:1;min-height:0;overflow-y:auto;padding:10px 18px 92px">
-      <div style="position:relative;padding-left:22px">
-        <div style="position:absolute;left:5px;top:6px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(47,255,143,.09))"></div>
-        <sc-if value="{{ pyLine }}" hint-placeholder-val="{{ false }}">
-          <div style="position:relative;margin-bottom:16px">
-            <span style="position:absolute;left:-22px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px rgba(47,255,143,.2)"></span>
-            <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ pyLine }}</div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ tlSampleOn }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-bottom:12px;background:rgba(139,92,246,.13);border:1px solid var(--ac2-hi);border-radius:10px;padding:9px 13px;font:400 11px/1.5 var(--fu);color:var(--ac2-hi)">{{ tlSampleNote }}</div>
-        </sc-if>
-        <sc-for list="{{ tlEntries }}" as="e" hint-placeholder-count="4">
-          <div style="position:relative;margin-bottom:11px;animation:fadeUp .22s ease">
-            <span style="position:absolute;left:-19px;top:15px;width:7px;height:7px;border-radius:50%;background:{{ e.dot }}"></span>
-            <button onClick="{{ e.toggle }}" aria-expanded="{{ e.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;background:var(--sf);border:1px solid {{ e.bdC }};border-radius:var(--rad);padding:12px 14px">
-              <div style="display:flex;align-items:baseline;gap:8px">
-                <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
-                <span style="flex:1"></span>
-                <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
-              </div>
-              <div style="font:400 15.5px/1.35 var(--fd);margin-top:2px">{{ e.title }}</div>
-              <sc-if value="{{ e.open }}" hint-placeholder-val="{{ false }}">
-                <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx);margin-top:6px;animation:fadeUp .2s ease">{{ e.body }}</div>
-              </sc-if>
-              <sc-if value="{{ e.closed }}" hint-placeholder-val="{{ true }}">
-                <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.preview }}</div>
-              </sc-if>
-              <sc-if value="{{ e.underShow }}" hint-placeholder-val="{{ false }}">
-                <div style="font:600 10.5px/1.6 var(--fu);color:var(--blue);margin-top:7px;border-top:1px solid var(--bd);padding-top:7px">{{ e.under }}</div>
-              </sc-if>
-            </button>
-          </div>
+<sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:18px 18px 32px;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
+        <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
+          <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
-        <sc-if value="{{ tlEmpty }}" hint-placeholder-val="{{ false }}">
-          <div style="font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment with the + below.</div>
-        </sc-if>
       </div>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+          <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
+            <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
+            <span style="font:italic 400 11.5px/1.3 var(--fb);color:var(--mut)">{{ pr.sub }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
+          <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
+          <sc-if value="{{ orLumManageOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumManage }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12px var(--fu)">{{ orLumManageLabel }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
+          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
+              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
+                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
+                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
+                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
+                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          </sc-if>
+          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          </sc-if>
+          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">It reads your chart, not a sample</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">The chart on screen is a sample until you give your own birth date. The Oracle writes for one person, so it waits for yours.</p>
+          <button onClick="{{ orUseMine }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Give my birth date</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orOff }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">The Oracle is consulted through inCommon&#8217;s server, and this copy of the app cannot reach it. Everything else here works on this device as it always has.</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orNeedSignIn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to consult the Oracle</div>
+          <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">Each reading is written for one person and kept with their account, so asking again never costs a second reading. Signing in takes an email address and nothing else.</p>
+          <button onClick="{{ orSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in with email</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orConsent }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Before the Oracle reads for you</div>
+          <p style="margin:0;font:400 12.5px/1.65 var(--fu);color:var(--mut)">{{ orPrivacy }}</p>
+          <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p style="margin:6px 0;max-width:44ch;font:italic 400 19px/1.45 var(--fd);color:var(--mut)">{{ orLoadingText }}</p>
+          <span aria-hidden="true" style="width:50%;height:2rem;border-radius:8px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:90%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          <span aria-hidden="true" style="width:70%;height:1rem;border-radius:6px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orErrOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ orErrText }}</p>
+          <sc-if value="{{ orErrRetry }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ orShowReading }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ orAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ orLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+            <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ op.t }}</p>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+            <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ tp.title }}</div>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ tp.body }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ orHasChapters }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <sc-for list="{{ orChapters }}" as="ch" hint-placeholder-count="4">
+                <section style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:14px">
+                  <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                  <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ ch.heading }}</h3>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ ch.body }}</p>
+                </section>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orHasTiming }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Windows of Time</div>
+              <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">When to act, when to wait</div>
+              <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ orTiming }}" as="tm" hint-placeholder-count="3">
+                  <li style="display:flex;flex-direction:column;gap:2px;border-left:2px solid var(--ac2);padding-left:11px">
+                    <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
+                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                  </li>
+                </sc-for>
+              </ol>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orHasShadow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">What asks to be met</div>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orShadow }}</p>
+              </div>
+              <sc-if value="{{ orHasPrompts }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                  <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Questions to sit with</div>
+                  <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ orPrompts }}" as="q" hint-placeholder-count="3">
+                      <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ q.t }}</li>
+                    </sc-for>
+                  </ul>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+            <sc-for list="{{ orRealms }}" as="rm" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                <h4 style="margin:0;font:400 20px/1.25 var(--fd);color:var(--tx)">{{ rm.t }}</h4>
+                <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ rm.v }}</p>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ orHasTransits }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Celestial Currents</div>
+              <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Key transits</div>
+              <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ orTransits }}" as="tr" hint-placeholder-count="3">
+                  <li style="display:flex;flex-direction:column;gap:2px">
+                    <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
+                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orRitual }}</p>
+              <p style="margin:0;font:400 12.5px var(--fu);color:var(--mut)">Auspicious hue &#183; <em style="font:italic 400 14px var(--fb);color:var(--tx)">{{ orHue }}</em></p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+              <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+              <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
+            </div>
+          </div>
+        </article>
+      </sc-if>
     </div>
-    <button onClick="{{ addGo }}" aria-label="Mark a moment" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:18px;bottom:14px;width:54px;height:54px;border-radius:50%;background:var(--ac);color:var(--onac);display:flex;align-items:center;justify-content:center;font:400 27px/1 var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:8" style-active="transform:scale(.94)">+</button>
-    </div>
-    </sc-if>
   </div>
 </sc-if>
 
@@ -8034,62 +8422,10 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="display:flex;flex-direction:column;gap:2px">
-        <div style="font:400 19px var(--fd);color:var(--tx)">Cloud</div>
-        <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">A temporary surface, while sync is being proven. It will change.</div>
-      </div>
-      <sc-if value="{{ cloudUnavailable }}" hint-placeholder-val="{{ false }}">
-        <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--dim)">Sync is not available in this build.</div>
-      </sc-if>
-      <sc-if value="{{ cloudShowSignedOutForm }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <input value="{{ cloudEmail }}" onChange="{{ cloudEmailType }}" type="email" placeholder="Email" aria-label="Email" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-          <input value="{{ cloudPassword }}" onChange="{{ cloudPasswordType }}" type="password" placeholder="Password" aria-label="Password" style="box-sizing:border-box;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-          <button onClick="{{ cloudSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudSignInLabel }}</button>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-          <div style="font:italic 400 11px/1.55 var(--fb);color:var(--dim)">What leaves this device is decided by the consent switches in Settings. Nothing leaves without them.</div>
-        </div>
-      </sc-if>
-      <sc-if value="{{ cloudShowSignedIn }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--tx)">Signed in as {{ cloudSignedInEmail }}</span>
-            <button onClick="{{ cloudSignOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 9px;font:600 11px var(--fu);color:var(--dim)">Sign out</button>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine1 }}</div>
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine2 }}</div>
-            <div style="font:400 12px/1.5 var(--fu);color:var(--tx)">{{ cloudSyncLine3 }}</div>
-          </div>
-          <button onClick="{{ cloudSyncNowGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudSyncNowLabel }}</button>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-          <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:10px">
-            <button onClick="{{ cloudRecoveryStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Email me a recovery code</button>
-          </div>
-        </div>
-      </sc-if>
-      <sc-if value="{{ cloudRecoveryPending }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <sc-if value="{{ cloudShowRecoveryWaiting }}" hint-placeholder-val="{{ true }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 12px/1.5 var(--fu);color:var(--tx)">Check your email for the sign-in link, then come back to this screen.</div>
-          </sc-if>
-          <sc-if value="{{ cloudShowRecoveryPin }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;align-items:center;gap:10px">
-              <input value="{{ cloudRecoveryPin }}" onChange="{{ cloudRecoveryPinType }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="New PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
-              <button onClick="{{ cloudRecoveryCompleteGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ cloudRecoveryCompleteLabel }}</button>
-            </div>
-          </sc-if>
-          <sc-if value="{{ cloudHasMsg }}" hint-placeholder-val="{{ false }}">
-            <div style="min-height:44px;display:flex;align-items:center;font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ cloudMsg }}</div>
-          </sc-if>
-        </div>
-      </sc-if>
-    </div>
+    <!-- The Cloud card that stood here (email and password sign in, Sync now,
+         a recovery code) was removed on the owner's word in v6.5: signing in
+         lives on the cover and signing out in the profile menu. The cloud
+         module and its vals are untouched. -->
     <div style="display:flex;flex-direction:column;gap:8px">
       <button onClick="{{ exportGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ exportLabel }}</button>
       <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
@@ -8098,7 +8434,7 @@ input[type="date"]{color-scheme:dark}
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Birth data</div>
-      <button onClick="{{ logOutGo }}" aria-label="Log out and clear your birth data" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(224,141,125,.45);background:rgba(224,141,125,.08);font:700 13px var(--fu);color:var(--warn)">Log Out</button>
+      <button onClick="{{ logOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(224,141,125,.45);background:rgba(224,141,125,.08);font:700 13px var(--fu);color:var(--warn)">Clear birth data</button>
       <span style="font:400 10px/1.5 var(--fu);color:var(--dim)">Clears your birth date, time and place and returns you to the birth screen. Your journal, your saved people, your readings and every setting stay exactly where they are.</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
@@ -8472,6 +8808,17 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Change your picture</span>
         <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">→</span>
       </button>
+      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
+           The cloud cannot bring a record back down to a device yet (pullAll
+           has no caller), so clearing anything here would be permanent. The
+           reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
+      </button>
+      <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
+      </button>
       <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Stay with&nbsp;{{ actName }}</button>
     </div>
   </div>
@@ -8742,6 +9089,9 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" aria-label="Confirm delete" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--warn)">Delete {{ formName }} permanently?</div>
       <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">All journals, moods, conversations, and the charts drawn for them will be erased. This cannot be undone.</div>
+      <sc-if value="{{ delSolo }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">It is the only profile on this device, so inCommon starts over with a fresh one and the birth page opens.</div>
+      </sc-if>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Type the name to confirm.</div>
       <input value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
@@ -9339,6 +9689,9 @@ class Component extends DCLogic {
        this.cloud stays null) if the module is absent, the vendored client
        did not load, or the project is not configured yet; the app is
        exactly the offline-first program it was without this pass. */
+    this.lumReturnRead();
+    this._onPageShow = e => { if (e && e.persisted && this.state.lumBusy) this.setState({ lumBusy: null }); };
+    window.addEventListener('pageshow', this._onPageShow);
     const IC = typeof window !== 'undefined' && window.InCommonCloud;
     if (IC && window.ProfileManager && window.InCommonCore) {
       this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage }) || null;
@@ -9440,6 +9793,8 @@ class Component extends DCLogic {
     this.syncSectionToTab();
     this.syncAtlasItem();
     this.syncChartExpandPersist();
+    this.lumAuto();
+    this.oracleAutoAsk();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -9455,6 +9810,8 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
+    if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
+    clearTimeout(this._lumT);
     /* Clean up ephemeris router and WASM instance */
     if (this.ephIntegration) {
       this.ephIntegration.close();
@@ -9507,6 +9864,7 @@ class Component extends DCLogic {
        (libView null), but this returned the bare /library for that state, so
        arriving at /library/practices immediately rewrote the address to
        /library and Back had nothing to restore. Caught by F4c. */
+    if (tab === 'library' && !st.libView && !st.selId && st.libSub === 'throughline') return '/library/throughline';
     if (tab === 'library') return this.LIB_PATHS[st.libView] || this.LIB_PATHS.practices;
     return '/' + tab;
   }
@@ -9585,13 +9943,20 @@ class Component extends DCLogic {
         : Object.keys(this.SPIRIT_PATHS).find(k => this.SPIRIT_PATHS[k] === seg[1]);
       return go({ tab: 'spirit', spiritView: key || null });
     }
+    /* Throughline was a nav tab until The Oracle took its seat, and it is a
+       Library tab now. Its old address is kept as an alias, the same way
+       /spirit/together is kept for Synastry, so links and bookmarks made while
+       it was a tab still land on the record. */
+    if (seg[0] === 'throughline' || (seg[0] === 'library' && seg[1] === 'throughline')) {
+      return go({ tab: 'library', libSub: 'throughline', libView: null, selId: null });
+    }
     if (seg[0] === 'library') {
       const view = Object.keys(this.LIB_PATHS).find(k => this.LIB_PATHS[k] === '/' + seg.join('/')) || (seg[1] ? null : 'practices');
       /* A bare /library is the shelf itself, and the shelf is libView null.
          Resolving it to 'practices' matched no view and painted an empty pane. */
       return go({ tab: 'library', libSub: 'library', libView: (view && view !== 'practices') ? view : null, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, atlasItem: null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
     }
-    const tabs = ['today', 'library', 'spirit', 'throughline', 'settings'];
+    const tabs = ['today', 'library', 'spirit', 'oracle', 'settings'];
     return go({ tab: tabs.indexOf(seg[0]) === -1 ? 'today' : seg[0] });
   }
   boot() {
@@ -11060,12 +11425,13 @@ class Component extends DCLogic {
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
     if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
-    /* Chiron and the four asteroids. Chiron's elements are fitted against 81
-       JPL Horizons positions across 1900 to 2060 and measure 0.92 degrees at
-       worst, so it names a sign and an aspect and not a degree: see
-       degreeSafe(). It is not fetched, because a fifty year orbit that Saturn
-       and Uranus keep perturbing is chaotic and a fit against real positions is
-       the better answer for it.
+    /* Chiron and the four asteroids. Chiron is fetched from JPL Horizons now,
+       as the Celestial Codex asked Horizons for it, and measures 0.025 degrees
+       at worst against 404 of Horizons' own positions, so it names a degree:
+       see degreeSafe(). It was left out once on the argument that its orbit is
+       chaotic, which is true of the single fitted set in
+       minor-bodies-ephemeris.js (0.92 degrees, still the fallback) and not of
+       an osculating set taken at the nearest of 51 epochs.
 
        The four asteroids ARE fetched, and they are the reason this comment
        changed. They sat on minor-bodies-ephemeris.js's single epoch coplanar
@@ -11107,18 +11473,17 @@ class Component extends DCLogic {
      an imprecise number, and it reads as the most exact thing on the page
      because it is the most specific. The ten astral bodies are measured against
      JPL Horizons to 0.03 degrees and keep their symbols (the series they came
-     from before claimed "well inside a degree" here and measured 6.5); Chiron
-     is fitted to 0.92 and does not; the asteroids are unpinned and do not.
+     from before claimed "well inside a degree" here and measured 6.5). Chiron
+     and the four asteroids are fetched from Horizons and measure 0.058 degrees
+     at worst, so they keep theirs; on the fitted fallback, Chiron at 0.92 and
+     Pallas at 29.6, they do not.
 
      This is the gate the next body passes through too: measure it, record the
-     worst case, and let that decide what it is allowed to say. */
-  /* Chiron alone, under both spellings, because the expanded chart addresses a
-     point by id and the natal wheel by name and a name only list let pallas
-     through once. The four asteroids were on this list and have come off it:
-     they are fetched now and measure 0.058 degrees at worst, so they earn the
-     degree the way every other fetched body does, by measurement rather than by
-     being absent from a list. */
-  DEGREE_SAFE_EXCEPT = ['Chiron', 'chiron'];
+     worst case, and let that decide what it is allowed to say. There is no
+     list of names any more. Chiron was the last body on one, and it came off
+     when it was fetched: a list is what stays behind when a measurement moves,
+     and the fallback's own accuracy is read instead, so the same body names a
+     degree from the fetched elements and withholds it on the fitted ones. */
   /* The fetched bodies earn a degree by measurement: a worst case against JPL
      Horizons (or the Swiss Ephemeris, for the hypotheticals) at or under a
      fifth of a degree. check-minor-body-elements.js holds every body to the
@@ -11127,14 +11492,19 @@ class Component extends DCLogic {
   DEGREE_SAFE_WORST = 0.2;
   COMET_IDS = ['halley', 'halebopp', 'hyakutake'];
   degreeSafe(name) {
-    if (this.DEGREE_SAFE_EXCEPT.indexOf(name) !== -1 || this.COMET_IDS.indexOf(name) !== -1) return false;
-    const ME = window.MinorBodyElements;
+    if (this.COMET_IDS.indexOf(name) !== -1) return false;
+    const ME = window.MinorBodyElements, low = String(name).toLowerCase();
     /* The wheel asks by name and the expanded table by id, and the measurement
        is filed under the id, so a name is lowered before the lookup or a
        measured body would silently fall through to the permissive default. */
-    if (!ME) return true;
-    const key = ME.has(name) ? name : (ME.has(String(name).toLowerCase()) ? String(name).toLowerCase() : null);
-    return key == null ? true : ME.worstDeg(key) <= this.DEGREE_SAFE_WORST;
+    const key = ME ? (ME.has(name) ? name : (ME.has(low) ? low : null)) : null;
+    if (key != null) return ME.worstDeg(key) <= this.DEGREE_SAFE_WORST;
+    /* Not measured there, so if it is drawn at all it comes from the fitted
+       fallback, and the fallback states its own accuracy per body. */
+    const MBE = window.MinorBodiesEphemeris;
+    const fb = MBE && MBE.elements ? Object.keys(MBE.elements).find(b => b.toLowerCase() === low) : null;
+    if (fb) { const a = MBE.elements[fb].accuracyDeg; return a != null && a <= this.DEGREE_SAFE_WORST; }
+    return true;
   }
   /* Where a fetched body's position comes from and how good it is, in one
      sentence, whether or not it keeps its degree. */
@@ -11209,8 +11579,8 @@ class Component extends DCLogic {
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const timed = !!(p && p.hasBirthTime), tm = timed ? p.birthTime.split(':').map(Number) : [12, 0];
     const y = +m[1], mo = +m[2] - 1, d = +m[3], hh = tm[0] || 0, mi = tm[1] || 0;
-    const off = timed ? this.birthUtcOffset(p, y, mo, d, hh, mi) : 0; // local birth clock -> UT
-    return new Date(Date.UTC(y, mo, d, hh - off, mi));
+    const off = this.birthUtcOffset(p, y, mo, d, hh, mi); // local birth clock -> UT; an untimed birth is local noon
+    return new Date(Date.UTC(y, mo, d, hh, mi) - off * 36e5);
   }
   /* The offset stored on a profile is the zone's STANDARD offset: the gazetteer
      keeps -8 for America/Los_Angeles and a separate dst flag it never applies.
@@ -11236,7 +11606,7 @@ class Component extends DCLogic {
     if (!tz || tz === 'manual') return fallback;
     let off = fallback;
     for (let i = 0; i < 2; i++) {
-      const at = new Date(Date.UTC(y, mo, d, hh - off, mi));
+      const at = new Date(Date.UTC(y, mo, d, hh, mi) - off * 36e5);
       const found = this.zoneOffset(tz, at);
       if (found == null) return fallback;
       if (found === off) return off;
@@ -11260,13 +11630,36 @@ class Component extends DCLogic {
     } catch (e) { return null; }
   }
   natalDate() { return this.natalDateFor(this.activeProfile()); }
+  /* THE SIDEREAL TIME AND THE OBLIQUITY, TAKEN AS THE CELESTIAL CODEX TOOK
+     THEM. The Codex asked astronomy-engine for the apparent sidereal time,
+     which carries the nutation in right ascension, and let the obliquity move
+     with the date. inCommon used the mean sidereal time and the J2000
+     obliquity held fixed, which is up to 17 arcseconds of sidereal time and
+     10 of obliquity from the sky of the birth date, and moved the Ascendant
+     by up to about an arcminute. Apparent sidereal time belongs with the true
+     obliquity of the date, the mean one plus the nutation, and the library
+     returns both, so this takes both. The old arithmetic stays as the
+     fallback for a build where the library did not load, which is the same
+     order lonRaw() keeps. Returns the RAMC in degrees for a longitude, and
+     the obliquity in radians. */
+  skyFrame(t, lonDeg) {
+    const A = window.Astronomy;
+    if (A && isFinite(t) && typeof A.SiderealTime === 'function' && typeof A.e_tilt === 'function') {
+      try {
+        const d = new Date((t + 2451545.0 - 2440587.5) * 86400000);
+        const tilt = A.e_tilt(A.MakeTime(d));
+        return { ramc: this.norm360(A.SiderealTime(d) * 15 + lonDeg), eps: tilt.tobl * this.RAD };
+      } catch (e) { /* fall through to the mean arithmetic */ }
+    }
+    return { ramc: this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + lonDeg), eps: 23.4393 * this.RAD };
+  }
   // Ascendant and MC, only when both birth time and coordinates are known.
   ascendant() {
     const p = this.activeProfile();
     if (!p || !p.timedChart) return null;
     const R = this.RAD, t = this.t2000(this.natalDate());
-    const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
-    const eps = 23.4393 * R, phi = p.birthLat * R, ramc = lst * R;
+    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const eps = fr.eps, phi = p.birthLat * R, ramc = lst * R;
     const asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     const mc = this.norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / R);
     const s = this.signOf(asc);
@@ -11311,8 +11704,8 @@ class Component extends DCLogic {
     if (!p || !p.timedChart) return null;
     const R = this.RAD;
     if (t == null) t = this.t2000(this.natalDate());
-    const lst = this.norm360(this.norm360(280.46061837 + 360.98564736629 * t) + p.birthLon);
-    const eps = 23.4393 * R;
+    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const eps = fr.eps;
     const ramc = (lst + 180) * R, phi = (90 - p.birthLat) * R;
     const v = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
     // The closed form lands on whichever of the TWO prime vertical crossings
@@ -11545,15 +11938,24 @@ class Component extends DCLogic {
   }
   artNum(n) { return /^(8|11|18|8\d)$/.test(String(n)) ? 'an' : 'a'; }
   numReduce(n) { n = Math.abs(+n || 0); while (n > 9) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
+  /* MASTER NUMBERS ARE KEPT WHEREVER A NUMBER IS READ, which the owner asked
+     for on 29 September 2026. 11, 22 and 33 stop the reduction, the same three
+     InCommonCore.reduce() has always kept for the Life Path and the Personal
+     Year, and now the Personal Day, the week, the cycles and the pinnacles keep
+     them too. numReduce() above still reduces all the way, and stays for the
+     two places arithmetic needs a single digit: a challenge is a difference,
+     and the first pinnacle ends at 36 less the Life Path's root. */
+  NUM_MASTERS = [11, 22, 33];
+  numKeep(n) { n = Math.abs(+n || 0); while (n > 9 && this.NUM_MASTERS.indexOf(n) === -1) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
   numerology() {
     const core = window.InCommonCore, dob = this.dob();
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const y = +m[1], mo = +m[2], d = +m[3];
     const lp = core ? core.lifePath(dob).value : this.numReduce(mo + d + y);
-    const rm = this.numReduce(mo), rd = this.numReduce(d), ry = this.numReduce(y);
-    const p1 = this.numReduce(rm + rd), p2 = this.numReduce(rd + ry), p3 = this.numReduce(p1 + p2), p4 = this.numReduce(rm + ry);
+    const rm = this.numKeep(mo), rd = this.numKeep(d), ry = this.numKeep(y);
+    const p1 = this.numKeep(rm + rd), p2 = this.numKeep(rd + ry), p3 = this.numKeep(p1 + p2), p4 = this.numKeep(rm + ry);
     const end1 = 36 - this.numReduce(lp);
-    const c1 = Math.abs(rm - rd), c2 = Math.abs(rd - ry);
+    const c1 = Math.abs(this.numReduce(mo) - this.numReduce(d)), c2 = Math.abs(this.numReduce(d) - this.numReduce(y));
     const age = Math.floor((Date.now() - Date.parse(dob + 'T12:00:00')) / 31557600000);
     return { lp: lp, rm: rm, rd: rd, ry: ry, age: isNaN(age) ? null : age,
       pinnacles: [[p1, '0 to ' + end1], [p2, (end1 + 1) + ' to ' + (end1 + 9)], [p3, (end1 + 10) + ' to ' + (end1 + 18)], [p4, (end1 + 19) + ' onward']],
@@ -12035,18 +12437,35 @@ class Component extends DCLogic {
     const motorThroat = defined.has('Throat') && motors.some(m => seen.has(m));
     const sacral = defined.has('Sacral');
     const type = defined.size === 0 ? 'Reflector' : sacral && motorThroat ? 'Manifesting Generator' : sacral ? 'Generator' : motorThroat ? 'Manifestor' : 'Projector';
-    const authority = defined.has('Solar Plexus') ? 'Emotional: wait out the wave; there is no truth in the now' : defined.has('Sacral') ? 'Sacral: the gut response in the moment' : defined.has('Spleen') ? 'Splenic: the quiet first instinct, spoken once' : defined.has('Heart') ? 'Ego: what you have the will and worth for' : defined.has('G') ? 'Self-projected: hear your own voice out loud' : defined.size ? 'Mental: talk it through with trusted people, in the right environment' : 'Lunar: let a full cycle pass before deciding';
+    const authority = defined.has('Solar Plexus') ? 'Emotional: wait out the wave; there is no truth in the now' : defined.has('Sacral') ? 'Sacral: the gut response in the moment' : defined.has('Spleen') ? 'Splenic: the quiet first instinct, spoken once' : defined.has('Heart') ? (defined.has('Throat') && seen.has('Heart') ? 'Ego manifested: what you have the will and worth for, said out loud and then acted on' : 'Ego projected: what you have the will and worth for, heard as you talk it through with someone you trust') : defined.has('G') ? 'Self-projected: hear your own voice out loud' : defined.size ? 'Mental: talk it through with trusted people, in the right environment' : 'Lunar: let a full cycle pass before deciding';
+    /* THE EGO SPLIT AND THE DEFINITION, AS THE CELESTIAL CODEX NAMED THEM. An
+       Ego authority is two different authorities in the tradition: manifested
+       when the Heart reaches the Throat, which is a Manifestor's, and projected
+       when it does not, which is a Projector's, and one says it and acts while
+       the other hears it said. inCommon called both Ego. And the definition,
+       how many separate pieces the defined centres fall into, is a line the
+       Codex drew and inCommon did not: it is what says whether the reader is
+       whole on their own or has a gap another person bridges. */
+    const piece = from => { const got = new Set([from]), qq = [from]; while (qq.length) { const c = qq.shift(); (adj[c] || []).forEach(n => { if (!got.has(n)) { got.add(n); qq.push(n); } }); } return got; };
+    const counted = new Set(); let parts = 0;
+    defined.forEach(c => { if (counted.has(c)) return; parts++; piece(c).forEach(x => counted.add(x)); });
+    const definition = this.HD_DEFINITION[Math.min(parts, 4)];
     const gates = [...gset].sort((a, b) => a - b).map(g => { const a = acts.find(x => x.gate === g); return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '' }; });
-    this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts };
+    this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts,
+      definition: definition, definitionParts: parts };
     return this._hd;
   }
+  HD_DEFINITION = [
+    'No Definition: every centre is open, so the chart takes its shape from the people and places around it',
+    'Single Definition: everything defined is joined in one piece',
+    'Split Definition: two separate defined areas, which a gate in somebody else can bridge',
+    'Triple Split: three separate defined areas',
+    'Quadruple Split: four separate defined areas'];
   personalDay(pyVal, when) {
     const core = window.InCommonCore, d = when || new Date();
     if (!core) return null;
     const pm = core.personalMonth(pyVal || 0, d.getMonth() + 1).value;
-    let n = pm + d.getDate(); // a personal DAY reduces all the way to 1 to 9
-    while (n > 9) n = String(n).split('').reduce((s, c) => s + +c, 0);
-    return n;
+    return this.numKeep(pm + d.getDate()); // 11, 22 and 33 are kept, as the month and year keep them
   }
   /* ---- Eastern time. One source for every "today" stamp in the app. ------- */
   estParts(d) {
@@ -13509,7 +13928,7 @@ class Component extends DCLogic {
     if (!d) return null;
     const key = 'num|' + when.toDateString() + '|' + this.dob() + '|' + this.birthName();
     if (this._numHoroKey === key && this._numHoro) return this._numHoro;
-    const EP = this.NUM_EXPECT[d.pdV] || [['something worth noticing', 'pushing it']];
+    const EP = this.NUM_EXPECT[d.pdV] || this.NUM_EXPECT[this.numReduce(d.pdV)] || [['something worth noticing', 'pushing it']];
     const E = EP[this.dfigIndex(when, EP.length, d.pdV, dt => this.dpdOf(dt))];
     const tom = this.addDays(when, 1), pdTom = this.personalDay(d.pyV, tom);
     const eom = new Date(when.getFullYear(), when.getMonth() + 1, 0);
@@ -13660,7 +14079,7 @@ class Component extends DCLogic {
   fmtDay(d) { const f = this._fmt('day', { month: 'short', day: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
   fmtMonth(d) { const f = this._fmt('month', { month: 'long', year: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); }
   weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
-  personalWeek(pyV, d) { return this.numReduce(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
+  personalWeek(pyV, d) { return this.numKeep(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
   isRetro(name, date) { const t = this.t2000(date); return this.norm360(this.lonOf(name, t + 1) - this.lonOf(name, t)) > 180; }
   // Retrograde motion, computed from the same ephemeris the wheel is drawn from.
@@ -14225,12 +14644,19 @@ class Component extends DCLogic {
     const counts = {};
     rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
     return {
-      libSubs: [['library', 'Library', ''], ['archive', 'Archive', rows.length ? String(rows.length) : '']].map(([k, label, n]) => ({
+      /* Throughline is the middle tab: it was a nav tab of its own until The
+         Oracle took the seat, and the record belongs beside the Archive, which
+         is the other place a reader's own hand is kept. */
+      libSubs: [['library', 'Library', ''], ['throughline', 'Throughline', ''], ['archive', 'Archive', rows.length ? String(rows.length) : '']].map(([k, label, n]) => ({
         label: label, n: n, on: (st.libSub || 'library') === k, c: (st.libSub || 'library') === k ? 'var(--ac)' : 'var(--dim)',
         ul: (st.libSub || 'library') === k ? 'var(--ac)' : 'transparent',
         go: () => this.setState({ libSub: k, libView: null, selId: null, arcSel: null, apSec: null }) })),
       libTabsShow: this.curTab() === 'library' && !st.selId && !st.libView,
       libArchive: this.curTab() === 'library' && !st.selId && !st.libView && (st.libSub || 'library') === 'archive',
+      /* Not gated on the tab, the way libList is not: the phone draws the
+         Library section whichever section is in view, and a gate on curTab()
+         would leave the section blank behind the reader as they scroll past. */
+      libTL: !st.selId && !st.libView && st.libSub === 'throughline',
       arcQuery: st.arcQuery || '',
       arcTypeQ: e => this.setState({ arcQuery: e.target.value }),
       arcFilters: [['all', 'All'], ['alignment', 'Alignments'], ['stella_conversation', 'Conversations'], ['journal', 'Journals']].map(([k, label]) => ({
@@ -14247,7 +14673,7 @@ class Component extends DCLogic {
         ? 'Nothing in the Archive yet. Save an alignment from the Today tab, or keep a journal entry, and it will appear here.'
         : 'Nothing matches that filter. Try All, or a shorter word.',
       tlCountLabel: this.tlAll().length + ' marked ' + (this.tlAll().length === 1 ? 'moment' : 'moments') + ' \u00b7 the timeline view',
-      goThroughline: () => this.setState({ tab: 'throughline' }),
+      goThroughline: () => this.setState({ tab: 'library', libSub: 'throughline', libView: null, selId: null, spiritView: null }),
       arcOpen: !!sel,
       arcClose: () => this.setState({ arcSel: null }),
       arcSelTitle: sel ? this.arcTitle(sel) : '',
@@ -14373,7 +14799,7 @@ class Component extends DCLogic {
     if (!A || !hd) return null;
     if (tab === 'type' || tab === 'sleep') return hd.type || null;
     if (tab === 'mood') {
-      const first = String(hd.authority || '').split(':')[0].trim().toLowerCase();
+      const first = String(hd.authority || '').split(':')[0].trim().split(/\s+/)[0].toLowerCase();
       const au = first && (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1);
       return au ? au.name : null;
     }
@@ -14799,7 +15225,7 @@ class Component extends DCLogic {
         obstacles: [s2.ignored, 'Treating strategy as a rule to obey. It is a claim about how you work, and it earns its place only by being tested against your own record.'] };
       ask = 'How do I tell the difference between responding and initiating in practice?';
     } else if (sel.kind === 'authority') {
-      const first = String(hd.authority).split(':')[0].trim().toLowerCase();
+      const first = String(hd.authority).split(':')[0].trim().split(/\s+/)[0].toLowerCase();
       const au = (A.AUTHORITIES || []).find(x => x.name.toLowerCase().indexOf(first) !== -1) || A.AUTHORITIES[0];
       title = au.name; kicker = 'Inner authority'; sec = 'authorities'; item = au.name; edge = 'rgba(139,92,246,.4)';
       youKicker = 'Yours \u00b7 ' + au.name;
@@ -15331,7 +15757,7 @@ class Component extends DCLogic {
       moverQuality: this.bodyEnergy(top.a.name), natalQuality: this.bodyEnergy(top.b.name) };
     if (d.center) el.design = { theme: this.centerTheme(d.center), defined: !!d.definedCenter, channel: !!d.chan };
     if (d.pdV && d.pyV) {
-      const blend = this.reduceNum(d.pyV + d.pdV);
+      const blend = this.numKeep(d.pyV + d.pdV);
       el.numbers = { day: d.pdV, year: d.pyV, blend: blend, dayEssence: this.numEssence(d.pdV),
         yearEssence: this.numEssence(d.pyV), blendEssence: this.numEssence(blend) };
     }
@@ -15702,7 +16128,7 @@ class Component extends DCLogic {
       astrology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%223.6%22%20r%3D%222.1%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + this.fmtPos(d.sun) + ', Moon ' + this.fmtPos(d.moon) + ' (' + d.phase + '). Contacts to natal: ' +
         (d.hits.length ? d.hits.map(h => h.a.name + ' ' + this.aspName(h.asp) + ' to natal ' + h.b.name + ' at ' + this.fmtPos(h.b) + ', orb ' + h.orb.toFixed(1) + ' deg').join('; ') : 'none within orb'),
       humanDesign: d.hd.type + ', authority ' + d.hd.authority + '. Sun in Gate ' + d.sunGate.gate + '.' + d.sunGate.line + ' (' + (this.GATE_NAMES[d.sunGate.gate] || '') + ') in the ' + (d.center || 'unmapped') + ' center, ' + (d.definedCenter ? 'defined' : 'undefined') + '. Moon in Gate ' + d.moonGate.gate + '.' + d.moonGate.line + '. ' + (d.chan ? 'Completes channel ' + d.chan[0] + '-' + d.chan[1] + ' with natal Gate ' + d.partner + '.' : 'No channel completed today.'),
-      numerology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M5.4%2015.8v3.4M12%2011v8.2M18.6%206.2v13%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%205.15A2.6%202.6%200%200%201%2012%209.65A2.6%202.6%200%200%201%2012%205.15Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + d.lp + ', Personal Year ' + d.pyV + ', Personal Month ' + d.pmV + ', Personal Day ' + d.pdV + '. Year plus day reduces to ' + this.reduceNum(d.pyV + d.pdV) + '.',
+      numerology: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M5.4%2015.8v3.4M12%2011v8.2M18.6%206.2v13%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%205.15A2.6%202.6%200%200%201%2012%209.65A2.6%202.6%200%200%201%2012%205.15Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)' + d.lp + ', Personal Year ' + d.pyV + ', Personal Month ' + d.pmV + ', Personal Day ' + d.pdV + '. Year plus day reduces to ' + this.numKeep(d.pyV + d.pdV) + '.',
       integration: this.dailyTogetherText(d),
       topContact: top ? top.a.name + ' ' + this.aspName(top.asp) + ' to natal ' + top.b.name : 'none'
     };
@@ -15711,7 +16137,7 @@ class Component extends DCLogic {
     const d = this.dailyData();
     if (!d) return null;
     const top = d.hits[0], a = top ? this.aspName(top.asp) : '';
-    const sum = this.reduceNum(d.pyV + d.pdV);
+    const sum = this.numKeep(d.pyV + d.pdV);
     const segs = [
       { tag: 'CALCULATED', text: top
         ? 'Astrology: transiting ' + top.a.name + ' at ' + this.fmtPos(top.a) + ' forms a ' + a + ' to your natal ' + top.b.name + ' at ' + this.fmtPos(top.b) + ', orb ' + top.orb.toFixed(1) + ' degrees. That contact works on ' + this.bodyEnergy(top.b.name) + '.'
@@ -16691,7 +17117,7 @@ class Component extends DCLogic {
     const lpB = core && other.birthDate ? core.lifePath(other.birthDate).value : null;
     const num = [];
     if (lpA != null && lpB != null) {
-      const sum = this.reduceNum ? this.reduceNum(lpA + lpB) : null;
+      const sum = this.numKeep(lpA + lpB);
       num.push(H('The arithmetic', 'Life Path ' + lpA + ' for ' + A.first + ', Life Path ' + lpB + ' for ' + B.first + '. Each one reduces from a birth date, so you can check the working yourselves.'));
       num.push(H('What the system holds', lpA === lpB
         ? 'You both carry ' + lpA + ': ' + (this.NUM_MEANING[lpA] || 'its own theme') + '.'
@@ -17071,6 +17497,19 @@ class Component extends DCLogic {
       spiritView: null, placeSel: null, aspSel: null, dpSel: null, numSel: null,
       libView: null, selId: null, hdSel: null, memSel: null, revealPI: false });
   }
+  /* LOG OUT, FROM THE PROFILE MENU. The account is signed out and the reader
+     goes back to the cover, where signing in lives. Nothing on the device is
+     cleared: the cloud cannot bring a record back down yet, so clearing here
+     would be permanent, and the birth moment is cleared by its own control in
+     Settings. The cover lives beside the app: index.html in the bundle, which
+     the site root serves, and cover.html beside the source shell. */
+  coverHref() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
+  accountLogOut() {
+    this.setState({ quickOpen: false });
+    const go = () => { location.href = this.coverHref(); };
+    if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
+    else go();
+  }
   firstRunDone(patch) {
     this.writeLS(this.FIRSTRUN_KEY, true);
     this.authGo(null, { af: {}, ...(patch || {}) });
@@ -17149,7 +17588,7 @@ class Component extends DCLogic {
         if (m && BT && geo.timezone && geo.timezone !== 'manual') {
           const t = (parsed && parsed.ok ? parsed.time : '12:00').split(':');
           const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-          const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+          const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
           out.push({ t: geo.timezone + ', ' + BT.offsetLabel(r.offset) + ' on that date' +
             (dst == null ? '' : dst ? ', daylight saving in effect' : ', standard time') + '.', c: 'var(--tx)' });
           if (r.ambiguous) out.push({ t: 'That local time falls inside a clock change, so it happened twice. This reading takes the first of the two.', c: 'var(--warn)' });
@@ -17205,7 +17644,7 @@ class Component extends DCLogic {
         const parsed = this.state.afTimeUnknown ? null : BT.parse(this.af('btime'), this.af('bmer') || '24');
         const t = (parsed && parsed.ok ? parsed.time : '12:00').split(':');
         const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-        const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+        const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
         notes.push({ t: BT.offsetLabel(r.offset) + ' on that date' +
           (dst == null ? '' : dst ? ', daylight saving in effect.' : ', standard time.'), c: 'var(--mut)' });
         if (r.ambiguous) notes.push({ t: 'That local time falls inside a clock change, so it happened twice. This reading takes the first of the two.', c: 'var(--warn)' });
@@ -17899,6 +18338,453 @@ class Component extends DCLogic {
             wins.length + (wins.length === 1 ? ' window on your chart' : ' windows on your chart')])
           .concat(hdCloses ? [hdCloses + (hdCloses === 1 ? ' gate closing a channel' : ' gates closing a channel')] : [])) };
     return this._mr;
+  }
+  /* ---- The Oracle ---------------------------------------------------------
+
+     THE ONE SCREEN THAT CALLS A MODEL, AND WHY IT IS ALLOWED TO.
+     V1.6.0 took every model out of the build, and the Dream Journal still says
+     in its own header that nothing there calls one. The Oracle is the owner's
+     decision, taken on 29 September 2026, to bring one back for this screen
+     alone: the reading is written by Kimi, Moonshot AI's model, through a
+     Supabase Edge Function that holds the key (server/oracle/), because a key
+     in a public page is a key anybody can spend. Everything else in the app still computes on the
+     device, and the Dream Journal's rule still holds for the Dream Journal.
+
+     IT OPERATES AS THE CELESTIAL CODEX'S ORACLE DID, which the owner asked for
+     on 29 September 2026. The page builds the Codex's dossier on the device,
+     line for line in the Codex's format, from inCommon's own chart, so the
+     reading never contradicts the wheel or the wiring beside it. It asks the
+     moment the screen is open, and again when the period or the depth changes,
+     exactly as the Codex's query did. The server holds the Codex's
+     instructions and schema word for word.
+
+     One step is inCommon's own: the first time, the reader is told what leaves
+     the device and presses Consult the Oracle. After that the screen behaves as
+     the Codex's did. A reading is kept on the device and on the server for the
+     period it covers, so opening the screen again costs nothing. */
+  ORACLE_PERIODS = [['daily', 'Today', 'the day’s omen'], ['weekly', 'This Week', 'the seven-day tide'], ['monthly', 'This Month', 'the lunar chapter']];
+  oracleLocalDate(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  /* The Codex's horoscopePeriod: the key the reading is kept under, and the
+     instant the sky is read at. The day at noon UTC, the week at its Thursday,
+     the month at its fifteenth. The server derives the same key. */
+  oraclePeriod(period, localDate) {
+    const [y, m, d] = localDate.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d, 12));
+    if (period === 'daily') return { key: localDate, at: date };
+    if (period === 'monthly') return { key: y + '-' + String(m).padStart(2, '0'), at: new Date(Date.UTC(y, m - 1, 15, 12)) };
+    const monday = new Date(date.getTime() - ((date.getUTCDay() + 6) % 7) * 864e5);
+    return { key: monday.toISOString().slice(0, 10), at: new Date(monday.getTime() + 3 * 864e5) };
+  }
+  /* Per profile, cascaded by ProfileManager.deleteProfile with the rest of the
+     profile's keys. The birth stamp is in the slot, so a corrected birth time
+     finds no reading rather than the one written for the old chart, which is
+     what the Codex did by deleting its readings when the birth data changed. */
+  oracleStoreKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracle'; }
+  oracleConsentKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleConsent'; }
+  oracleSlot(period, depth) {
+    const p = this.activeProfile();
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
+  }
+  oracleCached(period, depth) {
+    const all = this.readLS(this.oracleStoreKey(), {});
+    const hit = all && typeof all === 'object' ? all[this.oracleSlot(period, depth)] : null;
+    return hit && hit.reading && typeof hit.reading === 'object' ? hit : null;
+  }
+  oracleKeep(slot, entry) {
+    const k = this.oracleStoreKey(), all = this.readLS(k, {}) || {};
+    all[slot] = entry;
+    Object.keys(all).sort((a, b) => ((all[b] && all[b].at) || 0) - ((all[a] && all[a].at) || 0))
+      .slice(12).forEach(x => { delete all[x]; });
+    this.writeLS(k, all);
+  }
+  /* THE DOSSIER, IN THE CODEX'S FORMAT. buildCosmicContext() in the Codex, line
+     for line: the same headings, the same order, the same aspect orbs and
+     transit tolerances, the same keys where it wrote keys. What fills it is
+     inCommon's: the positions are the same library the Codex used, and the
+     Human Design and the numbers are the ones inCommon's own pages show, named
+     in the Codex's words. */
+  ORACLE_KEY = { Sun: 'sun', Moon: 'moon', Mercury: 'mercury', Venus: 'venus', Mars: 'mars', Jupiter: 'jupiter', Saturn: 'saturn',
+    Uranus: 'uranus', Neptune: 'neptune', Pluto: 'pluto', 'North Node': 'northNode', 'South Node': 'southNode', Earth: 'earth' };
+  ORACLE_MAJOR = [['conjunction', 0, 8], ['sextile', 60, 5], ['square', 90, 7], ['trine', 120, 7], ['opposition', 180, 8]];
+  ORACLE_ALL = [['conjunction', 0, 8], ['semisextile', 30, 2], ['semisquare', 45, 2], ['sextile', 60, 5], ['quintile', 72, 1.5],
+    ['square', 90, 7], ['trine', 120, 7], ['sesquiquadrate', 135, 2], ['quincunx', 150, 3], ['opposition', 180, 8]];
+  ORACLE_STRATEGY = { Generator: 'Wait to Respond', 'Manifesting Generator': 'Wait to Respond, then Inform', Manifestor: 'Inform Before Acting',
+    Projector: 'Wait for the Invitation', Reflector: 'Wait a Lunar Cycle' };
+  ORACLE_PROFILE = ['', 'Investigator', 'Hermit', 'Martyr', 'Opportunist', 'Heretic', 'Role Model'];
+  ORACLE_CENTER = { Head: 'head', Ajna: 'ajna', Throat: 'throat', G: 'g', Heart: 'heart', Sacral: 'sacral', Spleen: 'spleen', 'Solar Plexus': 'solarPlexus', Root: 'root' };
+  oracleAspect(lonA, lonB, table, scale) {
+    let diff = Math.abs(this.norm360(lonA - lonB)); if (diff > 180) diff = 360 - diff;
+    for (const [type, angle, orb] of table) { const off = Math.abs(diff - angle); if (off <= orb * scale) return { type, orb: off }; }
+    return null;
+  }
+  oracleDossier(period, depth) {
+    const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
+    const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
+    const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
+    const house = lon => asc ? Math.floor(this.norm360(lon - asc.asc) / 30) + 1 : null;
+    const eleven = date => this.chartAt(date).filter(x => x.name !== 'South Node').map(x => ({
+      key: this.ORACLE_KEY[x.name], name: x.name, lon: x.lon, sign: x.sign, kind: x.name === 'North Node' ? 'node' : 'planet',
+      retro: x.name === 'Sun' || x.name === 'Moon' || x.name === 'North Node' ? false : this.isRetro(x.name, date) }));
+    const natal = eleven(nd), sky = eleven(at);
+    const aspects = [];
+    for (let i = 0; i < natal.length; i++) for (let j = i + 1; j < natal.length; j++) {
+      const a = this.oracleAspect(natal[i].lon, natal[j].lon, this.ORACLE_MAJOR, 1);
+      if (a) aspects.push(natal[i].key + ' ' + a.type + ' ' + natal[j].key);
+    }
+    const transits = [];
+    sky.forEach(t => { if (t.key === 'northNode') return; natal.forEach(n => {
+      const a = this.oracleAspect(t.lon, n.lon, this.ORACLE_MAJOR, 0.35);
+      if (a) transits.push('Transiting ' + t.name + ' ' + a.type + ' natal ' + n.name + ' (orb ' + a.orb.toFixed(1) + '°)');
+    }); });
+    /* Human Design: inCommon's chart, in the Codex's vocabulary. */
+    const hd = this.hdChart(), act = (body, kind) => hd.acts.find(a => a.body === body && a.kind === kind);
+    /* The Ego split and the definition come from hdChart() now, which draws
+       them on the chart's own screen too, so the dossier and the screen
+       cannot name them differently. */
+    const authWord = String(hd.authority).split(':')[0];
+    const authority = { Emotional: 'Emotional (Solar Plexus)', Sacral: 'Sacral', Splenic: 'Splenic', 'Self-projected': 'Self-Projected',
+      Mental: 'Mental (Environmental)', Lunar: 'Lunar', 'Ego manifested': 'Ego Manifested', 'Ego projected': 'Ego Projected' }[authWord] || authWord;
+    const definition = String(hd.definition).split(':')[0];
+    const pSun = act('Sun', 'personality'), dSun = act('Sun', 'design');
+    const gname = g => this.GATE_NAMES[g] || '';
+    const skySun = this.gateOf(sky[0].lon);
+    /* The numbers: inCommon's own, at the period's instant as the Codex took them. */
+    const core = window.InCommonCore, NC = window.NumerologyContent, dob = this.dob();
+    const lp = this.numerology().lp, nm = NC ? NC.fromName(this.birthName()) : null;
+    const py = core ? core.personalYear(dob, at.getFullYear()).value : null;
+    const pm = core && py != null ? core.personalMonth(py, at.getMonth() + 1).value : null;
+    const pd = py != null ? this.personalDay(py, at) : null;
+    const bday = core ? core.birthday(dob).value : null;
+    const first = String(this.birthName() || '').trim().split(/\s+/)[0] ||
+      (p && p.name && p.name !== 'Default Profile' ? String(p.name).trim().split(/\s+/)[0] : '');
+    const numParts = ['Life Path ' + lp];
+    if (nm) numParts.push('Expression ' + nm.expression, 'Soul Urge ' + nm.soulUrge, 'Personality ' + nm.personality);
+    numParts.push('Birthday ' + bday, 'Personal Year ' + py, 'Personal Month ' + pm, 'Personal Day ' + pd);
+    const lines = [];
+    if (first) lines.push('NAME: ' + first);
+    lines.push('NATAL PLACEMENTS: ' + natal.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
+    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) : 'Birth time unknown: no ascendant or houses.');
+    lines.push('KEY NATAL ASPECTS: ' + aspects.slice(0, 12).join(', '));
+    lines.push('CURRENT SKY: ' + sky.map(x => x.name + ' in ' + x.sign + (x.retro ? ' Rx' : '')).join(', '));
+    lines.push('ACTIVE TRANSITS TO NATAL: ' + (transits.length ? transits.join('; ') : 'none exact'));
+    lines.push('HUMAN DESIGN: ' + hd.type + '; Strategy: ' + (this.ORACLE_STRATEGY[hd.type] || '') + '; Authority: ' + authority +
+      '; Profile ' + pSun.line + '/' + dSun.line + ' ' + this.ORACLE_PROFILE[pSun.line] + ' / ' + this.ORACLE_PROFILE[dSun.line] + '; ' + definition +
+      '; Defined centers: ' + ([...hd.defined].map(c => this.ORACLE_CENTER[c] || c).join(', ') || 'none') +
+      '; Channels: ' + (hd.activeChannels.map(c => c[0] + '-' + c[1]).join(', ') || 'none') +
+      '; Personality Sun gate ' + pSun.gate + ' (' + gname(pSun.gate) + '), Design Sun gate ' + dSun.gate + ' (' + gname(dSun.gate) + ')');
+    lines.push('CURRENT TRANSITING SUN GATE: ' + skySun.gate + '.' + skySun.line + ' (' + gname(skySun.gate) + ')');
+    lines.push('NUMEROLOGY: ' + numParts.join('; '));
+    if (depth === 'deep') {
+      /* The Codex's advanced chart: the South Node, Black Moon Lilith, the
+         bodies it fetched from Horizons, and the three sensitive points, in its
+         order, from inCommon's expanded chart (which is measured against
+         Horizons too). */
+      let rows = [];
+      try { rows = this.fullChart(true); } catch (e) { rows = []; }
+      const row = id => rows.find(r => r.id === id && r.lon != null);
+      const nn = natal.find(x => x.key === 'northNode');
+      const extras = [{ key: 'southNode', name: 'South Node', lon: this.norm360(nn.lon + 180), kind: 'node', retro: false }];
+      const add = (id, key, name, kind) => { const r = row(id); if (r) extras.push({ key, name, lon: r.lon, kind, retro: kind === 'asteroid' && !!r.retro }); };
+      add('lilithMean', 'lilith', 'Black Moon Lilith', 'point');
+      [['chiron', 'Chiron'], ['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta'], ['eris', 'Eris']].forEach(([id, name]) => add(id, id, name, 'asteroid'));
+      if (asc && p) {
+        add('vertex', 'vertex', 'Vertex', 'point');
+        const fr = this.skyFrame(this.t2000(nd), p.birthLon), ramc = fr.ramc * this.RAD, eps = fr.eps;
+        extras.push({ key: 'eastPoint', name: 'East Point', lon: this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps))) / this.RAD), kind: 'point', retro: false });
+        add('partOfFortune', 'fortune', 'Part of Fortune', 'point');
+      }
+      const all = natal.concat(extras), minor = [];
+      for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+        const a = all[i], b = all[j];
+        if ((a.key === 'northNode' && b.key === 'southNode') || (a.key === 'southNode' && b.key === 'northNode')) continue;
+        const asp = this.oracleAspect(a.lon, b.lon, this.ORACLE_ALL, a.kind === 'planet' && b.kind === 'planet' ? 1 : 0.6);
+        if (asp) minor.push(a.key + ' ' + asp.type + ' ' + b.key + ' (' + asp.orb.toFixed(1) + '°)');
+      }
+      const deepTransits = [];
+      sky.forEach(t => { if (t.key === 'northNode') return; extras.forEach(n => {
+        const a = this.oracleAspect(t.lon, n.lon, this.ORACLE_MAJOR, 0.3);
+        if (a) deepTransits.push('Transiting ' + t.name + ' ' + a.type + ' natal ' + n.name + ' (orb ' + a.orb.toFixed(1) + '°)');
+      }); });
+      const ORDER = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+      const acts = [];
+      ['personality', 'design'].forEach(kind => ORDER.forEach(body => { const a = act(body, kind); if (a) acts.push((kind === 'design' ? 'D' : 'P') + '-' + this.ORACLE_KEY[body] + ' ' + a.gate + '.' + a.line); }));
+      const letters = String(this.birthName() || '').toUpperCase().replace(/[^A-Z]/g, '').split('');
+      const present = new Set(letters.map(c => ((c.charCodeAt(0) - 65) % 9) + 1));
+      const keep = n => { while (n > 9 && n !== 11 && n !== 22 && n !== 33) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; };
+      lines.push('ADVANCED NATAL POINTS: ' + extras.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
+      lines.push('ALL NATAL ASPECTS INCL. MINOR: ' + minor.join(', '));
+      lines.push('TRANSITS TO ADVANCED POINTS: ' + (deepTransits.join('; ') || 'none exact'));
+      lines.push('HD ACTIVATIONS: ' + acts.join(', '));
+      if (nm) lines.push('NUMEROLOGY EXTRA: Maturity ' + keep(lp + nm.expression) + '; Karmic lessons ' + ([1, 2, 3, 4, 5, 6, 7, 8, 9].filter(n => !present.has(n)).join(', ') || 'none'));
+    }
+    return lines.join('\n');
+  }
+  /* The Codex's words for each way a reading can fail. Silent for now has no
+     Ask again, as in the Codex; the resting and clouded answers do. */
+  ORACLE_ERR = ((silent, resting) => ({
+    limit: silent, silent: silent, notSetUp: silent, off: silent,
+    busy: resting, pending: resting,
+    premium: 'This feature is part of Codex Luminary.'
+  }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
+  oracleAsk(period, depth) {
+    const slot = this.oracleSlot(period, depth), C = this.cloud;
+    if (this._orBusy && this._orBusy[slot]) return;
+    if (!C || typeof C.oracleRead !== 'function') { this.setState({ orErr: { slot, reason: 'off' } }); return; }
+    const localDate = this.oracleLocalDate();
+    let dossier;
+    try { dossier = this.oracleDossier(period, depth); } catch (e) { this.setState({ orErr: { slot, reason: 'error' } }); return; }
+    this._orBusy = { ...(this._orBusy || {}), [slot]: true };
+    this.setState({ orBusyMap: { ...this._orBusy }, orErr: null });
+    this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    C.oracleRead({ period, depth, localDate, dossier }).then(r => {
+      delete this._orBusy[slot];
+      if (r && r.ok && r.reading) {
+        this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
+        this.setState({ orBusyMap: { ...this._orBusy }, orErr: null, orTick: (this.state.orTick || 0) + 1 });
+        this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
+      } else {
+        const reason = (r && r.reason) || 'error';
+        /* The server's record of the subscription is the one that counts. The
+           page believed this reader was a Luminary and the server did not, so
+           the page stops believing it and asks billing again, with a sync. */
+        if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
+        this.setState({ orBusyMap: { ...this._orBusy }, orErr: { slot, reason } });
+        this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
+      }
+    });
+  }
+  /* Whether the page may ask for this slot now without a press: the reader is
+     signed in, the chart is theirs, they have consented once, and nothing is
+     kept, in flight or failed for it. */
+  oracleWillAsk(period, depth) {
+    const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
+    if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
+    if (!this.readLS(this.oracleConsentKey(), false)) return false;
+    if (depth === 'deep' && !(st.lum && st.lum.isPremium)) return false;
+    if (this.oracleCached(period, depth)) return false;
+    if (st.orBusyMap && st.orBusyMap[slot]) return false;
+    return !(st.orErr && st.orErr.slot === slot);
+  }
+  /* THE CODEX ASKED WHEN THE SCREEN OPENED, and so does this. Called from the
+     one componentDidUpdate. The phone draws every section at once and the tab
+     follows the section in view, so a reader scrolling past the Oracle would
+     otherwise pay for a reading they never stopped to look at: the ask waits
+     until the screen has been in view for 600ms. Leaving the screen forgets a
+     failure, so coming back tries again, as the Codex's query did on a
+     remount. */
+  oracleAutoAsk() {
+    if (this.curTab() !== 'oracle' || !this.state.ready) {
+      clearTimeout(this._orAutoT); this._orAutoT = null; this._orAutoFor = null;
+      if (this._orSeen && this.state.orErr) this.setState({ orErr: null });
+      this._orSeen = false;
+      return;
+    }
+    this._orSeen = true;
+    const period = this.state.orPeriod || 'daily', depth = this.state.orDepth || 'standard';
+    const want = period + '|' + depth;
+    if (this._orAutoFor === want || !this.oracleWillAsk(period, depth)) return;
+    this._orAutoFor = want;
+    clearTimeout(this._orAutoT);
+    this._orAutoT = setTimeout(() => {
+      this._orAutoT = null; this._orAutoFor = null;
+      const st = this.state;
+      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
+    }, 600);
+  }
+  /* ---- Codex Luminary ------------------------------------------------------
+
+     THE CODEX CHARGED FOR ITS IN-DEPTH READING, AND SO DOES THIS, which the
+     owner asked for on 29 September 2026. The Codex's Luminary subscription
+     is ported whole: its two prices, $12.99 a month and $119.99 a year, its
+     Stripe Checkout and billing portal, its webhook and its lazy re-sync, in
+     server/billing/index.ts, and its words on this page. In inCommon the one
+     thing Luminary unlocks is the in-depth reading. Everything else in the app
+     stays free, which the gate says in a line of its own.
+
+     The page asks whether the reader is a Luminary the first time the Oracle
+     is opened with a session, and never on render: the phone draws every
+     section at once, and a status call per paint would be a Stripe call per
+     paint for anybody whose row has gone stale. The server decides in the
+     end, because the Oracle function checks the row itself before it writes
+     an in-depth reading, so a page that believes the wrong thing costs a
+     refusal and not a reading. */
+  LUM_PLANS = [['monthly', 'Monthly', '$12.99', 'per month', '', '$12.99/mo'], ['annual', 'Yearly', '$119.99', 'per year \u00b7 $10.00/mo', 'Save 23%', '$119.99/yr']];
+  /* Stripe sends the reader back to the address the page named, with
+     ?luminary=success or ?luminary=cancelled before the hash, the Codex's
+     ?checkout= under a name this app does not already use. It is read once and
+     dropped, so a reload cannot replay the welcome. */
+  lumReturnRead() {
+    let v = null;
+    try {
+      const q = new URLSearchParams(location.search);
+      v = q.get('luminary');
+      if (!v) return;
+      q.delete('luminary');
+      const rest = q.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    } catch (e) { return; }
+    if (v === 'success') this.setState({ lumReturn: 'success', orDepth: 'deep' });
+    else setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+  }
+  lumReturnTo() { return location.origin + location.pathname + '#/oracle'; }
+  lumAuto() {
+    const cs = this.state.cloudStatus, C = this.cloud;
+    const who = cs && cs.mode === 'cloud' ? String(cs.email || 'signed in') : null;
+    if (!who || !C || typeof C.billingStatus !== 'function') {
+      if (this._lumFor) { this._lumFor = null; clearTimeout(this._lumT); this.setState({ lum: null }); }
+      return;
+    }
+    if (this._lumFor === who) return;
+    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success') return;
+    this._lumFor = who;
+    this.lumFetch(this.state.lumReturn === 'success', 0);
+  }
+  /* After a checkout, Stripe has the subscription before the webhook has
+     told anybody, so the status is asked with a sync, and asked again a few
+     times while it still reads unpaid: the Codex's "Confirming your payment
+     with Stripe" is that wait, said on the page. */
+  lumFetch(sync, tries) {
+    const C = this.cloud;
+    if (!C || typeof C.billingStatus !== 'function') return;
+    clearTimeout(this._lumT);
+    C.billingStatus({ sync: !!sync }).then(r => {
+      const was = this.state.lum;
+      const lum = r && r.ok && r.status ? { ...r.status }
+        : { isPremium: false, billingConfigured: false, failed: r && ['notSetUp', 'notConfigured'].indexOf(r.reason) === -1 ? (r.reason || 'error') : null };
+      this.setState({ lum });
+      if (this.state.lumReturn === 'success') {
+        if (lum.isPremium) {
+          this.setState({ lumReturn: null });
+          this.toastMsg('Welcome to Codex Luminary. The whole sky is yours.');
+        } else if ((tries || 0) < 4 && !lum.failed) {
+          this._lumT = setTimeout(() => this.lumFetch(true, (tries || 0) + 1), 2500);
+        } else {
+          this.setState({ lumReturn: null });
+        }
+      }
+      if (lum.isPremium && !(was && was.isPremium)) this.speak('Codex Luminary is open.', 'polite');
+    });
+  }
+  lumBuy() {
+    const C = this.cloud;
+    if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
+    this.setState({ lumBusy: 'checkout' });
+    C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo()).then(r => {
+      if (r && r.ok) { location.href = r.url; return; }
+      this.setState({ lumBusy: null });
+      const reason = (r && r.reason) || 'error';
+      if (reason === 'already') { this.toastMsg('You already have Codex Luminary. Manage it from the billing portal.'); this.lumFetch(true, 0); return; }
+      this.toastMsg(reason === 'notConfigured' || reason === 'notSetUp' ? 'Payments are being set up. Check back soon.'
+        : reason === 'signedOut' ? 'Sign in again to continue.' : 'Checkout could not open. Please try again.');
+    });
+  }
+  lumManage() {
+    const C = this.cloud;
+    if (this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
+    this.setState({ lumBusy: 'portal' });
+    C.billingPortal(this.lumReturnTo()).then(r => {
+      if (r && r.ok) { location.href = r.url; return; }
+      this.setState({ lumBusy: null });
+      this.toastMsg(r && r.reason === 'noAccount' ? 'There is no billing account on this sign in.' : 'The billing portal could not open. Please try again.');
+    });
+  }
+  oracleVals() {
+    const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
+    const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
+    const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth);
+    const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
+    const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
+    const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
+    /* In depth is Luminary's, as the Codex's was: until the status is in the
+       page waits, and a reader who is not a Luminary sees the gate instead of
+       any reading, a kept one included, because the Codex showed the gate in
+       its place. */
+    const lum = st.lum, canDeep = !!(lum && lum.isPremium);
+    const deepish = depth === 'deep' && signedIn && !sample && !off;
+    const lumWait = deepish && !lum, locked = deepish && !!lum && !canDeep;
+    const r = hit && !locked && !lumWait ? hit.reading : null;
+    const consented = !!this.readLS(this.oracleConsentKey(), false);
+    const str = v => typeof v === 'string' ? v : '';
+    const list = v => Array.isArray(v) ? v : [];
+    const pick = (on, a, b) => on ? a : b;
+    const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+    const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+    const chapters = r ? list(r.chapters).filter(c => c && str(c.heading)) : [];
+    const timing = r ? list(r.timing).filter(t => t && str(t.when)) : [];
+    const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
+    const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
+    const ov = r ? paras(r.overview) : [];
+    const blocked = sample || off || !!r || locked || lumWait;
+    const waiting = !blocked && !err && signedIn && consented;
+    const plan = st.lumPlan || 'annual', planRow = this.LUM_PLANS.find(x => x[0] === plan);
+    const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
+    return {
+      orIcon: this.uiIcon('oracle'),
+      orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
+        bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
+        c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
+      orPeriods: this.ORACLE_PERIODS.map(([k, label, sub]) => ({ label, sub, on: period === k,
+        bd: pick(period === k, 'var(--ac2)', 'var(--bd)'), bg: pick(period === k, 'rgba(var(--atmc),.24)', 'transparent'),
+        c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orPeriod: k }) })),
+      orSample: !r && sample,
+      orOff: !r && !sample && off,
+      orNeedSignIn: !blocked && !busy && !signedIn,
+      orConsent: !blocked && !busy && !err && signedIn && !consented,
+      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk(period, depth); },
+      /* The Codex showed its loading panel from the moment it asked; the
+         600ms wait before asking shows the same panel. */
+      orBusy: !r && !locked && (busy || waiting || lumWait),
+      orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
+      orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
+      orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
+      orPrivacy: 'The Oracle reads your chart the way the Celestial Codex did. Asking sends your first name, your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Moonshot AI, whose model Kimi writes the reading. No journal entry, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. From then on the Oracle reads for you whenever you open it, and each reading is kept with your account for the period it covers.',
+      orAskGo: () => this.oracleAsk(period, depth),
+      orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+      orUseMine: () => this.authGo('birth'),
+      orLoadingText: lumWait ? 'Checking your Luminary subscription…' : depth === 'deep'
+        ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
+        : 'The Oracle is reading the heavens for you…',
+      orLumMember: deepish && canDeep && !!lum.plan,
+      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') : '',
+      orLumManageOn: !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      orLumManageLabel: st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
+      orLumManage: () => this.lumManage(),
+      orLumGate: locked,
+      orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
+      orLumPlansOn: !!(lum && lum.billingConfigured),
+      orLumPlans: this.LUM_PLANS.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
+        bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
+        c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
+      orLumBuyOn: !!(lum && lum.billingConfigured),
+      orLumCta: st.lumBusy === 'checkout' ? 'Opening secure checkout…' : 'Become a Luminary · ' + planRow[5],
+      orLumBuy: () => this.lumBuy(),
+      orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured),
+      orLumNote: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
+      orLumRetryOn: !!(lum && lum.failed),
+      orLumRetry: () => this.lumFetch(true, 0),
+      orShowReading: !!r,
+      orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
+      orLabel: r ? str(hit.label) : '',
+      orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
+      orOvFirst: ov[0] || '', orOvRest: ov.slice(1).map(t => ({ t })),
+      orTriple: r ? [['☉ The Stars', 'Astrological weather', r.stars], ['◈ The Design', 'Your energetic current', r.design], ['∞ The Numbers', 'The cycle’s cadence', r.numbers]]
+        .map(([eyebrow, title, body]) => ({ eyebrow, title, body: str(body) })) : [],
+      orHasChapters: chapters.length > 0,
+      orChapters: chapters.map((c, i) => ({ num: ROMAN[i] || String(i + 1), heading: str(c.heading), body: paras(c.body).join('\n\n') })),
+      orHasTiming: timing.length > 0,
+      orTiming: timing.map(t => ({ when: str(t.when), guidance: str(t.guidance) })),
+      orHasShadow: !!(r && str(r.shadowWork)), orShadow: r ? str(r.shadowWork) : '',
+      orHasPrompts: prompts.length > 0, orPrompts: prompts.map(q => ({ t: q })),
+      orRealms: r ? [['♀︎', 'Love & Kinship', r.love], ['♄', 'Work & Purpose', r.work], ['☽', 'Spirit & Body', r.spirit]]
+        .map(([g, t, v]) => ({ g, t, v: str(v) })) : [],
+      orHasTransits: transits.length > 0,
+      orTransits: transits.map(t => ({ transit: str(t.transit), meaning: str(t.meaning) })),
+      orRitual: r ? str(r.ritual) : '', orHue: r ? str(r.auspiciousColor) : '', orMantra: r ? str(r.mantra) : ''
+    };
   }
   monthVals() {
     const st = this.state, core = window.InCommonCore;
@@ -19012,7 +19898,7 @@ class Component extends DCLogic {
        the app name here, which left the primary landing screen as the one
        screen in the build whose only heading did not name it. The brand still
        lives in the rail and in the document title. */
-    const heads = { today: ['Today', ''], library: ['Library', '10 practices \u00b7 the curated set'], spirit: ['Spirit', 'your charts, drawn from your own birth moment'], throughline: ['Throughline', 'a record, not a scoreboard'], settings: ['Settings', 'Everybody has something'] };
+    const heads = { today: ['Today', ''], library: ['Library', '10 practices \u00b7 the curated set'], spirit: ['Spirit', 'your charts, drawn from your own birth moment'], oracle: ['The Oracle', 'the heavens, read for you alone'], settings: ['Settings', 'Everybody has something'] };
     const sel = PL && st.selId ? PL.PRACTICES.find(p => p.id === st.selId) : null;
     const steps = sel ? sel.steps : [];
     const lastStep = sel ? st.pstep === steps.length - 1 : false;
@@ -19139,7 +20025,7 @@ class Component extends DCLogic {
           })() : {},
         };
       })(),
-      isToday: st.tab === 'today', isLibrary: st.tab === 'library', isSpirit: st.tab === 'spirit', isThroughline: st.tab === 'throughline', isSettings: st.tab === 'settings',
+      isToday: st.tab === 'today', isLibrary: st.tab === 'library', isSpirit: st.tab === 'spirit', isOracle: st.tab === 'oracle', isSettings: st.tab === 'settings',
       tabs: [['today', 'Today'], ['spirit', 'Spirit'], ['library', 'Library'], ['settings', 'Settings']].map(([id, t]) => {
         const on = st.tab === id;
         return { t, on: on, c: on ? 'var(--ac)' : 'var(--dim)', dot: on ? 'var(--ac)' : 'transparent',
@@ -19225,6 +20111,7 @@ class Component extends DCLogic {
           ...this.tarotVals(),
           ...this.monthVals(),
           ...this.dreamVals(),
+          ...this.oracleVals(),
           ...this.tarotLibVals(),
           ...this.dreamLibVals(),
           ...this.ichingVals(),
@@ -19742,7 +20629,7 @@ class Component extends DCLogic {
             aria: 'House ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
           globalTransits: tr.global.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
           personalTransits: tr.personal.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
-          hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority,
+          hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority, hdDefinition: hd.definition,
           hdTypeGo: this.hdOpen({ kind: 'type' }), hdStrategyGo: this.hdOpen({ kind: 'strategy' }), hdAuthorityGo: this.hdOpen({ kind: 'authority' }),
           hdProfileGo: this.hdOpen({ kind: 'profile' }),
           ...(() => {
@@ -20172,6 +21059,12 @@ class Component extends DCLogic {
           canAddProfile: !PM.atCapacity(), atCapacity: PM.atCapacity(), soloProfile: all.length === 1,
           addProfileGo: () => openForm('add', null),
           quickOpen: st.quickOpen, quickOpenGo: () => this.setState({ quickOpen: true }), quickClose: () => this.setState({ quickOpen: false }),
+          /* The profile menu's own two ways out. Log out is the account; Delete
+             opens the same name-typed confirmation Settings uses, pointed at the
+             active profile, without opening the edit sheet under it. */
+          menuLogOutGo: () => this.accountLogOut(),
+          menuLogOutNote: (st.cloudStatus && st.cloudStatus.mode === 'cloud' && st.cloudStatus.email) || 'back to the cover',
+          menuDelGo: () => this.setState({ quickOpen: false, formMode: null, form: { id: prof.id, name: prof.name }, delOpen: true, delName: '' }),
           switchOpen: !!tgt, switchName: tgt ? tgt.name : '', switchNeedsPin: !!(tgt && tgt.pinSet),
           switchWhy: tgt ? ['The current session ends here. The next profile starts fresh, with no memory of it.',
             prof.name + '\u2019s journal, moods, and charts stop being visible.',
@@ -20232,7 +21125,7 @@ class Component extends DCLogic {
             }
             const t = parsed.time.split(':');
             const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
-            const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+            const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0], +t[1]) - r.offset * 36e5));
             return { formTimeNoteShow: true, formTimeNoteC: r.ambiguous ? 'var(--warn)' : 'var(--ok)',
               formTimeNote: 'Read as ' + parsed.time + (BT.format12(parsed.time) ? ' (' + BT.format12(parsed.time) + ')' : '') + ' in ' + geo.timezone + ', ' +
                 BT.offsetLabel(r.offset) + ' on ' + fm.birthDate + (dst == null ? '' : dst ? ', daylight saving in effect' : ', standard time') + '.' +
@@ -20304,10 +21197,29 @@ class Component extends DCLogic {
           delName: st.delName, delType: e => this.setState({ delName: e.target.value }),
           delBd: st.delName && st.delName !== fm.name ? 'var(--warn)' : 'var(--bd)',
           delBg: st.delName === fm.name ? 'var(--warn)' : 'var(--sf2)', delC: st.delName === fm.name ? '#05060a' : 'var(--dim)',
+          delSolo: all.length <= 1,
           delGo: () => {
             if (st.delName !== fm.name) return;
             try {
               const wasActive = fm.id === prof.id;
+              /* THE LAST PROFILE IS DELETED BY STARTING OVER. profile-manager
+                 refuses to leave a device with no profile at all, and it is
+                 right to: every screen reads one. So a fresh one is made the
+                 way a blank device makes it, the old one is deleted with its
+                 whole cascade, and the first run opens, which is what deleting
+                 the only person on a device means. */
+              if (all.length <= 1) {
+                const fresh = PM.createProfile({ name: 'Default Profile', birthDate: this.DOB });
+                PM.setActiveProfile(fresh.id);
+                this.writeLS(this.SAMPLE_KEY, fresh.id);
+                PM.deleteProfile(fm.id, st.delName);
+                try { localStorage.removeItem(this.FIRSTRUN_KEY); } catch (e) {}
+                this._hd = null; this._hdStamp = null;
+                this.setState({ delOpen: false, delName: '', formMode: null, form: null, profileTick: st.profileTick + 1,
+                  consentTick: st.consentTick + 1, msgs: [this.greetMsg()], spiritView: null, auth: 'birth', af: {}, tab: 'today' });
+                this.toastMsg('Deleted. Nothing of it remains on this device.');
+                return;
+              }
               PM.deleteProfile(fm.id, st.delName);
               this._hd = null; this._hdStamp = null;
               this.setState({ delOpen: false, delName: '', formMode: null, form: null, profileTick: st.profileTick + 1,
@@ -20516,6 +21428,7 @@ class Component extends DCLogic {
     spirit: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.6%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%203.4v3.2M12%2017.4v3.2M3.4%2012h3.2M17.4%2012h3.2%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E)',
     library: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M4.6%205.4v13.2M12%204.4v15.2M19.4%205.4v13.2%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M3%2019.6h18%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%208.92A3.1%203.1%200%200%201%2012%2014.28A3.1%203.1%200%200%201%2012%208.92Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)',
     throughline: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Cpath%20d%3D%22M12%203.2v17.6%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%226.2%22%20r%3D%222.1%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%209.75A2.6%202.6%200%200%201%2012%2014.25A2.6%202.6%200%200%201%2012%209.75Z%22%20fill%3D%22currentColor%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217.8%22%20r%3D%222.1%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E)',
+    oracle: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.6%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M6.46%2012A6.4%206.4%200%200%201%2017.54%2012A6.4%206.4%200%200%201%206.46%2012Z%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.9%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)',
     settings: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Crect%20x%3D%222.8%22%20y%3D%227.6%22%20width%3D%2218.4%22%20height%3D%228.8%22%20rx%3D%224.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2216.6%22%20cy%3D%2212%22%20r%3D%222.5%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)',
     search: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%2210.6%22%20cy%3D%2210.6%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M15.3%2015.3l5.1%205.1%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E)',
     help: 'url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E)',
@@ -20533,7 +21446,7 @@ class Component extends DCLogic {
     ['today', 'Today', '\u25CE'],
     ['spirit', 'Spirit', '\u2609'],
     ['library', 'Library', '\u2732'],
-    ['throughline', 'Throughline', '\u25C8'],
+    ['oracle', 'The Oracle', '\u263D'],
     ['settings', 'Settings', '\u2699']
   ];
   dtBind() {
@@ -20690,7 +21603,8 @@ class Component extends DCLogic {
       L('Today', 'the daily reading, all three systems at once', '◎', 'today daily home now horoscope reading', this.searchTab('today')),
       L('Spirit', 'your charts, drawn from your own birth moment', '✦', 'spirit charts mine me', this.searchTab('spirit')),
       L('Library', 'the shelf: practices, the atlases and the rooms', '▤', 'library shelf rooms reference browse', this.searchTab('library')),
-      L('Throughline', 'your record, in your own hand', '◈', 'throughline timeline record journal diary history moments entries', this.searchTab('throughline')),
+      L('The Oracle', 'a reading written for your chart, for today, the week or the month', '\u263D', 'oracle reading horoscope omen tide lunar chapter week month in-depth deep ritual mantra shadow work journal prompts', this.searchTab('oracle')),
+      L('Throughline', 'your record, in your own hand', '◈', 'throughline timeline record journal diary history moments entries', this.searchLib(null, { libSub: 'throughline' })),
       L('Settings', 'profiles, theme, consent, and what leaves this device', '⚙', 'settings preferences options consent privacy theme dark light contrast motion profile account analytics export language delete data', this.searchTab('settings')),
       L('Natal wheel', 'your birth chart, drawn from your own moment', '☉', 'astrology natal wheel birth chart placements astral bodies houses ascendant rising sign', this.searchSpirit('astrology', 0)),
       L('The Wiring', 'your bodygraph: type, authority, centres and channels', '◇', 'human design wiring bodygraph type authority strategy centres centers channels gates profile definition', this.searchSpirit('humanDesign', 1)),
@@ -20733,7 +21647,7 @@ class Component extends DCLogic {
         const T = this.TLTYPES[e.type] || this.TLTYPES.event;
         return { glyph: '◈', title: e.title || 'Entry', sub: String(T[0]).toLowerCase() + ' · ' + e.date,
           body: (e.preview || '') + ' ' + (e.body || ''),
-          target: this.searchTab('throughline', { tlOpen: e.id, tlFilter: 'all' }) };
+          target: this.searchLib(null, { libSub: 'throughline', tlOpen: e.id, tlFilter: 'all' }) };
       }), 6));
 
       let chart = [];
@@ -20946,7 +21860,7 @@ class Component extends DCLogic {
       dtWeekday: now.toLocaleDateString(undefined, { weekday: 'long' }),
       dtDateBig: now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' }),
       reflLabel: st.reflOpen ? 'Collapse' : 'Expand',
-      goThroughlineGo: () => this.setState({ tab: 'throughline' }),
+      goThroughlineGo: () => this.setState({ tab: 'library', libSub: 'throughline', libView: null, selId: null, spiritView: null }),
       dtRecent: tl.slice(0, 6).map(e => { const T2 = this.TLTYPES[e.type] || this.TLTYPES.event;
         return { title: e.title, preview: e.preview || '', date: fmtD(e.date), typeT: T2[0], typeC: T2[1], dot: T2[1] }; }),
       dtRecentEmpty: tl.length === 0,
@@ -20965,7 +21879,7 @@ class Component extends DCLogic {
     ['today', 'Today', '\u2609'],
     ['spirit', 'Spirit', '\u2726'],
     ['library', 'Library', '\u25A4'],
-    ['throughline', 'Throughline', '\u25EF'],
+    ['oracle', 'The Oracle', '\u263D'],
     ['settings', 'Settings', '\u2699']
   ];
   VT_TABS = [['astrology', 'Astrology'], ['humanDesign', 'Human Design'], ['numerology', 'Numerology'], ['angel', 'Synchronicities'], ['synastry', 'Synastry'], ['tarot', 'Tarot'], ['month', 'The Month Ahead'], ['dream', 'Dream Journal']];
@@ -21379,8 +22293,8 @@ class Component extends DCLogic {
          whenever this shell is up, exactly as Synchronicities is. Its vals gate
          on the width alone for the same reason. */
       spiritDream: true,
-      isThroughline: true, isSettings: true,
-      /* isToday, isSpirit, isThroughline and isSettings are true together
+      isOracle: true, isSettings: true,
+      /* isToday, isSpirit, isOracle and isSettings are true together
          because the vertical shell renders all five sections at once and
          scrolls between them. libShell is not a section, though: it is the
          shelf INSIDE the Library section, and it was set true beside them.
