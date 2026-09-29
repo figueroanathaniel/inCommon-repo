@@ -61,7 +61,7 @@ const checkOnly = process.argv.indexOf('--check') !== -1;
 
 /* The modules, in the order the helmet loads them. Several read globals set
    by earlier ones, so this order is part of the contract, not a preference. */
-const VENDORED = ['supabase-js-2.57.1.umd.min.js'];
+const VENDORED = ['supabase-js-2.57.1.umd.min.js', 'astronomy-engine-2.1.19.min.js'];
 const MODULES = [
   /* Ephemeris architecture (V1.0.0): dual-backend system with fallback */
   'ephemeris-points.js',
@@ -469,6 +469,21 @@ for (const f of THREE_FILES) {
         '  screen is the SIGNAL LOST message on a machine perfectly capable of\n' +
         '  drawing it. Both files are vendored in app/ beside the vendored React.');
   }
+  fs.copyFileSync(from, path.join(BUNDLE, f));
+}
+
+/* "Continue with Google" loads these two on the press, or on the return from
+   Google, rather than at load: the vendored Supabase client and the one module
+   allowed to call it. The app has both inlined, but the cover is its own page,
+   so they sit beside index.html as files. A cover that names them and a bundle
+   without them is a button that says the sign in files did not load. */
+const SIGNIN_FILES = ['supabase-js-2.57.1.umd.min.js', 'incommon-cloud.js'];
+for (const f of SIGNIN_FILES) {
+  if (cover.indexOf("'./" + f + "'") === -1) {
+    die('the cover no longer loads ./' + f + '; update SIGNIN_FILES in tools/build-bundle.js to match it');
+  }
+  const from = path.join(appDir, f);
+  if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for Continue with Google');
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 

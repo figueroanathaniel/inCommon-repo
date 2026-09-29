@@ -179,6 +179,13 @@ input[type="date"]{color-scheme:dark}
      its channel table from hd-atlas.js above rather than keeping a second
      copy of it. -->
 <script src="./birth-time.js"></script>
+<!-- Where the ten astral bodies are. astronomy-engine 2.1.19 (MIT, Don Cross),
+     vendored byte for byte from the npm registry tarball, because the hand
+     written series it replaced measured up to 6.5 degrees from JPL Horizons.
+     modulesReady() waits for window.Astronomy: the scripts in this helmet are
+     hoisted as async tags, so without the wait a chart drawn first would be
+     memoised from the old series for the rest of the session. -->
+<script src="./astronomy-engine-2.1.19.min.js"></script>
 <script src="./arc-solver.js"></script>
 <script src="./ephemeris-cache.js"></script>
 <script src="./hd-wheel.js"></script>
@@ -234,6 +241,114 @@ input[type="date"]{color-scheme:dark}
   <div data-screen-label="First run" role="dialog" aria-modal="true" aria-label="Your birth moment" style="position:absolute;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;background:var(--bg);padding:clamp(16px,4vw,48px) 16px calc(28px + env(safe-area-inset-bottom))">
     <div aria-hidden="true" style="position:absolute;left:-16%;right:-16%;top:-34%;height:96%;z-index:0;pointer-events:none;background:radial-gradient(closest-side, rgba(var(--atmc),.30), transparent 70%);animation:atmosDrift 26s ease-in-out infinite"></div>
     <div aria-hidden="true" style="position:absolute;left:-24%;right:-24%;top:44%;height:96%;z-index:0;pointer-events:none;background:radial-gradient(closest-side, rgba(var(--atmc2),.22), transparent 72%);animation:atmosDrift2 41s ease-in-out infinite"></div>
+    <!-- THE CODEX'S PAGE, and the one a reader meets. Its layout and its words
+         are the Celestial Codex's: the eyebrow, the line, the three coordinates
+         and one card. What it is drawn in is inCommon's: tokens rather than
+         hexes, so every identity paints it; the action colour on the one
+         action; --ac2-hi for the labels, because --ac2 is never text; and the
+         birth time as digits and an explicit clock rather than a native time
+         control, for the reason the classic form below gives. -->
+    <sc-if value="{{ authCodex }}" hint-placeholder-val="{{ true }}">
+      <div style="position:relative;z-index:1;width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;margin:auto;text-align:center">
+        <div style="display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s ease-out both">
+          <div style="font:600 11px var(--fu);letter-spacing:.26em;text-transform:uppercase;color:var(--ac2-hi);margin:0 0 12px">The First Inscription</div>
+          <!-- The gradient runs between two text tokens, so it holds its
+               contrast in every identity; color is the violet end, which is
+               what a reader without background-clip support sees. -->
+          <h1 style="margin:0 0 16px;font:400 clamp(38px,7vw,60px)/1.05 var(--fb);letter-spacing:.004em;color:var(--tx);text-wrap:balance">Tell the Codex <em style="font-style:italic;color:var(--ac2-hi);background:linear-gradient(100deg,var(--tx),var(--ac2-hi) 70%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">when you arrived.</em></h1>
+          <p style="margin:0 0 30px;max-width:34em;font:400 15px/1.7 var(--fb);color:var(--mut);text-wrap:pretty">Three coordinates unlock everything: the name you were given, the moment of your first breath, and the place where the sky first saw you.</p>
+        </div>
+        <sc-if value="{{ authHasErr }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="box-sizing:border-box;width:100%;margin:0 0 16px;background:rgba(224,141,125,.1);border:1px solid rgba(224,141,125,.42);border-radius:12px;padding:11px 13px;font:400 12.5px/1.55 var(--fu);color:var(--tx);text-align:left">{{ authErr }}</div>
+        </sc-if>
+        <div style="position:relative;box-sizing:border-box;width:100%;text-align:left;padding:clamp(20px,5vw,32px);border:1px solid var(--bd);border-radius:12px;background:var(--sf);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 40px rgba(var(--atmc),.12),inset 0 0 60px rgba(var(--atmc2),.05);animation:panelIn .6s ease-out both">
+          <span aria-hidden="true" style="position:absolute;top:-1px;left:-1px;width:14px;height:14px;box-sizing:border-box;border-top:1px solid var(--ac2);border-left:1px solid var(--ac2);border-top-left-radius:12px"></span>
+          <span aria-hidden="true" style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;box-sizing:border-box;border-bottom:1px solid var(--ac2);border-right:1px solid var(--ac2);border-bottom-right-radius:12px"></span>
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Full birth name</span>
+              <input value="{{ afBname }}" onChange="{{ typeBname }}" placeholder="As written on your birth certificate" autoComplete="name" aria-label="Full birth name" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
+              <span style="font:italic 400 13.5px/1.5 var(--fb);color:var(--mut)">Numerology reads every letter, so use the name you were given.</span>
+            </div>
+            <!-- Two columns when the card is wide enough for both, one on a
+                 phone. auto-fit does what the Codex's media query did, with no
+                 stylesheet rule to add. -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:24px 16px">
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Date of birth</span>
+                <input value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" min="1900-01-01" aria-label="Date of birth" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 14px;color:var(--tx);font:400 15px var(--fu);color-scheme:dark">
+                <sc-if value="{{ afBdateHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bdate" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBdateErr }}</div></sc-if>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Time of birth</span>
+                <sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:6px">
+                    <div role="group" aria-label="Time of birth, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 6px">
+                      <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:36px;min-height:44px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 16px var(--fu)">
+                      <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--mut)">:</span>
+                      <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:36px;min-height:44px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 16px var(--fu)">
+                    </div>
+                    <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="display:flex;gap:4px">
+                      <sc-for list="{{ afBmerRows }}" as="m" hint-placeholder-count="3">
+                        <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:48px;padding:0 4px;display:flex;align-items:center;justify-content:center;border:1px solid {{ m.bd }};border-radius:8px;background:{{ m.bg }};color:{{ m.c }};font:600 10.5px var(--fu);letter-spacing:.06em">{{ m.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ afBtimeHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-btime" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBtimeErr }}</div></sc-if>
+                <!-- Not knowing is an answer and is given here, never read off
+                     an empty field: blank still means nobody has been asked. -->
+                <button onClick="{{ afBtimeUnknownGo }}" role="switch" aria-checked="{{ cxUnknownOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
+                  <span aria-hidden="true" style="flex:none;position:relative;box-sizing:border-box;width:42px;height:24px;border-radius:999px;border:1px solid {{ cxSwBd }};background:{{ cxSwBg }};transition:background var(--motion)">
+                    <span style="position:absolute;top:1px;left:{{ cxSwX }};width:20px;height:20px;border-radius:50%;background:var(--tx);transition:left var(--motion)"></span>
+                  </span>
+                  <span style="font:400 13px/1.4 var(--fu);color:var(--mut)">I don't know my birth time</span>
+                </button>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Place of birth</span>
+              <div style="position:relative">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ac2-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <input value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="Search a city, e.g. Orlando" autoComplete="off" aria-label="Place of birth" aria-describedby="incommon-place-list" aria-invalid="{{ afBplaceBad }}" aria-errormessage="incommon-err-bplace" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 14px 0 38px;color:var(--tx);font:400 15px var(--fu)">
+              </div>
+              <!-- The candidates, each with the coordinates and the zone it
+                   would write onto the chart, so the reader chooses the place
+                   and not just the spelling. -->
+              <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
+                <ul id="incommon-place-list" aria-label="Places that match" style="list-style:none;margin:0;padding:4px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);max-height:260px;overflow-y:auto">
+                  <sc-for list="{{ cxPlaceHits }}" as="p" hint-placeholder-count="3">
+                    <li><button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 12px;border-radius:6px">
+                      <span style="font:400 14px/1.35 var(--fu);color:var(--tx)">{{ p.label }}</span>
+                      <span style="font:400 11px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ p.sub }}</span>
+                    </button></li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ cxPlaceHasChosen }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:6px;font:400 11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ok)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M20 6 9 17l-5-5"></path></svg><span>{{ cxPlaceChosen }}</span></div>
+              </sc-if>
+              <sc-if value="{{ cxPlaceHasNotes }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ cxPlaceNotes }}" as="n" hint-placeholder-count="1">
+                  <div style="font:400 12px/1.55 var(--fu);color:{{ n.c }}">{{ n.t }}</div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ afBplaceHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bplace" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBplaceErr }}</div></sc-if>
+              <sc-if value="{{ cxUnknownHelp }}" hint-placeholder-val="{{ false }}">
+                <span style="font:italic 400 13.5px/1.5 var(--fb);color:var(--mut)">Without a birth time the Moon's degree is approximate, and the houses, the Ascendant and the Midheaven are left out rather than estimated.</span>
+              </sc-if>
+            </div>
+            <button onClick="{{ birthGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);color:var(--onac);font:700 15px var(--fu);letter-spacing:.02em">Cast my Codex</button>
+          </div>
+        </div>
+        <button onClick="{{ birthSkip }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;margin:14px 0 0;padding:0 14px;display:flex;align-items:center;justify-content:center;font:400 12px var(--fu);color:var(--dim);text-decoration:underline;text-underline-offset:3px">Skip for now</button>
+        <div style="margin:10px 0 0;max-width:40em;font:400 10.5px/1.6 var(--fu);color:var(--dim)">Two things leave this device, both of them only when they have to: the typefaces, and a birth place you ask to have looked up, which is sent as the place name and nothing else. Everything else, your charts, your writing, your birth details, lives in this browser only, and Settings can change or clear any of it.</div>
+      </div>
+    </sc-if>
+    <!-- INCOMMON'S OWN FIRST RUN FORM, tucked away. authBirth is false while
+         FIRSTRUN_CLASSIC is, so none of this renders; it is kept whole so that
+         one flag brings it back. -->
+    <sc-if value="{{ authBirth }}" hint-placeholder-val="{{ false }}">
     <div style="position:relative;z-index:1;width:100%;max-width:440px;display:flex;flex-direction:column;gap:22px;margin:auto">
       <div style="display:flex;flex-direction:column;gap:13px">
         <!-- The rim colour, brought in as an accent bar. #8b5cf6 is a fill and
@@ -300,6 +415,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <div style="font:400 10px/1.6 var(--fu);color:var(--dim);border-top:1px solid var(--bd);padding-top:11px">Two things leave this device, both of them only when they have to: the typefaces, and a birth place you ask to have looked up, which is sent as the place name and nothing else. Everything else, your charts, your writing, your birth details, lives in this browser only, and Settings can change or clear any of it.</div>
     </div>
+    </sc-if>
   </div>
 </sc-if>
 <sc-if value="{{ shellVertical }}" hint-placeholder-val="{{ false }}">
@@ -340,7 +456,14 @@ input[type="date"]{color-scheme:dark}
 <!-- Pinned rather than placed in the scroll, because the sections snap at a
      full viewport each and anything ahead of the first one becomes a partial
      snap stop. It sits below the header and does not hide with it: a reader is
-     owed this on every screen, not only the one they landed on. -->
+     owed this on every screen, not only the one they landed on.
+     Pinned also means it covers what is under it, and every section pads its
+     top by the header alone, so on a phone the first 60 or more pixels of each
+     page sat behind this: the date on Today, the introduction on Spirit. Each
+     section now opens with data-sample-spacer, this same row laid out the same
+     way and never painted, behind the same sampleOn. It takes exactly this
+     banner's height at any width and any text size without measuring anything,
+     and it is aria-hidden and holds no control. -->
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;top:var(--hdr);left:0;right:0;z-index:59;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(139,92,246,.17);border-bottom:1px solid var(--bd);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)">
     <span style="flex:1;font:400 10.5px/1.45 var(--fu);color:var(--ac2-hi)">{{ sampleText }}</span>
@@ -349,6 +472,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <div data-vt-scroll="1" role="main" data-main-region="1" aria-label="Your readings" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:scroll;overflow-x:hidden;scroll-behavior:smooth">
 <section data-vt-sec="Today" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Today" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Today</h1>
 <div style="flex:none;display:flex;flex-direction:column;gap:5px;padding:18px 20px 8px">
@@ -680,6 +804,7 @@ input[type="date"]{color-scheme:dark}
   </div>
 </section>
 <section data-vt-sec="Spirit" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Spirit" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">Spirit</h1>
     <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">Swipe between your chart, design, numbers, Synchronicities, Synastry, a tarot reading, and the month ahead.</div>
@@ -2410,6 +2535,7 @@ input[type="date"]{color-scheme:dark}
   </div>
 </section>
 <section data-vt-sec="Library" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Library" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">Library</h1>
     <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">Practices, the 360 degrees, and the reference atlases.</div>
@@ -3175,6 +3301,7 @@ input[type="date"]{color-scheme:dark}
   </div>
 </section>
 <section data-vt-sec="Throughline" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Throughline" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">Throughline</h1>
     <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">What actually happened, in your own hand.</div>
@@ -3238,6 +3365,7 @@ input[type="date"]{color-scheme:dark}
   </div>
 </section>
 <section data-vt-sec="Settings" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Settings" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">Settings</h1>
     <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">Profiles, memory, consent, and safety.</div>
@@ -8887,7 +9015,10 @@ class Component extends DCLogic {
   curTab() { return this.state.tab ?? (this.props.defaultTab ?? 'today'); }
   effOffline() { return !this.state.online || (this.props.simulateOffline ?? false); }
   curMode() { return this.state.mode ?? (this.props.defaultMode ?? 'standard'); }
-  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols); }
+  /* window.Astronomy is here because a chart drawn before it arrives is drawn
+     from the fallback series and memoised that way. It cannot hold the splash
+     forever: boot() gives up after 50 tries and lonRaw() still answers. */
+  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols && window.Astronomy); }
   PM() { return window.ProfileManager; }
   /* Read at the call site, never cached: a module that failed to load has to
      leave the app working rather than take it down, which is why every use of
@@ -10877,6 +11008,54 @@ class Component extends DCLogic {
   }
   lonRaw(name, t) {
     const R = this.RAD;
+    /* THE TEN ASTRAL BODIES COME FROM astronomy-engine, and the series below
+       them is the fallback for a build where that file did not load.
+
+       The series was a two term Moon and a coplanar first order Kepler model
+       for everything else, and nothing ever measured it. Against 19,750 JPL
+       Horizons positions from 1900 to 2100 it was out by 1.3 degrees on the
+       Moon and up to 6.5 on Mars, which moved a Human Design Type for about
+       one birth in twelve and a defined channel for nearly two in five. The
+       library measures 0.023 degrees at worst on the Moon and under 0.006 on
+       the rest, and tools/check-astral-bodies.js holds all ten to 0.03 against
+       that same fixture. t is days from J2000 in UT, which is exactly what
+       MakeTime reads a number as. MakeTime throws on a t that is not finite,
+       where the series answers NaN, so an unparsed birth date takes the series
+       and draws nothing rather than throwing out of a render. */
+    const A = window.Astronomy;
+    if (A && Number.isFinite(t) && (name === 'Sun' || name === 'Moon' || this.PL_EL[name])) {
+      const at = tt => {
+        const time = A.MakeTime(tt);
+        if (name === 'Sun') return A.SunPosition(time).elon;
+        if (name === 'Moon') return A.EclipticGeoMoon(time).lon;
+        return A.Ecliptic(A.GeoVector(name, time, true)).elon;
+      };
+      if (['Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(name) === -1) return this.norm360(at(t));
+      /* MARS OUTWARD ARE READ OFF A FOUR DAY GRID. A library position costs 20
+         to 45us, and 155 for Pluto, whose orbit it integrates numerically;
+         transitWindows() asks for 1,986 of them in a row while the app boots,
+         which took the scan from about 10ms to over 100. Cubic interpolation
+         between library positions on a grid anchored at J2000 measures, at
+         worst over 1900 to 2100, 0.0003 degrees for Mars and 0.00003 or less
+         for the rest: ten to a hundred times under the library's own distance
+         from Horizons. Mercury and Venus measure 0.05 and 0.002 on the same
+         grid and are asked for directly, as are the Sun and the Moon.
+         Every node is a pure function of its index, so the memo cannot go
+         stale, and it clears wholesale at its ceiling like EphemerisCache. A
+         lone cold call costs four nodes; the position cache in front of lonOf
+         pays that once. Neighbours are unwrapped onto the middle node before
+         they are mixed, or a crossing of 0 Aries averages 359 and 1 into 180.
+         check-astral-bodies.js measures all six against the direct library
+         across every such crossing in its fixture. */
+      const grids = this._aeGrid || (this._aeGrid = {});
+      const G = grids[name] || (grids[name] = new Map()), h = 4, k = Math.floor(t / h), u = t / h - k;
+      if (G.size > 4000) G.clear();
+      const node = i => { let v = G.get(i); if (v === undefined) { v = at(i * h); G.set(i, v); } return v; };
+      const near = (v, ref) => v - Math.round((v - ref) / 360) * 360;
+      const p1 = node(k), p0 = near(node(k - 1), p1), p2 = near(node(k + 1), p1), p3 = near(node(k + 2), p2);
+      return this.norm360(p0 * (-u * (u - 1) * (u - 2) / 6) + p1 * ((u + 1) * (u - 1) * (u - 2) / 2)
+        + p2 * (-(u + 1) * u * (u - 2) / 2) + p3 * ((u + 1) * u * (u - 1) / 6));
+    }
     if (name === 'Sun') { const M = this.norm360(357.5291 + .98560028 * t), L = this.norm360(280.459 + .98564736 * t); return this.norm360(L + 1.915 * Math.sin(M * R) + .02 * Math.sin(2 * M * R)); }
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
     if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
@@ -10926,9 +11105,10 @@ class Component extends DCLogic {
      A Sabian symbol is a claim about ONE degree of arc. Printing one for a body
      whose position is good to about a degree is a precise statement resting on
      an imprecise number, and it reads as the most exact thing on the page
-     because it is the most specific. The ten astral bodies and both nodes are computed
-     to well inside a degree and keep their symbols; Chiron is fitted to 0.92
-     and does not; the asteroids are unpinned and do not.
+     because it is the most specific. The ten astral bodies are measured against
+     JPL Horizons to 0.03 degrees and keep their symbols (the series they came
+     from before claimed "well inside a degree" here and measured 6.5); Chiron
+     is fitted to 0.92 and does not; the asteroids are unpinned and do not.
 
      This is the gate the next body passes through too: measure it, record the
      worst case, and let that decide what it is allowed to say. */
@@ -16837,6 +17017,14 @@ class Component extends DCLogic {
    * profile through ProfileManager, and Settings owns every later edit.
    * Key written: incommon.firstrun. */
   FIRSTRUN_KEY = 'incommon.firstrun';
+  /* THE PAGE A READER MEETS IS THE CODEX'S, and inCommon's own is tucked away.
+     The Celestial Codex asked for the birth moment on one page: an eyebrow, a
+     line that says why, and one card holding the name, the date, the time and
+     a place search that shows coordinates and a zone before anything is saved.
+     That page is the first run now. inCommon's form is still in the markup,
+     whole, behind this flag, and setting it true brings it back with nothing
+     else to change: the two pages share every field, handler and check. */
+  FIRSTRUN_CLASSIC = false;
   /* Holds the id of the profile the app invented on a blank device, so the
      reading drawn from it can say whose it is. */
   SAMPLE_KEY = 'incommon.sample';
@@ -16974,12 +17162,95 @@ class Component extends DCLogic {
     }
     return out;
   }
+  /* The place half of the Codex page. Two costs shape it: a search over the
+     170,000 places in the gazetteer and a lookup of one exact name each take
+     over a tenth of a second, and this runs on every render of the page. So
+     the search reads a copy of the query that settles 350ms after the last
+     keystroke, the way the Codex debounced its own, and both answers are kept
+     for the text they were asked about until the text changes.
+
+     A place counts as chosen when it resolves, whether it was picked from the
+     list or typed in full, because PM.geocode is what the chart will read and
+     it is the only honest judge of whether a place was placed. The list goes
+     away once a candidate is picked, and comes back the moment the text moves
+     off it, which is exactly the Codex's rule. */
+  birthPlaceInfo() {
+    const PM = this.PM(), G = window.Gazetteer, BT = this.BT();
+    const place = this.af('bplace').trim(), pick = this.af('bplacePick');
+    const q = String(this.state.afPlaceQ || '').trim();
+    /* Coordinates typed by hand are an answer, not a search: the digits of
+       "51.5, -0.12" otherwise match six towns in Kazakhstan. */
+    const coords = /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/.test(place);
+    let hits = [];
+    if (G && place !== pick && !coords && q.length >= 2 && place.length >= 2) {
+      if (this._placeHitsQ !== q) { this._placeHitsQ = q; this._placeHits = G.search(q, 6); }
+      hits = this._placeHits || [];
+      /* Typed out in full, a place is as chosen as a picked one. */
+      if (hits.some(r => r.label.toLowerCase() === place.toLowerCase())) hits = [];
+    }
+    const searching = place !== pick && !coords;
+    let geo = null;
+    if (place && PM) {
+      if (this._placeGeoQ !== place) { this._placeGeoQ = place; this._placeGeo = PM.geocode(place); }
+      geo = this._placeGeo;
+    }
+    const ns = v => Math.abs(v).toFixed(2) + '° ' + (v >= 0 ? 'N' : 'S');
+    const ew = v => Math.abs(v).toFixed(2) + '° ' + (v >= 0 ? 'E' : 'W');
+    const notes = [];
+    let chosen = '';
+    if (geo && geo.resolved && geo.lat != null) {
+      chosen = ns(geo.lat) + ', ' + ew(geo.lon) + (geo.timezone && geo.timezone !== 'manual' ? ' · ' + geo.timezone : '');
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(this.af('bdate'));
+      if (m && BT && geo.timezone && geo.timezone !== 'manual') {
+        const parsed = this.state.afTimeUnknown ? null : BT.parse(this.af('btime'), this.af('bmer') || '24');
+        const t = (parsed && parsed.ok ? parsed.time : '12:00').split(':');
+        const r = BT.utcOffsetFor(geo.timezone, +m[1], +m[2] - 1, +m[3], +t[0], +t[1], geo.tzOffset);
+        const dst = BT.isDst(geo.timezone, new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +t[0] - r.offset, +t[1])));
+        notes.push({ t: BT.offsetLabel(r.offset) + ' on that date' +
+          (dst == null ? '' : dst ? ', daylight saving in effect.' : ', standard time.'), c: 'var(--mut)' });
+        if (r.ambiguous) notes.push({ t: 'That local time falls inside a clock change, so it happened twice. This reading takes the first of the two.', c: 'var(--warn)' });
+      } else if (geo.timezone === 'manual') {
+        notes.push({ t: 'Coordinates entered by hand, so the offset is the one your longitude implies rather than a zone with a history.', c: 'var(--mut)' });
+      }
+    } else if (place.length >= 2 && q === place && !hits.length) {
+      notes.push({ t: 'Nothing by that name in the place list. Try the fuller name with its region, or type the coordinates as latitude, longitude.', c: 'var(--warn)' });
+    }
+    return { place, geo, chosen, notes, searching,
+      hits: hits.map(r => ({ label: r.label,
+        sub: ns(r.lat) + ', ' + ew(r.lon) + ' · ' + r.timezone,
+        go: () => {
+          clearTimeout(this._placeT);
+          this.setState(s => ({ af: { ...(s.af || {}), bplace: r.label, bplacePick: r.label }, afPlaceQ: r.label, authErr: '' }));
+          this.afClearErr('bplace');
+        } })) };
+  }
+  typeBirthPlace(e) {
+    const v = String(e.target.value || '');
+    this.afSet('bplace', v);
+    this.afClearErr('bplace');
+    clearTimeout(this._placeT);
+    this._placeT = setTimeout(() => this.setState({ afPlaceQ: v }), 350);
+  }
   birthSubmit() {
     const PM = this.PM(), name = this.af('bname').trim(), date = this.af('bdate');
-    /* G7: field level, not a banner. Nothing new is required here, the
-       Skip control still leaves with an empty form: what is checked is
-       whether what was typed can be read as a date and a time. */
+    /* G7: field level, not a banner. On inCommon's own form nothing is
+       required, and the Skip control still leaves with an empty form: what is
+       checked is whether what was typed can be read as a date and a time.
+
+       The Codex page asks for two things more. A date, because "Cast my Codex"
+       with no date casts nothing, and a place that resolves if one was typed,
+       because the Codex would not take a place it could not put on a map and
+       neither should a chart: an unplaced city used to save quietly and draw
+       whole sign houses. The name is not required here although the Codex
+       required it: a chart does not need it, and the date alone is still
+       enough to begin. Skip for now leaves either page with nothing saved. */
     const errs = {}, time = this.af('btime');
+    const codex = !this.FIRSTRUN_CLASSIC;
+    if (codex && !date) errs.bdate = 'Choose your date of birth.';
+    if (codex && this.af('bplace').trim()) {
+      const g = PM ? PM.geocode(this.af('bplace').trim()) : null;
+      if (!g || !g.resolved) errs.bplace = 'Search for and select your place of birth, or type its coordinates as latitude, longitude.';
+    }
     if (date) {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
       const d = m ? new Date(date + 'T00:00:00') : null;
@@ -17014,18 +17285,26 @@ class Component extends DCLogic {
        date, had both silently dropped: nothing saved, no error, and the next
        screen said "You are in." From the reader's side that is "my birth time
        will not take". Any field being present is enough to be worth saving. */
-    const place = this.af('bplace');
+    const place = this.af('bplace').trim();
     const savedTime = unknown ? '' : (parsed && parsed.ok ? parsed.time : (time ? this.normTime(time) : ''));
+    /* The Codex asks for the full name given at birth, because numerology
+       reads every letter, and calls the reader by the first word of it. So on
+       that page the whole name goes where the Numbers page keeps the birth
+       name, and the profile is named by its first word. inCommon's own form
+       asked what to call the reader, and that answer is the profile name. */
+    const profName = codex ? name.split(/\s+/)[0] : name;
     if (PM && PM.activeId() && (name || date || savedTime || place || unknown)) {
-      try { PM.updateProfile(PM.activeId(), { ...(name ? { name: name } : {}),
+      try { PM.updateProfile(PM.activeId(), { ...(profName ? { name: profName } : {}),
         ...(date ? { birthDate: date } : {}), ...(savedTime ? { birthTime: savedTime } : {}),
         ...(unknown ? { timeUnknown: true } : {}),
         ...(place ? { birthLocation: place } : {}) }); } catch (e) {}
+      if (codex && name) this.writeLS(this.nkey(), name);
     }
     if (unknown) this.track('birth_time_declared_unknown');
     if (place || date) this.track('birth_data_confirmed');
-    this.firstRunDone({ memTick: (this.state.memTick || 0) + 1, afTimeUnknown: false });
-    this.toastMsg(name || date || savedTime || place || unknown ? 'Saved. Every reading is drawn from that.' : 'You are in.');
+    this.firstRunDone({ memTick: (this.state.memTick || 0) + 1, afTimeUnknown: false, afPlaceQ: '' });
+    this.toastMsg(!(name || date || savedTime || place || unknown) ? 'You are in.'
+      : codex ? 'Your stars have been inscribed.' : 'Saved. Every reading is drawn from that.');
   }
   /* WHAT THIS SCREEN IS ALLOWED TO CLAIM, in one place, for every chart on it.
      The rule is the same one the module states: time dependent elements are
@@ -17051,10 +17330,24 @@ class Component extends DCLogic {
       piLabel: this.state.revealPI ? 'Hide' : 'Reveal',
       piReveal: () => this.setState({ revealPI: !this.state.revealPI })
     };
-    if (!step) return { ...base, authGate: false, authBirth: false, authHasErr: false, authErr: '' };
-    const confirm = this.birthConfirmLines();
+    if (!step) return { ...base, authGate: false, authBirth: false, authCodex: false, authHasErr: false, authErr: '' };
+    const classic = !!this.FIRSTRUN_CLASSIC;
+    /* Only the page on screen pays for its own lines: the classic confirm
+       panel reads geocode, and so does the Codex place search. */
+    const confirm = classic ? this.birthConfirmLines() : [];
+    const pl = classic ? null : this.birthPlaceInfo();
+    const unk = !!this.state.afTimeUnknown;
     return { ...base,
-      authGate: true, authBirth: step === 'birth',
+      authGate: true, authBirth: step === 'birth' && classic, authCodex: step === 'birth' && !classic,
+      /* The Codex page. */
+      cxTypePlace: e => this.typeBirthPlace(e),
+      cxPlaceHits: pl ? pl.hits : [], cxPlaceHasHits: !!(pl && pl.hits.length),
+      cxPlaceChosen: pl ? pl.chosen : '', cxPlaceHasChosen: !!(pl && pl.chosen),
+      cxPlaceNotes: pl ? pl.notes : [], cxPlaceHasNotes: !!(pl && pl.notes.length),
+      cxPlaceExpanded: pl && pl.hits.length ? 'true' : 'false',
+      cxUnknownOn: unk ? 'true' : 'false', cxUnknownHelp: unk,
+      cxSwBg: unk ? 'var(--ok)' : 'var(--sf2)', cxSwBd: unk ? 'var(--ok)' : 'var(--bd)',
+      cxSwX: unk ? '19px' : '1px',
       authErr: this.state.authErr || '', authHasErr: !!this.state.authErr,
       afBname: this.af('bname'), typeBname: this.afType('bname'),
       afBdate: this.af('bdate'), typeBdate: this.afType('bdate'),
@@ -18542,6 +18835,7 @@ class Component extends DCLogic {
       chartSummaryOff: (st.dpSel || st.placeSel || st.aspSel) ? 'true' : 'false',
       afBdateBad: fe.bdate ? 'true' : 'false', afBdateHasErr: !!fe.bdate, afBdateErr: fe.bdate || '',
       afBtimeBad: fe.btime ? 'true' : 'false', afBtimeHasErr: !!fe.btime, afBtimeErr: fe.btime || '',
+      afBplaceBad: fe.bplace ? 'true' : 'false', afBplaceHasErr: !!fe.bplace, afBplaceErr: fe.bplace || '',
       /* G9: the wheel's aspect colours, named in words next to the colour.
          ASP_COLOR now also carries the four expanded-only minor aspects
          (quincunx, semisextile, semisquare, sesquisquare - see natalAspects'

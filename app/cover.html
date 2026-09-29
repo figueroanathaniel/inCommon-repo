@@ -159,7 +159,7 @@
   .sub {
     position: absolute; left: 0; right: 0;
     top: calc(50% + clamp(22px, 5.8vw, 98px) + clamp(10px, 1.5vw, 26px));
-    display: flex; justify-content: center;
+    display: flex; flex-direction: column; align-items: center; gap: clamp(10px, 1.4vw, 18px);
     opacity: 0; transition: opacity 2800ms cubic-bezier(.4,0,.2,1) 3200ms;
   }
   body.live .sub { opacity: 1; }
@@ -180,6 +180,47 @@
   @keyframes enter-glow {
     0%, 100% { text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55); }
     50%      { text-shadow: 0 0 6px rgba(255,248,231,.85), 0 0 20px rgba(183,155,255,.78), 0 0 46px rgba(139,92,246,.78); }
+  }
+  /* THE SECOND WAY IN, FOR A READER WHO WANTS AN ACCOUNT.
+     Google's own dark button rather than the cover's cream, because this is
+     the one control here whose look is set by somebody else's branding rules.
+     It sits under "enter here" and arrives with it, so the invitation is still
+     one beat, and scrollFade takes it away with the link. The G carries
+     Google's green: that is their mark rather than #2fff8f, so the rim is
+     still the only inCommon green on the cover, and the departure is recorded
+     in CLAUDE.md rather than taken quietly. */
+  /* The email button wears the same dark style so the two ways to an account
+     read as a pair, and neither competes with "enter here" above them. */
+  .signin {
+    pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
+    min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
+    background: #131314; border: 1px solid #8e918f; color: #e3e3e3;
+    font: 500 14px/1 Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .01em;
+  }
+  .signin:hover { background: #1c1c1e; border-color: #b3b6b4; }
+  .signin:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 3px; }
+  .signin[aria-busy="true"] { cursor: progress; opacity: .7; }
+  .signin svg { width: 18px; height: 18px; flex: none; display: block; }
+  .signin[hidden], .mailform[hidden] { display: none; }
+  .mailform {
+    pointer-events: auto; display: flex; gap: 8px; width: min(88vw, 380px);
+  }
+  .mailform input {
+    flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
+    border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
+    font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .mailform input::placeholder { color: #9aa0a6; }
+  .mailform input:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .mailform .signin { padding: 0 18px; }
+  .sr {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  .authmsg {
+    min-height: 1.5em; max-width: min(88vw, 440px); text-align: center;
+    font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
   }
   @media (prefers-reduced-motion: reduce) {
     .markwrap { transition: opacity 1200ms ease 600ms; }
@@ -241,7 +282,17 @@
 <div id="veil"></div>
 <div class="markwrap">
   <h1 class="mark">inCommon</h1>
-  <div class="sub"><a class="enter" href="./inCommonApp%20v2.dc.html">enter here</a></div>
+  <div class="sub">
+    <a class="enter" href="./inCommonApp%20v2.dc.html">enter here</a>
+    <button class="signin google" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
+    <button class="signin email" type="button" aria-expanded="false" aria-controls="mailform"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#e3e3e3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span>Continue with email</span></button>
+    <form id="mailform" class="mailform" hidden novalidate>
+      <label class="sr" for="mailaddr">Email address</label>
+      <input id="mailaddr" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+      <button class="signin" type="submit">Send link</button>
+    </form>
+    <p class="authmsg" role="status" aria-live="polite"></p>
+  </div>
 </div>
 <div class="glyph" aria-hidden="true">
   <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
@@ -271,6 +322,162 @@
       document.body.classList.add('signal-lost');
     }
   }, 9000);
+</script>
+<!-- CONTINUE WITH GOOGLE OR EMAIL, STARTED AND FINISHED ON THIS PAGE.
+
+     Both come back the same way: Google's return and the emailed link each
+     land here as ?code=, and the one exchange below finishes either.
+
+     A plain script rather than part of the module, for the reason the 9 second
+     fallback above is one: with no WebGL the module dies at the renderer, and
+     a way in that died with it would be a second failure on top of the first.
+
+     Nothing is fetched until the reader asks. The two files are loaded on the
+     press, or on the return from Google, and every call to Supabase goes
+     through incommon-cloud.js, the one module allowed to talk to it.
+
+     The return comes back HERE, as ?code=, not to the app. The app's router is
+     the hash and this page forwards any hash to the app, so the code is kept
+     before the #, where neither page routes on it (see oauthStart in
+     incommon-cloud.js). Once it is exchanged the session sits in this
+     browser's storage, the query is dropped so a reload cannot spend the code
+     twice, and the reader goes on through the same address "enter here"
+     holds. That address is read off the link rather than written here: the
+     build rewrites it and asserts there are exactly two copies of it. -->
+<script>
+(function () {
+  var btn = document.querySelector('button.google');
+  var mailBtn = document.querySelector('button.email');
+  var form = document.getElementById('mailform');
+  var addr = document.getElementById('mailaddr');
+  var msg = document.querySelector('.authmsg');
+  var enter = document.querySelector('a.enter');
+  if (!btn || !mailBtn || !form || !addr || !msg || !enter) return;
+  var sendBtn = form.querySelector('button[type="submit"]');
+  var busy = false, loading = null;
+  var ANYWAY = ' Enter here works without an account.';
+  var WHY = {
+    disabled: 'Google sign in is not switched on for inCommon yet.' + ANYWAY,
+    offline: 'There is no connection to sign in with.' + ANYWAY,
+    off: 'The sign in files did not load.' + ANYWAY,
+    error: 'Sign in could not start.' + ANYWAY,
+    unfinished: 'Sign in did not finish. An emailed link has to be opened in the same browser that asked for it.' + ANYWAY,
+    googleUnfinished: 'Google sign in did not finish.' + ANYWAY,
+    cancelled: 'Google sign in was cancelled.' + ANYWAY,
+    expired: 'That sign in link has expired or was already used. Send a new one from here.' + ANYWAY,
+    sent: 'Check your email for a sign in link. Open it in this browser and it brings you straight in.',
+    rate: 'Too many sign in emails have gone out in the last hour. Try again later.' + ANYWAY,
+    invalid: 'That email address does not look complete.',
+    mailUnfinished: 'That sign in link did not finish. Open it in the same browser you asked from, or send a new one.' + ANYWAY
+  };
+  /* Which way the reader started, so the return can speak to it. localStorage
+     rather than sessionStorage, because an emailed link usually opens in a new
+     tab, and a tab is where sessionStorage ends. */
+  var VIA = 'incommon.signin.via';
+  function via(v) {
+    try { if (v === undefined) return localStorage.getItem(VIA); if (v) localStorage.setItem(VIA, v); else localStorage.removeItem(VIA); }
+    catch (e) { return null; }
+  }
+  function say(text) { msg.textContent = text; }
+  function hold() { busy = true; btn.setAttribute('aria-busy', 'true'); sendBtn.setAttribute('aria-busy', 'true'); }
+  function settle() { busy = false; btn.removeAttribute('aria-busy'); sendBtn.removeAttribute('aria-busy'); }
+  function clean() { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+  function load(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error(src)); };
+      document.head.appendChild(s);
+    });
+  }
+  /* A failed load is forgotten, so the next press tries again rather than
+     failing at once on the first attempt's broken promise. */
+  function cloud() {
+    return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
+      .then(function () { return load('./incommon-cloud.js'); })
+      .then(function () {
+        if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
+        return window.InCommonCloud;
+      })
+      .catch(function (e) { loading = null; throw e; }));
+  }
+  var here = location.origin + location.pathname;
+
+  /* The query is read for what it means and never echoed. Anybody can write a
+     link to this page with any error_description in it, and a sentence of
+     theirs painted on this cover would read as ours. */
+  var q = new URLSearchParams(location.search);
+  var code = q.get('code');
+  var refused = q.get('error');
+  var cameBy = via();
+  /* Opened in another browser, the link arrives with no record of how it was
+     asked for, so the unknown case speaks to both ways rather than guessing. */
+  function unfinished() { return cameBy === 'email' ? WHY.mailUnfinished : cameBy === 'google' ? WHY.googleUnfinished : WHY.unfinished; }
+  if (code) {
+    hold();
+    say('Signing you in.');
+    cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
+      clean();
+      if (r.ok) { via(null); location.replace(enter.getAttribute('href')); return; }
+      if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
+      settle();
+      say(unfinished());
+    }, function () { clean(); settle(); say(WHY.off); });
+  } else if (refused) {
+    /* error_code is a fixed vocabulary, so it may choose the sentence; it is
+       still never shown. An expired email link also arrives as access_denied,
+       which is why cancelled is only said when the reader went to Google. */
+    var errCode = q.get('error_code');
+    clean();
+    say(errCode === 'otp_expired' ? WHY.expired
+      : cameBy === 'google' && refused === 'access_denied' ? WHY.cancelled
+      : unfinished());
+  }
+
+  /* Back from Google's page restores this one from the back-forward cache
+     with the buttons still held, so they are let go here. */
+  addEventListener('pageshow', function (e) { if (e.persisted && !code) { settle(); say(''); } });
+
+  btn.addEventListener('click', function () {
+    if (busy) return;
+    hold();
+    via('google');
+    say('Opening Google.');
+    cloud().then(function (C) {
+      return C.oauthStart('google', here);
+    }).then(function (r) {
+      if (r.ok) { location.assign(r.url); return; }
+      settle();
+      say(WHY[r.reason] || WHY.error);
+    }, function () { settle(); say(WHY.off); });
+  });
+
+  /* The email button opens the field in its place rather than beside it, so
+     the cover never shows a form nobody asked for. */
+  mailBtn.addEventListener('click', function () {
+    mailBtn.hidden = true;
+    mailBtn.setAttribute('aria-expanded', 'true');
+    form.hidden = false;
+    addr.focus();
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (busy) return;
+    hold();
+    via('email');
+    say('Sending your link.');
+    cloud().then(function (C) {
+      return C.emailStart(addr.value, here);
+    }).then(function (r) {
+      settle();
+      if (r.ok) { say(WHY.sent); return; }
+      say(WHY[r.reason] || WHY.error);
+      if (r.reason === 'invalid') addr.focus();
+    }, function () { settle(); say(WHY.off); });
+  });
+})();
 </script>
 
 <script type="module">
@@ -1207,6 +1414,9 @@ setInterval(() => {
 const markEl = document.querySelector('.mark');
 const glyphEl = document.querySelector('.glyph');
 const enterEl = document.querySelector('a.enter');
+/* Every way in, and the line that reports on the sign in, leave together. */
+const wayEls = [enterEl, document.querySelector('button.google'), document.querySelector('button.email'),
+  document.getElementById('mailform'), document.querySelector('.authmsg')].filter(Boolean);
 
 /* Declared here rather than beside the click handler below, because
    scrollFade reads it and scrollFade is called at module scope before that
@@ -1238,8 +1448,10 @@ function scrollFade() {
      the only thing on the page still doing its job. Hidden once it is gone,
      so a keyboard cannot tab to a control nobody can see. */
   const way = 1 - outT * outT;
-  enterEl.style.opacity = way.toFixed(4);
-  enterEl.style.visibility = way < 0.02 ? 'hidden' : '';
+  for (const el of wayEls) {
+    el.style.opacity = way.toFixed(4);
+    el.style.visibility = way < 0.02 ? 'hidden' : '';
+  }
 
   const inT = Math.min(1, Math.max(0, (t - 0.14) / 0.41));
   mainU.uRim.value = inT * inT * (3.0 - 2.0 * inT);

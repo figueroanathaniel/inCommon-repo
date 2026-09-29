@@ -153,6 +153,11 @@ const LAYERS = {
        name, which is why the upstream filenames are kept. */
     'three.module.js',
     'three.core.js',
+    /* Where the ten astral bodies are. astronomy-engine 2.1.19, MIT, copied
+       byte for byte from the npm registry tarball. Vendored rather than
+       fetched for the reason React is, and named with its version the way the
+       Supabase client is, because nothing imports it by an upstream name. */
+    'astronomy-engine-2.1.19.min.js',
   ],
 };
 

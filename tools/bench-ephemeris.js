@@ -82,7 +82,10 @@ if (missing.length) {
   process.exit(1);
 }
 
-global.window = { MinorBodies: null };
+/* The ten astral bodies come from astronomy-engine in the app, so the bench
+   loads the same vendored file: without it lonRaw() falls back to the old
+   series and this would time a branch the app no longer runs. */
+global.window = { MinorBodies: null, Astronomy: require(path.join(repo, 'app', 'astronomy-engine-2.1.19.min.js')) };
 let Eph;
 try {
   Eph = eval('(class Eph {\n' + pieces.join('\n') + '\n})');

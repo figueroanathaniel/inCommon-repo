@@ -8,6 +8,13 @@ and up. **Do not create phone / tablet / 9:16 / desktop forks.** 820px is the
 only breakpoint that changes the component tree.
 
 ## Ephemeris architecture (V1.0.0)
+**Read this first: none of the router below supplies a position.** It is
+initialised in `componentDidMount()` and closed on unmount, and nothing between
+those two calls asks it for anything; `swisseph-wasm` has never been installed.
+Every chart comes from `lonOf()` and `lonRaw()` in the app class, and the ten
+astral bodies there come from `astronomy-engine` now: see "The ten astral bodies
+come from a library" below. The list is kept because the files still load.
+
 **Dual-backend ephemeris system** with graceful fallback. Modules:
 - `ephemeris-points.js`: centralized point registry (17 points, single source of truth)
 - `ephemeris-backend-current.js`: the fallback, existing simplified ephemeris (Kepler + analytical)
@@ -1383,6 +1390,92 @@ crossing in a window rather than the first, because Saturn and Chiron can cross
 a natal longitude three times and one date for a three pass return is a false
 statement about when something happens. Nothing calls it yet.
 
+## The ten astral bodies come from a library, and they are measured
+Until this pass the Sun, Moon and planets came from a hand written series in
+`lonRaw()`: a two term Moon and a coplanar first order Kepler model for Mercury
+to Pluto. Nothing in the build compared them with anything outside it, while the
+asteroids were held to JPL Horizons to a twentieth of a degree. Against 19,750
+Horizons positions from 1900 to 2100 the series was out by 1.3 degrees on the
+Moon, 3.9 on Venus, 6.5 on Mars and 2.9 on Pluto, and a comment beside it said
+"well inside a degree".
+
+What that changed, over 2,000 random births from 1950 to 2010, with one set of
+Human Design rules and only the positions swapped:
+
+| Changed | Share |
+|---|---|
+| Any activated gate | 74% |
+| Defined channels | 39% |
+| **Authority** | **8.8%** |
+| **Type** | **8.4%** |
+
+It is the same class of error as the 88 day design side, a third of its size,
+and it survived the same way: nineteen gates were green, because every one of
+them tested what it was pointed at and none was pointed at the foundation.
+
+**`astronomy-engine` 2.1.19 (MIT, Don Cross) is vendored** as
+`app/astronomy-engine-2.1.19.min.js`, byte for byte from the npm registry
+tarball, and named with its version the way the Supabase client is. It measures
+0.023 degrees at worst on the Moon and under 0.006 on the other nine. It is one
+browser file and needs no bundler, and needing a bundler was the reason the
+series was hand written in the first place.
+
+**`modulesReady()` waits for `window.Astronomy`.** Helmet scripts are hoisted as
+async tags, so without the wait a chart drawn before the library lands is
+memoised from the fallback for the session, the trap the minor bodies had with
+`window.MinorBodies`. The wait cannot hold the splash forever: `boot()` gives up
+after 50 tries and shows its banner, and `lonRaw()` answers from the old series,
+which is kept as the fallback for exactly that case. Verified both ways in a
+browser: a six second delay boots with the library in place, and a blocked file
+boots at about 9.6 seconds on the fallback.
+
+**Mars outward are read off a four day grid.** A library position costs 20 to
+45us, and 155 for Pluto, whose orbit it integrates numerically.
+`transitWindows()` asks for 1,986 in a row during boot and went from about 10ms
+to over 100. Cubic interpolation between library positions on a grid anchored at
+J2000 measures 0.0003 degrees at worst for Mars and 0.00003 or less for the
+rest, and the scan now takes about 6ms in a browser, less than before. Mercury
+and Venus measure 0.05 and 0.002 on the same grid and are asked for directly, as
+are the Sun and the Moon. Two things about the grid are easy to undo. Neighbours
+are unwrapped onto the middle node before they are mixed, or a crossing of 0
+Aries averages 359 and 1 into 180: this pass made that bug once, in a scratch
+test. And a lone cold call costs four nodes, which the position cache in front
+of `lonOf()` pays once. `bench-ephemeris.js` loads the same file now, so the
+ratios quoted in "The one cache that holds positions" were measured against the
+old series; run the bench rather than quoting them.
+
+**`check-astral-bodies.js` is the gate** and `fetch-astral-bodies.js` makes its
+fixture. It lifts `lonRaw()` out of the app the way `bench-ephemeris.js` does,
+loads the vendored file, and holds all ten bodies to 0.03 degrees, a thirtieth of
+a Human Design line, against every Horizons position. It also asserts that the
+old series FAILS that ceiling with the library removed, which is what proves it
+can go red; walks the grid against the library at a quarter day through all 164
+crossings of 0 Aries in the fixture; pins the vendored file's SHA-256; asserts a
+non-finite instant answers NaN; and checks the two seams that fail silently,
+`modulesReady()` and the `app/sw.js` precache. Each of those was sabotaged once
+and turned it red.
+
+**Only a finite instant reaches the library.** `MakeTime` throws on NaN, where
+the series quietly answered NaN, so a half typed partner birth date that parses
+to an invalid date would have thrown out of a render instead of drawing nothing.
+`lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
+back for all ten bodies.
+
+**`people-library.js` `STATE_VERSION` is 2.** Its own comment says the number
+moves when the arithmetic of `computed_state` changes, and the bump is what
+invalidates `pair-cache.js`, so no stored composite outlives the positions it
+was made from.
+
+**This changes existing readers' charts**, as the design side fix did: about one
+birth in twelve reads as a different Type. It is a correction rather than a
+change, and it is worth saying out loud.
+
+**The deploy bundle was rebuilt in place.** `deploy/v6.3/` carries the library
+and the cover's sign in, so the deploy preview shows what the source does. There
+was no version bump, by the rule in "Where things live in this repository":
+rebuilding does not earn one, and the stamp moves when a build has been deployed
+and confirmed live. The two earlier v6.3 rebuilds made the same call.
+
 ## A routed jump owns the pager tab until it lands
 `vtGoTab()` sets `vtTab` and then smooth scrolls the pager to that page, and
 the pager's scroll handler derives `vtTab` from `scrollLeft` on every scroll
@@ -2503,6 +2596,179 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
+## Signing in on the cover: Google and email, and why the code comes back to it
+The owner asked for Google sign in on the cover on 28 September 2026, as part of
+moving toward the Celestial Codex direction. It rides the Supabase project the
+cloud sync already uses, so there is one account system, not two. The cloud UI
+spec's "No provider sign-ins" line describes the temporary Settings surface of
+step 4 and is superseded here for the cover.
+
+**The return lands on the cover as `?code=`, and that is the whole design.**
+supabase-js defaults to the implicit flow, which hands the tokens back after the
+`#`, and `#` is this app's router: a return to the app is read as an address,
+and a return to the cover is forwarded to the app as one by the hash forward in
+its head. PKCE hands back `?code=`, before the `#`, where neither page routes.
+The cover exchanges the code, supabase-js writes the session to localStorage
+under the key it derives from the project url, the query is dropped so a reload
+cannot spend the code twice, and the reader goes on to the app, whose own client
+finds the session on load. Driven end to end in a browser with Supabase and
+Google faked: the authorize request carried an S256 challenge and the cover as
+`redirect_to`, the exchange sent the returned code with its verifier, and the
+app came up on `#/today` with `cloudStatus.mode` of `cloud`.
+
+**The app's own client stays implicit on purpose.** Its email links (sign up
+confirmation, the PIN recovery link) would only open in the browser that asked
+for them under PKCE, because the code verifier lives there. K20 asserts `init()`
+still creates the client with the library defaults.
+
+**Every Supabase call is still in `incommon-cloud.js`.** `providerEnabled()`,
+`oauthStart()` and `oauthFinish()` need no `init()`, because the cover has no
+ProfileManager, and they make their own PKCE client with `detectSessionInUrl`
+off so the exchange is explicit. The module's header rule, never touching the
+network without a session, now carries its one exception in writing: the two
+calls a reader starts by pressing the button, which carry no local state. K15 to
+K19 cover the flow, the disabled provider, no network and a missing library;
+turning the flow back to implicit reds K15, and skipping the provider check reds
+K16 and K17.
+
+**The provider is asked before the redirect.** With Google switched off in the
+project, the authorize endpoint answers with a raw JSON error page, so
+`providerEnabled()` reads the project's public auth settings first and the
+button says in a sentence that Google sign in is not switched on yet. **It is
+off today**: the project allows email only, and turning it on is the owner's
+step in the Supabase dashboard (Authentication, Providers, Google, with a
+Google Cloud OAuth client whose redirect URI is the project's
+`/auth/v1/callback`), plus every cover address in Authentication, URL
+Configuration, Redirect URLs, or Supabase sends the reader to the Site URL
+instead.
+
+**Continue with email is the way in that works today.** Added the next day, when
+the owner asked for a sign in that needs no Google registration: the email
+provider is already on, on Supabase's free plan. `emailStart()` asks the same
+PKCE client for a magic link sent back to the cover, so the link returns as
+`?code=` and the one exchange that finishes Google finishes it too. The price of
+PKCE is that the link has to be opened in the browser that asked, because the
+code verifier lives there, and the screen says so rather than failing
+mysteriously. A new address is signed up by the same link. The button opens the
+field in its own place, so the cover never shows a form nobody asked for, and
+an address with no `@` and dot is refused before anything is sent. Two limits
+belong to the owner, not the code: Supabase's built in sender allows only a few
+emails an hour, so launch traffic wants a custom SMTP sender in the dashboard,
+and the cover's address has to be in Redirect URLs here as well. K21 to K23 and
+a browser drive with Supabase faked cover sending, the return in a second tab
+of the same browser landing signed in, the rate limit, a bad address, a link
+opened in another browser, and an expired one.
+
+**Which way the reader started is kept in `incommon.signin.via`**, in
+localStorage because an emailed link usually opens in a new tab and a tab is
+where sessionStorage ends. The return reads it to choose its sentence, and it is
+cleared on success. With no record, which is what a link opened in another
+browser looks like, the sentence speaks to both ways rather than guessing.
+
+**The script is plain, not part of the module, and loads nothing until asked.**
+With no WebGL the module dies at the renderer, and a way in that died with it
+would be a second failure on top of the first. The two files it needs, the
+vendored Supabase client and `incommon-cloud.js`, are loaded on the press or on
+the return, never at page load. The app address is read off the "enter here"
+link rather than written a third time, because `build-bundle.js` asserts there
+are exactly two copies of it. The build copies both files beside `index.html` as
+`SIGNIN_FILES` and refuses if the cover stops naming either one.
+
+**The return's query is read for what it means and never echoed.** Anybody can
+write a link to the cover with any `error_description` in it, and a sentence of
+theirs painted on the first screen would read as ours: a crafted "your account is
+locked, call this number" came back as the cover's own fixed sentence and
+nothing of its text. `error_code` is a fixed vocabulary, so it may choose the
+sentence and is still never shown: `otp_expired` says the link expired or was
+used. `access_denied` reads as cancelled only when the reader went to Google,
+because an expired email link arrives as `access_denied` too, and everything
+else reads as did not finish. A failed load of the two files is forgotten so the next press
+retries, and a return through the back button lets the held button go.
+
+**Two things on the cover changed that the section above states as rules.** It
+now has three controls, not one: H5 still counts one `a[href]`, because the
+Google and email controls are buttons that do not navigate by themselves. And the G carries
+Google's green: the button follows Google's own dark style because its look is
+set by their branding rules, and that green is their mark rather than
+`#2fff8f`, so the rim is still the only inCommon green on the cover.
+
+**The gap it leaves, stated rather than hidden.** `pullAll()` has no caller, so
+signing in on a new device pushes that device's record up and brings nothing
+down. The first run used to say "No account, no sign-in", which contradicted a
+reader who had just signed in on the cover; the Codex page below replaced it and
+does not say it. The tucked away classic form still does, so if it is ever
+brought back, that sentence goes back to the consent language pass.
+
+## The first run is the Codex's page, and inCommon's is tucked away
+The owner asked on 29 September 2026 for the Celestial Codex's birth page to
+become the first run, with inCommon's put away rather than deleted. So the page a
+reader meets has the Codex's layout and words: "The First Inscription", "Tell
+the Codex *when you arrived.*", the three coordinates line, one card with the
+full birth name, the date and the time side by side, a place search that lists
+candidates with their coordinates and zone, and "Cast my Codex". The word Codex
+is on it on purpose; the owner is merging the two and chose the page as it was.
+
+**Tucked away means one flag.** `FIRSTRUN_CLASSIC` on the logic class is false,
+`authVals()` sets `authCodex` or `authBirth` from it, and inCommon's form is still
+in the markup whole behind `authBirth`. The two pages share every field, handler
+and check, so setting the flag true brings the old page back with nothing else to
+change.
+
+**What was adopted, and what was kept from inCommon because it is correctness
+rather than style.** The Codex's time field was a native `type=time` defaulting
+to 12:00 and marked known, which is exactly the two faults "The birth moment has
+three states" exists to prevent: a platform dependent control, and a noon that
+reads as an answer. So the time stays digits and an explicit 24h, AM or PM, empty
+until typed, and "I don't know my birth time" is a switch that records unknown
+rather than a default. The Codex showed a chosen place's coordinates and zone;
+this page adds the offset that applied on the birth date and whether daylight
+saving was in effect, which is the part that moves the Ascendant. Errors stay
+field level, with `aria-invalid` and `aria-errormessage` per field, because G7
+holds that. And the page is drawn in tokens: the one action wears `--ac`, the
+labels wear `--ac2-hi` because `--ac2` is never text, the corner brackets wear
+`--ac2` as borders, and the heading's gradient runs between `--tx` and
+`--ac2-hi` so it holds its contrast in every identity. The Codex's gold has no
+token here, and a hex in the template is exactly what the theme boundary bars.
+
+**What it requires.** The Codex refused to cast without a name, a date and a
+place. Here the date is required, because a cast with no date casts nothing,
+and a place that was typed has to resolve, because an unplaced city used to save
+quietly and draw whole sign houses. The name is not required: a chart does not
+need one, and inCommon's rule that the date alone is enough to begin still
+holds. Skip for now stays, under the card, and R2 and G4 hold it there.
+
+**The name is split the way the Codex split it.** The full name goes to the
+birth name store the Numbers page reads, `incommon.p.<id>.birthName`, because
+Expression and Soul Urge read every letter; the profile is named by its first
+word, which is what the Codex called the reader.
+
+**The place search is debounced and memoised, and that is measured.** A
+`Gazetteer.search` over 170,000 places costs about 150ms and a
+`PM.geocode` of one exact name about 130ms, and `authVals()` runs on every
+render of this page. So the search reads `afPlaceQ`, a copy of the text that
+settles 350ms after the last keystroke, the Codex's own debounce, and both
+answers are kept for the text they were asked about. Coordinates typed as
+latitude, longitude are an answer rather than a search: their digits otherwise
+matched six towns in Kazakhstan. A place typed out in full counts as picked.
+
+**G7 finds the date field by type now**, inside the gate, because its label moved
+from "Birth date" to "Date of birth". What that row tests is the error wiring,
+and it should not break on a wording change again.
+
+## The phone sample banner is pinned, so every section carries its shadow
+The sample banner in the vertical shell is `position:absolute` under the header,
+deliberately outside the scroll so it is never a snap stop. Every section pads
+its top by `var(--hdr)` alone, so the banner covered the first 62 pixels of each
+page at 390 wide and 78 at 320: the date on Today, the introduction on Spirit.
+`main` had it too.
+
+Each of the five sections now opens with `data-sample-spacer`: the banner's own
+row, laid out the same way, `visibility:hidden`, `aria-hidden`, with spans where
+the banner has a button, behind the same `sampleOn`. It takes the banner's exact
+height at any width and any text size without measuring anything, measured equal
+at 320, 390 and 430. **If the banner's padding, gap, font or button box
+changes, change the spacer with it**, or the page starts short of it again.
+
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where
 the app, the modules, the doc pages and the harness were all siblings. Every
@@ -2627,25 +2893,26 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds twenty-eight scripts. Nineteen are gates and are worth running
+`tools/` holds thirty scripts. Twenty are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
-`check-registry-integration.js`, `check-minor-body-elements.js`.
-Six generate:
+`check-registry-integration.js`, `check-minor-body-elements.js`,
+`check-astral-bodies.js`.
+Seven generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
-(needs network: JPL Horizons), `build-extended-points-doc.js`
+and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
 doc's own counts can never drift from the registry's). `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
 
 `drift-check.js` is none of the three above and does not run cold the way
-the other twenty-seven do. It is the only script in `tools/` that drives a
+the other twenty-nine do. It is the only script in `tools/` that drives a
 real browser, because it exists to answer a different question:
 `check-deployed.js` asks whether the live site matches what was built, and
 this asks whether `deploy/v6.3/` itself still matches the bytes the seven

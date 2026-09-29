@@ -50,8 +50,10 @@
   var VERSION = '1.0.0';
   /* Bumped whenever the shape or the arithmetic of computed_state changes, so
      stored records can be recognised as stale and recomputed. It is also what
-     invalidates the pair cache. */
-  var STATE_VERSION = 1;
+     invalidates the pair cache. 2: the ten astral bodies moved from the
+     hand written series to astronomy-engine, so every stored longitude and
+     every cached composite gate list was computed by arithmetic that is gone. */
+  var STATE_VERSION = 2;
   var KEY = 'incommon.people.v1';
   var LEGACY_KEY = 'incommon.friends';
   var MAX_PEOPLE = 12;

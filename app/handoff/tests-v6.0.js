@@ -1069,13 +1069,16 @@
       await sleep(700);
       var d0 = w0.document;
       await waitGate(d0, 5000);
-      var dateIn = d0.querySelector('input[aria-label="Birth date"]');
+      /* Found by type inside the gate rather than by its label, which moved
+         from "Birth date" to "Date of birth" with the Codex page and may move
+         again: what this row tests is the error wiring, not the wording. */
+      var dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
       if (dateIn) {
         w0.__incommonApp.afSet('bdate', '1776-07-04');
         await sleep(260);
         w0.__incommonApp.birthSubmit();
         await sleep(420);
-        dateIn = d0.querySelector('input[aria-label="Birth date"]');
+        dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
         var errId = dateIn && dateIn.getAttribute('aria-errormessage');
         var errEl = errId ? d0.getElementById(errId) : null;
         t('G7', 'A bad birth date marks its own field and points at a real message',
@@ -1088,7 +1091,7 @@
         w0.__incommonApp.afSet('bdate', '1992-07-02');
         w0.__incommonApp.afClearErr('bdate');
         await sleep(400);
-        dateIn = d0.querySelector('input[aria-label="Birth date"]');
+        dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
         t('G7b', 'Correcting the field clears aria-invalid and the message together',
           { invalid: 'false', messageGone: true },
           { invalid: dateIn ? dateIn.getAttribute('aria-invalid') : 'no field',
