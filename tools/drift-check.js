@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/*! tools/drift-check.js: re-verify deploy/v6.3/ against a recorded baseline,
+/*! tools/drift-check.js: re-verify the current deploy/<version>/ against a recorded baseline,
  *  and only spend a browser run when the bundle has actually moved.
  *
  * WHY THIS EXISTS. Seven of the suite's eight phases (M, E, F, G, T, R, N)
@@ -36,7 +36,7 @@
  *
  * NOTHING IN app/ OR deploy/ IS EVER WRITTEN. Every phase is graded by
  * intercepting the verification runner's own network requests and
- * answering them with the real deploy/v6.3/ bytes read off disk. H
+ * answering them with the real deploy/<version>/ bytes read off disk. H
  * additionally serves a version of the H runner file with its internal
  * 180s budget raised, again served only, never written to disk.
  *
@@ -53,15 +53,31 @@ const fs = require('fs');
 const path = require('path');
 
 const REPO = path.resolve(__dirname, '..');
-const BUNDLE = path.join(REPO, 'deploy/v6.3');
+/* The folder is READ OUT of build-bundle.js, the same way check-deployed.js
+   reads it, rather than typed again here. This file said deploy/v6.3 in four
+   places, and the version moves once per deployment: a hand written copy is
+   the copy that grades last version's bundle the first time a bump forgets
+   it, and reports green while it does. */
+const BUNDLE_NAME = (() => {
+  const src = fs.readFileSync(path.join(__dirname, 'build-bundle.js'), 'utf8');
+  const m = /const BUNDLE = path\.join\(repo, 'deploy', '([^']+)'\)/.exec(src);
+  if (!m) {
+    console.error('drift-check: cannot read BUNDLE out of build-bundle.js.');
+    process.exit(2);
+  }
+  return m[1];
+})();
+const BUNDLE = path.join(REPO, 'deploy', BUNDLE_NAME);
 const APP_HTML = path.join(BUNDLE, 'app.html');
 const INDEX_HTML = path.join(BUNDLE, 'index.html');
 const BASELINE_PATH = path.join(REPO, 'tools/fixtures/drift-check-baseline.json');
 const ORIGIN = 'http://127.0.0.1:8099';
 
+const APP_KEY = 'deploy/' + BUNDLE_NAME + '/app.html';
+const INDEX_KEY = 'deploy/' + BUNDLE_NAME + '/index.html';
 const TRACKED = {
-  'deploy/v6.3/app.html': APP_HTML,
-  'deploy/v6.3/index.html': INDEX_HTML
+  [APP_KEY]: APP_HTML,
+  [INDEX_KEY]: INDEX_HTML
 };
 
 const PHASES = [
@@ -135,8 +151,8 @@ function readBaseline() {
 
 function writeBaseline(hashes) {
   const out = {
-    'deploy/v6.3/app.html': hashes['deploy/v6.3/app.html'],
-    'deploy/v6.3/index.html': hashes['deploy/v6.3/index.html'],
+    [APP_KEY]: hashes[APP_KEY],
+    [INDEX_KEY]: hashes[INDEX_KEY],
     recordedAt: new Date().toISOString(),
     recordedBy: 'a full drift-check sweep that passed all green (M/E/F/G/T/R/N)'
   };

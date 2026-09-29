@@ -2649,8 +2649,9 @@ PKCE client for a magic link sent back to the cover, so the link returns as
 `?code=` and the one exchange that finishes Google finishes it too. The price of
 PKCE is that the link has to be opened in the browser that asked, because the
 code verifier lives there, and the screen says so rather than failing
-mysteriously. A new address is signed up by the same link. The button opens the
-field in its own place, so the cover never shows a form nobody asked for, and
+mysteriously. A new address is signed up by the same link. The field opens in
+place when asked for, from "enter here" since v6.4 (see below), so the cover
+never shows a form nobody asked for, and
 an address with no `@` and dot is refused before anything is sent. Two limits
 belong to the owner, not the code: Supabase's built in sender allows only a few
 emails an hour, so launch traffic wants a custom SMTP sender in the dashboard,
@@ -2686,11 +2687,41 @@ else reads as did not finish. A failed load of the two files is forgotten so the
 retries, and a return through the back button lets the held button go.
 
 **Two things on the cover changed that the section above states as rules.** It
-now has three controls, not one: H5 still counts one `a[href]`, because the
-Google and email controls are buttons that do not navigate by themselves. And the G carries
+has more than one control now: H5 still counts one `a[href]`, because the
+sign in controls are buttons that do not navigate by themselves. And the G carries
 Google's green: the button follows Google's own dark style because its look is
 set by their branding rules, and that green is their mark rather than
 `#2fff8f`, so the rim is still the only inCommon green on the cover.
+
+**"enter here" is the way to signing in, and the Google button is hidden.**
+Decided by the owner on 29 September 2026, in v6.4. The "Continue with email"
+button is gone: the first press of "enter here" opens the email field in its
+place, with "Continue without an account" under it, so the one link on the
+cover is both doors and neither is louder than the other. Three things keep it
+from costing anybody the way in they had:
+
+- **The link is still a real anchor with a real href**, untouched in the markup,
+  so with the sign in script dead it navigates exactly as it always did, and the
+  build's two copies of the app address and its `<a class="enter" href=...>`
+  check are unchanged. `aria-controls` and `aria-expanded` are written by the
+  script for the same reason: only while it runs does the link open anything.
+- **"Continue without an account" goes on through the link** by clicking it,
+  so the module's exit, the rim becoming the mark, runs exactly as before. The
+  plain script's listener is registered before the module's (a plain script
+  runs while the page parses, a module after it), stops the first press with
+  `stopImmediatePropagation`, and steps aside on every press after, so a second
+  press of "enter here" also goes in.
+- **A return that did not finish opens the field by itself**, an expired link
+  or one opened in another browser, because what that reader needs next is a
+  new link, one field away rather than one press away.
+
+Google is hidden with the `hidden` attribute and its code is intact: Google sign
+in is not switched on in the project, the owner is not setting it up, and a
+button that can only say so is not worth a place on the first screen. Removing
+the attribute brings it back. H15 asserts both steps now, in one row so the
+phase stays at 17: the first press opens the field without leaving or starting
+the exit, the opened state passes 44px and 4.5:1 with the page at the top where
+both sweeps can see it, and "Continue without an account" runs the exit.
 
 **The gap it leaves, stated rather than hidden.** `pullAll()` has no caller, so
 signing in on a new device pushes that device's record up and brings nothing
@@ -2787,7 +2818,7 @@ that a later change is most likely to break:
   attribute, so a grep for script tags does not find it.
 
 - **The folder is named for the version, and the version moves once per
-  deployment.** `deploy/v6.3/` holds the bundle stamped `incommon-v6.3`, and
+  deployment.** `deploy/v6.4/` holds the bundle stamped `incommon-v6.4`, and
   those two numbers are the same number on purpose: a folder called `v1.7`
   holding a bundle stamped `v5.8` told a reader nothing. Rebuilding does not
   earn a bump. The stamp changes when a build has been deployed AND confirmed
@@ -2796,7 +2827,7 @@ that a later change is most likely to break:
   the failure `check-deployed.js` exists to catch.
 - **There are three ways this repo reaches a host and all three now work.**
   Git connected, where `netlify.toml` names the publish directory. Dragging
-  `deploy/v6.3/`, where that folder's own `_redirects` and `_headers` travel
+  `deploy/v6.4/`, where that folder's own `_redirects` and `_headers` travel
   with it. And dragging the REPOSITORY, which is the one a person actually
   does because the repo is the thing on their desktop, and which failed
   silently for as long as it was the only shape nothing covered: `publish` is
@@ -2858,7 +2889,7 @@ that a later change is most likely to break:
   On ENOSPC it now says how much room it needed and that the old bundle is
   untouched.
 - **`deploy/` is a shelf, not a site.** It holds one folder per shipped
-  bundle, so the thing you upload is `deploy/v6.3/`. A host pointed at
+  bundle, so the thing you upload is `deploy/v6.4/`. A host pointed at
   `deploy/` itself, or at the repo root, serves a directory with no page in
   it: the deploy succeeds and the link is broken, which is a failure with no
   error anywhere in it. **The folder is named ONCE, in `BUNDLE` at the top of
@@ -2915,7 +2946,7 @@ cache and asserts it did not change an answer.
 the other twenty-nine do. It is the only script in `tools/` that drives a
 real browser, because it exists to answer a different question:
 `check-deployed.js` asks whether the live site matches what was built, and
-this asks whether `deploy/v6.3/` itself still matches the bytes the seven
+this asks whether the current `deploy/<version>/` itself still matches the bytes the seven
 deterministic verification phases (M, E, F, G, T, R, N) last passed against,
 skipping the browser run entirely when a `sha256sum` says it does. It needs
 Playwright and a Chromium binary this repo installs for nobody, and says so

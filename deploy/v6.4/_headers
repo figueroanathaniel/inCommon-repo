@@ -1,0 +1,24 @@
+# The four files a redeploy has to actually reach.
+#
+# The service worker serves the copy it has. If the CDN also serves the copy it
+# has, an installed phone can sit on a build for as long as its edge cache
+# lives, and nothing about the device suggests it is looking at an old one.
+# must-revalidate means the browser asks every time and gets 304 when nothing
+# moved, which costs one small request and makes a deploy arrive.
+#
+# Everything else in this folder is cache first on purpose: the icons, the
+# vendored React and the vendored three.js are files whose contents do not
+# change without the release they belong to changing.
+#
+# index.html is the cover and app.html is the app. Both are pages a redeploy
+# has to reach, so both are listed: a must-revalidate cover in front of a
+# stale app is a fresh door onto an old room.
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/app.html
+  Cache-Control: public, max-age=0, must-revalidate
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.json
+  Cache-Control: public, max-age=0, must-revalidate

@@ -1,0 +1,6 @@
+# The link is public. The contents are not: everything a reader writes stays on
+# the device that wrote it, so there is nothing here for a crawler to reach
+# beyond the app shell itself.
+
+User-agent: *
+Allow: /

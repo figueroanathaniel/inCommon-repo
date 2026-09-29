@@ -51,7 +51,7 @@ const srcPath = path.join(appDir, 'inCommonApp v2.dc.html');
    version it reads lives beside the output and neither path existed any more.
    Bump this when a new bundle folder is cut, or the build lands in the previous
    release. */
-const BUNDLE = path.join(repo, 'deploy', 'v6.3');
+const BUNDLE = path.join(repo, 'deploy', 'v6.4');
 
 const outFlag = process.argv.indexOf('--out');
 const outPath = outFlag !== -1 && process.argv[outFlag + 1]
