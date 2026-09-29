@@ -2692,11 +2692,68 @@ Google's green: the button follows Google's own dark style because its look is
 set by their branding rules, and that green is their mark rather than
 `#2fff8f`, so the rim is still the only inCommon green on the cover.
 
-**Two gaps it leaves, stated rather than hidden.** `pullAll()` has no caller, so
+**The gap it leaves, stated rather than hidden.** `pullAll()` has no caller, so
 signing in on a new device pushes that device's record up and brings nothing
-down. And the first run screen still says "No account, no sign-in", which a
-reader who just signed in will find contradicts what they did. The
-consent language pass owns that sentence.
+down. The first run used to say "No account, no sign-in", which contradicted a
+reader who had just signed in on the cover; the Codex page below replaced it and
+does not say it. The tucked away classic form still does, so if it is ever
+brought back, that sentence goes back to the consent language pass.
+
+## The first run is the Codex's page, and inCommon's is tucked away
+The owner asked on 29 September 2026 for the Celestial Codex's birth page to
+become the first run, with inCommon's put away rather than deleted. So the page a
+reader meets has the Codex's layout and words: "The First Inscription", "Tell
+the Codex *when you arrived.*", the three coordinates line, one card with the
+full birth name, the date and the time side by side, a place search that lists
+candidates with their coordinates and zone, and "Cast my Codex". The word Codex
+is on it on purpose; the owner is merging the two and chose the page as it was.
+
+**Tucked away means one flag.** `FIRSTRUN_CLASSIC` on the logic class is false,
+`authVals()` sets `authCodex` or `authBirth` from it, and inCommon's form is still
+in the markup whole behind `authBirth`. The two pages share every field, handler
+and check, so setting the flag true brings the old page back with nothing else to
+change.
+
+**What was adopted, and what was kept from inCommon because it is correctness
+rather than style.** The Codex's time field was a native `type=time` defaulting
+to 12:00 and marked known, which is exactly the two faults "The birth moment has
+three states" exists to prevent: a platform dependent control, and a noon that
+reads as an answer. So the time stays digits and an explicit 24h, AM or PM, empty
+until typed, and "I don't know my birth time" is a switch that records unknown
+rather than a default. The Codex showed a chosen place's coordinates and zone;
+this page adds the offset that applied on the birth date and whether daylight
+saving was in effect, which is the part that moves the Ascendant. Errors stay
+field level, with `aria-invalid` and `aria-errormessage` per field, because G7
+holds that. And the page is drawn in tokens: the one action wears `--ac`, the
+labels wear `--ac2-hi` because `--ac2` is never text, the corner brackets wear
+`--ac2` as borders, and the heading's gradient runs between `--tx` and
+`--ac2-hi` so it holds its contrast in every identity. The Codex's gold has no
+token here, and a hex in the template is exactly what the theme boundary bars.
+
+**What it requires.** The Codex refused to cast without a name, a date and a
+place. Here the date is required, because a cast with no date casts nothing,
+and a place that was typed has to resolve, because an unplaced city used to save
+quietly and draw whole sign houses. The name is not required: a chart does not
+need one, and inCommon's rule that the date alone is enough to begin still
+holds. Skip for now stays, under the card, and R2 and G4 hold it there.
+
+**The name is split the way the Codex split it.** The full name goes to the
+birth name store the Numbers page reads, `incommon.p.<id>.birthName`, because
+Expression and Soul Urge read every letter; the profile is named by its first
+word, which is what the Codex called the reader.
+
+**The place search is debounced and memoised, and that is measured.** A
+`Gazetteer.search` over 170,000 places costs about 150ms and a
+`PM.geocode` of one exact name about 130ms, and `authVals()` runs on every
+render of this page. So the search reads `afPlaceQ`, a copy of the text that
+settles 350ms after the last keystroke, the Codex's own debounce, and both
+answers are kept for the text they were asked about. Coordinates typed as
+latitude, longitude are an answer rather than a search: their digits otherwise
+matched six towns in Kazakhstan. A place typed out in full counts as picked.
+
+**G7 finds the date field by type now**, inside the gate, because its label moved
+from "Birth date" to "Date of birth". What that row tests is the error wiring,
+and it should not break on a wording change again.
 
 ## The phone sample banner is pinned, so every section carries its shadow
 The sample banner in the vertical shell is `position:absolute` under the header,
