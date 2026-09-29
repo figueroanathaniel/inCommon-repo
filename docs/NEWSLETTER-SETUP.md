@@ -6,7 +6,7 @@ steps below.
 
 ## What the app does now
 
-The cover's Create an account form has a box under the password:
+The cover's Create New Account form has a box under the password:
 
 > Send me the inCommon newsletter
 

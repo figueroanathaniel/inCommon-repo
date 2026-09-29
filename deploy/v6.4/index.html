@@ -239,6 +239,10 @@
   .mailform [hidden] { display: none !important; }
   .mailform .modes { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 4px; }
   .mailform[data-mode="up"] .signin { margin: 0 auto; }
+  /* Making an account is a button in its own right, named the way the owner
+     asked for it, and its own row under Sign in: a small underlined link read
+     as something secondary, and it is one of the two things this form is for. */
+  .mailform .signin.alt { flex: 1 1 100%; justify-content: center; }
   /* The newsletter box, ticked to start with and one press to untick. It is a
      label around a native checkbox, so the whole line is the target and a
      screen reader hears a checkbox with its own name, and the violet is the
@@ -337,8 +341,8 @@
       <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
       <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
       <button class="signin" type="submit">Sign in</button>
+      <button class="signin alt" type="button" data-to="up">Create New Account</button>
       <div class="modes">
-        <button class="mode" type="button" data-to="up">Create an account</button>
         <button class="mode" type="button" data-to="forgot">Forgot password?</button>
         <button class="mode" type="button" data-to="in" hidden>Sign in instead</button>
       </div>
@@ -419,7 +423,7 @@
   var sendBtn = form.querySelector('button[type="submit"]');
   var news = form.querySelector('.news');
   var passLabel = form.querySelector('label[for="mailpass"]');
-  var modeBtns = form.querySelectorAll('button.mode');
+  var modeBtns = form.querySelectorAll('button[data-to]');
   var busy = false, loading = null, opened = false, through = false, mode = 'in';
   var ANYWAY = ' You can still continue without an account.';
   var LINK_AGAIN = ' Sign in with your password, or choose “Forgot password?” for a new link.';
@@ -434,7 +438,7 @@
     weak: 'That password is too easy to guess. Choose a longer one.',
     same: 'That is the password the account already has. Choose a different one.',
     wrong: 'That email and password do not match. If you used to sign in with an emailed link, choose “Forgot password?” to set a password.',
-    unconfirmed: 'That address is not confirmed yet. Open the link in the email sent when the account was made, in any browser, then sign in here. If it never came, choose “Create an account” with the same address to have it sent again.',
+    unconfirmed: 'That address is not confirmed yet. Open the link in the email sent when the account was made, in any browser, then sign in here. If it never came, choose “Create New Account” with the same address to have it sent again.',
     exists: 'That address already has an account. Sign in with its password, or choose “Forgot password?” to set one.',
     closed: 'New accounts are not being made right now.' + ANYWAY,
     confirm: 'Check your email for a link to confirm your address. It works in any browser, and once it is opened you can sign in here with your password.',
@@ -449,7 +453,7 @@
   var MODES = {
     in: { button: 'Sign in', busy: 'Signing you in.', pass: true, passAuto: 'current-password',
       passLabel: 'Password', passHint: 'Password', to: ['up', 'forgot'] },
-    up: { button: 'Create account', busy: 'Making your account.', pass: true, passAuto: 'new-password',
+    up: { button: 'Create New Account', busy: 'Making your account.', pass: true, passAuto: 'new-password',
       passLabel: 'Choose a password, 8 or more characters', passHint: 'Choose a password, 8 or more', news: true, to: ['in'], back: 'Sign in instead' },
     forgot: { button: 'Send reset link', busy: 'Sending the link.', pass: false, to: ['in'], back: 'Back to sign in' },
     set: { button: 'Save password', busy: 'Saving your password.', pass: true, passAuto: 'new-password',
@@ -476,13 +480,17 @@
     /* Signed in by a recovery link, the reader has an account in hand, so the
        way on without one would be the wrong sentence. */
     skip.hidden = !opened || m === 'set';
-    if (focus) (d.noAddr || (addr.value && d.pass) ? pass : addr).focus();
+    /* Focus goes to the first thing still to do: the address, the password,
+       the newsletter box nobody has seen yet, then the button. */
+    if (focus) (d.noAddr ? pass : !addr.value ? addr : d.pass && !pass.value ? pass
+      : d.news ? document.getElementById('newsopt') : sendBtn).focus();
   }
+  /* What was typed stays typed: somebody who filled in both fields and then
+     pressed Create New Account has chosen their password already. */
   for (var mi = 0; mi < modeBtns.length; mi++) {
     modeBtns[mi].addEventListener('click', function () {
       if (busy) return;
       say('');
-      pass.value = '';
       setMode(this.getAttribute('data-to'), true);
     });
   }
