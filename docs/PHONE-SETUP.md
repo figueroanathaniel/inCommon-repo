@@ -3,7 +3,7 @@
 The app side of signing in by phone is built: the cover takes an email or a
 phone number in one field, a sign up by phone asks for the code a text brings,
 Forgot password with a number texts a code that leads to choosing a new
-password, and the profile menu has a Phone number item that adds or changes the
+password, and the profile card (Profile, in the profile icon's menu) has a Phone number item that adds or changes the
 number on an account. None of it works until Supabase can send a text, and
 that is the owner's half, below.
 
@@ -18,7 +18,7 @@ no email account is affected.
 | Cover, Sign in | "Email or phone" takes either. A US or Canadian number can be typed any usual way, `(555) 123-4567`; any other needs `+` and its country code. |
 | Cover, Create New Account | With a number, the newsletter box goes away (the list is read by email), Supabase texts a six digit code, and the cover asks for it. The right code signs the reader in. |
 | Cover, Forgot password? | With a number, the button reads "Text me a code". The code signs the reader in and the cover asks for a new password. A number with no account is answered in exactly the same words, so nobody can use the page to find out whose number is registered. |
-| App, profile menu, Phone number | For a signed in reader: the number, then the code texted to it, then it is on the account. Readers who made their account by email add a number here, and from then on can sign in with it and recover by text. |
+| App, profile icon, Profile, Phone number | For a signed in reader: the number, then the code texted to it, then it is on the account. Readers who made their account by email add a number here, and from then on can sign in with it and recover by text. |
 
 ## Your half
 

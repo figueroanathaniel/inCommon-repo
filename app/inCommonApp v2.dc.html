@@ -449,7 +449,7 @@ input[type="date"]{color-scheme:dark}
   <svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true" style="flex:none;display:block"><path d="M50 27.5A26 26 0 0 1 50 72.5A26 26 0 0 1 50 27.5Z" fill="#2fff8f"></path><circle cx="37" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6.5"></circle><circle cx="63" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6.5"></circle></svg>
   <span style="flex:1"></span>
   <button onClick="{{ searchOpenGo }}" aria-label="Search" aria-describedby="incommon-search-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:var(--ac);-webkit-mask:{{ searchIcon }} center/contain no-repeat;mask:{{ searchIcon }} center/contain no-repeat"></span></button>
-  <button onClick="{{ quickOpenGo }}" aria-label="Profile, switch and picture" title="{{ actName }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-9px">
+  <button onClick="{{ pmenuGo }}" aria-label="Profile menu" aria-haspopup="dialog" aria-expanded="{{ pmenuExpanded }}" title="{{ actName }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-right:-9px">
     <span style="position:relative;width:24px;height:24px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontS }};color:var(--onac)">{{ avaText }}</span>
   </button>
 </header>
@@ -4475,10 +4475,121 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- THE PROFILE MENU. The icon opens this list and nothing else: Profile,
+     Settings, Get Help, Log Out, in the order the owner gave them. Get Help
+     wears --crisis, never --ac, because it is a safety control. -->
+<sc-if value="{{ pmenuOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ pmenuClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:84">
+    <div role="dialog" aria-label="Profile menu" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:12px 12px 22px;display:flex;flex-direction:column;gap:2px;animation:fadeUp .25s ease">
+      <button onClick="{{ pmProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="position:relative;flex:none;width:24px;height:24px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontS }};color:var(--onac)">{{ avaText }}</span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Profile</span>
+        <span style="flex:none;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--fu);color:var(--dim)">{{ actName }}</span>
+      </button>
+      <button onClick="{{ pmSettingsGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
+      </button>
+      <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
+      </button>
+      <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
+      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
+           The cloud cannot bring a record back down to a device yet (pullAll
+           has no caller), so clearing anything here would be permanent. The
+           reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
+        <span style="flex:none;max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--fu);color:var(--dim)">{{ pmLogOutNote }}</span>
+      </button>
+    </div>
+  </div>
+</sc-if>
+
+<!-- GET HELP, FROM THE MENU: a prompt to call. The line is the one for where
+     the reader is (callVals); with no line for their country it offers the way
+     to find one rather than a number that would not connect. -->
+<sc-if value="{{ callOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ callClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:82">
+    <div role="dialog" aria-label="Get Help" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:88%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--crisis);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Talk to someone now</div>
+      <sc-if value="{{ callKnown }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font:600 14px var(--fu);color:var(--tx)">{{ callName }}</div>
+          <div style="font:400 12.5px/1.55 var(--fb);color:var(--mut)">{{ callSub }}</div>
+        </div>
+        <a href="{{ callHref }}" style="box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;border-radius:999px;background:linear-gradient(135deg,var(--crisis),var(--crisis-lo));color:#fff;font:700 19px var(--fu);text-decoration:none;box-shadow:0 8px 26px rgba(229,83,77,.36)"><span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:#fff;-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>{{ callLabel }}</a>
+        <sc-if value="{{ callHasText }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ callTextHref }}" style="box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;color:var(--tx);font:600 13px var(--fu);text-decoration:none">{{ callTextLabel }}</a>
+        </sc-if>
+        <a href="{{ callEmHref }}" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--bd);border-radius:999px;font:400 12.5px var(--fu);color:var(--mut);text-decoration:none">In immediate danger, call <span style="font-weight:700;color:var(--tx)">{{ callEm }}</span></a>
+      </sc-if>
+      <sc-if value="{{ callUnknown }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">If you are in immediate danger, call your local emergency number. Free, confidential lines are listed by country, and one of them is yours.</div>
+        <a href="{{ callFindHref }}" target="_blank" rel="noopener" style="box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:linear-gradient(135deg,var(--crisis),var(--crisis-lo));color:#fff;font:700 19px var(--fu);text-decoration:none">Find a line near you</a>
+      </sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ callClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Not now</button>
+        <button onClick="{{ callMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">More lines</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- THE PROFILE CARD. Profile in the menu opens it: who the chart says the
+     reader is, in the big three, the type and the Life Path, with a motto made
+     from them (profileCardVals, mottoFor), and under it what the old profile
+     sheet held, less Log Out, which moved to the menu. -->
 <sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ quickClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:83">
-    <div role="dialog" aria-label="Switch profile" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
-      <div style="font:400 21px var(--fd)">Who are we reading for?</div>
+  <div onClick="{{ quickClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:83">
+    <div role="dialog" aria-label="Your profile" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
+      <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span aria-hidden="true" style="position:relative;flex:none;width:54px;height:54px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontL }};color:var(--onac)">{{ avaText }}</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <div style="font:400 24px/1.15 var(--fd);color:var(--tx);overflow-wrap:anywhere">{{ actName }}</div>
+            <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Profile</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ pcBig3 }}" as="b" hint-placeholder-count="3">
+            <div style="box-sizing:border-box;min-width:0;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+              <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ b.k }}</span>
+              <sc-if value="{{ b.has }}" hint-placeholder-val="{{ true }}">
+                <span style="display:flex;align-items:baseline;gap:5px;min-width:0"><span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac2-hi)">{{ b.g }}</span><span style="font:600 13.5px var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ b.sign }}</span></span>
+              </sc-if>
+              <sc-if value="{{ b.none }}" hint-placeholder-val="{{ false }}">
+                <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ b.why }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Human Design</span>
+            <span style="font:600 13.5px var(--fu);color:var(--tx)">{{ pcType }}</span>
+          </div>
+          <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Life Path</span>
+            <span style="font:600 13.5px var(--fu);color:var(--tx)">{{ pcLp }}</span>
+          </div>
+        </div>
+        <sc-if value="{{ pcHasMotto }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:5px;padding:2px 2px 0;border-left:2px solid var(--ac2);padding-left:12px">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Your motto</span>
+            <span style="font:italic 400 17px/1.45 var(--fd);color:var(--tx)">{{ pcMotto }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pcSample }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;font:400 11px/1.5 var(--fu);color:var(--mut)">This card is drawn from the sample birth moment until you add yours.</span>
+            <button onClick="{{ pcSampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 11px var(--fu);color:var(--ac2-hi)">Use mine</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="font:400 17px var(--fd);margin-top:6px">Who are we reading for?</div>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Switching ends the current conversation and hides the other profile’s data.</div>
       <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="2">
         <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ p.edge }};border-radius:12px;padding:11px 14px">
@@ -4497,22 +4608,14 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Change your picture</span>
         <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">→</span>
       </button>
-      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
       <button onClick="{{ menuPhoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
-      <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
-        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
-        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
-      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
-      <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Stay with&nbsp;{{ actName }}</button>
+      <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Close</button>
     </div>
   </div>
 </sc-if>
@@ -4964,7 +5067,7 @@ input[type="date"]{color-scheme:dark}
     <div style="flex:none;font:600 11px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ estClock }}</div>
     <button onClick="{{ searchOpenGo }}" aria-label="Search" aria-describedby="incommon-search-help" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--bd);border-radius:10px;font:400 11.5px var(--fu);color:var(--dim)"><span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:currentColor;-webkit-mask:{{ searchIcon }} center/contain no-repeat;mask:{{ searchIcon }} center/contain no-repeat"></span>{{ searchKeyHint }}</button>
     <sc-if value="{{ hasProfile }}" hint-placeholder-val="{{ false }}">
-      <button onClick="{{ quickOpenGo }}" aria-label="Profile, switch and picture" title="{{ actName }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center">
+      <button onClick="{{ pmenuGo }}" aria-label="Profile menu" aria-haspopup="dialog" aria-expanded="{{ pmenuExpanded }}" title="{{ actName }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center">
         <span style="position:relative;width:26px;height:26px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontS }};color:var(--onac)">{{ avaText }}</span>
       </button>
     </sc-if>
@@ -8832,10 +8935,121 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- THE PROFILE MENU. The icon opens this list and nothing else: Profile,
+     Settings, Get Help, Log Out, in the order the owner gave them. Get Help
+     wears --crisis, never --ac, because it is a safety control. -->
+<sc-if value="{{ pmenuOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ pmenuClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.45);z-index:14">
+    <div role="dialog" aria-label="Profile menu" onClick="{{ swallow }}" style="position:absolute;top:66px;right:clamp(12px,2vw,32px);width:min(270px,calc(100% - 24px));box-sizing:border-box;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:0 18px 44px rgba(0,0,0,.55);animation:fadeUp .18s ease">
+      <button onClick="{{ pmProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="position:relative;flex:none;width:24px;height:24px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontS }};color:var(--onac)">{{ avaText }}</span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Profile</span>
+        <span style="flex:none;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--fu);color:var(--dim)">{{ actName }}</span>
+      </button>
+      <button onClick="{{ pmSettingsGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
+      </button>
+      <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
+      </button>
+      <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
+      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
+           The cloud cannot bring a record back down to a device yet (pullAll
+           has no caller), so clearing anything here would be permanent. The
+           reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
+        <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
+        <span style="flex:none;max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--fu);color:var(--dim)">{{ pmLogOutNote }}</span>
+      </button>
+    </div>
+  </div>
+</sc-if>
+
+<!-- GET HELP, FROM THE MENU: a prompt to call. The line is the one for where
+     the reader is (callVals); with no line for their country it offers the way
+     to find one rather than a number that would not connect. -->
+<sc-if value="{{ callOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ callClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:12">
+    <div role="dialog" aria-label="Get Help" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:88%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--crisis);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .25s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Talk to someone now</div>
+      <sc-if value="{{ callKnown }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="font:600 14px var(--fu);color:var(--tx)">{{ callName }}</div>
+          <div style="font:400 12.5px/1.55 var(--fb);color:var(--mut)">{{ callSub }}</div>
+        </div>
+        <a href="{{ callHref }}" style="box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;gap:9px;border-radius:999px;background:linear-gradient(135deg,var(--crisis),var(--crisis-lo));color:#fff;font:700 19px var(--fu);text-decoration:none;box-shadow:0 8px 26px rgba(229,83,77,.36)"><span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:#fff;-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>{{ callLabel }}</a>
+        <sc-if value="{{ callHasText }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ callTextHref }}" style="box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;color:var(--tx);font:600 13px var(--fu);text-decoration:none">{{ callTextLabel }}</a>
+        </sc-if>
+        <a href="{{ callEmHref }}" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--bd);border-radius:999px;font:400 12.5px var(--fu);color:var(--mut);text-decoration:none">In immediate danger, call <span style="font-weight:700;color:var(--tx)">{{ callEm }}</span></a>
+      </sc-if>
+      <sc-if value="{{ callUnknown }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">If you are in immediate danger, call your local emergency number. Free, confidential lines are listed by country, and one of them is yours.</div>
+        <a href="{{ callFindHref }}" target="_blank" rel="noopener" style="box-sizing:border-box;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:linear-gradient(135deg,var(--crisis),var(--crisis-lo));color:#fff;font:700 19px var(--fu);text-decoration:none">Find a line near you</a>
+      </sc-if>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ callClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Not now</button>
+        <button onClick="{{ callMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">More lines</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- THE PROFILE CARD. Profile in the menu opens it: who the chart says the
+     reader is, in the big three, the type and the Life Path, with a motto made
+     from them (profileCardVals, mottoFor), and under it what the old profile
+     sheet held, less Log Out, which moved to the menu. -->
 <sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ quickClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;z-index:13">
-    <div role="dialog" aria-label="Switch profile" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
-      <div style="font:400 21px var(--fd)">Who are we reading for?</div>
+  <div onClick="{{ quickClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:13">
+    <div role="dialog" aria-label="Your profile" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
+      <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span aria-hidden="true" style="position:relative;flex:none;width:54px;height:54px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontL }};color:var(--onac)">{{ avaText }}</span>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <div style="font:400 24px/1.15 var(--fd);color:var(--tx);overflow-wrap:anywhere">{{ actName }}</div>
+            <div style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Profile</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ pcBig3 }}" as="b" hint-placeholder-count="3">
+            <div style="box-sizing:border-box;min-width:0;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+              <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ b.k }}</span>
+              <sc-if value="{{ b.has }}" hint-placeholder-val="{{ true }}">
+                <span style="display:flex;align-items:baseline;gap:5px;min-width:0"><span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac2-hi)">{{ b.g }}</span><span style="font:600 13.5px var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ b.sign }}</span></span>
+              </sc-if>
+              <sc-if value="{{ b.none }}" hint-placeholder-val="{{ false }}">
+                <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ b.why }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Human Design</span>
+            <span style="font:600 13.5px var(--fu);color:var(--tx)">{{ pcType }}</span>
+          </div>
+          <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:12px;background:var(--sf);border:1px solid var(--bd)">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Life Path</span>
+            <span style="font:600 13.5px var(--fu);color:var(--tx)">{{ pcLp }}</span>
+          </div>
+        </div>
+        <sc-if value="{{ pcHasMotto }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:5px;padding:2px 2px 0;border-left:2px solid var(--ac2);padding-left:12px">
+            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Your motto</span>
+            <span style="font:italic 400 17px/1.45 var(--fd);color:var(--tx)">{{ pcMotto }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pcSample }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;font:400 11px/1.5 var(--fu);color:var(--mut)">This card is drawn from the sample birth moment until you add yours.</span>
+            <button onClick="{{ pcSampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 11px var(--fu);color:var(--ac2-hi)">Use mine</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="font:400 17px var(--fd);margin-top:6px">Who are we reading for?</div>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Switching ends the current conversation and hides the other profile’s data.</div>
       <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="2">
         <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ p.edge }};border-radius:12px;padding:11px 14px">
@@ -8854,22 +9068,14 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Change your picture</span>
         <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">→</span>
       </button>
-      <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
       <button onClick="{{ menuPhoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
-      <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
-        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
-        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
-      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
-      <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Stay with&nbsp;{{ actName }}</button>
+      <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Close</button>
     </div>
   </div>
 </sc-if>
@@ -9381,7 +9587,8 @@ class Component extends DCLogic {
     synWith: null, synManual: null, synForm: null, circleWith: [], cardIn: null, cardOut: null, stLang: null, stTurn: 0,
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
-    phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '' };
+    phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
+    pmenuOpen: false, callOpen: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -10088,11 +10295,14 @@ class Component extends DCLogic {
   }
   toastMsg(t) { clearTimeout(this._tt); this.setState({ toast: t }); this._tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
   openHelp() {
-    // Anonymous timestamp only. No user ID, no context, no message content.
+    this.crisisAudit();
+    this.setState({ helpOpen: true, callOpen: false });
+  }
+  // Anonymous timestamp only. No user ID, no context, no message content.
+  crisisAudit() {
     const log = this.readLS('incommon.crisis.audit', []);
     (Array.isArray(log) ? log : []).push({ type: 'crisis_button_accessed', timestamp: new Date().toISOString() });
     this.writeLS('incommon.crisis.audit', (Array.isArray(log) ? log : []).slice(-100));
-    this.setState({ helpOpen: true });
   }
 
   consentMap() {
@@ -10883,6 +11093,28 @@ class Component extends DCLogic {
   HD_CHANNELS = [[1, 8, 'G', 'Throat'], [2, 14, 'G', 'Sacral'], [3, 60, 'Sacral', 'Root'], [4, 63, 'Ajna', 'Head'], [5, 15, 'Sacral', 'G'], [6, 59, 'Solar Plexus', 'Sacral'], [7, 31, 'G', 'Throat'], [9, 52, 'Sacral', 'Root'], [10, 20, 'G', 'Throat'], [10, 34, 'G', 'Sacral'], [10, 57, 'G', 'Spleen'], [11, 56, 'Ajna', 'Throat'], [12, 22, 'Throat', 'Solar Plexus'], [13, 33, 'G', 'Throat'], [16, 48, 'Throat', 'Spleen'], [17, 62, 'Ajna', 'Throat'], [18, 58, 'Spleen', 'Root'], [19, 49, 'Root', 'Solar Plexus'], [20, 34, 'Throat', 'Sacral'], [20, 57, 'Throat', 'Spleen'], [21, 45, 'Heart', 'Throat'], [23, 43, 'Throat', 'Ajna'], [24, 61, 'Ajna', 'Head'], [25, 51, 'G', 'Heart'], [26, 44, 'Heart', 'Spleen'], [27, 50, 'Sacral', 'Spleen'], [28, 38, 'Spleen', 'Root'], [29, 46, 'Sacral', 'G'], [30, 41, 'Solar Plexus', 'Root'], [32, 54, 'Spleen', 'Root'], [34, 57, 'Sacral', 'Spleen'], [35, 36, 'Throat', 'Solar Plexus'], [37, 40, 'Solar Plexus', 'Heart'], [39, 55, 'Root', 'Solar Plexus'], [42, 53, 'Sacral', 'Root'], [47, 64, 'Ajna', 'Head']];
   HD_CENTERS = [['Head', 'inspiration and mental pressure', 'pressure'], ['Ajna', 'conceptualizing, certainty, and doubt', 'awareness'], ['Throat', 'expression and manifestation', 'expression'], ['G', 'identity, direction, and love', 'identity'], ['Heart', 'willpower, worth, and ego', 'motor'], ['Sacral', 'life force, work, and sexuality', 'motor'], ['Solar Plexus', 'emotional waves and feeling', 'motor'], ['Spleen', 'instinct, health, and fear in the now', 'awareness'], ['Root', 'adrenal pressure, stress, and momentum', 'motor']];
   HD_STRATEGY = { Generator: 'Wait to respond. Let the thing show up, then feel for the gut yes.', 'Manifesting Generator': 'Wait to respond, then inform before you move.', Manifestor: 'Inform the people affected, then act.', Projector: 'Wait for the invitation. Recognition comes before the work.', Reflector: 'Wait a lunar cycle on anything large; sample the room before deciding.' };
+  /* THE MOTTO ON THE PROFILE CARD, the owner's request of 30 September 2026:
+     "a personalized motto for the individual". It is composed on the device
+     from three systems, one clause each, so it is never the same sentence for
+     two readers who differ in any of them and it is identical every time for
+     the same chart. The Life Path gives the aim, the Sun gives the manner, and
+     the Human Design type gives the way in, which is the strategy said as an
+     action. Every clause is something to do, never a statement about who the
+     reader is, the same line the three part readings keep. Nothing here calls
+     a model: the Oracle is the one screen that does. */
+  MOTTO_LP = { 1: 'Lead from what is yours', 2: 'Make peace your craft', 3: 'Say it so it lives', 4: 'Build what lasts',
+    5: 'Keep the door open', 6: 'Tend what you love', 7: 'Trust the quiet question', 8: 'Hold power with care',
+    9: 'Give it back to the world', 11: 'Carry the light you see', 22: 'Build the dream in daylight', 33: 'Teach through the way you care' };
+  MOTTO_SUN = { Aries: 'With a first spark', Taurus: 'At an unhurried pace', Gemini: 'With a curious mind', Cancer: 'With a sheltering heart',
+    Leo: 'With a warm fire', Virgo: 'With careful hands', Libra: 'With an even hand', Scorpio: 'From a steady depth',
+    Sagittarius: 'With a wide horizon in view', Capricorn: 'With patient resolve', Aquarius: 'With the future in mind', Pisces: 'With the grace of the tide' };
+  MOTTO_TYPE = { Generator: 'answer what lights you up', 'Manifesting Generator': 'answer what lights you up, then move',
+    Manifestor: 'tell the ones it touches, then begin', Projector: 'wait to be asked in', Reflector: 'let a full moon pass before you choose' };
+  mottoFor(lp, sun, type) {
+    const aim = this.MOTTO_LP[lp] || this.MOTTO_LP[this.numReduce(lp)] || '', manner = this.MOTTO_SUN[sun] || '', way = this.MOTTO_TYPE[type] || '';
+    if (!aim || !manner || !way) return '';
+    return aim + '. ' + manner + ', ' + way + '.';
+  }
   HD_TYPE_DESC = { Generator: 'Built for sustainable work you actually love. Frustration is the signal you answered a question no one asked.', 'Manifesting Generator': 'Fast, multi-track, and non-linear. Skipping steps is native to you; informing keeps the resistance down.', Manifestor: 'Built to initiate. Anger shows up when you move without telling anyone first.', Projector: 'Built to guide, not to grind. Bitterness shows up when you push instead of waiting to be seen.', Reflector: 'Wholly open. You sample the health of your environment. Where you are matters more than what you do.' };
   // Bodies beyond the ten. Nodes are exact from the mean-node formula; Chiron is
   // supplied by minor-bodies-ephemeris.js (fitted against 81 JPL Horizons
@@ -17612,6 +17844,99 @@ class Component extends DCLogic {
      signing in lives; this is the one place a signed in reader adds or changes
      the number. It asks through the module and the session it already holds,
      and it is refused plainly when the device is not signed in. */
+  /* THE PROFILE ICON OPENS A MENU, the owner's request of 30 September 2026:
+     Profile, Settings, Get Help and Log Out, in that order. Profile opens the
+     card (the old profile sheet, now headed by who the chart says the reader
+     is); Settings is the tab, and on the phone the shell carries the reader
+     there (syncSectionToTab); Get Help opens the call prompt below; Log Out is
+     the one that used to sit in the profile sheet, moved rather than copied,
+     so there is one way out of the account. */
+  profileMenuVals() {
+    const st = this.state, cs = st.cloudStatus || {};
+    const shown = p => String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3');
+    const close = { pmenuOpen: false };
+    return {
+      pmenuOpen: !!st.pmenuOpen,
+      pmenuGo: () => this.setState({ pmenuOpen: !st.pmenuOpen, quickOpen: false }),
+      pmenuClose: () => this.setState(close),
+      pmenuExpanded: st.pmenuOpen ? 'true' : 'false',
+      pmProfileGo: () => this.setState({ ...close, quickOpen: true }),
+      pmSettingsGo: () => this.setState({ ...close, tab: 'settings', spiritView: null }),
+      pmHelpGo: () => { this.crisisAudit(); this.setState({ ...close, callOpen: true }); },
+      pmLogOutGo: () => { this.setState(close); this.accountLogOut(); },
+      pmLogOutNote: (cs.mode === 'cloud' && (cs.email || shown(cs.phone))) || 'back to the cover',
+      pmSettingsIcon: this.uiIcon('settings'),
+      ...this.profileCardVals(),
+      ...this.callVals()
+    };
+  }
+  /* THE PROFILE CARD: the big three, the Human Design type, the Life Path and
+     the motto made from them. Computed only while the card is open, from the
+     same methods every other screen reads (chartAt, ascendant, hdChart, the
+     core's lifePath), so the card cannot disagree with the wheel, the wiring
+     or the numbers page. A Rising with no birth time is said to need one
+     rather than guessed, as availability() says everywhere else. */
+  profileCardVals() {
+    const st = this.state, core = window.InCommonCore, p = this.activeProfile();
+    const none = { pcBig3: [], pcType: '', pcLp: '', pcMotto: '', pcHasMotto: false, pcSample: false, pcSampleGo: () => {} };
+    if (!st.quickOpen || !p || !st.ready) return none;
+    try {
+      const SG = ['\u2648\uFE0E', '\u2649\uFE0E', '\u264A\uFE0E', '\u264B\uFE0E', '\u264C\uFE0E', '\u264D\uFE0E', '\u264E\uFE0E', '\u264F\uFE0E', '\u2650\uFE0E', '\u2651\uFE0E', '\u2652\uFE0E', '\u2653\uFE0E'];
+      const ch = this.chartAt(this.natalDate()), sun = ch[0], moon = ch[1], asc = this.ascendant();
+      const hd = this.hdChart(), lp = core ? core.lifePath(this.dob()).value : null;
+      const cell = (k, s) => s ? { k: k, g: SG[s.idx], sign: s.sign, has: true, none: false, why: '' } : { k: k, g: '', sign: '', has: false, none: true, why: 'needs a birth time' };
+      const motto = this.mottoFor(lp, sun.sign, hd && hd.type);
+      return {
+        pcBig3: [cell('Sun', sun), cell('Moon', moon), cell('Rising', asc)],
+        pcType: (hd && hd.type) || '', pcLp: lp == null ? '' : String(lp),
+        pcMotto: motto, pcHasMotto: !!motto,
+        pcSample: this.usingSampleBirth(),
+        pcSampleGo: () => { this.setState({ quickOpen: false }); this.authGo('birth'); this.speak('The birth moment form is open.', 'polite'); }
+      };
+    } catch (e) { return none; }
+  }
+  /* GET HELP FROM THE MENU PROMPTS A CALL, to the line for where the reader
+     is. The country is read from the device's time zone first, because that
+     follows the phone, and from the language's region after, and it is never
+     guessed past that: a reader somewhere the directory does not cover is
+     given the way to find their own line and the full list, not a number
+     that would not connect. It wears --crisis and never --ac, as every safety
+     control does, and opening it logs the same one anonymous timestamp the
+     crisis sheet logs. */
+  helpCountry() {
+    let tz = '', loc = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    try { loc = String(navigator.language || ''); } catch (e) {}
+    if (/^Australia\//.test(tz)) return 'AU';
+    if (/^Europe\/(London|Belfast|Dublin|Guernsey|Isle_of_Man|Jersey)$/.test(tz)) return 'UK';
+    if (/^America\/(Toronto|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Moncton|Montreal|Whitehorse|Yellowknife|Iqaluit|Glace_Bay|Goose_Bay|Dawson_Creek|Swift_Current|Rankin_Inlet|Cambridge_Bay|Inuvik|Atikokan|Blanc-Sablon|Creston|Fort_Nelson|Nipigon|Thunder_Bay|Rainy_River|Dawson|Resolute|Pangnirtung)$/.test(tz)) return 'CA';
+    if (/^(America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Juneau|Sitka|Nome|Adak|Menominee|Metlakatla|Yakutat|Puerto_Rico|Indiana\/.+|Kentucky\/.+|North_Dakota\/.+)|Pacific\/Honolulu|US\/.+)$/.test(tz)) return 'US';
+    if (tz && tz !== 'UTC' && tz !== 'Etc/UTC') return null;
+    const m = /[-_]([A-Za-z]{2})$/.exec(loc), r = m ? m[1].toUpperCase() : '';
+    if (r === 'GB' || r === 'IE') return 'UK';
+    return ['US', 'CA', 'AU'].indexOf(r) !== -1 ? r : null;
+  }
+  callVals() {
+    const st = this.state;
+    const off = { callOpen: false, callKnown: false, callUnknown: false, callName: '', callSub: '', callLabel: '', callHref: '', callHasText: false, callTextLabel: '', callTextHref: '', callEm: '', callEmHref: '' };
+    const base = { callClose: () => this.setState({ callOpen: false }), callMoreGo: () => this.openHelp(), callFindHref: 'https://findahelpline.com' };
+    if (!st.callOpen) return { ...off, ...base };
+    const cc = this.helpCountry(), D = this.CD();
+    const EM = { US: '911', CA: '911', UK: '999', AU: '000' };
+    let e = null;
+    try { e = cc && D ? (D.byCountry(cc) || []).find(x => x.crisis && x.phone) : null; } catch (err) { e = null; }
+    if (!e && cc === 'US') e = { name: '988 Suicide & Crisis Lifeline', phone: '988', text: '988', hours: '24/7', description: '' };
+    if (!e) return { ...off, ...base, callOpen: true, callUnknown: true };
+    const digits = String(e.phone).replace(/[^\d+]/g, ''), textNum = /^\d{3,6}$/.test(String(e.text || '').trim()) ? String(e.text).trim() : '';
+    return {
+      ...off, ...base, callOpen: true, callKnown: true,
+      callName: e.name,
+      callSub: 'Free and confidential' + (e.hours === '24/7' ? ', open all day and all night.' : ', ' + e.hours + '.'),
+      callLabel: 'Call ' + e.phone, callHref: 'tel:' + digits,
+      callHasText: !!textNum, callTextLabel: 'Text ' + textNum, callTextHref: textNum ? 'sms:' + textNum : '',
+      callEm: EM[cc] || '', callEmHref: EM[cc] ? 'tel:' + EM[cc] : ''
+    };
+  }
   phoneVals() {
     const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
     const signedIn = !!(C && cs.mode === 'cloud'), has = cs.phone || '';
@@ -19869,7 +20194,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, pmenuOpen: false, callOpen: false,
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -21085,6 +21410,7 @@ class Component extends DCLogic {
         };
       })(),
       ...this.phoneVals(),
+      ...this.profileMenuVals(),
       ...(() => {
         if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',
           avaIsImg: false, avaImg: '', avaText: '?', avaBg: 'var(--ac)', avaPrevBg: 'var(--ac)', avaBgImg: 'none', avaPrevBgImg: 'none', avaFontS: '600 9.5px var(--fu)', avaFontM: '600 12px var(--fu)', avaFontL: '600 17px var(--fu)',
@@ -21264,12 +21590,10 @@ class Component extends DCLogic {
             go: () => p.isActive ? openForm('edit', prof) : this.setState({ switchTo: p.id, pin: ['', '', '', ''], pinErr: '', quickOpen: false }) })),
           canAddProfile: !PM.atCapacity(), atCapacity: PM.atCapacity(), soloProfile: all.length === 1,
           addProfileGo: () => openForm('add', null),
-          quickOpen: st.quickOpen, quickOpenGo: () => this.setState({ quickOpen: true }), quickClose: () => this.setState({ quickOpen: false }),
-          /* The profile menu's own two ways out. Log out is the account; Delete
-             opens the same name-typed confirmation Settings uses, pointed at the
-             active profile, without opening the edit sheet under it. */
-          menuLogOutGo: () => this.accountLogOut(),
-          menuLogOutNote: (st.cloudStatus && st.cloudStatus.mode === 'cloud' && (st.cloudStatus.email || String(st.cloudStatus.phone || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3'))) || 'back to the cover',
+          quickOpen: st.quickOpen, quickClose: () => this.setState({ quickOpen: false }),
+          /* Delete opens the same name-typed confirmation Settings uses, pointed
+             at the active profile, without opening the edit sheet under it. Log
+             Out moved to the profile menu (profileMenuVals). */
           menuDelGo: () => this.setState({ quickOpen: false, formMode: null, form: { id: prof.id, name: prof.name }, delOpen: true, delName: '' }),
           switchOpen: !!tgt, switchName: tgt ? tgt.name : '', switchNeedsPin: !!(tgt && tgt.pinSet),
           switchWhy: tgt ? ['The current session ends here. The next profile starts fresh, with no memory of it.',
