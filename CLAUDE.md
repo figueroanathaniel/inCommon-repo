@@ -2673,7 +2673,8 @@ password (`passwordSet()`, `updateUser` on the adopted session); every other
 type goes on to the app signed in. P7 of the browser drive forged a token and
 nothing was stored.
 
-**Four modes, one form.** `data-mode` on `#mailform` is `in` (email, password,
+**Four modes, one form**, and two more since 30 September 2026 (`code` and
+`back`, in the next section). `data-mode` on `#mailform` is `in` (email, password,
 Sign in), `up` (email, a new password of eight or more, the newsletter box,
 Create New Account), `forgot` (email, Send reset link) and `set` (a new password,
 Save password). A mode is a set of rows, never a second form, so what is typed
@@ -2851,6 +2852,90 @@ down. The first run used to say "No account, no sign-in", which contradicted a
 reader who had just signed in on the cover; the Codex page below replaced it and
 does not say it. The tucked away classic form still does, so if it is ever
 brought back, that sentence goes back to the consent language pass.
+
+## Remember me and the phone
+The owner asked on 30 September 2026 for a Remember me box ("i need loyal users
+to have that convenience"), for signing in by phone, and for the phone on the
+profile to recover the password by text. `docs/PHONE-SETUP.md` is the owner's
+half: nothing here sends a text until Supabase has an SMS provider, and until
+then a number is answered with `phoneOff`, in words, and email is untouched.
+
+**The password is never this page's to keep.** A password in localStorage is
+readable by every script that ever runs on the origin and by anybody holding the
+device, and it would be the one secret this app stored in the clear. So
+Remember me keeps three things and the password is not one of them: the login,
+in `incommon.signin.remember`, filled back into the field next time; the
+session, which is what staying signed in is; and the password goes to the
+browser's own password manager, through `PasswordCredential` where Chromium has
+it and through the `username` and `current-password` autocomplete names
+everywhere else. Q1 of the drive scans every stored value for the password and
+K44 does the same in the module.
+
+**Unticked, the session ends with the browser, and that took a sweep.** The
+session sits in localStorage, which survives a closed browser, so a box that
+only forgot the login would change nothing a reader could see. An unremembered
+sign in sets `incommon.signin.ephemeral` and a cookie with no expiry,
+`incommon_signin_live`, which the browser drops on closing. Mark present and
+cookie gone means the browser was closed, and the stored session is removed
+before any client reads it: by `ephemeralSweep()` in `init()` on the app, and by
+the cover's own copy at load. The two copies share four names (the two keys, the
+cookie, and `sb-<project>-auth-token`), and K38 reads both files and holds them
+equal, because the cover loads nothing until asked and so cannot call the
+module to do it. K45 and Q3, reopened with the session cookie dropped, prove it
+on both pages. A browser that restores session cookies on relaunch keeps the
+reader signed in, which is that browser's choice and not a fault here.
+
+**Remembered, the cover offers the way on, not the form.** `back` mode: "Signed
+in as ...", one Continue button that goes in without a request, and "Use another
+account" to reach the form with the login filled. It is read from the stored
+session at load, never from the network. `?signin=1` skips it on purpose: the
+app sends a reader there because it found no session, so a stored one is stale.
+The desktop still opens it with "enter here", by the owner's rule of 30
+September; the phone shows it at once.
+
+**One field takes an email or a number**, "Email or phone", `type=text` so a
+phone keyboard does not hide the digits behind an email layout. The module
+decides which it is (`idOf()`, `normPhone()`): ten digits, or eleven starting
+with 1, is a US or Canadian number, `00` is the international prefix, and
+anything else needs its `+` and country code, because guessing a country is how
+a code goes to a stranger. The cover's `isPhone()` only picks a label and hides
+the newsletter box; it never decides what is sent. Numbers are shown grouped
+only where the grouping is certain, `+1 555 123 4567`, and as sent otherwise.
+
+**A number has two paths through Supabase, and both end in a session.** A sign
+up by phone is `signUp({ phone, password })`, which texts a code with phone
+confirmations on; the code is `verifyOtp` type `sms`. A new password by phone is
+`signInWithOtp` with `shouldCreateUser: false`, then the same `verifyOtp`, then
+`set` mode on the session it brought, which is the step the reset email leads to
+as well. Supabase has no reset text as such, and a code that signs the number's
+account in is the honest equivalent.
+
+**Nobody learns whose number has an account.** Supabase refuses a code for a
+number with no account (`otp_disabled`, "Signups not allowed for otp"), and the
+module answers that exactly as it answers a sent code, as the reset email does
+for an address. Q5 drives both and compares the sentence. `exists` on a sign
+up is the one tell, and it is the same one email already has.
+
+**`code` mode sends a text only when pressed for.** A number that was never
+confirmed (`phoneUnconfirmed`) is taken to the code step with "Text me a new
+code" under it, and nothing is sent until that is pressed: a text costs money,
+and an automatic one on a failed sign in is a way to make the page send texts
+to a number the typist does not hold. Q6 counts zero.
+
+**A phone on an existing account is the app's, not the cover's.** Most accounts
+were made by email, so the profile menu has a Phone number item in both shells:
+the number, `updateUser({ phone })`, then the texted code as `verifyOtp` type
+`phone_change`, on the session the app already holds. `phoneAddVerify()` writes
+the confirmed user into the module's session and notifies, so the menu names the
+number at once rather than after the auth event lands. Signed out, the dialog
+says why and offers the cover's sign in. Q7 and Q8 drive it in both shells, Q9
+signed out, and all five states measured clean over the 32 theme cases at 1440
+and 375 (no pair under 4.5:1, nothing under 44px).
+
+**The rows.** K38 to K45 in the module; Q1 to Q9 in a browser drive with
+Supabase faked, and P1 to P15 of the password drive still 15 of 15; the layout
+sweep at nine sizes now walks `code`, `set` and `back` through the real script,
+with the phone on its side scrolling as designed and nothing else out of place.
 
 ## The first run is the Codex's page, and inCommon's is tucked away
 The owner asked on 29 September 2026 for the Celestial Codex's birth page to

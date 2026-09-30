@@ -253,13 +253,19 @@
     font: 400 13px/1.35 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
   .mailform .news input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: #8b5cf6; cursor: pointer; }
+  /* Remember me wears the newsletter box's clothes and sits under the button
+     it belongs to. What it keeps is written beside the sign in script. */
+  .mailform .keep { min-height: 44px; }
   .mailform .field {
     flex: 1 1 100%; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
     border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
     font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
   .mailform[data-mode="in"] .pw, .mailform[data-mode="set"] .pw,
-  .mailform[data-mode="forgot"] #mailaddr { flex: 1 1 0; }
+  .mailform[data-mode="forgot"] #mailaddr, .mailform[data-mode="code"] #mailcode { flex: 1 1 0; }
+  /* Already signed in, the form is one button, Continue, the width of the
+     fields it stands in for. */
+  .mailform[data-mode="back"] .signin { flex: 1 1 100%; justify-content: center; }
   /* THE EYE. The password field carries a button at its right end that shows
      what was typed and hides it again, the owner's request of 30 September
      2026: a slashed eye while it is hidden, an open eye while it shows. It is
@@ -367,8 +373,10 @@
   <div class="sub">
     <a class="enter" href="./app.html">enter here</a>
     <form id="mailform" class="mailform" data-mode="in" hidden novalidate>
-      <label class="sr" for="mailaddr">Email address</label>
-      <input class="field" id="mailaddr" name="email" type="email" autocomplete="username" inputmode="email" placeholder="Email" required>
+      <label class="sr" for="mailaddr">Email or phone number</label>
+      <input class="field" id="mailaddr" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or phone" required>
+      <label class="sr" for="mailcode" hidden>Code from the text</label>
+      <input class="field" id="mailcode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" hidden>
       <label class="sr" for="mailpass">Password</label>
       <span class="pw">
         <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
@@ -379,8 +387,10 @@
       </span>
       <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
       <button class="signin" type="submit">Sign in</button>
+      <label class="news keep"><input id="rememberopt" type="checkbox" checked> Remember me</label>
       <button class="signin alt" type="button" data-to="up">Create New Account</button>
       <div class="modes">
+        <button class="mode resend" type="button" hidden>Text me a new code</button>
         <button class="mode" type="button" data-to="forgot">Forgot password?</button>
         <button class="mode" type="button" data-to="in" hidden>Sign in instead</button>
       </div>
@@ -454,17 +464,26 @@
   var form = document.getElementById('mailform');
   var addr = document.getElementById('mailaddr');
   var pass = document.getElementById('mailpass');
+  var codeIn = document.getElementById('mailcode');
+  var newsBox = document.getElementById('newsopt');
+  var keepBox = document.getElementById('rememberopt');
   var skip = document.querySelector('button.skip');
   var msg = document.querySelector('.authmsg');
   var enter = document.querySelector('a.enter');
-  if (!form || !addr || !pass || !skip || !msg || !enter) return;
+  if (!form || !addr || !pass || !codeIn || !newsBox || !keepBox || !skip || !msg || !enter) return;
   var sendBtn = form.querySelector('button[type="submit"]');
-  var news = form.querySelector('.news');
+  var news = newsBox.parentNode, keepRow = keepBox.parentNode;
+  var addrLabel = form.querySelector('label[for="mailaddr"]');
   var passLabel = form.querySelector('label[for="mailpass"]');
+  var codeLabel = form.querySelector('label[for="mailcode"]');
   var pw = form.querySelector('.pw');
   var eye = form.querySelector('button.eye');
+  var resendBtn = form.querySelector('button.resend');
   var modeBtns = form.querySelectorAll('button[data-to]');
   var busy = false, loading = null, opened = false, through = false, mode = 'in';
+  /* The module once it has loaded; the number a code was texted to, and why;
+     and who is signed in already, when somebody is. */
+  var Cmod = null, codeFor = null, backAs = null;
   var ANYWAY = ' You can still continue without an account.';
   var LINK_AGAIN = ' Sign in with your password, or choose “Forgot password?” for a new link.';
   var WHY = {
@@ -472,58 +491,89 @@
     off: 'The sign in files did not load.' + ANYWAY,
     error: 'Sign in could not finish.' + ANYWAY,
     rate: 'Too many tries in a short time. Wait a few minutes and try again.' + ANYWAY,
-    invalid: 'That email address does not look complete.',
+    invalid: 'Enter an email address or a phone number. Outside the US and Canada, start the number with + and its country code.',
     nopassword: 'Enter your password.',
     short: 'Choose a password of 8 or more characters.',
     weak: 'That password is too easy to guess. Choose a longer one.',
     same: 'That is the password the account already has. Choose a different one.',
-    wrong: 'That email and password do not match. If you used to sign in with an emailed link, choose “Forgot password?” to set a password.',
+    wrong: 'That email or phone number and password do not match. If you used to sign in with an emailed link, choose “Forgot password?” to set a password.',
     unconfirmed: 'That address is not confirmed yet. Open the link in the email sent when the account was made, in any browser, then sign in here. If it never came, choose “Create New Account” with the same address to have it sent again.',
-    exists: 'That address already has an account. Sign in with its password, or choose “Forgot password?” to set one.',
+    exists: 'That email or phone number already has an account. Sign in with its password, or choose “Forgot password?” to set one.',
     closed: 'New accounts are not being made right now.' + ANYWAY,
     confirm: 'Check your email for a link to confirm your address. It works in any browser, and once it is opened you can sign in here with your password.',
     resetSent: 'If that address has an account, a link to choose a new password is on its way. It works in any browser.',
     saved: 'Your password is saved.',
     expired: 'That link has expired or was already used.' + LINK_AGAIN,
-    unfinished: 'That link did not finish.' + LINK_AGAIN
+    unfinished: 'That link did not finish.' + LINK_AGAIN,
+    phoneOff: 'Signing in by phone is not switched on yet. Use your email address for now.' + ANYWAY,
+    smsFailed: 'The text could not be sent. Check the number, or use your email address.',
+    nocode: 'Enter the code from the text.',
+    badCode: 'That code is not right or has expired. Check the text, or choose “Text me a new code”.',
+    phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
+    phoneTaken: 'That number is already on an account.'
   };
   /* What each mode shows, says and asks the password manager for. A mode is
      a set of rows, never a second form, so the address typed in one is still
      there in the next. */
+  /* code is the text's code, for finishing a phone sign up or starting a new
+     password by phone; back is the reader who is signed in already, which a
+     remembered session makes the usual case for somebody coming back. */
   var MODES = {
     in: { button: 'Sign in', busy: 'Signing you in.', pass: true, passAuto: 'current-password',
-      passLabel: 'Password', passHint: 'Password', to: ['up', 'forgot'] },
+      passLabel: 'Password', passHint: 'Password', keep: true, to: ['up', 'forgot'] },
     up: { button: 'Create New Account', busy: 'Making your account.', pass: true, passAuto: 'new-password',
       passLabel: 'Choose a password, 8 or more characters', passHint: 'Choose a password, 8 or more', news: true, to: ['in'], back: 'Sign in instead' },
-    forgot: { button: 'Send reset link', busy: 'Sending the link.', pass: false, to: ['in'], back: 'Back to sign in' },
+    forgot: { button: 'Send reset link', phoneButton: 'Text me a code', busy: 'Sending the link.', phoneBusy: 'Sending the code.',
+      pass: false, to: ['in'], back: 'Back to sign in' },
     set: { button: 'Save password', busy: 'Saving your password.', pass: true, passAuto: 'new-password',
-      passLabel: 'New password, 8 or more characters', passHint: 'New password, 8 or more', noAddr: true, to: [] }
+      passLabel: 'New password, 8 or more characters', passHint: 'New password, 8 or more', noAddr: true, noSkip: true, to: [] },
+    code: { button: 'Verify', busy: 'Checking the code.', pass: false, noAddr: true, code: true, keep: true, resend: true,
+      to: ['in'], back: 'Back to sign in' },
+    back: { button: 'Continue', pass: false, noAddr: true, noSkip: true, to: ['in'], back: 'Use another account' }
   };
+  /* A phone is digits and the punctuation people write numbers with. This only
+     chooses a label and whether the newsletter box shows; the module decides
+     what the number is. */
+  /* A number is shown the way people read one where the grouping is certain,
+     which for the US and Canada it is; any other stays as it was sent. */
+  function showPhone(p) { return String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3'); }
+  function isPhone(v) { v = String(v || '').trim(); return /^[+\d\s().-]+$/.test(v) && v.replace(/\D/g, '').length >= 7; }
+  /* The newsletter is read by email, so a sign up by phone is not asked, and a
+     new password by phone is a text rather than a link. */
+  function fitLogin() {
+    var d = MODES[mode], ph = isPhone(addr.value);
+    sendBtn.textContent = ph && d.phoneButton || d.button;
+    news.hidden = !d.news || ph;
+  }
+  addr.addEventListener('input', fitLogin);
   function setMode(m, focus) {
     var d = MODES[m];
     mode = m;
     form.setAttribute('data-mode', m);
-    sendBtn.textContent = d.button;
-    addr.hidden = !!d.noAddr;
+    addr.hidden = addrLabel.hidden = !!d.noAddr;
     pw.hidden = passLabel.hidden = !d.pass;
+    codeIn.hidden = codeLabel.hidden = !d.code;
     if (d.pass) {
       pass.setAttribute('autocomplete', d.passAuto);
       pass.setAttribute('placeholder', d.passHint);
       passLabel.textContent = d.passLabel;
     }
-    news.hidden = !d.news;
+    keepRow.hidden = !d.keep;
+    resendBtn.hidden = !d.resend;
+    fitLogin();
     for (var i = 0; i < modeBtns.length; i++) {
       var b = modeBtns[i], to = b.getAttribute('data-to');
       b.hidden = d.to.indexOf(to) === -1;
       if (to === 'in' && d.back) b.textContent = d.back;
     }
-    /* Signed in by a recovery link, the reader has an account in hand, so the
-       way on without one would be the wrong sentence. */
-    skip.hidden = !opened || m === 'set';
-    /* Focus goes to the first thing still to do: the address, the password,
-       the newsletter box nobody has seen yet, then the button. */
-    if (focus) (d.noAddr ? pass : !addr.value ? addr : d.pass && !pass.value ? pass
-      : d.news ? document.getElementById('newsopt') : sendBtn).focus();
+    /* Signed in already, or by a recovery link, the reader has an account in
+       hand, so the way on without one would be the wrong sentence. */
+    skip.hidden = !opened || !!d.noSkip;
+    if (m === 'back') say('Signed in as ' + backAs + '.');
+    /* Focus goes to the first thing still to do: the code, the address, the
+       password, the newsletter box nobody has seen yet, then the button. */
+    if (focus) (d.code ? codeIn : d.noAddr ? (d.pass ? pass : sendBtn) : !addr.value ? addr
+      : d.pass && !pass.value ? pass : !news.hidden ? newsBox : sendBtn).focus();
   }
   /* What was typed stays typed: somebody who filled in both fields and then
      pressed Create New Account has chosen their password already. */
@@ -536,6 +586,54 @@
   }
   /* The key the emailed link used to leave, which nothing reads any more. */
   try { localStorage.removeItem('incommon.signin.via'); } catch (e) {}
+
+  /* REMEMBER ME. What it keeps is the login, here, and the session, which is
+     staying signed in; the password is the browser's to keep, in its own
+     password manager, never this page's (keep(), below, hands it over). The
+     module writes these keys and init() in the app clears an unremembered
+     session the same way this does; K38 holds the two to the same names.
+     Nothing here touches the network: it is this browser's own storage, read
+     before the reader has asked for anything. */
+  var REMEMBER_KEY = 'incommon.signin.remember', EPHEMERAL_KEY = 'incommon.signin.ephemeral';
+  var LIVE_COOKIE = 'incommon_signin_live', SESSION_KEY = 'sb-lkzcybzhjjxdqetwwdrx-auth-token';
+  (function () {
+    try {
+      var v = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null'), on = !v || v.on !== false;
+      keepBox.checked = on;
+      if (on && v && v.login) addr.value = String(v.login);
+    } catch (e) {}
+  })();
+  /* A sign in that asked not to be remembered ends with the browser session
+     it was made in: the mark is there and the session cookie is gone. */
+  function signedInAs() {
+    try {
+      if (localStorage.getItem(EPHEMERAL_KEY) === '1'
+          && !new RegExp('(^|;\\s*)' + LIVE_COOKIE + '=1(;|$)').test(document.cookie)) {
+        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(EPHEMERAL_KEY);
+        return null;
+      }
+      var st = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'), u = st && st.user;
+      if (!st || !st.refresh_token || !u) return null;
+      return u.email || (u.phone ? showPhone('+' + String(u.phone).replace(/^\+/, '')) : '') || 'your account';
+    } catch (e) { return null; }
+  }
+  var signedIn = signedInAs();
+  /* After a sign in: the preference and the login go to the module, and with
+     the box ticked the password goes to the browser's password manager, which
+     is what fills it next time. PasswordCredential exists in Chromium; Safari
+     and Firefox offer to save from the form itself, which is why the fields
+     carry autocomplete names. */
+  function keep(login, secret) {
+    var on = keepBox.checked;
+    if (Cmod && Cmod.rememberSet) Cmod.rememberSet(on, login);
+    if (!on || !login || !secret) return;
+    try {
+      if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+        navigator.credentials.store(new PasswordCredential({ id: login, password: secret, name: login })).catch(function () {});
+      }
+    } catch (e) {}
+  }
   function say(text) { msg.textContent = text; }
   function hold() { busy = true; sendBtn.setAttribute('aria-busy', 'true'); }
   function settle() { busy = false; sendBtn.removeAttribute('aria-busy'); }
@@ -557,10 +655,10 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.3.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.4.0'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
-        return window.InCommonCloud;
+        return (Cmod = window.InCommonCloud);
       })
       .catch(function (e) { loading = null; throw e; }));
   }
@@ -601,7 +699,7 @@
         say(r.email ? 'Choose a new password for ' + r.email + '.' : 'Choose a new password.');
         return;
       }
-      if (r.ok) { location.replace(enter.getAttribute('href')); return; }
+      if (r.ok) { keep(r.email || '', ''); location.replace(enter.getAttribute('href')); return; }
       if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
       open(false);
       say(r.reason === 'offline' ? WHY.offline : WHY.unfinished);
@@ -613,7 +711,7 @@
     say('Signing you in.');
     cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
       clean();
-      if (r.ok) { location.replace(enter.getAttribute('href')); return; }
+      if (r.ok) { keep(r.email || '', ''); location.replace(enter.getAttribute('href')); return; }
       if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
       settle();
       open(false);
@@ -630,6 +728,12 @@
     clean();
     document.body.classList.add('asked');
     open(true);
+  } else if (signedIn) {
+    /* Somebody who is signed in already is offered the way on, not the form
+       they filled in last time. The Oracle's ?signin=1 is left out on
+       purpose: it means the app found no session, so a stored one is stale. */
+    backAs = signedIn;
+    mode = 'back';
   }
 
   /* A return through the back button restores this page from the
@@ -690,28 +794,77 @@
   fitWidth();
   if (small) { if (small.addEventListener) small.addEventListener('change', fitWidth); else if (small.addListener) small.addListener(fitWidth); }
 
+  /* The code step. The number is the one the module normalised, so the
+     sentence names it the way it was sent, country code and all. A new
+     password by text says "if", exactly as the email does, so the page never
+     tells anybody whose number has an account. */
+  function toCode(phone, purpose, text) {
+    codeFor = { phone: phone, purpose: purpose };
+    codeIn.value = '';
+    setMode('code', true);
+    say(text || (purpose === 'signup'
+      ? 'A code is on its way to ' + showPhone(phone) + '. Enter it here to finish making your account.'
+      : 'If ' + showPhone(phone) + ' has an account, a code is on its way to it. Enter it here, then choose a new password.'));
+  }
+  resendBtn.addEventListener('click', function () {
+    if (busy || !codeFor) return;
+    hold();
+    say('Sending another code.');
+    cloud().then(function (C) { return C.phoneCodeResend(codeFor.phone, codeFor.purpose); }).then(function (r) {
+      settle();
+      say(r.ok ? 'Another code is on its way to ' + showPhone(codeFor.phone) + '.' : WHY[r.reason] || WHY.error);
+      codeIn.focus();
+    }, function () { settle(); say(WHY.off); });
+  });
+
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
     var m = mode, d = MODES[m];
+    if (m === 'back') { goIn(); return; }
+    if (m === 'code' && !codeIn.value.trim()) { say(WHY.nocode); codeIn.focus(); return; }
+    var login = addr.value.trim(), ph = isPhone(login);
     reveal(false);
     hold();
-    say(d.busy);
+    say(ph && d.phoneBusy || d.busy);
     cloud().then(function (C) {
-      if (m === 'in') return C.passwordSignIn(addr.value, pass.value);
+      if (m === 'in') return C.passwordSignIn(login, pass.value);
       /* The newsletter answer goes with the sign up, and only there. Supabase
          keeps it only when this call creates the account, which is when the
-         owner asked for it to be asked. */
-      if (m === 'up') return C.passwordSignUp(addr.value, pass.value, here, { newsletter: !!document.getElementById('newsopt').checked });
-      if (m === 'forgot') return C.passwordResetStart(addr.value, here);
+         owner asked for it to be asked. A phone has no address to write to. */
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? {} : { newsletter: !!newsBox.checked });
+      if (m === 'forgot') return C.passwordResetStart(login, here);
+      if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
       return C.passwordSet(pass.value);
     }).then(function (r) {
       settle();
+      /* A sign up or a new password by phone goes on to the code the text
+         brings; a new password by phone then comes back here to choose it. */
+      if (r.ok && r.via === 'phone') { toCode(r.phone, m === 'up' ? 'signup' : 'recover'); return; }
       if (r.ok && r.confirm) { pass.value = ''; setMode('in', false); say(WHY.confirm); return; }
       if (r.ok && m === 'forgot') { say(WHY.resetSent); return; }
-      if (r.ok) { pass.value = ''; say(m === 'set' ? WHY.saved : 'Signed in.'); goIn(); return; }
+      if (r.ok && m === 'code' && codeFor.purpose === 'recover') {
+        codeIn.value = '';
+        pass.value = '';
+        setMode('set', true);
+        say('Choose a new password for ' + (r.email || showPhone(r.phone)) + '.');
+        return;
+      }
+      if (r.ok) {
+        keep(login || (codeFor && codeFor.phone) || r.email || '', pass.value);
+        pass.value = '';
+        codeIn.value = '';
+        say(m === 'set' ? WHY.saved : 'Signed in.');
+        goIn();
+        return;
+      }
+      /* A number that was never confirmed signs in to nothing yet, so the
+         reader is taken to the code, and asks for one when ready: a text is
+         sent only when somebody presses for it. */
+      if (r.reason === 'phoneUnconfirmed' && Cmod && Cmod.normPhone(login)) { toCode(Cmod.normPhone(login), 'signup', WHY.phoneUnconfirmed); return; }
       say(WHY[r.reason] || WHY.error);
       if (r.reason === 'invalid') addr.focus();
+      else if (r.reason === 'badCode') codeIn.focus();
       else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
     }, function () { settle(); say(WHY.off); });
   });

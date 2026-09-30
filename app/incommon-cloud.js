@@ -13,9 +13,10 @@
  * WHAT THIS MODULE NEVER DOES:
  *   1. It never touches the network without a session, with one exception
  *      the reader asks for by pressing a button: signing in, making an
- *      account or asking for a new password on the cover, and taking the
- *      session an emailed link brings back. None of those calls carries any
- *      local state; the record only moves once the app's own client exists.
+ *      account or asking for a new password on the cover, by email or by
+ *      phone, checking a code a text brought, and taking the session an
+ *      emailed link brings back. None of those calls carries any local state;
+ *      the record only moves once the app's own client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
  *      revocation takes effect on the next push, not on the next login. Rows
@@ -47,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.3.0';
+  var VERSION = '2.4.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -511,6 +512,39 @@
   }
 
   var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  /* A PHONE NUMBER IS A LOGIN TOO, since the owner asked on 30 September 2026
+     for signing in by phone and for recovering a password by text. The cover
+     has one field for both, so every function below takes what was typed and
+     asks idOf() which it is: an email if it has the shape of one, a phone if
+     it has only digits and the punctuation people write numbers with.
+
+     Supabase wants a phone in E.164, a plus and the country code. People type
+     (555) 123-4567. Ten digits with no plus are read as a US number, eleven
+     starting with 1 likewise, and a leading 00 is the international prefix.
+     Anything else needs the country code written, and the cover says so,
+     because guessing a country is how a text goes to a stranger. */
+  var PHONE_SHAPE = /^\+[1-9]\d{7,14}$/;
+  function normPhone(raw) {
+    var s = String(raw || '').trim();
+    if (!s || /[a-z@]/i.test(s) || !/^[+\d\s().-]+$/.test(s)) return null;
+    var plus = s.charAt(0) === '+', d = s.replace(/\D/g, '');
+    if (!plus && d.slice(0, 2) === '00') { d = d.slice(2); plus = true; }
+    if (!plus) {
+      if (d.length === 10) d = '1' + d;
+      else if (!(d.length === 11 && d.charAt(0) === '1')) return null;
+    }
+    var e = '+' + d;
+    return PHONE_SHAPE.test(e) ? e : null;
+  }
+  function idOf(raw) {
+    var s = String(raw || '').trim();
+    if (EMAIL_SHAPE.test(s)) return { email: s };
+    var p = normPhone(s);
+    return p ? { phone: p } : null;
+  }
+  /* Supabase keeps a phone without its plus. */
+  function phoneOfUser(u) { return u && u.phone ? '+' + String(u.phone).replace(/^\+/, '') : null; }
   /* Eight, stated rather than left to the project's own floor of six. A
      project that asks for more still refuses a shorter one, and that comes
      back as weak. */
@@ -525,6 +559,12 @@
     var m = String((e && e.message) || ''), code = String((e && e.code) || '');
     if (e && e.status === 429 || /rate limit|too many/i.test(m) || /rate_limit/.test(code)) return 'rate';
     if (e && (e.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(m))) return 'offline';
+    if (code === 'phone_provider_disabled' || /unsupported phone provider|phone (signups|logins|provider)[^.]*disabled/i.test(m)) return 'phoneOff';
+    if (code === 'sms_send_failed' || /error sending (confirmation |phone change |recovery )?(sms|otp)/i.test(m)) return 'smsFailed';
+    if (code === 'otp_expired' || /token has expired or is invalid/i.test(m)) return 'badCode';
+    if (code === 'phone_not_confirmed' || /phone not confirmed/i.test(m)) return 'phoneUnconfirmed';
+    if (code === 'phone_exists' || /phone number has already been registered/i.test(m)) return 'phoneTaken';
+    if (/invalid phone/i.test(m)) return 'invalid';
     if (code === 'invalid_credentials' || /invalid login credentials/i.test(m)) return 'wrong';
     if (code === 'email_not_confirmed' || /email not confirmed/i.test(m)) return 'unconfirmed';
     if (code === 'user_already_exists' || code === 'email_exists' || /already registered/i.test(m)) return 'exists';
@@ -542,19 +582,19 @@
     return { ok: false, reason: authReason(res.error), error: String(res.error.message || '') };
   }
 
-  function passwordSignIn(email, password) {
-    var addr = String(email || '').trim();
-    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+  function passwordSignIn(login, password) {
+    var id = idOf(login);
+    if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     if (!password) return Promise.resolve({ ok: false, reason: 'nopassword' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
     return authCall(function () {
-      return c.auth.signInWithPassword({ email: addr, password: String(password) });
+      return c.auth.signInWithPassword(id.email ? { email: id.email, password: String(password) } : { phone: id.phone, password: String(password) });
     }).then(function (res) {
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, email: (s.user && s.user.email) || addr };
+      return { ok: true, email: (s.user && s.user.email) || id.email || null, phone: phoneOfUser(s.user) || id.phone || null };
     });
   }
 
@@ -577,12 +617,27 @@
      anybody: the only tell is a user with no identities, which is reported
      as exists so the reader is sent to sign in rather than told to check an
      email that will never come. */
-  function passwordSignUp(email, password, redirectTo, opts) {
-    var addr = String(email || '').trim();
-    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+  function passwordSignUp(login, password, redirectTo, opts) {
+    var id = idOf(login);
+    if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     if (String(password || '').length < PASSWORD_MIN) return Promise.resolve({ ok: false, reason: 'short' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    /* By phone, Supabase texts a code rather than emailing a link, and the
+       cover asks for it (phoneCodeCheck). There is no newsletter answer to
+       carry: the list is read by email, and a phone account has none. */
+    if (id.phone) {
+      return authCall(function () {
+        return c.auth.signUp({ phone: id.phone, password: String(password) });
+      }).then(function (res) {
+        if (res && res.error) return refused(res);
+        var d = (res && res.data) || {};
+        if (d.session) return { ok: true, signedIn: true, phone: phoneOfUser(d.session.user) || id.phone };
+        if (d.user && Array.isArray(d.user.identities) && d.user.identities.length === 0) return { ok: false, reason: 'exists' };
+        return { ok: true, confirm: true, via: 'phone', phone: id.phone };
+      });
+    }
+    var addr = id.email;
     var options = { emailRedirectTo: redirectTo };
     if (opts && typeof opts.newsletter === 'boolean') {
       options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
@@ -602,16 +657,177 @@
      the # and type=recovery, which the cover adopts and then asks for the new
      password. Supabase answers the same whether or not the address has an
      account, and so does the cover. */
-  function passwordResetStart(email, redirectTo) {
-    var addr = String(email || '').trim();
-    if (!EMAIL_SHAPE.test(addr)) return Promise.resolve({ ok: false, reason: 'invalid' });
+  function passwordResetStart(login, redirectTo) {
+    var id = idOf(login);
+    if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    if (id.phone) return phoneCodeSend(c, id.phone);
     return authCall(function () {
-      return c.auth.resetPasswordForEmail(addr, { redirectTo: redirectTo });
+      return c.auth.resetPasswordForEmail(id.email, { redirectTo: redirectTo });
     }).then(function (res) {
       return res && res.error ? refused(res) : { ok: true };
     });
+  }
+
+  /* BY PHONE, A NEW PASSWORD STARTS WITH A CODE BY TEXT. Supabase has no reset
+     text as such; what it has is a one time code that signs the number's
+     account in, and a signed in account may set its password (passwordSet),
+     which is the same last step the reset email leads to. shouldCreateUser is
+     off, so a number with no account is never made one here. Supabase refuses
+     such a number with "signups not allowed for otp", and the cover answers
+     it exactly as it answers a number that has an account, so nobody can use
+     this to find out whose number is registered. */
+  function phoneCodeSend(c, phone) {
+    return authCall(function () {
+      return c.auth.signInWithOtp({ phone: phone, options: { shouldCreateUser: false } });
+    }).then(function (res) {
+      if (res && res.error) {
+        var r = refused(res);
+        if (r.reason === 'closed' || /otp_disabled/.test(String(res.error.code || ''))) return { ok: true, via: 'phone', phone: phone };
+        return r;
+      }
+      return { ok: true, via: 'phone', phone: phone };
+    });
+  }
+
+  /* The code the text brought, for either reason the cover asked for one:
+     finishing a phone sign up, or starting a new password. Both are Supabase's
+     type sms, and both come back with a session on this client. */
+  function codeOf(raw) { var t = String(raw || '').replace(/\s/g, ''); return /^\d{4,10}$/.test(t) ? t : null; }
+  function phoneCodeCheck(phone, code) {
+    var p = normPhone(phone), t = codeOf(code);
+    if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
+    if (!t) return Promise.resolve({ ok: false, reason: 'badCode' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return authCall(function () {
+      return c.auth.verifyOtp({ phone: p, token: t, type: 'sms' });
+    }).then(function (res) {
+      if (res && res.error) return refused(res);
+      var s = res && res.data && res.data.session;
+      if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
+      return { ok: true, phone: phoneOfUser(s.user) || p, email: (s.user && s.user.email) || null };
+    });
+  }
+  /* Another code, for the reason the first one was sent. A sign up asks
+     Supabase to resend its confirmation; a new password simply asks again. */
+  function phoneCodeResend(phone, purpose) {
+    var p = normPhone(phone);
+    if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    if (purpose === 'recover') return phoneCodeSend(c, p);
+    return authCall(function () {
+      return c.auth.resend({ type: 'sms', phone: p });
+    }).then(function (res) {
+      return res && res.error ? refused(res) : { ok: true, via: 'phone', phone: p };
+    });
+  }
+
+  /* ---------- a phone on an account that already exists ----------
+
+     Most accounts were made with an email. For one of them to sign in by
+     phone, or to recover its password by text, the phone has to be on the
+     account and proven to belong to its owner, so the app asks for the
+     number, Supabase texts a code to it (updateUser), and the code confirms
+     it (verifyOtp, type phone_change). This is the app's own client, with the
+     session it already has: the cover is for the signed out. */
+  function phoneAddStart(raw) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    var p = normPhone(raw);
+    if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
+    return authCall(function () {
+      return client.auth.updateUser({ phone: p });
+    }).then(function (res) {
+      return res && res.error ? refused(res) : { ok: true, phone: p };
+    });
+  }
+  function phoneAddVerify(raw, code) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    var p = normPhone(raw), t = codeOf(code);
+    if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
+    if (!t) return Promise.resolve({ ok: false, reason: 'badCode' });
+    return authCall(function () {
+      return client.auth.verifyOtp({ phone: p, token: t, type: 'phone_change' });
+    }).then(function (res) {
+      if (res && res.error) return refused(res);
+      var u = res && res.data && (res.data.user || (res.data.session && res.data.session.user));
+      /* The library tells onAuthStateChange as well; this makes the phone
+         show at once rather than after that event lands. */
+      if (u && session) { session = Object.assign({}, session, { user: u }); notify(); }
+      return { ok: true, phone: phoneOfUser(u) || p };
+    });
+  }
+
+  /* ---------- remember me ----------
+
+     The owner asked on 30 September 2026 for a Remember me box, so a loyal
+     reader need not type their login again. Three things are remembered and
+     none of them is the password in this page's storage: a password kept in
+     localStorage is readable by any script that ever runs on this origin and
+     by anybody holding the device, and it would be the one secret this app
+     stored in the clear. So:
+
+     - the login they typed is kept here (REMEMBER_KEY), and the cover fills
+       it in next time;
+     - the password is handed to the browser's own password manager, which
+       keeps it encrypted and fills it back (the cover does that, through the
+       Credential Management API where it exists and the autocomplete names
+       everywhere);
+     - and the session is kept, which is what staying signed in is.
+
+     Unticked, the login is forgotten and the session lasts only while the
+     browser is open: EPHEMERAL_KEY marks it, a session cookie (no expiry, so
+     the browser drops it on closing) says this browser session is the one
+     that signed in, and init() clears the stored session when the mark is
+     there and the cookie is not. The session sits in localStorage, which
+     survives a closed browser, so without the sweep an unticked box would
+     change nothing. */
+  var REMEMBER_KEY = 'incommon.signin.remember';
+  var EPHEMERAL_KEY = 'incommon.signin.ephemeral';
+  var LIVE_COOKIE = 'incommon_signin_live';
+  function localStore() { try { return root.localStorage || null; } catch (e) { return null; } }
+  function rememberGet() {
+    try {
+      var st = localStore(), v = st && JSON.parse(st.getItem(REMEMBER_KEY) || 'null');
+      var on = !v || v.on !== false;
+      return { on: on, login: on && v && v.login ? String(v.login) : null };
+    } catch (e) { return { on: true, login: null }; }
+  }
+  function rememberSet(on, login) {
+    var st = localStore();
+    if (!st) return false;
+    try {
+      if (on) {
+        var l = String(login || '').trim();
+        st.setItem(REMEMBER_KEY, JSON.stringify(l ? { on: true, login: l } : { on: true }));
+        st.removeItem(EPHEMERAL_KEY);
+      } else {
+        st.setItem(REMEMBER_KEY, JSON.stringify({ on: false }));
+        st.setItem(EPHEMERAL_KEY, '1');
+        if (root.document) root.document.cookie = LIVE_COOKIE + '=1; path=/; SameSite=Lax';
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  /* The key supabase-js keeps a session under, derived the way it derives it:
+     sb, the first label of the project's host, auth-token. */
+  function sessionKeyFor(url) {
+    var host = String(url || '').replace(/^[a-z]+:\/\//i, '').split('/')[0];
+    return 'sb-' + host.split('.')[0] + '-auth-token';
+  }
+  function ephemeralSweep(url, storage) {
+    try {
+      if (!storage || storage.getItem(EPHEMERAL_KEY) !== '1') return false;
+      var cookie = (root.document && root.document.cookie) || '';
+      if (new RegExp('(^|;\\s*)' + LIVE_COOKIE + '=1(;|$)').test(cookie)) return false;
+      storage.removeItem(sessionKeyFor(url));
+      storage.removeItem(EPHEMERAL_KEY);
+      return true;
+    } catch (e) { return false; }
   }
 
   /* Tokens from an emailed link, read off the cover's hash by the cover. They
@@ -766,6 +982,7 @@
     return {
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
+      phone: session && session.user ? phoneOfUser(session.user) : null,
       lastPushAt: lastPushAt || null,
       pendingOps: loadOutbox().length,
       VERSION: VERSION
@@ -783,6 +1000,9 @@
     var l = lib();
     if (!l || typeof l.createClient !== 'function') return null; // vendored library absent: stay inert
     cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm };
+    /* Before the client reads the stored session: a sign in that asked not to
+       be remembered ends with the browser session it was made in. */
+    ephemeralSweep(url, opts.storage);
     client = l.createClient(url, anonKey);
 
     /* THE SEAM. Any ProfileManager event means the local record changed, and
@@ -826,6 +1046,13 @@
     adoptSession: adoptSession,
     passwordSet: passwordSet,
     oauthFinish: oauthFinish,
+    phoneCodeCheck: phoneCodeCheck,
+    phoneCodeResend: phoneCodeResend,
+    phoneAddStart: phoneAddStart,
+    phoneAddVerify: phoneAddVerify,
+    rememberGet: rememberGet,
+    rememberSet: rememberSet,
+    normPhone: normPhone,
     oracleRead: oracleRead,
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
