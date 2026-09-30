@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numerology · The Number Field</title>
+<style>
+  /* Deep Field tokens, per repo colour rules: --ac2 is never text, purple text
+     wears --ac2-hi, action green is for primary actions and active states. */
+  :root {
+    --bg: #05060a;
+    --sf: rgba(16, 19, 28, 0.72);
+    --sf2: #0b0d13;
+    --bd: #24222c;
+    --tx: #e8ecf1;
+    --mut: #9aa3b2;
+    --ac: #2fff8f;
+    --ac-hi: #7dffb9;
+    --onac: #05060a;
+    --ac2: #8b5cf6;
+    --ac2-hi: #b79bff;
+    --blue: #7d9bff;
+    --atmc: 139, 92, 246;
+    --rad: 14px;
+    --font-base: "Inter Tight", system-ui, sans-serif;
+    --font-display: "Petrona", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--tx); }
+  body {
+    font-family: var(--font-base);
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--atmc), 0.18), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 110%, rgba(var(--atmc), 0.12), transparent 60%),
+      var(--bg);
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  .eyebrow {
+    letter-spacing: 0.32em; text-transform: uppercase; font-size: 0.72rem;
+    color: var(--ac2-hi); margin: 0 0 0.6rem;
+  }
+  h1 {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(2rem, 5vw, 3.1rem); margin: 0 0 0.5rem; line-height: 1.08;
+  }
+  h1 em { color: var(--ac); font-style: italic; }
+  .lede { color: var(--mut); max-width: 56ch; margin: 0 0 2rem; line-height: 1.55; }
+
+  .panel {
+    background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rad);
+    padding: 1.25rem 1.4rem; backdrop-filter: blur(6px);
+  }
+
+  form { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 0.35rem; flex: 1 1 200px; }
+  label { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut); }
+  input {
+    font: inherit; color: var(--tx); background: var(--sf2);
+    border: 1px solid var(--bd); border-radius: 10px; padding: 0.7rem 0.85rem;
+  }
+  input:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ac); border-color: var(--ac); }
+  button.cta {
+    font: inherit; font-weight: 600; color: var(--onac); background: var(--ac);
+    border: none; border-radius: 10px; padding: 0.75rem 1.4rem; cursor: pointer;
+  }
+  button.cta:hover { background: var(--ac-hi); }
+  .hint { color: var(--mut); font-size: 0.82rem; margin: 0.8rem 0 0; width: 100%; }
+
+  #stage { position: relative; margin: 1.4rem 0; min-height: 380px; overflow: hidden; padding: 0; }
+  #stage canvas { display: block; width: 100%; height: 420px; }
+  #stageOverlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; color: var(--mut); pointer-events: none; padding: 1rem;
+  }
+  #stageCaption {
+    position: absolute; left: 0; right: 0; bottom: 0.7rem; text-align: center;
+    font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mut);
+    pointer-events: none;
+  }
+  #glFail {
+    display: none; margin: 0 0 1rem; padding: 0.8rem 1rem; border: 1px solid var(--bd);
+    border-radius: 10px; color: var(--mut); font-size: 0.85rem;
+  }
+
+  #results { display: none; }
+  #results.on { display: block; }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .card h3 {
+    margin: 0 0 0.2rem; font-family: var(--font-display); font-size: 1.35rem; font-weight: 500;
+  }
+  .card .num { font-size: 2.4rem; line-height: 1; color: var(--ac); font-weight: 600; }
+  .card .work { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 0.72rem; color: var(--mut); margin: 0.35rem 0 0.6rem; word-break: break-word; }
+  .card p { margin: 0.3rem 0; line-height: 1.5; font-size: 0.92rem; color: var(--tx); }
+  .card .essence { color: var(--ac2-hi); }
+  ul.lists { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  ul.lists li { margin: 0.25rem 0; font-size: 0.88rem; line-height: 1.45; color: var(--tx); }
+  .tag { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mut); }
+  #synthesis { margin-bottom: 1rem; }
+  #synthesis p { font-family: var(--font-display); font-size: 1.12rem; line-height: 1.55; margin: 0; }
+  footer { color: var(--mut); font-size: 0.78rem; margin-top: 2.5rem; line-height: 1.6; }
+  footer code { color: var(--blue); }
+  @media (max-width: 560px) { #stage canvas { height: 300px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">My Numerology · 3D field</p>
+  <h1>The number <em>field</em></h1>
+  <p class="lede">Every number this page shows is computed on the device by the shared
+  modules, and every sentence is read from the shared content layer. The field is a
+  portrait of those numbers: the Life Path at the centre, the name numbers on their
+  orbits, and the current year, month, and day held in the band around them.</p>
+
+  <section class="panel" aria-label="Birth details">
+    <form id="nf" novalidate>
+      <div class="field">
+        <label for="nm">Name at birth</label>
+        <input id="nm" name="nm" type="text" autocomplete="off" placeholder="e.g. Maya Lin Chen">
+      </div>
+      <div class="field">
+        <label for="dob">Birth date</label>
+        <input id="dob" name="dob" type="date">
+      </div>
+      <button class="cta" type="submit">Read the field</button>
+      <p class="hint">Numerology reads the name and the calendar only. A birth place is
+      not part of any number on this page.</p>
+    </form>
+  </section>
+
+  <section id="stage" class="panel" aria-label="3D number field">
+    <div id="stageOverlay"><p>Enter a name and a birth date,<br>and the field assembles itself.</p></div>
+    <div id="stageCaption">life path at the centre · name numbers in orbit · the cycle band around them</div>
+  </section>
+  <p id="glFail">WebGL or the three.js CDN was unavailable, so the field is drawn on a
+  plain 2D canvas. Every number and sentence below is identical either way.</p>
+
+  <section id="results" aria-live="polite">
+    <div id="synthesis" class="panel card"><span class="tag">Read as one picture</span><p id="synText"></p></div>
+    <div class="grid">
+      <div class="card panel" id="cardLifePath"></div>
+      <div class="card panel" id="cardCycles"></div>
+      <div class="card panel" id="cardCore"></div>
+      <div class="card panel" id="cardStage"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Prototype <code>Numerology.html</code>. Engine: <code>app/incommon-core.js</code>
+    (InCommonCore, digit reduction preserving 11/22/33, life path, personal year and
+    month). Text: <code>app/numerology-content.js</code> (NumerologyContent, universal,
+    position, stage, and list readings). Personal day, pinnacles, and challenges are the
+    standard method composed from the same reduce(): personal day is personal month plus
+    day of month, first pinnacle is reduced month plus reduced day of birth, and the
+    first pinnacle closes at 36 minus the life path. Stage readings follow the shared
+    stageKey: under 28, under 56, then mature.</p>
+  </footer>
+</main>
+
+<script src="app/incommon-core.js"></script>
+<script src="app/numerology-content.js"></script>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+/* 3D number field. Renders only what app.js publishes on window.NUM_FIELD.
+   Falls back to a 2D canvas when WebGL or the CDN import is unavailable, the
+   same contract as the app's SafeCanvas: no WebGL must never mean no page. */
+const stage = document.getElementById('stage');
+const overlay = document.getElementById('stageOverlay');
+const glFail = document.getElementById('glFail');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function palette(n) {
+  if (n === 11 || n === 22 || n === 33) return 0xd9b96a; /* masters wear gold */
+  return 0x2fff8f;
+}
+function violet() { return 0x8b5cf6; }
+
+let api = null; /* {update(data)} set by whichever renderer wins */
+
+async function boot3d() {
+  const probe = document.createElement('canvas');
+  const gl = probe.getContext('webgl2') || probe.getContext('webgl');
+  if (!gl) throw new Error('no webgl');
+  const THREE = await import('three');
+  if (!THREE || !THREE.WebGLRenderer) throw new Error('no three');
+
+  const canvas = document.createElement('canvas');
+  stage.insertBefore(canvas, overlay);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 2, 0.1, 100);
+  camera.position.set(0, 1.6, 7.2);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const key = new THREE.PointLight(0x2fff8f, 60, 40); key.position.set(4, 5, 4); scene.add(key);
+  const fill = new THREE.PointLight(0x8b5cf6, 40, 40); fill.position.set(-5, -2, -3); scene.add(fill);
+
+  const root = new THREE.Group();
+  scene.add(root);
+
+  /* ambient starfield shell */
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(360 * 3);
+  for (let i = 0; i < 360; i++) {
+    const r = 9 + Math.random() * 7;
+    const t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+    starPos[i * 3] = r * Math.sin(p) * Math.cos(t);
+    starPos[i * 3 + 1] = r * Math.cos(p);
+    starPos[i * 3 + 2] = r * Math.sin(p) * Math.sin(t);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x7d9bff, size: 0.045, transparent: true, opacity: 0.75 }));
+  scene.add(stars);
+
+  /* rebuilt on each reading */
+  let reading = null;
+
+  function numberSprite(text, color) {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d');
+    g.font = '600 84px Georgia'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.shadowColor = color; g.shadowBlur = 18; g.fillStyle = color;
+    g.fillText(text, 64, 70);
+    const tex = new THREE.CanvasTexture(c);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+    sp.scale.setScalar(0.7);
+    return sp;
+  }
+
+  function build(data) {
+    while (root.children.length) {
+      const c = root.children.pop();
+      c.traverse && c.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.map && o.material.map.dispose(); o.material && o.material.dispose && o.material.dispose(); });
+      root.remove(c);
+    }
+    const lp = data.lifePath;
+    const coreColor = palette(lp);
+
+    /* centre: the life path core, wire shell around a lit heart */
+    const heart = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(0.85, 1),
+      new THREE.MeshStandardMaterial({ color: coreColor, emissive: coreColor, emissiveIntensity: 0.55, roughness: 0.35, metalness: 0.2, flatShading: true })
+    );
+    root.add(heart);
+    const shell = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(1.28, 1),
+      new THREE.MeshBasicMaterial({ color: violet(), wireframe: true, transparent: true, opacity: 0.4 })
+    );
+    root.add(shell);
+    const lpLabel = numberSprite(String(lp), '#2fff8f');
+    lpLabel.position.set(0, 1.85, 0); lpLabel.scale.setScalar(0.9);
+    root.add(lpLabel);
+
+    /* name numbers on tilted orbits */
+    const orbiters = [
+      { n: data.expression, label: 'E', r: 2.35, tilt: 0.42, speed: 0.22, phase: 0.0 },
+      { n: data.soulUrge, label: 'S', r: 2.75, tilt: -0.30, speed: 0.16, phase: 1.7 },
+      { n: data.personality, label: 'P', r: 3.10, tilt: 0.18, speed: 0.12, phase: 3.4 },
+      { n: data.birthday, label: 'B', r: 3.45, tilt: -0.12, speed: 0.09, phase: 5.1 },
+    ];
+    const orbitersLive = [];
+    for (const o of orbiters) {
+      const col = palette(o.n);
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(o.r, 0.008, 8, 128),
+        new THREE.MeshBasicMaterial({ color: 0x24222c })
+      );
+      ring.rotation.x = Math.PI / 2 + o.tilt;
+      root.add(ring);
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(0.13, 20, 20),
+        new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.5, roughness: 0.4 })
+      );
+      const tag = numberSprite(String(o.n), '#e8ecf1');
+      tag.scale.setScalar(0.42);
+      root.add(dot); root.add(tag);
+      orbitersLive.push(Object.assign({ dot, tag, ring }, o));
+    }
+
+    /* cycle band: nine nodes, the personal year lit, month and day nearer the core */
+    const band = new THREE.Mesh(
+      new THREE.TorusGeometry(2.05, 0.012, 8, 128),
+      new THREE.MeshBasicMaterial({ color: violet(), transparent: true, opacity: 0.5 })
+    );
+    band.rotation.x = Math.PI / 2 - 0.55;
+    root.add(band);
+    const bandNodes = [];
+    for (let i = 1; i <= 9; i++) {
+      const a = (i / 9) * Math.PI * 2;
+      const active = i === (lp && data.personalYear);
+      const node = new THREE.Mesh(
+        new THREE.SphereGeometry(active ? 0.16 : 0.07, 14, 14),
+        new THREE.MeshStandardMaterial({
+          color: active ? palette(i) : 0x3a4152,
+          emissive: active ? palette(i) : 0x000000,
+          emissiveIntensity: active ? 0.9 : 0,
+        })
+      );
+      node.userData.base = new THREE.Vector3(Math.cos(a) * 2.05, 0, Math.sin(a) * 2.05)
+        .applyEuler(new THREE.Euler(Math.PI / 2 - 0.55, 0, 0));
+      node.position.copy(node.userData.base);
+      const lbl = numberSprite(String(i), active ? '#2fff8f' : '#5b6478');
+      lbl.scale.setScalar(active ? 0.5 : 0.3);
+      lbl.position.copy(node.position).multiplyScalar(1.12);
+      root.add(node); root.add(lbl);
+      bandNodes.push({ node, lbl, active });
+    }
+    /* month and day held close to the heart */
+    const monthDot = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16),
+      new THREE.MeshStandardMaterial({ color: palette(data.personalMonth), emissive: palette(data.personalMonth), emissiveIntensity: 0.6 }));
+    monthDot.position.set(0.9, 0.55, 0.4);
+    const monthLbl = numberSprite('M' + data.personalMonth, '#e8ecf1'); monthLbl.scale.setScalar(0.4);
+    monthLbl.position.copy(monthDot.position).add(new THREE.Vector3(0, 0.32, 0));
+    const dayDot = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16),
+      new THREE.MeshStandardMaterial({ color: palette(data.personalDay), emissive: palette(data.personalDay), emissiveIntensity: 0.6 }));
+    dayDot.position.set(-0.85, -0.5, 0.55);
+    const dayLbl = numberSprite('D' + data.personalDay, '#e8ecf1'); dayLbl.scale.setScalar(0.36);
+    dayLbl.position.copy(dayDot.position).add(new THREE.Vector3(0, -0.3, 0));
+    root.add(monthDot, monthLbl, dayDot, dayLbl);
+
+    reading = { heart, shell, orbitersLive, bandNodes, monthDot, dayDot };
+    overlay.style.display = 'none';
+  }
+
+  function resize() {
+    const w = stage.clientWidth, h = canvas.clientHeight || 420;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  let t0 = performance.now();
+  function frame(now) {
+    const t = (now - t0) / 1000;
+    if (reading) {
+      reading.heart.rotation.y = t * 0.25;
+      reading.heart.rotation.x = Math.sin(t * 0.4) * 0.15;
+      reading.shell.rotation.y = -t * 0.12;
+      reading.shell.rotation.z = t * 0.07;
+      for (const o of reading.orbitersLive) {
+        const a = o.phase + t * o.speed;
+        const v = new THREE.Vector3(Math.cos(a) * o.r, 0, Math.sin(a) * o.r)
+          .applyEuler(new THREE.Euler(Math.PI / 2 + o.tilt, 0, 0));
+        o.dot.position.copy(v);
+        o.tag.position.copy(v).multiplyScalar(1.1);
+        o.ring.rotation.z = t * 0.03;
+      }
+      const pulse = 1 + Math.sin(t * 1.4) * 0.05;
+      reading.heart.scale.setScalar(pulse);
+    }
+    stars.rotation.y = t * 0.008;
+    renderer.render(scene, camera);
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  if (reduced) { resize(); requestAnimationFrame(frame); /* single static frame */ }
+  else requestAnimationFrame(frame);
+
+  api = { update: build };
+}
+
+function boot2d() {
+  glFail.style.display = 'block';
+  const canvas = document.createElement('canvas');
+  stage.insertBefore(canvas, overlay);
+  const g = canvas.getContext('2d');
+  let data = null, t0 = performance.now();
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = stage.clientWidth * dpr;
+    canvas.height = (stage.clientHeight || 420) * dpr;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', () => { resize(); draw(performance.now()); });
+  resize();
+  function draw(now) {
+    const w = stage.clientWidth, h = stage.clientHeight || 420;
+    const t = reduced ? 0 : (now - t0) / 1000;
+    g.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.42;
+    g.strokeStyle = '#24222c'; g.lineWidth = 1;
+    for (let i = 1; i <= 4; i++) { g.beginPath(); g.arc(cx, cy, R * i / 4, 0, Math.PI * 2); g.stroke(); }
+    for (let i = 0; i < 120; i++) {
+      const a = i * 2.39996, r = R * (0.55 + ((i * 37) % 50) / 50 * 0.55);
+      g.fillStyle = 'rgba(125,155,255,0.5)';
+      g.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 1.4, 1.4);
+    }
+    if (!data) return;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '600 ' + Math.round(R * 0.5) + 'px Georgia';
+    g.fillStyle = '#2fff8f';
+    g.shadowColor = '#2fff8f'; g.shadowBlur = 22;
+    g.fillText(String(data.lifePath), cx, cy);
+    g.shadowBlur = 0;
+    const orbits = [
+      { n: data.expression, r: R * 0.5, sp: 0.22, ph: 0 },
+      { n: data.soulUrge, r: R * 0.66, sp: 0.16, ph: 2.1 },
+      { n: data.personality, r: R * 0.82, sp: 0.12, ph: 4.2 },
+      { n: data.birthday, r: R * 1.0, sp: 0.09, ph: 5.6 },
+    ];
+    g.font = '500 13px system-ui';
+    for (const o of orbits) {
+      const a = o.ph + t * o.sp;
+      const x = cx + Math.cos(a) * o.r, y = cy + Math.sin(a) * o.r * 0.62;
+      g.fillStyle = (o.n === 11 || o.n === 22 || o.n === 33) ? '#d9b96a' : '#2fff8f';
+      g.beginPath(); g.arc(x, y, 7, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#e8ecf1';
+      g.fillText(String(o.n), x, y - 16);
+    }
+    for (let i = 1; i <= 9; i++) {
+      const a = (i / 9) * Math.PI * 2 - Math.PI / 2 + t * 0.05;
+      const x = cx + Math.cos(a) * R * 0.28, y = cy + Math.sin(a) * R * 0.28;
+      const active = i === data.personalYear;
+      g.fillStyle = active ? '#2fff8f' : '#3a4152';
+      g.beginPath(); g.arc(x, y, active ? 6 : 2.6, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = '#e8ecf1'; g.font = '500 12px system-ui';
+    g.fillText('year ' + data.personalYear + ' · month ' + data.personalMonth + ' · day ' + data.personalDay, cx, h - 18);
+    overlay.style.display = 'none';
+    if (!reduced) requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+  api = { update(d) { data = d; draw(performance.now()); } };
+}
+
+boot3d().catch(boot2d);
+
+addEventListener('numfield', function () {
+  if (api && window.NUM_FIELD) api.update(window.NUM_FIELD);
+});
+</script>
+
+<script>
+/* Reading logic. All arithmetic through InCommonCore; all text through
+   NumerologyContent. Personal day, pinnacles, and challenges are the
+   standard method composed from the same exported reduce(). */
+(function () {
+  var form = document.getElementById('nf');
+  var results = document.getElementById('results');
+  if (!window.InCommonCore || !window.NumerologyContent) {
+    form.innerHTML = '<p class="hint">app/incommon-core.js or app/numerology-content.js did not load. This page must sit at the repo root, next to app/.</p>';
+    return;
+  }
+  var IC = window.InCommonCore, NC = window.NumerologyContent;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function li(arr) {
+    return '<ul class="lists">' + arr.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>';
+  }
+  /* Some content strings already carry terminal punctuation, some do not. */
+  function dot(s) { s = String(s); return /[.!?]$/.test(s) ? s : s + '.'; }
+  function calc() {
+    var name = document.getElementById('nm').value.trim();
+    var dob = document.getElementById('dob').value;
+    if (!name || !/^\d{4}-\d{2}-\d{2}/.test(dob)) {
+      results.classList.add('on');
+      document.getElementById('synText').textContent = 'A name at birth and a birth date are both needed for the field.';
+      return;
+    }
+    var today = new Date();
+    var profile = { dob: dob, nameAtBirth: name };
+    var core = IC.coreNumbers(profile, today);
+
+    /* personal day: personal month plus day of month, reduced (standard method) */
+    var pd = IC.reduce(core.personalMonth.value + today.getDate());
+    var personalDay = pd.value;
+    var pdWork = core.personalMonth.value + ' + ' + today.getDate() + (pd.value !== core.personalMonth.value + today.getDate() ? ' → ' + pd.value : '');
+
+    /* birth components, each reduced first, the module's own fixture style */
+    var y = +dob.slice(0, 4), mo = +dob.slice(5, 7), d = +dob.slice(8, 10);
+    var rm = IC.reduce(mo).value, rd = IC.reduce(d).value, ry = IC.reduce(IC.digitSum(y)).value;
+    var lp = core.lifePath.value;
+
+    /* pinnacles: P1 = mo+day, P2 = day+year, P3 = P1+P2, P4 = mo+year (all reduced).
+       First pinnacle closes at 36 minus the life path, then nine years each. */
+    var p1 = IC.reduce(rm + rd).value, p2 = IC.reduce(rd + ry).value,
+        p3 = IC.reduce(p1 + p2).value, p4 = IC.reduce(rm + ry).value;
+    var age = Math.floor((today - new Date(y, mo - 1, d)) / (365.2425 * 864e5));
+    var pivot = 36 - (lp > 9 ? IC.reduce(lp).value : lp);
+    var curPin = age < pivot ? p1 : age < pivot + 9 ? p2 : age < pivot + 18 ? p3 : p4;
+
+    /* challenges: C1 = |month - day|, C2 = |day - year|, C3 = |C1 - C2|, main = |month - year| */
+    var c1 = IC.reduce(Math.abs(rm - rd)).value, c2 = IC.reduce(Math.abs(rd - ry)).value;
+    var cMain = IC.reduce(Math.abs(rm - ry)).value;
+
+    var field = {
+      lifePath: lp, expression: core.expression.value, soulUrge: core.soulUrge.value,
+      personality: core.personality.value, birthday: core.birthday.value,
+      personalYear: core.personalYear.value, personalMonth: core.personalMonth.value,
+      personalDay: personalDay
+    };
+    window.NUM_FIELD = field;
+    dispatchEvent(new Event('numfield'));
+
+    var clp = NC.content(lp), cex = NC.content(core.expression.value),
+        csu = NC.content(core.soulUrge.value), cpe = NC.content(core.personality.value),
+        cbd = NC.content(core.birthday.value),
+        cpy = NC.content(core.personalYear.value), cpm = NC.content(core.personalMonth.value),
+        cpd = NC.content(personalDay), cpn = NC.content(curPin);
+
+    var stageKey = NC.stageKey(age);
+    var stageText = clp.stage ? clp.stage[stageKey] : '';
+
+    document.getElementById('synText').textContent = NC.synthesis({
+      lifePath: lp, personalYear: core.personalYear.value, personalDay: personalDay,
+      expression: core.expression.value, soulUrge: core.soulUrge.value,
+      pinnacle: curPin, challenge: cMain === 0 ? null : cMain
+    });
+
+    document.getElementById('cardLifePath').innerHTML =
+      '<span class="tag">Life Path</span><div class="num">' + lp + '</div>' +
+      '<h3>' + esc(clp.name) + '</h3>' +
+      '<p class="essence">' + esc(dot(clp.essence)) + '</p>' +
+      '<p>' + esc(dot(clp.path)) + '</p>' +
+      '<p class="work">' + esc(core.lifePath.work) + '</p>' +
+      '<span class="tag">Strengths</span>' + li(clp.strengths) +
+      '<span class="tag">Challenges</span>' + li(clp.challenges) +
+      '<span class="tag">Opportunities</span>' + li(clp.opportunities) +
+      '<span class="tag">Obstacles</span>' + li(clp.obstacles);
+
+    document.getElementById('cardCycles').innerHTML =
+      '<span class="tag">The cycle you are in</span>' +
+      '<div class="num">' + core.personalYear.value + '</div>' +
+      '<h3>Personal Year · ' + esc(cpy.name) + '</h3>' +
+      '<p>' + esc(dot(cpy.year)) + '</p>' +
+      '<p class="work">' + esc(core.personalYear.work) + '</p>' +
+      '<p><strong>Month ' + core.personalMonth.value + '</strong> · ' + esc(dot(cpm.month)) + '</p>' +
+      '<p class="work">' + esc(core.personalMonth.work) + '</p>' +
+      '<p><strong>Day ' + personalDay + '</strong> · ' + esc(dot(cpd.day)) + '</p>' +
+      '<p class="work">' + esc(pdWork) + '</p>' +
+      '<span class="tag">Pinnacle</span>' +
+      '<p>' + curPin + ' · ' + esc(dot(cpn.pinnacle)) + '</p>' +
+      (cMain === 0
+        ? '<p class="essence">No active challenge in the standard method.</p>'
+        : '<span class="tag">Challenge</span><p>' + cMain + ' · ' + esc(dot(NC.content(cMain).challenge)) + '</p>');
+
+    document.getElementById('cardCore').innerHTML =
+      '<span class="tag">The name numbers</span>' +
+      '<h3>Expression ' + core.expression.value + ' · ' + esc(cex.name) + '</h3>' +
+      '<p>' + esc(dot(cex.express)) + '</p>' +
+      '<h3>Soul Urge ' + core.soulUrge.value + ' · ' + esc(csu.name) + '</h3>' +
+      '<p>' + esc(dot(csu.soul)) + '</p>' +
+      '<h3>Personality ' + core.personality.value + ' · ' + esc(cpe.name) + '</h3>' +
+      '<p>' + esc(dot(cpe.personality || cpe.express)) + '</p>' +
+      '<h3>Birthday ' + core.birthday.value + ' · ' + esc(cbd.name) + '</h3>' +
+      '<p>' + esc(dot(cbd.birthday)) + '</p>' +
+      '<p class="work">' + esc(core.expression.work || '') + '</p>';
+
+    document.getElementById('cardStage').innerHTML =
+      '<span class="tag">Stage of life · ' + esc(NC.stageLabel(age)) + '</span>' +
+      '<div class="num">' + age + '</div>' +
+      '<h3>Reading a ' + esc(stageKey) + ' ' + lp + '</h3>' +
+      '<p>' + esc(dot(stageText)) + '</p>' +
+      '<span class="tag">The number itself</span>' +
+      '<p>' + esc(dot(clp.universal)) + '</p>';
+
+    results.classList.add('on');
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  form.addEventListener('submit', function (e) { e.preventDefault(); calc(); });
+})();
+</script>
+</body>
+</html>

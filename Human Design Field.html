@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Human Design · The Wiring Field</title>
+<style>
+  :root {
+    --bg: #05060a;
+    --sf: rgba(16, 19, 28, 0.72);
+    --sf2: #0b0d13;
+    --bd: #24222c;
+    --tx: #e8ecf1;
+    --mut: #9aa3b2;
+    --ac: #2fff8f;
+    --ac-hi: #7dffb9;
+    --onac: #05060a;
+    --ac2: #8b5cf6;
+    --ac2-hi: #b79bff;
+    --blue: #7d9bff;
+    --rad: 14px;
+    --font-base: "Inter Tight", system-ui, sans-serif;
+    --font-display: "Petrona", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--tx); }
+  body {
+    font-family: var(--font-base);
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.16), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 110%, rgba(139, 92, 246, 0.10), transparent 60%),
+      var(--bg);
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  .eyebrow { letter-spacing: 0.32em; text-transform: uppercase; font-size: 0.72rem; color: var(--ac2-hi); margin: 0 0 0.6rem; }
+  h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(2rem, 5vw, 3.1rem); margin: 0 0 0.5rem; line-height: 1.08; }
+  h1 em { color: var(--ac); font-style: italic; }
+  .lede { color: var(--mut); max-width: 58ch; margin: 0 0 2rem; line-height: 1.55; }
+  .panel { background: var(--sf); border: 1px solid var(--bd); border-radius: var(--rad); padding: 1.25rem 1.4rem; backdrop-filter: blur(6px); }
+  form { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 0.35rem; flex: 1 1 180px; }
+  label { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut); }
+  input { font: inherit; color: var(--tx); background: var(--sf2); border: 1px solid var(--bd); border-radius: 10px; padding: 0.7rem 0.85rem; }
+  input:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ac); border-color: var(--ac); }
+  button.cta { font: inherit; font-weight: 600; color: var(--onac); background: var(--ac); border: none; border-radius: 10px; padding: 0.75rem 1.4rem; cursor: pointer; }
+  button.cta:hover { background: var(--ac-hi); }
+  .hint { color: var(--mut); font-size: 0.82rem; margin: 0.8rem 0 0; width: 100%; line-height: 1.5; }
+  #stage { position: relative; margin: 1.4rem 0; min-height: 420px; overflow: hidden; padding: 0; }
+  #stage canvas { display: block; width: 100%; height: 480px; }
+  #stageOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--mut); pointer-events: none; padding: 1rem; }
+  #stageCaption { position: absolute; left: 0; right: 0; bottom: 0.7rem; text-align: center; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mut); pointer-events: none; }
+  #glFail { display: none; margin: 0 0 1rem; padding: 0.8rem 1rem; border: 1px solid var(--bd); border-radius: 10px; color: var(--mut); font-size: 0.85rem; }
+  #results { display: none; }
+  #results.on { display: block; }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card h3 { margin: 0 0 0.35rem; font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; }
+  .card .big { font-size: 1.9rem; line-height: 1.15; color: var(--ac); font-weight: 600; font-family: var(--font-display); }
+  .card p { margin: 0.3rem 0; line-height: 1.5; font-size: 0.92rem; }
+  .card .essence { color: var(--ac2-hi); }
+  .card .sub { color: var(--mut); font-size: 0.8rem; }
+  .tag { display: block; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mut); margin: 0.75rem 0 0.25rem; }
+  .tag:first-child { margin-top: 0; }
+  ul.lists { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+  ul.lists li { margin: 0.3rem 0; font-size: 0.88rem; line-height: 1.45; }
+  #synthesis { margin-bottom: 1rem; }
+  #synthesis p { font-family: var(--font-display); font-size: 1.1rem; line-height: 1.55; margin: 0; }
+  .moments { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0 0 1rem; }
+  .moments .panel { flex: 1 1 240px; padding: 0.9rem 1.1rem; }
+  .moments .tag { margin-top: 0; }
+  .moments .when { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 0.85rem; color: var(--blue); }
+  table.places { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  table.places td, table.places th { text-align: left; padding: 0.3rem 0.5rem 0.3rem 0; border-bottom: 1px solid var(--bd); vertical-align: top; }
+  table.places th { color: var(--mut); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .pill { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; border: 1px solid var(--bd); font-size: 0.72rem; }
+  .pill.on { color: var(--ac); border-color: var(--ac); }
+  footer { color: var(--mut); font-size: 0.78rem; margin-top: 2.5rem; line-height: 1.6; }
+  footer code { color: var(--blue); }
+  @media (max-width: 560px) { #stage canvas { height: 340px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">The Wiring · 3D field</p>
+  <h1>The bodygraph, as a <em>field</em></h1>
+  <p class="lede">Two skies are computed for you: the moment of your first breath, and the moment
+  the Sun stood eighty eight degrees earlier, which the tradition reads as the unconscious
+  design. Every gate comes from the shared ephemeris and the shared wheel, every channel and
+  centre from the shared topology, and every sentence from the shared atlas. Type, authority,
+  and strategy are derived from the defined centres by the standard rules, stated in the footer.</p>
+
+  <section class="panel" aria-label="Birth details">
+    <form id="nf" novalidate>
+      <div class="field">
+        <label for="dob">Birth date</label>
+        <input id="dob" name="dob" type="date">
+      </div>
+      <div class="field">
+        <label for="tob">Birth time (optional)</label>
+        <input id="tob" name="tob" type="time">
+      </div>
+      <button class="cta" type="submit">Assemble the field</button>
+      <p class="hint">The time is read as your device local time and no birth place is asked, so
+      angles and houses are not part of this page. With no time, the chart is cast for noon local
+      and labelled as that assumption, the same noon rule the app uses for an unknown time.</p>
+    </form>
+  </section>
+
+  <section id="stage" class="panel" aria-label="3D bodygraph field">
+    <div id="stageOverlay"><p>Enter a birth date,<br>and the wiring assembles itself.</p></div>
+    <div id="stageCaption">nine centres · thirty six channels · the lights of two skies</div>
+  </section>
+  <p id="glFail">WebGL was unavailable, so the field is drawn on a plain 2D canvas. Every gate,
+  channel, and sentence below is identical either way.</p>
+
+  <section id="results" aria-live="polite">
+    <div class="moments">
+      <div class="panel"><span class="tag">The personality moment</span><div class="when" id="mP"></div></div>
+      <div class="panel"><span class="tag">The design moment · Sun 88 degrees earlier</span><div class="when" id="mD"></div></div>
+    </div>
+    <div id="synthesis" class="panel card"><span class="tag">Read as one picture</span><p id="synText"></p></div>
+    <div class="grid">
+      <div class="card panel" id="cardType"></div>
+      <div class="card panel" id="cardAuth"></div>
+      <div class="card panel" id="cardProfile"></div>
+      <div class="card panel" id="cardWiring"></div>
+      <div class="card panel" id="cardCentres"></div>
+      <div class="card panel" id="cardGates"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Prototype <code>Human Design Field.html</code>. Sky: <code>app/ephemeris-backend-current.js</code>
+    (self contained analytical ephemeris) through <code>app/ephemeris-points.js</code>. Gates and
+    lines: <code>app/hd-wheel.js</code> (302 degree origin, half open boundary rule). Channels and
+    centres: <code>app/hd-topology.js</code>. Design moment: <code>app/arc-solver.js</code>
+    <code>designMoment()</code>, bisecting the Sun to 88 degrees earlier rather than using a flat
+    day count, because the Earth is fastest in January and slowest in July and 88 degrees is 86.6
+    to 92.0 days. Text: <code>app/hd-atlas.js</code>. Activations: every basic, node, and derived
+    point in the registry at both moments; a channel is defined when both of its gates are present,
+    a centre when it holds a gate of a defined channel. Type follows the standard wiring rules: no
+    defined centres reads as Reflector, a defined Sacral reads as Generator, or Manifesting
+    Generator when another motor also reaches the Throat, no Sacral with a motor to the Throat
+    reads as Manifestor, otherwise Projector. Authority follows the usual hierarchy over defined
+    centres: Solar Plexus, then Sacral, then Spleen, then Heart, then G, then the Lunar rule for a
+    Reflector, otherwise none inner. The vendored <code>app/three.module.js</code> (r184) renders the
+    field; a 2D canvas carries the same drawing when WebGL is absent.</p>
+  </footer>
+</main>
+
+<script src="app/ephemeris-points.js"></script>
+<script src="app/ephemeris-backend-current.js"></script>
+<script src="app/arc-solver.js"></script>
+<script src="app/hd-wheel.js"></script>
+<script src="app/hd-topology.js"></script>
+<script src="app/hd-atlas.js"></script>
+
+<script type="importmap">
+{ "imports": { "three": "./app/three.module.js" } }
+</script>
+
+<script type="module">
+/* 3D wiring field. Renders only what app.js publishes on window.HD_FIELD.
+   Fallback: 2D canvas, same contract as the app's SafeCanvas. */
+const stage = document.getElementById('stage');
+const overlay = document.getElementById('stageOverlay');
+const glFail = document.getElementById('glFail');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Classic bodygraph arrangement, y up. Kept as data so the 2D fallback
+   draws the same figure. */
+const LAYOUT = {
+  Head: { x: 0, y: 3.15, shape: 'square', size: 0.62 },
+  Ajna: { x: 0, y: 2.25, shape: 'square', size: 0.66 },
+  Throat: { x: 0, y: 1.25, shape: 'square', size: 0.66 },
+  G: { x: 0, y: 0.15, shape: 'diamond', size: 0.62 },
+  Heart: { x: 1.55, y: 0.45, shape: 'tri', size: 0.5 },
+  Spleen: { x: -1.75, y: 0.25, shape: 'tri', size: 0.55 },
+  'Solar Plexus': { x: 1.65, y: -1.2, shape: 'tri', size: 0.55 },
+  Sacral: { x: 0, y: -1.35, shape: 'square', size: 0.66 },
+  Root: { x: 0, y: -2.95, shape: 'square', size: 0.66 },
+};
+const MOTORS = ['Root', 'Heart', 'Solar Plexus', 'Sacral'];
+
+let api = null;
+
+function centreShape(THREE, shape, size) {
+  let g;
+  if (shape === 'square') g = new THREE.ShapeGeometry(new THREE.Shape([
+    new THREE.Vector2(-size, -size), new THREE.Vector2(size, -size),
+    new THREE.Vector2(size, size), new THREE.Vector2(-size, size),
+  ]));
+  else if (shape === 'diamond') g = new THREE.ShapeGeometry(new THREE.Shape([
+    new THREE.Vector2(0, size * 1.15), new THREE.Vector2(size, 0),
+    new THREE.Vector2(0, -size * 1.15), new THREE.Vector2(-size, 0),
+  ]));
+  else g = new THREE.ShapeGeometry(new THREE.Shape([ /* triangle */
+    new THREE.Vector2(-size, -size * 0.85), new THREE.Vector2(size, -size * 0.85),
+    new THREE.Vector2(0, size),
+  ]));
+  return g;
+}
+
+async function boot3d() {
+  const probe = document.createElement('canvas');
+  const gl = probe.getContext('webgl2') || probe.getContext('webgl');
+  if (!gl) throw new Error('no webgl');
+  const THREE = await import('three');
+
+  const canvas = document.createElement('canvas');
+  stage.insertBefore(canvas, overlay);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 2, 0.1, 100);
+  camera.position.set(0, 0.2, 7.4);
+  camera.lookAt(0, 0, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const key = new THREE.PointLight(0xffffff, 50, 50); key.position.set(3, 4, 6); scene.add(key);
+
+  const root = new THREE.Group();
+  scene.add(root);
+
+  const starsGeo = new THREE.BufferGeometry();
+  const sp = new Float32Array(320 * 3);
+  for (let i = 0; i < 320; i++) {
+    const r = 10 + Math.random() * 6, t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+    sp[i * 3] = r * Math.sin(p) * Math.cos(t); sp[i * 3 + 1] = r * Math.cos(p); sp[i * 3 + 2] = r * Math.sin(p) * Math.sin(t);
+  }
+  starsGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+  const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0x7d9bff, size: 0.04, transparent: true, opacity: 0.6 }));
+  scene.add(stars);
+
+  function labelSprite(text, color, scale) {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 96;
+    const g = c.getContext('2d');
+    g.font = '600 44px Georgia'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.shadowColor = color; g.shadowBlur = 14; g.fillStyle = color;
+    g.fillText(text, 128, 50);
+    const sp2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+    sp2.scale.set(scale || 1.0, (scale || 1.0) * 0.375, 1);
+    return sp2;
+  }
+
+  let field = null;
+
+  function build(data) {
+    while (root.children.length) {
+      const c = root.children.pop();
+      c.traverse && c.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.map && o.material.map.dispose(); o.material && o.material.dispose && o.material.dispose(); });
+      root.remove(c);
+    }
+    const graph = new THREE.Group();
+    root.add(graph);
+
+    const centreMeshes = {};
+    const centres = window.HDTopology.CENTERS;
+    for (const name of centres) {
+      const L = LAYOUT[name];
+      const defined = data.definedCentres.indexOf(name) !== -1;
+      const atlasC = window.HDAtlas.CENTERS[name] || { color: '#888888', label: name };
+      const geo = centreShape(THREE, L.shape, L.size);
+      const mat = new THREE.MeshStandardMaterial({
+        color: defined ? new THREE.Color(atlasC.color) : new THREE.Color(0x2a2f3a),
+        emissive: defined ? new THREE.Color(atlasC.color) : new THREE.Color(0x000000),
+        emissiveIntensity: defined ? 0.55 : 0,
+        roughness: 0.5, metalness: 0.1, transparent: true, opacity: defined ? 0.95 : 0.5,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(L.x, L.y, 0);
+      graph.add(mesh);
+      const lbl = labelSprite(atlasC.label.split(' ')[0], defined ? '#e8ecf1' : '#5b6478', 0.85);
+      lbl.position.set(L.x, L.y, 0.06);
+      graph.add(lbl);
+      centreMeshes[name] = mesh;
+    }
+
+    const pairs = window.HDTopology.pairs();
+    const definedKeys = data.definedChannels;
+    for (const ch of pairs) {
+      const ca = window.HDTopology.centerOf(ch.a), cb = window.HDTopology.centerOf(ch.b);
+      if (!ca || !cb || ca === cb) continue;
+      const A = LAYOUT[ca], B = LAYOUT[cb];
+      const isDef = definedKeys.indexOf(ch.key) !== -1;
+      const pts = [];
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24;
+        const x = A.x + (B.x - A.x) * t, y = A.y + (B.y - A.y) * t;
+        const bow = Math.sin(t * Math.PI) * 0.08;
+        const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy) || 1;
+        pts.push(new THREE.Vector3(x - dy / len * bow, y + dx / len * bow, 0.02));
+      }
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+        color: isDef ? 0x2fff8f : 0x39404f, transparent: true, opacity: isDef ? 0.95 : 0.32,
+      }));
+      graph.add(line);
+    }
+
+    /* the lights: Sun and Earth at both moments, orbiting outside the graph */
+    const markers = [];
+    const lights = [
+      { who: '☉', sub: 'P', color: '#ffd76a', moment: 'personality' },
+      { who: '⊕', sub: 'P', color: '#7d9bff', moment: 'personality' },
+      { who: '☉', sub: 'D', color: '#d9b96a', moment: 'design' },
+      { who: '⊕', sub: 'D', color: '#9aa3b2', moment: 'design' },
+    ];
+    lights.forEach((L, i) => {
+      const grp = new THREE.Group();
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.11, 18, 18),
+        new THREE.MeshStandardMaterial({ color: new THREE.Color(L.color), emissive: new THREE.Color(L.color), emissiveIntensity: 0.7 }));
+      const lbl = labelSprite(L.who + ' ' + L.sub, L.color, 0.62);
+      lbl.position.set(0, 0.32, 0);
+      grp.add(dot); grp.add(lbl);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(3.3 + i * 0.28, 0.006, 6, 128),
+        new THREE.MeshBasicMaterial({ color: 0x24222c }));
+      ring.rotation.x = Math.PI / 2 + [-0.35, 0.25, -0.15, 0.4][i];
+      root.add(ring);
+      root.add(grp);
+      markers.push({ grp, ring, speed: 0.1 - i * 0.018, phase: i * 1.6, r: 3.3 + i * 0.28, tilt: [-0.35, 0.25, -0.15, 0.4][i] });
+    });
+
+    /* beams from each light to the centre of its gate */
+    data.placements.forEach((p, i) => {
+      const cName = window.HDTopology.centerOf(p.gate);
+      if (!cName || !LAYOUT[cName]) return;
+      const a = new THREE.Vector3(0, 0, 0.05);
+      const L = LAYOUT[cName];
+      a.set(L.x, L.y, 0.05);
+      const m = markers[i] ? markers[i].grp : null;
+      if (!m) return;
+      const geo = new THREE.BufferGeometry().setFromPoints([a, a.clone()]);
+      const beam = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.55 }));
+      beam.userData.follow = m;
+      beam.userData.target = a.clone();
+      root.add(beam);
+      markers[i].beam = beam;
+    });
+
+    graph.position.y = 0.15;
+    field = { graph, markers };
+    overlay.style.display = 'none';
+  }
+
+  function resize() {
+    const w = stage.clientWidth, h = canvas.clientHeight || 480;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  let t0 = performance.now();
+  const tmp = null;
+  function frame(now) {
+    const t = (now - t0) / 1000;
+    if (field) {
+      field.graph.rotation.y = Math.sin(t * 0.12) * 0.28;
+      field.graph.rotation.x = Math.sin(t * 0.09) * 0.08;
+      for (const m of field.markers) {
+        const a = m.phase + t * m.speed;
+        const v = new THREE.Vector3(Math.cos(a) * m.r, 0, Math.sin(a) * m.r)
+          .applyEuler(new THREE.Euler(m.tilt, 0, 0));
+        m.grp.position.copy(v);
+        if (m.beam) {
+          const pos = m.beam.geometry.attributes.position;
+          pos.setXYZ(1, v.x, v.y + 0.15, v.z);
+          pos.needsUpdate = true;
+        }
+      }
+    }
+    stars.rotation.y = t * 0.006;
+    renderer.render(scene, camera);
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  if (reduced) requestAnimationFrame(frame);
+  else requestAnimationFrame(frame);
+
+  api = { update: build };
+}
+
+function boot2d() {
+  glFail.style.display = 'block';
+  const canvas = document.createElement('canvas');
+  stage.insertBefore(canvas, overlay);
+  const g = canvas.getContext('2d');
+  let data = null; const t0 = performance.now();
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = stage.clientWidth * dpr;
+    canvas.height = (stage.clientHeight || 480) * dpr;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', () => { resize(); draw(performance.now()); });
+  resize();
+  function draw(now) {
+    const w = stage.clientWidth, h = stage.clientHeight || 480;
+    const t = reduced ? 0 : (now - t0) / 1000;
+    g.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2, S = Math.min(w, h) / 7.2;
+    const px = (x) => cx + x * S, py = (y) => cy - y * S;
+    for (let i = 0; i < 100; i++) {
+      const a = i * 2.39996, r = S * (3.4 + ((i * 31) % 40) / 40 * 1.4);
+      g.fillStyle = 'rgba(125,155,255,0.45)';
+      g.fillRect(cx + Math.cos(a + t * 0.01) * r, cy + Math.sin(a + t * 0.01) * r, 1.3, 1.3);
+    }
+    if (!data) return;
+    const topo = window.HDTopology;
+    for (const ch of topo.pairs()) {
+      const ca = topo.centerOf(ch.a), cb = topo.centerOf(ch.b);
+      if (!ca || !cb || ca === cb) continue;
+      const A = LAYOUT[ca], B = LAYOUT[cb];
+      const isDef = data.definedChannels.indexOf(ch.key) !== -1;
+      g.strokeStyle = isDef ? 'rgba(47,255,143,0.9)' : 'rgba(57,64,79,0.5)';
+      g.lineWidth = isDef ? 2 : 1;
+      g.beginPath(); g.moveTo(px(A.x), py(A.y)); g.lineTo(px(B.x), py(B.y)); g.stroke();
+    }
+    for (const name of topo.CENTERS) {
+      const L = LAYOUT[name];
+      const defined = data.definedCentres.indexOf(name) !== -1;
+      const atlasC = window.HDAtlas.CENTERS[name] || { color: '#888', label: name };
+      g.save();
+      g.translate(px(L.x), py(L.y));
+      const s = L.size * S;
+      g.beginPath();
+      if (L.shape === 'square') g.rect(-s, -s, s * 2, s * 2);
+      else if (L.shape === 'diamond') { g.moveTo(0, -s * 1.15); g.lineTo(s, 0); g.lineTo(0, s * 1.15); g.lineTo(-s, 0); }
+      else { g.moveTo(0, -s); g.lineTo(s, s * 0.85); g.lineTo(-s, s * 0.85); }
+      g.closePath();
+      g.fillStyle = defined ? atlasC.color : '#2a2f3a';
+      g.globalAlpha = defined ? 0.95 : 0.55;
+      g.fill();
+      g.globalAlpha = 1;
+      if (defined) { g.shadowColor = atlasC.color; g.shadowBlur = 18; g.fill(); g.shadowBlur = 0; }
+      g.fillStyle = defined ? '#05060a' : '#9aa3b2';
+      g.font = '600 11px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(atlasC.label.split(' ')[0], 0, 1);
+      g.restore();
+    }
+    data.placements.forEach((p, i) => {
+      const cName = topo.centerOf(p.gate);
+      if (!cName || !LAYOUT[cName]) return;
+      const a = (i * 1.6) + t * (0.12 - i * 0.02);
+      const x = cx + Math.cos(a) * S * 3.1, y = cy + Math.sin(a) * S * 1.75;
+      g.strokeStyle = 'rgba(139,92,246,0.4)'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(px(LAYOUT[cName].x), py(LAYOUT[cName].y)); g.stroke();
+      g.fillStyle = ['#ffd76a', '#7d9bff', '#d9b96a', '#9aa3b2'][i];
+      g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#e8ecf1'; g.font = '500 12px system-ui'; g.textAlign = 'center';
+      g.fillText(p.who, x, y - 13);
+    });
+    overlay.style.display = 'none';
+    if (!reduced) requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+  api = { update(d) { data = d; draw(performance.now()); } };
+}
+
+boot3d().catch(boot2d);
+
+addEventListener('hdfield', function () {
+  if (api && window.HD_FIELD) api.update(window.HD_FIELD);
+});
+</script>
+
+<script>
+/* Chart logic. Sky through the ephemeris backend, gates through HDWheel,
+   wiring through HDTopology, text through HDAtlas. Type and authority are
+   the standard derivations from defined centres, stated in the footer. */
+(function () {
+  var form = document.getElementById('nf');
+  var results = document.getElementById('results');
+  var need = ['EphemerisPoints', 'EphemerisBackendCurrent', 'ArcSolver', 'HDWheel', 'HDTopology', 'HDAtlas'];
+  var missing = need.filter(function (k) { return !window[k]; });
+  if (missing.length) {
+    form.innerHTML = '<p class="hint">These modules did not load: ' + missing.join(', ') +
+      '. This page must sit at the repo root, next to app/.</p>';
+    return;
+  }
+  var Points = window.EphemerisPoints, Backend = window.EphemerisBackendCurrent,
+      Arc = window.ArcSolver, Wheel = window.HDWheel, Topo = window.HDTopology,
+      Atlas = window.HDAtlas;
+  var DAY = 86400000;
+  var MOTORS = ['Root', 'Heart', 'Solar Plexus', 'Sacral'];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function dot(s) { s = String(s); return /[.!?]$/.test(s) ? s : s + '.'; }
+  function fmtDate(d) {
+    return d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function activationsAt(backend, t) {
+    var out = [];
+    var pts = Points.ordered().filter(function (p) {
+      return p.category === 'basic' || p.category === 'node' || p.category === 'derived';
+    });
+    for (var i = 0; i < pts.length; i++) {
+      var ep = backend.compute(pts[i].id, t, null, null, null);
+      if (!ep) continue; /* honest gap: minor bodies need data this page does not ship */
+      var gl = Wheel.gateLine(ep.lon);
+      out.push({ id: pts[i].id, name: pts[i].name, glyph: pts[i].glyph, lon: ep.lon, gate: gl.gate, line: gl.line });
+    }
+    return out;
+  }
+
+  function derive(gates) {
+    var set = {};
+    gates.forEach(function (g) { set[g] = true; });
+    var definedChannels = [], adjacency = {};
+    Topo.CENTERS.forEach(function (c) { adjacency[c] = []; });
+    Topo.pairs().forEach(function (ch) {
+      if (set[ch.a] && set[ch.b]) {
+        definedChannels.push(ch.key);
+        var ca = Topo.centerOf(ch.a), cb = Topo.centerOf(ch.b);
+        if (ca && cb && ca !== cb && adjacency[ca].indexOf(cb) === -1) {
+          adjacency[ca].push(cb); adjacency[cb].push(ca);
+        }
+      }
+    });
+    var definedCentres = Topo.CENTERS.filter(function (c) {
+      return definedChannels.some(function (k) {
+        var p = k.split('-').map(Number);
+        return Topo.centerOf(p[0]) === c || Topo.centerOf(p[1]) === c;
+      });
+    });
+    var has = function (c) { return definedCentres.indexOf(c) !== -1; };
+    function reaches(from, to, seen) {
+      if (from === to) return true;
+      seen = seen || {};
+      if (seen[from]) return false;
+      seen[from] = true;
+      return (adjacency[from] || []).some(function (n) { return reaches(n, to, seen); });
+    }
+    /* type: the standard wiring rules */
+    var type;
+    if (!definedCentres.length) type = 'Reflector';
+    else if (has('Sacral')) {
+      var otherMotor = MOTORS.filter(function (m) { return m !== 'Sacral' && has(m) && reaches(m, 'Throat'); });
+      type = otherMotor.length ? 'Manifesting Generator' : 'Generator';
+    } else if (MOTORS.some(function (m) { return has(m) && reaches(m, 'Throat'); })) type = 'Manifestor';
+    else type = 'Projector';
+    /* authority: the usual hierarchy over defined centres */
+    var authority;
+    if (type === 'Reflector') authority = 'Lunar';
+    else if (has('Solar Plexus')) authority = 'Emotional';
+    else if (has('Sacral')) authority = 'Sacral';
+    else if (has('Spleen')) authority = 'Splenic';
+    else if (has('Heart')) authority = 'Ego';
+    else if (has('G')) authority = 'Self';
+    else authority = 'Mental';
+    return { definedChannels: definedChannels, definedCentres: definedCentres, type: type, authority: authority };
+  }
+
+  function calc() {
+    var dob = document.getElementById('dob').value;
+    var tob = document.getElementById('tob').value;
+    if (!/^\d{4}-\d{2}-\d{2}/.test(dob)) {
+      results.classList.add('on');
+      document.getElementById('synText').textContent = 'A birth date is needed to assemble the field.';
+      return;
+    }
+    var timeUnknown = !/^\d{2}:\d{2}/.test(tob);
+    var hh = timeUnknown ? 12 : +tob.slice(0, 2);
+    var mi = timeUnknown ? 0 : +tob.slice(3, 5);
+    var y = +dob.slice(0, 4), mo = +dob.slice(5, 7), d = +dob.slice(8, 10);
+    /* device local, stated in the hint and footer; the app itself resolves
+       zones through Intl and a birth place, which this page does not ask. */
+    var birth = new Date(y, mo - 1, d, hh, mi, 0);
+    var tP = birth.getTime() / DAY + 2440587.5 - 2451545.0;
+
+    var backend = Backend.create();
+    var sunLon = function (t) { return backend.lonRaw('Sun', t); };
+    var dR = Arc.designMoment(sunLon, tP);
+    if (!dR.solved || dR.t == null) {
+      results.classList.add('on');
+      document.getElementById('synText').textContent =
+        'The design moment did not solve against this ephemeris. The chart is not shown rather than shown from a fallback constant.';
+      return;
+    }
+    var tD = dR.t;
+    var designDate = new Date((tD + 2451545.0 - 2440587.5) * DAY);
+
+    var actP = activationsAt(backend, tP);
+    var actD = activationsAt(backend, tD);
+    var gates = [];
+    actP.concat(actD).forEach(function (a) { if (gates.indexOf(a.gate) === -1) gates.push(a.gate); });
+
+    var wiring = derive(gates);
+    var pSun = actP.filter(function (a) { return a.id === 'sun'; })[0];
+    var dSun = actD.filter(function (a) { return a.id === 'sun'; })[0];
+    var profile = (pSun && dSun) ? Atlas.profileFor(pSun.line, dSun.line) : null;
+
+    var light = function (act, who, momentName) {
+      var sun = act.filter(function (a) { return a.id === 'sun'; })[0];
+      var earth = act.filter(function (a) { return a.id === 'earth'; })[0];
+      return [
+        sun ? { who: '☉ ' + momentName, gate: sun.gate, line: sun.line } : null,
+        earth ? { who: '⊕ ' + momentName, gate: earth.gate, line: earth.line } : null
+      ].filter(Boolean);
+    };
+    var placements = light(actP, '☉', 'personality').concat(light(actD, '☉', 'design'));
+
+    window.HD_FIELD = {
+      definedChannels: wiring.definedChannels, definedCentres: wiring.definedCentres,
+      type: wiring.type, authority: wiring.authority, placements: placements
+    };
+    dispatchEvent(new Event('hdfield'));
+
+    document.getElementById('mP').textContent = fmtDate(birth) + (timeUnknown ? ' · noon chart, time unknown' : '');
+    document.getElementById('mD').textContent = fmtDate(designDate) + ' · solved in ' + dR.iterations + ' bisections';
+
+    document.getElementById('synText').textContent =
+      'A ' + wiring.type + ' with ' + wiring.authority.toLowerCase() + ' authority, profile ' +
+      (profile ? profile.key : 'unknown') + ', ' + wiring.definedCentres.length +
+      ' defined centre' + (wiring.definedCentres.length === 1 ? '' : 's') + ' and ' +
+      wiring.definedChannels.length + ' defined channel' + (wiring.definedChannels.length === 1 ? '' : 's') +
+      '. ' + (profile ? dot(profile.how) : '');
+
+    var T = Atlas.TYPES[wiring.type];
+    if (T) {
+      document.getElementById('cardType').innerHTML =
+        '<span class="tag">Type</span><div class="big">' + esc(wiring.type) + '</div>' +
+        '<p>' + esc(dot(T.def || '')) + '</p>' +
+        '<p class="essence">' + esc(dot(T.aura || '')) + '</p>' +
+        '<span class="tag">Signature</span><p>' + esc(dot(T.signature || '')) + '</p>' +
+        '<span class="tag">Not self</span><p>' + esc(dot(T.notSelf || '')) + '</p>' +
+        '<p class="sub">' + esc(T.pct || '') + '</p>';
+    }
+    var authEntry = null;
+    var want = { Emotional: 'Emotional', Sacral: 'Sacral', Splenic: 'Spleen', Ego: 'Ego', Self: 'Self', Lunar: 'Lunar', Mental: 'Mental' }[wiring.authority];
+    Atlas.AUTHORITIES.forEach(function (a) {
+      if (!authEntry && a.name.indexOf(want === 'Emotional' ? 'Emotional' : want === 'Splenic' ? 'Spleen' : want === 'Ego' ? 'Ego' : want === 'Self' ? 'Self' : want === 'Lunar' ? 'Lunar' : want === 'Mental' ? 'Mental' : 'Sacral') !== -1) authEntry = a;
+    });
+    if (authEntry) {
+      document.getElementById('cardAuth').innerHTML =
+        '<span class="tag">Authority</span><div class="big">' + esc(authEntry.name) + '</div>' +
+        '<p>' + esc(dot(authEntry.how)) + '</p>' +
+        '<span class="tag">Recognize it</span><p>' + esc(dot(authEntry.recognize)) + '</p>' +
+        '<span class="tag">Follow it</span><p>' + esc(dot(authEntry.follow)) + '</p>';
+    }
+    var strat = null;
+    Atlas.STRATEGIES.forEach(function (s) {
+      if (strat) return;
+      var who = s.who.toLowerCase();
+      if (who.indexOf(wiring.type.toLowerCase()) !== -1) strat = s;
+      else if (wiring.type === 'Manifesting Generator' && who.indexOf('manifesting generator') !== -1) strat = s;
+    });
+    if (strat) {
+      document.getElementById('cardProfile').innerHTML =
+        '<span class="tag">Profile</span><div class="big">' + (profile ? esc(profile.key) : '?') +
+        ' · ' + (profile ? esc(profile.name) : '') + '</div>' +
+        '<p>' + (profile ? esc(dot(profile.line)) : '') + '</p>' +
+        '<span class="tag">Strategy · ' + esc(strat.name) + '</span>' +
+        '<p>' + esc(dot(strat.who + ', ' + strat.when.charAt(0).toLowerCase() + strat.when.slice(1))) + '</p>' +
+        '<p>' + esc(dot(strat.recognize)) + '</p>' +
+        '<span class="tag">Ignored</span><p>' + esc(dot(strat.ignored)) + '</p>';
+    }
+    var chHtml = wiring.definedChannels.map(function (k) {
+      var p = k.split('-').map(Number);
+      var c = Atlas.channel(p[0], p[1]);
+      return '<li><strong>' + esc(k) + '</strong>' + (c ? ' · ' + esc(c.name) + '. ' + esc(dot(c.meaning)) : '') + '</li>';
+    }).join('');
+    document.getElementById('cardWiring').innerHTML =
+      '<span class="tag">Defined channels</span>' +
+      (chHtml ? '<ul class="lists">' + chHtml + '</ul>' : '<p>No fully defined channels in this chart.</p>') +
+      '<p class="sub">' + wiring.definedChannels.length + ' of 36 · a channel lights when both its gates are present in the two skies</p>';
+
+    var cenHtml = Topo.CENTERS.map(function (c) {
+      var A = Atlas.CENTERS[c];
+      var def = wiring.definedCentres.indexOf(c) !== -1;
+      return '<li><span class="pill' + (def ? ' on' : '') + '">' + (def ? 'defined' : 'open') + '</span> <strong>' +
+        esc(A ? A.label : c) + '</strong><br><span class="sub">' +
+        esc(dot(A ? (def ? A.defined : A.open) : '')) + '</span></li>';
+    }).join('');
+    document.getElementById('cardCentres').innerHTML =
+      '<span class="tag">The nine centres</span><ul class="lists">' + cenHtml + '</ul>';
+
+    function rowsFor(act, momentName) {
+      return act.map(function (a) {
+        return '<tr><td>' + esc(a.glyph + ' ' + a.name) + '</td><td>' + esc(momentName) + '</td>' +
+          '<td>gate ' + a.gate + ' · line ' + a.line + '</td><td>' + esc(Atlas.gateName(a.gate)) + '</td></tr>';
+      }).join('');
+    }
+    document.getElementById('cardGates').innerHTML =
+      '<span class="tag">Activations of the two skies</span>' +
+      '<table class="places"><tr><th>Point</th><th>Sky</th><th>Gate</th><th>Name</th></tr>' +
+      rowsFor(actP, 'conscious') + rowsFor(actD, 'design') + '</table>' +
+      '<p class="sub">Basic, node, and derived points only. Chiron and the asteroids need minor body data this page does not ship; their absence is stated, not hidden.</p>';
+
+    results.classList.add('on');
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  form.addEventListener('submit', function (e) { e.preventDefault(); calc(); });
+})();
+</script>
+</body>
+</html>
