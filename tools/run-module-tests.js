@@ -1505,7 +1505,7 @@ async function runCloudTests() {
      (lib()/init() now do something instead of throwing), and the point of
      these three rows is to confirm that something is the correct inert
      nothing, not to reassert "nothing changed." */
-  function loadIsolatedCloud(supabaseLib, fetchFn) {
+  function loadIsolatedCloud(supabaseLib, fetchFn, extra) {
     var src = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
     /* setTimeout/clearTimeout are host globals, not ECMAScript intrinsics:
        a vm context does not get them for free the way it gets JSON/Promise/
@@ -1513,6 +1513,9 @@ async function runCloudTests() {
        explicitly or K14 would be testing a ReferenceError, not the module. */
     var selfStub = { supabase: supabaseLib, setTimeout: setTimeout, clearTimeout: clearTimeout };
     if (fetchFn) selfStub.fetch = fetchFn;
+    /* localStorage and document, for the rows that need a browser's storage
+       and cookie jar (K38 on); every row before them runs without either. */
+    if (extra) Object.keys(extra).forEach(function (k) { selfStub[k] = extra[k]; });
     selfStub.self = selfStub; // self === self, the way a real Window is
     var ctx = vm.createContext(selfStub);
     vm.runInContext(src, ctx, { filename: 'incommon-cloud.js (isolated K12-K14 instance)' });
@@ -1554,19 +1557,21 @@ async function runCloudTests() {
      went with it. */
   function oauthHarness(opts) {
     opts = opts || {};
-    var h = { created: [], oauth: [], exchanged: [], otp: [], pw: [], up: [], reset: [], set: [], upd: [] };
+    var h = { created: [], oauth: [], exchanged: [], otp: [], pw: [], up: [], reset: [], set: [], upd: [], verify: [], resend: [] };
     var answer = function (k, ok) { return Promise.resolve(opts[k] ? { data: {}, error: opts[k] } : ok); };
     var fakeLib = { createClient: function (url, key, o) {
       h.created.push({ url: url, opts: o || null });
       return { auth: {
         onAuthStateChange: function () {},
-        signInWithOtp: function (a) { h.otp.push(a); return Promise.resolve({ data: {}, error: null }); },
+        signInWithOtp: function (a) { h.otp.push(a); return answer('otpError', { data: {}, error: null }); },
+        verifyOtp: function (a) { h.verify.push(a); return answer('verifyError', { data: { session: { user: { phone: String(a.phone).replace(/^\+/, ''), email: opts.verifyEmail || '' } }, user: { phone: String(a.phone).replace(/^\+/, '') } }, error: null }); },
+        resend: function (a) { h.resend.push(a); return answer('resendError', { data: {}, error: null }); },
         signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: {}, error: null }); },
         exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); },
-        signInWithPassword: function (a) { h.pw.push(a); return answer('pwError', { data: { session: { user: { email: a.email } } }, error: null }); },
+        signInWithPassword: function (a) { h.pw.push(a); return answer('pwError', { data: { session: { user: a.phone ? { phone: a.phone.slice(1) } : { email: a.email } } }, error: null }); },
         signUp: function (a) {
           h.up.push(a);
-          var d = opts.upData || { user: { email: a.email, identities: [{ id: 'i1' }] }, session: null };
+          var d = opts.upData || { user: a.phone ? { phone: a.phone.slice(1), identities: [{ id: 'i1' }] } : { email: a.email, identities: [{ id: 'i1' }] }, session: null };
           return answer('upError', { data: d, error: null });
         },
         resetPasswordForEmail: function (e, o) { h.reset.push({ email: e, opts: o }); return answer('resetError', { data: {}, error: null }); },
@@ -1574,7 +1579,7 @@ async function runCloudTests() {
         updateUser: function (u) { h.upd.push(u); return answer('updError', { data: { user: {} }, error: null }); }
       }, from: function () { return fakeClient([]).from('x'); } };
     } };
-    h.C = loadIsolatedCloud(fakeLib, function () { return Promise.reject(new Error('no network in the test')); });
+    h.C = loadIsolatedCloud(fakeLib, function () { return Promise.reject(new Error('no network in the test')); }, opts.extra);
     return h;
   }
   var gOn = oauthHarness();
@@ -1689,6 +1694,149 @@ async function runCloudTests() {
   t('K37', 'a hash missing a token is refused without asking the server, and tokens the server refuses sign nobody in', {
     half: 'error', halfCalls: 0, expired: { ok: false, reason: 'error' }
   }, { half: half.reason, halfCalls: gHalf.set.length, expired: { ok: expired.ok, reason: expired.reason } });
+
+  /* ---- K38-K45: remember me and the phone, the owner's request of 30
+     September 2026. Remember me keeps the login and the session and never the
+     password; a phone signs in, signs up by a texted code, and recovers a
+     password by one, without ever telling anybody whether a number has an
+     account; and a signed in reader adds a phone in the app. */
+  function jarStore() {
+    var m = {};
+    return { m: m, getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } };
+  }
+  function cookieDoc(initial) {
+    var jar = {};
+    String(initial || '').split(/;\s*/).forEach(function (c) { var i = c.indexOf('='); if (i > 0) jar[c.slice(0, i)] = c.slice(i + 1); });
+    var d = {};
+    Object.defineProperty(d, 'cookie', {
+      get: function () { return Object.keys(jar).map(function (k) { return k + '=' + jar[k]; }).join('; '); },
+      set: function (v) { var nv = String(v).split(';')[0], i = nv.indexOf('='); jar[nv.slice(0, i).trim()] = nv.slice(i + 1); }
+    });
+    return d;
+  }
+  var cloudSrc = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
+  var coverSrc = fs.readFileSync(path.join(repo, 'app', 'cover.html'), 'utf8');
+  var projUrl = (cloudSrc.match(/PROJECT_URL = '([^']+)'/) || [])[1] || '';
+  var sessKey = 'sb-' + projUrl.replace(/^https?:\/\//, '').split('.')[0] + '-auth-token';
+  var cloudVer = (cloudSrc.match(/VERSION = '([^']+)'/) || [])[1];
+  t('K38', 'the cover reads remember me and the session by the same names the module writes them, the session key being the one supabase-js derives from the project, and it loads this VERSION of the module', {
+    remember: true, ephemeral: true, cookie: true, session: true, version: true
+  }, {
+    remember: /REMEMBER_KEY = 'incommon\.signin\.remember'/.test(cloudSrc) && coverSrc.indexOf("'incommon.signin.remember'") !== -1,
+    ephemeral: /EPHEMERAL_KEY = 'incommon\.signin\.ephemeral'/.test(cloudSrc) && coverSrc.indexOf("'incommon.signin.ephemeral'") !== -1,
+    cookie: /LIVE_COOKIE = 'incommon_signin_live'/.test(cloudSrc) && coverSrc.indexOf("'incommon_signin_live'") !== -1,
+    session: sessKey === 'sb-lkzcybzhjjxdqetwwdrx-auth-token' && coverSrc.indexOf("'" + sessKey + "'") !== -1,
+    version: coverSrc.indexOf("./incommon-cloud.js?v=" + cloudVer + "'") !== -1
+  });
+
+  var gPh = oauthHarness();
+  var norm = {};
+  ['(555) 123-4567', '555.123.4567', '+44 20 7946 0958', '0044 20 7946 0958', '1 555 123 4567', '12345', '555 1234', 'call me', 'reader@k39.invalid', '+0 555 123 4567']
+    .forEach(function (x) { norm[x] = gPh.C.normPhone(x); });
+  var phIn = await gPh.C.passwordSignIn(' (555) 123-4567 ', 'correct horse');
+  t('K39', 'a phone is a login: a US number written any usual way becomes E.164, any other needs its country code, a number that is not one is refused, and signing in by phone sends the number and never an address', {
+    norm: { '(555) 123-4567': '+15551234567', '555.123.4567': '+15551234567', '+44 20 7946 0958': '+442079460958', '0044 20 7946 0958': '+442079460958',
+      '1 555 123 4567': '+15551234567', '12345': null, '555 1234': null, 'call me': null, 'reader@k39.invalid': null, '+0 555 123 4567': null },
+    sent: { phone: '+15551234567', password: 'correct horse' }, ok: true, phone: '+15551234567', email: null
+  }, { norm: norm, sent: gPh.pw[0] || null, ok: phIn.ok, phone: phIn.phone, email: phIn.email });
+
+  var gPu = oauthHarness({ verifyEmail: '' });
+  var puStart = await gPu.C.passwordSignUp('+44 20 7946 0958', 'correct horse', 'https://cover.k40.invalid/', { newsletter: true });
+  var puBad = await gPu.C.phoneCodeCheck('+442079460958', 'abc');
+  var puDone = await gPu.C.phoneCodeCheck('+442079460958', ' 123 456 ');
+  t('K40', 'a sign up by phone sends the number and the password with no newsletter answer (the list is read by email), is told to wait for a code, and the code signs in; a code that is not digits is refused before anything is sent', {
+    sent: { phone: '+442079460958', password: 'correct horse' }, start: { ok: true, confirm: true, via: 'phone', phone: '+442079460958' },
+    bad: 'badCode', verified: [{ phone: '+442079460958', token: '123456', type: 'sms' }], done: { ok: true, phone: '+442079460958' }
+  }, {
+    sent: gPu.up[0] || null, start: { ok: puStart.ok, confirm: !!puStart.confirm, via: puStart.via, phone: puStart.phone },
+    bad: puBad.reason, verified: gPu.verify, done: { ok: puDone.ok, phone: puDone.phone }
+  });
+
+  var gPr = oauthHarness(), gPrNone = oauthHarness({ otpError: { status: 422, code: 'otp_disabled', message: 'Signups not allowed for otp' } });
+  var prHas = await gPr.C.passwordResetStart('555-123-4567', 'https://cover.k41.invalid/');
+  var prNone = await gPrNone.C.passwordResetStart('555-123-4567', 'https://cover.k41.invalid/');
+  var prAgain = await gPr.C.phoneCodeResend('+15551234567', 'recover');
+  var prUp = await gPr.C.phoneCodeResend('+15551234567', 'signup');
+  t('K41', 'a new password by phone is a code by text that never makes an account, a number with no account is answered exactly as one with an account, and another code is asked for the reason the first was', {
+    has: { ok: true, via: 'phone', phone: '+15551234567' }, none: { ok: true, via: 'phone', phone: '+15551234567' },
+    otp: [{ phone: '+15551234567', options: { shouldCreateUser: false } }, { phone: '+15551234567', options: { shouldCreateUser: false } }],
+    emails: 0, again: true, up: true, resent: [{ type: 'sms', phone: '+15551234567' }]
+  }, {
+    has: { ok: prHas.ok, via: prHas.via, phone: prHas.phone }, none: { ok: prNone.ok, via: prNone.via, phone: prNone.phone },
+    otp: gPr.otp, emails: gPr.reset.length + gPrNone.reset.length, again: prAgain.ok, up: prUp.ok, resent: gPr.resend
+  });
+
+  var phoneRefusals = {};
+  var phoneCases = [
+    ['phoneOff', 'pwError', { status: 400, code: 'phone_provider_disabled', message: 'Phone logins are disabled' }],
+    ['phoneUnconfirmed', 'pwError', { status: 400, code: 'phone_not_confirmed', message: 'Phone not confirmed' }],
+    ['smsFailed', 'upError', { status: 500, code: 'sms_send_failed', message: 'Error sending confirmation sms' }],
+    ['phoneTaken', 'upError', { status: 422, code: 'phone_exists', message: 'Phone number has already been registered' }],
+    ['badCode', 'verifyError', { status: 403, code: 'otp_expired', message: 'Token has expired or is invalid' }],
+    ['oldBadCode', 'verifyError', { status: 403, message: 'Token has expired or is invalid' }],
+    ['invalid', 'upError', { status: 400, code: 'validation_failed', message: 'Invalid phone number format (E.164 required)' }]
+  ];
+  for (var pci = 0; pci < phoneCases.length; pci++) {
+    var o = {}; o[phoneCases[pci][1]] = phoneCases[pci][2];
+    var gpc = oauthHarness(o), rr;
+    if (phoneCases[pci][1] === 'pwError') rr = await gpc.C.passwordSignIn('+15551234567', 'correct horse');
+    else if (phoneCases[pci][1] === 'upError') rr = await gpc.C.passwordSignUp('+15551234567', 'correct horse', 'x');
+    else rr = await gpc.C.phoneCodeCheck('+15551234567', '123456');
+    phoneRefusals[phoneCases[pci][0]] = rr.reason;
+  }
+  t('K42', 'every refusal a phone can meet comes back as a reason the cover can say', {
+    phoneOff: 'phoneOff', phoneUnconfirmed: 'phoneUnconfirmed', smsFailed: 'smsFailed', phoneTaken: 'phoneTaken', badCode: 'badCode', oldBadCode: 'badCode', invalid: 'invalid'
+  }, phoneRefusals);
+
+  var addCalls = [];
+  var addClient = { auth: {
+    updateUser: function (u) { addCalls.push({ update: u }); return Promise.resolve({ data: { user: {} }, error: null }); },
+    verifyOtp: function (a) { addCalls.push({ verify: a }); return Promise.resolve({ data: { user: { email: 'reader@k43.invalid', phone: a.phone.slice(1) } }, error: null }); }
+  } };
+  var CP = loadIsolatedCloud({ createClient: function () { return {}; } });
+  CP._setClientForTests(addClient, null);
+  var addOut = await CP.phoneAddStart('555 123 4567');
+  CP._setClientForTests(addClient, { user: { id: 'u43', email: 'reader@k43.invalid' } });
+  var addStart = await CP.phoneAddStart('(555) 123-4567');
+  var addBad = await CP.phoneAddVerify('+15551234567', '');
+  var addDone = await CP.phoneAddVerify('+15551234567', '654321');
+  t('K43', 'a phone is added only to an account that is signed in: the number is sent to the account, the code confirms it as a phone change, and the status names it at once', {
+    out: 'signedOut', start: { ok: true, phone: '+15551234567' }, bad: 'badCode', done: { ok: true, phone: '+15551234567' },
+    calls: [{ update: { phone: '+15551234567' } }, { verify: { phone: '+15551234567', token: '654321', type: 'phone_change' } }], status: '+15551234567'
+  }, {
+    out: addOut.reason, start: { ok: addStart.ok, phone: addStart.phone }, bad: addBad.reason, done: { ok: addDone.ok, phone: addDone.phone },
+    calls: addCalls, status: CP.status().phone
+  });
+
+  var remStore = jarStore(), remDoc = cookieDoc('');
+  var gRem = oauthHarness({ extra: { localStorage: remStore, document: remDoc } });
+  var remDefault = gRem.C.rememberGet();
+  await gRem.C.passwordSignIn('reader@k44.invalid', 'a secret, long');
+  gRem.C.rememberSet(true, ' reader@k44.invalid ');
+  var remOn = gRem.C.rememberGet(), markOn = remStore.getItem('incommon.signin.ephemeral');
+  gRem.C.rememberSet(false, 'reader@k44.invalid');
+  var remOff = gRem.C.rememberGet();
+  var anySecret = Object.keys(remStore.m).some(function (k) { return remStore.m[k].indexOf('a secret, long') !== -1; });
+  t('K44', 'remember me keeps the login when ticked and forgets it when not, starts ticked, marks an unremembered sign in with a browser session cookie, and never keeps the password', {
+    fresh: { on: true, login: null }, on: { on: true, login: 'reader@k44.invalid' }, markOn: null,
+    off: { on: false, login: null }, markOff: '1', cookie: true, secret: false
+  }, {
+    fresh: remDefault, on: remOn, markOn: markOn, off: remOff, markOff: remStore.getItem('incommon.signin.ephemeral'),
+    cookie: /(^|; )incommon_signin_live=1(;|$)/.test(remDoc.cookie), secret: anySecret
+  });
+
+  function sweepCase(mark, cookie) {
+    var st = jarStore();
+    st.setItem(sessKey, '{"refresh_token":"rt"}');
+    if (mark) st.setItem('incommon.signin.ephemeral', '1');
+    var seen = null;
+    var Cx = loadIsolatedCloud({ createClient: function () { seen = st.getItem(sessKey); return initClient; } }, null, { document: cookieDoc(cookie ? 'incommon_signin_live=1' : 'other=2') });
+    Cx.init({ url: projUrl, anonKey: 'k45-fake-anon', core: {}, pm: pmG, storage: st });
+    return { seenByClient: !!seen, mark: st.getItem('incommon.signin.ephemeral') };
+  }
+  t('K45', 'an unremembered session ends with the browser session: with the mark and no cookie init() clears it before the client reads it, and a live cookie or a remembered sign in keeps it', {
+    closed: { seenByClient: false, mark: null }, live: { seenByClient: true, mark: '1' }, remembered: { seenByClient: true, mark: null }
+  }, { closed: sweepCase(true, false), live: sweepCase(true, true), remembered: sweepCase(false, false) });
 
   /* ---- K26-K29: the Oracle is asked through this module, with a session,
      and every failure comes back as a reason rather than a throw. */

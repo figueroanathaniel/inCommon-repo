@@ -28,6 +28,11 @@ Accounts made before 29 September 2026 were made by an emailed sign in link,
 which asked the same question with the same box. Their answers are recorded the
 same way.
 
+An account made with a phone number instead of an email is not asked: the box
+is hidden when the field holds a number, because the list is read by email and
+that account has none. If the reader adds an email later, they are not on the
+list until they are asked.
+
 Nothing is sent to any mailing service from the app. The list lives in your
 Supabase project until you take it out.
 

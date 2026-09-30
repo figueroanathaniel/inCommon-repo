@@ -4501,6 +4501,10 @@ input[type="date"]{color-scheme:dark}
            The cloud cannot bring a record back down to a device yet (pullAll
            has no caller), so clearing anything here would be permanent. The
            reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ menuPhoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
+      </button>
       <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
@@ -4715,6 +4719,48 @@ input[type="date"]{color-scheme:dark}
       </sc-for>
       <button onClick="{{ welcomeSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13.5px var(--fu)">Save preferences</button>
       <button onClick="{{ welcomeSkip }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 12px var(--fu);color:var(--dim)">Skip for now. You can change this anytime in Settings</button>
+    </div>
+  </div>
+</sc-if>
+
+<!-- THE PHONE ON THE ACCOUNT. Signed out, it says so and offers the cover;
+     signed in, it takes the number, then the code the text brings. -->
+<sc-if value="{{ phOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ phClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="{{ phTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ phTitle }}</div>
+      <sc-if value="{{ phSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">A phone number belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to add it.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ phSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ phStepNum }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">With a phone on your account you can sign in with the number, and get a code by text when you need a new password.</div>
+        <sc-if value="{{ phHas }}" hint-placeholder-val="{{ false }}">
+          <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">On your account now: {{ phNow }}. To change it, enter the new number.</div>
+        </sc-if>
+        <input value="{{ phNum }}" onChange="{{ phNumType }}" onKeyDown="{{ phNumKey }}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567" aria-label="Phone number, with its country code" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ phSendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ phSendLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ phStepCode }}" hint-placeholder-val="{{ false }}">
+        <input value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phBackGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Back</button>
+          <button onClick="{{ phVerifyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ phVerifyLabel }}</button>
+        </div>
+        <button onClick="{{ phResendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">Send a new code</button>
+      </sc-if>
+      <sc-if value="{{ phStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
+        <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -8812,6 +8858,10 @@ input[type="date"]{color-scheme:dark}
            The cloud cannot bring a record back down to a device yet (pullAll
            has no caller), so clearing anything here would be permanent. The
            reader goes back to the cover, which is where signing in lives. -->
+      <button onClick="{{ menuPhoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
+      </button>
       <button onClick="{{ menuLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Log out</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuLogOutNote }}</span>
@@ -9084,6 +9134,48 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- THE PHONE ON THE ACCOUNT. Signed out, it says so and offers the cover;
+     signed in, it takes the number, then the code the text brings. -->
+<sc-if value="{{ phOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ phClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
+    <div role="dialog" aria-modal="true" aria-label="{{ phTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ phTitle }}</div>
+      <sc-if value="{{ phSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">A phone number belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to add it.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ phSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ phStepNum }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">With a phone on your account you can sign in with the number, and get a code by text when you need a new password.</div>
+        <sc-if value="{{ phHas }}" hint-placeholder-val="{{ false }}">
+          <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">On your account now: {{ phNow }}. To change it, enter the new number.</div>
+        </sc-if>
+        <input value="{{ phNum }}" onChange="{{ phNumType }}" onKeyDown="{{ phNumKey }}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567" aria-label="Phone number, with its country code" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ phSendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ phSendLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ phStepCode }}" hint-placeholder-val="{{ false }}">
+        <input value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ phBackGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Back</button>
+          <button onClick="{{ phVerifyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ phVerifyLabel }}</button>
+        </div>
+        <button onClick="{{ phResendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">Send a new code</button>
+      </sc-if>
+      <sc-if value="{{ phStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
+        <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ delOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ delClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
     <div role="dialog" aria-label="Confirm delete" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
@@ -9288,7 +9380,8 @@ class Component extends DCLogic {
     ypCat: null, ypAll: false, ypCountry: undefined, ypPick: false, pnotes: {}, revealPI: false, memSel: null, memPin: '', memPinOK: false, memPinErr: '',
     synWith: null, synManual: null, synForm: null, circleWith: [], cardIn: null, cardOut: null, stLang: null, stTurn: 0,
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
-    cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false };
+    cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
+    phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '' };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -17511,6 +17604,67 @@ class Component extends DCLogic {
     if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
     else go();
   }
+  /* A PHONE ON THE ACCOUNT, FROM THE PROFILE MENU. The owner asked on 30
+     September 2026 for signing in by phone and for recovering a password by
+     text, and both need the number on the account and proven to be the
+     reader's: the number goes to Supabase, a code comes back by text, and the
+     code confirms it. Everything else about it is on the cover, which is where
+     signing in lives; this is the one place a signed in reader adds or changes
+     the number. It asks through the module and the session it already holds,
+     and it is refused plainly when the device is not signed in. */
+  phoneVals() {
+    const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
+    const signedIn = !!(C && cs.mode === 'cloud'), has = cs.phone || '';
+    /* The US and Canada group their digits one way; any other number stays
+       as Supabase holds it, since a wrong grouping reads as a wrong number. */
+    const show = p => String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3');
+    const WHY = {
+      invalid: 'Enter the number with its country code, like +44 20 7946 0958. A US or Canadian number can be its ten digits.',
+      badCode: 'That code is not right or has expired. Check the text, or send a new code.',
+      phoneTaken: 'That number is already on another account.',
+      phoneOff: 'Phone numbers are not switched on for accounts yet.',
+      smsFailed: 'The text could not be sent. Check the number and try again.',
+      rate: 'Too many tries in a short time. Wait a minute and try again.',
+      offline: 'There is no connection.',
+      signedOut: 'This device is not signed in any more. Sign in on the cover, then add the number.',
+      off: 'The sign in files did not load.'
+    };
+    const why = r => WHY[r && r.reason] || 'That did not finish. Try again in a moment.';
+    const send = () => {
+      if (!C || st.phBusy) return;
+      if (!String(st.phNum).trim()) { this.setState({ phMsg: 'Enter the number first.' }); return; }
+      this.setState({ phBusy: true, phMsg: 'Sending the code.' });
+      C.phoneAddStart(st.phNum).then(r => this.setState(r.ok
+        ? { phBusy: false, phStep: 'code', phNum: r.phone, phCode: '', phMsg: 'A code is on its way to ' + show(r.phone) + '.' }
+        : { phBusy: false, phMsg: why(r) }));
+    };
+    const verify = () => {
+      if (!C || st.phBusy) return;
+      if (!String(st.phCode).trim()) { this.setState({ phMsg: 'Enter the code from the text.' }); return; }
+      this.setState({ phBusy: true, phMsg: 'Checking the code.' });
+      C.phoneAddVerify(st.phNum, st.phCode).then(r => this.setState(r.ok
+        ? { phBusy: false, phStep: 'done', phCode: '', phMsg: show(r.phone) + ' is on your account. You can sign in with it, and a code by text can set a new password.' }
+        : { phBusy: false, phMsg: why(r) }));
+    };
+    const enter = go => e => { if (e && e.key === 'Enter') { e.preventDefault(); go(); } };
+    return {
+      menuPhoneGo: () => this.setState({ quickOpen: false, phOpen: true, phStep: 'num', phNum: show(has), phCode: '', phBusy: false, phMsg: '' }),
+      menuPhoneNote: show(has) || (signedIn ? 'add one' : 'sign in first'),
+      phOpen: !!st.phOpen, phSignedIn: signedIn, phSignedOut: !signedIn,
+      phHas: !!has, phNow: show(has),
+      phTitle: has ? 'Your phone number' : 'Add a phone number',
+      phStepNum: signedIn && st.phStep === 'num', phStepCode: signedIn && st.phStep === 'code', phStepDone: signedIn && st.phStep === 'done',
+      phNum: st.phNum, phNumType: e => this.setState({ phNum: e.target.value, phMsg: '' }), phNumKey: enter(send),
+      phCode: st.phCode, phCodeType: e => this.setState({ phCode: e.target.value, phMsg: '' }), phCodeKey: enter(verify),
+      phMsg: st.phMsg,
+      phSendGo: send, phSendLabel: st.phBusy ? 'Sending' : 'Text me a code',
+      phVerifyGo: verify, phVerifyLabel: st.phBusy ? 'Checking' : 'Confirm',
+      phResendGo: send,
+      phBackGo: () => this.setState({ phStep: 'num', phCode: '', phMsg: '' }),
+      phSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+      phClose: () => this.setState({ phOpen: false, phStep: 'num', phCode: '', phBusy: false, phMsg: '' })
+    };
+  }
   firstRunDone(patch) {
     this.writeLS(this.FIRSTRUN_KEY, true);
     this.authGo(null, { af: {}, ...(patch || {}) });
@@ -19715,7 +19869,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false,
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -20930,6 +21084,7 @@ class Component extends DCLogic {
           cloudRecoveryCompleteGo: () => this.cloudCompleteRecovery(), cloudRecoveryCompleteLabel: st.cloudBusy ? 'Updating…' : 'Set new PIN'
         };
       })(),
+      ...this.phoneVals(),
       ...(() => {
         if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',
           avaIsImg: false, avaImg: '', avaText: '?', avaBg: 'var(--ac)', avaPrevBg: 'var(--ac)', avaBgImg: 'none', avaPrevBgImg: 'none', avaFontS: '600 9.5px var(--fu)', avaFontM: '600 12px var(--fu)', avaFontL: '600 17px var(--fu)',
@@ -21114,7 +21269,7 @@ class Component extends DCLogic {
              opens the same name-typed confirmation Settings uses, pointed at the
              active profile, without opening the edit sheet under it. */
           menuLogOutGo: () => this.accountLogOut(),
-          menuLogOutNote: (st.cloudStatus && st.cloudStatus.mode === 'cloud' && st.cloudStatus.email) || 'back to the cover',
+          menuLogOutNote: (st.cloudStatus && st.cloudStatus.mode === 'cloud' && (st.cloudStatus.email || String(st.cloudStatus.phone || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3'))) || 'back to the cover',
           menuDelGo: () => this.setState({ quickOpen: false, formMode: null, form: { id: prof.id, name: prof.name }, delOpen: true, delName: '' }),
           switchOpen: !!tgt, switchName: tgt ? tgt.name : '', switchNeedsPin: !!(tgt && tgt.pinSet),
           switchWhy: tgt ? ['The current session ends here. The next profile starts fresh, with no memory of it.',
