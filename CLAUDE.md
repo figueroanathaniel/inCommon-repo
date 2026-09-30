@@ -2386,7 +2386,8 @@ in the head for exactly this reason, and without the rule the wordmark would sit
 at full strength on top of the SIGNAL LOST message it is meant to defer to. That
 was live for three revisions after the dim was moved into JS.
 
-**The way in is a subtitle, and it waits for the title.** The arrow in the top
+**The way in is a subtitle, and it waits for the title** (on the desktop; a
+phone shows the sign in form straight away, see "Signing in on the cover"). The arrow in the top
 corner is gone. "enter here" sits under the wordmark inside `.markwrap`, in
 Marcellus at roughly a third of the wordmark's size, and fades in over 2800ms
 starting 3200ms after `body.live`, so the title has finished arriving before
@@ -2781,11 +2782,14 @@ across nine sizes from 320x568 to 1920x1080 in every mode: every control inside
 the viewport and at least 44px tall, nothing overlapping the title, the one
 exception the phone on its side, which scrolls as designed.
 
-**"enter here" is the way to signing in.**
-Decided by the owner on 29 September 2026, in v6.4. The first press of "enter
-here" opens the form in its place, with "Continue without an account" under it,
-so the one link on the cover is both doors and neither is louder than the
-other. Three things keep it from costing anybody the way in they had:
+**"enter here" is the way to signing in, and only that.**
+Decided by the owner on 29 September 2026, in v6.4, and narrowed on 30
+September ("on desktop, enter here should only open up the email and password
+entry area"). A press of "enter here" opens the form in its place, with
+"Continue without an account" under it, and never goes into the app: a second
+press takes the reader back to the first empty field. The way in without an
+account is that button, and Sign in goes in on its own once it succeeds. Three
+things keep it from costing anybody the way in they had:
 
 - **The link is still a real anchor with a real href**, untouched in the markup,
   so with the sign in script dead it navigates exactly as it always did, and the
@@ -2795,9 +2799,9 @@ other. Three things keep it from costing anybody the way in they had:
 - **"Continue without an account" goes on through the link** by clicking it,
   so the module's exit, the rim becoming the mark, runs exactly as before. The
   plain script's listener is registered before the module's (a plain script
-  runs while the page parses, a module after it), stops the first press with
-  `stopImmediatePropagation`, and steps aside on every press after, so a second
-  press of "enter here" also goes in.
+  runs while the page parses, a module after it), stops every press of the link
+  with `stopImmediatePropagation`, and steps aside only when `through` is set,
+  which only Continue without an account and a finished sign in set.
 - **A return that did not finish opens the form by itself**, an expired link
   or a refused one, because what that reader needs next is the password or a
   new link, one field away rather than one press away.
@@ -2805,7 +2809,41 @@ other. Three things keep it from costing anybody the way in they had:
 H15 asserts both steps now, in one row so the
 phase stays at 17: the first press opens the form without leaving or starting
 the exit, the opened state passes 44px and 4.5:1 with the page at the top where
-both sweeps can see it, and "Continue without an account" runs the exit.
+both sweeps can see it, and "Continue without an account" runs the exit. P13 of
+the password drive presses the link twice and three times and stays on the
+cover.
+
+**On a phone there is no "enter here" at all.** The owner asked on 30 September
+2026 for the phone to show the email and password and nothing in front of
+them, so the form is open from the start and the link is not drawn. A phone is
+what the app calls one, narrower than 820, or a touch screen under 500 tall,
+which is the same phone on its side and would otherwise get the desktop's link
+at 844 wide. The sign in script sets `body.phone` and CSS hides the link from
+that class, never from a media query alone: with the script dead the form cannot
+open, and a link hidden by width would leave a phone with no way in at all. The
+anchor stays in the markup either way, because Sign in and Continue without an
+account go on through it. Nothing is focused on load, so the keyboard does not
+spring up over the page before the reader has seen it. P15 drives it at 390 wide
+with touch, and a tablet keeps the desktop's link.
+
+**The password has an eye.** A button at the field's right end shows what was
+typed and hides it again (the owner, 30 September 2026): a slashed eye while it
+is hidden, an open eye while it shows, one fixed name, "Show password", with
+`aria-pressed` carrying the state. Its press is cancelled on `pointerdown` and
+`mousedown` so focus stays in the field, because on a phone focus leaving the
+field drops the keyboard; the click still lands. The field goes back to a
+password field the moment the form is sent, so a password manager sees one when
+it offers to save. It is a 44px target inside the field, which leaves it room.
+The field is wrapped in `.pw` for that, so the mode switch hides the wrapper,
+not the input. P14.
+
+**Without WebGL the way in was invisible, and it is not any more.** The title
+and the way in are revealed by `body.live`, which the module adds on its first
+frame. With no WebGL the module dies before that, so the whole column sat at
+opacity 0 under the SIGNAL LOST message: a device without WebGL could neither
+sign in nor go in. `body.signal-lost`, set by the 9 second fallback, brings the
+column up now, the wordmark at the dim its own rule already gave it. Measured
+with WebGL disabled: both at 0 before, both at 1 after.
 
 **The gap it leaves, stated rather than hidden.** `pullAll()` has no caller, so
 signing in on a new device pushes that device's record up and brings nothing

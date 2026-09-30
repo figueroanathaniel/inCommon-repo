@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4 cover  |  built 2026-09-29 -->
+<!-- inCommon incommon-v6.4 cover  |  built 2026-09-30 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -258,8 +258,26 @@
     border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
     font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
-  .mailform[data-mode="in"] #mailpass, .mailform[data-mode="set"] #mailpass,
+  .mailform[data-mode="in"] .pw, .mailform[data-mode="set"] .pw,
   .mailform[data-mode="forgot"] #mailaddr { flex: 1 1 0; }
+  /* THE EYE. The password field carries a button at its right end that shows
+     what was typed and hides it again, the owner's request of 30 September
+     2026: a slashed eye while it is hidden, an open eye while it shows. It is
+     a 44px target inside the field, the field leaves it room, and pressing it
+     does not take focus out of the field, so the keyboard on a phone stays
+     up. aria-pressed carries the state under one fixed name. */
+  .mailform .pw { position: relative; display: flex; flex: 1 1 100%; min-width: 0; }
+  .mailform .pw .field { flex: 1 1 auto; padding-right: 48px; }
+  .mailform .eye {
+    position: absolute; top: 0; right: 0; width: 44px; height: 44px; padding: 0; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: 0; border-radius: 999px; cursor: pointer; color: #cfd5e2;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mailform .eye:hover { color: #fff8e7; }
+  .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
+  .mailform .eye svg { width: 20px; height: 20px; display: block; }
+  .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
   .mailform .field::placeholder { color: #9aa0a6; }
   .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .mailform .signin { padding: 0 18px; flex: none; }
@@ -318,6 +336,20 @@
      reason, and without this rule the wordmark would then sit at full strength
      on top of the SIGNAL LOST message it is supposed to defer to. */
   body.signal-lost .mark { opacity: .18; }
+  /* With no renderer, body.live never arrives, and the reveal it carries never
+     ran: the title and the whole way in sat at opacity 0 under the SIGNAL LOST
+     message, so a device without WebGL could not sign in or go in at all.
+     The 9 second fallback's class brings them up instead. */
+  body.signal-lost .markwrap, body.signal-lost .sub { opacity: 1; }
+  /* ON A PHONE THE FORM IS THE WAY IN, with no "enter here" in front of it
+     (the owner, 30 September 2026). body.phone is set by the sign in script,
+     not by a media query, so that with the script dead the link is still
+     there and still navigates: hiding it by width alone would leave a phone
+     with no way in at all. The link stays in the markup either way, because
+     Sign in and Continue without an account go on through it. The form does
+     not wait out the title's staging here, since it is what the page is. */
+  body.phone .enter { display: none; }
+  body.phone .sub { transition: opacity 900ms ease 500ms; }
   @media (max-width: 640px) {
     .mark { font-size: clamp(34px, 13.5vw, 96px); }
     #fallback, #notice { left: 18px; right: 18px; bottom: 18px; font-size: 10px; letter-spacing: .13em; }
@@ -338,7 +370,13 @@
       <label class="sr" for="mailaddr">Email address</label>
       <input class="field" id="mailaddr" name="email" type="email" autocomplete="username" inputmode="email" placeholder="Email" required>
       <label class="sr" for="mailpass">Password</label>
-      <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+      <span class="pw">
+        <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button class="eye" type="button" aria-controls="mailpass" aria-pressed="false" aria-label="Show password">
+          <svg class="shut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+          <svg class="seen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </span>
       <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
       <button class="signin" type="submit">Sign in</button>
       <button class="signin alt" type="button" data-to="up">Create New Account</button>
@@ -423,6 +461,8 @@
   var sendBtn = form.querySelector('button[type="submit"]');
   var news = form.querySelector('.news');
   var passLabel = form.querySelector('label[for="mailpass"]');
+  var pw = form.querySelector('.pw');
+  var eye = form.querySelector('button.eye');
   var modeBtns = form.querySelectorAll('button[data-to]');
   var busy = false, loading = null, opened = false, through = false, mode = 'in';
   var ANYWAY = ' You can still continue without an account.';
@@ -465,7 +505,7 @@
     form.setAttribute('data-mode', m);
     sendBtn.textContent = d.button;
     addr.hidden = !!d.noAddr;
-    pass.hidden = passLabel.hidden = !d.pass;
+    pw.hidden = passLabel.hidden = !d.pass;
     if (d.pass) {
       pass.setAttribute('autocomplete', d.passAuto);
       pass.setAttribute('placeholder', d.passHint);
@@ -596,15 +636,19 @@
      back-forward cache with the button still held, so it is let go here. */
   addEventListener('pageshow', function (e) { if (e.persisted && !returning) { settle(); say(''); } });
 
-  /* "enter here" opens the form rather than a form sitting on the cover
-     unasked. This listener is registered before the module's, because a plain
-     script runs while the page is parsed and a module runs after, so on the
-     first press it can stop the exit from starting. After that it steps aside
-     and the press goes on to the module, or to the browser. aria-expanded is
-     written here rather than in the markup because only while this script
-     runs does the link open anything. */
+  /* "enter here" opens the form and does nothing else, the owner's call of 30
+     September 2026: the way in without an account is "Continue without an
+     account", and a second press of the link now takes the reader back to
+     the first empty field rather than into the app. This listener is
+     registered before the module's, because a plain script runs while the
+     page is parsed and a module runs after, so it can stop the exit from
+     starting; it steps aside only when Sign in or Continue without an account
+     sends the reader on through the link (through). aria-expanded is written
+     here rather than in the markup because only while this script runs does
+     the link open anything, and with the script dead the anchor simply
+     navigates, which is the way in the cover has always had. */
   function open(focus) {
-    if (opened) return;
+    if (opened) { if (focus) setMode(mode, true); return; }
     opened = true;
     document.body.classList.add('open');
     enter.setAttribute('aria-expanded', 'true');
@@ -614,17 +658,43 @@
   enter.setAttribute('aria-controls', 'mailform');
   enter.setAttribute('aria-expanded', opened ? 'true' : 'false');
   enter.addEventListener('click', function (ev) {
-    if (through || opened) return;
+    if (through) return;
     ev.preventDefault();
     ev.stopImmediatePropagation();
     open(true);
   });
   skip.addEventListener('click', goIn);
 
+  /* The eye. Pressing it must not move focus out of the field, or a phone
+     drops its keyboard, so the press is cancelled and the click still lands.
+     The field goes back to hidden when the form is sent, so a password
+     manager sees a password field when it offers to save. */
+  function reveal(on) {
+    pass.type = on ? 'text' : 'password';
+    eye.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  eye.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+  eye.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  eye.addEventListener('click', function () { reveal(pass.type === 'password'); });
+
+  /* On a phone the form is open from the start and "enter here" is not shown
+     (body.phone). A phone is what the app calls one, narrower than 820, or a
+     touch screen under 500 tall, which is the same phone held on its side: at
+     844 wide it would otherwise get the desktop's link. */
+  var small = window.matchMedia ? window.matchMedia('(max-width: 819px), (pointer: coarse) and (max-height: 500px)') : null;
+  function fitWidth() {
+    var on = !!(small && small.matches);
+    document.body.classList.toggle('phone', on);
+    if (on) open(false);
+  }
+  fitWidth();
+  if (small) { if (small.addEventListener) small.addEventListener('change', fitWidth); else if (small.addListener) small.addListener(fitWidth); }
+
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
     var m = mode, d = MODES[m];
+    reveal(false);
     hold();
     say(d.busy);
     cloud().then(function (C) {
