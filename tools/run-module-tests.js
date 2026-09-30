@@ -440,6 +440,72 @@ if (!hdLine) {
   tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
 })();
 
+/* ------------------------------------------------ V: the profile menu
+   The owner asked on 30 September 2026 for the profile icon to open a menu
+   (Profile, Settings, Get Help, Log Out), for the profile card to carry a
+   motto made for the reader, and for Get Help to prompt a call. The motto and
+   the line are chosen by methods in the app class, lifted out here the way the
+   U rows lift the numbers. */
+(() => {
+  const CD = require(path.join(repo, 'app', 'crisis-directory.js'));
+  const field = name => {
+    const i = appSrc.indexOf('\n  ' + name + ' = ');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('};\n', i);
+    return appSrc.slice(i, j + 2);
+  };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const one = re => { const m = re.exec(appSrc); return m ? m[0] : ''; };
+  const src = 'class V {\n' + one(/  numReduce\(n\)[^\n]*/) + '\n' + field('MOTTO_LP') + '\n' + field('MOTTO_SUN') + '\n' +
+    field('MOTTO_TYPE') + '\n' + method('mottoFor') + '\n' + method('helpCountry') + '\n' + method('callVals') + '\n}';
+  let env = { tz: 'America/New_York', lang: 'en-US' };
+  const ctx = {
+    Intl: { DateTimeFormat: function () { return { resolvedOptions: () => ({ timeZone: env.tz }) }; } },
+    navigator: { get language() { return env.lang; } }, String: String, Math: Math
+  };
+  let X = null;
+  try { X = vm.runInNewContext('(' + src + ')', ctx); } catch (e) { X = null; }
+  tTrue('V1', 'the motto and the call line lift out of the app and compile', typeof X === 'function');
+  if (typeof X !== 'function') return;
+  const x = new X();
+  const LPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
+  const SUNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  const TYPES = ['Generator', 'Manifesting Generator', 'Manifestor', 'Projector', 'Reflector'];
+  const all = [];
+  LPS.forEach(lp => SUNS.forEach(sun => TYPES.forEach(ty => all.push(x.mottoFor(lp, sun, ty)))));
+  const DASH = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  t('V2', 'every Life Path, Sun and type makes a motto: 720 of them, all different, each two sentences ending in a full stop, none with a dash',
+    { count: 720, distinct: 720, shaped: 720, dashed: 0 },
+    { count: all.filter(Boolean).length, distinct: new Set(all).size, shaped: all.filter(m => /^[A-Z][^.]+\. [A-Z][^.]+\.$/.test(m)).length, dashed: all.filter(m => DASH.test(m)).length });
+  t('V3', 'the motto is something to do, never a statement about who the reader is, and the same chart always gets the same one',
+    { aboutReader: 0, stable: true, missingPart: '' },
+    { aboutReader: all.filter(m => /\byou are\b|\byou're\b|\byour nature\b/i.test(m)).length,
+      stable: x.mottoFor(4, 'Taurus', 'Generator') === x.mottoFor(4, 'Taurus', 'Generator') && x.mottoFor(4, 'Taurus', 'Generator') === 'Build what lasts. At an unhurried pace, answer what lights you up.',
+      missingPart: x.mottoFor(null, 'Leo', 'Projector') + x.mottoFor(5, '', 'Projector') + x.mottoFor(5, 'Leo', '') });
+  const where = [['Europe/London', 'en-US'], ['Europe/Dublin', 'en-IE'], ['Australia/Sydney', 'en-US'], ['America/Toronto', 'en-US'], ['America/New_York', 'es-US'],
+    ['Pacific/Honolulu', 'en-US'], ['America/Indiana/Indianapolis', 'en-US'], ['Asia/Tokyo', 'en-US'], ['America/Mexico_City', 'es-MX'], ['UTC', 'en-GB'], ['UTC', 'fr-FR'], ['', 'en_CA']]
+    .map(([tz, lang]) => { env = { tz, lang }; return (tz || '-') + ' ' + lang + ' ' + x.helpCountry(); });
+  t('V4', 'the line follows the time zone first and the language only when the zone says nothing, and a place the directory does not cover gets no country',
+    ['Europe/London en-US UK', 'Europe/Dublin en-IE UK', 'Australia/Sydney en-US AU', 'America/Toronto en-US CA', 'America/New_York es-US US',
+     'Pacific/Honolulu en-US US', 'America/Indiana/Indianapolis en-US US', 'Asia/Tokyo en-US null', 'America/Mexico_City es-MX null', 'UTC en-GB UK', 'UTC fr-FR null', '- en_CA CA'], where);
+  x.CD = () => CD;
+  x.openHelp = () => {};
+  x.setState = () => {};
+  const call = tz => { env = { tz, lang: 'en-US' }; x.state = { callOpen: true }; const v = x.callVals(); return [v.callKnown, v.callName, v.callHref, v.callTextHref, v.callEmHref].join(' | '); };
+  t('V5', 'Get Help prompts a call to the crisis line for where the reader is, with the emergency number beside it, and offers the way to find one where the directory has none',
+    ['true | 988 Suicide & Crisis Lifeline | tel:988 | sms:988 | tel:911', 'true | Samaritans | tel:116123 |  | tel:999', 'true | 988 Suicide Crisis Helpline | tel:988 | sms:988 | tel:911',
+     'true | Lifeline Australia | tel:131114 |  | tel:000', 'false |  |  |  | '],
+    ['America/Chicago', 'Europe/London', 'America/Vancouver', 'Australia/Perth', 'Asia/Tokyo'].map(call));
+  env = { tz: 'Asia/Tokyo', lang: 'en-US' }; x.state = { callOpen: true };
+  const far = x.callVals();
+  tTrue('V5b', 'where there is no line, the prompt says to find one and carries no number', far.callUnknown === true && !far.callHref && far.callFindHref === 'https://findahelpline.com');
+})();
+
 const WH = require(path.join(repo, 'app', 'hd-wheel.js'));
 
 /* The app keeps its own literal as a fallback. This sweeps both at every

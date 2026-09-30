@@ -2923,7 +2923,7 @@ and an automatic one on a failed sign in is a way to make the page send texts
 to a number the typist does not hold. Q6 counts zero.
 
 **A phone on an existing account is the app's, not the cover's.** Most accounts
-were made by email, so the profile menu has a Phone number item in both shells:
+were made by email, so the profile card (Profile, in the profile menu) has a Phone number item in both shells:
 the number, `updateUser({ phone })`, then the texted code as `verifyOtp` type
 `phone_change`, on the session the app already holds. `phoneAddVerify()` writes
 the confirmed user into the module's session and notifies, so the menu names the
@@ -3315,23 +3315,79 @@ things, each measured:
 `people-library.js` `STATE_VERSION` went to 3 for the first three, which
 invalidates every stored pair.
 
-## The profile menu can log out and delete, and Settings lost the Cloud card
-The owner asked on 29 September 2026 for both in the profile icon's menu.
+## The profile icon opens a menu, and Profile opens the card
+The owner asked on 29 September 2026 for Log Out and Delete in the profile
+icon's sheet, and on 30 September for the icon to open a list instead:
+**Profile, Settings, Get Help, Log Out, in that order.** `profileMenuVals()`
+holds all four, and the icon in both shells is `pmenuGo`, named "Profile menu"
+with `aria-haspopup` and `aria-expanded`. On the desktop the list drops from the
+icon; on the phone it is a bottom sheet, because `[data-vt-modals]` makes every
+vertical dialog one and a dropdown there would be the one dialog that is not.
 
-**Log out signs out and keeps everything on the device.** `accountLogOut()`
-calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
-is `./` in the bundle and `./cover.html` in the source shell, because the app
-is `app.html` in one and the long name in the other. The line under it names the
-signed in address, or says "back to the cover" when there is none. The Settings
-button that used to say "Log out" cleared birth data, which is a different act
-wearing the same word, so it says "Clear birth data" now.
+**Profile opens the card**, which is the old profile sheet headed by who the
+chart says the reader is: the big three, the Human Design type, the Life Path,
+and a motto. Under it sits what the sheet already held, the profiles on the
+device, Change your picture, Phone number and Delete this profile, less Log
+Out, which **moved** to the menu rather than being copied, so there is one way
+out of the account. `profileCardVals()` computes only while the card is open,
+from `chartAt()`, `ascendant()`, `hdChart()` and the core's `lifePath()`, the
+same methods the wheel, the wiring and the numbers page read, so the card cannot
+disagree with them. A Rising with no birth time says it needs one, and the
+sample chart says it is the sample, with Use mine beside it.
+
+**The motto is composed, never written by a model.** `mottoFor(lp, sun, type)`
+takes one clause from each system: the Life Path gives the aim
+(`MOTTO_LP`, all twelve numbers, masters included), the Sun the manner
+(`MOTTO_SUN`), and the type the way in, which is the strategy said as an action
+(`MOTTO_TYPE`). "Build what lasts. At an unhurried pace, answer what lights you
+up." Every clause is something to do and none says who the reader is, the same
+line the three part readings keep. V2 and V3 hold all 720 combinations
+distinct, two sentences each, dashless, and free of "you are". The Oracle stays
+the one screen that calls a model.
+
+**Settings is the tab**, `tab: 'settings'`, and on the phone
+`syncSectionToTab()` carries the reader there, which is why the menu does not
+scroll anything itself.
+
+**Get Help prompts a call, to the line for where the reader is.**
+`helpCountry()` reads the device's time zone first, because that follows the
+phone, and the language's region only when the zone says nothing (UTC). It knows
+the four countries `crisis-directory.js` covers, and `callVals()` takes that
+country's first crisis line with a phone: 988 (call or text) in the US and
+Canada, Samaritans 116 123 in the UK and Ireland, Lifeline 13 11 14 in Australia,
+each with the emergency number beside it. **Anywhere else it gives no number**,
+because a number that does not connect is worse than none at a moment like this;
+it says to call the local emergency number and offers findahelpline.com and the
+full list. It wears `--crisis`, never `--ac`, and opening it logs the same one
+anonymous timestamp the crisis sheet does (`crisisAudit()`). The call button is
+white on the crisis gradient, about 3.7:1, which is why it is 19px bold: that
+passes as large text, and the contrast sweep cannot read a gradient to catch it.
+V4 to V5b hold the country and the line.
+
+**Driven, and measured.** Both shells: the menu's four rows in order at 48px,
+Escape closes it, Profile opens the card with values equal to the app's own
+methods and no Log Out in it, Settings lands on Settings, Get Help opens the
+prompt with `tel:` and `sms:` links and logs one timestamp, More lines opens the
+crisis sheet, and Log Out signs out and reaches the cover. London, Sydney,
+Toronto and Tokyo each get their own answer. The menu, the card and both forms
+of the prompt measured clean in all 32 theme cases at 1440 and 375, and fit at
+320x568, 375x667, a phone on its side, 1024 and 1920, scrolling where they are
+taller than the screen.
 
 **Delete this profile opens the same dialog Settings opens**, typed name and
-all, from both shells' menus. ProfileManager refuses to delete the last profile
-on a device, so for that one the dialog says what happens instead: inCommon
-starts over with a fresh profile and the birth page opens, which is what
-deleting the only profile means to the person doing it. A fresh profile is made
-and made active BEFORE the old one is deleted, so the refusal never fires.
+all. ProfileManager refuses to delete the last profile on a device, so for that
+one the dialog says what happens instead: inCommon starts over with a fresh
+profile and the birth page opens, which is what deleting the only profile means
+to the person doing it. A fresh profile is made and made active BEFORE the old
+one is deleted, so the refusal never fires.
+
+**Log Out signs out and keeps everything on the device.** `accountLogOut()`
+calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
+is `./` in the bundle and `./cover.html` in the source shell, because the app
+is `app.html` in one and the long name in the other. The line beside it names
+the signed in address or number, or says "back to the cover" when there is
+none. The Settings button that used to say "Log out" cleared birth data, which
+is a different act wearing the same word, so it says "Clear birth data" now.
 
 **The Cloud card is gone from both Settings screens**, replaced by a comment
 where it stood. Signing in happens on the cover now, and a second account door
