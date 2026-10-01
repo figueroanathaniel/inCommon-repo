@@ -5102,7 +5102,7 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Your charts</div>
-          <sc-for list="{{ chartCards }}" as="c" hint-placeholder-count="4">
+          <sc-for list="{{ todayChartCards }}" as="c" hint-placeholder-count="3">
             <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 17px;transition:transform .2s ease,border-color .2s ease">
               <span aria-hidden="true" style="flex:none;width:42px;height:42px;border-radius:12px;background:{{ c.chipBg }};border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;background-color:{{ c.glyphC }};-webkit-mask:{{ c.icon }} center/contain no-repeat;mask:{{ c.icon }} center/contain no-repeat"></span></span>
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
@@ -20656,7 +20656,7 @@ class Component extends DCLogic {
           ...this.arcVals(),
           ...this.delMemVals(),
           ...this.memSelVals(),
-          chartCards: [
+          ...(() => { const all = [
             { edge: 'var(--blue)', chipBg: 'rgba(var(--atmc),.18)', glyph: '\u2609', name: 'Astrology',
               desc: 'Your birth chart, transits, and planetary placements.', meta: natalSun.sign + ' Sun \u00b7 ' + (asc ? asc.sign + ' rising' : 'no birth time'),
               go: () => this.setState({ tab: 'spirit', spiritView: 'astrology', focusToday: false }) },
@@ -20700,7 +20700,12 @@ class Component extends DCLogic {
             icon: this.uiIcon({ 'Astrology': 'astrology', 'Human Design': 'humandesign',
               'Numerology': 'numerology', 'Synchronicities': 'angel',
               'Synastry': 'synastry', 'Tarot': 'tarot', 'The Month Ahead': 'today',
-              'Dream Journal': 'dream' }[c.name] || 'spirit') })),
+              'Dream Journal': 'dream' }[c.name] || 'spirit') }));
+            /* Today carries the three charts only, in this order. The rest
+               stay on the Spirit hub, which reads chartCards whole. */
+            const pick = n => all.find(c => c.name === n);
+            return { chartCards: all, todayChartCards: ['Human Design', 'Astrology', 'Numerology'].map(pick) };
+          })(),
           ...this.dailyPopVals(),
           ...this.numerVals(pyV, pdV, now),
           ...this.numberDetailVals(),
