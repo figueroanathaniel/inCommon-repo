@@ -481,7 +481,7 @@
       await go('#/today', 700);
       var todayHasAlign = /Today.s Alignment/.test(txt(doc.querySelector('[data-screen-label="Today"]')));
       var elsewhere = [];
-      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/spirit/angel-numbers', '#/library/practices', '#/library/throughline', '#/oracle'];
+      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/library/synchronicities', '#/library/journal', '#/library/throughline', '#/oracle'];
       for (var oi = 0; oi < others.length; oi++) {
         await go(others[oi], 520);
         var scr = qa('[data-screen-label]').filter(function (s) { return s.getBoundingClientRect().height > 0; });
@@ -580,7 +580,7 @@
         var list = PL && PL.PRACTICES;
         var first = list && list.length ? list[0] : null;
         named.practiceSeeded = !!first;
-        win.__incommonApp.setState({ tab: 'library', libSub: 'library', libView: null,
+        win.__incommonApp.setState({ tab: 'library', libSub: 'journal', libView: null,
           selId: first && first.id, pv: 'run', pstep: 0 });
       } catch (e) { named.practiceSeeded = 'threw: ' + (e && e.message); }
       await sleep(800);
@@ -604,8 +604,13 @@
 
       /* ---- Fix 4: routes ---- */
       onStep('fix 4: routes');
+      /* The Library is six tabs and a handful of rooms, each with one address. The
+         old Spirit and practices addresses are kept as aliases, so they stay in
+         the list: an alias that stopped resolving would be a broken bookmark. */
       var routes = ['#/today', '#/spirit', '#/spirit/daily', '#/spirit/astrology', '#/spirit/human-design',
         '#/spirit/numerology', '#/spirit/angel-numbers', '#/spirit/synastry', '#/library',
+        '#/library/study', '#/library/journal', '#/library/readings', '#/library/archive', '#/library/commons',
+        '#/library/synchronicities', '#/library/dream-journal', '#/library/readings/tarot',
         '#/library/practices', '#/library/sabian-lexicon', '#/library/throughline', '#/throughline', '#/oracle', '#/settings'];
       var routeResults = {}, routeExpect = {};
       for (var ri = 0; ri < routes.length; ri++) {
@@ -634,21 +639,21 @@
       onStep('fix 4: back');
       var back = await capped(async function () {
         await go('#/today', 500);
-        await go('#/library/practices', 500);
+        await go('#/library/journal', 500);
         await go('#/settings', 500);
         var before = w2.location.hash;
         return { before: before };
       }, 4000);
       var rev = await capped(async function () {
         var seq = [];
-        await go('#/library/practices', 620); seq.push(win.location.hash);
+        await go('#/library/journal', 620); seq.push(win.location.hash);
         await go('#/today', 620); seq.push(win.location.hash);
         return seq;
       }, 6000);
       var popWired = false;
       try { popWired = typeof win.__incommonApp._onPop === 'function'; } catch (e) {}
       t('F4c', 'Reversing to an earlier path restores that screen, and popstate is wired',
-        { steps: ['#/library/practices', '#/today'], popstate: true },
+        { steps: ['#/library/journal', '#/today'], popstate: true },
         { steps: Array.isArray(rev) ? rev : rev, popstate: popWired });
 
       /* ---- Fix 5: persistence ---- */
@@ -719,7 +724,7 @@
 
       /* ---- Fix 5c: twenty navigations, no drift ---- */
       onStep('fix 5: navigation endurance');
-      var loop = ['#/today', '#/spirit/astrology', '#/spirit/synastry', '#/library/practices', '#/oracle'];
+      var loop = ['#/today', '#/spirit/astrology', '#/library/commons', '#/library/journal', '#/oracle'];
       var t0 = Date.now();
       for (var n = 0; n < 20; n++) { await go(loop[n % loop.length], 210); }
       var elapsed = Date.now() - t0;
@@ -973,8 +978,8 @@
 
       /* ---- R5: Synastry, named and addressed ---- */
       onStep('removal: the Synastry rename');
-      await go('#/spirit/synastry', 620);
-      var synScreen = doc.querySelector('[data-screen-label="Spirit / Synastry"]');
+      await go('#/library/commons', 620);
+      var synScreen = doc.querySelector('[data-screen-label="Library / The Commons"]');
       var synTxt = txt(synScreen);
       /* WHAT THIS ROW MEANS, AND WHAT IT USED TO MEASURE.
          The claim is that the FEATURE is not called Together any more. It used
@@ -998,18 +1003,19 @@
           heading: /Synastry/.test(synTxt),
           kicker: /together/i.test(kicker) ? kicker : '',
           card: /together/i.test(cardHead) ? cardHead.slice(0, 80) : '' });
-      await go('#/spirit', 560);
-      var hubTxt = [].slice.call(doc.querySelectorAll('[data-screen-label]')).map(txt).join(' ');
-      t('R5b', 'The Spirit hub lists it as Synastry, not Together',
-        { synastry: true, together: false },
-        { synastry: /Synastry/.test(hubTxt), together: /\bTogether\b/.test(hubTxt) });
+      /* The feature is listed once, as a Library tab, and the tab strip is where a
+         reader meets its name before opening it. */
+      var tabsTxt = [].slice.call(doc.querySelectorAll('[role="tablist"][aria-label="Library sections"]')).map(txt).join(' ');
+      t('R5b', 'The Library lists it under The Commons and names it Synastry, not Together',
+        { commons: true, synastry: true, together: false },
+        { commons: /The Commons/.test(tabsTxt), synastry: /Synastry/.test(synTxt), together: /\bTogether\b/.test(tabsTxt) });
       /* The old address is an alias, not a redirect to Today: an existing link
          has to land on the same screen and then correct itself. */
       onStep('removal: the legacy address');
       await go('#/spirit/together', 780);
       t('R5c', 'The pre-V1.6 address still lands on Synastry and rewrites itself',
-        { landed: true, rewritten: '#/spirit/synastry' },
-        { landed: !!doc.querySelector('[data-screen-label="Spirit / Synastry"]'),
+        { landed: true, rewritten: '#/library/commons' },
+        { landed: !!doc.querySelector('[data-screen-label="Library / The Commons"]'),
           rewritten: win.location.hash });
 
       /* ---- R6: the account is gone from Settings too ---- */
@@ -1268,8 +1274,8 @@
       t('G9b', 'Neither of the methods that made the compatibility figure survives',
         { scorer: 'undefined', bander: 'undefined' },
         { scorer: typeof app.synScoreOf, bander: typeof app.synBandFor });
-      await goP('#/spirit/synastry', 900);
-      var synTxt = txt(dp.querySelector('[data-screen-label="Spirit / Synastry"]'));
+      await goP('#/library/commons', 900);
+      var synTxt = txt(dp.querySelector('[data-screen-label="Library / The Commons"]'));
       var ring = dp.querySelector('[data-chart="synastry"] svg text');
       t('G9c', 'No figure is drawn or written on the synastry screen',
         { ring: false, outOf100: false, bandWords: false },
@@ -1391,7 +1397,7 @@
          name, not the screen, which is precisely the condition G3 exists to
          catch. The row asserts what the heading SAYS as well as that there is
          exactly one of it. */
-      var routes = [['#/today', 'Today'], ['#/spirit', 'Spirit'], ['#/library/practices', 'Library'],
+      var routes = [['#/today', 'Today'], ['#/spirit', 'My Charts'], ['#/library/journal', 'Library'],
         ['#/oracle', 'The Oracle'], ['#/settings', 'Settings']];
       var h1Bad = [];
       for (var ri = 0; ri < routes.length; ri++) {
@@ -1438,8 +1444,8 @@
        dated windows       a timing feature is only worth having if its dates
                            are checkable, and only worth reading if the sky does
                            not drown the reader's own record.
-       the month ahead     a dated reading, on a page that has to exist in both
-                           shells.
+       the Library        six tabs, each listing what it lists once, and the
+                           rooms that used to be Spirit pages.
        Synchronicities     a renamed page with a second lookup on it, and the
                            rename has to be complete or half the app points at a
                            name that is gone.
@@ -1509,7 +1515,7 @@
 
       /* ---- N1 to N4: the card that leaves the device ---- */
       onStep('new surfaces: the synastry card');
-      await goD('#/spirit/synastry', 700);
+      await goD('#/library/commons', 700);
       app.setState({ synManual: PARTNER, synWith: 'manual' });
       await sleep(700);
       var shareBtn = find(dd, /Share this reading/i);
@@ -1578,7 +1584,7 @@
          section that renders with its handlers missing. Reading circleVals()
          alone would pass on exactly that build. */
       onStep('new surfaces: the circle');
-      await goD('#/spirit/synastry', 700);
+      await goD('#/library/commons', 700);
       var ciSection = function () {
         var heads = [].slice.call(dd.querySelectorAll('*')).filter(function (e) {
           return e.children.length === 0 && txt(e) === 'More than two of you';
@@ -1758,63 +1764,14 @@
             return skyRanges.some(function (rg) { return n.indexOf(rg) !== -1; });
           }) });
 
-      /* ---- N9 to N13: the month ahead ---- */
-      onStep('new surfaces: the month ahead');
-      await goD('#/spirit/month', 900);
-      var page = dd.querySelector('[data-screen-label="Spirit / The Month Ahead"]');
-      var r0 = app.monthReading(0);
-      var heads = r0 ? r0.sections.map(function (x) { return x.head; }) : [];
-      t('N9', 'The month page exists on the desktop and is drawn for this month',
-        { page: true, label: app.fmtMonth(new Date()), sections: true },
-        { page: !!page, label: r0 ? r0.label : 'no reading', sections: heads.length >= 6 });
-      t('N9b', 'The reading covers the sky, the reader’s own windows, the gates the Sun walks, a date and the numbers',
-        { shape: true, marked: true, gates: true },
-        { shape: heads.indexOf('What the month is made of') !== -1 && heads.indexOf('What is working on you') !== -1 &&
-            heads.indexOf('The tempo underneath') !== -1 && heads.indexOf('How to hold it') !== -1,
-          marked: heads.indexOf('The date worth marking') !== -1,
-          gates: heads.indexOf('The gates the Sun walks') !== -1 });
-      var stamp0 = page ? txt(page) : '';
-      t('N10', 'This month’s issue names its publication date and the next one',
-        { published: true, next: true },
-        { published: /published on the first/i.test(stamp0), next: /the next one lands/i.test(stamp0) });
-
-      app.setState({ monthOff: 1 });
-      await sleep(600);
-      var ahead = txt(dd.querySelector('[data-screen-label="Spirit / The Month Ahead"]') || dd.body);
-      t('N10b', 'Reading ahead is named rather than blocked',
-        { labelled: true, isNextMonth: true },
-        { labelled: /read ahead/i.test(ahead),
-          isNextMonth: ahead.indexOf(app.fmtMonth(app.monthBounds(1).from)) !== -1 });
-
-      /* The stepper is clamped to the window the scan can actually see. */
-      app.setState({ monthOff: app.MONTH_MAX });
-      await sleep(500);
-      var atMax = !!find(dd, /→$/);
-      app.setState({ monthOff: app.MONTH_MIN });
-      await sleep(500);
-      var atMin = !!find(dd, /^←\s+\w+\s+\d{4}$/);
-      app.setState({ monthOff: 0 });
-      await sleep(400);
-      t('N11', 'The month stepper stops where the scan does, at both ends',
-        { forwardOffered: false, backOffered: false },
-        { forwardOffered: atMax, backOffered: atMin });
-
-      var keptTitle = 'The month ahead · ' + r0.label;
-      app.monthKeep(r0);
-      await sleep(500);
-      t('N12', 'Keeping the month writes one reading onto the Throughline',
-        { kept: true, type: 'reading' },
-        { kept: app.tlAll().some(function (e) { return e.title === keptTitle; }),
-          type: (app.tlAll().filter(function (e) { return e.title === keptTitle; })[0] || {}).type });
-      t('N12b', 'Every control on the month page meets 44px and passes 4.5:1',
-        { taps: [], contrast: [] },
-        { taps: page ? tapTargets(wd, { querySelectorAll: function (q) { return page.querySelectorAll(q); } }) : 'no page',
-          contrast: page ? contrastFails(wd, { querySelectorAll: function (q) { return page.querySelectorAll(q); } }, 4.5).fails : 'no page' });
+      /* ---- N9 to N12b: the Month Ahead used to be here ----
+         It was removed from the project on 2 October 2026 and these ids stay
+         retired rather than reassigned: an id is an identity, not a position. */
 
       /* ---- N13 to N17: Synchronicities ---- */
       onStep('new surfaces: Synchronicities');
-      await goD('#/spirit/synchronicities', 800);
-      var sync = dd.querySelector('[data-screen-label="Synchronicities"]');
+      await goD('#/library/synchronicities', 800);
+      var sync = dd.querySelector('[data-screen-label="Library / Synchronicities"]');
       t('N13', 'The page answers to its own address and carries its own name',
         { page: true, named: true, oldNameGone: true },
         { page: !!sync, named: !!sync && /Synchronicities/.test(txt(sync)),
@@ -1824,15 +1781,15 @@
           oldNameGone: !/Angel Number Encounters/.test(String(dd.body.innerText || '')) });
       await goD('#/spirit/angel-numbers', 800);
       t('N13b', 'The address the page used to have still lands on it',
-        { page: true, rewritten: '/spirit/synchronicities' },
-        { page: !!dd.querySelector('[data-screen-label="Synchronicities"]'), rewritten: app.currentPath() });
+        { page: true, rewritten: '/library/synchronicities' },
+        { page: !!dd.querySelector('[data-screen-label="Library / Synchronicities"]'), rewritten: app.currentPath() });
 
       var numIn = dd.querySelector('input[aria-label="The number you keep seeing"]');
       app.setState({ angelInput: '111', angelResult: null, angelSaved: false });
       await sleep(250);
       app.angelLookup();
       await sleep(400);
-      var numTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var numTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N14', 'The number half still reads a repeating number',
         { field: true, number: true, meaning: true },
         { field: !!numIn, number: /111/.test(numTxt), meaning: /awakening|doorway|attention/i.test(numTxt) });
@@ -1842,7 +1799,7 @@
       await sleep(400);
       app.animalPick('Crow');
       await sleep(450);
-      var animTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var animTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N15', 'The animal half reads a sighting in three parts, kept apart',
         { name: true, tradition: true, origin: true, testable: true },
         { name: /Crow/.test(animTxt),
@@ -1854,7 +1811,7 @@
       await sleep(250);
       app.animalLookup();
       await sleep(450);
-      var unTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var unTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       /* The rule this row exists for: a number composes from its digits, an
          animal does not compose from its letters. */
       t('N16', 'An animal that is not in the list gets no invented meaning, and can still be kept',
@@ -1901,7 +1858,7 @@
         { kept: !!other, kind: other ? other.kind : '(none)',
           onLine: app.tlAll().some(function (e) { return /Noticed: A green pickup truck/.test(e.title); }) });
 
-      var otherPanel = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var otherPanel = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N18b', 'and no interpretation reaches the entry or the screen',
         { body: true, screen: true, saidPlainly: true },
         { /* the stored entry offers no reading of any kind */
@@ -1917,9 +1874,9 @@
          count without ever throwing, and a detector that quietly overcounts is
          worse than one that is plainly broken, because it reads as a finding. */
       onStep('new surfaces: the dream journal');
-      await goD('#/spirit/dreams', 700);
+      await goD('#/library/dream-journal', 700);
       var DS = wd.DreamSymbols;
-      var dreamScreen = dd.querySelector('[data-screen-label="Spirit / Dream Journal"]');
+      var dreamScreen = dd.querySelector('[data-screen-label="Library / Dream Journal"]');
       /* Seven categories since weather was added: a tornado read every other
          image in the dream and had nothing for the one that was the point. The
          count is still asserted rather than loosened, because a category
@@ -1988,7 +1945,7 @@
           lineCount += h.lines.filter(function (t) { return t && t.length > 12; }).length;
         });
       }
-      app.setState({ tab: 'library', libSub: 'library', libView: 'iching', icSec: 'heaven', icHex: null, icQuery: '', selId: null, spiritView: null });
+      app.setState({ tab: 'library', libSub: 'readings', libView: 'iching', icSec: 'heaven', icHex: null, icQuery: '', selId: null, spiritView: null });
       await sleep(600);
       var icRoom = dd.querySelector('[data-screen-label="Library / The Book of Changes"]');
       t('N25', 'All sixty four figures are present, distinct, and in the order the book has',
@@ -2068,6 +2025,110 @@
           hasJudgment: !!(icKept && icKept.body.length > 200),
           noBirthData: !!(icKept && !/[0-9]{4}-[0-9]{2}-[0-9]{2}T|birth/i.test(icKept.body)) });
 
+      /* ---- N41 to N46: the Library, rebuilt ----
+         Six tabs, each listing what it lists exactly once. These rows exist
+         because the old Library listed things twice (the Book of Changes on the
+         shelf and on the Spirit hub, Synchronicities in two shells, the
+         Throughline in three places) and a list that is true once can quietly
+         become true twice again. */
+      onStep('new surfaces: the Library tabs');
+      var visTabs = function (doc) {
+        return [].slice.call(doc.querySelectorAll('[role="tablist"][aria-label="Library sections"] [role="tab"]'))
+          .map(function (b) { return txt(b).replace(/\d+$/, ''); });
+      };
+      var pos = function (s, names) { return names.map(function (n) { return s.indexOf(n); }); };
+      var inOrder = function (a) { return a.every(function (v, i) { return v > -1 && (i === 0 || v > a[i - 1]); }); };
+      await goD('#/library/study', 800);
+      var libScreen = function () { return [].slice.call(dd.querySelectorAll('[data-screen-label="Library"]'))[0]; };
+      var studyTxt = txt(libScreen());
+      var studyOrder = ['Human Design Atlas', 'Astropedia', 'The Numbers', 'My Tarot', 'Dream Symbols', 'Sabian Lexicon'];
+      var numbersBtn = find(dd, /The Numbers/);
+      t('N41', 'The Library is six tabs, and Study lists its six in the order given, The Numbers as coming soon and not a control',
+        { tabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'], ordered: true, comingSoon: true, numbersIsControl: false, journalItemsAbsent: true },
+        { tabs: visTabs(dd), ordered: inOrder(pos(studyTxt, studyOrder)), comingSoon: /COMING SOON/i.test(studyTxt),
+          numbersIsControl: !!numbersBtn,
+          journalItemsAbsent: !/Synchronicities|Dream Journal|Book of Changes/.test(studyTxt) });
+
+      await goD('#/library/journal', 800);
+      var jTxt = txt(libScreen());
+      var jRows = [].slice.call(dd.querySelectorAll('[data-screen-label="Library"] button')).map(txt)
+        .filter(function (s) { return /UNIVERSAL|MILD CAUTION/.test(s); })
+        .map(function (s) { return { title: s.replace(/(UNIVERSAL|MILD CAUTION).*$/, '').trim().split(/\s{2,}|(?<=[a-z\)’])(?=[A-Z][a-z]+ [a-z])/)[0], risk: /MILD CAUTION/.test(s) ? 'mild' : 'universal' }; });
+      var jKey = function (s) { return String(s).replace(/^[^A-Za-z0-9]+/, '').toLowerCase(); };
+      var firstMild = jRows.map(function (r) { return r.risk; }).indexOf('mild');
+      var uni = jRows.filter(function (r) { return r.risk === 'universal'; }).map(function (r) { return jKey(r.title); });
+      var mild = jRows.filter(function (r) { return r.risk === 'mild'; }).map(function (r) { return jKey(r.title); });
+      var sortedCopy = function (a) { return a.slice().sort(); };
+      t('N42', 'Journal lists Synchronicities and the Dream Journal, then the ten practices, Universal caution first and then Mild caution, each alphabetical',
+        { rooms: true, ten: 10, universalFirst: true, headings: ['Universal caution', 'Mild caution'], uniSorted: true, mildSorted: true },
+        { rooms: inOrder(pos(jTxt, ['Synchronicities', 'Dream Journal', 'Universal caution', 'Mild caution'])),
+          ten: jRows.length,
+          universalFirst: firstMild === -1 || jRows.slice(0, firstMild).every(function (r) { return r.risk === 'universal'; }) && jRows.slice(firstMild).every(function (r) { return r.risk === 'mild'; }),
+          headings: [].slice.call(dd.querySelectorAll('[data-screen-label="Library"] [role="heading"]')).map(txt),
+          uniSorted: uni.join('|') === sortedCopy(uni).join('|'),
+          mildSorted: mild.join('|') === sortedCopy(mild).join('|') });
+
+      await goD('#/library/readings', 800);
+      var tarotG = dd.querySelector('[role="group"][aria-label="Tarot"]'), bookG = dd.querySelector('[role="group"][aria-label="The Book of Changes"]');
+      var tr = tarotG && tarotG.getBoundingClientRect(), br = bookG && bookG.getBoundingClientRect();
+      var divEl = tarotG && tarotG.nextElementSibling, dr = divEl && divEl.getBoundingClientRect();
+      var openedTarot = null, openedBook = null;
+      var drawBtn = find(dd, /Draw a reading/);
+      if (drawBtn) { drawBtn.click(); await sleep(700); openedTarot = app.state.libView; }
+      await goD('#/library/readings', 800);
+      var consultBtn = find(dd, /Consult the book/);
+      if (consultBtn) { consultBtn.click(); await sleep(700); openedBook = app.state.libView; }
+      t('N43', 'Readings puts Tarot on the left half and The Book of Changes on the right, a divider between, and each opens its own room',
+        { left: true, right: true, divider: true, sameRow: true, tarotOpens: 'reading', bookOpens: 'iching' },
+        { left: !!tr && !!br && tr.right <= br.left, right: !!tr && !!br && br.left >= tr.right,
+          divider: !!dr && dr.width <= 2 && dr.left >= tr.right - 1 && dr.right <= br.left + 1,
+          sameRow: !!tr && !!br && Math.abs(tr.top - br.top) < 4,
+          tarotOpens: openedTarot, bookOpens: openedBook });
+
+      /* The banner is on every tab and in no list. */
+      var banners = [];
+      for (var bi = 0; bi < 6; bi++) {
+        var bsub = ['study', 'journal', 'readings', 'throughline', 'archive', 'commons'][bi];
+        await goD('#/library/' + bsub, 700);
+        banners.push([].slice.call(dd.querySelectorAll('button')).filter(function (b) { return /Self Help Yellow Pages/.test(txt(b)); }).length);
+      }
+      await goD('#/library/study', 700);
+      find(dd, /Self Help Yellow Pages/).click();
+      await sleep(700);
+      t('N44', 'Self Help Yellow Pages is a banner on every one of the six tabs, once each, and opens the directory',
+        { counts: [1, 1, 1, 1, 1, 1], opens: 'help' },
+        { counts: banners, opens: app.state.libView });
+
+      /* Throughline and Archive live in the Library and nowhere else. */
+      await goD('#/library/archive', 800);
+      var arcNoLink = !find(dd, /Your Throughline/);
+      await goD('#/today', 800);
+      var todayLink = !!find(dd, /^Throughline$/) || !!find(dd, /Archive/);
+      await goD('#/spirit', 800);
+      var spiritLink = !!find(dd, /Throughline|Archive/);
+      var navTxt = [].slice.call(dd.querySelectorAll('[data-app-nav] a, [data-app-nav] button, nav button')).map(txt).join(' ');
+      t('N45', 'Throughline and Archive are listed only as Library tabs: not on Today, My Charts, the Archive or the side nav',
+        { archiveHasNoThroughlineCard: true, today: false, myCharts: false, nav: false },
+        { archiveHasNoThroughlineCard: arcNoLink, today: todayLink, myCharts: spiritLink, nav: /Throughline|Archive/.test(navTxt) });
+
+      /* The charts, in the order given, on both screens that list them. */
+      var chartNames = ['Human Design', 'Astrology', 'Numerology', 'Synchronicities', 'Synastry', 'Tarot', 'Dream Journal', 'Month Ahead'];
+      var listed = function (doc, label) {
+        return [].slice.call(doc.querySelectorAll('[data-screen-label="' + label + '"] button')).map(txt)
+          .filter(function (s) { return s.length > 40 && !/\+\s*$/.test(s); })
+          .map(function (s) { return chartNames.filter(function (n) { return s.indexOf(n) === 0; })[0]; }).filter(Boolean);
+      };
+      await goD('#/spirit', 800);
+      var hubList = listed(dd, 'Spirit');
+      var navCur = dd.querySelector('[data-app-nav] [aria-current="page"], [data-app-nav] [aria-current="true"]');
+      var navName = navCur ? txt(navCur).replace(/[^A-Za-z ]/g, '').trim() : 'n/a';
+      await goD('#/today', 800);
+      var todayList = listed(dd, 'Today');
+      t('N46', 'My Charts and Today each list Human Design, Astrology and Numerology, in that order, and nothing else',
+        { myCharts: ['Human Design', 'Astrology', 'Numerology'], today: ['Human Design', 'Astrology', 'Numerology'], tabName: 'My Charts' },
+        { myCharts: hubList, today: todayList,
+          tabName: navName });
+
       /* ---- N18, N19: the phone shell ---- */
       onStep('new surfaces: the phone shell');
       var fp = await frame(src, 375, 667);
@@ -2076,22 +2137,30 @@
       if (!(await ready(wp, 16000))) { t('N18-0', 'App boots the phone shell for this phase', true, false); return A; }
       await sleep(900);
       var dp = wp.document, pApp = wp.__incommonApp;
-      var tabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Spirit"] [role="tab"]')).map(function (b) { return txt(b); });
-      t('N36', 'The Spirit pager carries the new pages, under the names the app uses',
-        { pages: 8, sync: true, month: true, dream: true, oldName: false },
-        { pages: dp.querySelectorAll('[data-vt-pager] > [data-vt-page]').length,
-          sync: tabs.indexOf('Synchronicities') !== -1,
-          month: tabs.indexOf('The Month Ahead') !== -1,
-          dream: tabs.indexOf('Dream Journal') !== -1,
-          oldName: tabs.indexOf('Angel Number Encounters') !== -1 });
-      var pSync = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Synchronicities"]');
-      var pMonth = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / The Month Ahead"]');
-      var pDream = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]');
-      t('N36b', 'Every one of those pages renders with its handlers on the shell that holds it',
-        { syncPage: true, monthPage: true, dreamPage: true, taps: [], dreamTaps: [] },
-        { syncPage: !!pSync, monthPage: !!pMonth, dreamPage: !!pDream,
-          taps: pSync ? tapTargets(wp, { querySelectorAll: function (q) { return pSync.querySelectorAll(q); } }) : 'no page',
-          dreamTaps: pDream ? tapTargets(wp, { querySelectorAll: function (q) { return pDream.querySelectorAll(q); } }) : 'no page' });
+      /* N36: the pager now carries the three charts and nothing else, and the
+         Library carries six tabs. The pages that used to be pager pages (the
+         sightings, the dreams, the tarot reading and Synastry) live in the
+         Library, and the Month Ahead is gone from the project. */
+      var tabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Spirit"] [role="tablist"][aria-label="Spirit views"] [role="tab"]')).map(function (b) { return txt(b); });
+      /* The strip is drawn while the Library is the current section, so the row
+         puts the reader there first, as a swipe would. */
+      pApp.setState({ tab: 'library', libSub: 'study', libView: null, selId: null });
+      await sleep(700);
+      var libTabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Library"] [role="tablist"][aria-label="Library sections"] [role="tab"]'))
+        .map(function (b) { return txt(b).replace(/\d+$/, ''); });
+      t('N36', 'The Spirit pager carries the three charts in order, and the Library carries its six tabs',
+        { pages: 3, order: ['Human Design', 'Astrology', 'Numerology'], libTabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'] },
+        { pages: dp.querySelectorAll('[data-vt-pager] > [data-vt-page]').length, order: tabs, libTabs: libTabs });
+      /* The rooms that moved are opened the way a reader opens them, and each is
+         asked for inside the Library section, which is where the phone draws it. */
+      pApp.setState({ tab: 'library', libSub: 'journal', libView: 'angel', selId: null });
+      await sleep(900);
+      var pSync = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Synchronicities"]');
+      var pSyncTaps = pSync ? tapTargets(wp, { querySelectorAll: function (q) { return pSync.querySelectorAll(q); } }) : 'no page';
+      t('N36b', 'The Synchronicities room renders in the phone Library with its handlers on, and meets 44px',
+        { syncPage: true, taps: [], absentFromSpirit: true },
+        { syncPage: !!pSync, taps: pSyncTaps,
+          absentFromSpirit: !dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Library / Synchronicities"]') });
 
       /* The failure this page has actually had: a field that renders while its
          change handler is missing. Typed through a real input event rather than
@@ -2099,7 +2168,7 @@
       var animOn = pSync ? [].slice.call(pSync.querySelectorAll('button')).filter(function (b) { return /^An animal$/.test(txt(b)); })[0] : null;
       if (animOn) animOn.click();
       await sleep(450);
-      var animIn = dp.querySelector('[data-vt-sec="Spirit"] input[aria-label="The animal you keep seeing"]');
+      var animIn = dp.querySelector('[data-vt-sec="Library"] input[aria-label="The animal you keep seeing"]');
       var typed = 'no field';
       if (animIn) {
         var setter = Object.getOwnPropertyDescriptor(wp.HTMLInputElement.prototype, 'value').set;
@@ -2116,7 +2185,11 @@
          with no change handler looks completely correct and swallows the dream,
          so it is typed into through a real input event rather than by setting
          state, which cannot fail that way. */
-      var dreamTA = dp.querySelector('[data-vt-sec="Spirit"] textarea[aria-label="The dream itself"]');
+      pApp.setState({ tab: 'library', libSub: 'journal', libView: 'dreamj', selId: null });
+      await sleep(900);
+      var pDream = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]');
+      var dreamTaps = pDream ? tapTargets(wp, { querySelectorAll: function (q) { return pDream.querySelectorAll(q); } }) : 'no page';
+      var dreamTA = dp.querySelector('[data-vt-sec="Library"] textarea[aria-label="The dream itself"]');
       var dreamTyped = 'no field', dreamFound = 'not run';
       if (dreamTA) {
         var tset = Object.getOwnPropertyDescriptor(wp.HTMLTextAreaElement.prototype, 'value').set;
@@ -2128,38 +2201,38 @@
       }
       t('N23', 'The dream narrative takes typing on the phone, and the figures in it are found there',
         { typed: 'I went down to the basement and a snake was on the stairs.',
-          found: 'Basement,Snake,Stairs' },
-        { typed: dreamTyped, found: dreamFound });
+          found: 'Basement,Snake,Stairs', taps: [] },
+        { typed: dreamTyped, found: dreamFound, taps: dreamTaps });
 
       /* N24: the rule this app has broken more than once. An address has to
-         resolve to a screen in the shell the reader is actually standing in,
-         and the Dream Journal lives in two different places on the two shells.
+         resolve to a screen in the shell the reader is actually standing in.
+         The Dream Journal is one Library room on both shells now, and the old
+         /spirit/dreams address is an alias that has to land on it.
 
-         Sampled across the whole flight rather than read once. vtGoTab claims
-         the tab before the scroll starts and holds it until the jump lands, so
-         the destination is the only value the tab may ever take: the pages it
-         travels through are not the reader's and must not be announced as if
-         they were. One read at a fixed moment asked how busy the machine was
-         instead, and one read after the pager settles would not see a walk at
-         all, which is why this counts values rather than waiting for quiet.
+         Sampled across the whole flight rather than read once. The jump from
+         Today to the Library crosses the Spirit section, and vtGoSection claims
+         the section before the scroll starts and holds it until the jump lands,
+         so the destination is the only tab the app may ever take: a screen it
+         travels through is not the reader's and must not be announced or pushed
+         onto the Back stack as if it were. One read at a fixed moment asked how
+         busy the machine was instead, which is why this counts values rather than
+         waiting for quiet.
 
-         Parked on Today first so it is a real jump every run. Straight after
-         N23 the pager is already sitting on the Dream Journal, and a jump of no
-         distance proves nothing about a jump. */
+         Parked on Today first so it is a real jump every run. */
       wp.location.hash = '#/today';
       await sleep(900);
-      var n24Start = pApp.state.vtTab, n24Seen = [], n24Waited = 0;
+      var n24Start = pApp.state.tab, n24Seen = [], n24Waited = 0;
       wp.location.hash = '#/spirit/dreams';
       while (n24Waited < 2500) {
-        var n24Now = pApp.state.vtTab;
+        var n24Now = pApp.state.tab;
         if (n24Now !== n24Start && n24Seen.indexOf(n24Now) === -1) n24Seen.push(n24Now);
         await sleep(50);
         n24Waited += 50;
       }
-      var pDreamByPath = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]');
-      t('N24', 'Spirit slash dreams lands on a real screen on both shells, not a blank shelf, and announces nothing on the way',
-        { desktop: true, phone: true, phoneTab: 7, travelled: [7] },
-        { desktop: !!dreamScreen, phone: !!pDreamByPath, phoneTab: pApp.state.vtTab, travelled: n24Seen });
+      var pDreamByPath = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]');
+      t('N24', 'Spirit slash dreams lands on the Dream Journal in the Library on both shells, and announces nothing on the way',
+        { desktop: true, phone: true, phoneTab: 'library', travelled: ['library'], address: '/library/dream-journal' },
+        { desktop: !!dreamScreen, phone: !!pDreamByPath, phoneTab: pApp.state.tab, travelled: n24Seen, address: pApp.currentPath() });
 
 
       /* ---- N34, N35: Circle on the phone shell ----
@@ -2331,18 +2404,18 @@
           sabian: reach('Leo 15', 'Sabian degrees'),
           help: reach('suicide', 'Lines that answer') });
 
-      /* The routing rule, on the shell that breaks it. A row that wrote
-         spiritView 'dream' on the phone would paint a Spirit view no vertical
-         shell draws: the sheet would close onto a blank screen with no way
-         back, and the state would look correct while it did. */
+      /* The routing rule, on the shell that breaks it. A row has to name a room
+         the shell standing there draws: one that wrote a libView the vertical
+         shell does not name would close the sheet onto an empty shelf with no
+         way back, and the state would look correct while it did. */
       var pDreamRow = rowNamed(pRows, 'Dream Journal');
       if (pDreamRow) pDreamRow.click();
       await sleep(1200);
       t('N38', 'A result lands on a screen that exists in the shell it was clicked in',
-        { row: true, closed: true, tab: 'spirit', page: 7, noSpiritView: true, painted: true },
-        { row: !!pDreamRow, closed: !pApp.state.vtSearch, tab: pApp.state.tab, page: pApp.state.vtTab,
+        { row: true, closed: true, tab: 'library', view: 'dreamj', sub: 'journal', noSpiritView: true, painted: true },
+        { row: !!pDreamRow, closed: !pApp.state.vtSearch, tab: pApp.state.tab, view: pApp.state.libView, sub: pApp.state.libSub,
           noSpiritView: pApp.state.spiritView === null,
-          painted: !!dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]') });
+          painted: !!dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]') });
 
       /* A card is a selection inside a room, so the desktop is where the deeper
          target is driven: the row has to open the room AND what is in it. */
