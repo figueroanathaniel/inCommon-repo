@@ -224,65 +224,83 @@ which is how three G6 rows failed on a working implementation.
 ring only draws with a second person on the device, and a rule that can only be
 verified in one setup is a rule that quietly stops being verified.
 
-## Where tarot lives
-Two different things share the word, and they are not on the same tab.
+## My Charts is three charts, and the Library is six tabs
+Decided by the owner on 2 October 2026. The Spirit tab is named **My Charts**
+(the id, the address `/spirit` and the state key stay `spirit`) and holds three
+charts, in this order: Human Design, Astrology, Numerology. On the phone that is
+a pager of three pages (`VT_TABS`), on the desktop the hub of three cards, and
+Today lists the same three through the same `chartCards`. Synchronicities,
+Synastry, the tarot reading, the Dream Journal and the Month Ahead are no longer
+Spirit pages, and the Throughline accordion that sat on the desktop hub is gone.
 
-**The reading is a Spirit page**, beside the wheel and the numbers: a topic, a
-depth, a card count, a seeded shuffle. `tarotVals()`, gate `spiritReading`,
-addressed `/spirit/tarot`, the sixth page of the pager on the phone and a
-`spiritView` on the desktop. It used to hang off the Throughline behind
-`tlFilter === 'reading'`, which put the making of a thing inside the account of
-it, and `vtVals` forced that gate false to keep the timeline whole, so on the
-phone it could not be reached at all.
+**The Month Ahead is removed from the project**, not hidden: `monthVals()`,
+`monthReading()` and its helpers, `gateRuns()`, `fmtMonth()`, the state keys, the
+address, the search row and the N9 to N12b rows are all deleted, and those ids
+stay retired because an id is an identity, not a position. `/spirit/month` now
+lands on the hub like any unknown Spirit address.
 
-**The deck is a Library page**: all 78 cards as reference, nobody draws it.
-`tarotLibVals()`, gate `libTarot`, addressed `/library/tarot`, and it renders
-inside the Library section on both shells.
+**The Library is six tabs, in this order** (`LIB_SUBS`, state key `libSub`, the
+default is `study`): Study, Journal, Readings, Throughline, Archive and The
+Commons. Each room belongs to exactly one tab (`LIB_VIEW_SUB`) and is entered
+from it, so Back returns to it. `libSubOf()` normalises a stored value, because a
+device can hold the old `library` key.
 
-The rule underneath both: **a screen has to exist in the shell the reader is
-standing in.** `vtVals` decides which Library view the vertical shell draws, and
-a `libView` it does not name paints the shelf with every one of its own gates
-switched off, which is a blank screen with no way back. That is what
-`libView: 'angel'` did on the phone for as long as Synchronicities has been a
-Spirit pager page: the Library card wrote an address whose screen was somewhere
-else, and the report was that the number field would not take typing.
-Synchronicities has one home per shell, so `goAngelGo()` and `openPath()` both
-split on the width and send the reader to the page rather than to the address.
+| Tab | Holds, in this order |
+|---|---|
+| Study | Human Design Atlas, Astropedia, The Numbers (coming soon: a dashed card, deliberately not a control), My Tarot, Dream Symbols, Sabian Lexicon |
+| Journal | Synchronicities, Dream Journal, then the ten practices grouped by caution: Universal caution first, then Mild caution, each group alphabetical. A leading quotation mark does not count when sorting, so the Spiritual Bypass check is filed under S |
+| Readings | Tarot on the left half and The Book of Changes on the right, a divider between. Each half opens its own room (`libView` `reading` and `iching`) |
+| Throughline | the record, as it was |
+| Archive | the Archive, as it was |
+| The Commons | Synastry, and the Circle that renders inside it |
 
-The matching rule for the values: **the vertical shell renders every Spirit page
-at once**, so a page's vals must be present whenever that shell is up. Both
-`tarotVals()` and `angelVals()` gate on `vertical` alone for that reason. Asking
-for `curTab()` as well paints the page with no handlers on it, which is an input
-with no value binding and no change handler: it looks right and does nothing.
+**Every item is listed once.** The Archive no longer carries a card back to the
+Throughline, the desktop Today page no longer carries a Throughline button, the
+Yellow Pages row is not in the Study list, and the Book of Changes is not in
+Study as well as Readings. Throughline and Archive live in the Library and
+nowhere else: N45 holds that, and N41 to N46 hold the rest of this table, so a
+list that is true once cannot quietly become true twice.
 
-`monthVals()` is the third page under that rule and the newest: `/spirit/month`,
-the seventh page of the phone pager, `spiritView: 'month'` on the desktop,
-reached by `goMonthGo()` and by an `openPath()` branch that splits on the width
-exactly as Synchronicities does.
+**The Self Help Yellow Pages is a banner on every tab**, a `position: sticky`
+footer inside the Library shell (`libBanner`), wearing `--crisis`, never the
+action colour. It is hidden inside a room or a practice, because those are not
+tabs. N44.
 
-**The month reading carries Human Design as its own section**, "The gates the
-Sun walks", between the reader's windows and the marked date. It walks
-`gateRuns()` over the month and asks each run where the gate's centre sits in
-this chart and which channels it closes against a natal gate. The Earth is asked
-too, because it sits opposite and the gate boundaries line up across the wheel,
-so both change gate on the same day. **A gate that is already natal closes
-nothing new**, which is why `closing()` returns empty for it: a channel with
-both gates natal is one the chart already has, and calling it a transit would
-be a false finding. A closing run that begins inside the month joins the marked
-date candidates at weight 2.5, below the lightest transit window, so it names
-the day only when the slower sky offers nothing.
+**Rooms the old Spirit pages became.** `libView` `angel` (Synchronicities,
+`/library/synchronicities`, gate `libAngel`), `dreamj` (the Dream Journal,
+`/library/dream-journal`, `libDreamJ`), `reading` (the tarot reading,
+`/library/readings/tarot`, `libReading`), and The Commons is a tab rather than a
+room (`/library/commons`, `libSyn`). `LIB_PATHS` is keyed by `libView`. The old
+Spirit addresses (`/spirit/synchronicities`, `/spirit/angel-numbers`,
+`/spirit/dreams`, `/spirit/tarot`, `/spirit/synastry`, `/spirit/together`,
+`/spirit/i-ching`) and `/library/practices` are kept as aliases in `openPath()`,
+and `currentPath()` rewrites the address to the new one on arrival.
 
-**A sentence the reader has just read is shortened, not repeated.** Neighbouring
-gates share a centre, so October walks six in a row through the Spleen, and the
-full centre sentence six times over read as the app running out of things to
-say. A run in the same centre as the one before says so in one clause, and each
-long explanation (defined, open, natal, closing, unanswered) is given once per
-month and shortened after.
+**The rule that outlived the move: a screen has to exist in the shell the reader
+is standing in.** The phone and the desktop each carry their own Library markup,
+so the six tabs, the rooms and the banner are written once and placed in both,
+and `vtVals` and `dtVals` both name the rooms in their `libShell` exclusion list.
+A `libView` that list does not name paints the shelf with every gate switched
+off, which is a blank screen with no way back. The old fault of that shape was
+`libView: 'angel'` on the phone while Synchronicities was a pager page.
+
+**The matching rule for the values: a room's vals are present exactly when the
+room is open**, and the room's gate is the state (`libView === 'angel'`), not the
+width. `angelVals()`, `tarotVals()` and `dreamVals()` are asked for on the phone
+only while their room is the one showing. The gate must not be `vertical` alone
+any more: that was right while a page was always mounted in a pager, and wrong
+now, because it would paint the room under every Library tab.
+
+**Six tabs do not fit a phone.** The strip scrolls sideways, and
+`syncLibTabIntoView()` (from the one `componentDidUpdate`) moves its own
+`scrollLeft` so a tab chosen by an address or a search row is on screen.
+It must not use `scrollIntoView`, which would also move the snapped page.
 
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
-The vals function is still `angelVals()` and the gate is still `spiritAngel`,
+The vals function is still `angelVals()` and the gate is `libAngel` (it was
+`spiritAngel` while this was a Spirit page: see "My Charts is three charts"),
 because the number half is still the angel number half; `sightMode` picks which
 lookup is on screen and `animalLookup()` is the second one.
 
@@ -301,8 +319,9 @@ have had to invent. Do not add a composed fallback to `animal-symbolism.js`.
 the tradition holds, where that reading came from, and what it may be doing for
 the person who noticed. The third is never a statement about the reader.
 
-`/spirit/synchronicities` is the address. `/spirit/angel-numbers` is kept as an
-alias in `openPath()`, the same way `/spirit/together` is kept for Synastry.
+`/library/synchronicities` is the address, a Journal room. `/spirit/synchronicities`
+and `/spirit/angel-numbers` are kept as aliases in `openPath()`, the same way
+`/spirit/together` is kept for Synastry.
 
 ## Anything Else logs and does not interpret
 Synchronicities has three tabs now. The number half composes a meaning from the
@@ -362,9 +381,9 @@ time, never a default.
 
 ## The Dream Journal
 `dream-symbols.js` holds the registry, `dreamVals()` the page, gate
-`spiritDream`, addressed `/spirit/dreams`, the eighth page of the phone pager
-and `spiritView: 'dream'` on the desktop. `goDreamGo()` splits on the width
-exactly as `goMonthGo()` does, and there was never a Library address for it.
+`libDreamJ`, addressed `/library/dream-journal`: a Journal room on both shells
+(`libView: 'dreamj'`). It was the eighth Spirit pager page until 2 October 2026,
+and `/spirit/dreams` is kept as an alias.
 
 **A dream is a journal memory with a tag**, the same shape a sighting is, which
 is what puts it on the Throughline stamped with the window covering its date
@@ -596,14 +615,13 @@ state behind a pair key. G37 asserts the module names no storage API.
 follows. A member with no birth time stays in the Ground and is named, with the
 affected mechanics listed.
 
-**Circle renders inside Synastry in both shells, and is not a ninth Spirit
-page.** `circleVals()`, gated on nothing but the modules being present, spread
-beside `synVals()` at the single call site, and the markup sits inside
-`spiritSyn` and OUTSIDE `synOpen` so it is reachable when no pair is chosen.
-Two reasons, and the first is the one that matters: the Spirit pager has eight
-pages and the indices are load bearing, so a ninth renumbers what `openPath()`
-and `vtGoTab()` point at and renumbers N24. The second is that this is where it
-belongs anyway, which is the same call `hd-composite` made.
+**Circle renders inside Synastry in both shells, and Synastry is The Commons
+tab of the Library.** `circleVals()`, gated on nothing but the modules being
+present, spread beside `synVals()` at the single call site, and the markup sits
+inside `libSyn` and OUTSIDE `synOpen` so it is reachable when no pair is chosen.
+It is not a page of its own: this is where it belongs, which is the same call
+`hd-composite` made, and a screen of its own would be a second place to open the
+same group.
 
 **The reader is supplied by the shell, never by the Ground.** hd-circle returns
 no seat, so the person holding the phone is marked on the chip row and nowhere
@@ -1192,13 +1210,10 @@ is missing, and the rule above still governs it there.
 half and `ichingVals()` for the consultation.
 
 **Both halves are one room, and that is not the shape the other systems use.**
-Tarot is split: the reading is a Spirit page, the deck is a Library page. This
-is not, for two reasons. The vertical shell carries Spirit as a pager and the
-page indices are load bearing, so a tenth page moves what `openPath()` and
-`vtGoTab()` point at and renumbers N24. And it is the wrong shape for this
-system anyway: the Book of Changes is a book you consult, so the consultation
-sits at the front of the room that holds the sixty four. A Spirit page can be
-added later without moving anything.
+Tarot is split: the reading is a Readings room, the deck is a Study room. This
+one is not: the Book of Changes is a book you consult, so the consultation sits
+at the front of the room that holds the sixty four, and the room is listed once,
+on the Readings tab, on the right half beside the tarot reading.
 
 **`iching` is deliberately absent from `SPIRIT_PATHS`.** It was in it, and that
 made `/spirit/i-ching` resolve to a `spiritView` no shell draws, which is a
@@ -1499,7 +1514,8 @@ and confirmed live. The two earlier v6.3 rebuilds made the same call.
 ## A routed jump owns the pager tab until it lands
 `vtGoTab()` sets `vtTab` and then smooth scrolls the pager to that page, and
 the pager's scroll handler derives `vtTab` from `scrollLeft` on every scroll
-event. So a jump from the first Spirit page to the ninth walked the state
+event. (The pager has three pages now; the account below is from when it had
+nine, and the guard is unchanged.) So a jump from the first Spirit page to the ninth walked the state
 through every page between them, and everything that follows `vtTab` followed
 it there: `aria-current` crossed the tablist, and the live region announced
 pages nobody asked for. A deep link into the Dream Journal read aloud as five
@@ -1592,8 +1608,9 @@ never `--ac`: whether a gate is natal is not an action.
 the thirty six channels complete only when the two are together, which both
 people already close alone, which one closes and the other does not, and which
 the pair does not reach at all. It renders inside Synastry rather than as a
-ninth Spirit page, because Synastry is already the two person surface and
+page of its own, because Synastry is already the two person surface and
 already carries the consent story, the one sided label and the partner picker.
+Synastry is The Commons tab of the Library now.
 
 **Six states, not four.** Electromagnetic (one gate each, different gates),
 companionship (both hold the whole channel), dominance (one holds it whole, the
@@ -1745,13 +1762,14 @@ the people saved on this device, and the lines that answer.
 
 **A row never writes state. It names a target, and `searchGo()` resolves it
 against the shell standing there.** That is the whole routing rule, and it is
-the one that is easy to undo: the desktop sets a `spiritView`, the phone leaves
-it null and scrolls its pager to the page holding the same thing. A row that set
-`spiritView: 'dream'` on the phone would paint a Spirit view no vertical shell
-draws, which is a blank screen with no way back, and the state would look
-correct while it did. `searchTab()`, `searchSpirit()`, `searchLib()` and
-`searchAngel()` are the four target builders, and Synchronicities needs the
-fourth for exactly the reason `goAngelGo()` is a method rather than a `setState`.
+the one that is easy to undo: the desktop sets a `spiritView` for a chart, the
+phone leaves it null and scrolls its pager to the page holding the same thing.
+A row that wrote a `libView` the vertical shell does not name would close the
+sheet onto an empty shelf with no way back, and the state would look correct
+while it did. `searchTab()`, `searchSpirit()` (the three charts, pages 0 to 2 of
+the pager), `searchLib()` and `searchAngel()` are the target builders.
+`searchLib()` names the tab as well as the room, from `LIB_VIEW_SUB`, so Back
+from the room lands on the tab it was reached from.
 
 **Where the module has its own search, the bar calls it.** The hexagrams, the
 dream images and the animals come back through `IChing.search`,
@@ -1869,7 +1887,8 @@ they actually are, and renaming any of them to v5.9 would make them lie.
 `Verification v6.0.dc.html` runs `handoff/tests-v6.0.js`: Checks A to E plus S
 (short desktop), the functional sweep, the theme phase, the removal phase
 (group R, V1.6.0), the ADA phase (group G, V1.7.0) and the new surfaces phase
-(group N). 276 assertions. A full run takes 25+ minutes.
+(group N). 275 assertions (group N is 57 rows since 2 October 2026: the Month
+Ahead rows left and six Library rows, N41 to N46, arrived). A full run takes 25+ minutes.
 
 The theme phase runs four identities now rather than three, which is what took
 the total from 236 to 252: eight cases at two widths at four rows each. The T ids
@@ -2101,7 +2120,9 @@ a dead build, because two empty sections are also identical.
 circle needs other people on the device and a card is how a reader gets one.
 Three stores now, and the finally block restores all three.
 
-**The Spirit pager rows are N36 and N36b, and were `N18`/`N18b` twice over.**
+**The pager rows are N36 and N36b, and were `N18`/`N18b` twice over.** (They
+assert the three chart pages and the six Library tabs now, and that the
+Synchronicities room renders in the phone Library with its handlers on.)
 Two different pairs carried those ids: the third kind of sighting, which
 CLAUDE.md cites above and which sits correctly between N17 and N20, and the
 Spirit pager. Both ran and both passed, so nothing was ever skipped, but the
@@ -3016,10 +3037,12 @@ composed on the device. That reverses the V1.6.0 stance for this screen and for
 this screen alone. It is the owner's call and it is recorded here rather than
 argued again.
 
-**Throughline is the middle Library tab.** `libSubs` is Library, Throughline,
-Archive, and `libTL` is the gate: `libSub === 'throughline'` with no room and no
-practice open. It is NOT gated on `curTab()`, the way `libList` is not, because
-the phone draws the Library section whichever section is in view. The markup is
+**Throughline is the fourth Library tab.** The six tabs are Study, Journal,
+Readings, Throughline, Archive and The Commons (see "My Charts is three charts,
+and the Library is six tabs"), and `libTL` is the gate: `libSub === 'throughline'`
+with no room and no practice open. It is NOT gated on `curTab()`, the way the
+Study, Journal and Readings lists are not, because the phone draws the Library
+section whichever section is in view. The markup is
 the old tab's, moved, with `position:relative` added to its wrapper so the "+"
 still anchors to the record rather than to the section. `/library/throughline`
 is the address, and `/throughline` is kept as an alias in `openPath()`, the same
