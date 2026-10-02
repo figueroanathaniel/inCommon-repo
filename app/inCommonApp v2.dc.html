@@ -95,8 +95,10 @@ input[type="date"]{color-scheme:dark}
 [data-vt] *::-webkit-scrollbar{width:0;height:0}
 @media (orientation:landscape) and (max-height:520px){[data-vt]{--hdr:calc(46px + env(safe-area-inset-top))!important;--nav:calc(54px + env(safe-area-inset-bottom))!important;--dock:46px!important}}
 [data-vt-scroll]{scroll-snap-type:y mandatory;touch-action:none;overscroll-behavior-y:contain}
-[data-vt-page]{touch-action:pan-y;overscroll-behavior-y:contain}
-[data-vt-pager]{scroll-snap-type:x mandatory;touch-action:pan-x}
+[data-vt-page]{touch-action:pan-y pinch-zoom;overscroll-behavior-y:contain}
+[data-vt-pager]{scroll-snap-type:x mandatory;touch-action:pan-x pinch-zoom}
+/* A field under 16px makes iOS zoom the page in when it takes focus, and a touch-action of pan alone forbids the pinch that would undo it, so the page stayed zoomed with no way out. Fields are 16px on a touch screen, and pinch is allowed back on every scroller. */
+@media (pointer:coarse){input,textarea,select{font-size:16px!important}}
 [data-vt-page] > [data-screen-label]{flex:none!important;min-height:0!important;overflow:visible!important;position:static!important;inset:auto!important;z-index:auto!important;padding-left:20px!important;padding-right:20px!important;padding-bottom:0!important;background:transparent!important;animation:none!important}
 [data-vt-page] > [data-screen-label] > *{max-width:none}
 [data-vt-page] > [data-screen-label="Today"] > div:first-child{display:none!important}
@@ -1592,17 +1594,19 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
-      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;animation:fadeUp .22s ease">
-        <div style="display:flex;align-items:stretch;gap:0">
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:0">
           <div role="group" aria-label="Tarot" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-right:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">Tarot</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><g fill="var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.6" stroke-linejoin="round"><rect x="14" y="30" width="46" height="70" rx="6" transform="rotate(-14 37 65)"></rect><rect x="74" y="30" width="46" height="70" rx="6" transform="rotate(14 97 65)"></rect><rect x="44" y="22" width="46" height="70" rx="6"></rect></g><path d="M67 45l6 12 12 2-9 9 2 13-11-6-11 6 2-13-9-9 12-2z" fill="var(--ac2-hi)"></path></svg></div>
             <button onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
           <div aria-hidden="true" style="flex:none;width:1px;background:var(--bd)"></div>
           <div role="group" aria-label="The Book of Changes" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-left:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><rect x="25" y="18" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="58" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect></svg></div>
             <button onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
           </div>
         </div>
@@ -2188,15 +2192,11 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libBanner }}" hint-placeholder-val="{{ true }}">
-      <div style="flex:none;position:sticky;bottom:0;z-index:5;background:linear-gradient(to top,var(--bg) 78%,transparent);box-sizing:border-box;padding:12px 18px 12px">
-            <button onClick="{{ goHelp }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(229,83,77,.1),var(--sf));border:1px solid var(--crisis);border-radius:var(--rad);padding:13px 15px;transition:background-color .3s ease">
-              <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--tx);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
-                <span style="font:400 16px var(--fd);color:var(--tx)">Self Help Yellow Pages</span>
-                <span style="font:400 11px var(--fu);color:var(--dim)">crisis lines, warm lines and referrals · the numbers themselves</span>
-              </span>
-              <span style="flex:none;font:400 14px var(--fb);color:var(--tx)">→</span>
-            </button>
+      <div style="flex:none;position:sticky;bottom:0;z-index:5;pointer-events:none;box-sizing:border-box;padding:8px 18px 12px">
+        <button onClick="{{ goHelp }}" aria-label="Self Help Yellow Pages" style="all:unset;cursor:pointer;pointer-events:auto;position:relative;box-sizing:border-box;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(150deg,rgba(229,83,77,.16),rgba(229,83,77,.16))">
+          <span aria-hidden="true" style="display:flex"><span style="width:26px;height:26px;background-color:var(--tx);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
+          <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Self Help Yellow Pages</span>
+        </button>
       </div>
     </sc-if>
   </div>
@@ -6354,17 +6354,19 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
-      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;animation:fadeUp .22s ease">
-        <div style="display:flex;align-items:stretch;gap:0">
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:0">
           <div role="group" aria-label="Tarot" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-right:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">Tarot</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><g fill="var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.6" stroke-linejoin="round"><rect x="14" y="30" width="46" height="70" rx="6" transform="rotate(-14 37 65)"></rect><rect x="74" y="30" width="46" height="70" rx="6" transform="rotate(14 97 65)"></rect><rect x="44" y="22" width="46" height="70" rx="6"></rect></g><path d="M67 45l6 12 12 2-9 9 2 13-11-6-11 6 2-13-9-9 12-2z" fill="var(--ac2-hi)"></path></svg></div>
             <button onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
           <div aria-hidden="true" style="flex:none;width:1px;background:var(--bd)"></div>
           <div role="group" aria-label="The Book of Changes" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-left:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><rect x="25" y="18" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="58" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect></svg></div>
             <button onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
           </div>
         </div>
@@ -6952,15 +6954,11 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libBanner }}" hint-placeholder-val="{{ true }}">
-      <div style="flex:none;position:sticky;bottom:0;z-index:5;background:linear-gradient(to top,var(--bg) 78%,transparent);box-sizing:border-box;padding:12px 18px 12px">
-            <button onClick="{{ goHelp }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(229,83,77,.1),var(--sf));border:1px solid var(--crisis);border-radius:var(--rad);padding:13px 15px;transition:background-color .3s ease">
-              <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--tx);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
-                <span style="font:400 16px var(--fd);color:var(--tx)">Self Help Yellow Pages</span>
-                <span style="font:400 11px var(--fu);color:var(--dim)">crisis lines, warm lines and referrals · the numbers themselves</span>
-              </span>
-              <span style="flex:none;font:400 14px var(--fb);color:var(--tx)">→</span>
-            </button>
+      <div style="flex:none;position:sticky;bottom:0;z-index:5;pointer-events:none;box-sizing:border-box;padding:8px 18px 12px">
+        <button onClick="{{ goHelp }}" aria-label="Self Help Yellow Pages" style="all:unset;cursor:pointer;pointer-events:auto;position:relative;box-sizing:border-box;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(150deg,rgba(229,83,77,.16),rgba(229,83,77,.16))">
+          <span aria-hidden="true" style="display:flex"><span style="width:26px;height:26px;background-color:var(--tx);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2215.4%22%20cy%3D%2212%22%20r%3D%226.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%206.58A6.4%206.4%200%200%201%2012%2017.42A6.4%206.4%200%200%201%2012%206.58Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
+          <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Self Help Yellow Pages</span>
+        </button>
       </div>
     </sc-if>
   </div>
