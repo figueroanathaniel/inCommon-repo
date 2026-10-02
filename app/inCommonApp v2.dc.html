@@ -1592,17 +1592,19 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
-      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;animation:fadeUp .22s ease">
-        <div style="display:flex;align-items:stretch;gap:0">
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:0">
           <div role="group" aria-label="Tarot" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-right:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">Tarot</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><g fill="var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.6" stroke-linejoin="round"><rect x="14" y="30" width="46" height="70" rx="6" transform="rotate(-14 37 65)"></rect><rect x="74" y="30" width="46" height="70" rx="6" transform="rotate(14 97 65)"></rect><rect x="44" y="22" width="46" height="70" rx="6"></rect></g><path d="M67 45l6 12 12 2-9 9 2 13-11-6-11 6 2-13-9-9 12-2z" fill="var(--ac2-hi)"></path></svg></div>
             <button onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
           <div aria-hidden="true" style="flex:none;width:1px;background:var(--bd)"></div>
           <div role="group" aria-label="The Book of Changes" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-left:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><rect x="25" y="18" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="58" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect></svg></div>
             <button onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
           </div>
         </div>
@@ -6350,17 +6352,19 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
-      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;animation:fadeUp .22s ease">
-        <div style="display:flex;align-items:stretch;gap:0">
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:0">
           <div role="group" aria-label="Tarot" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-right:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">Tarot</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Draw a reading: what it is about, how deep it goes, and how many cards.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><g fill="var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.6" stroke-linejoin="round"><rect x="14" y="30" width="46" height="70" rx="6" transform="rotate(-14 37 65)"></rect><rect x="74" y="30" width="46" height="70" rx="6" transform="rotate(14 97 65)"></rect><rect x="44" y="22" width="46" height="70" rx="6"></rect></g><path d="M67 45l6 12 12 2-9 9 2 13-11-6-11 6 2-13-9-9 12-2z" fill="var(--ac2-hi)"></path></svg></div>
             <button onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
           <div aria-hidden="true" style="flex:none;width:1px;background:var(--bd)"></div>
           <div role="group" aria-label="The Book of Changes" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:10px;padding-left:14px">
             <div style="font:400 20px/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
-            <div style="flex:1;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div style="flex:none;font:italic 400 12px/1.55 var(--fb);color:var(--dim)">Ask it something, and read all 64 hexagrams with their changing lines.</div>
+            <div aria-hidden="true" style="flex:1;display:flex;align-items:center;justify-content:center;padding:6px 0"><svg viewBox="0 0 134 110" style="width:min(100%,170px);height:auto"><rect x="25" y="18" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="38" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="58" width="84" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="25" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect><rect x="73" y="78" width="36" height="8" rx="4" fill="var(--ac2-hi)"></rect></svg></div>
             <button onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--ac);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
           </div>
         </div>
