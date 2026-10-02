@@ -18950,8 +18950,10 @@ input[type="date"]{color-scheme:dark}
 [data-vt] *::-webkit-scrollbar{width:0;height:0}
 @media (orientation:landscape) and (max-height:520px){[data-vt]{--hdr:calc(46px + env(safe-area-inset-top))!important;--nav:calc(54px + env(safe-area-inset-bottom))!important;--dock:46px!important}}
 [data-vt-scroll]{scroll-snap-type:y mandatory;touch-action:none;overscroll-behavior-y:contain}
-[data-vt-page]{touch-action:pan-y;overscroll-behavior-y:contain}
-[data-vt-pager]{scroll-snap-type:x mandatory;touch-action:pan-x}
+[data-vt-page]{touch-action:pan-y pinch-zoom;overscroll-behavior-y:contain}
+[data-vt-pager]{scroll-snap-type:x mandatory;touch-action:pan-x pinch-zoom}
+/* A field under 16px makes iOS zoom the page in when it takes focus, and a touch-action of pan alone forbids the pinch that would undo it, so the page stayed zoomed with no way out. Fields are 16px on a touch screen, and pinch is allowed back on every scroller. */
+@media (pointer:coarse){input,textarea,select{font-size:16px!important}}
 [data-vt-page] > [data-screen-label]{flex:none!important;min-height:0!important;overflow:visible!important;position:static!important;inset:auto!important;z-index:auto!important;padding-left:20px!important;padding-right:20px!important;padding-bottom:0!important;background:transparent!important;animation:none!important}
 [data-vt-page] > [data-screen-label] > *{max-width:none}
 [data-vt-page] > [data-screen-label="Today"] > div:first-child{display:none!important}
