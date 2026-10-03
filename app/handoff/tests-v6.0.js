@@ -2759,6 +2759,8 @@
       var mf = d.getElementById('mailform'), skipBtn = d.querySelector('button.skip');
       var firstPress = !!(mf && !mf.hidden && skipBtn && !skipBtn.hidden) &&
         a.getAttribute('aria-expanded') === 'true' && w.location.pathname === pathBefore &&
+        /* Pressed once, the link leaves the page: the form is the way on. */
+        w.getComputedStyle(a).display === 'none' &&
         (op(w, '.markwrap') === null || op(w, '.markwrap') >= 0.95);
       var openedTargets = tapTargets(w, d);
       var openedContrast = contrastFails(w, d, 4.5).fails;
@@ -2780,7 +2782,7 @@
       }
       /* preventDefault ran and the transition is running: an anchor left alone
          would already have left. */
-      t('H15', 'The link opens the email sign in, and continuing runs the exit instead of navigating at once',
+      t('H15', 'The link opens the email sign in and then leaves the page, and continuing runs the exit instead of navigating at once',
         { emailFirst: true, openedTargets: [], openedContrast: [], stillOnTheCover: true, transitionRunning: true },
         { emailFirst: firstPress, openedTargets: openedTargets, openedContrast: openedContrast,
           stillOnTheCover: stillHere, transitionRunning: fading });
