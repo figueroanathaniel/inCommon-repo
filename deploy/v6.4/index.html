@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4 cover  |  built 2026-10-02 -->
+<!-- inCommon incommon-v6.4 cover  |  built 2026-10-03 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -226,6 +226,8 @@
      phone on its side, may scroll it. */
   body.open .markwrap { align-content: safe center; }
   body.open .sub { position: static; margin-top: clamp(10px, 1.5vw, 26px); padding-bottom: 12px; }
+  /* Pressed once, "enter here" has done its job: the form is open and the way on is Sign in or Continue without an account. It leaves the page rather than sitting above the form. display:none still lets those two buttons click it, which is how they go through. */
+  body.open .enter { display: none; }
   @media (max-height: 560px) { body.open .markwrap { overflow-y: auto; } }
   .mailform {
     pointer-events: auto; display: flex; flex-wrap: wrap; gap: 8px; width: min(88vw, 380px);
