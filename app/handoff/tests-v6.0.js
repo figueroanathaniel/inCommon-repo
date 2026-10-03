@@ -2095,7 +2095,7 @@
       await goD('#/library/study', 700);
       find(dd, /Self Help Yellow Pages/).click();
       await sleep(700);
-      t('N44', 'Self Help Yellow Pages is a banner on every one of the six tabs, once each, and opens the directory',
+      t('N44', 'On the desktop, Self Help Yellow Pages is a banner on every one of the six tabs, once each, and opens the directory',
         { counts: [1, 1, 1, 1, 1, 1], opens: 'help' },
         { counts: banners, opens: app.state.libView });
 
@@ -2161,6 +2161,15 @@
         { syncPage: true, taps: [], absentFromSpirit: true },
         { syncPage: !!pSync, taps: pSyncTaps,
           absentFromSpirit: !dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Library / Synchronicities"]') });
+
+      /* N47: the square is never drawn twice. The phone carries the Get Help
+         square on every screen, so the Library's own banner does not draw there;
+         the desktop has no such square and the Library banner is its only one. */
+      var phoneSquares = [].slice.call(dp.querySelectorAll('button')).filter(function (b) {
+        return /^(Get help now|Self Help Yellow Pages)$/.test(b.getAttribute('aria-label') || '');
+      }).map(function (b) { return b.getAttribute('aria-label'); });
+      t('N47', 'The help square appears once on the phone, as Get Help, and the Library banner square is not drawn beside it',
+        { phone: ['Get help now'] }, { phone: phoneSquares });
 
       /* The failure this page has actually had: a field that renders while its
          change handler is missing. Typed through a real input event rather than

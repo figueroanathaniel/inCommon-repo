@@ -69,8 +69,8 @@ class Component extends DCLogic {
   SRC = '../app/inCommonApp v2.dc.html';
   /* WHAT A COMPLETE RUN LOOKS LIKE.
 
-     The suite makes 60 distinct t(N...) calls and THREE of them are guards that
-     only fire on a failure, so a healthy run emits 57. The guards are N0 and
+     The suite makes 61 distinct t(N...) calls and THREE of them are guards that
+     only fire on a failure, so a healthy run emits 58. The guards are N0 and
      N18-0, which report that the desktop frame and the phone frame failed to
      boot and then return immediately, and N-ERR, which is the catch block. It
      said 57 and 56 while it counted N0 alone, so the number sat two behind the
@@ -89,7 +89,7 @@ class Component extends DCLogic {
      and 11 turn on the shell, this number does not move with the environment.
      Subtract the guards before changing it: a guard that reddens every healthy
      run is a guard somebody switches off. */
-  EXPECTED = 57;
+  EXPECTED = 58;
   state = { rows: [], status: 'Loading the harness\u2026', running: true };
 
   async componentDidMount() {

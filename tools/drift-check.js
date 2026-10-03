@@ -87,7 +87,7 @@ const PHASES = [
   { tag: 'G', file: 'Verification G - ada phase.dc.html', expect: 33 },
   { tag: 'T', file: 'Verification T - theme phase.dc.html', expect: 64 },
   { tag: 'R', file: 'Verification R - removal phase.dc.html', expect: 14 },
-  { tag: 'N', file: 'Verification N - new surfaces.dc.html', expect: 57 }
+  { tag: 'N', file: 'Verification N - new surfaces.dc.html', expect: 58 }
 ];
 
 const args = process.argv.slice(2);

@@ -261,10 +261,14 @@ Study as well as Readings. Throughline and Archive live in the Library and
 nowhere else: N45 holds that, and N41 to N46 hold the rest of this table, so a
 list that is true once cannot quietly become true twice.
 
-**The Self Help Yellow Pages is a banner on every tab**, a `position: sticky`
-footer inside the Library shell (`libBanner`), wearing `--crisis`, never the
-action colour. It is hidden inside a room or a practice, because those are not
-tabs. N44.
+**The help square is drawn once per screen.** It is a 52px square carrying the
+inCommon symbol, wearing `--crisis`, never the action colour. On the phone it is
+the Get Help button on every screen (`helpGo`, the dock), and the Library does
+NOT draw its own beside it: the phone's Library shell has no banner (N47). On the
+desktop there is no dock button, so the Library carries the Self Help Yellow Pages
+square as a `position: sticky` footer on every tab (`libBanner`), hidden inside a
+room or a practice because those are not tabs (N44). Do not add a second square
+to a shell that already has one.
 
 **Rooms the old Spirit pages became.** `libView` `angel` (Synchronicities,
 `/library/synchronicities`, gate `libAngel`), `dreamj` (the Dream Journal,
@@ -1887,8 +1891,8 @@ they actually are, and renaming any of them to v5.9 would make them lie.
 `Verification v6.0.dc.html` runs `handoff/tests-v6.0.js`: Checks A to E plus S
 (short desktop), the functional sweep, the theme phase, the removal phase
 (group R, V1.6.0), the ADA phase (group G, V1.7.0) and the new surfaces phase
-(group N). 275 assertions (group N is 57 rows since 2 October 2026: the Month
-Ahead rows left and six Library rows, N41 to N46, arrived). A full run takes 25+ minutes.
+(group N). 276 assertions (group N is 58 rows since 2 October 2026: the Month
+Ahead rows left and seven Library rows, N41 to N47, arrived). A full run takes 25+ minutes.
 
 The theme phase runs four identities now rather than three, which is what took
 the total from 236 to 252: eight cases at two widths at four rows each. The T ids
