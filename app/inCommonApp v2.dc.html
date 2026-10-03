@@ -251,7 +251,7 @@ input[type="date"]{color-scheme:dark}
          birth time as digits and an explicit clock rather than a native time
          control, for the reason the classic form below gives. -->
     <sc-if value="{{ authCodex }}" hint-placeholder-val="{{ true }}">
-      <div style="position:relative;z-index:1;width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;margin:auto;text-align:center">
+      <div style="position:relative;z-index:1;width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;margin:0 auto;text-align:center">
         <div style="display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s ease-out both">
           <div style="font:600 11px var(--fu);letter-spacing:.26em;text-transform:uppercase;color:var(--ac2-hi);margin:0 0 12px">The First Inscription</div>
           <!-- The gradient runs between two text tokens, so it holds its
@@ -260,9 +260,6 @@ input[type="date"]{color-scheme:dark}
           <h1 style="margin:0 0 16px;font:400 clamp(38px,7vw,60px)/1.05 var(--fb);letter-spacing:.004em;color:var(--tx);text-wrap:balance">Tell the Codex <em style="font-style:italic;color:var(--ac2-hi);background:linear-gradient(100deg,var(--tx),var(--ac2-hi) 70%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">when you arrived.</em></h1>
           <p style="margin:0 0 30px;max-width:34em;font:400 15px/1.7 var(--fb);color:var(--mut);text-wrap:pretty">Three coordinates unlock everything: the name you were given, the moment of your first breath, and the place where the sky first saw you.</p>
         </div>
-        <sc-if value="{{ authHasErr }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="box-sizing:border-box;width:100%;margin:0 0 16px;background:rgba(224,141,125,.1);border:1px solid rgba(224,141,125,.42);border-radius:12px;padding:11px 13px;font:400 12.5px/1.55 var(--fu);color:var(--tx);text-align:left">{{ authErr }}</div>
-        </sc-if>
         <div style="position:relative;box-sizing:border-box;width:100%;text-align:left;padding:clamp(20px,5vw,32px);border:1px solid var(--bd);border-radius:12px;background:var(--sf);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 40px rgba(var(--atmc),.12),inset 0 0 60px rgba(var(--atmc2),.05);animation:panelIn .6s ease-out both">
           <span aria-hidden="true" style="position:absolute;top:-1px;left:-1px;width:14px;height:14px;box-sizing:border-box;border-top:1px solid var(--ac2);border-left:1px solid var(--ac2);border-top-left-radius:12px"></span>
           <span aria-hidden="true" style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;box-sizing:border-box;border-bottom:1px solid var(--ac2);border-right:1px solid var(--ac2);border-bottom-right-radius:12px"></span>
@@ -279,11 +276,11 @@ input[type="date"]{color-scheme:dark}
               <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
                 <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Date of birth</span>
                 <input value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" min="1900-01-01" aria-label="Date of birth" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 14px;color:var(--tx);font:400 15px var(--fu);color-scheme:dark">
-                <sc-if value="{{ afBdateHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bdate" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBdateErr }}</div></sc-if>
+                <div style="min-height:18px"><sc-if value="{{ afBdateHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bdate" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBdateErr }}</div></sc-if></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
                 <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Time of birth</span>
-                <sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
+                <div style="min-height:48px"><sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
                   <div style="display:flex;gap:6px">
                     <div role="group" aria-label="Time of birth, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 6px">
                       <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:36px;min-height:44px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 16px var(--fu)">
@@ -296,8 +293,8 @@ input[type="date"]{color-scheme:dark}
                       </sc-for>
                     </div>
                   </div>
-                </sc-if>
-                <sc-if value="{{ afBtimeHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-btime" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBtimeErr }}</div></sc-if>
+                </sc-if></div>
+                <div style="min-height:18px"><sc-if value="{{ afBtimeHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-btime" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBtimeErr }}</div></sc-if></div>
                 <!-- Not knowing is an answer and is given here, never read off
                      an empty field: blank still means nobody has been asked. -->
                 <button onClick="{{ afBtimeUnknownGo }}" role="switch" aria-checked="{{ cxUnknownOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
@@ -313,12 +310,8 @@ input[type="date"]{color-scheme:dark}
               <div style="position:relative">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ac2-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 <input value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="Search a city, e.g. Orlando" autoComplete="off" aria-label="Place of birth" aria-describedby="incommon-place-list" aria-invalid="{{ afBplaceBad }}" aria-errormessage="incommon-err-bplace" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 14px 0 38px;color:var(--tx);font:400 15px var(--fu)">
-              </div>
-              <!-- The candidates, each with the coordinates and the zone it
-                   would write onto the chart, so the reader chooses the place
-                   and not just the spelling. -->
-              <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
-                <ul id="incommon-place-list" aria-label="Places that match" style="list-style:none;margin:0;padding:4px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);max-height:260px;overflow-y:auto">
+                <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
+                <ul id="incommon-place-list" aria-label="Places that match" style="position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;list-style:none;margin:0;padding:4px;border:1px solid var(--bd);border-radius:8px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));max-height:260px;overflow-y:auto;box-shadow:0 14px 34px rgba(0,0,0,.5)">
                   <sc-for list="{{ cxPlaceHits }}" as="p" hint-placeholder-count="3">
                     <li><button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 12px;border-radius:6px">
                       <span style="font:400 14px/1.35 var(--fu);color:var(--tx)">{{ p.label }}</span>
@@ -327,6 +320,11 @@ input[type="date"]{color-scheme:dark}
                   </sc-for>
                 </ul>
               </sc-if>
+              </div>
+              <!-- The candidates, each with the coordinates and the zone it
+                   would write onto the chart, so the reader chooses the place
+                   and not just the spelling. -->
+              <div style="min-height:64px;display:flex;flex-direction:column;gap:8px">
               <sc-if value="{{ cxPlaceHasChosen }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;align-items:center;gap:6px;font:400 11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ok)"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M20 6 9 17l-5-5"></path></svg><span>{{ cxPlaceChosen }}</span></div>
               </sc-if>
@@ -336,10 +334,14 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </sc-if>
               <sc-if value="{{ afBplaceHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bplace" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBplaceErr }}</div></sc-if>
-              <sc-if value="{{ cxUnknownHelp }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ cxUnknownHelp }}" hint-placeholder-val="{{ false }}">
                 <span style="font:italic 400 13.5px/1.5 var(--fb);color:var(--mut)">Without a birth time the Moon's degree is approximate, and the houses, the Ascendant and the Midheaven are left out rather than estimated.</span>
               </sc-if>
+              </div>
             </div>
+            <sc-if value="{{ authHasErr }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="box-sizing:border-box;width:100%;margin:0;background:rgba(224,141,125,.1);border:1px solid rgba(224,141,125,.42);border-radius:12px;padding:11px 13px;font:400 12.5px/1.55 var(--fu);color:var(--tx);text-align:left">{{ authErr }}</div>
+        </sc-if>
             <button onClick="{{ birthGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);color:var(--onac);font:700 15px var(--fu);letter-spacing:.02em">Cast my Codex</button>
           </div>
         </div>
