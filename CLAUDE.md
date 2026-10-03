@@ -3010,6 +3010,20 @@ answers are kept for the text they were asked about. Coordinates typed as
 latitude, longitude are an answer rather than a search: their digits otherwise
 matched six towns in Kazakhstan. A place typed out in full counts as picked.
 
+**The page holds still while it is filled in.** It used to be centred with
+`margin: auto`, so every line that appeared moved the whole card: the place
+candidates pushed the button 278px, the unknown time switch took the time field
+away and pulled the place up, and an error banner above the card shifted every
+field down while somebody was typing in them. Now the column is top aligned, the
+place candidates float over the card as a dropdown (`position:absolute` under the
+input), the date and time errors, the place messages and the unknown time note
+each live in a reserved slot, the time field keeps its row when the switch is on,
+and the form error sits inside the card above the button, so the only thing it can
+move is the button. Measured by driving the page: name, date and place stay at the
+same y through typing a place, switching the time off and casting with errors.
+Anything new that appears here belongs in a reserved slot or an overlay, never in
+the flow above a field.
+
 **G7 finds the date field by type now**, inside the gate, because its label moved
 from "Birth date" to "Date of birth". What that row tests is the error wiring,
 and it should not break on a wording change again.
