@@ -1176,6 +1176,18 @@ void main(){
   int  crossings = 0;
   vec3 jetc = lin(vec3(0.58,0.40,1.00));
 
+  /* THE STEP BUDGET IS SPENT, NOT SHORTENED.
+
+     The ladder cuts uSteps from 235 to 62 to buy frame time. Cutting the count
+     alone leaves each step the same length, so a ray that needs about 190 steps
+     to cross the disk zone and leave is abandoned a third of the way: the upper
+     and lower arcs of the disk vanish and the sky is read from rays still deep
+     in flight, which smears it into streaks. So the step LENGTH grows as the
+     count falls and every ray still finishes its journey, at a coarser step.
+     The scale is 1.0 at 190 steps and above, so the top three rungs, which a
+     capable machine sits on, are exactly what they were. */
+  float dts = max(1.0, 190.0 / float(uSteps));
+
   for (int i = 0; i < MAXSTEPS; i++){
     if (i >= uSteps) break;
     float r2 = dot(pos, pos);
@@ -1186,6 +1198,7 @@ void main(){
     float rho = length(pos.xz);
     float dt  = clamp(0.050 * r, 0.022, 1.70);
     if (abs(pos.y) < 1.15 && rho < DOUT + 1.5) dt = min(dt, 0.20);
+    dt = min(dt * dts, 4.0);
 
     vec3 p0 = pos;
     vec3 a0 = -1.5 * h2 * pos / (r2 * r2 * r);
