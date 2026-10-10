@@ -2610,6 +2610,21 @@ was, so a 400ms frame falls four rungs and a 160ms frame falls two, and a single
 frame over 150ms is enough on its own rather than needing a second. The
 50-frame averaging window still governs ordinary drift in both directions.
 
+**A lower rung must not paint a black hole around the hole.** `uSteps` falls from
+235 to 62 down the ladder, and a ray that passes the hole spends most of its
+budget crawling through the disk zone at `dt` 0.20. At the low rungs it was
+still in flight when the loop ended, neither captured nor escaped, so it took no
+sky: a solid black saucer swallowing the outer disk and the starfield around the
+hole. It was reported as the event horizon "cutting out" on desktop, and it only
+shows once the ladder has fallen, which is why 1280x720 and 1920x940 were whole
+in this container and 2560x1080 was not; a real machine reaches it through a wide
+or dense display on an integrated GPU. The fix is after the loop and leaves the
+integration alone: a ray with an impact parameter above `BCRIT` is never
+captured, so one that ran out of steps is treated as escaped and reads the sky
+along the direction it has. Below `BCRIT`, or inside r 3.0, it stays black. Do
+not read a screenshot taken at one size as proof of the ladder: the rung is
+chosen by how fast the machine is, so check the render at the bottom rung too.
+
 **The measured symptom to recognise.** `GL_VENDOR = Disabled` and
 `BindToCurrentSequence failed` in the console, WebGL unavailable in every
 browser on the machine including ones that were never pointed at this page, and

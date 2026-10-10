@@ -1232,6 +1232,24 @@ void main(){
     }
   }
 
+  /* A RAY THAT RAN OUT OF STEPS IS NOT A RAY THAT WAS CAPTURED.
+
+     The quality ladder cuts uSteps from 235 to as few as 62, and a ray that
+     passes the hole spends most of its budget crawling through the disk zone
+     at dt 0.20. At the low rungs it was still in flight when the loop ended,
+     was neither captured nor escaped, and took no sky at all: a solid black
+     saucer around the hole and the outer lobes of the disk, which is what a
+     wide or dense desktop display on an integrated GPU saw once the ladder had
+     fallen. A ray whose impact parameter is above BCRIT is never captured, so
+     one that ran out of budget was bound for the sky, and the direction it has
+     now is close enough to the one it would have reached: the sky is diffuse
+     noise and a small error in where it is read from cannot be seen. A ray
+     below BCRIT is captured by definition and stays black, and so does anything
+     inside r 3.0, which is the photon sphere's own trapped light; the ring is
+     drawn over it below. Nothing at the top of the ladder changes, where rays end
+     before the budget does. */
+  if (!escaped && b > BCRIT && length(pos) > 3.0) escaped = true;
+
   vec3 col = acc.rgb + vol;
   if (escaped) col += sky(normalize(vel)) * (1.0 - acc.a);
 
