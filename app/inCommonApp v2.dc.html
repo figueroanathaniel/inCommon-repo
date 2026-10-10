@@ -18607,7 +18607,8 @@ class Component extends DCLogic {
   ORACLE_ERR = ((silent, resting) => ({
     limit: silent, silent: silent, notSetUp: silent, off: silent,
     busy: resting, pending: resting,
-    premium: 'This feature is part of Codex Luminary.'
+    premium: 'This feature is part of Codex Luminary.',
+    timeout: 'This reading took too long to write. Try again in a minute.'
   }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
   /* TWO ANSWERS ARE NOT FAILURES YET, and the page used to show the resting
      line for both over a reading that was on its way. PENDING is the server

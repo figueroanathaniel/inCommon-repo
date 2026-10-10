@@ -915,6 +915,9 @@
         if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
+        /* The function gave up on Kimi (504 TIMEOUT). Kimi was writing, so it
+           counts toward the limit, and it is not the same as a refusal. */
+        if (code === 'TIMEOUT' || st === 504) return { ok: false, reason: 'timeout' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };

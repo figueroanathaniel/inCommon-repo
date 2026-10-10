@@ -17403,6 +17403,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
+        /* The function gave up on Kimi (504 TIMEOUT). Kimi was writing, so it
+           counts toward the limit, and it is not the same as a refusal. */
+        if (code === 'TIMEOUT' || st === 504) return { ok: false, reason: 'timeout' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
@@ -37463,7 +37466,8 @@ class Component extends DCLogic {
   ORACLE_ERR = ((silent, resting) => ({
     limit: silent, silent: silent, notSetUp: silent, off: silent,
     busy: resting, pending: resting,
-    premium: 'This feature is part of Codex Luminary.'
+    premium: 'This feature is part of Codex Luminary.',
+    timeout: 'This reading took too long to write. Try again in a minute.'
   }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
   /* TWO ANSWERS ARE NOT FAILURES YET, and the page used to show the resting
      line for both over a reading that was on its way. PENDING is the server

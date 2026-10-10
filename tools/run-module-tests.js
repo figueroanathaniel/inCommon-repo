@@ -1932,14 +1932,14 @@ async function runCloudTests() {
   }, { ok: rIn.ok, fn: ocIn.calls[0] && ocIn.calls[0].name, period: ocIn.calls[0] && ocIn.calls[0].body.period,
     title: rIn.reading && rIn.reading.title, cached: rIn.cached, periodKey: rIn.periodKey });
   var reasons = {};
-  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')]];
+  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')], ['504', httpErr(504, 'TIMEOUT')]];
   for (var ci = 0; ci < cases.length; ci++) {
     var ec = cases[ci][1];
     CO._setClientForTests(oracleClient(function () { return { data: null, error: ec }; }).client, { user: { id: 'u1' } });
     reasons[cases[ci][0]] = (await CO.oracleRead({ period: 'weekly' })).reason;
   }
   t('K28', 'each way the function can fail is a reason the page can say in words', {
-    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error'
+    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error', '504': 'timeout'
   }, reasons);
   CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
   var rPrem = await CO.oracleRead({ period: 'daily', depth: 'deep' });
