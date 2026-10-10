@@ -1562,10 +1562,32 @@ const QL = [
 ];
 let qi = 2;
 
+/* THE SCENE NEVER RENDERS BELOW 720p, WHATEVER RUNG THE LADDER IS ON.
+
+   The ladder's scale used to be free to fall to 0.28 of the screen, so a
+   machine that could not hold the frame rate was shown the picture at a
+   fraction of 720p and it read as soft and blocky. That was reported
+   ("the resolution is shotty, at least 720p"). The shorter side of the scene
+   buffer is held at 720 device pixels, or at the canvas's own size where the
+   screen is smaller than that, and what a slow machine gives up is steps
+   instead: the step count falls with the rung and the step length grows to
+   match (dts in the shader), which costs detail in the disk's far side and not
+   the sharpness of the whole frame. Cost is pixels times steps: 720p at 62 steps
+   is about 57 million, against 81 million for the old 0.58 floor at 116 steps
+   on a 1080p screen and 207 million at a density of 1.6, and that old floor is
+   the one that took an Intel UHD 600's driver down. It is more than the old
+   bottom rung asked for (26 million), so a machine that survived only because
+   of that rung is the one to watch. */
+const MIN_SIDE = 720;
+
 function buildScene() {
   const ss = QL[qi].ss;
   const cap = 4.6e6;
   let sw = W * ss, sh = H * ss;
+  const nat = renderer.domElement;
+  const want = Math.min(MIN_SIDE, Math.min(nat.width, nat.height));
+  const short = Math.min(sw, sh);
+  if (short < want) { const k = (want + 1) / short; sw *= k; sh *= k; }
   const over = (sw * sh) / cap;
   if (over > 1) { const k = Math.sqrt(over); sw /= k; sh /= k; }
   if (rtScene) rtScene.dispose();
