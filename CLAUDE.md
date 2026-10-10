@@ -2621,7 +2621,18 @@ in this container and 2560x1080 was not; a real machine reaches it through a wid
 or dense display on an integrated GPU. The fix is after the loop and leaves the
 integration alone: a ray with an impact parameter above `BCRIT` is never
 captured, so one that ran out of steps is treated as escaped and reads the sky
-along the direction it has. Below `BCRIT`, or inside r 3.0, it stays black. Do
+along the direction it has. Below `BCRIT`, or inside r 3.0, it stays black. That fallback was not enough on its own: it painted the black away but the
+disk's upper and lower arcs were still missing at the bottom rung, because those
+rays had been abandoned before they reached the disk, and the sky they read was
+smeared into streaks. The real fix is in the integration's step LENGTH, not its
+count: `dts = max(1.0, 190.0 / uSteps)` scales `dt` up as the budget falls (to a
+cap of 4.0), so every ray still finishes its journey at a coarser step. It is
+1.0 at 190 steps and above, so the top three rungs run the code they always ran.
+The test that found it forces a rung: replace `let qi = 2;` with the rung wanted
+and stub `drop()` and the two averaging branches, serve that copy, and render at
+2560x1080. Rung 0 is the truth, rung 8 should show the same picture at a lower
+resolution, and a missing arc or a black dome above the hole is this fault again.
+Do
 not read a screenshot taken at one size as proof of the ladder: the rung is
 chosen by how fast the machine is, so check the render at the bottom rung too.
 
