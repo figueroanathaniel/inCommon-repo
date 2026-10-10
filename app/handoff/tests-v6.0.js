@@ -1738,7 +1738,12 @@
 
       onStep('new surfaces: the Sky filter');
       await goD('#/library/throughline', 700);
-      var chips = [].slice.call(dd.querySelectorAll('[role="radio"]')).filter(function (b) { return /^Sky$/i.test(txt(b)); });
+      /* The filter is a dropdown now (10 October 2026): one button opens a menu
+         of menuitemradio options, so the Sky option is only in the DOM once the
+         menu is open. */
+      var ddTrig = dd.querySelector('[data-screen-label="Throughline"] [data-dd-trigger]');
+      if (ddTrig) { ddTrig.click(); await sleep(300); }
+      var chips = [].slice.call(dd.querySelectorAll('[role="menuitemradio"]')).filter(function (b) { return /^Sky$/i.test(txt(b)); });
       if (chips[0]) chips[0].click();
       await sleep(500);
       var rowTxt = [].slice.call(dd.querySelectorAll('[data-screen-label="Throughline"] button'))

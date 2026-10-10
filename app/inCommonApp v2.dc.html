@@ -240,7 +240,7 @@ input[type="date"]{color-scheme:dark}
        [role="dialog"]. Without them this screen was a full page overlay with
        six controls of its own and 278 behind it, none of them shielded: the
        first Tab out of the birth form walked into somebody else's chart. -->
-  <div data-screen-label="First run" role="dialog" aria-modal="true" aria-label="Your birth moment" style="position:absolute;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;background:var(--bg);padding:clamp(16px,4vw,48px) 16px calc(28px + env(safe-area-inset-bottom))">
+  <div data-screen-label="First run" role="dialog" aria-modal="true" aria-label="Your birth moment" style="position:absolute;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;overflow-x:hidden;overflow-y:auto;background:var(--bg);padding:clamp(16px,4vw,48px) 16px calc(28px + env(safe-area-inset-bottom))">
     <div aria-hidden="true" style="position:absolute;left:-16%;right:-16%;top:-34%;height:96%;z-index:0;pointer-events:none;background:radial-gradient(closest-side, rgba(var(--atmc),.30), transparent 70%);animation:atmosDrift 26s ease-in-out infinite"></div>
     <div aria-hidden="true" style="position:absolute;left:-24%;right:-24%;top:44%;height:96%;z-index:0;pointer-events:none;background:radial-gradient(closest-side, rgba(var(--atmc2),.22), transparent 72%);animation:atmosDrift2 41s ease-in-out infinite"></div>
     <!-- THE CODEX'S PAGE, and the one a reader meets. Its layout and its words
@@ -578,7 +578,7 @@ input[type="date"]{color-scheme:dark}
                         <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:{{ m.bg }};color:{{ m.c }};font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase">{{ m.label }}</button>
                       </sc-for>
                     </div>
-                    <button onClick="{{ goCharts }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 30px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">Spirit <span style="font:400 13px var(--fb);text-transform:none;letter-spacing:0;color:var(--ac)">→</span></button>
+                    <button onClick="{{ goCharts }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 30px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">My Charts <span style="font:400 13px var(--fb);text-transform:none;letter-spacing:0;color:var(--ac)">→</span></button>
                     <sc-if value="{{ alignIsShuffle }}" hint-placeholder-val="{{ false }}">
                       <button onClick="{{ alignReroll }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border:1px solid rgba(47,255,143,.34);border-radius:10px;background:rgba(47,255,143,.08);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac)">Shuffle again</button>
                     </sc-if>
@@ -903,10 +903,16 @@ input[type="date"]{color-scheme:dark}
     </div>
     <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;flex-direction:column;gap:13px">
-        <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Human Design readings" style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
-          <sc-for list="{{ hdTabs }}" as="t" hint-placeholder-count="5">
-            <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border:1px solid {{ t.bd }};border-radius:999px;background:{{ t.bg }};font:600 11.5px var(--fu);color:{{ t.c }}">{{ t.label }}</button>
-          </sc-for>
+        <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
+          <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+          <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+            <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+              <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
+                <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
           <div style="display:flex;flex-direction:column;gap:4px">
@@ -1440,10 +1446,18 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libTL }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Throughline" style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
-        <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
-          <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
-            <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
-          </sc-for>
+        <div style="flex:none;display:flex;flex-direction:column;padding:12px 18px 8px">
+          <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
+            <button data-dd-trigger="1" onClick="{{ tlDdGo }}" aria-haspopup="menu" aria-expanded="{{ tlDdExpanded }}" aria-label="Filter timeline, {{ tlDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ tlDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+            <sc-if value="{{ tlDdOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+              <div role="menu" aria-label="Filter timeline" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+                <sc-for list="{{ tlFilters }}" as="o" hint-placeholder-count="6">
+                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
         </div>
         <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:flex;flex-direction:column">
@@ -3330,7 +3344,6 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
   <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
     <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">The Oracle</h1>
-    <div style="font:400 13px/1.5 var(--fu);color:var(--mut)">The heavens, read for you alone.</div>
   </div>
   <div data-vt-page="1" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
 <sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
@@ -3345,7 +3358,6 @@ input[type="date"]{color-scheme:dark}
         <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
-            <span style="font:italic 400 11.5px/1.3 var(--fb);color:var(--mut)">{{ pr.sub }}</span>
           </button>
         </sc-for>
       </div>
@@ -3555,7 +3567,6 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
     <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
       <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
       <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is spirituality as spirituality intended; here, you are more than you knew you were. Our faith is in your ability to absorb what your potential might be, through the tools we have provided. We do not claim to be a replacement for professional help. If you find yourself in a crisis situation, please refer to our comprehensive list of hotlines available to the public in our Self Help Yellow Pages. Your experience is the final authority. Every claim is tagged by kind; memory is opt-in per source and lives on this device; a deterministic safety gate runs before any reading is generated; humans beat readings, every time. Here, everyone has something in common.</div>
       
@@ -3612,9 +3623,6 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ atCapacity }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 11px/1.5 var(--fu);color:var(--dim);text-align:center;padding:8px">Maximum of six profiles reached. Delete one to add another.</div>
       </sc-if>
-      <sc-if value="{{ soloProfile }}" hint-placeholder-val="{{ false }}">
-        <div style="font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">One profile so far. Add another for a partner, a child, or a chart you read for someone else. Nothing crosses between them unless both sides say so.</div>
-      </sc-if>
       <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px">
           <div style="font:400 17px var(--fd)">Shared Guidance</div>
@@ -3646,12 +3654,10 @@ input[type="date"]{color-scheme:dark}
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Visual Identity &amp; Accessibility</div>
-      <div style="font:400 11.5px/1.6 var(--fb);color:var(--dim)">Colour and type only. Nothing here changes a calculation, and the choice belongs to this profile rather than to the device.</div>
       <sc-for list="{{ themeRows }}" as="t" hint-placeholder-count="3">
         <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
             <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
-            <span style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ t.note }}</span>
           </span>
           <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:{{ t.tickColor }}">{{ t.tick }}</span>
         </button>
@@ -3784,6 +3790,7 @@ input[type="date"]{color-scheme:dark}
         <span style="font:400 15px var(--fb);color:var(--warn)">→</span>
       </button>
     </div>
+    <div style="margin-top:auto;padding:10px 0 2px;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
   </div>
 </sc-if>
 
@@ -4012,7 +4019,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCategory }}</div>
           <div style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ numTitle }}</div>
-          <div style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ numFrom }}</div>
+          <sc-if value="{{ numHasFrom }}" hint-placeholder-val="{{ true }}"><div style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ numFrom }}</div></sc-if>
         </div>
       </div>
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
@@ -5192,7 +5199,7 @@ input[type="date"]{color-scheme:dark}
                         </sc-for>
                       </div>
                       <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:8px">
-                        <button onClick="{{ goCharts }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 30px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">Spirit <span style="font:400 13px var(--fb);text-transform:none;letter-spacing:0;color:var(--ac)">→</span></button>
+                        <button onClick="{{ goCharts }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 30px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--tx)">My Charts <span style="font:400 13px var(--fb);text-transform:none;letter-spacing:0;color:var(--ac)">→</span></button>
                         <sc-if value="{{ alignIsShuffle }}" hint-placeholder-val="{{ false }}">
                           <button onClick="{{ alignReroll }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 20px;border:1px solid rgba(47,255,143,.34);border-radius:10px;background:rgba(47,255,143,.08);font:600 10.5px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac)">Shuffle again</button>
                         </sc-if>
@@ -5955,10 +5962,16 @@ input[type="date"]{color-scheme:dark}
       </div>
         <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:13px">
-            <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Human Design readings" style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
-              <sc-for list="{{ hdTabs }}" as="t" hint-placeholder-count="5">
-                <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border:1px solid {{ t.bd }};border-radius:999px;background:{{ t.bg }};font:600 11.5px var(--fu);color:{{ t.c }}">{{ t.label }}</button>
-              </sc-for>
+            <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
+              <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+              <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+                <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+                  <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
+                    <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
               <div style="display:flex;flex-direction:column;gap:4px">
@@ -6106,7 +6119,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCategory }}</div>
           <div style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ numTitle }}</div>
-          <div style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ numFrom }}</div>
+          <sc-if value="{{ numHasFrom }}" hint-placeholder-val="{{ true }}"><div style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ numFrom }}</div></sc-if>
         </div>
       </div>
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
@@ -6192,10 +6205,18 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libTL }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Throughline" style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
-        <div onKeyDown="{{ radioKeys }}" style="flex:none;display:flex;flex-wrap:wrap;gap:6px;padding:12px 18px 8px" role="radiogroup" aria-label="Filter timeline">
-          <sc-for list="{{ tlFilters }}" as="f" hint-placeholder-count="5">
-            <button onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.c }};font:600 11px var(--fu)">{{ f.t }}</button>
-          </sc-for>
+        <div style="flex:none;display:flex;flex-direction:column;padding:12px 18px 8px">
+          <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
+            <button data-dd-trigger="1" onClick="{{ tlDdGo }}" aria-haspopup="menu" aria-expanded="{{ tlDdExpanded }}" aria-label="Filter timeline, {{ tlDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ tlDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+            <sc-if value="{{ tlDdOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+              <div role="menu" aria-label="Filter timeline" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+                <sc-for list="{{ tlFilters }}" as="o" hint-placeholder-count="6">
+                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
         </div>
         <sc-if value="{{ tlTimeline }}" hint-placeholder-val="{{ true }}">
         <div style="flex:1;min-height:0;display:flex;flex-direction:column">
@@ -8104,7 +8125,6 @@ input[type="date"]{color-scheme:dark}
         <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
-            <span style="font:italic 400 11.5px/1.3 var(--fb);color:var(--mut)">{{ pr.sub }}</span>
           </button>
         </sc-for>
       </div>
@@ -8307,7 +8327,6 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
     <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
-      <div style="min-height:44px;display:flex;align-items:center;font:400 12.5px/1.5 var(--fb);color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
       <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
       <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is spirituality as spirituality intended; here, you are more than you knew you were. Our faith is in your ability to absorb what your potential might be, through the tools we have provided. We do not claim to be a replacement for professional help. If you find yourself in a crisis situation, please refer to our comprehensive list of hotlines available to the public in our Self Help Yellow Pages. Your experience is the final authority. Every claim is tagged by kind; memory is opt-in per source and lives on this device; a deterministic safety gate runs before any reading is generated; humans beat readings, every time. Here, everyone has something in common.</div>
       
@@ -8364,9 +8383,6 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ atCapacity }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 11px/1.5 var(--fu);color:var(--dim);text-align:center;padding:8px">Maximum of six profiles reached. Delete one to add another.</div>
       </sc-if>
-      <sc-if value="{{ soloProfile }}" hint-placeholder-val="{{ false }}">
-        <div style="font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">One profile so far. Add another for a partner, a child, or a chart you read for someone else. Nothing crosses between them unless both sides say so.</div>
-      </sc-if>
       <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px">
           <div style="font:400 17px var(--fd)">Shared Guidance</div>
@@ -8398,12 +8414,10 @@ input[type="date"]{color-scheme:dark}
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Visual Identity &amp; Accessibility</div>
-      <div style="font:400 11.5px/1.6 var(--fb);color:var(--dim)">Colour and type only. Nothing here changes a calculation, and the choice belongs to this profile rather than to the device.</div>
       <sc-for list="{{ themeRows }}" as="t" hint-placeholder-count="3">
         <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid {{ t.bd }};border-radius:12px;padding:11px 14px">
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
             <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ t.label }}</span>
-            <span style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ t.note }}</span>
           </span>
           <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:{{ t.tickColor }}">{{ t.tick }}</span>
         </button>
@@ -8536,6 +8550,7 @@ input[type="date"]{color-scheme:dark}
         <span style="font:400 15px var(--fb);color:var(--warn)">→</span>
       </button>
     </div>
+    <div style="margin-top:auto;padding:10px 0 2px;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
   </div>
 </sc-if>
 
@@ -15147,18 +15162,21 @@ class Component extends DCLogic {
   }
   hdTeachVals() {
     const tabs = this.hdTeachings();
-    if (!tabs.length) return { hdTeachOn: false, hdTabs: [], hdParas: [], hdQuads: [] };
+    if (!tabs.length) return { hdTeachOn: false, hdTabs: [], hdParas: [], hdQuads: [], hdDdLabel: '', hdDdOpen: false, hdDdExpanded: 'false', hdDdGo: () => {} };
     const cur = tabs.find(t => t.key === this.state.hdTab) || tabs[0];
     return {
       hdTeachOn: true,
       hdTabs: tabs.map(t => {
         const on = t.key === cur.key;
         return { label: t.label, on,
-          bg: on ? 'rgba(47,255,143,.12)' : 'transparent',
-          bd: on ? 'var(--ac)' : 'var(--bd)',
-          c: on ? 'var(--ac)' : 'var(--tx)',
-          go: () => this.setState({ hdTab: t.key }) };
+          mbg: on ? 'rgba(47,255,143,.12)' : 'transparent',
+          mc: on ? 'var(--ac)' : 'var(--tx)',
+          go: () => this.setState({ hdTab: t.key, ddOpen: null }) };
       }),
+      hdDdLabel: cur.label,
+      hdDdOpen: this.state.ddOpen === 'hd',
+      hdDdExpanded: this.state.ddOpen === 'hd' ? 'true' : 'false',
+      hdDdGo: () => this.setState({ ddOpen: this.state.ddOpen === 'hd' ? null : 'hd' }),
       hdTeachTitle: cur.title, hdTeachKicker: cur.kicker,
       hdParas: cur.paragraphs.map(t => ({ t })),
       hdQuads: cur.quads.map(q => ({ label: q.label, accent: q.accent, items: q.items.map(t => ({ t })) }))
@@ -15191,13 +15209,13 @@ class Component extends DCLogic {
        thing making a quiet app feel charged; --atmo went up, because a sky you
        cannot see is a gradient artefact rather than an atmosphere. The surfaces
        took a few points of blue and the ground did not move at all. */
-    deepfield: { label: 'Deep Field', note: 'cold sky, warm horizon. The default.',
+    deepfield: { label: 'Deep Field',
       face: null, shared: {}, scoped: {},
       hc: { '--bd': 'rgba(120,150,255,.5)', '--ac2-hi': '#cbb8ff', '--blue': '#a8c0ff', '--mood': '#a8c0ff' } },
     /* Midnight is not gone, it is a delta now. Every value below is exactly what
        the three roots carried before Deep Field took the seat, so choosing it
        returns the app to the palette it shipped with, token for token. */
-    midnight: { label: 'Midnight', note: 'the previous identity: cosmic blue, green and violet.',
+    midnight: { label: 'Midnight',
       face: null,
       shared: { '--atmc2': '139,92,246', '--atmc3': '47,255,143', '--atmo': '.6',
         '--sf-g': '#181b24', '--chl': '#24222c', '--chl2': '#1c1a23',
@@ -15206,7 +15224,7 @@ class Component extends DCLogic {
         vt: { '--sf': '#05060a', '--sf2': '#14161d', '--bd': 'rgba(var(--atmc),.3)' },
         dt: { '--sf': '#14161d', '--sf2': '#1c1f29', '--bd': 'rgba(var(--atmc),.34)' } },
       hc: { '--bd': 'rgba(120,150,255,.5)', '--ac2-hi': '#cbb8ff', '--blue': '#a8c0ff', '--mood': '#a8c0ff' } },
-    dawn: { label: 'Dawn', note: 'warm and low, set in Petrona.',
+    dawn: { label: 'Dawn',
       face: ['Petrona', 'Petrona:ital,wght@0,400;0,500;1,400'],
       shared: { '--tx': '#f0ebe5', '--atmc': '200,160,120', '--atmc2': '190,118,96', '--atmc3': '200,160,120', '--atmo': '.6',
         '--sf-g': '#2a221d', '--chl': '#3a2f26', '--chl2': '#2d2520', '--rail1': '#12100e', '--rail2': '#0d0b0a',
@@ -15219,7 +15237,7 @@ class Component extends DCLogic {
         vt: { '--bg': '#12100e', '--sf': '#1a1512', '--sf2': '#221c18', '--bd': 'rgba(200,160,120,.2)' },
         dt: { '--bg': '#1a1512', '--sf': '#221c18', '--sf2': '#2d2520', '--bd': 'rgba(200,160,120,.22)' } },
       hc: { '--bd': 'rgba(200,160,120,.42)', '--ac2-hi': '#dcc9f0' } },
-    gold: { label: 'Gold', note: 'the older identity: gold and violet on near black.',
+    gold: { label: 'Gold',
       face: null,
       shared: { '--tx': '#e8e6ee', '--atmc': '211,173,110', '--atmc2': '154,122,200', '--atmc3': '211,173,110', '--atmo': '.6',
         '--sf-g': '#1c1a25', '--chl': '#2a2733', '--chl2': '#201d2a', '--rail1': '#0a0910', '--rail2': '#06050a', '--dim': 'rgba(232,230,238,.62)', '--mut': 'rgba(232,230,238,.62)',
@@ -16401,7 +16419,7 @@ class Component extends DCLogic {
       ['Opportunities', c.lists.opportunities, 'var(--ac)'], ['Obstacles', c.lists.obstacles, 'var(--ac2-hi)']];
     return {
       spiritNumDetail: true, numValue: c.value, numCategory: c.category, numTitle: c.title,
-      numFrom: 'Calculated from ' + c.from + '.', numIsPinnacle: c.isPinnacle,
+      numFrom: /birth month, day, and year in turn/.test(c.from) ? '' : 'Calculated from ' + c.from + '.', numHasFrom: !/birth month, day, and year in turn/.test(c.from), numIsPinnacle: c.isPinnacle,
       numRange: sel.range ? 'Peak period, ages ' + sel.range : '',
       numBg: c.isPinnacle ? 'rgba(47,255,143,.08)' : 'var(--sf)',
       numBd: c.isPinnacle ? 'rgba(47,255,143,.56)' : 'var(--bd)',
@@ -18401,7 +18419,7 @@ class Component extends DCLogic {
      the device and presses Consult the Oracle. After that the screen behaves as
      the Codex's did. A reading is kept on the device and on the server for the
      period it covers, so opening the screen again costs nothing. */
-  ORACLE_PERIODS = [['daily', 'Today', 'the day’s omen'], ['weekly', 'This Week', 'the seven-day tide'], ['monthly', 'This Month', 'the lunar chapter']];
+  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
   oracleLocalDate(d) {
     d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -18811,7 +18829,7 @@ class Component extends DCLogic {
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
-      orPeriods: this.ORACLE_PERIODS.map(([k, label, sub]) => ({ label, sub, on: period === k,
+      orPeriods: this.ORACLE_PERIODS.map(([k, label]) => ({ label, on: period === k,
         bd: pick(period === k, 'var(--ac2)', 'var(--bd)'), bg: pick(period === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orPeriod: k }) })),
       orSample: !r && sample,
@@ -19702,6 +19720,29 @@ class Component extends DCLogic {
      and Enter already select, because every chip is a real button. Shared by
      the radiogroups and the tablists: the interaction is the same and the
      only difference is which role the children carry. */
+  /* The dropdowns that replaced a row of pills (the Human Design readings, the
+     Throughline filter). Each is a list of buttons, so Tab already walks it;
+     the arrows, Home and End move focus without choosing, and Escape closes and
+     hands focus back to the button that opened it. */
+  ddKeys(e) {
+    const menu = e.currentTarget;
+    if (e.key === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      const trig = menu.parentElement && menu.parentElement.querySelector('[data-dd-trigger]');
+      this.setState({ ddOpen: null });
+      if (trig) try { trig.focus(); } catch (x) {}
+      return;
+    }
+    const K = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+    if (K.indexOf(e.key) === -1) return;
+    const items = [].slice.call(menu.querySelectorAll('[role="menuitemradio"]'));
+    if (!items.length) return;
+    e.preventDefault();
+    const at = items.indexOf(document.activeElement);
+    const n = e.key === 'Home' ? 0 : e.key === 'End' ? items.length - 1
+      : e.key === 'ArrowDown' ? (at + 1) % items.length : (at <= 0 ? items.length - 1 : at - 1);
+    items[n].focus();
+  }
   radioKeys(e) {
     const K = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'];
     if (K.indexOf(e.key) === -1) return;
@@ -19928,7 +19969,7 @@ class Component extends DCLogic {
        the app name here, which left the primary landing screen as the one
        screen in the build whose only heading did not name it. The brand still
        lives in the rail and in the document title. */
-    const heads = { today: ['Today', ''], library: ['Library', 'study, journal, readings and your record'], spirit: ['My Charts', 'your charts, drawn from your own birth moment'], oracle: ['The Oracle', 'the heavens, read for you alone'], settings: ['Settings', 'Everybody has something'] };
+    const heads = { today: ['Today', ''], library: ['Library', 'study, journal, readings and your record'], spirit: ['My Charts', 'your charts, drawn from your own birth moment'], oracle: ['The Oracle', ''], settings: ['Settings', 'Everybody has something'] };
     const sel = PL && st.selId ? PL.PRACTICES.find(p => p.id === st.selId) : null;
     const steps = sel ? sel.steps : [];
     const lastStep = sel ? st.pstep === steps.length - 1 : false;
@@ -20176,8 +20217,8 @@ class Component extends DCLogic {
           ...this.themeVals(),
           chartSummary: { head: asc ? 'What this wheel is drawn from' : 'What this wheel is drawn from, and what it is missing',
             text: asc
-              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. Because there is a birth time, the houses are measured from a real Ascendant rather than assumed: that is the difference between a chart that describes a life and one that only describes a day. The positions come from an offline ephemeris, so hold the final degree loosely: a single minute of birth time can move a cusp further than most people expect.'
-              : 'Sun at ' + fmtDeg(natalSun) + ', taken from the birth date alone. Without a birth time the sky can be placed but not oriented, so the houses below are a whole-sign solar chart: an honest approximation rather than a timed reading. It will still tell you a great deal. Add a birth time and a city in Settings and the wheel redraws from a real Ascendant, and a fair amount of what follows will read differently.' },
+              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. With a birth time the houses are equal houses: each is 30 degrees, counted from the exact Ascendant, which is why the time matters. The positions are calculated on this device from an astronomical ephemeris and agree with NASA JPL Horizons to a few hundredths of a degree, so the limit is the birth time rather than the sky: the Ascendant moves about a degree every four minutes, so a time that is a few minutes out can shift the houses by a degree or more, and can carry a cusp across a sign boundary.'
+              : 'Sun at ' + fmtDeg(natalSun) + ', taken from the birth date alone. Without a birth time the chart cannot be set against the horizon, so there is no Ascendant and the houses below are whole-sign houses counted from the Sun\u2019s sign: a solar chart, which is the usual method when no time is known and not a timed reading. The Moon is placed for noon local time on the birth date, and it travels about thirteen degrees a day, so it can be out by as much as six or seven degrees either way. Add a birth time and a city in Settings and the wheel redraws from a real Ascendant, and a fair amount of what follows will read differently.' },
           houseMode: asc ? 'equal house \u00b7 timed' : 'whole-sign solar \u00b7 no birth time',
           ...(() => {
             const S = window.SabianSymbols, expanded = st.chartMode === 'expanded';
@@ -20769,7 +20810,14 @@ class Component extends DCLogic {
       /* The Throughline is the record and nothing else, now that the reading
          has moved to Spirit, so the timeline is always what this tab shows. */
       tlTimeline: true,
-      tlFilters: [['all', 'Everything'], ['event', 'Life events'], ['practice', 'Practices'], ['mood', 'Moods'], ['reading', 'Readings'], ['dream', 'Dreams'], ['transit', 'Sky']].map(([v, t]) => ({ t, on: st.tlFilter === v, c: st.tlFilter === v ? '#05060a' : 'var(--dim)', bg: st.tlFilter === v ? 'var(--ac)' : 'transparent', bd: st.tlFilter === v ? 'var(--ac)' : 'var(--bd)', go: () => this.setState({ tlFilter: v }) })),
+      tlFilters: [['all', 'Everything'], ['event', 'Life events'], ['practice', 'Practices'], ['mood', 'Moods'], ['reading', 'Readings'], ['dream', 'Dreams'], ['transit', 'Sky']].map(([v, t]) => ({ t, on: st.tlFilter === v, c: st.tlFilter === v ? '#05060a' : 'var(--dim)', bg: st.tlFilter === v ? 'var(--ac)' : 'transparent', bd: st.tlFilter === v ? 'var(--ac)' : 'var(--bd)', label: t, mbg: st.tlFilter === v ? 'rgba(47,255,143,.12)' : 'transparent', mc: st.tlFilter === v ? 'var(--ac)' : 'var(--tx)', go: () => this.setState({ tlFilter: v, ddOpen: null }) })),
+      tlDdLabel: ({ event: 'Life events', practice: 'Practices', mood: 'Moods', reading: 'Readings', dream: 'Dreams', transit: 'Sky' })[st.tlFilter] || 'Everything',
+      tlDdOpen: st.ddOpen === 'tl',
+      tlDdExpanded: st.ddOpen === 'tl' ? 'true' : 'false',
+      tlDdGo: () => this.setState({ ddOpen: st.ddOpen === 'tl' ? null : 'tl' }),
+      ddClose: () => this.setState({ ddOpen: null }),
+      ddKeys: e => this.ddKeys(e),
+      ddMenuRef: el => { if (el && !el._ddFocused) { el._ddFocused = true; const t = el.querySelector('[aria-checked="true"]') || el.querySelector('button'); if (t) try { t.focus(); } catch (x) {} } },
       /* A sky row carries a range where an entry of the reader's carries a
          day, because a window without both ends is the vague timing this was
          built to replace. Everything the reader wrote carries the window it
@@ -21938,6 +21986,60 @@ class Component extends DCLogic {
   VT_PULL = 160;     /* travel from the top of a page before it counts */
   VT_PULL_MS = 350;  /* and the least time that travel may take */
   VT_ARM_MS = 6000;  /* how long an armed pull stays armed */
+  VT_HSWIPE = 56;    /* sideways travel before a swipe moves to the next screen */
+
+  /* THE SIDEWAYS SWIPE IS ONE CHAIN, NOT THREE.
+
+     Today, the three charts, the six Library tabs, the Oracle and Settings are
+     read as one line from left to right, so a swipe always has a neighbour:
+     the last chart hands on to the first Library tab, the last Library tab to
+     the Oracle, and back again the other way. The pager's own horizontal
+     scroll never fired on a phone, because the section column above it is
+     touch-action none and that value is inherited by what is inside it, so
+     the swipe is read here from the same touch listeners the section bands use.
+
+     Where it must not fire: on anything that scrolls sideways under the finger
+     (the Library tab strip, a wide table, the wheel), in a field, inside a room
+     or a selected placement, and inside a dialog. Each of those already has a
+     sideways gesture of its own or no use for this one. */
+  vtHScrollableAt(node) {
+    let n = node;
+    while (n && n !== document.body && n.nodeType === 1) {
+      if (n.hasAttribute('data-chart') || n.hasAttribute('data-noswipe') || /^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName)) return true;
+      if (!n.hasAttribute('data-vt-pager')) {
+        const c = getComputedStyle(n);
+        if (/(auto|scroll)/.test(c.overflowX) && n.scrollWidth > n.clientWidth + 2) return true;
+      }
+      n = n.parentElement;
+    }
+    return false;
+  }
+  /* dir is +1 for the next screen (a swipe to the left) and -1 for the one
+     before it. */
+  vtSwipeStep(dir) {
+    const st = this.state, sec = st.vtSec || 0, last = this.VT_SECTIONS.length - 1;
+    if (st.libView || st.selId || st.placeSel || st.numSel || st.dpSel || st.aspSel || st.ddOpen) return;
+    if (sec === 1) {
+      const n = (st.vtTab || 0) + dir;
+      if (n >= 0 && n < this.VT_TABS.length) { this.vtGoTab(n); return; }
+    }
+    const subs = this.LIB_SUBS;
+    if (sec === 2) {
+      const n = subs.findIndex(x => x[0] === this.libSubOf()) + dir;
+      if (n >= 0 && n < subs.length) {
+        this.setState({ libSub: subs[n][0], libView: null, selId: null, arcSel: null, apSec: null });
+        return;
+      }
+    }
+    const to = sec + dir;
+    if (to < 0 || to > last) return;
+    const id = this.VT_SECTIONS[to][0];
+    const root = this.sectionRoot(id);
+    if (id === 'library') root.libSub = dir > 0 ? subs[0][0] : subs[subs.length - 1][0];
+    this.setState(root);
+    this.vtGoSection(to);
+    if (id === 'spirit') this.vtGoTab(dir > 0 ? 0 : this.VT_TABS.length - 1);
+  }
 
   vtActivePage() {
     const secs = this.vtSecEls();
@@ -21991,9 +22093,10 @@ class Component extends DCLogic {
   vtBindTouch() {
     let sy = 0, sx = 0, band = 0, page = null, inner = null;
     let armed = false, fired = false, pull = 0, startAt = 0;
+    let hz = 0, hzY = 0, hzOK = false, hzStart = 0;
 
     this._vtTS = e => {
-      armed = false;
+      armed = false; hz = 0; hzY = 0; hzOK = false;
       if (!e.touches || e.touches.length !== 1) return;
       if (this.state.dtW >= this.BP.md) return;
       if (document.querySelector('[role="dialog"]')) return;
@@ -22004,9 +22107,12 @@ class Component extends DCLogic {
       band = (sy <= this.VT_BAND || sy >= h - this.VT_BAND) ? 1 : 0;
       page = this.vtActivePage();
       inner = this.vtScrollableAt(t.target);
+      hzOK = !band && !this.vtHScrollableAt(t.target);
+      hzStart = this._vtPager ? this._vtPager.scrollLeft : 0;
     };
 
     this._vtTM = e => {
+      if (hzOK && e.touches && e.touches.length === 1) { hz = e.touches[0].clientX - sx; hzY = e.touches[0].clientY - sy; }
       if (!armed || !e.touches || e.touches.length !== 1) return;
       const t = e.touches[0], dy = t.clientY - sy, dx = t.clientX - sx;
       if (Math.abs(dx) > Math.abs(dy)) { armed = false; return; }
@@ -22039,7 +22145,14 @@ class Component extends DCLogic {
       }
     };
 
-    this._vtTE = () => {
+    this._vtTE = e => {
+      /* A pager that already moved under the finger was moved by the browser,
+         so the swipe is not repeated here. */
+      if (hzOK && e && e.type === 'touchend' && Math.abs(hz) >= this.VT_HSWIPE && Math.abs(hz) > Math.abs(hzY) * 1.5) {
+        const pg = this._vtPager;
+        if (!(pg && Math.abs(pg.scrollLeft - hzStart) > 8)) this.vtSwipeStep(hz < 0 ? 1 : -1);
+      }
+      hz = 0; hzY = 0; hzOK = false;
       const slowEnough = Date.now() - startAt >= this.VT_PULL_MS;
       if (pull > this.VT_PULL && slowEnough) {
         const now = Date.now();
@@ -22071,7 +22184,7 @@ class Component extends DCLogic {
       if (e.key !== 'Escape') return;
       if (this.state.vtSearch) { this.setState({ vtSearch: false, vtQuery: '' }); return; }
       if (this.state.voiceOpen) { this.voiceCloseGo(); return; }
-      this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, helpOpen: false, quickOpen: false, addOpen: false });
+      this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, helpOpen: false, quickOpen: false, addOpen: false, ddOpen: null });
     };
     document.addEventListener('keydown', this._vtKey);
     this.vtBindTouch();
