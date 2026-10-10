@@ -1953,12 +1953,20 @@ async function runCloudTests() {
   });
   CO._setClientForTests(two.client, { user: { id: 'u1' } });
   var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var firstSeen = [];
+  var twoCb = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: { reading: { title: 'T', chapters: [{ heading: 'h', body: 'b' }] } }, error: null } : { data: { reading: { title: 'T' } }, error: null }; });
+  CO._setClientForTests(twoCb.client, { user: { id: 'u1' } });
+  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D', onFirst: function (f) { firstSeen.push({ chapters: !!(f.reading && f.reading.chapters), callsSoFar: twoCb.calls.length }); } });
+  var cbBodyClean = twoCb.calls.every(function (c) { return !('onFirst' in c.body); });
   var one = oracleClient(function () { return { data: { reading: { title: 'T', chapters: [] } }, error: null }; });
   CO._setClientForTests(one.client, { user: { id: 'u1' } });
   await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
   var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
   CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
   var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  t('K29c', 'the first half is handed to the page before the second is asked for, without the callback in the request body', {
+    seen: [{ chapters: false, callsSoFar: 1 }], bodyClean: true
+  }, { seen: firstSeen, bodyClean: cbBodyClean });
   t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
     parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
   }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),

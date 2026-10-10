@@ -3409,6 +3409,17 @@ and the function can be deployed in either order. Do not merge the two schemas
 back into one call, and do not count the b rows as attempts, or a reading costs
 two of the six. K29b holds the client half.
 
+## The first half is shown while the second is written
+Added 10 October 2026. `oracleRead()` takes an optional `onFirst` callback and
+calls it with the first half of an in-depth reading as soon as that call
+answers, before the second is asked for. The page keeps it in `_orFirst[slot]`,
+in memory only, and shows it once the slot has been opened with the button, with
+a dashed status line (`orMoreOn`) saying the chapters, timing, shadow work and
+journal prompts are still being written. It is never passed to `oracleKeep()`:
+the kept reading is the whole one, so a half is never mistaken for it. If the
+second half fails the first stays on screen, the line turns into the error and
+Ask again appears. A new ask clears it. K29c holds the client half.
+
 ## In depth is Codex Luminary, and Stripe takes the payment
 The owner asked on 29 September 2026 to charge for the advanced readings with
 the Stripe payment the Celestial Codex had. The Codex's Luminary is ported
