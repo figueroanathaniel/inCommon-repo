@@ -1946,6 +1946,23 @@ async function runCloudTests() {
   t('K28b', 'an in-depth reading refused for want of Luminary comes back as premium, so the page can show the gate', {
     ok: false, reason: 'premium'
   }, { ok: rPrem.ok, reason: rPrem.reason });
+  var two = oracleClient(function (n, o) {
+    return o.body.part === 'b'
+      ? { data: { reading: { title: 'T', overview: 'O', chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+  });
+  CO._setClientForTests(two.client, { user: { id: 'u1' } });
+  var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var one = oracleClient(function () { return { data: { reading: { title: 'T', chapters: [] } }, error: null }; });
+  CO._setClientForTests(one.client, { user: { id: 'u1' } });
+  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
+  CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
+  var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
+    parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
+  }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
+    legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {

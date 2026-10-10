@@ -17386,7 +17386,22 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return Promise.resolve().then(function () { return ctx.json(); })
       .then(function (b) { return (b && b.code) || null; }, function () { return null; });
   }
+  /* AN IN-DEPTH READING IS TWO CALLS, because one call for all of it ran past
+     what the function may take. The first writes the standard fields, deeper;
+     the second writes chapters, timing, shadow work and journal prompts and
+     answers with the two joined. Each call has the function's whole time to
+     itself, and the first is kept, so a failed second one is retried alone.
+     A server that still writes the whole reading in one call (it has no
+     chapters to add) answers the first with them already in, and the second
+     call is skipped. */
   function oracleRead(req) {
+    if (!req || req.depth !== 'deep') return oracleCall(req);
+    return oracleCall(Object.assign({}, req, { part: 'a' })).then(function (a) {
+      if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
+      return oracleCall(Object.assign({}, req, { part: 'b' }));
+    });
+  }
+  function oracleCall(req) {
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
     if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
     return Promise.resolve().then(function () {

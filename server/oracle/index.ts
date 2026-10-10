@@ -123,6 +123,21 @@ const DEEP_SCHEMA = {
   },
 };
 
+// An in-depth reading is written in two calls, because one call for all of it
+// ran past what the function may take. Part a is the standard fields written
+// deeper; part b is the four fields only the in-depth reading has. The page asks
+// for a, then for b, and b answers with the two joined.
+const DEEP_B_SCHEMA = {
+  ...DEEP_SCHEMA,
+  required: ["chapters", "timing", "shadowWork", "journalPrompts"],
+  properties: {
+    chapters: DEEP_SCHEMA.properties.chapters,
+    timing: DEEP_SCHEMA.properties.timing,
+    shadowWork: DEEP_SCHEMA.properties.shadowWork,
+    journalPrompts: DEEP_SCHEMA.properties.journalPrompts,
+  },
+};
+
 // ---------------------------------------------------------------------------
 // The voice: the Celestial Codex's instructions, copied from its
 // horoscope_POST handler word for word, so the Oracle is asked exactly what the
@@ -145,16 +160,23 @@ Field guidance:
 - auspiciousColor: a single evocative color name.
 - keyTransits: 2-4 items, each naming a real transit from the dossier and its meaning in one sentence.`;
 
-const DEEP_INSTRUCTIONS = `${INSTRUCTIONS}
+// The in-depth reading's two halves. Each is the instructions above cut to the
+// fields it writes, so the text the model is held to is the same text.
+const DEEP_A_INSTRUCTIONS = `${INSTRUCTIONS}
 
-THIS IS AN IN-DEPTH LUMINARY READING. Go far deeper than a standard horoscope, like a private session with a master astrologer.
+THIS IS THE FIRST HALF OF AN IN-DEPTH LUMINARY READING. Go far deeper than a standard horoscope, like a private session with a master astrologer.
 - Use the ENTIRE chart in the dossier: nodes, Black Moon Lilith, Chiron, Ceres, Pallas, Juno, Vesta, Eris, the Vertex, Part of Fortune, East Point, and minor aspects, alongside the planets, houses, Human Design gates/channels and numerology cycles.
 - overview: 3 rich paragraphs.
+- keyTransits: 4-8 items.
+Write only the fields in the schema. The chapters, timing, shadow work and journal prompts are written in a second pass.`;
+
+const DEEP_B_INSTRUCTIONS = `${INSTRUCTIONS.split("Field guidance:")[0]}Field guidance:
+THIS IS THE SECOND HALF OF AN IN-DEPTH LUMINARY READING. The first half (title, overview, the three systems, love, work, spirit, ritual, mantra, colour and key transits) is already written. Go far deeper, like a private session with a master astrologer, and write only the fields below.
+- Use the ENTIRE chart in the dossier: nodes, Black Moon Lilith, Chiron, Ceres, Pallas, Juno, Vesta, Eris, the Vertex, Part of Fortune, East Point, and minor aspects, alongside the planets, houses, Human Design gates/channels and numerology cycles.
 - chapters: 5-7 chapters, each a distinct theme of the period (for example a key transit, a sensitive point being activated, a relationship theme, a vocational theme, a healing theme), each with an evocative heading and 2 substantial paragraphs (separate with a blank line) naming the exact placements and transits involved.
 - timing: 3-6 windows within the period (dates or day ranges, or phases like "the waxing half"), each with specific guidance.
 - shadowWork: one paragraph of compassionate shadow work tied to Lilith, Chiron, Pluto, or a challenging aspect in the dossier.
-- journalPrompts: 3-5 probing questions.
-- keyTransits: 4-8 items.`;
+- journalPrompts: 3-5 probing questions.`;
 
 // ---------------------------------------------------------------------------
 // The period: the Codex's horoscopePeriod, from the local date the page sends.
@@ -252,6 +274,9 @@ Deno.serve(async (req) => {
   if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
   const deep = depth === "deep";
+  // An in-depth reading is two calls (see DEEP_B_SCHEMA). A caller that names no
+  // part gets the first, whose stored rows are the key old full readings sit on.
+  const part: "a" | "b" = deep && body.part === "b" ? "b" : "a";
 
   // In depth is the Codex's Luminary reading, and it is asked for before the
   // stored one is looked up, as the Codex did: a subscription that has lapsed
@@ -269,11 +294,22 @@ Deno.serve(async (req) => {
   // data changes. inCommon keeps several people on one device and the server
   // never sees a birth, so the dossier's hash does that job.
   const chartKey = await shortHash(dossier);
-  const same = { user_id: user.id, period, period_key: key, depth, chart_key: chartKey };
+  // The second half lives under the same hash with a suffix, so the table and
+  // its unique index need no change.
+  const same = { user_id: user.id, period, period_key: key, depth, chart_key: part === "b" ? chartKey + ".b" : chartKey };
+
+  // The second half is written to follow the first and is returned joined to
+  // it, so it can only be asked for once the first is done.
+  let first: Record<string, unknown> | null = null;
+  if (part === "b") {
+    const a = await mine().select("content").match({ ...same, chart_key: chartKey, status: "done" }).limit(1).maybeSingle();
+    if (!a.data?.content) return reply(400, { code: "BAD_REQUEST" });
+    first = a.data.content as Record<string, unknown>;
+  }
 
   // Already written for this chart and period: hand it back, free.
   const done = await mine().select("content").match({ ...same, status: "done" }).limit(1).maybeSingle();
-  if (done.data?.content) return reply(200, { reading: done.data.content, cached: true, periodKey: key, label });
+  if (done.data?.content) return reply(200, { reading: first ? { ...first, ...done.data.content } : done.data.content, cached: true, periodKey: key, label });
 
   // A request that died mid write (the function was stopped) would otherwise
   // hold its key forever.
@@ -287,11 +323,18 @@ Deno.serve(async (req) => {
   const writing = await mine().select("id").match({ ...same, status: "pending" }).limit(1).maybeSingle();
   if (writing.data) return reply(409, { code: "PENDING" });
 
-  // Every reading costs money, so the limit counts attempts, not successes.
+  // Every reading costs money, so the limit counts attempts, not successes. An
+  // in-depth reading is one attempt however many calls write it: the second
+  // halves are not counted here, and are bounded on their own just below.
   const since = new Date(Date.now() - 864e5).toISOString();
-  const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);
+  const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since).not("chart_key", "like", "%.b");
   if (recent.error) { console.error("oracle: counting failed", recent.error); return reply(500, { code: "STORE" }); }
-  if ((recent.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
+  if (part === "a" && (recent.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
+  if (part === "b") {
+    const seconds = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since).like("chart_key", "%.b");
+    if (seconds.error) { console.error("oracle: counting failed", seconds.error); return reply(500, { code: "STORE" }); }
+    if ((seconds.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
+  }
 
   // Claim the key before paying for it. The partial unique index in schema.sql
   // lets only one pending or finished row exist per key, so a second press, or
@@ -309,7 +352,8 @@ Deno.serve(async (req) => {
   const fail = () => mine().update({ status: "failed" }).eq("id", rowId);
 
   const model = deep ? DEEP_MODEL : MODEL;
-  const schema = deep ? DEEP_SCHEMA : SCHEMA;
+  const schema = !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
+  const instructions = !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
   let status = 0, raw = "";
@@ -323,11 +367,11 @@ Deno.serve(async (req) => {
         // The instructions go first and never change, so Kimi's context cache
         // serves them at a sixth of the price after the first reading.
         messages: [
-          { role: "system", content: deep ? DEEP_INSTRUCTIONS : INSTRUCTIONS },
-          { role: "user", content: `Compose the ${deep ? "IN-DEPTH " : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}` },
+          { role: "system", content: instructions },
+          { role: "user", content: `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}` },
         ],
         response_format: { type: "json_schema", json_schema: { name: "horoscope", strict: true, schema } },
-        max_completion_tokens: deep ? 16000 : 8000,
+        max_completion_tokens: deep ? 10000 : 8000,
         ...thinkingFor(model, deep ? DEEP_THINKING : "off"),
       }),
     });
@@ -379,8 +423,8 @@ Deno.serve(async (req) => {
     console.error("oracle: Kimi's answer was not a whole reading", String(choice?.message?.content ?? "").slice(0, 400));
     return reply(500, { code: "MODEL" });
   }
-  const reading = clean(parsed);
+  const reading = clean(parsed) as Record<string, unknown>;
 
   await mine().update({ status: "done", content: reading, model: data.model ?? model }).eq("id", rowId);
-  return reply(200, { reading, cached: false, periodKey: key, label });
+  return reply(200, { reading: first ? { ...first, ...reading } : reading, cached: false, periodKey: key, label });
 });
