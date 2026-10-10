@@ -24,7 +24,7 @@
 //
 // Secrets it reads: MOONSHOT_API_KEY (required). ORACLE_MODEL,
 // ORACLE_DEEP_MODEL, ORACLE_DEEP_THINKING, ORACLE_TIME_LIMIT,
-// ORACLE_DAILY_LIMIT and LUMINARY_ADMIN_EMAILS are optional knobs.
+// ORACLE_DAILY_LIMIT (failed attempts do not count toward it) and LUMINARY_ADMIN_EMAILS are optional knobs.
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided
 // by Supabase itself. The tables it reads and writes are in schema.sql beside
 // this file.
@@ -323,18 +323,18 @@ Deno.serve(async (req) => {
   const writing = await mine().select("id").match({ ...same, status: "pending" }).limit(1).maybeSingle();
   if (writing.data) return reply(409, { code: "PENDING" });
 
-  // Every reading costs money, so the limit counts attempts, not successes. An
-  // in-depth reading is one attempt however many calls write it: the second
-  // halves are not counted here, and are bounded on their own just below.
+  // The limit counts attempts that wrote or are writing a reading. A failed
+  // attempt delivered nothing, so it does not use one up; a timeout must not
+  // cost the reader one of their readings. Failures are still bounded, at
+  // four times the limit, so a broken request cannot run up Kimi's bill
+  // without end. An in-depth reading is one attempt however many calls write
+  // it: the second halves (chart_key ending .b) are counted on their own.
   const since = new Date(Date.now() - 864e5).toISOString();
-  const recent = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since).not("chart_key", "like", "%.b");
+  const recent = await mine().select("status, chart_key").eq("user_id", user.id).gte("created_at", since);
   if (recent.error) { console.error("oracle: counting failed", recent.error); return reply(500, { code: "STORE" }); }
-  if (part === "a" && (recent.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
-  if (part === "b") {
-    const seconds = await mine().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since).like("chart_key", "%.b");
-    if (seconds.error) { console.error("oracle: counting failed", seconds.error); return reply(500, { code: "STORE" }); }
-    if ((seconds.count ?? 0) >= DAILY_LIMIT) return reply(429, { code: "LIMIT" });
-  }
+  const mineNow = (recent.data ?? []).filter((r) => String(r.chart_key).endsWith(".b") === (part === "b"));
+  const kept = mineNow.filter((r) => r.status !== "failed").length;
+  if (kept >= DAILY_LIMIT || mineNow.length >= DAILY_LIMIT * 4) return reply(429, { code: "LIMIT" });
 
   // Claim the key before paying for it. The partial unique index in schema.sql
   // lets only one pending or finished row exist per key, so a second press, or

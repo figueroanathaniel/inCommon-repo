@@ -3303,7 +3303,10 @@ leaving the screen forgets a failure, so coming back tries again, as the
 Codex's query did on a remount.
 
 **The server holds the limits the page cannot.** A daily limit per reader
-counts attempts, because a failed reading was still paid for; a row is claimed
+counts readings written or being written, and a failed attempt does not use one
+up (changed 10 October 2026: a timeout was costing readers one of their six
+for nothing); failures are bounded at four times the limit so a broken request
+cannot run up the bill; a row is claimed
 before the model is called, and a partial unique index lets only one pending
 or finished row exist per key, so a double press or a second tab waits rather
 than paying twice. The table is written only by the function with the service
