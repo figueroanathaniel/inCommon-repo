@@ -1596,9 +1596,11 @@ function resize() {
      about 30.5, so about 0.34 either side before lensing), so the horizontal
      half-FOV has to stay near 0.425. The old cap of 0.47 let it fall with the
      width below an aspect of 0.9 and cropped the disk on every phone. The cap
-     is 0.8 now: at 390x844 the horizontal half-FOV is 0.37, which holds the
-     disk, and the hole is smaller on a tall screen by the same factor. */
-  mainU.uTan.value = Math.min(0.8, Math.max(0.235, 0.425 / aspect));
+     is 0.95 now: at 390x844 the horizontal half-FOV is 0.425, the same as a
+     16:9 desktop, so the whole disk is in frame, and the hole is smaller on a
+     tall screen by the same factor (a larger tangent is a wider view, which
+     shrinks everything in it). */
+  mainU.uTan.value = Math.min(0.95, Math.max(0.235, 0.425 / aspect));
   finalU.uCA.value = 0.00075 + 0.0004 / Math.max(1, aspect);
   buildScene();
   buildBloom();
