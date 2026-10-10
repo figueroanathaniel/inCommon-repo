@@ -2217,6 +2217,80 @@ six literal `POSSIBILITY` spans sat in the markup, and two `sc-if`s had
 horoscope page (the three systems read as one) keeps its name, and F1b still
 asserts it on Today. `/spirit/together` is kept as an alias in `openPath()`.
 
+## Discovery belongs to the reader: do not explain a screen before it is opened
+Decided by the owner on 10 October 2026, and it is a design principle rather than
+a one-off edit. A subheader that tells the reader what a control or a reading is
+about, what it holds, or why it exists, takes away the thing they came to do,
+which is find out. The app does not give everything away. When a title and the
+thing it names are enough, the line under the title goes.
+
+**What was removed, and only this.** The owner named each line, and the rule is
+not a licence to strip other subtitles. Removed: the Oracle's "The heavens, read
+for you alone." (phone page and the desktop heading); "the day's omen", "the
+seven-day tide" and "the lunar chapter" under Today, This Week and This Month;
+the numerology "Calculated from the reduced birth month, day, and year in turn."
+line, for the period cycle only (every other number keeps its own "Calculated
+from" line, because it was not listed); the Settings line "Colour and type only.
+Nothing here changes a calculation, and the choice belongs to this profile
+rather than to the device."; the "One profile so far. Add another for a
+partner..." line; and the four theme descriptions (Deep Field, Midnight, Dawn,
+Gold). **Do not remove any other subheader, and do not add one back.** Before
+deleting a line of this kind, ask whether the owner named it.
+
+**What this does not touch.** Consent language, safety copy, error and empty
+states, accessible names and the sentences that say what a calculation cannot do
+(`availability()`, the missing birth time note) are not subheaders. Those exist
+so a reader is not misled, and they stay.
+
+## Swiping on the phone is one chain, read left to right
+The order is Today, the three charts (Human Design, Astrology, Numerology), the
+six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
+that line, so the last chart hands on to the first Library tab, the last Library
+tab to the Oracle, and the other way back (landing on the last chart or the last
+tab when going backwards). `vtSwipeStep(dir)` does the move and `vtBindTouch()`
+reads the gesture. Three things are easy to undo.
+
+**The pager's own horizontal scroll never fired on a phone.** The section column
+is `touch-action: none` and what is inside inherits it, so a swipe on the
+My Charts pager did nothing at all; this was measured, the pager stayed at
+scrollLeft 0 through a real swipe. The swipe is read from the same touch
+listeners the section bands use. If the browser did move the pager under the
+finger, `vtBindTouch` leaves it alone so a gesture is never handled twice.
+
+**It must not fire where a sideways gesture already means something.**
+`vtHScrollableAt()` refuses a touch that starts on anything scrolling sideways
+(the Library tab strip, a wide table), on a field, on `[data-chart]` (the wheel
+pans and zooms) or on `[data-noswipe]`; and `vtSwipeStep` does nothing inside a
+room (`libView`), with a placement, number, dream or aspect selected, or while a
+dropdown is open.
+
+**It lands exactly, because it goes through the existing routes.** Sections use
+`vtGoSection` and pages use `vtGoTab`, which pin the scroll offset after the
+smooth scroll, so `scrollTop` equals the section's `offsetTop` and the pager
+sits on a multiple of its width. A swipe that wrote scroll offsets itself would
+fight snap and the routed-jump claims described above.
+
+## A row of pills becomes a dropdown when it is a choice of one
+The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
+Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
+which on a phone wrapped to three lines above the content. Each is one button,
+right aligned, naming the current choice, and opening a `role="menu"` of
+`menuitemradio` buttons. State is `ddOpen` (`'hd'` or `'tl'`). Choosing, tapping
+outside, or Escape closes it; Escape hands focus back to the button that opened
+it (`data-dd-trigger`), and the arrows, Home and End move focus without
+choosing (`ddKeys`). The pills are gone from the markup, not hidden, so there is
+no second control for the same choice. The panel is painted over an opaque
+`--bg` with `--sf2` on top, because under Deep Field `--sf2` carries alpha and a
+menu over text must not let the text through. The cap is `min(40vh, 300px)` so it
+stays clear of the dock on a short phone.
+
+## The credit line is the last thing on the Settings page
+"Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
+Settings page in both shells, centred, in the smallest type in the app (7px,
+below the 7.5px badges). It used to head the About card. It is `margin-top: auto`
+inside the column so it stays at the bottom whatever the content above it
+grows to.
+
 ## Zero em dash
 No em dash or en dash anywhere: not in app copy, not in generated readings, not
 in comments, not in the docs. Use a comma, a colon, or a full stop. The rule is
