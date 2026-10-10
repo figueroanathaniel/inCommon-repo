@@ -3392,6 +3392,20 @@ no ask on open, the press asks, a prepared reading shows within half a second of
 the press with no second request, a failed preparation is silent and the button
 still works, and a standard reading still asks on open.
 
+## The in-depth reading is written in two calls
+Added 10 October 2026. One call for the whole reading ran past the function's
+wall clock, so `oracleRead()` in `incommon-cloud.js` asks twice for depth `deep`:
+`part: 'a'` (the standard fields written deeper, with `keyTransits`), then
+`part: 'b'` (chapters, timing, shadow work, journal prompts), and the server
+answers b with the two joined. The second half is stored under `chart_key + '.b'`,
+so the table and its unique index are untouched. A reading counts once toward the
+daily limit: `.b` rows are excluded from that count and bounded by it separately,
+and b is refused unless a is done. A server that still answers the first call
+with chapters already in it makes the client skip the second call, so the page
+and the function can be deployed in either order. Do not merge the two schemas
+back into one call, and do not count the b rows as attempts, or a reading costs
+two of the six. K29b holds the client half.
+
 ## In depth is Codex Luminary, and Stripe takes the payment
 The owner asked on 29 September 2026 to charge for the advanced readings with
 the Stripe payment the Celestial Codex had. The Codex's Luminary is ported

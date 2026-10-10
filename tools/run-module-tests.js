@@ -1932,20 +1932,37 @@ async function runCloudTests() {
   }, { ok: rIn.ok, fn: ocIn.calls[0] && ocIn.calls[0].name, period: ocIn.calls[0] && ocIn.calls[0].body.period,
     title: rIn.reading && rIn.reading.title, cached: rIn.cached, periodKey: rIn.periodKey });
   var reasons = {};
-  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')]];
+  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')], ['504', httpErr(504, 'TIMEOUT')]];
   for (var ci = 0; ci < cases.length; ci++) {
     var ec = cases[ci][1];
     CO._setClientForTests(oracleClient(function () { return { data: null, error: ec }; }).client, { user: { id: 'u1' } });
     reasons[cases[ci][0]] = (await CO.oracleRead({ period: 'weekly' })).reason;
   }
   t('K28', 'each way the function can fail is a reason the page can say in words', {
-    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error'
+    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error', '504': 'timeout'
   }, reasons);
   CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
   var rPrem = await CO.oracleRead({ period: 'daily', depth: 'deep' });
   t('K28b', 'an in-depth reading refused for want of Luminary comes back as premium, so the page can show the gate', {
     ok: false, reason: 'premium'
   }, { ok: rPrem.ok, reason: rPrem.reason });
+  var two = oracleClient(function (n, o) {
+    return o.body.part === 'b'
+      ? { data: { reading: { title: 'T', overview: 'O', chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+  });
+  CO._setClientForTests(two.client, { user: { id: 'u1' } });
+  var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var one = oracleClient(function () { return { data: { reading: { title: 'T', chapters: [] } }, error: null }; });
+  CO._setClientForTests(one.client, { user: { id: 'u1' } });
+  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
+  CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
+  var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
+    parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
+  }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
+    legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {

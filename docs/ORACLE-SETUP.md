@@ -157,6 +157,17 @@ Set these as Edge Function secrets. Each is optional.
 | `ORACLE_DAILY_LIMIT` | `6` | Attempts per reader in any 24 hours. |
 | `LUMINARY_ADMIN_EMAILS` | none | Comma separated addresses that read in depth without a subscription. Set the same value on the `billing` function. |
 
+**An in-depth reading is two calls.** One call for all of it ran past what the
+function may take, so the page asks for the first half (the standard fields,
+written deeper), then the second (chapters, timing, shadow work and journal
+prompts), and the second answers with both joined. Each call has the whole time
+limit to itself and the first is kept, so a failed second half is retried
+alone. Nothing changes in the database: the second half is stored under the
+chart's hash with `.b` added. The daily limit counts a reading once, and the
+second halves are bounded by the same number on their own. Deploy the function
+before or with the page: an older function still answers the first call with the
+whole reading, and the page then skips the second.
+
 **Time limit.** Supabase stops a function that runs too long: at the time of
 writing, 150 seconds on the free plan and 400 on a paid one. Kimi writes
 `kimi-k2.6` at about 70 tokens a second on its own API and `kimi-k3` at 40 to
