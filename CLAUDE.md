@@ -3343,6 +3343,55 @@ reading is written for one person and kept with them; a sample chart is refused
 on the page before anything is sent, because the Oracle writes for one person
 and a sample is nobody.
 
+## The in-depth reading is prepared ahead, and still opened with a press
+The owner asked on 10 October 2026 for the Luminary reading to load in seconds.
+It cannot be written in seconds: an in-depth reading is about six thousand
+tokens, a minute or two of a model writing, and the function gives up at 140.
+So the writing is moved to before the reader asks, and the owner chose that the
+reader should still open it with the **Consult the Oracle** button rather than
+have it appear on its own. This reverses "the page asks the moment the Oracle is
+open" for the in-depth reading only. Standard readings are unchanged and still
+ask when the screen opens.
+
+**What the page does now.** `oracleWillAsk()` is false for `deep`, so nothing is
+asked on open. On the In-Depth screen a Luminary who has agreed once sees
+`orDeepGate`: the button and nothing else, whether the reading is already on the
+device or not. Pressing it (`orDeepGo`) records that this slot is opened
+(`orOpened`) and shows the reading at once if it is kept, or asks for it if it
+is not, with the loading panel and the usual wait. `orOpenDeep()` also sets
+`incommon.p.<id>.oracleDeep`, which is deleted with the profile like the other
+Oracle keys.
+
+**The preparing is `oraclePrepareAuto()`, from the one `componentDidUpdate`.**
+Four seconds after everything is true it asks, quietly, for the current
+period's in-depth reading: the page is ready, the reader is signed in on a chart
+that is theirs, has agreed to the Oracle, has asked for an in-depth reading
+before (`oracleDeep`), and the server has confirmed Luminary. It asks once per
+slot per session, so the daily limit of six attempts is not spent on a page
+nobody opened, and `lumAuto()` asks billing at start for a reader with
+`oracleDeep` set rather than only when the Oracle is open, or the premium
+answer would arrive too late to prepare anything. A reader who has never asked
+for an in-depth reading sends nothing, which is what keeps the promise that the
+chart stays on the device until they say otherwise, and keeps the cost to
+someone who reads them.
+
+**Quiet is a mode of `oracleAsk(period, depth, again, quiet)`.** A quiet ask
+says nothing aloud, keeps the loading panel off the screen (`oracleVals` does not
+count it as busy until the slot is opened), shows no error if it fails, keeps
+waiting out PENDING and RATE_LIMITED when the reader is not on the Oracle, and
+does not make a standard reading wait behind it (`orNonQuietBusy()`). The moment
+the reader presses the button for that slot it is not quiet any more: the
+panel, the announcement and any error are theirs. A failed preparation is
+forgotten, and pressing the button asks again.
+
+**What it does not fix.** The first in-depth reading a reader ever asks for, and
+any period not yet prepared, still takes the full minute or two. Only the
+current period is prepared, so weekly and monthly in-depth readings are written
+when asked. Driven rather than read, in a browser with the cloud module faked:
+no ask on open, the press asks, a prepared reading shows within half a second of
+the press with no second request, a failed preparation is silent and the button
+still works, and a standard reading still asks on open.
+
 ## In depth is Codex Luminary, and Stripe takes the payment
 The owner asked on 29 September 2026 to charge for the advanced readings with
 the Stripe payment the Celestial Codex had. The Codex's Luminary is ported

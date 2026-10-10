@@ -3430,6 +3430,14 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
+      <!-- IN DEPTH IS OPENED WITH A PRESS. The reading may already be written
+           (prepared ahead), and it is still the reader who asks for it. -->
+      <sc-if value="{{ orDeepGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button onClick="{{ orDeepGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
@@ -8197,6 +8205,14 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ orConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
+      <!-- IN DEPTH IS OPENED WITH A PRESS. The reading may already be written
+           (prepared ahead), and it is still the reader who asks for it. -->
+      <sc-if value="{{ orDeepGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button onClick="{{ orDeepGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
       <sc-if value="{{ orBusy }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:34px 20px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
@@ -10044,6 +10060,7 @@ class Component extends DCLogic {
     this.syncChartExpandPersist();
     this.lumAuto();
     this.oracleAutoAsk();
+    this.oraclePrepareAuto();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -18441,6 +18458,11 @@ class Component extends DCLogic {
      what the Codex did by deleting its readings when the birth data changed. */
   oracleStoreKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracle'; }
   oracleConsentKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleConsent'; }
+  /* Set once the reader has pressed Consult the Oracle for an in-depth reading.
+     It is what lets the page prepare the next one in the background: nothing is
+     sent for a reader who has never asked for one, and the cost of preparing is
+     only ever paid for somebody who reads them. */
+  oracleDeepKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleDeep'; }
   oracleSlot(period, depth) {
     const p = this.activeProfile();
     return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
@@ -18601,14 +18623,29 @@ class Component extends DCLogic {
      nothing: the server hands back the finished one, or says it is still
      being written, before it counts anything or calls the model. */
   ORACLE_WAIT = { pending: { every: [10000], tries: 36 }, busy: { every: [15000, 30000, 45000], tries: 3 } };
-  oracleAsk(period, depth, again) {
+  /* QUIET MEANS PREPARED AHEAD, and nobody has pressed anything. A quiet ask
+     says nothing aloud, keeps the loading panel off the screen, shows no error
+     if it fails, and keeps going when the reader leaves the Oracle, because the
+     point of it is that the reading is already written when they come. The
+     moment they press Consult the Oracle for that slot it stops being quiet:
+     the panel and any error are theirs from then on. */
+  orNonQuietBusy() {
+    const q = this._orQuiet || {};
+    return Object.keys(this._orBusy || {}).filter(k => !q[k]);
+  }
+  orOpenDeep(slot) {
+    this.writeLS(this.oracleDeepKey(), true);
+    this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
+  }
+  oracleAsk(period, depth, again, quiet) {
     const slot = this.oracleSlot(period, depth), C = this.cloud;
     const held = this._orBusy || (this._orBusy = {});
+    this._orQuiet = this._orQuiet || {};
     if (!again && held[slot]) return;
     /* One reading at a time from this page, because Kimi may be writing one
        at a time for everybody. Another slot in flight or waiting defers this
        one, and the one componentDidUpdate asks for it once that is answered. */
-    if (!again && Object.keys(held).some(k => k !== slot)) { if (this.state.orErr) this.setState({ orErr: null }); return; }
+    if (!again && this.orNonQuietBusy().some(k => k !== slot)) { if (this.state.orErr && !quiet) this.setState({ orErr: null }); return; }
     if (!C || typeof C.oracleRead !== 'function') { this.setState({ orErr: { slot, reason: 'off' } }); return; }
     const localDate = this.oracleLocalDate();
     let dossier;
@@ -18616,19 +18653,21 @@ class Component extends DCLogic {
     held[slot] = true;
     this._orTry = this._orTry || {};
     this._orRetryT = this._orRetryT || {};
-    if (!again) { delete this._orTry[slot]; this.setState({ orBusyMap: { ...held }, orErr: null }); }
-    if (!again) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    if (!again) this._orQuiet[slot] = !!quiet;
+    if (!again) { delete this._orTry[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
+    if (!again && !quiet) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
     C.oracleRead({ period, depth, localDate, dossier }).then(r => {
       const waits = { ...(this.state.orWaitMap || {}) };
       if (r && r.ok && r.reading) {
-        delete held[slot]; delete this._orTry[slot]; delete waits[slot];
+        const loud = !this._orQuiet[slot] || !!(this.state.orOpened || {})[slot];
+        delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot];
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
         this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: null, orTick: (this.state.orTick || 0) + 1 });
-        this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
+        if (loud) this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
         return;
       }
       const reason = (r && r.reason) || 'error';
-      const wait = this.ORACLE_WAIT[reason], n = this._orTry[slot] || 0, here = this.curTab() === 'oracle';
+      const wait = this.ORACLE_WAIT[reason], n = this._orTry[slot] || 0, here = this._orQuiet[slot] || this.curTab() === 'oracle';
       if (wait && here && n < wait.tries) {
         this._orTry[slot] = n + 1;
         this._orRetryT[slot] = setTimeout(() => { delete this._orRetryT[slot]; this.oracleAsk(period, depth, true); },
@@ -18636,7 +18675,11 @@ class Component extends DCLogic {
         if (waits[slot] !== reason) this.setState({ orWaitMap: { ...waits, [slot]: reason } });
         return;
       }
-      delete held[slot]; delete this._orTry[slot]; delete waits[slot];
+      const loud = !this._orQuiet[slot] || !!(this.state.orOpened || {})[slot];
+      delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot];
+      /* A reading prepared ahead that could not be written says nothing: the
+         reader never asked for it, and pressing the button asks again. */
+      if (!loud) { this.setState({ orBusyMap: { ...held }, orWaitMap: waits }); return; }
       /* Left the screen while waiting: nothing failed, and coming back asks
          again, which finds the reading written or still being written. */
       if (wait && !here) { this.setState({ orBusyMap: { ...held }, orWaitMap: waits }); return; }
@@ -18655,9 +18698,11 @@ class Component extends DCLogic {
     const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
     if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
-    if (depth === 'deep' && !(st.lum && st.lum.isPremium)) return false;
+    /* In depth is never asked for on open. The reader presses Consult the
+       Oracle, and a reading prepared ahead (oraclePrepareAuto) is waiting. */
+    if (depth === 'deep') return false;
     if (this.oracleCached(period, depth)) return false;
-    if (st.orBusyMap && Object.keys(st.orBusyMap).length) return false;
+    if (this.orNonQuietBusy().length) return false;
     return !(st.orErr && st.orErr.slot === slot);
   }
   /* THE CODEX ASKED WHEN THE SCREEN OPENED, and so does this. Called from the
@@ -18675,7 +18720,7 @@ class Component extends DCLogic {
       /* A wait between two asks stops with the screen. A request actually in
          flight is left to answer, and stops itself when it sees the screen
          has gone. */
-      const timers = this._orRetryT || {}, stopped = Object.keys(timers);
+      const timers = this._orRetryT || {}, stopped = Object.keys(timers).filter(k => !(this._orQuiet && this._orQuiet[k]));
       if (stopped.length) {
         const waits = { ...(this.state.orWaitMap || {}) };
         stopped.forEach(k => { clearTimeout(timers[k]); delete timers[k]; delete this._orBusy[k]; delete this._orTry[k]; delete waits[k]; });
@@ -18694,6 +18739,35 @@ class Component extends DCLogic {
       const st = this.state;
       if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
     }, 600);
+  }
+  /* THE IN-DEPTH READING IS WRITTEN BEFORE IT IS ASKED FOR. A reading of that
+     size takes a minute or two to write, which no screen can hide, so for a
+     Luminary who has already pressed Consult the Oracle for one, the page asks
+     for the current period's quietly a few seconds after the app is ready and
+     keeps it on the device. Opening the Oracle then shows the button, and the
+     press shows the reading at once. It sends exactly what pressing the button
+     sends, to the same function, for somebody who has already agreed to it, and
+     it asks once a session for one reading, so the daily limit is not spent on a
+     page nobody opened. Nothing happens for a reader who has never asked for an
+     in-depth reading, for one whose subscription the server has not confirmed,
+     or on the sample chart. */
+  oraclePrepareAuto() {
+    const st = this.state, cs = st.cloudStatus, C = this.cloud;
+    if (!st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
+    if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
+    if (!(st.lum && st.lum.isPremium)) return;
+    const period = st.orPeriod || 'daily', slot = this.oracleSlot(period, 'deep');
+    this._orPrepTried = this._orPrepTried || {};
+    if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
+    if (this.orNonQuietBusy().length || (this._orBusy && this._orBusy[slot]) || this._orPrepT) return;
+    this._orPrepT = setTimeout(() => {
+      this._orPrepT = null;
+      const s2 = this.state, p2 = s2.orPeriod || 'daily', sl2 = this.oracleSlot(p2, 'deep');
+      if (this._orPrepTried[sl2] || this.oracleCached(p2, 'deep') || this.orNonQuietBusy().length || (this._orBusy && this._orBusy[sl2])) return;
+      if (!(s2.lum && s2.lum.isPremium) || !s2.ready) return;
+      this._orPrepTried[sl2] = true;
+      this.oracleAsk(p2, 'deep', false, true);
+    }, 4000);
   }
   /* ---- Codex Luminary ------------------------------------------------------
 
@@ -18739,7 +18813,7 @@ class Component extends DCLogic {
       return;
     }
     if (this._lumFor === who) return;
-    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success') return;
+    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success' && !this.readLS(this.oracleDeepKey(), false)) return;
     this._lumFor = who;
     this.lumFetch(this.state.lumReturn === 'success', 0);
   }
@@ -18796,9 +18870,13 @@ class Component extends DCLogic {
     const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth);
-    const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
+    /* A reading being prepared ahead is not on the screen until the reader has
+       pressed Consult the Oracle for it, so it does not count as busy here. */
+    const opened = !!(st.orOpened && st.orOpened[slot]);
+    const quiet = !!(this._orQuiet && this._orQuiet[slot]) && !opened;
+    const busy = !!(st.orBusyMap && st.orBusyMap[slot]) && !quiet;
     const waitWhy = busy && st.orWaitMap ? st.orWaitMap[slot] : null;
-    const otherBusy = !busy && !!st.orBusyMap && Object.keys(st.orBusyMap).length > 0;
+    const otherBusy = !busy && this.orNonQuietBusy().some(k => k !== slot);
     const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
     const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
     /* In depth is Luminary's, as the Codex's was: until the status is in the
@@ -18808,8 +18886,11 @@ class Component extends DCLogic {
     const lum = st.lum, canDeep = !!(lum && lum.isPremium);
     const deepish = depth === 'deep' && signedIn && !sample && !off;
     const lumWait = deepish && !lum, locked = deepish && !!lum && !canDeep;
-    const r = hit && !locked && !lumWait ? hit.reading : null;
     const consented = !!this.readLS(this.oracleConsentKey(), false);
+    /* In depth is shown only once the reader has pressed Consult the Oracle for
+       it, whether it was written a minute ago or is still to be written. */
+    const deepGate = deepish && canDeep && consented && !busy && !err && !opened;
+    const r = hit && !locked && !lumWait && !(deepish && !opened) ? hit.reading : null;
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
@@ -18820,7 +18901,7 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
-    const blocked = sample || off || !!r || locked || lumWait;
+    const blocked = sample || off || !!r || locked || lumWait || deepGate;
     const waiting = !blocked && !err && signedIn && consented;
     const plan = st.lumPlan || 'annual', planRow = this.LUM_PLANS.find(x => x[0] === plan);
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
@@ -18836,7 +18917,9 @@ class Component extends DCLogic {
       orOff: !r && !sample && off,
       orNeedSignIn: !blocked && !busy && !signedIn,
       orConsent: !blocked && !busy && !err && signedIn && !consented,
-      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk(period, depth); },
+      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+      orDeepGate: deepGate,
+      orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
       orBusy: !r && !locked && (busy || waiting || lumWait),
@@ -18844,7 +18927,7 @@ class Component extends DCLogic {
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
       orPrivacy: 'The Oracle reads your chart the way the Celestial Codex did. Asking sends your first name, your chart’s positions, your Human Design and your numbers to inCommon’s server, and on to Moonshot AI, whose model Kimi writes the reading. No journal entry, birth date, time or place is sent, though the positions are enough to work out roughly when you were born. From then on the Oracle reads for you whenever you open it, and each reading is kept with your account for the period it covers.',
-      orAskGo: () => this.oracleAsk(period, depth),
+      orAskGo: () => { if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
       orLoadingText: lumWait ? 'Checking your Luminary subscription…'
