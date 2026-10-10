@@ -52,9 +52,11 @@ Three things keep the bill bounded:
    the stored reading back for free until the period turns over. Pressing the
    button again, or opening it on another device, costs nothing.
 2. **A daily limit per reader**, 6 attempts in any 24 hours by default. It
-   counts attempts rather than successes, because a failed reading was still
-   paid for. The worst case is 6 in-depth readings, about 30 cents, per reader
-   per day. Most days a reader will ask for one or two.
+   counts readings written or being written; a failed attempt does not use
+   one up, so a timeout never costs the reader a reading. Failed attempts are
+   still bounded, at four times the limit, because Kimi is paid for them. The
+   worst case is 6 in-depth readings, about 30 cents, per reader per day, plus
+   the cost of the failures. Most days a reader will ask for one or two.
 3. **The prepaid balance is the ceiling.** Kimi spends only what you have put
    in. When the balance runs out, the Oracle says it is silent for now, and
    nothing else in the app is affected. Top up a small amount at a time and
@@ -154,7 +156,7 @@ Set these as Edge Function secrets. Each is optional.
 | `ORACLE_DEEP_MODEL` | the same as `ORACLE_MODEL` | Which Kimi model writes an in-depth reading. `kimi-k3` writes more richly and costs about three times as much. |
 | `ORACLE_DEEP_THINKING` | `off` | Whether the model thinks before an in-depth reading, as the Codex asked its model to. `on` for `kimi-k2.6`; `low`, `high` or `max` for `kimi-k3`, which cannot switch it off. Thinking is paid for as output and takes time. Standard readings never think. |
 | `ORACLE_TIME_LIMIT` | `140` | Seconds the function waits for Kimi before giving up and saying so. |
-| `ORACLE_DAILY_LIMIT` | `6` | Attempts per reader in any 24 hours. |
+| `ORACLE_DAILY_LIMIT` | `6` | Readings per reader in any 24 hours. Failed attempts do not count, and are bounded at four times this. |
 | `LUMINARY_ADMIN_EMAILS` | none | Comma separated addresses that read in depth without a subscription. Set the same value on the `billing` function. |
 
 **An in-depth reading is two calls.** One call for all of it ran past what the

@@ -905,12 +905,20 @@
      itself, and the first is kept, so a failed second one is retried alone.
      A server that still writes the whole reading in one call (it has no
      chapters to add) answers the first with them already in, and the second
-     call is skipped. */
+     call is skipped. The page may pass onFirst, called with the first half as
+     soon as it arrives, so it can be shown while the second is written. */
   function oracleRead(req) {
-    if (!req || req.depth !== 'deep') return oracleCall(req);
-    return oracleCall(Object.assign({}, req, { part: 'a' })).then(function (a) {
+    if (!req) return oracleCall(req);
+    var onFirst = typeof req.onFirst === 'function' ? req.onFirst : null;
+    var body = Object.assign({}, req);
+    delete body.onFirst;
+    if (body.depth !== 'deep') return oracleCall(body);
+    return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
-      return oracleCall(Object.assign({}, req, { part: 'b' }));
+      /* The first half is on its way to the page before the second is asked
+         for, so the reader has something to read while it is written. */
+      if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
+      return oracleCall(Object.assign({}, body, { part: 'b' }));
     });
   }
   function oracleCall(req) {

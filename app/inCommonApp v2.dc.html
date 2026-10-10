@@ -3490,6 +3490,14 @@ input[type="date"]{color-scheme:dark}
               </sc-for>
             </div>
           </sc-if>
+          <sc-if value="{{ orMoreOn }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
+              <p style="margin:0;font:italic 400 15px/1.5 var(--fb);color:var(--mut)">{{ orMoreText }}</p>
+              <sc-if value="{{ orMoreRetry }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+              </sc-if>
+            </div>
+          </sc-if>
           <sc-if value="{{ orHasTiming }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
               <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Windows of Time</div>
@@ -8263,6 +8271,14 @@ input[type="date"]{color-scheme:dark}
                   <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ ch.body }}</p>
                 </section>
               </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ orMoreOn }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
+              <p style="margin:0;font:italic 400 15px/1.5 var(--fb);color:var(--mut)">{{ orMoreText }}</p>
+              <sc-if value="{{ orMoreRetry }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+              </sc-if>
             </div>
           </sc-if>
           <sc-if value="{{ orHasTiming }}" hint-placeholder-val="{{ false }}">
@@ -18655,13 +18671,23 @@ class Component extends DCLogic {
     this._orTry = this._orTry || {};
     this._orRetryT = this._orRetryT || {};
     if (!again) this._orQuiet[slot] = !!quiet;
-    if (!again) { delete this._orTry[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
+    this._orFirst = this._orFirst || {};
+    if (!again) { delete this._orTry[slot]; delete this._orFirst[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
     if (!again && !quiet) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
-    C.oracleRead({ period, depth, localDate, dossier }).then(r => {
+    /* The first half of an in-depth reading is shown the moment it arrives,
+       while the second is still being written. It lives in memory only: the
+       kept reading is the whole one, so a half is never mistaken for it. */
+    const onFirst = depth === 'deep' ? f => {
+      if (!f || !f.reading || !held[slot]) return;
+      this._orFirst[slot] = { reading: f.reading, label: f.label || '' };
+      this.setState({ orTick: (this.state.orTick || 0) + 1 });
+      if (!this._orQuiet[slot] || !!(this.state.orOpened || {})[slot]) this.speak('The first part of your reading has arrived. The rest is still being written.', 'polite');
+    } : null;
+    C.oracleRead({ period, depth, localDate, dossier, onFirst }).then(r => {
       const waits = { ...(this.state.orWaitMap || {}) };
       if (r && r.ok && r.reading) {
         const loud = !this._orQuiet[slot] || !!(this.state.orOpened || {})[slot];
-        delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot];
+        delete held[slot]; delete this._orTry[slot]; delete waits[slot]; delete this._orQuiet[slot]; delete this._orFirst[slot];
         this.oracleKeep(slot, { reading: r.reading, label: r.label || '', at: Date.now() });
         this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: null, orTick: (this.state.orTick || 0) + 1 });
         if (loud) this.speak('The Oracle has answered: ' + (r.reading.title || 'your reading is here') + '.', 'polite');
@@ -18870,10 +18896,14 @@ class Component extends DCLogic {
   oracleVals() {
     const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
-    const slot = this.oracleSlot(period, depth), hit = this.oracleCached(period, depth);
+    const slot = this.oracleSlot(period, depth), cached = this.oracleCached(period, depth);
     /* A reading being prepared ahead is not on the screen until the reader has
        pressed Consult the Oracle for it, so it does not count as busy here. */
     const opened = !!(st.orOpened && st.orOpened[slot]);
+    /* Only the first half of an in-depth reading, shown while the second is
+       still being written (or could not be). A whole kept reading wins. */
+    const partial = !cached && depth === 'deep' && opened && this._orFirst && this._orFirst[slot] || null;
+    const hit = cached || partial;
     const quiet = !!(this._orQuiet && this._orQuiet[slot]) && !opened;
     const busy = !!(st.orBusyMap && st.orBusyMap[slot]) && !quiet;
     const waitWhy = busy && st.orWaitMap ? st.orWaitMap[slot] : null;
@@ -18957,6 +18987,10 @@ class Component extends DCLogic {
         : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
       orLumRetryOn: !!(lum && lum.failed),
       orLumRetry: () => this.lumFetch(true, 0),
+      orMoreOn: !!partial && !!r,
+      orMoreText: err && !busy ? (this.ORACLE_ERR[err] || 'The rest of the reading could not be written just now.')
+        : 'The chapters, timing windows, shadow work and journal prompts are still being written…',
+      orMoreRetry: !!partial && !busy && !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
       orShowReading: !!r,
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',

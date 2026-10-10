@@ -3303,7 +3303,10 @@ leaving the screen forgets a failure, so coming back tries again, as the
 Codex's query did on a remount.
 
 **The server holds the limits the page cannot.** A daily limit per reader
-counts attempts, because a failed reading was still paid for; a row is claimed
+counts readings written or being written, and a failed attempt does not use one
+up (changed 10 October 2026: a timeout was costing readers one of their six
+for nothing); failures are bounded at four times the limit so a broken request
+cannot run up the bill; a row is claimed
 before the model is called, and a partial unique index lets only one pending
 or finished row exist per key, so a double press or a second tab waits rather
 than paying twice. The table is written only by the function with the service
@@ -3405,6 +3408,17 @@ with chapters already in it makes the client skip the second call, so the page
 and the function can be deployed in either order. Do not merge the two schemas
 back into one call, and do not count the b rows as attempts, or a reading costs
 two of the six. K29b holds the client half.
+
+## The first half is shown while the second is written
+Added 10 October 2026. `oracleRead()` takes an optional `onFirst` callback and
+calls it with the first half of an in-depth reading as soon as that call
+answers, before the second is asked for. The page keeps it in `_orFirst[slot]`,
+in memory only, and shows it once the slot has been opened with the button, with
+a dashed status line (`orMoreOn`) saying the chapters, timing, shadow work and
+journal prompts are still being written. It is never passed to `oracleKeep()`:
+the kept reading is the whole one, so a half is never mistaken for it. If the
+second half fails the first stays on screen, the line turns into the error and
+Ask again appears. A new ask clears it. K29c holds the client half.
 
 ## In depth is Codex Luminary, and Stripe takes the payment
 The owner asked on 29 September 2026 to charge for the advanced readings with
