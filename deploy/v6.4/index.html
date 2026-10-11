@@ -287,18 +287,14 @@
   .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
   .mailform .eye svg { width: 20px; height: 20px; display: block; }
   .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
-  /* Turnstile's slot. Somebody signing in with what the browser or a password
-     manager filled in never sees it: the widget runs out of sight. Somebody
-     typing their details by hand sees it, the owner's request of 11 October
-     2026, and the slot is empty, taking no room, until then. It is drawn only
-     in the modes whose call carries a token, so a reader choosing a new
-     password or entering an authenticator code is not shown a check that
-     guards nothing there. */
+  /* Turnstile's slot. The check is drawn as soon as the form opens (the
+     owner, 11 October 2026), and only in the modes whose call carries a
+     token, so a reader choosing a new password or entering an authenticator
+     code is not shown a check that guards nothing there. */
   .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; min-width: 0; }
-  /* Not shown, the widget still runs, so the slot is taken out of the row
-     rather than hidden: Cloudflare puts an invisible frame in it, which made
-     it a zero height row of its own and pushed Sign in off the password's
-     line. */
+  /* Until the widget is drawn the slot is out of the row, so a frame
+     Cloudflare has not filled yet never makes a zero height row that pushes
+     Sign in off the password's line. */
   .mailform .captcha:not(.shown) {
     position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); pointer-events: none;
   }
@@ -753,21 +749,19 @@
      CAPTCHA protection in Supabase, never the other way round.
 
      The widget is run on demand (execute) and reset after every call, because
-     a token is good once. It is asked early, on the first focus inside the
-     form, so the token is usually waiting by the time the reader presses the
-     button. It starts invisible (interaction-only), which is all a reader
-     whose browser or password manager filled the form ever meets. The first
-     key typed or text pasted into the address or the password, by the
-     reader's own hand, draws it again visibly (always), because somebody
-     entering details rather than using saved ones is who the owner asked to
-     see the check. Autofill fires no such input, so it stays out of sight
-     there. Appearance is fixed when a widget is drawn, so changing it is a
-     remove and a fresh render, and a run already waited for is started again
-     on the new one. Nothing is said in words: the widget speaks for itself. */
+     a token is good once. It is drawn where it can be seen (always) the moment
+     the form opens, typed or filled in, the owner's call of 11 October 2026:
+     shown only to hand typed details, it was hidden from everybody whose
+     browser filled the form, which read as no check at all. Opening the form
+     also starts the run, so the token is usually waiting by the time the
+     reader presses the button. A plain visit to the desktop cover, with the
+     form still closed, sends nothing to Cloudflare; a phone opens the form at
+     once, so a phone loads it on arrival. Nothing is said in words: the
+     widget speaks for itself. */
   var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
   var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
   var capBox = form.querySelector('.captcha');
-  var ts = { loading: null, id: null, wait: null, timer: null, running: false, shown: false, typed: false };
+  var ts = { loading: null, id: null, wait: null, timer: null, running: false };
   function capSettle(ok, val) {
     var w = ts.wait;
     ts.running = false;
@@ -779,18 +773,16 @@
   /* Flexible is 300px at least, so a form narrower than that (a 320px phone)
      takes the compact widget rather than running off the edge. */
   function capDraw(T) {
-    ts.shown = ts.typed;
-    capBox.classList.toggle('shown', ts.shown);
+    capBox.classList.add('shown');
     ts.id = T.render(capBox, {
       sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark',
       size: form.clientWidth && form.clientWidth < 300 ? 'compact' : 'flexible',
-      execution: 'execute', appearance: ts.shown ? 'always' : 'interaction-only', 'response-field': false,
+      execution: 'execute', appearance: 'always', 'response-field': false,
       callback: function (t) { capSettle(true, t); },
       'error-callback': function () { capSettle(false); return true; },
-      'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} },
-      /* Cloudflare asking for a tick on the hidden widget: the slot comes into
-         the row so the box can be seen, and nothing is said in words. */
-      'before-interactive-callback': function () { capBox.classList.add('shown'); }
+      /* A token lasts five minutes. One that runs out while the form sits open
+         is fetched again, so the box on screen never shows a spent check. */
+      'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} capRun(); }
     });
   }
   function capLoad() {
@@ -801,24 +793,17 @@
       return T;
     }).catch(function (e) { ts.loading = null; throw e; }));
   }
-  /* Typed by hand: draw the widget where it can be seen and run it, so the
-     check is under way while the reader finishes typing. */
-  function capShow() {
-    if (!TURNSTILE_SITE_KEY || ts.typed) return;
-    ts.typed = true;
+  /* Load the widget and run it, unless a run is under way or a token is
+     waiting. Called when the form opens, on the first focus inside it, and
+     when a token runs out. */
+  function capRun() {
+    if (!TURNSTILE_SITE_KEY) return;
     capLoad().then(function (T) {
-      if (ts.shown) return;
-      try { T.remove(ts.id); } catch (e) {}
-      capDraw(T);
+      if (ts.running || T.getResponse(ts.id)) return;
       ts.running = true;
       try { T.execute(ts.id); } catch (e) { ts.running = false; }
     }, function () {});
   }
-  var HAND = { insertText: 1, insertCompositionText: 1, insertFromPaste: 1, insertFromDrop: 1,
-    deleteContentBackward: 1, deleteContentForward: 1, deleteWordBackward: 1, deleteWordForward: 1 };
-  function byHand(e) { if (e.isTrusted && HAND[e.inputType]) capShow(); }
-  addr.addEventListener('input', byHand);
-  pass.addEventListener('input', byHand);
   /* A token for one call: the one waiting if it is still fresh, otherwise a
      new run of the widget. Two minutes is long enough for somebody who has to
      tick the box, and short enough that a blocked widget says so. */
@@ -845,17 +830,14 @@
   function captchaSpent() {
     ts.running = false;
     if (window.turnstile && ts.id != null) { try { window.turnstile.reset(ts.id); } catch (e) {} }
+    /* The box is on screen, and a reset one sits blank until it runs, so it
+       runs again now and the next press usually finds its token waiting. */
+    capRun();
   }
-  /* Asked early: the first focus inside the form loads the widget and runs it,
-     so the token is usually ready before the button is pressed. */
+  /* Asked early, in case the form gained focus some way other than opening. */
   form.addEventListener('focusin', function warm() {
-    if (!TURNSTILE_SITE_KEY) return;
     form.removeEventListener('focusin', warm);
-    capLoad().then(function (T) {
-      if (ts.running || T.getResponse(ts.id)) return;
-      ts.running = true;
-      try { T.execute(ts.id); } catch (e) { ts.running = false; }
-    }, function () {});
+    capRun();
   });
   /* The five calls the server asks a token of. */
   function needsToken(m) { return m === 'in' || m === 'up' || m === 'forgot'; }
@@ -1008,6 +990,7 @@
     enter.setAttribute('aria-expanded', 'true');
     form.hidden = false;
     setMode(mode, focus);
+    capRun();
   }
   enter.setAttribute('aria-controls', 'mailform');
   enter.setAttribute('aria-expanded', opened ? 'true' : 'false');

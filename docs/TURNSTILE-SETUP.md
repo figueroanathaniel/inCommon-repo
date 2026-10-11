@@ -23,12 +23,12 @@ Do not add `localhost` or `127.0.0.1` to the production widget. For testing on
 your own machine, make a second widget, or use Cloudflare's test site key
 `1x00000000000000000000AA` in a local copy only.
 
-Widget mode **Managed** is the right one. The page shows the check to anybody
-typing their email and password by hand (your request of 11 October 2026), and
-keeps it out of sight for somebody whose browser or password manager filled the
-form in, unless Cloudflare is unsure of them and wants a box ticked. Nothing is
-written beside it. Choosing **Invisible** instead would hide it from everybody,
-typed or not, because that mode never draws a box.
+Widget mode **Managed** is the right one. The page shows the check whenever
+the sign in, create account or reset form is open (your request of 11 October
+2026): most people see it tick itself to Success, and somebody Cloudflare is
+unsure of gets a box to tick. Nothing is written beside it. Choosing
+**Invisible** instead would hide it from everybody, because that mode never
+draws a box.
 
 ## 2. Deploy the site first
 
