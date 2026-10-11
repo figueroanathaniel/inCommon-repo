@@ -38,6 +38,10 @@ const PRICES = {
 } as const;
 const ACTIVE = new Set(["active", "trialing"]);
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+// Confirmed addresses only, the same rule as server/oracle: an unconfirmed
+// address proves nothing about who holds it.
+const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
+  !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 
 type Plan = keyof typeof LOOKUP;
 type Row = {
@@ -59,6 +63,24 @@ const CORS = {
 
 function reply(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+}
+
+// TWO-STEP SIGN IN. A reader who turned it on is served only on a session that
+// entered the code: a password alone makes a session at aal1, and the code
+// lifts it to aal2. auth.getUser() has just checked this token with the auth
+// server, so its claims can be read here without checking it again, and the
+// factors come from that same live answer rather than from anything the page
+// sent. A token that cannot be read owes the code: the side to fail on is the
+// closed one.
+function owesCode(req: Request, user: { factors?: { status?: string }[] | null }): boolean {
+  if (!(user.factors ?? []).some((f) => f.status === "verified")) return false;
+  try {
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const p = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(p + "===".slice((p.length + 3) % 4))).aal !== "aal2";
+  } catch {
+    return true;
+  }
 }
 
 const secretKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -131,7 +153,7 @@ async function syncCustomer(s: Stripe, customerId: string): Promise<void> {
 // Reads a reader's status, and asks Stripe again when the row is stale, so it
 // comes right even if the webhook was never set up. The Codex's rule: stale
 // when not active, when the paid period has ended, or when six hours old.
-async function statusFor(user: { id: string; email?: string }, force: boolean) {
+async function statusFor(user: { id: string; email?: string; email_confirmed_at?: string | null }, force: boolean) {
   let row = await rowFor(user.id);
   if (row && stripe) {
     const stale = force ||
@@ -148,7 +170,7 @@ async function statusFor(user: { id: string; email?: string }, force: boolean) {
       }
     }
   }
-  const admin = ADMINS.includes(String(user.email ?? "").toLowerCase());
+  const admin = isAdmin(user);
   return {
     isPremium: admin || (!!row && ACTIVE.has(row.status)),
     plan: row?.plan ?? null,
@@ -234,6 +256,7 @@ Deno.serve(async (req) => {
   const { data: who } = await asReader.auth.getUser();
   const user = who?.user;
   if (!user) return reply(401, { code: "SIGNED_OUT" });
+  if (owesCode(req, user)) return reply(401, { code: "MFA_REQUIRED" });
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }

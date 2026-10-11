@@ -14,8 +14,8 @@
  *   1. It never touches the network without a session, with one exception
  *      the reader asks for by pressing a button: signing in, making an
  *      account or asking for a new password on the cover, by email or by
- *      phone, checking a code a text brought, and taking the session an
- *      emailed link brings back. None of those calls carries any local state;
+ *      phone, checking a code a text brought or an authenticator app shows,
+ *      and taking the session an emailed link brings back. None of those calls carries any local state;
  *      the record only moves once the app's own client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
@@ -48,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.4.0';
+  var VERSION = '2.6.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -113,6 +113,11 @@
   var cfg = null;       // { url, anonKey, storage, core, pm }
   var client = null;
   var session = null;
+  /* A session whose password passed and whose code has not been entered yet
+     (two-step sign in, below). It is kept here rather than in session, so
+     every call that asks for a session finds none, and the app reads as
+     signed out until the cover has the code. */
+  var held = null;
   var listeners = [];
   var timer = null;
   var lastPushAt = 0;
@@ -562,6 +567,9 @@
     if (code === 'phone_provider_disabled' || /unsupported phone provider|phone (signups|logins|provider)[^.]*disabled/i.test(m)) return 'phoneOff';
     if (code === 'sms_send_failed' || /error sending (confirmation |phone change |recovery )?(sms|otp)/i.test(m)) return 'smsFailed';
     if (code === 'otp_expired' || /token has expired or is invalid/i.test(m)) return 'badCode';
+    if (code === 'mfa_verification_failed' || code === 'mfa_challenge_expired' || /invalid totp code/i.test(m)) return 'badCode';
+    if (code === 'insufficient_aal' || /aal2 (session )?(is )?required/i.test(m)) return 'needsCode';
+    if (/^mfa_.*not_enabled$/.test(code)) return 'mfaOff';
     if (code === 'phone_not_confirmed' || /phone not confirmed/i.test(m)) return 'phoneUnconfirmed';
     if (code === 'phone_exists' || /phone number has already been registered/i.test(m)) return 'phoneTaken';
     if (/invalid phone/i.test(m)) return 'invalid';
@@ -571,6 +579,7 @@
     if (code === 'same_password' || /different from the old/i.test(m)) return 'same';
     if (code === 'weak_password' || (e && e.name === 'AuthWeakPasswordError') || /password should/i.test(m)) return 'weak';
     if (code === 'signup_disabled' || /signups not allowed/i.test(m)) return 'closed';
+    if (code === 'captcha_failed' || /captcha/i.test(m)) return 'captcha';
     return 'error';
   }
   function authCall(run) {
@@ -581,20 +590,33 @@
   function refused(res) {
     return { ok: false, reason: authReason(res.error), error: String(res.error.message || '') };
   }
+  /* CLOUDFLARE TURNSTILE, since 11 October 2026. With CAPTCHA protection on in
+     the project, Supabase refuses five calls that arrive without a token:
+     password sign in, sign up, the reset email, a text code and a resend
+     (the server's own /token for the password grant, /signup, /recover, /otp
+     and /resend). Checking a code, refreshing a session, finishing an emailed
+     link and the two-step code are not asked for one. The cover gets the token
+     from the widget and hands it in as opts.captchaToken; a token is good once,
+     so the cover asks for a fresh one per call. With no token the calls are
+     sent exactly as before, which is what lets the page ship before the
+     project turns the check on. */
+  function cap(opts) { var t = opts && opts.captchaToken; return t ? String(t) : null; }
 
-  function passwordSignIn(login, password) {
+  function passwordSignIn(login, password, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     if (!password) return Promise.resolve({ ok: false, reason: 'nopassword' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
     return authCall(function () {
-      return c.auth.signInWithPassword(id.email ? { email: id.email, password: String(password) } : { phone: id.phone, password: String(password) });
+      var cred = id.email ? { email: id.email, password: String(password) } : { phone: id.phone, password: String(password) };
+      if (cap(opts)) cred.options = { captchaToken: cap(opts) };
+      return c.auth.signInWithPassword(cred);
     }).then(function (res) {
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, email: (s.user && s.user.email) || id.email || null, phone: phoneOfUser(s.user) || id.phone || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || id.email || null, phone: phoneOfUser(s.user) || id.phone || null });
     });
   }
 
@@ -628,7 +650,9 @@
        carry: the list is read by email, and a phone account has none. */
     if (id.phone) {
       return authCall(function () {
-        return c.auth.signUp({ phone: id.phone, password: String(password) });
+        var up = { phone: id.phone, password: String(password) };
+        if (cap(opts)) up.options = { captchaToken: cap(opts) };
+        return c.auth.signUp(up);
       }).then(function (res) {
         if (res && res.error) return refused(res);
         var d = (res && res.data) || {};
@@ -639,6 +663,7 @@
     }
     var addr = id.email;
     var options = { emailRedirectTo: redirectTo };
+    if (cap(opts)) options.captchaToken = cap(opts);
     if (opts && typeof opts.newsletter === 'boolean') {
       options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
@@ -657,14 +682,16 @@
      the # and type=recovery, which the cover adopts and then asks for the new
      password. Supabase answers the same whether or not the address has an
      account, and so does the cover. */
-  function passwordResetStart(login, redirectTo) {
+  function passwordResetStart(login, redirectTo, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
-    if (id.phone) return phoneCodeSend(c, id.phone);
+    if (id.phone) return phoneCodeSend(c, id.phone, opts);
     return authCall(function () {
-      return c.auth.resetPasswordForEmail(id.email, { redirectTo: redirectTo });
+      var o = { redirectTo: redirectTo };
+      if (cap(opts)) o.captchaToken = cap(opts);
+      return c.auth.resetPasswordForEmail(id.email, o);
     }).then(function (res) {
       return res && res.error ? refused(res) : { ok: true };
     });
@@ -678,9 +705,11 @@
      such a number with "signups not allowed for otp", and the cover answers
      it exactly as it answers a number that has an account, so nobody can use
      this to find out whose number is registered. */
-  function phoneCodeSend(c, phone) {
+  function phoneCodeSend(c, phone, opts) {
     return authCall(function () {
-      return c.auth.signInWithOtp({ phone: phone, options: { shouldCreateUser: false } });
+      var o = { shouldCreateUser: false };
+      if (cap(opts)) o.captchaToken = cap(opts);
+      return c.auth.signInWithOtp({ phone: phone, options: o });
     }).then(function (res) {
       if (res && res.error) {
         var r = refused(res);
@@ -707,19 +736,21 @@
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, phone: phoneOfUser(s.user) || p, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, phone: phoneOfUser(s.user) || p, email: (s.user && s.user.email) || null });
     });
   }
   /* Another code, for the reason the first one was sent. A sign up asks
      Supabase to resend its confirmation; a new password simply asks again. */
-  function phoneCodeResend(phone, purpose) {
+  function phoneCodeResend(phone, purpose, opts) {
     var p = normPhone(phone);
     if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
-    if (purpose === 'recover') return phoneCodeSend(c, p);
+    if (purpose === 'recover') return phoneCodeSend(c, p, opts);
     return authCall(function () {
-      return c.auth.resend({ type: 'sms', phone: p });
+      var r = { type: 'sms', phone: p };
+      if (cap(opts)) r.options = { captchaToken: cap(opts) };
+      return c.auth.resend(r);
     }).then(function (res) {
       return res && res.error ? refused(res) : { ok: true, via: 'phone', phone: p };
     });
@@ -844,7 +875,7 @@
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || null });
     });
   }
 
@@ -872,8 +903,160 @@
     return Promise.resolve().then(function () { return c.auth.exchangeCodeForSession(code); }).then(function (res) {
       var s = res && res.data && res.data.session;
       if (res.error || !s) return { ok: false, reason: 'error', error: res.error && res.error.message };
-      return { ok: true, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || null });
     }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
+  }
+
+  /* ---------- two-step sign in ----------
+
+     The owner asked on 11 October 2026 for two-step sign in, optional. A
+     reader who turns it on adds inCommon to an authenticator app (a TOTP
+     factor, which Supabase offers on every plan; a texted code would need the
+     SMS provider docs/PHONE-SETUP.md has not switched on), and from then on a
+     password alone is not enough: every sign in asks for the six digits the
+     app is showing.
+
+     A PASSWORD THAT PASSED STILL MAKES A SESSION, and that is the part to
+     hold. Supabase signs the reader in at aal1 and expects the code to lift it
+     to aal2, so between the two there is a real session for an account whose
+     owner asked for more than a password. Three places refuse it, and all
+     three are needed. This module holds it aside (owesCode) and the app treats
+     it as signed out, which is courtesy. server/oracle and server/billing
+     answer it MFA_REQUIRED. And server/mfa-policies.sql refuses it at every
+     table, which is the wall: without it a stolen password would read the
+     reader's record straight from the REST API with the cover never asked.
+
+     owesCode reads two things the session already carries: whether the user
+     has a verified factor, and the aal claim inside the access token. A
+     token that cannot be read owes the code, because the side to fail on is
+     the closed one. Nothing here is a reason to trust the token: the server
+     checks it on every call, and this only decides what the page offers. */
+  function b64urlText(s) {
+    var A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    s = String(s || '').replace(/-/g, '+').replace(/_/g, '/').replace(/=+$/, '');
+    var out = '', bits = 0, acc = 0;
+    for (var i = 0; i < s.length; i++) {
+      var v = A.indexOf(s.charAt(i));
+      if (v < 0) return null;
+      acc = (acc << 6) | v; bits += 6;
+      if (bits >= 8) { bits -= 8; out += String.fromCharCode((acc >> bits) & 255); }
+    }
+    try { return decodeURIComponent(escape(out)); } catch (e) { return out; }
+  }
+  function tokenClaims(token) {
+    try { return JSON.parse(b64urlText(String(token || '').split('.')[1]) || 'null'); } catch (e) { return null; }
+  }
+  function owesCode(s) {
+    var f = s && s.user && s.user.factors;
+    if (!Array.isArray(f) || !f.some(function (x) { return x && x.status === 'verified'; })) return false;
+    var c = tokenClaims(s.access_token);
+    return !(c && c.aal === 'aal2');
+  }
+  /* A sign in on the cover that still owes its code says so, and the cover
+     asks for it before going on. */
+  function gate(s, out) { if (owesCode(s)) out.mfa = true; return out; }
+  /* Six digits, as every authenticator app shows them; spaces are allowed
+     because some apps print the code as two groups of three. */
+  function totpOf(raw) { var t = String(raw || '').replace(/\s/g, ''); return /^\d{6}$/.test(t) ? t : null; }
+  /* The one verified authenticator, from the server's own list, which
+     supabase-js reads fresh from the user rather than from the session. */
+  function verifiedFactor(c) {
+    return authCall(function () { return c.auth.mfa.listFactors(); }).then(function (res) {
+      if (res && res.error) return { error: res.error };
+      var t = res && res.data && res.data.totp;
+      return { factor: Array.isArray(t) && t.length ? t[0] : null, all: (res && res.data && res.data.all) || [] };
+    });
+  }
+  function codeCheck(c, code, factorId) {
+    var t = totpOf(code);
+    if (!t) return Promise.resolve({ ok: false, reason: 'badCode' });
+    var found = factorId ? Promise.resolve({ factor: { id: factorId } }) : verifiedFactor(c);
+    return found.then(function (f) {
+      if (f.error) return refused(f);
+      if (!f.factor) return { ok: false, reason: 'error', error: 'no authenticator on this account' };
+      return authCall(function () {
+        return c.auth.mfa.challengeAndVerify({ factorId: f.factor.id, code: t });
+      }).then(function (res) {
+        return res && res.error ? refused(res) : { ok: true, factorId: f.factor.id };
+      });
+    });
+  }
+  /* The cover's half: the code that finishes a sign in. The session it lifts
+     is the one the password made, so it is stored where the app's client
+     reads it, already at aal2. */
+  function mfaVerify(code) {
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return codeCheck(c, code);
+  }
+  /* "Use another account" from the code step leaves nothing half signed in
+     on this device. Local scope, so the reader's other devices stay as they
+     were. */
+  function coverSignOut() {
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: true });
+    return authCall(function () { return c.auth.signOut({ scope: 'local' }); }).then(function () { return { ok: true }; });
+  }
+
+  /* The app's half, on the session the app already holds: whether it is on,
+     turning it on, and turning it off. Turning it on is two steps, because an
+     authenticator that has never shown a code is not proven to hold the
+     secret: enroll returns the QR code and the key, and the first code the
+     app shows confirms it (and lifts this session to aal2 as it does).
+     Turning it off asks for a current code first, so a phone left unlocked is
+     not enough to take the second step away. */
+  function appReady() {
+    if (!client) return { ok: false, reason: 'off' };
+    if (!session) return { ok: false, reason: 'signedOut' };
+    return null;
+  }
+  function mfaStatus() {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return verifiedFactor(client).then(function (f) {
+      return f.error ? refused(f) : { ok: true, on: !!f.factor };
+    });
+  }
+  function mfaEnrollStart() {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return verifiedFactor(client).then(function (f) {
+      if (f.error) return refused(f);
+      if (f.factor) return { ok: false, reason: 'already' };
+      /* A setup that was started and never confirmed leaves an unverified
+         factor behind, and Supabase caps how many there may be, so those go
+         first. They never counted for anything: only a verified one asks
+         for a code. */
+      var stale = f.all.filter(function (x) { return x && x.factor_type === 'totp' && x.status !== 'verified'; });
+      return stale.reduce(function (p, x) {
+        return p.then(function () { return authCall(function () { return client.auth.mfa.unenroll({ factorId: x.id }); }); });
+      }, Promise.resolve()).then(function () {
+        return authCall(function () {
+          return client.auth.mfa.enroll({ factorType: 'totp', issuer: 'inCommon', friendlyName: 'inCommon ' + Date.now() });
+        });
+      }).then(function (res) {
+        if (res && res.error) return refused(res);
+        var d = (res && res.data) || {}, t = d.totp || {};
+        if (!d.id || !t.qr_code || !t.secret) return { ok: false, reason: 'error', error: 'no authenticator returned' };
+        return { ok: true, factorId: d.id, qr: t.qr_code, secret: t.secret, uri: t.uri || null };
+      });
+    });
+  }
+  function mfaEnrollVerify(factorId, code) {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    if (!factorId) return Promise.resolve({ ok: false, reason: 'error', error: 'no authenticator to confirm' });
+    return codeCheck(client, code, factorId);
+  }
+  function mfaDisable(code) {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return codeCheck(client, code).then(function (r) {
+      if (!r.ok) return r;
+      return authCall(function () { return client.auth.mfa.unenroll({ factorId: r.factorId }); }).then(function (res) {
+        return res && res.error ? refused(res) : { ok: true };
+      });
+    });
   }
 
   /* ---------- the Oracle ---------- */
@@ -942,7 +1125,9 @@
            counts toward the limit, and it is not the same as a refusal. */
         if (code === 'TIMEOUT' || st === 504) return { ok: false, reason: 'timeout' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
-        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        /* MFA_REQUIRED is a session that never entered its code; to the page
+           it is signed out, and the cover asks for the code. */
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
         if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
@@ -979,7 +1164,7 @@
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
         if (code === 'ALREADY') return { ok: false, reason: 'already' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
-        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
       });
@@ -1009,6 +1194,7 @@
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
+      owesCode: !!held,
       lastPushAt: lastPushAt || null,
       pendingOps: loadOutbox().length,
       VERSION: VERSION
@@ -1044,7 +1230,8 @@
 
     client.auth.onAuthStateChange(function (_event, s) {
       var had = !!session;
-      session = s || null;
+      held = owesCode(s) ? s : null;
+      session = held ? null : (s || null);
       notify();
       if (session && !had) push();
     });
@@ -1083,6 +1270,13 @@
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    mfaVerify: mfaVerify,
+    coverSignOut: coverSignOut,
+    mfaStatus: mfaStatus,
+    mfaEnrollStart: mfaEnrollStart,
+    mfaEnrollVerify: mfaEnrollVerify,
+    mfaDisable: mfaDisable,
+    owesCode: owesCode,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app
        plainly has data are a consent gate working as designed, and counts
@@ -1105,7 +1299,7 @@
     /* Test hooks: run-module-tests.js injects these instead of the vendored
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
-    _setClientForTests: function (c, s) { client = c; session = s || null; },
+    _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
     _setConfigForTests: function (o) { cfg = o; }
   };
 

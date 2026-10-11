@@ -263,7 +263,8 @@
     font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   }
   .mailform[data-mode="in"] .pw, .mailform[data-mode="set"] .pw,
-  .mailform[data-mode="forgot"] #mailaddr, .mailform[data-mode="code"] #mailcode { flex: 1 1 0; }
+  .mailform[data-mode="forgot"] #mailaddr, .mailform[data-mode="code"] #mailcode,
+  .mailform[data-mode="mfa"] #mailcode { flex: 1 1 0; }
   /* Already signed in, the form is one button, Continue, the width of the
      fields it stands in for. */
   .mailform[data-mode="back"] .signin { flex: 1 1 100%; justify-content: center; }
@@ -285,6 +286,11 @@
   .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
   .mailform .eye svg { width: 20px; height: 20px; display: block; }
   .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
+  /* Turnstile's slot. The widget runs out of sight and only draws itself when
+     Cloudflare wants somebody to tick a box, so the slot is empty, and takes
+     no room, for nearly everybody. */
+  .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; }
+  .mailform .captcha:empty { display: none; }
   .mailform .field::placeholder { color: #9aa0a6; }
   .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .mailform .signin { padding: 0 18px; flex: none; }
@@ -387,6 +393,7 @@
         </button>
       </span>
       <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
+      <div class="captcha" aria-live="polite"></div>
       <button class="signin" type="submit">Sign in</button>
       <label class="news keep"><input id="rememberopt" type="checkbox" checked> Remember me</label>
       <button class="signin alt" type="button" data-to="up">Create New Account</button>
@@ -485,6 +492,10 @@
   /* The module once it has loaded; the number a code was texted to, and why;
      and who is signed in already, when somebody is. */
   var Cmod = null, codeFor = null, backAs = null;
+  /* What a sign in goes on to once its two-step code is in: the app, the
+     app by replacing this page (a return from an email), or choosing a new
+     password (a recovery that owed a code). */
+  var afterMfa = null;
   var ANYWAY = ' You can still continue without an account.';
   var LINK_AGAIN = ' Sign in with your password, or choose “Forgot password?” for a new link.';
   var WHY = {
@@ -511,7 +522,12 @@
     nocode: 'Enter the code from the text.',
     badCode: 'That code is not right or has expired. Check the text, or choose “Text me a new code”.',
     phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
-    phoneTaken: 'That number is already on an account.'
+    phoneTaken: 'That number is already on an account.',
+    captcha: 'The check that keeps automated sign ups out did not finish. Try again, and if it keeps happening, something in this browser may be blocking challenges.cloudflare.com.' + ANYWAY,
+    captchaAsk: 'One more step: tick the box below to show this is a person.',
+    nomfa: 'Enter the 6 digit code your authenticator app is showing.',
+    mfaBad: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
+    mfaAsk: 'Two-step sign in is on for this account. Enter the 6 digit code your authenticator app is showing.'
   };
   /* What each mode shows, says and asks the password manager for. A mode is
      a set of rows, never a second form, so the address typed in one is still
@@ -529,7 +545,12 @@
     set: { button: 'Save password', busy: 'Saving your password.', pass: true, passAuto: 'new-password',
       passLabel: 'New password, 8 or more characters', passHint: 'New password, 8 or more', noAddr: true, noSkip: true, to: [] },
     code: { button: 'Verify', busy: 'Checking the code.', pass: false, noAddr: true, code: true, keep: true, resend: true,
-      to: ['in'], back: 'Back to sign in' },
+      codeLabel: 'Code from the text', codeHint: 'Code from the text', to: ['in'], back: 'Back to sign in' },
+    /* Two-step sign in: the password passed and the account asks for the code
+       its authenticator app shows as well. "Use another account" signs the
+       half finished session out of this browser rather than leaving it. */
+    mfa: { button: 'Verify', busy: 'Checking the code.', pass: false, noAddr: true, code: true,
+      codeLabel: 'Code from your authenticator app', codeHint: '6 digit code', to: ['in'], back: 'Use another account' },
     back: { button: 'Continue', pass: false, noAddr: true, noSkip: true, to: ['in'], back: 'Use another account' }
   };
   /* A phone is digits and the punctuation people write numbers with. This only
@@ -554,6 +575,7 @@
     addr.hidden = addrLabel.hidden = !!d.noAddr;
     pw.hidden = passLabel.hidden = !d.pass;
     codeIn.hidden = codeLabel.hidden = !d.code;
+    if (d.code) { codeIn.setAttribute('placeholder', d.codeHint); codeLabel.textContent = d.codeLabel; }
     if (d.pass) {
       pass.setAttribute('autocomplete', d.passAuto);
       pass.setAttribute('placeholder', d.passHint);
@@ -571,6 +593,7 @@
        hand, so the way on without one would be the wrong sentence. */
     skip.hidden = !opened || !!d.noSkip;
     if (m === 'back') say('Signed in as ' + backAs + '.');
+    if (m === 'mfa' && backAs && !msg.textContent) say('Signed in as ' + backAs + '. ' + WHY.mfaAsk);
     /* Focus goes to the first thing still to do: the code, the address, the
        password, the newsletter box nobody has seen yet, then the button. */
     if (focus) (d.code ? codeIn : d.noAddr ? (d.pass ? pass : sendBtn) : !addr.value ? addr
@@ -582,6 +605,7 @@
     modeBtns[mi].addEventListener('click', function () {
       if (busy) return;
       say('');
+      if (mode === 'mfa') { afterMfa = null; backAs = null; cloud().then(function (C) { return C.coverSignOut(); }, function () {}); }
       setMode(this.getAttribute('data-to'), true);
     });
   }
@@ -616,9 +640,24 @@
       }
       var st = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'), u = st && st.user;
       if (!st || !st.refresh_token || !u) return null;
+      storedOwes = owesCode(st);
       return u.email || (u.phone ? showPhone('+' + String(u.phone).replace(/^\+/, '')) : '') || 'your account';
     } catch (e) { return null; }
   }
+  /* A stored session that passed its password and never entered its code.
+     The same rule as owesCode() in incommon-cloud.js, which this page cannot
+     call before the reader asks for anything, and K46 holds the two equal:
+     a verified authenticator on the user, and a token whose aal is not aal2.
+     A token that cannot be read owes the code. */
+  function owesCode(st) {
+    try {
+      var f = st && st.user && st.user.factors;
+      if (!Array.isArray(f) || !f.some(function (x) { return x && x.status === 'verified'; })) return false;
+      var p = String(st.access_token || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(p + '==='.slice((p.length + 3) % 4))).aal !== 'aal2';
+    } catch (e) { return true; }
+  }
+  var storedOwes = false;
   var signedIn = signedInAs();
   /* After a sign in: the preference and the login go to the module, and with
      the box ticked the password goes to the browser's password manager, which
@@ -648,6 +687,93 @@
       document.head.appendChild(s);
     });
   }
+  /* CLOUDFLARE TURNSTILE (11 October 2026). Supabase's CAPTCHA protection asks
+     for a token on the five calls that can be scripted to make accounts or
+     send email and texts: sign in, sign up, the reset email, a text code and
+     a resend. The widget comes from Cloudflare, so it is the one third party
+     script on this page, and it is not loaded until the reader starts using
+     the form: a visitor who only looks at the cover sends nothing anywhere.
+
+     The site key below is public by design (it names the widget, and the page
+     cannot work without showing it); the secret key lives only in the Supabase
+     dashboard. Empty means the check is off and every call goes as before.
+     With the key set and CAPTCHA protection still off in Supabase, the token
+     is sent and ignored, which is how this page ships before the project
+     switches the check on. The
+     order matters, and docs/TURNSTILE-SETUP.md says so: this key first, then
+     CAPTCHA protection in Supabase, never the other way round.
+
+     The widget is rendered once, invisible (interaction-only), run on demand
+     (execute), and reset after every call, because a token is good once. It is
+     asked early, on the first focus inside the form, so the token is usually
+     waiting by the time the reader presses the button. */
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
+  var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  var capBox = form.querySelector('.captcha');
+  var ts = { loading: null, id: null, wait: null, timer: null, running: false };
+  function capSettle(ok, val) {
+    var w = ts.wait;
+    ts.running = false;
+    if (!w) return;
+    ts.wait = null;
+    clearTimeout(ts.timer);
+    if (ok) w.ok(val); else w.fail(val);
+  }
+  function capLoad() {
+    return ts.loading || (ts.loading = load(TS_SRC).then(function () {
+      var T = window.turnstile;
+      if (!T || typeof T.render !== 'function') throw new Error('turnstile missing');
+      ts.id = T.render(capBox, {
+        sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark', size: 'flexible',
+        execution: 'execute', appearance: 'interaction-only', 'response-field': false,
+        callback: function (t) { capSettle(true, t); },
+        'error-callback': function () { capSettle(false); return true; },
+        'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} },
+        'before-interactive-callback': function () { say(WHY.captchaAsk); }
+      });
+      return T;
+    }).catch(function (e) { ts.loading = null; throw e; }));
+  }
+  /* A token for one call: the one waiting if it is still fresh, otherwise a
+     new run of the widget. Two minutes is long enough for somebody who has to
+     tick the box, and short enough that a blocked widget says so. */
+  function captchaToken() {
+    if (!TURNSTILE_SITE_KEY) return Promise.resolve(null);
+    return capLoad().then(function (T) {
+      var have = ts.id != null && T.getResponse(ts.id);
+      if (have && !(T.isExpired && T.isExpired(ts.id))) return have;
+      return new Promise(function (ok, fail) {
+        /* A run already under way (the early one, from the first focus) is
+           waited for rather than started again. */
+        var running = ts.running;
+        if (ts.wait) { var old = ts.wait; ts.wait = null; clearTimeout(ts.timer); old.fail(); }
+        ts.wait = { ok: ok, fail: fail };
+        ts.timer = setTimeout(function () { capSettle(false); }, 120000);
+        if (running) return;
+        ts.running = true;
+        try { T.execute(ts.id); } catch (e) { try { T.reset(ts.id); T.execute(ts.id); } catch (e2) { capSettle(false); } }
+      });
+    }).catch(function () { var e = new Error('captcha'); e.captcha = true; throw e; });
+  }
+  /* Spent: the token went with a call, so the widget starts again for the
+     next one. */
+  function captchaSpent() {
+    ts.running = false;
+    if (window.turnstile && ts.id != null) { try { window.turnstile.reset(ts.id); } catch (e) {} }
+  }
+  /* Asked early: the first focus inside the form loads the widget and runs it,
+     so the token is usually ready before the button is pressed. */
+  form.addEventListener('focusin', function warm() {
+    if (!TURNSTILE_SITE_KEY) return;
+    form.removeEventListener('focusin', warm);
+    capLoad().then(function (T) {
+      if (ts.running || T.getResponse(ts.id)) return;
+      ts.running = true;
+      try { T.execute(ts.id); } catch (e) { ts.running = false; }
+    }, function () {});
+  });
+  /* The five calls the server asks a token of. */
+  function needsToken(m) { return m === 'in' || m === 'up' || m === 'forgot'; }
   /* A failed load is forgotten, so the next press tries again rather than
      failing at once on the first attempt's broken promise. The module is asked
      for by its VERSION, because the deployed worker keeps it cache first: a
@@ -656,7 +782,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.4.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.6.0'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -691,6 +817,7 @@
     say('Signing you in.');
     cloud().then(function (C) { return C.adoptSession(tokens.at, tokens.rt); }).then(function (r) {
       settle();
+      if (r.ok && r.mfa) { toMfa(tokens.kind === 'recovery' ? { kind: 'set', who: r.email } : { kind: 'link', login: r.email || '' }); return; }
       if (r.ok && tokens.kind === 'recovery') {
         /* A link to choose a new password: the reader is signed in now, and
            the one thing left is the password itself. */
@@ -712,6 +839,7 @@
     say('Signing you in.');
     cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
       clean();
+      if (r.ok && r.mfa) { settle(); toMfa({ kind: 'link', login: r.email || '' }); return; }
       if (r.ok) { keep(r.email || '', ''); location.replace(enter.getAttribute('href')); return; }
       if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
       settle();
@@ -728,7 +856,17 @@
        is dropped so a reload is an ordinary visit. */
     clean();
     document.body.classList.add('asked');
+    /* The app sends a reader here too when its session still owes its
+       two-step code, and then the code is what is left to do. */
+    if (signedIn && storedOwes) { backAs = signedIn; afterMfa = { kind: 'go' }; mode = 'mfa'; }
     open(true);
+    if (mode === 'mfa') say('Signed in as ' + backAs + '. ' + WHY.mfaAsk);
+  } else if (signedIn && storedOwes) {
+    /* Signed in with the password and never with the code: the code is the
+       way on, not Continue. */
+    backAs = signedIn;
+    afterMfa = { kind: 'go' };
+    mode = 'mfa';
   } else if (signedIn) {
     /* Somebody who is signed in already is offered the way on, not the form
        they filled in last time. The Oracle's ?signin=1 is left out on
@@ -807,15 +945,28 @@
       ? 'A code is on its way to ' + showPhone(phone) + '. Enter it here to finish making your account.'
       : 'If ' + showPhone(phone) + ' has an account, a code is on its way to it. Enter it here, then choose a new password.'));
   }
+  /* The two-step code. The session the password (or the link, or the text)
+     made is in this browser already, at aal1; the code lifts it to aal2, and
+     then the reader goes on to whatever the sign in was for. */
+  function toMfa(after) {
+    afterMfa = after;
+    codeIn.value = '';
+    open(false);
+    setMode('mfa', true);
+    say(WHY.mfaAsk);
+  }
   resendBtn.addEventListener('click', function () {
     if (busy || !codeFor) return;
     hold();
     say('Sending another code.');
-    cloud().then(function (C) { return C.phoneCodeResend(codeFor.phone, codeFor.purpose); }).then(function (r) {
+    Promise.all([cloud(), captchaToken()]).then(function (a) {
+      return a[0].phoneCodeResend(codeFor.phone, codeFor.purpose, { captchaToken: a[1] });
+    }).then(function (r) {
       settle();
+      captchaSpent();
       say(r.ok ? 'Another code is on its way to ' + showPhone(codeFor.phone) + '.' : WHY[r.reason] || WHY.error);
       codeIn.focus();
-    }, function () { settle(); say(WHY.off); });
+    }, function (e) { settle(); captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
   });
 
   form.addEventListener('submit', function (ev) {
@@ -824,21 +975,51 @@
     var m = mode, d = MODES[m];
     if (m === 'back') { goIn(); return; }
     if (m === 'code' && !codeIn.value.trim()) { say(WHY.nocode); codeIn.focus(); return; }
+    if (m === 'mfa' && !codeIn.value.trim()) { say(WHY.nomfa); codeIn.focus(); return; }
     var login = addr.value.trim(), ph = isPhone(login);
     reveal(false);
     hold();
     say(ph && d.phoneBusy || d.busy);
-    cloud().then(function (C) {
-      if (m === 'in') return C.passwordSignIn(login, pass.value);
+    var tokenFor = needsToken(m);
+    Promise.all([cloud(), tokenFor ? captchaToken() : null]).then(function (a) {
+      var C = a[0], capt = { captchaToken: a[1] };
+      if (m === 'in') return C.passwordSignIn(login, pass.value, capt);
       /* The newsletter answer goes with the sign up, and only there. Supabase
          keeps it only when this call creates the account, which is when the
          owner asked for it to be asked. A phone has no address to write to. */
-      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? {} : { newsletter: !!newsBox.checked });
-      if (m === 'forgot') return C.passwordResetStart(login, here);
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? capt : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken });
+      if (m === 'forgot') return C.passwordResetStart(login, here, capt);
       if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
+      if (m === 'mfa') return C.mfaVerify(codeIn.value);
       return C.passwordSet(pass.value);
     }).then(function (r) {
       settle();
+      if (tokenFor) captchaSpent();
+      /* The password, or the text's code, passed and the account asks for its
+         two-step code as well. The password is held only until then, for the
+         browser's password manager, and the field is cleared now. */
+      if (r.ok && r.mfa) {
+        var recovering = m === 'code' && codeFor && codeFor.purpose === 'recover';
+        toMfa(recovering ? { kind: 'set', who: r.email || showPhone(r.phone) }
+          : { kind: 'in', login: login || (codeFor && codeFor.phone) || r.email || '', secret: pass.value });
+        pass.value = '';
+        return;
+      }
+      if (r.ok && m === 'mfa') {
+        var a = afterMfa || { kind: 'go' };
+        afterMfa = null;
+        codeIn.value = '';
+        if (a.kind === 'set') {
+          setMode('set', true);
+          say(a.who ? 'Choose a new password for ' + a.who + '.' : 'Choose a new password.');
+          return;
+        }
+        keep(a.login || '', a.secret || '');
+        say('Signed in.');
+        if (a.kind === 'link') location.replace(enter.getAttribute('href'));
+        else goIn();
+        return;
+      }
       /* A sign up or a new password by phone goes on to the code the text
          brings; a new password by phone then comes back here to choose it. */
       if (r.ok && r.via === 'phone') { toCode(r.phone, m === 'up' ? 'signup' : 'recover'); return; }
@@ -863,11 +1044,11 @@
          reader is taken to the code, and asks for one when ready: a text is
          sent only when somebody presses for it. */
       if (r.reason === 'phoneUnconfirmed' && Cmod && Cmod.normPhone(login)) { toCode(Cmod.normPhone(login), 'signup', WHY.phoneUnconfirmed); return; }
-      say(WHY[r.reason] || WHY.error);
+      say(m === 'mfa' && r.reason === 'badCode' ? WHY.mfaBad : WHY[r.reason] || WHY.error);
       if (r.reason === 'invalid') addr.focus();
       else if (r.reason === 'badCode') codeIn.focus();
       else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
-    }, function () { settle(); say(WHY.off); });
+    }, function (e) { settle(); if (tokenFor) captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
   });
 })();
 </script>

@@ -2012,6 +2012,182 @@ async function runCloudTests() {
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var bThrow = await CO.billingPortal('https://x.invalid/');
   t('K34', 'a thrown billing call comes back as offline', { ok: false, reason: 'offline' }, { ok: bThrow.ok, reason: bThrow.reason });
+
+  /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
+     October 2026. A password that passed on an account with an authenticator
+     makes a session at aal1 that still owes its code: the cover asks for it,
+     the app holds that session aside as signed out, and the code lifts it to
+     aal2. Turning it on proves the app holds the secret with a first code,
+     and turning it off asks for a current one. */
+  function jwtOf(claims) {
+    var b = function (o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    return b({ alg: 'HS256', typ: 'JWT' }) + '.' + b(claims) + '.sig';
+  }
+  var VER = [{ id: 'f1', factor_type: 'totp', status: 'verified' }];
+  var UNV = [{ id: 'f0', factor_type: 'totp', status: 'unverified' }];
+  var sess = function (factors, aal, extra) {
+    return Object.assign({ access_token: aal === 'bad' ? 'not.a-token!' : aal === 'none' ? '' : jwtOf({ sub: 'u46', aal: aal }),
+      refresh_token: 'r', user: Object.assign({ id: 'u46', email: 'reader@k46.invalid', factors: factors }, extra || {}) });
+  };
+  var owesCases = {
+    nothing: null, noUser: { access_token: jwtOf({ aal: 'aal1' }) }, noFactors: sess(undefined, 'aal1'),
+    unverifiedOnly: sess(UNV, 'aal1'), verifiedAal1: sess(VER, 'aal1'), verifiedAal2: sess(VER, 'aal2'),
+    verifiedNoToken: sess(VER, 'none'), verifiedBadToken: sess(VER, 'bad')
+  };
+  var CM = loadIsolatedCloud({ createClient: function () { return {}; } });
+  var coverOwesSrc = (coverSrc.match(/function owesCode\(st\) \{[\s\S]*?\n  \}/) || [])[0];
+  var coverOwes = coverOwesSrc ? vm.runInNewContext('(' + coverOwesSrc + ')', { atob: function (s) { return Buffer.from(s, 'base64').toString('binary'); }, JSON: JSON, Array: Array, String: String }) : null;
+  var modOwes = {}, covOwes = {};
+  Object.keys(owesCases).forEach(function (k) { modOwes[k] = CM.owesCode(owesCases[k]); covOwes[k] = coverOwes ? coverOwes(owesCases[k]) : 'missing'; });
+  t('K46', 'a session owes its two-step code exactly when the user has a verified authenticator and the token is not aal2, an unreadable token owes it, and the cover reads stored sessions by the same rule as the module', {
+    module: { nothing: false, noUser: false, noFactors: false, unverifiedOnly: false, verifiedAal1: true, verifiedAal2: false, verifiedNoToken: true, verifiedBadToken: true },
+    coverSame: true
+  }, { module: modOwes, coverSame: JSON.stringify(modOwes) === JSON.stringify(covOwes) });
+
+  /* A cover client whose sign ins come back owing a code or not, and whose
+     authenticator calls are recorded. */
+  function mfaHarness(o) {
+    o = o || {};
+    var h = { verify: [], challenge: [], listed: 0, unenroll: [], enroll: [], signOut: [] };
+    var s = o.session || sess(VER, 'aal1');
+    var mfa = {
+      listFactors: function () { h.listed++; var all = o.all || (o.factors || VER); return Promise.resolve({ data: { all: all, totp: all.filter(function (f) { return f.status === 'verified'; }) }, error: null }); },
+      challengeAndVerify: function (a) { h.verify.push(a); return Promise.resolve(o.verifyError ? { data: null, error: o.verifyError } : { data: { access_token: jwtOf({ aal: 'aal2' }) }, error: null }); },
+      unenroll: function (a) { h.unenroll.push(a); return Promise.resolve({ data: { id: a.factorId }, error: null }); },
+      enroll: function (a) { h.enroll.push(a); return Promise.resolve({ data: { id: 'fNew', type: 'totp', totp: { qr_code: 'data:image/svg+xml;utf-8,<svg/>', secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' } }, error: null }); }
+    };
+    var auth = {
+      onAuthStateChange: function (cb) { h.onAuth = cb; },
+      signInWithPassword: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      setSession: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      exchangeCodeForSession: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      verifyOtp: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      signOut: function (a) { h.signOut.push(a); return Promise.resolve({ error: null }); },
+      mfa: mfa
+    };
+    h.client = { auth: auth, from: function (table) { return fakeClient([]).from(table); } };
+    h.C = loadIsolatedCloud({ createClient: function () { return h.client; } });
+    return h;
+  }
+  var mOwe = mfaHarness(), mFree = mfaHarness({ session: sess(undefined, 'aal1') });
+  var siOwe = await mOwe.C.passwordSignIn('reader@k46.invalid', 'correct horse');
+  var siFree = await mFree.C.passwordSignIn('reader@k46.invalid', 'correct horse');
+  var adOwe = await mOwe.C.adoptSession('at', 'rt'), exOwe = await mOwe.C.oauthFinish('c'), phOwe = await mOwe.C.phoneCodeCheck('+15551234567', '123456');
+  t('K47', 'every way the cover makes a session says when it still owes its two-step code (password, emailed link, old sign in link, texted code), and an account without one is not asked', {
+    password: { ok: true, mfa: true }, free: { ok: true, mfa: false }, link: true, oldLink: true, text: true
+  }, { password: { ok: siOwe.ok, mfa: !!siOwe.mfa }, free: { ok: siFree.ok, mfa: !!siFree.mfa }, link: !!adOwe.mfa, oldLink: !!exOwe.mfa, text: !!phOwe.mfa });
+
+  var mV = mfaHarness();
+  var vShort = await mV.C.mfaVerify('12345'), vCalls = mV.verify.length;
+  var vOk = await mV.C.mfaVerify(' 123 456 ');
+  var mBad = mfaHarness({ verifyError: { code: 'mfa_verification_failed', message: 'Invalid TOTP code entered', status: 422 } });
+  var vBad = await mBad.C.mfaVerify('000000');
+  var mNone = mfaHarness({ factors: [] });
+  var vNone = await mNone.C.mfaVerify('123456');
+  var soOut = await mV.C.coverSignOut();
+  t('K48', 'the cover checks a two-step code against the account\'s verified authenticator: anything but six digits is refused without asking, spaces are allowed, a wrong code is badCode, no authenticator is an error, and leaving the step signs this browser out only', {
+    shortReason: 'badCode', shortCalls: 0, ok: true, sent: { factorId: 'f1', code: '123456' }, bad: 'badCode', none: 'error', signOut: { ok: true, scope: 'local' }
+  }, { shortReason: vShort.reason, shortCalls: vCalls, ok: vOk.ok, sent: mV.verify[0], bad: vBad.reason, none: vNone.reason,
+    signOut: { ok: soOut.ok, scope: mV.signOut[0] && mV.signOut[0].scope } });
+
+  var mG = mfaHarness();
+  mG.C.init({ url: 'https://k49-test.invalid', anonKey: 'k49-fake-anon', core: {}, pm: fakePM([{ id: 'p1', name: 'R' }], {}), storage: clStore() });
+  mG.onAuth('SIGNED_IN', sess(VER, 'aal1'));
+  var gHeld = mG.C.status();
+  var gOracle = await mG.C.oracleRead({ period: 'daily' }), gPush = await mG.C.push(), gMfa = await mG.C.mfaStatus();
+  mG.onAuth('MFA_CHALLENGE_VERIFIED', sess(VER, 'aal2'));
+  var gUp = mG.C.status();
+  mG.onAuth('SIGNED_IN', sess(undefined, 'aal1'));
+  var gPlain = mG.C.status();
+  t('K49', 'in the app a session that still owes its code is held aside: the app reads as signed out and says why, nothing is pushed and no function is asked, and the same account at aal2, or an account without two-step, is signed in', {
+    held: { mode: 'local', owesCode: true }, oracle: 'signedOut', push: 'no-session', status: 'signedOut',
+    lifted: { mode: 'cloud', owesCode: false }, plain: { mode: 'cloud', owesCode: false }
+  }, { held: { mode: gHeld.mode, owesCode: gHeld.owesCode }, oracle: gOracle.reason, push: gPush.reason, status: gMfa.reason,
+    lifted: { mode: gUp.mode, owesCode: gUp.owesCode }, plain: { mode: gPlain.mode, owesCode: gPlain.owesCode } });
+
+  var appSess = sess(undefined, 'aal1');
+  var eOut = mfaHarness({ all: UNV.concat([{ id: 'f9', factor_type: 'totp', status: 'unverified' }]) });
+  eOut.C._setClientForTests(eOut.client, null);
+  var enOut = await eOut.C.mfaEnrollStart();
+  eOut.C._setClientForTests(eOut.client, appSess);
+  var stOff = await eOut.C.mfaStatus();
+  var en = await eOut.C.mfaEnrollStart();
+  var enVerify = await eOut.C.mfaEnrollVerify(en.factorId, '654321');
+  var eOn = mfaHarness();
+  eOn.C._setClientForTests(eOn.client, sess(VER, 'aal2'));
+  var stOn = await eOn.C.mfaStatus(), enAgain = await eOn.C.mfaEnrollStart();
+  t('K50', 'turning two-step on needs a session, clears setups that were never confirmed, asks for an authenticator named inCommon, hands back the QR code and the setup key, and is confirmed only by a first code for that new authenticator; an account that has it on is told so', {
+    signedOut: 'signedOut', statusOff: { ok: true, on: false }, cleared: ['f0', 'f9'],
+    enroll: { factorType: 'totp', issuer: 'inCommon' }, got: { ok: true, factorId: 'fNew', qr: true, secret: 'JBSWY3DPEHPK3PXP' },
+    confirmed: { ok: true, sent: { factorId: 'fNew', code: '654321' } }, statusOn: { ok: true, on: true }, already: 'already'
+  }, { signedOut: enOut.reason, statusOff: stOff, cleared: eOut.unenroll.map(function (u) { return u.factorId; }),
+    enroll: { factorType: eOut.enroll[0] && eOut.enroll[0].factorType, issuer: eOut.enroll[0] && eOut.enroll[0].issuer },
+    got: { ok: en.ok, factorId: en.factorId, qr: /^data:image\/svg/.test(en.qr || ''), secret: en.secret },
+    confirmed: { ok: enVerify.ok, sent: eOut.verify[0] }, statusOn: stOn, already: enAgain.reason });
+
+  var dBad = mfaHarness({ verifyError: { code: 'mfa_verification_failed', message: 'Invalid TOTP code entered' } });
+  dBad.C._setClientForTests(dBad.client, sess(VER, 'aal2'));
+  var offBad = await dBad.C.mfaDisable('111111');
+  var dOk = mfaHarness();
+  dOk.C._setClientForTests(dOk.client, sess(VER, 'aal2'));
+  var offOk = await dOk.C.mfaDisable('222222');
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(401, 'MFA_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var mfaOracle = await CO.oracleRead({ period: 'daily' }), mfaBill = await CO.billingStatus();
+  t('K51', 'turning two-step off asks for a current code first and removes nothing on a wrong one; and a server that refuses a session for its missing code reads to the page as signed out', {
+    wrong: { ok: false, reason: 'badCode', removed: 0 }, right: { ok: true, removed: ['f1'] }, oracle: 'signedOut', billing: 'signedOut'
+  }, { wrong: { ok: offBad.ok, reason: offBad.reason, removed: dBad.unenroll.length },
+    right: { ok: offOk.ok, removed: dOk.unenroll.map(function (u) { return u.factorId; }) }, oracle: mfaOracle.reason, billing: mfaBill.reason });
+
+  /* ---- K52-K53: Cloudflare Turnstile, 11 October 2026. With CAPTCHA
+     protection on, Supabase asks a token of the five calls that can be scripted
+     (password sign in, sign up, the reset email, a text code, a resend) and of
+     nothing else. The cover hands the token in; without one the calls go
+     exactly as before, which is what lets the page ship first. */
+  var tk = { captchaToken: 'tok-k52' };
+  var gT = oauthHarness();
+  await gT.C.passwordSignIn('reader@k52.invalid', 'correct horse', tk);
+  await gT.C.passwordSignIn('(555) 123-4567', 'correct horse', tk);
+  await gT.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: true, captchaToken: 'tok-k52' });
+  await gT.C.passwordSignUp('(555) 123-4567', 'correct horse', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('(555) 123-4567', 'https://k52.invalid/', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'signup', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'recover', tk);
+  await gT.C.phoneCodeCheck('+15551234567', '123456');
+  var gN = oauthHarness();
+  await gN.C.passwordSignIn('reader@k52.invalid', 'correct horse');
+  await gN.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: false });
+  await gN.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/');
+  await gN.C.phoneCodeResend('(555) 123-4567', 'signup');
+  var tokOf = function (o) { return o && o.captchaToken; };
+  t('K52', 'a Turnstile token rides on every call the server asks one of (sign in by email and by phone, sign up by both, the reset email and the text, both resends), never on a code check, and with no token the calls are sent exactly as before', {
+    withToken: { pw: ['tok-k52', 'tok-k52'], up: ['tok-k52', 'tok-k52'], newsletterKept: true, reset: 'tok-k52', otp: ['tok-k52', 'tok-k52'], resend: 'tok-k52', verifyCarries: false },
+    without: { pwOptions: false, upToken: false, resetToken: false, resendOptions: false }
+  }, {
+    withToken: { pw: gT.pw.map(function (a) { return tokOf(a.options); }), up: gT.up.map(function (a) { return tokOf(a.options); }),
+      newsletterKept: !!(gT.up[0].options && gT.up[0].options.data && gT.up[0].options.data.newsletter === true),
+      reset: tokOf(gT.reset[0] && gT.reset[0].opts), otp: gT.otp.map(function (a) { return tokOf(a.options); }),
+      resend: tokOf(gT.resend[0] && gT.resend[0].options), verifyCarries: JSON.stringify(gT.verify).indexOf('tok-k52') !== -1 },
+    without: { pwOptions: 'options' in gN.pw[0], upToken: 'captchaToken' in (gN.up[0].options || {}), resetToken: 'captchaToken' in (gN.reset[0].opts || {}),
+      resendOptions: 'options' in gN.resend[0] }
+  });
+  var capReasons = {};
+  [['missing', { code: 'captcha_failed', message: 'captcha protection: request disallowed (no captcha_token found)', status: 400 }],
+   ['refused', { message: 'captcha protection: request disallowed (timeout-or-duplicate)', status: 400 }]].forEach(function (c) {
+    capReasons[c[0]] = null; capReasons['_' + c[0]] = c[1];
+  });
+  capReasons.missing = (await oauthHarness({ pwError: capReasons._missing }).C.passwordSignIn('reader@k52.invalid', 'x', tk)).reason;
+  capReasons.refused = (await oauthHarness({ upError: capReasons._refused }).C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', tk)).reason;
+  delete capReasons._missing; delete capReasons._refused;
+  var hdrSrc = fs.readFileSync(path.join(repo, 'deploy', 'v6.4', '_headers'), 'utf8');
+  var csp = (hdrSrc.match(/Content-Security-Policy: (.*)/) || [])[1] || '';
+  var dir = function (name) { return ((csp.match(new RegExp('(?:^|; )' + name + ' ([^;]*)')) || [])[1] || '').split(/\s+/); };
+  var tsSrc = (coverSrc.match(/var TS_SRC = '([^']+)'/) || [])[1] || '';
+  var tsOrigin = tsSrc ? new URL(tsSrc).origin : '';
+  t('K53', 'a refused or missing Turnstile token is a reason the cover can say, and the security headers let the cover reach the one Turnstile origin it loads, for its script and its frame, and nowhere else new', {
+    reasons: { missing: 'captcha', refused: 'captcha' }, origin: 'https://challenges.cloudflare.com', script: true, frame: true, connectUnchanged: true
+  }, { reasons: capReasons, origin: tsOrigin, script: dir('script-src').indexOf(tsOrigin) !== -1, frame: dir('frame-src').indexOf(tsOrigin) !== -1,
+    connectUnchanged: dir('connect-src').indexOf(tsOrigin) === -1 });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */

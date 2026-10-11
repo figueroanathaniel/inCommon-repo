@@ -53,6 +53,11 @@ const DAILY_LIMIT = Number(Deno.env.get("ORACLE_DAILY_LIMIT") ?? "6");
 // The owner's own addresses read in depth without a subscription, which is
 // how the Codex's admin role passed its paywall.
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+// An address counts only once it is confirmed. Matching the address alone let
+// anybody who reached it first, while Confirm email was off or before the owner
+// had signed up with it, read in depth for free.
+const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
+  !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 const ACTIVE = new Set(["active", "trialing"]);
 
 function thinkingFor(model: string, level: Thinking): Record<string, unknown> {
@@ -69,6 +74,24 @@ const CORS = {
 
 function reply(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+}
+
+// TWO-STEP SIGN IN. A reader who turned it on is served only on a session that
+// entered the code: a password alone makes a session at aal1, and the code
+// lifts it to aal2. auth.getUser() has just checked this token with the auth
+// server, so its claims can be read here without checking it again, and the
+// factors come from that same live answer rather than from anything the page
+// sent. A token that cannot be read owes the code: the side to fail on is the
+// closed one.
+function owesCode(req: Request, user: { factors?: { status?: string }[] | null }): boolean {
+  if (!(user.factors ?? []).some((f) => f.status === "verified")) return false;
+  try {
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const p = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(p + "===".slice((p.length + 3) % 4))).aal !== "aal2";
+  } catch {
+    return true;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -254,6 +277,7 @@ Deno.serve(async (req) => {
   const { data: who } = await asReader.auth.getUser();
   const user = who?.user;
   if (!user) return reply(401, { code: "SIGNED_OUT" });
+  if (owesCode(req, user)) return reply(401, { code: "MFA_REQUIRED" });
 
   // The table is written only from here. A reader may read their own rows and
   // nothing else, so nobody can add, change or remove the rows the daily limit
@@ -282,7 +306,7 @@ Deno.serve(async (req) => {
   // stored one is looked up, as the Codex did: a subscription that has lapsed
   // does not keep reading what it paid for on another device. The row is kept
   // current by the billing function (server/billing), from Stripe.
-  if (deep && !ADMINS.includes(String(user.email ?? "").toLowerCase())) {
+  if (deep && !isAdmin(user)) {
     const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
     const end = sub.data?.current_period_end ? Date.parse(sub.data.current_period_end) : null;
     const paid = !!sub.data && ACTIVE.has(sub.data.status) && (end === null || end > Date.now());
