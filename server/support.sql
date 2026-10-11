@@ -13,6 +13,10 @@
 -- Table Editor, support_requests, filtered on status = 'open', answer each by
 -- email from the address the reader gave, and set status to 'answered'.
 --
+-- No dollar sign appears outside the one tagged function body, because the
+-- dashboard's SQL Editor splits a script on dollar signs before it runs it:
+-- an email pattern ending in one cut the table definition short there.
+--
 -- A request is throttled by a trigger rather than by the page, because the
 -- page can be bypassed: five per email address per day, and two hundred across
 -- everybody per hour, which is far above real use and well below a flood.
@@ -22,7 +26,7 @@ create table if not exists public.support_requests (
   created_at  timestamptz not null default now(),
   user_id     uuid default auth.uid() references auth.users (id) on delete set null,
   topic       text not null check (topic in ('general', 'account', 'billing', 'privacy', 'delete', 'problem')),
-  email       text not null check (char_length(email) between 3 and 254 and email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),
+  email       text not null check (char_length(email) between 3 and 254 and email like '%_@_%._%' and email !~ '[[:space:]]'),
   message     text not null check (char_length(message) between 10 and 5000),
   status      text not null default 'open' check (status in ('open', 'answered', 'closed'))
 );
@@ -41,7 +45,7 @@ create policy "anyone may send a support request" on public.support_requests
   with check (status = 'open' and (user_id is null or user_id = (select auth.uid())));
 
 create or replace function public.support_requests_throttle() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public as $throttle$
 begin
   if (select count(*) from public.support_requests
       where lower(email) = lower(new.email) and created_at > now() - interval '1 day') >= 5 then
@@ -51,7 +55,7 @@ begin
     raise exception 'support_rate' using errcode = 'P0001';
   end if;
   return new;
-end $$;
+end $throttle$;
 
 drop trigger if exists support_requests_throttle on public.support_requests;
 create trigger support_requests_throttle before insert on public.support_requests
