@@ -2242,6 +2242,46 @@ states, accessible names and the sentences that say what a calculation cannot do
 (`availability()`, the missing birth time note) are not subheaders. Those exist
 so a reader is not misled, and they stay.
 
+## No disclaimers, and no line saying how a reading is made
+Decided by the owner on 11 October 2026, and it widens the section above. Small
+grey text that tells the reader what a screen is, how a number was worked out,
+where a reading came from, what leaves the device, or what a reading is not, is
+gone from both shells. The owner's words: "they give away the math/process
+behind this. We don't do that."
+
+**What went.** The Oracle's consent paragraph (`orPrivacy`) and its heading; the
+availability note and "Left uncomputed" (`btAvailNote`, `btAvailList`); "What
+this wheel is drawn from" (`chartSummary`); the "Read from ..." lines under the
+three daily readings; orb tables and transit notes on a placement page; the
+degree withheld sentence (`plNoSabianWhy`); every footer that said a reading is
+the tradition's, was not quoted, or was computed on the device (Astropedia,
+the Atlas, the Book of Changes, tarot, the dream registry and journal,
+Synchronicities, numerology); "Calculated from"; the bodygraph gloss
+(`bgNote`); the connection row caution, the Circle caution and its precision
+and footer lines, the one sided synastry note and `synCaveat`; the privacy
+notes beside saving a person and sending a card; the Settings explanations of
+consent, memory, deletion, the PIN, the picture and analytics; the Library and
+Today card descriptions; the "Worth remembering" and "What this is not"
+reading sections and the Astropedia method and caution sections.
+
+**What stays, and why.** Crisis and safety copy (the Get Help lines, "If you are
+in immediate danger", the practice risk levels and their caution), errors,
+empty states, field labels, the two-step setup instructions, the payment terms
+beside the Luminary button (cancellation terms are owed at the point of sale),
+and the sample banner, shortened. The modules still return `CONFIG_CAUTION`,
+`GROUP_CAUTION` and `availability().note`; the screen no longer draws them.
+
+**This overrides earlier sections where they disagree**: the availability line
+above the wheel ("The birth moment has three states"), the gloss ("The
+wiring"), the caution rendered beside the row ("Connection charts" and
+"Circles"), `otherNote` ("Anything Else logs and does not interpret"), and the
+consent sentence on the Oracle. Harness rows N18b and N33 still assert the old
+sentences are present and fail until they are changed to match.
+
+**Do not add a line of this kind back.** Before writing a sentence under a
+title, ask whether it explains the screen, the method or the source. If it
+does, it does not ship.
+
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the
 six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
