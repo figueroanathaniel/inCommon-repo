@@ -1946,31 +1946,41 @@ async function runCloudTests() {
   t('K28b', 'an in-depth reading refused for want of Luminary comes back as premium, so the page can show the gate', {
     ok: false, reason: 'premium'
   }, { ok: rPrem.ok, reason: rPrem.reason });
-  var two = oracleClient(function (n, o) {
-    return o.body.part === 'b'
-      ? { data: { reading: { title: 'T', overview: 'O', chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
-      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
-  });
-  CO._setClientForTests(two.client, { user: { id: 'u1' } });
-  var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
-  var firstSeen = [];
-  var twoCb = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: { reading: { title: 'T', chapters: [{ heading: 'h', body: 'b' }] } }, error: null } : { data: { reading: { title: 'T' } }, error: null }; });
+  /* In depth is two calls asked for at the same time: both are on the wire before
+     either answers, the first half reaches the page the moment it answers even
+     while the second is still out, and the two come back joined. */
+  var seenAtAnswer = [];
+  var twoCalls = [];
+  var twoCb = { calls: twoCalls, client: { functions: { invoke: function (name, opts) {
+    twoCalls.push({ name: name, body: opts && opts.body });
+    var part = opts.body.part;
+    seenAtAnswer.push(part + ':' + twoCalls.length);
+    return new Promise(function (res) {
+      setTimeout(function () { res(part === 'b'
+        ? { data: { reading: { chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+        : { data: { reading: { title: 'T', overview: 'O' } }, error: null }); }, part === 'b' ? 40 : 5);
+    });
+  } } } };
   CO._setClientForTests(twoCb.client, { user: { id: 'u1' } });
-  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D', onFirst: function (f) { firstSeen.push({ chapters: !!(f.reading && f.reading.chapters), callsSoFar: twoCb.calls.length }); } });
-  var cbBodyClean = twoCb.calls.every(function (c) { return !('onFirst' in c.body); });
-  var one = oracleClient(function () { return { data: { reading: { title: 'T', chapters: [] } }, error: null }; });
-  CO._setClientForTests(one.client, { user: { id: 'u1' } });
-  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var firstSeen = [];
+  var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D',
+    onFirst: function (f) { firstSeen.push({ chapters: !!(f.reading && f.reading.chapters), callsSoFar: twoCalls.length }); } });
+  var cbBodyClean = twoCalls.every(function (c) { return !('onFirst' in c.body); });
   var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
   CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
-  var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
-  t('K29c', 'the first half is handed to the page before the second is asked for, without the callback in the request body', {
-    seen: [{ chapters: false, callsSoFar: 1 }], bodyClean: true
+  var halfSeen = 0;
+  var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D', onFirst: function () { halfSeen++; } });
+  var firstFail = oracleClient(function (n, o) { return o.body.part === 'a' ? { data: null, error: httpErr(429, 'RATE_LIMITED') } : { data: { reading: { chapters: [] } }, error: null }; });
+  CO._setClientForTests(firstFail.client, { user: { id: 'u1' } });
+  var rFirstFail = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  t('K29c', 'the first half is handed to the page the moment it answers, while the second is still out, without the callback in the request body', {
+    seen: [{ chapters: false, callsSoFar: 2 }], bodyClean: true
   }, { seen: firstSeen, bodyClean: cbBodyClean });
-  t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
-    parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
-  }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
-    legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
+  t('K29b', 'an in-depth reading is two calls asked for at the same time and joined; either failing is its own reason, never a partial reading; the first half still reaches the page when only the second fails', {
+    onWire: ['a:1', 'b:2'], joined: { title: 'T', overview: 'O', chapters: 1, shadowWork: 's' },
+    half: { ok: false, reason: 'timeout', first: 1 }, firstFail: { ok: false, reason: 'busy' }
+  }, { onWire: seenAtAnswer, joined: { title: rTwo.reading.title, overview: rTwo.reading.overview, chapters: (rTwo.reading.chapters || []).length, shadowWork: rTwo.reading.shadowWork },
+    half: { ok: rHalf.ok, reason: rHalf.reason, first: halfSeen }, firstFail: { ok: rFirstFail.ok, reason: rFirstFail.reason } });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {

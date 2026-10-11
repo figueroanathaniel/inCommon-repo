@@ -3397,15 +3397,19 @@ still works, and a standard reading still asks on open.
 
 ## The in-depth reading is written in two calls
 Added 10 October 2026. One call for the whole reading ran past the function's
-wall clock, so `oracleRead()` in `incommon-cloud.js` asks twice for depth `deep`:
-`part: 'a'` (the standard fields written deeper, with `keyTransits`), then
-`part: 'b'` (chapters, timing, shadow work, journal prompts), and the server
-answers b with the two joined. The second half is stored under `chart_key + '.b'`,
+wall clock, so `oracleRead()` in `incommon-cloud.js` asks twice for depth `deep`,
+at the same time (changed 11 October 2026; it was a then b, which took the sum
+of the two times): `part: 'a'` (the standard fields written deeper, with
+`keyTransits`) and `part: 'b'` (chapters, timing, shadow work, journal
+prompts). The server answers each with its own fields and the client joins
+them. Neither waits on the other, so b no longer needs a done. If Kimi writes
+one request at a time for the whole app the second answers RATE_LIMITED, the
+page waits and asks again, and the half already written comes back from cache. The second half is stored under `chart_key + '.b'`,
 so the table and its unique index are untouched. A reading counts once toward the
 daily limit: `.b` rows are excluded from that count and bounded by it separately,
-and b is refused unless a is done. A server that still answers the first call
-with chapters already in it makes the client skip the second call, so the page
-and the function can be deployed in either order. Do not merge the two schemas
+Deploy the function before or with the page: an older function answers a
+`part: 'b'` as the same key as a, so the second call reads PENDING until the
+first finishes and then returns the whole reading, which is slower but correct. Do not merge the two schemas
 back into one call, and do not count the b rows as attempts, or a reading costs
 two of the six. K29b holds the client half.
 

@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4  |  built 2026-10-10  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4  |  built 2026-10-11  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17386,27 +17386,32 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return Promise.resolve().then(function () { return ctx.json(); })
       .then(function (b) { return (b && b.code) || null; }, function () { return null; });
   }
-  /* AN IN-DEPTH READING IS TWO CALLS, because one call for all of it ran past
-     what the function may take. The first writes the standard fields, deeper;
-     the second writes chapters, timing, shadow work and journal prompts and
-     answers with the two joined. Each call has the function's whole time to
-     itself, and the first is kept, so a failed second one is retried alone.
-     A server that still writes the whole reading in one call (it has no
-     chapters to add) answers the first with them already in, and the second
-     call is skipped. The page may pass onFirst, called with the first half as
-     soon as it arrives, so it can be shown while the second is written. */
+  /* AN IN-DEPTH READING IS TWO CALLS, asked for at the same time, because one
+     call for all of it ran past what the function may take and two in a row
+     took the sum of their times. Part a is the standard fields, deeper; part b
+     is chapters, timing, shadow work and journal prompts. Each has the
+     function's whole time to itself and is kept on its own, so a failure of one
+     is retried alone. The page may pass onFirst, called with the first half the
+     moment it arrives, so it can be shown while the second is still written.
+     The two are joined here. If Kimi is writing one request at a time for the
+     whole app, the second answers RATE_LIMITED and the page waits and asks
+     again, which finds the first already written. */
   function oracleRead(req) {
     if (!req) return oracleCall(req);
     var onFirst = typeof req.onFirst === 'function' ? req.onFirst : null;
     var body = Object.assign({}, req);
     delete body.onFirst;
     if (body.depth !== 'deep') return oracleCall(body);
-    return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
-      if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
-      /* The first half is on its way to the page before the second is asked
-         for, so the reader has something to read while it is written. */
-      if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      return oracleCall(Object.assign({}, body, { part: 'b' }));
+    var pa = oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
+      if (a.ok && onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
+      return a;
+    });
+    var pb = oracleCall(Object.assign({}, body, { part: 'b' }));
+    return Promise.all([pa, pb]).then(function (r) {
+      var a = r[0], b = r[1];
+      if (!a.ok) return a;
+      if (!b.ok) return b;
+      return Object.assign({}, a, { reading: Object.assign({}, a.reading, b.reading), cached: !!(a.cached && b.cached) });
     });
   }
   function oracleCall(req) {

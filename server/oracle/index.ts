@@ -126,7 +126,7 @@ const DEEP_SCHEMA = {
 // An in-depth reading is written in two calls, because one call for all of it
 // ran past what the function may take. Part a is the standard fields written
 // deeper; part b is the four fields only the in-depth reading has. The page asks
-// for a, then for b, and b answers with the two joined.
+// for both at the same time and joins them, so neither waits on the other.
 const DEEP_B_SCHEMA = {
   ...DEEP_SCHEMA,
   required: ["chapters", "timing", "shadowWork", "journalPrompts"],
@@ -171,7 +171,7 @@ THIS IS THE FIRST HALF OF AN IN-DEPTH LUMINARY READING. Go far deeper than a sta
 Write only the fields in the schema. The chapters, timing, shadow work and journal prompts are written in a second pass.`;
 
 const DEEP_B_INSTRUCTIONS = `${INSTRUCTIONS.split("Field guidance:")[0]}Field guidance:
-THIS IS THE SECOND HALF OF AN IN-DEPTH LUMINARY READING. The first half (title, overview, the three systems, love, work, spirit, ritual, mantra, colour and key transits) is already written. Go far deeper, like a private session with a master astrologer, and write only the fields below.
+THIS IS THE SECOND HALF OF AN IN-DEPTH LUMINARY READING. The first half (title, overview, the three systems, love, work, spirit, ritual, mantra, colour and key transits) is being written separately at the same time. Go far deeper, like a private session with a master astrologer, and write only the fields below.
 - Use the ENTIRE chart in the dossier: nodes, Black Moon Lilith, Chiron, Ceres, Pallas, Juno, Vesta, Eris, the Vertex, Part of Fortune, East Point, and minor aspects, alongside the planets, houses, Human Design gates/channels and numerology cycles.
 - chapters: 5-7 chapters, each a distinct theme of the period (for example a key transit, a sensitive point being activated, a relationship theme, a vocational theme, a healing theme), each with an evocative heading and 2 substantial paragraphs (separate with a blank line) naming the exact placements and transits involved.
 - timing: 3-6 windows within the period (dates or day ranges, or phases like "the waxing half"), each with specific guidance.
@@ -298,18 +298,9 @@ Deno.serve(async (req) => {
   // its unique index need no change.
   const same = { user_id: user.id, period, period_key: key, depth, chart_key: part === "b" ? chartKey + ".b" : chartKey };
 
-  // The second half is written to follow the first and is returned joined to
-  // it, so it can only be asked for once the first is done.
-  let first: Record<string, unknown> | null = null;
-  if (part === "b") {
-    const a = await mine().select("content").match({ ...same, chart_key: chartKey, status: "done" }).limit(1).maybeSingle();
-    if (!a.data?.content) return reply(400, { code: "BAD_REQUEST" });
-    first = a.data.content as Record<string, unknown>;
-  }
-
   // Already written for this chart and period: hand it back, free.
   const done = await mine().select("content").match({ ...same, status: "done" }).limit(1).maybeSingle();
-  if (done.data?.content) return reply(200, { reading: first ? { ...first, ...done.data.content } : done.data.content, cached: true, periodKey: key, label });
+  if (done.data?.content) return reply(200, { reading: done.data.content, cached: true, periodKey: key, label });
 
   // A request that died mid write (the function was stopped) would otherwise
   // hold its key forever.
@@ -426,5 +417,5 @@ Deno.serve(async (req) => {
   const reading = clean(parsed) as Record<string, unknown>;
 
   await mine().update({ status: "done", content: reading, model: data.model ?? model }).eq("id", rowId);
-  return reply(200, { reading: first ? { ...first, ...reading } : reading, cached: false, periodKey: key, label });
+  return reply(200, { reading, cached: false, periodKey: key, label });
 });

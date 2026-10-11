@@ -161,14 +161,16 @@ Set these as Edge Function secrets. Each is optional.
 
 **An in-depth reading is two calls.** One call for all of it ran past what the
 function may take, so the page asks for the first half (the standard fields,
-written deeper), then the second (chapters, timing, shadow work and journal
-prompts), and the second answers with both joined. Each call has the whole time
+written deeper) and the second (chapters, timing, shadow work and journal
+prompts) at the same time, and joins them. Each call has the whole time
 limit to itself and the first is kept, so a failed second half is retried
 alone. Nothing changes in the database: the second half is stored under the
 chart's hash with `.b` added. The daily limit counts a reading once, and the
 second halves are bounded by the same number on their own. Deploy the function
-before or with the page: an older function still answers the first call with the
-whole reading, and the page then skips the second.
+before or with the page: an older function treats the second call as the same
+key as the first, so it waits and then returns the whole reading, which is
+slower but correct. If Kimi on your recharge tier writes one request at a time,
+the two halves queue behind each other and the gain is smaller.
 
 **Time limit.** Supabase stops a function that runs too long: at the time of
 writing, 150 seconds on the free plan and 400 on a paid one. Kimi writes
