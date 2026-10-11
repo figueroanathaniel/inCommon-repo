@@ -2467,22 +2467,24 @@ code", the module passes it as `captchaToken` on exactly those calls (K52), and
 a refusal reads as `captcha` (K53). **A new call to any of those five
 endpoints has to carry a token**, or it breaks the day the check is switched on.
 
-Three things are easy to undo. The script loads on the first focus inside the
-form, never at page load, so a plain visit sends nothing to Cloudflare. A token
+Three things are easy to undo. The script loads when the form opens, never
+before, so a plain visit to the desktop cover sends nothing to Cloudflare. A token
 is good once, so the widget is reset after every call (`captchaSpent()`) and a
 run already in flight is waited for rather than started twice. And
 `challenges.cloudflare.com` is in `script-src` and `frame-src` in
 `deploy/v6.4/_headers`; K53 holds the cover's origin and the policy equal.
 
-**Typed by hand, the check is shown; filled in, it is not** (the owner, 11
-October 2026). The widget starts `interaction-only`; the first trusted `input`
-event of a typing, pasting or deleting kind (`HAND`) in the address or the
-password removes it and draws it again as `always`, because appearance is fixed
-at render. Autofill and password managers fire no such event. Nothing is said
-beside it: the "One more step" sentence is gone, and a hidden widget that wants
-a tick just brings its slot into the row (`.captcha.shown`). The slot is taken
-out of the flow while hidden, never left as an empty row, because Cloudflare
-puts a frame in it and that row pushed Sign in off the password's line. A press
+**The check is shown whenever the form is open** (the owner, 11 October 2026),
+as `appearance: 'always'`, in `in`, `up`, `forgot` and `code`. It was shown
+only to hand typed details for one revision, and that hid it from everybody
+whose browser or password manager filled the form, which read as no check at
+all. `open()` loads and runs it (`capRun()`), so the desktop cover still sends
+nothing to Cloudflare until "enter here" is pressed, and a phone, whose form is
+open on arrival, loads it at once. A token that expires while the form sits
+open is fetched again. Nothing is said beside it: the "One more step" sentence
+is gone. The slot is out of the row until the widget is drawn
+(`.captcha.shown`), because an empty frame there pushed Sign in off the
+password's line. A press
 still waiting on the check has sent nothing, so choosing another mode withdraws
 it (`sendGen`, `preSend`); before that, "Sign in instead" did nothing while a
 Create New Account press waited for a tick.
