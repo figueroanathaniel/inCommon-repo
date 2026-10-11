@@ -2474,6 +2474,19 @@ run already in flight is waited for rather than started twice. And
 `challenges.cloudflare.com` is in `script-src` and `frame-src` in
 `deploy/v6.4/_headers`; K53 holds the cover's origin and the policy equal.
 
+**Typed by hand, the check is shown; filled in, it is not** (the owner, 11
+October 2026). The widget starts `interaction-only`; the first trusted `input`
+event of a typing, pasting or deleting kind (`HAND`) in the address or the
+password removes it and draws it again as `always`, because appearance is fixed
+at render. Autofill and password managers fire no such event. Nothing is said
+beside it: the "One more step" sentence is gone, and a hidden widget that wants
+a tick just brings its slot into the row (`.captcha.shown`). The slot is taken
+out of the flow while hidden, never left as an empty row, because Cloudflare
+puts a frame in it and that row pushed Sign in off the password's line. A press
+still waiting on the check has sent nothing, so choosing another mode withdraws
+it (`sendGen`, `preSend`); before that, "Sign in instead" did nothing while a
+Create New Account press waited for a tick.
+
 **Deploy the page before switching the check on in Supabase.** The reverse
 order refuses every sign in until the page arrives. Driven in a browser with
 Cloudflare's test keys: the always passing key put a token on sign in, sign up
@@ -3789,7 +3802,13 @@ profile and the birth page opens, which is what deleting the only profile means
 to the person doing it. A fresh profile is made and made active BEFORE the old
 one is deleted, so the refusal never fires.
 
-**Log Out signs out and keeps everything on the device.** `accountLogOut()`
+**Log Out signs out and keeps everything on the device, and Back cannot undo
+it.** It marks the tab (`incommon.signin.out` in sessionStorage) and replaces
+the app's history entry with the cover. A plain script at the top of the app
+sends any app page reached through history (`back_forward`, or a back-forward
+cache `pageshow`) in a marked tab to the cover, hidden until it goes, and the
+cover reloads itself to its first screen when restored from that cache in a
+marked tab. Any other way into the app clears the mark. `accountLogOut()`
 calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
 is `./` in the bundle and `./cover.html` in the source shell, because the app
 is `app.html` in one and the long name in the other. The line beside it names

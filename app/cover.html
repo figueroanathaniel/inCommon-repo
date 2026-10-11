@@ -286,11 +286,24 @@
   .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
   .mailform .eye svg { width: 20px; height: 20px; display: block; }
   .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
-  /* Turnstile's slot. The widget runs out of sight and only draws itself when
-     Cloudflare wants somebody to tick a box, so the slot is empty, and takes
-     no room, for nearly everybody. */
-  .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; }
-  .mailform .captcha:empty { display: none; }
+  /* Turnstile's slot. Somebody signing in with what the browser or a password
+     manager filled in never sees it: the widget runs out of sight. Somebody
+     typing their details by hand sees it, the owner's request of 11 October
+     2026, and the slot is empty, taking no room, until then. It is drawn only
+     in the modes whose call carries a token, so a reader choosing a new
+     password or entering an authenticator code is not shown a check that
+     guards nothing there. */
+  .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; min-width: 0; }
+  /* Not shown, the widget still runs, so the slot is taken out of the row
+     rather than hidden: Cloudflare puts an invisible frame in it, which made
+     it a zero height row of its own and pushed Sign in off the password's
+     line. */
+  .mailform .captcha:not(.shown) {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); pointer-events: none;
+  }
+  .mailform .captcha:empty,
+  .mailform[data-mode="set"] .captcha, .mailform[data-mode="mfa"] .captcha,
+  .mailform[data-mode="back"] .captcha { display: none; }
   .mailform .field::placeholder { color: #9aa0a6; }
   .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .mailform .signin { padding: 0 18px; flex: none; }
@@ -515,6 +528,14 @@
   var resendBtn = form.querySelector('button.resend');
   var modeBtns = form.querySelectorAll('button[data-to]');
   var busy = false, loading = null, opened = false, through = false, mode = 'in';
+  /* A press that is still waiting for the sign in files or for Cloudflare's
+     check has sent nothing yet, so it can be withdrawn: choosing another mode
+     while it waits (Sign in instead, Back to sign in, Forgot password?) lets
+     it go rather than doing nothing. Before this, a Create New Account press
+     held behind a check left those buttons dead until the check finished, and
+     "Sign in instead" read as broken. Once the call has gone it is answered as
+     before. */
+  var sendGen = 0, preSend = false, WITHDRAWN = {};
   /* The module once it has loaded; the number a code was texted to, and why;
      and who is signed in already, when somebody is. */
   var Cmod = null, codeFor = null, backAs = null;
@@ -550,7 +571,6 @@
     phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
     phoneTaken: 'That number is already on an account.',
     captcha: 'The sign in check did not finish. Try again.' + ANYWAY,
-    captchaAsk: 'One more step: tick the box below to show this is a person.',
     nomfa: 'Enter the 6 digit code your authenticator app is showing.',
     mfaBad: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
     mfaAsk: 'Two-step sign in is on for this account. Enter the 6 digit code your authenticator app is showing.'
@@ -630,7 +650,8 @@
      pressed Create New Account has chosen their password already. */
   for (var mi = 0; mi < modeBtns.length; mi++) {
     modeBtns[mi].addEventListener('click', function () {
-      if (busy) return;
+      if (busy && !preSend) return;
+      if (busy) { sendGen++; preSend = false; settle(); }
       say('');
       if (mode === 'mfa') { afterMfa = null; backAs = null; cloud().then(function (C) { return C.coverSignOut(); }, function () {}); }
       setMode(this.getAttribute('data-to'), true);
@@ -730,14 +751,22 @@
      order matters, and docs/TURNSTILE-SETUP.md says so: this key first, then
      CAPTCHA protection in Supabase, never the other way round.
 
-     The widget is rendered once, invisible (interaction-only), run on demand
-     (execute), and reset after every call, because a token is good once. It is
-     asked early, on the first focus inside the form, so the token is usually
-     waiting by the time the reader presses the button. */
+     The widget is run on demand (execute) and reset after every call, because
+     a token is good once. It is asked early, on the first focus inside the
+     form, so the token is usually waiting by the time the reader presses the
+     button. It starts invisible (interaction-only), which is all a reader
+     whose browser or password manager filled the form ever meets. The first
+     key typed or text pasted into the address or the password, by the
+     reader's own hand, draws it again visibly (always), because somebody
+     entering details rather than using saved ones is who the owner asked to
+     see the check. Autofill fires no such input, so it stays out of sight
+     there. Appearance is fixed when a widget is drawn, so changing it is a
+     remove and a fresh render, and a run already waited for is started again
+     on the new one. Nothing is said in words: the widget speaks for itself. */
   var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
   var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
   var capBox = form.querySelector('.captcha');
-  var ts = { loading: null, id: null, wait: null, timer: null, running: false };
+  var ts = { loading: null, id: null, wait: null, timer: null, running: false, shown: false, typed: false };
   function capSettle(ok, val) {
     var w = ts.wait;
     ts.running = false;
@@ -746,21 +775,49 @@
     clearTimeout(ts.timer);
     if (ok) w.ok(val); else w.fail(val);
   }
+  /* Flexible is 300px at least, so a form narrower than that (a 320px phone)
+     takes the compact widget rather than running off the edge. */
+  function capDraw(T) {
+    ts.shown = ts.typed;
+    capBox.classList.toggle('shown', ts.shown);
+    ts.id = T.render(capBox, {
+      sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark',
+      size: form.clientWidth && form.clientWidth < 300 ? 'compact' : 'flexible',
+      execution: 'execute', appearance: ts.shown ? 'always' : 'interaction-only', 'response-field': false,
+      callback: function (t) { capSettle(true, t); },
+      'error-callback': function () { capSettle(false); return true; },
+      'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} },
+      /* Cloudflare asking for a tick on the hidden widget: the slot comes into
+         the row so the box can be seen, and nothing is said in words. */
+      'before-interactive-callback': function () { capBox.classList.add('shown'); }
+    });
+  }
   function capLoad() {
     return ts.loading || (ts.loading = load(TS_SRC).then(function () {
       var T = window.turnstile;
       if (!T || typeof T.render !== 'function') throw new Error('turnstile missing');
-      ts.id = T.render(capBox, {
-        sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark', size: 'flexible',
-        execution: 'execute', appearance: 'interaction-only', 'response-field': false,
-        callback: function (t) { capSettle(true, t); },
-        'error-callback': function () { capSettle(false); return true; },
-        'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} },
-        'before-interactive-callback': function () { say(WHY.captchaAsk); }
-      });
+      capDraw(T);
       return T;
     }).catch(function (e) { ts.loading = null; throw e; }));
   }
+  /* Typed by hand: draw the widget where it can be seen and run it, so the
+     check is under way while the reader finishes typing. */
+  function capShow() {
+    if (!TURNSTILE_SITE_KEY || ts.typed) return;
+    ts.typed = true;
+    capLoad().then(function (T) {
+      if (ts.shown) return;
+      try { T.remove(ts.id); } catch (e) {}
+      capDraw(T);
+      ts.running = true;
+      try { T.execute(ts.id); } catch (e) { ts.running = false; }
+    }, function () {});
+  }
+  var HAND = { insertText: 1, insertCompositionText: 1, insertFromPaste: 1, insertFromDrop: 1,
+    deleteContentBackward: 1, deleteContentForward: 1, deleteWordBackward: 1, deleteWordForward: 1 };
+  function byHand(e) { if (e.isTrusted && HAND[e.inputType]) capShow(); }
+  addr.addEventListener('input', byHand);
+  pass.addEventListener('input', byHand);
   /* A token for one call: the one waiting if it is still fresh, otherwise a
      new run of the widget. Two minutes is long enough for somebody who has to
      tick the box, and short enough that a blocked widget says so. */
@@ -904,7 +961,15 @@
 
   /* A return through the back button restores this page from the
      back-forward cache with the button still held, so it is let go here. */
-  addEventListener('pageshow', function (e) { if (e.persisted && !returning) { settle(); say(''); } });
+  addEventListener('pageshow', function (e) {
+    /* Back to a cover kept from before the reader logged out (the app marks
+       the tab on Log Out): it may still be open on a form or say "Signed in
+       as", so it is loaded again and starts from its first screen. */
+    var out = false;
+    try { out = sessionStorage.getItem('incommon.signin.out') === '1'; } catch (x) {}
+    if (e.persisted && out) { location.reload(); return; }
+    if (e.persisted && !returning) { settle(); say(''); }
+  });
 
   /* "enter here" opens the form and does nothing else, the owner's call of 30
      September 2026: the way in without an account is "Continue without an
@@ -1007,8 +1072,11 @@
     reveal(false);
     hold();
     say(ph && d.phoneBusy || d.busy);
-    var tokenFor = needsToken(m);
+    var tokenFor = needsToken(m), ticket = ++sendGen;
+    preSend = true;
     Promise.all([cloud(), tokenFor ? captchaToken() : null]).then(function (a) {
+      if (ticket !== sendGen) throw WITHDRAWN;
+      preSend = false;
       var C = a[0], capt = { captchaToken: a[1] };
       if (m === 'in') return C.passwordSignIn(login, pass.value, capt);
       /* The newsletter answer goes with the sign up, and only there. Supabase
@@ -1075,7 +1143,11 @@
       if (r.reason === 'invalid') addr.focus();
       else if (r.reason === 'badCode') codeIn.focus();
       else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
-    }, function (e) { settle(); if (tokenFor) captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
+    }, function (e) {
+      if (e === WITHDRAWN) return;
+      preSend = false;
+      settle(); if (tokenFor) captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off);
+    });
   });
 })();
 </script>

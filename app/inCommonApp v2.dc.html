@@ -15,6 +15,27 @@ window.__resources = Object.assign(window.__resources || {}, {
   'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': './react-dom-18.3.1.production.min.js'
 });
 </script>
+<script>
+/* LOGGED OUT, THEN BACK (11 October 2026). Log Out marks this tab and leaves
+   for the cover. Without this, the Back button brought the app back, from the
+   back-forward cache or loaded again, looking exactly as it did signed in. So
+   in a tab that logged out, an app page reached through history goes to the
+   cover's first screen instead, and is hidden until it has gone. Any other way
+   in (the cover's own, a link, a typed address, a reload) clears the mark,
+   because that is the reader choosing to come back. The mark is per tab
+   (sessionStorage), the same scope the history it guards. */
+(function () {
+  var KEY = 'incommon.signin.out';
+  function cover() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
+  function out() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function leave() { document.documentElement.style.visibility = 'hidden'; location.replace(cover()); }
+  var nav = null;
+  try { nav = performance.getEntriesByType('navigation')[0]; } catch (e) {}
+  if (nav && nav.type === 'back_forward') { if (out()) leave(); }
+  else { try { sessionStorage.removeItem(KEY); } catch (e) {} }
+  addEventListener('pageshow', function (e) { if (e.persisted && out()) leave(); });
+})();
+</script>
 <script src="./support.js"></script>
 <!-- Ephemeris system: dual-backend (Swiss WASM + fallback) with optional memoization.
      V1.0.0. Modules load in background; app works with or without Swiss installed. -->
@@ -17650,7 +17671,11 @@ class Component extends DCLogic {
   coverHref() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
   accountLogOut() {
     this.setState({ quickOpen: false });
-    const go = () => { location.href = this.coverHref(); };
+    /* Replace, not a new entry, and the tab is marked, so Back from the cover
+       cannot bring a signed in screen back: the guard at the top of this
+       file sends any app page reached through history to the cover. */
+    try { sessionStorage.setItem('incommon.signin.out', '1'); } catch (e) {}
+    const go = () => { location.replace(this.coverHref()); };
     if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
     else go();
   }
