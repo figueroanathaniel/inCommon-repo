@@ -47,3 +47,7 @@
   Cache-Control: public, max-age=0, must-revalidate
 /manifest.json
   Cache-Control: public, max-age=0, must-revalidate
+/terms.html
+  Cache-Control: public, max-age=0, must-revalidate
+/privacy.html
+  Cache-Control: public, max-age=0, must-revalidate

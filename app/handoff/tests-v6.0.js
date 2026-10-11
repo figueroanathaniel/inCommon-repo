@@ -1667,14 +1667,13 @@
         { identical: true, twoMembers: 2 },
         { identical: ciOrderA === ciOrderB && ciOrderA.length > 200, twoMembers: idsNow.length });
 
-      /* The caution travels with the reading and is on screen beside it, not
-         behind a tap, for the same reason the configuration caution is. */
-      t('N33', 'The group caution is rendered beside the Ground rather than behind a tap',
-        { present: true, saysNotAMeasure: true, notInsideAnExpander: true },
-        { present: ciText.indexOf('not a measure of the group or of anybody in it') !== -1,
-          saysNotAMeasure: /says nothing about who belongs/.test(ciText),
-          notInsideAnExpander: !!(ciSection() &&
-            [].slice.call(ciSection().querySelectorAll('[aria-expanded]')).length === 0) });
+      /* The module still returns its caution (G28 holds that), and the screen
+         no longer draws it: the owner's rule of 11 October 2026 took every
+         disclaimer line out of the app. The legal terms carry it instead. */
+      t('N33', 'The group caution is not drawn on the Circle screen',
+        { absent: true, saysNothingAbout: false },
+        { absent: ciText.indexOf('not a measure of the group or of anybody in it') === -1,
+          saysNothingAbout: /says nothing about who belongs/.test(ciText) });
 
       /* ---- N5 to N9: dated windows on the Throughline ---- */
       onStep('new surfaces: dated transit windows');
@@ -1865,13 +1864,14 @@
 
       var otherPanel = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N18b', 'and no interpretation reaches the entry or the screen',
-        { body: true, screen: true, saidPlainly: true },
+        { body: true, screen: true, unexplained: true },
         { /* the stored entry offers no reading of any kind */
           body: !!other && !/means|meaning|symbolis|the tradition|reads as/i.test(other.body),
-          /* nor does the panel, beyond the sentence that explains the absence */
+          /* nor does the panel */
           screen: !/what the tradition holds/i.test(otherPanel),
-          /* and the absence is stated rather than left looking unfinished */
-          saidPlainly: /no meaning is offered here/i.test(otherPanel) });
+          /* and the screen does not explain the absence: the owner's rule of
+             11 October 2026 took every line of that kind out of the app */
+          unexplained: !/no meaning is offered here/i.test(otherPanel) });
 
       /* ---- N20 to N22: the dream journal ----
          The registry, the counting discipline, and the record. N21 is the row
@@ -2706,7 +2706,9 @@
 
       onStep('cover: the one control');
       var a = d.querySelector('a.enter');
-      var links = d.querySelectorAll('a[href]');
+      /* The Terms and Privacy links under the sign in form are not ways in, so
+         they are not counted: the row is about the one way into the app. */
+      var links = [].slice.call(d.querySelectorAll('a[href]')).filter(function (x) { return !x.closest('.legal'); });
       var box = a ? a.getBoundingClientRect() : { width: 0, height: 0 };
       /* The way in is named by its own text now, so the accessible name and
          what a sighted reader sees are the same words and cannot drift. An svg

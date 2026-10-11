@@ -299,6 +299,26 @@
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
+  /* THE TERMS AND THE PRIVACY POLICY, the Terms directly above. They show
+     only once the form is open, because at rest the cover is the title and
+     one way in, and they are not ways in: H5 counts the links outside .legal.
+     Making an account says it agrees to both, beside the button that does it,
+     and that line shows in the up mode alone. */
+  body:not(.open) .legal { display: none; }
+  .legal[hidden] { display: none; }
+  .legal.links { display: flex; flex-direction: column; align-items: center; margin-top: 2px; }
+  body:not(.open) .legal.links { display: none; }
+  .legal.links a {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
+    color: #cfd5e2; font: 400 13px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .02em;
+    text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 0 12px rgba(5,6,10,.9);
+  }
+  .legal.links a:hover { color: #fff8e7; }
+  .legal.links a:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .agree {
+    margin: 0; max-width: min(88vw, 380px); text-align: center; color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
+    font: 400 12.5px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
   .authmsg {
     min-height: 1.5em; max-width: min(88vw, 440px); text-align: center;
     font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -406,6 +426,11 @@
     </form>
     <button class="skip" type="button" hidden>Continue without an account</button>
     <p class="authmsg" role="status" aria-live="polite"></p>
+    <p class="agree legal" hidden>By creating an account, you agree to the Terms &amp; Conditions and the Privacy Policy below.</p>
+    <nav class="legal links" aria-label="Legal">
+      <a href="./terms.html">Terms &amp; Conditions</a>
+      <a href="./privacy.html">Privacy Policy</a>
+    </nav>
   </div>
 </div>
 <div class="glyph" aria-hidden="true">
@@ -478,6 +503,7 @@
   var keepBox = document.getElementById('rememberopt');
   var skip = document.querySelector('button.skip');
   var msg = document.querySelector('.authmsg');
+  var agree = document.querySelector('.agree');
   var enter = document.querySelector('a.enter');
   if (!form || !addr || !pass || !codeIn || !newsBox || !keepBox || !skip || !msg || !enter) return;
   var sendBtn = form.querySelector('button[type="submit"]');
@@ -583,6 +609,7 @@
       passLabel.textContent = d.passLabel;
     }
     keepRow.hidden = !d.keep;
+    agree.hidden = m !== 'up';
     resendBtn.hidden = !d.resend;
     fitLogin();
     for (var i = 0; i < modeBtns.length; i++) {
@@ -783,7 +810,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.6.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.7.0'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -2052,7 +2079,8 @@ const glyphEl = document.querySelector('.glyph');
 const enterEl = document.querySelector('a.enter');
 /* Every way in, and the line that reports on the sign in, leave together. */
 const wayEls = [enterEl, document.getElementById('mailform'),
-  document.querySelector('button.skip'), document.querySelector('.authmsg')].filter(Boolean);
+  document.querySelector('button.skip'), document.querySelector('.authmsg'),
+  document.querySelector('.agree'), document.querySelector('.legal.links')].filter(Boolean);
 
 /* Declared here rather than beside the click handler below, because
    scrollFade reads it and scrollFade is called at module scope before that

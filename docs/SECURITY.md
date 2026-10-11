@@ -145,6 +145,14 @@ Follow `docs/TWO-STEP-SETUP.md`: check authenticator apps are allowed, run
 `server/mfa-policies.sql`, redeploy both functions. Until the SQL is run,
 two-step sign in protects the app and the functions but not the database.
 
+### Step 2c. Contact Support and the legal pages
+
+Follow `docs/LEGAL-SETUP.md`: run `server/support.sql` (then
+`server/mfa-policies.sql` again), and have a lawyer read the Terms and the
+Privacy Policy before launch. The two pages name Contact Support as the way to
+make a privacy or deletion request, so it has to be switched on before they go
+live.
+
 ### Step 3. The accounts that own everything
 
 The likeliest real breach for a small app is not the code, it is someone
@@ -182,7 +190,7 @@ into securityheaders.com.
 1. **Customer data on the device is unencrypted.** Anyone with an unlocked
    phone can read a reader's birth data and journal. The profile PIN is a
    courtesy gate, not encryption. This is a design choice of an on device app,
-   worth saying in the privacy policy.
+   and Privacy Policy section 3 says it.
 2. **The policy still allows inline script and eval**, because the template
    runtime compiles with `new Function`. It limits where data can go, not
    which script can run. Removing that would mean a build step.

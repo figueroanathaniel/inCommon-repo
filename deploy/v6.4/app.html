@@ -16536,7 +16536,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.6.0';
+  var VERSION = '2.7.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -17674,6 +17674,51 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     });
   }
 
+  /* ---------- Contact Support ----------
+
+     A support request is one row in public.support_requests
+     (server/support.sql). It is written straight to the REST API rather than
+     through the client, because a reader who never made an account has no
+     client and is exactly the reader most likely to need help, and because a
+     session held for its two-step code must not be the one sending it: the
+     restrictive policy in server/mfa-policies.sql would refuse that token. So a
+     signed in reader sends with their own token, which stamps user_id, and
+     anybody else sends with the public anon key. Nobody can read the table
+     back: there is no select policy, and the owner reads it in the dashboard.
+     The topics and the bounds are the table's own checks, repeated here so a
+     reader is told what is wrong before anything is sent. */
+  var SUPPORT_TOPICS = ['general', 'account', 'billing', 'privacy', 'delete', 'problem'];
+  function supportSend(req, opts) {
+    req = req || {};
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    var topic = String(req.topic || 'general');
+    var email = String(req.email || '').trim();
+    var message = String(req.message || '').trim();
+    if (SUPPORT_TOPICS.indexOf(topic) === -1) topic = 'general';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return Promise.resolve({ ok: false, reason: 'email' });
+    if (message.length < 10) return Promise.resolve({ ok: false, reason: 'short' });
+    if (message.length > 5000) return Promise.resolve({ ok: false, reason: 'long' });
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    var token = session && session.access_token ? session.access_token : key;
+    return Promise.resolve().then(function () {
+      return doFetch(url + '/rest/v1/support_requests', {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ topic: topic, email: email, message: message })
+      });
+    }).then(function (res) {
+      if (res && res.ok) return { ok: true };
+      return Promise.resolve(res ? res.text() : '').catch(function () { return ''; }).then(function (t) {
+        var st = res ? res.status : 0;
+        if (/support_rate/.test(t)) return { ok: false, reason: 'rate' };
+        if (st === 404 || /PGRST205|42P01|support_requests/.test(t) && /does not exist|Could not find/.test(t)) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || st === 403) return { ok: false, reason: 'refused' };
+        return { ok: false, reason: 'error', error: String(t || st).slice(0, 200) };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   /* ---------- status ---------- */
 
   function status() {
@@ -17755,6 +17800,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     rememberSet: rememberSet,
     normPhone: normPhone,
     oracleRead: oracleRead,
+    supportSend: supportSend,
+    SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
@@ -22345,7 +22392,8 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
         </div>
       </sc-if>
@@ -22528,7 +22576,7 @@ input[type="date"]{color-scheme:dark}
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
     <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
       <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
-      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is spirituality as spirituality intended; here, you are more than you knew you were. Our faith is in your ability to absorb what your potential might be, through the tools we have provided. We do not claim to be a replacement for professional help. If you find yourself in a crisis situation, please refer to our comprehensive list of hotlines available to the public in our Self Help Yellow Pages. Your experience is the final authority. Every claim is tagged by kind; memory is opt-in per source and lives on this device; a deterministic safety gate runs before any reading is generated; humans beat readings, every time. Here, everyone has something in common.</div>
+      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. It brings astrology, Human Design, numerology and other reflective traditions together with a private journal, so you can look at your own patterns over time and notice what you hold in common with the people around you. Your experience is the final authority. Here, everyone has something in common.</div>
       
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -22738,6 +22786,20 @@ input[type="date"]{color-scheme:dark}
         </span>
         <span style="font:400 15px var(--fb);color:var(--warn)">→</span>
       </button>
+    </div>
+    <!-- Support and the two legal pages. The Terms sit directly above the
+         Privacy Policy wherever the two are linked: here, on the cover and
+         beside the Luminary purchase. -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Support &amp; legal</div>
+      <button onClick="{{ supportGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+        <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
+        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+      </button>
+      <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
+        <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
+        <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
+      </nav>
     </div>
     <div style="margin-top:auto;padding:10px 0 2px;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
   </div>
@@ -23765,6 +23827,35 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ phStepDone }}" hint-placeholder-val="{{ false }}">
         <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
         <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<!-- CONTACT SUPPORT. The way the Terms and the Privacy Policy name for
+     reaching the operator, cancelling, and privacy and deletion requests.
+     Works signed out. Rows land in support_requests (server/support.sql). -->
+<sc-if value="{{ supOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ supClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="Contact Support" onClick="{{ swallow }}" style="width:100%;max-width:460px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Contact Support</div>
+      <sc-if value="{{ supFormOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="What it is about" style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ supTopics }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ t.bd }};border-radius:999px;font:600 12px var(--fu);color:{{ t.cc }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <input value="{{ supEmail }}" onChange="{{ supEmailType }}" type="email" inputmode="email" autocomplete="email" placeholder="Your email address" aria-label="Your email address, for our reply" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <textarea value="{{ supText }}" onChange="{{ supTextType }}" rows="5" maxlength="5000" placeholder="How can we help?" aria-label="Your message" style="box-sizing:border-box;width:100%;resize:vertical;min-height:120px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 16px/1.5 var(--fu);color:var(--tx)"></textarea>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ supMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ supClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ supSendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ supSendLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ supSentOn }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ supSentLine }}</div>
+        <button onClick="{{ supDoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
       </sc-if>
     </div>
   </div>
@@ -27030,7 +27121,8 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Secure payment by Stripe. Cancel anytime from the billing portal.</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
         </div>
       </sc-if>
@@ -27207,7 +27299,7 @@ input[type="date"]{color-scheme:dark}
   <div data-screen-label="Settings" style="flex:1;overflow-y:auto;padding:18px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
     <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 17px">
       <div style="font:400 19px var(--fd);color:var(--tx)">About inCommon</div>
-      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is spirituality as spirituality intended; here, you are more than you knew you were. Our faith is in your ability to absorb what your potential might be, through the tools we have provided. We do not claim to be a replacement for professional help. If you find yourself in a crisis situation, please refer to our comprehensive list of hotlines available to the public in our Self Help Yellow Pages. Your experience is the final authority. Every claim is tagged by kind; memory is opt-in per source and lives on this device; a deterministic safety gate runs before any reading is generated; humans beat readings, every time. Here, everyone has something in common.</div>
+      <div style="max-width:58ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">inCommon is a space for self-reflection. It brings astrology, Human Design, numerology and other reflective traditions together with a private journal, so you can look at your own patterns over time and notice what you hold in common with the people around you. Your experience is the final authority. Here, everyone has something in common.</div>
       
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -27417,6 +27509,20 @@ input[type="date"]{color-scheme:dark}
         </span>
         <span style="font:400 15px var(--fb);color:var(--warn)">→</span>
       </button>
+    </div>
+    <!-- Support and the two legal pages. The Terms sit directly above the
+         Privacy Policy wherever the two are linked: here, on the cover and
+         beside the Luminary purchase. -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Support &amp; legal</div>
+      <button onClick="{{ supportGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+        <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
+        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+      </button>
+      <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
+        <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
+        <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
+      </nav>
     </div>
     <div style="margin-top:auto;padding:10px 0 2px;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
   </div>
@@ -28183,6 +28289,35 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- CONTACT SUPPORT. The way the Terms and the Privacy Policy name for
+     reaching the operator, cancelling, and privacy and deletion requests.
+     Works signed out. Rows land in support_requests (server/support.sql). -->
+<sc-if value="{{ supOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ supClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
+    <div role="dialog" aria-modal="true" aria-label="Contact Support" onClick="{{ swallow }}" style="width:100%;max-width:460px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Contact Support</div>
+      <sc-if value="{{ supFormOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="What it is about" style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ supTopics }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ t.bd }};border-radius:999px;font:600 12px var(--fu);color:{{ t.cc }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <input value="{{ supEmail }}" onChange="{{ supEmailType }}" type="email" inputmode="email" autocomplete="email" placeholder="Your email address" aria-label="Your email address, for our reply" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <textarea value="{{ supText }}" onChange="{{ supTextType }}" rows="5" maxlength="5000" placeholder="How can we help?" aria-label="Your message" style="box-sizing:border-box;width:100%;resize:vertical;min-height:120px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 16px/1.5 var(--fu);color:var(--tx)"></textarea>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ supMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ supClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ supSendGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ supSendLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ supSentOn }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ supSentLine }}</div>
+        <button onClick="{{ supDoneGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <!-- TWO-STEP SIGN IN, optional. Signed out, it says so and offers the cover;
      signed in, it reads whether it is on, then turns it on (a QR code and the
      setup key, then the first code) or off (a current code first). -->
@@ -28454,6 +28589,7 @@ class Component extends DCLogic {
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
+    supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false };
 
@@ -29101,6 +29237,9 @@ class Component extends DCLogic {
       const tabKey = seg[1] === 'practices' ? 'journal' : (this.LIB_SUBS.some(s => s[0] === seg[1]) ? seg[1] : null);
       return go({ tab: 'library', libSub: view ? (this.LIB_VIEW_SUB[view] || this.libSubOf()) : (tabKey || 'study'), libView: view, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, atlasItem: null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
     }
+    /* /support is the address the Terms and the Privacy Policy point at: it
+       lands on Settings with Contact Support open. */
+    if (seg[0] === 'support') return go({ tab: 'settings', supOpen: true, supSent: false, supMsg: '', supBusy: false });
     const tabs = ['today', 'library', 'spirit', 'oracle', 'settings'];
     return go({ tab: tabs.indexOf(seg[0]) === -1 ? 'today' : seg[0] });
   }
@@ -36802,6 +36941,50 @@ class Component extends DCLogic {
     else { try { svg = decodeURIComponent(svg); } catch (e) { /* it was not encoded */ } }
     return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
   }
+  /* Contact Support. The Terms and the Privacy Policy name this as the way to
+     reach the operator, cancel, ask for a copy of one's data or have an account
+     deleted, so it works signed out as well as signed in: it calls the module's
+     supportSend() on window directly rather than through this.cloud, which is
+     absent until somebody signs in. The table is server/support.sql. */
+  supportVals() {
+    const st = this.state, IC = typeof window !== 'undefined' && window.InCommonCloud;
+    const cs = st.cloudStatus || {};
+    const TOPICS = [['general', 'A question'], ['account', 'My account'], ['billing', 'Billing or cancelling'],
+      ['privacy', 'My data or privacy'], ['delete', 'Delete my account'], ['problem', 'Something is not working']];
+    const WHY = {
+      email: 'Enter an email address we can reply to.',
+      short: 'Tell us a little more: at least 10 characters.',
+      long: 'That is longer than 5,000 characters. Please shorten it.',
+      rate: 'Several requests have come from this address today. We will answer them; you can send another tomorrow.',
+      notSetUp: 'Contact Support is not available right now. Please try again later.',
+      offline: 'There is no connection. Your message is still here; send it again when you are online.'
+    };
+    const send = () => {
+      if (st.supBusy) return;
+      if (!IC || !IC.supportSend) { this.setState({ supMsg: WHY.notSetUp }); return; }
+      this.setState({ supBusy: true, supMsg: '' });
+      IC.supportSend({ topic: st.supTopic, email: st.supEmail, message: st.supText }).then(r => {
+        if (r && r.ok) { this.setState({ supBusy: false, supSent: true, supMsg: '' }); this.speak('Your message is sent.', 'polite'); return; }
+        this.setState({ supBusy: false, supMsg: WHY[r && r.reason] || 'That did not send. Your message is still here; try again in a moment.' });
+      });
+    };
+    const shut = { supOpen: false, supBusy: false, supMsg: '', supSent: false };
+    return {
+      supportGo: () => this.setState({ quickOpen: false, supOpen: true, supSent: false, supMsg: '', supBusy: false,
+        supEmail: st.supEmail || (cs.email && /@/.test(cs.email) ? cs.email : '') }),
+      supOpen: !!st.supOpen, supFormOn: !st.supSent, supSentOn: !!st.supSent,
+      supTopics: TOPICS.map(t => ({ k: t[0], label: t[1], on: (st.supTopic || 'general') === t[0],
+        bd: (st.supTopic || 'general') === t[0] ? 'var(--ac)' : 'var(--bd)',
+        cc: (st.supTopic || 'general') === t[0] ? 'var(--ac)' : 'var(--tx)',
+        go: () => this.setState({ supTopic: t[0], supMsg: '' }) })),
+      supEmail: st.supEmail, supEmailType: e => this.setState({ supEmail: e.target.value, supMsg: '' }),
+      supText: st.supText, supTextType: e => this.setState({ supText: e.target.value, supMsg: '' }),
+      supMsg: st.supMsg, supSendGo: send, supSendLabel: st.supBusy ? 'Sending' : 'Send',
+      supSentLine: 'Sent. We will reply to ' + String(st.supEmail || '').trim() + '.',
+      supDoneGo: () => this.setState({ ...shut, supText: '', supTopic: 'general' }),
+      supClose: () => this.setState(shut)
+    };
+  }
   mfaVals() {
     const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
     const signedIn = !!(C && cs.mode === 'cloud');
@@ -38823,7 +39006,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, pmenuOpen: false, callOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false,
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -40041,6 +40224,7 @@ class Component extends DCLogic {
       })(),
       ...this.phoneVals(),
       ...this.mfaVals(),
+      ...this.supportVals(),
       ...this.profileMenuVals(),
       ...(() => {
         if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',

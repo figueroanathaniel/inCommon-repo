@@ -2275,12 +2275,69 @@ and the sample banner, shortened. The modules still return `CONFIG_CAUTION`,
 above the wheel ("The birth moment has three states"), the gloss ("The
 wiring"), the caution rendered beside the row ("Connection charts" and
 "Circles"), `otherNote` ("Anything Else logs and does not interpret"), and the
-consent sentence on the Oracle. Harness rows N18b and N33 still assert the old
-sentences are present and fail until they are changed to match.
+consent sentence on the Oracle. Harness rows N18b and N33 assert the absence
+now, with the owner's approval of 11 October 2026.
+
+**What a disclaimer said now lives in the legal pages**, which is where the
+owner put it: see "The Terms, the Privacy Policy and Contact Support" below.
+The Oracle's consent paragraph is Privacy Policy section 6, nearly word for
+word, and the button that sends is still the reader's own press.
 
 **Do not add a line of this kind back.** Before writing a sentence under a
 title, ask whether it explains the screen, the method or the source. If it
 does, it does not ship.
+
+## The Terms, the Privacy Policy and Contact Support
+Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
+policy, a generic and accurate About that discloses no method, folded into
+Terms & Conditions, and the Terms "right above the privacy policy". The owner's
+answers decide four facts written into both pages: **Nathaniel J. Figueroa, an
+individual in Florida**, until an LLC is formed; **Florida law and courts**;
+**16** as the minimum age (a parent's permission to subscribe under 18); and
+**Contact Support** as the contact route, because there is no domain for an
+email address yet. `docs/LEGAL-SETUP.md` is the owner's half, including what a
+lawyer should read before launch.
+
+**Two plain pages, `app/terms.html` and `app/privacy.html`.** No script, no web
+font and no third party request, so reading the privacy policy sends nothing
+anywhere, and they print. `build-bundle.js` copies both beside `index.html`,
+rewrites their way back to `./app.html`, refuses a dash, and refuses a cover
+that links the Privacy Policy above the Terms. `_headers` revalidates both.
+
+**The Terms sit directly above the Privacy Policy everywhere they are linked**:
+the cover (`.legal.links`, shown only once the form is open), Settings in both
+shells (Support & legal, under the crisis rows and above the credit line), and
+the Luminary purchase, where the automatic renewal sentence sits beside them
+because Florida and California both want renewal terms before the purchase.
+The cover's Create New Account mode shows `.agree`, the line that makes signing
+up an agreement to both. H5 counts the cover's links outside `.legal`, because
+those two are not ways in.
+
+**The pages describe the build, so they move with it.** A new outside service,
+anything new sent to the Oracle, a price or plan, the SMS provider, the LLC or
+the domain each needs both pages and the date changed in the same change. K55
+holds the facts that would drift first: the operator, Florida, 16, the Oracle's
+sent and not sent lists, the support route, the renewal sentence, the link
+order in the app and on the cover, and no dash.
+
+**Contact Support writes one row to `support_requests` (`server/support.sql`).**
+Anybody may insert, nobody may read back through the API, user_id and status
+cannot be chosen by the sender, and a trigger throttles five per address per day
+and two hundred an hour. `supportSend()` in `incommon-cloud.js` posts to the
+REST API directly, with the reader's token when fully signed in and the anon key
+otherwise, because the client is absent for a reader who never signed in and a
+session held for its two-step code would be refused by the restrictive policy
+(the table is in `server/mfa-policies.sql`'s list). It sends topic, email and
+message and nothing else (K54). `#/support` lands on Settings with the dialog
+open, which is the address both pages link. Driven against the real SQL on
+Postgres 16: anonymous and signed in sends land, a forged user id or status is
+refused, an aal1 session with a factor is refused, nothing reads back, and the
+sixth send from one address is refused.
+
+**The About card says what inCommon is and nothing about how.** The old card
+named the safety gate, the claim tags and the device storage, two of which were
+no longer true. The Settings card and the Terms carry the same opening; the
+disclaimers went to the Terms, sections 3 and 4.
 
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the
