@@ -16536,7 +16536,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.5.0';
+  var VERSION = '2.6.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -17067,6 +17067,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (code === 'same_password' || /different from the old/i.test(m)) return 'same';
     if (code === 'weak_password' || (e && e.name === 'AuthWeakPasswordError') || /password should/i.test(m)) return 'weak';
     if (code === 'signup_disabled' || /signups not allowed/i.test(m)) return 'closed';
+    if (code === 'captcha_failed' || /captcha/i.test(m)) return 'captcha';
     return 'error';
   }
   function authCall(run) {
@@ -17077,15 +17078,28 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   function refused(res) {
     return { ok: false, reason: authReason(res.error), error: String(res.error.message || '') };
   }
+  /* CLOUDFLARE TURNSTILE, since 11 October 2026. With CAPTCHA protection on in
+     the project, Supabase refuses five calls that arrive without a token:
+     password sign in, sign up, the reset email, a text code and a resend
+     (the server's own /token for the password grant, /signup, /recover, /otp
+     and /resend). Checking a code, refreshing a session, finishing an emailed
+     link and the two-step code are not asked for one. The cover gets the token
+     from the widget and hands it in as opts.captchaToken; a token is good once,
+     so the cover asks for a fresh one per call. With no token the calls are
+     sent exactly as before, which is what lets the page ship before the
+     project turns the check on. */
+  function cap(opts) { var t = opts && opts.captchaToken; return t ? String(t) : null; }
 
-  function passwordSignIn(login, password) {
+  function passwordSignIn(login, password, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     if (!password) return Promise.resolve({ ok: false, reason: 'nopassword' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
     return authCall(function () {
-      return c.auth.signInWithPassword(id.email ? { email: id.email, password: String(password) } : { phone: id.phone, password: String(password) });
+      var cred = id.email ? { email: id.email, password: String(password) } : { phone: id.phone, password: String(password) };
+      if (cap(opts)) cred.options = { captchaToken: cap(opts) };
+      return c.auth.signInWithPassword(cred);
     }).then(function (res) {
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
@@ -17124,7 +17138,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        carry: the list is read by email, and a phone account has none. */
     if (id.phone) {
       return authCall(function () {
-        return c.auth.signUp({ phone: id.phone, password: String(password) });
+        var up = { phone: id.phone, password: String(password) };
+        if (cap(opts)) up.options = { captchaToken: cap(opts) };
+        return c.auth.signUp(up);
       }).then(function (res) {
         if (res && res.error) return refused(res);
         var d = (res && res.data) || {};
@@ -17135,6 +17151,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     }
     var addr = id.email;
     var options = { emailRedirectTo: redirectTo };
+    if (cap(opts)) options.captchaToken = cap(opts);
     if (opts && typeof opts.newsletter === 'boolean') {
       options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
@@ -17153,14 +17170,16 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      the # and type=recovery, which the cover adopts and then asks for the new
      password. Supabase answers the same whether or not the address has an
      account, and so does the cover. */
-  function passwordResetStart(login, redirectTo) {
+  function passwordResetStart(login, redirectTo, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
-    if (id.phone) return phoneCodeSend(c, id.phone);
+    if (id.phone) return phoneCodeSend(c, id.phone, opts);
     return authCall(function () {
-      return c.auth.resetPasswordForEmail(id.email, { redirectTo: redirectTo });
+      var o = { redirectTo: redirectTo };
+      if (cap(opts)) o.captchaToken = cap(opts);
+      return c.auth.resetPasswordForEmail(id.email, o);
     }).then(function (res) {
       return res && res.error ? refused(res) : { ok: true };
     });
@@ -17174,9 +17193,11 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      such a number with "signups not allowed for otp", and the cover answers
      it exactly as it answers a number that has an account, so nobody can use
      this to find out whose number is registered. */
-  function phoneCodeSend(c, phone) {
+  function phoneCodeSend(c, phone, opts) {
     return authCall(function () {
-      return c.auth.signInWithOtp({ phone: phone, options: { shouldCreateUser: false } });
+      var o = { shouldCreateUser: false };
+      if (cap(opts)) o.captchaToken = cap(opts);
+      return c.auth.signInWithOtp({ phone: phone, options: o });
     }).then(function (res) {
       if (res && res.error) {
         var r = refused(res);
@@ -17208,14 +17229,16 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
   /* Another code, for the reason the first one was sent. A sign up asks
      Supabase to resend its confirmation; a new password simply asks again. */
-  function phoneCodeResend(phone, purpose) {
+  function phoneCodeResend(phone, purpose, opts) {
     var p = normPhone(phone);
     if (!p) return Promise.resolve({ ok: false, reason: 'invalid' });
     var c = coverLib();
     if (!c) return Promise.resolve({ ok: false, reason: 'off' });
-    if (purpose === 'recover') return phoneCodeSend(c, p);
+    if (purpose === 'recover') return phoneCodeSend(c, p, opts);
     return authCall(function () {
-      return c.auth.resend({ type: 'sms', phone: p });
+      var r = { type: 'sms', phone: p };
+      if (cap(opts)) r.options = { captchaToken: cap(opts) };
+      return c.auth.resend(r);
     }).then(function (res) {
       return res && res.error ? refused(res) : { ok: true, via: 'phone', phone: p };
     });

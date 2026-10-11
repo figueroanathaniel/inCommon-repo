@@ -2137,6 +2137,57 @@ async function runCloudTests() {
     wrong: { ok: false, reason: 'badCode', removed: 0 }, right: { ok: true, removed: ['f1'] }, oracle: 'signedOut', billing: 'signedOut'
   }, { wrong: { ok: offBad.ok, reason: offBad.reason, removed: dBad.unenroll.length },
     right: { ok: offOk.ok, removed: dOk.unenroll.map(function (u) { return u.factorId; }) }, oracle: mfaOracle.reason, billing: mfaBill.reason });
+
+  /* ---- K52-K53: Cloudflare Turnstile, 11 October 2026. With CAPTCHA
+     protection on, Supabase asks a token of the five calls that can be scripted
+     (password sign in, sign up, the reset email, a text code, a resend) and of
+     nothing else. The cover hands the token in; without one the calls go
+     exactly as before, which is what lets the page ship first. */
+  var tk = { captchaToken: 'tok-k52' };
+  var gT = oauthHarness();
+  await gT.C.passwordSignIn('reader@k52.invalid', 'correct horse', tk);
+  await gT.C.passwordSignIn('(555) 123-4567', 'correct horse', tk);
+  await gT.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: true, captchaToken: 'tok-k52' });
+  await gT.C.passwordSignUp('(555) 123-4567', 'correct horse', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('(555) 123-4567', 'https://k52.invalid/', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'signup', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'recover', tk);
+  await gT.C.phoneCodeCheck('+15551234567', '123456');
+  var gN = oauthHarness();
+  await gN.C.passwordSignIn('reader@k52.invalid', 'correct horse');
+  await gN.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: false });
+  await gN.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/');
+  await gN.C.phoneCodeResend('(555) 123-4567', 'signup');
+  var tokOf = function (o) { return o && o.captchaToken; };
+  t('K52', 'a Turnstile token rides on every call the server asks one of (sign in by email and by phone, sign up by both, the reset email and the text, both resends), never on a code check, and with no token the calls are sent exactly as before', {
+    withToken: { pw: ['tok-k52', 'tok-k52'], up: ['tok-k52', 'tok-k52'], newsletterKept: true, reset: 'tok-k52', otp: ['tok-k52', 'tok-k52'], resend: 'tok-k52', verifyCarries: false },
+    without: { pwOptions: false, upToken: false, resetToken: false, resendOptions: false }
+  }, {
+    withToken: { pw: gT.pw.map(function (a) { return tokOf(a.options); }), up: gT.up.map(function (a) { return tokOf(a.options); }),
+      newsletterKept: !!(gT.up[0].options && gT.up[0].options.data && gT.up[0].options.data.newsletter === true),
+      reset: tokOf(gT.reset[0] && gT.reset[0].opts), otp: gT.otp.map(function (a) { return tokOf(a.options); }),
+      resend: tokOf(gT.resend[0] && gT.resend[0].options), verifyCarries: JSON.stringify(gT.verify).indexOf('tok-k52') !== -1 },
+    without: { pwOptions: 'options' in gN.pw[0], upToken: 'captchaToken' in (gN.up[0].options || {}), resetToken: 'captchaToken' in (gN.reset[0].opts || {}),
+      resendOptions: 'options' in gN.resend[0] }
+  });
+  var capReasons = {};
+  [['missing', { code: 'captcha_failed', message: 'captcha protection: request disallowed (no captcha_token found)', status: 400 }],
+   ['refused', { message: 'captcha protection: request disallowed (timeout-or-duplicate)', status: 400 }]].forEach(function (c) {
+    capReasons[c[0]] = null; capReasons['_' + c[0]] = c[1];
+  });
+  capReasons.missing = (await oauthHarness({ pwError: capReasons._missing }).C.passwordSignIn('reader@k52.invalid', 'x', tk)).reason;
+  capReasons.refused = (await oauthHarness({ upError: capReasons._refused }).C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', tk)).reason;
+  delete capReasons._missing; delete capReasons._refused;
+  var hdrSrc = fs.readFileSync(path.join(repo, 'deploy', 'v6.4', '_headers'), 'utf8');
+  var csp = (hdrSrc.match(/Content-Security-Policy: (.*)/) || [])[1] || '';
+  var dir = function (name) { return ((csp.match(new RegExp('(?:^|; )' + name + ' ([^;]*)')) || [])[1] || '').split(/\s+/); };
+  var tsSrc = (coverSrc.match(/var TS_SRC = '([^']+)'/) || [])[1] || '';
+  var tsOrigin = tsSrc ? new URL(tsSrc).origin : '';
+  t('K53', 'a refused or missing Turnstile token is a reason the cover can say, and the security headers let the cover reach the one Turnstile origin it loads, for its script and its frame, and nowhere else new', {
+    reasons: { missing: 'captcha', refused: 'captcha' }, origin: 'https://challenges.cloudflare.com', script: true, frame: true, connectUnchanged: true
+  }, { reasons: capReasons, origin: tsOrigin, script: dir('script-src').indexOf(tsOrigin) !== -1, frame: dir('frame-src').indexOf(tsOrigin) !== -1,
+    connectUnchanged: dir('connect-src').indexOf(tsOrigin) === -1 });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */

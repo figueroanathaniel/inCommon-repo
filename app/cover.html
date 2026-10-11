@@ -286,6 +286,11 @@
   .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
   .mailform .eye svg { width: 20px; height: 20px; display: block; }
   .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
+  /* Turnstile's slot. The widget runs out of sight and only draws itself when
+     Cloudflare wants somebody to tick a box, so the slot is empty, and takes
+     no room, for nearly everybody. */
+  .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; }
+  .mailform .captcha:empty { display: none; }
   .mailform .field::placeholder { color: #9aa0a6; }
   .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .mailform .signin { padding: 0 18px; flex: none; }
@@ -388,6 +393,7 @@
         </button>
       </span>
       <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
+      <div class="captcha" aria-live="polite"></div>
       <button class="signin" type="submit">Sign in</button>
       <label class="news keep"><input id="rememberopt" type="checkbox" checked> Remember me</label>
       <button class="signin alt" type="button" data-to="up">Create New Account</button>
@@ -517,6 +523,8 @@
     badCode: 'That code is not right or has expired. Check the text, or choose “Text me a new code”.',
     phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
     phoneTaken: 'That number is already on an account.',
+    captcha: 'The check that keeps automated sign ups out did not finish. Try again, and if it keeps happening, something in this browser may be blocking challenges.cloudflare.com.' + ANYWAY,
+    captchaAsk: 'One more step: tick the box below to show this is a person.',
     nomfa: 'Enter the 6 digit code your authenticator app is showing.',
     mfaBad: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
     mfaAsk: 'Two-step sign in is on for this account. Enter the 6 digit code your authenticator app is showing.'
@@ -679,6 +687,93 @@
       document.head.appendChild(s);
     });
   }
+  /* CLOUDFLARE TURNSTILE (11 October 2026). Supabase's CAPTCHA protection asks
+     for a token on the five calls that can be scripted to make accounts or
+     send email and texts: sign in, sign up, the reset email, a text code and
+     a resend. The widget comes from Cloudflare, so it is the one third party
+     script on this page, and it is not loaded until the reader starts using
+     the form: a visitor who only looks at the cover sends nothing anywhere.
+
+     The site key below is public by design (it names the widget, and the page
+     cannot work without showing it); the secret key lives only in the Supabase
+     dashboard. Empty means the check is off and every call goes as before.
+     With the key set and CAPTCHA protection still off in Supabase, the token
+     is sent and ignored, which is how this page ships before the project
+     switches the check on. The
+     order matters, and docs/TURNSTILE-SETUP.md says so: this key first, then
+     CAPTCHA protection in Supabase, never the other way round.
+
+     The widget is rendered once, invisible (interaction-only), run on demand
+     (execute), and reset after every call, because a token is good once. It is
+     asked early, on the first focus inside the form, so the token is usually
+     waiting by the time the reader presses the button. */
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
+  var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  var capBox = form.querySelector('.captcha');
+  var ts = { loading: null, id: null, wait: null, timer: null, running: false };
+  function capSettle(ok, val) {
+    var w = ts.wait;
+    ts.running = false;
+    if (!w) return;
+    ts.wait = null;
+    clearTimeout(ts.timer);
+    if (ok) w.ok(val); else w.fail(val);
+  }
+  function capLoad() {
+    return ts.loading || (ts.loading = load(TS_SRC).then(function () {
+      var T = window.turnstile;
+      if (!T || typeof T.render !== 'function') throw new Error('turnstile missing');
+      ts.id = T.render(capBox, {
+        sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark', size: 'flexible',
+        execution: 'execute', appearance: 'interaction-only', 'response-field': false,
+        callback: function (t) { capSettle(true, t); },
+        'error-callback': function () { capSettle(false); return true; },
+        'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} },
+        'before-interactive-callback': function () { say(WHY.captchaAsk); }
+      });
+      return T;
+    }).catch(function (e) { ts.loading = null; throw e; }));
+  }
+  /* A token for one call: the one waiting if it is still fresh, otherwise a
+     new run of the widget. Two minutes is long enough for somebody who has to
+     tick the box, and short enough that a blocked widget says so. */
+  function captchaToken() {
+    if (!TURNSTILE_SITE_KEY) return Promise.resolve(null);
+    return capLoad().then(function (T) {
+      var have = ts.id != null && T.getResponse(ts.id);
+      if (have && !(T.isExpired && T.isExpired(ts.id))) return have;
+      return new Promise(function (ok, fail) {
+        /* A run already under way (the early one, from the first focus) is
+           waited for rather than started again. */
+        var running = ts.running;
+        if (ts.wait) { var old = ts.wait; ts.wait = null; clearTimeout(ts.timer); old.fail(); }
+        ts.wait = { ok: ok, fail: fail };
+        ts.timer = setTimeout(function () { capSettle(false); }, 120000);
+        if (running) return;
+        ts.running = true;
+        try { T.execute(ts.id); } catch (e) { try { T.reset(ts.id); T.execute(ts.id); } catch (e2) { capSettle(false); } }
+      });
+    }).catch(function () { var e = new Error('captcha'); e.captcha = true; throw e; });
+  }
+  /* Spent: the token went with a call, so the widget starts again for the
+     next one. */
+  function captchaSpent() {
+    ts.running = false;
+    if (window.turnstile && ts.id != null) { try { window.turnstile.reset(ts.id); } catch (e) {} }
+  }
+  /* Asked early: the first focus inside the form loads the widget and runs it,
+     so the token is usually ready before the button is pressed. */
+  form.addEventListener('focusin', function warm() {
+    if (!TURNSTILE_SITE_KEY) return;
+    form.removeEventListener('focusin', warm);
+    capLoad().then(function (T) {
+      if (ts.running || T.getResponse(ts.id)) return;
+      ts.running = true;
+      try { T.execute(ts.id); } catch (e) { ts.running = false; }
+    }, function () {});
+  });
+  /* The five calls the server asks a token of. */
+  function needsToken(m) { return m === 'in' || m === 'up' || m === 'forgot'; }
   /* A failed load is forgotten, so the next press tries again rather than
      failing at once on the first attempt's broken promise. The module is asked
      for by its VERSION, because the deployed worker keeps it cache first: a
@@ -687,7 +782,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.5.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.6.0'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -864,11 +959,14 @@
     if (busy || !codeFor) return;
     hold();
     say('Sending another code.');
-    cloud().then(function (C) { return C.phoneCodeResend(codeFor.phone, codeFor.purpose); }).then(function (r) {
+    Promise.all([cloud(), captchaToken()]).then(function (a) {
+      return a[0].phoneCodeResend(codeFor.phone, codeFor.purpose, { captchaToken: a[1] });
+    }).then(function (r) {
       settle();
+      captchaSpent();
       say(r.ok ? 'Another code is on its way to ' + showPhone(codeFor.phone) + '.' : WHY[r.reason] || WHY.error);
       codeIn.focus();
-    }, function () { settle(); say(WHY.off); });
+    }, function (e) { settle(); captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
   });
 
   form.addEventListener('submit', function (ev) {
@@ -882,18 +980,21 @@
     reveal(false);
     hold();
     say(ph && d.phoneBusy || d.busy);
-    cloud().then(function (C) {
-      if (m === 'in') return C.passwordSignIn(login, pass.value);
+    var tokenFor = needsToken(m);
+    Promise.all([cloud(), tokenFor ? captchaToken() : null]).then(function (a) {
+      var C = a[0], capt = { captchaToken: a[1] };
+      if (m === 'in') return C.passwordSignIn(login, pass.value, capt);
       /* The newsletter answer goes with the sign up, and only there. Supabase
          keeps it only when this call creates the account, which is when the
          owner asked for it to be asked. A phone has no address to write to. */
-      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? {} : { newsletter: !!newsBox.checked });
-      if (m === 'forgot') return C.passwordResetStart(login, here);
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? capt : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken });
+      if (m === 'forgot') return C.passwordResetStart(login, here, capt);
       if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
       if (m === 'mfa') return C.mfaVerify(codeIn.value);
       return C.passwordSet(pass.value);
     }).then(function (r) {
       settle();
+      if (tokenFor) captchaSpent();
       /* The password, or the text's code, passed and the account asks for its
          two-step code as well. The password is held only until then, for the
          browser's password manager, and the field is cleared now. */
@@ -947,7 +1048,7 @@
       if (r.reason === 'invalid') addr.focus();
       else if (r.reason === 'badCode') codeIn.focus();
       else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
-    }, function () { settle(); say(WHY.off); });
+    }, function (e) { settle(); if (tokenFor) captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
   });
 })();
 </script>

@@ -2353,6 +2353,35 @@ driven in a browser against a fake auth server, and the database rule against
 a real Postgres. The dialog and the cover's code step measured clean in all 32
 theme cases at 1440 and 375, and at 320x568.
 
+## Cloudflare Turnstile guards the five calls that can be scripted
+Added 11 October 2026. The owner made the widget; the cover carries it
+(`TURNSTILE_SITE_KEY`, action `signin`) and `docs/TURNSTILE-SETUP.md` is the
+owner's half. **Supabase Auth verifies the token itself** once CAPTCHA
+protection is on in the project, so there is no siteverify code in this repo and
+the secret key lives only in the Supabase dashboard.
+
+Supabase's server asks a token of five calls and only these: `/token` for the
+password grant, `/signup`, `/recover`, `/otp` and `/resend`. Code checks,
+refreshes, emailed links and the two-step code are exempt. So the cover asks
+for one on `in`, `up` and `forgot` (`needsToken()`) and on "Text me a new
+code", the module passes it as `captchaToken` on exactly those calls (K52), and
+a refusal reads as `captcha` (K53). **A new call to any of those five
+endpoints has to carry a token**, or it breaks the day the check is switched on.
+
+Three things are easy to undo. The script loads on the first focus inside the
+form, never at page load, so a plain visit sends nothing to Cloudflare. A token
+is good once, so the widget is reset after every call (`captchaSpent()`) and a
+run already in flight is waited for rather than started twice. And
+`challenges.cloudflare.com` is in `script-src` and `frame-src` in
+`deploy/v6.4/_headers`; K53 holds the cover's origin and the policy equal.
+
+**Deploy the page before switching the check on in Supabase.** The reverse
+order refuses every sign in until the page arrives. Driven in a browser with
+Cloudflare's test keys: the always passing key put a token on sign in, sign up
+and the reset email, the blocking key told the reader and sent Supabase
+nothing, the interactive key drew the box and said why, and no key fetched
+nothing from Cloudflare.
+
 ## Zero em dash
 No em dash or en dash anywhere: not in app copy, not in generated readings, not
 in comments, not in the docs. Use a comma, a colon, or a full stop. The rule is

@@ -128,9 +128,11 @@ must fail to write into A's profile.
   Do not use a broad wildcard such as `https://*.netlify.app/**`: emailed reset
   and confirmation links carry the session to whatever address is allowed
   there, so a wildcard lets another site's owner receive a customer's session.
-- **Attack Protection:** turn on CAPTCHA (Cloudflare Turnstile is free) once
-  signups open. It stops scripted account creation, which is what would be used
-  to run up the Oracle bill six readings per fake account per day.
+- **Attack Protection:** turn on CAPTCHA with Cloudflare Turnstile, following
+  `docs/TURNSTILE-SETUP.md`: the sign in page already carries the widget, so
+  deploy first, then paste the secret key in Supabase. It stops scripted
+  account creation, which is what would be used to run up the Oracle bill six
+  readings per fake account per day.
 - **Before turning on SMS** (`docs/PHONE-SETUP.md`): CAPTCHA first, and limit
   the SMS provider to the countries you serve. Open phone signup is a known
   target for "SMS pumping" fraud, which bills you for texts to premium numbers.
