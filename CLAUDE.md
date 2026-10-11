@@ -3803,12 +3803,21 @@ to the person doing it. A fresh profile is made and made active BEFORE the old
 one is deleted, so the refusal never fires.
 
 **Log Out signs out and keeps everything on the device, and Back cannot undo
-it.** It marks the tab (`incommon.signin.out` in sessionStorage) and replaces
-the app's history entry with the cover. A plain script at the top of the app
-sends any app page reached through history (`back_forward`, or a back-forward
-cache `pageshow`) in a marked tab to the cover, hidden until it goes, and the
-cover reloads itself to its first screen when restored from that cache in a
-marked tab. Any other way into the app clears the mark. `accountLogOut()`
+it.** It marks the tab (`incommon.signin.out` in sessionStorage) and goes to
+the cover as a new history entry. A plain script at the top of the app sends
+any app page reached through history (`back_forward`, or a back-forward cache
+`pageshow`) in a marked tab to the cover, hidden until it goes, so Back after
+Log Out brings the home screen up rather than the app. It is a new entry and
+not a replacement, because a replacement left nothing of the site behind the
+cover and Back left the site. The cover reloads itself to its first screen when
+restored from that cache in a marked tab. Any other way into the app clears the
+mark. The other half is on the cover: a cover reached through history by a
+reader who is signed in and owes no code goes straight back into the app on
+Today (`backIn()`), so Back from Today after signing in reads as Today
+refreshing rather than as being signed out. A marked tab is never sent in. And
+`signOut()` in `incommon-cloud.js` falls back to a local sign out when the
+server cannot be told, because supabase-js keeps the stored session on a
+network failure and the cover would then offer the reader straight back in. `accountLogOut()`
 calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
 is `./` in the bundle and `./cover.html` in the source shell, because the app
 is `app.html` in one and the long name in the other. The line beside it names

@@ -16557,7 +16557,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.7.0';
+  var VERSION = '2.7.1';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -17799,7 +17799,18 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     onSessionChange: function (cb) { if (typeof cb === 'function') listeners.push(cb); },
     signUp: function (email, password) { return normalize(client.auth.signUp({ email: email, password: password })); },
     signIn: function (email, password) { return normalize(client.auth.signInWithPassword({ email: email, password: password })); },
-    signOut: function () { return normalize(client.auth.signOut()); },
+    /* Signing out has to end the session on THIS device even when the server
+       cannot be told. supabase-js keeps the stored session when its sign out
+       request fails for any reason but a 401, 403 or 404 (no signal, a
+       timeout), so a Log Out on a weak connection left the reader signed in
+       and the cover offered them straight back in. The local sign out needs
+       no network. */
+    signOut: function () {
+      return normalize(client.auth.signOut()).then(function (r) {
+        if (r.ok) return r;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return r; });
+      });
+    },
     schedule: schedule,
     push: push,
     pullAll: pullAll,
@@ -36794,11 +36805,14 @@ class Component extends DCLogic {
   coverHref() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
   accountLogOut() {
     this.setState({ quickOpen: false });
-    /* Replace, not a new entry, and the tab is marked, so Back from the cover
-       cannot bring a signed in screen back: the guard at the top of this
-       file sends any app page reached through history to the cover. */
+    /* The tab is marked, so Back from the cover cannot bring a signed in
+       screen back: the guard at the top of this file sends an app page
+       reached through history to the cover's first screen. The cover is a new
+       entry rather than a replacement on purpose: a replacement left nothing
+       of this site behind it, so Back after Log Out left the site, where the
+       owner wants it to bring the home screen up again (11 October 2026). */
     try { sessionStorage.setItem('incommon.signin.out', '1'); } catch (e) {}
-    const go = () => { location.replace(this.coverHref()); };
+    const go = () => { location.href = this.coverHref(); };
     if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
     else go();
   }

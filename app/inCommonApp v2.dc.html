@@ -17671,11 +17671,14 @@ class Component extends DCLogic {
   coverHref() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
   accountLogOut() {
     this.setState({ quickOpen: false });
-    /* Replace, not a new entry, and the tab is marked, so Back from the cover
-       cannot bring a signed in screen back: the guard at the top of this
-       file sends any app page reached through history to the cover. */
+    /* The tab is marked, so Back from the cover cannot bring a signed in
+       screen back: the guard at the top of this file sends an app page
+       reached through history to the cover's first screen. The cover is a new
+       entry rather than a replacement on purpose: a replacement left nothing
+       of this site behind it, so Back after Log Out left the site, where the
+       owner wants it to bring the home screen up again (11 October 2026). */
     try { sessionStorage.setItem('incommon.signin.out', '1'); } catch (e) {}
-    const go = () => { location.replace(this.coverHref()); };
+    const go = () => { location.href = this.coverHref(); };
     if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
     else go();
   }

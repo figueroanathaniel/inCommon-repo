@@ -866,7 +866,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.7.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.7.1'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -961,14 +961,32 @@
 
   /* A return through the back button restores this page from the
      back-forward cache with the button still held, so it is let go here. */
+  /* BACK FROM THE APP, SIGNED IN (the owner, 11 October 2026). Signing in
+     goes on through the link, so the cover stays one step behind the app in
+     the tab's history, and Back from Today used to land here looking signed
+     out. A cover reached through history, by a reader who is signed in and
+     owes no code, goes straight back into the app instead, on Today, so Back
+     reads as the page refreshing. A tab that logged out (the app's mark) is
+     never sent in: that reader asked to leave. */
+  function loggedOut() { try { return sessionStorage.getItem('incommon.signin.out') === '1'; } catch (x) { return false; } }
+  function backIn() {
+    storedOwes = false;
+    if (loggedOut() || !signedInAs() || storedOwes) return false;
+    document.documentElement.style.visibility = 'hidden';
+    location.replace(enter.getAttribute('href') + '#/today');
+    return true;
+  }
+  var navKind = null;
+  try { navKind = performance.getEntriesByType('navigation')[0].type; } catch (x) {}
+  if (navKind === 'back_forward' && !returning) backIn();
   addEventListener('pageshow', function (e) {
-    /* Back to a cover kept from before the reader logged out (the app marks
-       the tab on Log Out): it may still be open on a form or say "Signed in
-       as", so it is loaded again and starts from its first screen. */
-    var out = false;
-    try { out = sessionStorage.getItem('incommon.signin.out') === '1'; } catch (x) {}
-    if (e.persisted && out) { location.reload(); return; }
-    if (e.persisted && !returning) { settle(); say(''); }
+    if (!e.persisted) return;
+    if (!returning && backIn()) return;
+    /* Back to a cover kept from before the reader logged out: it may still
+       be open on a form or say "Signed in as", so it is loaded again and
+       starts from its first screen. */
+    if (loggedOut()) { location.reload(); return; }
+    if (!returning) { settle(); say(''); }
   });
 
   /* "enter here" opens the form and does nothing else, the owner's call of 30

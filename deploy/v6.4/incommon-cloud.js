@@ -48,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.7.0';
+  var VERSION = '2.7.1';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1290,7 +1290,18 @@
     onSessionChange: function (cb) { if (typeof cb === 'function') listeners.push(cb); },
     signUp: function (email, password) { return normalize(client.auth.signUp({ email: email, password: password })); },
     signIn: function (email, password) { return normalize(client.auth.signInWithPassword({ email: email, password: password })); },
-    signOut: function () { return normalize(client.auth.signOut()); },
+    /* Signing out has to end the session on THIS device even when the server
+       cannot be told. supabase-js keeps the stored session when its sign out
+       request fails for any reason but a 401, 403 or 404 (no signal, a
+       timeout), so a Log Out on a weak connection left the reader signed in
+       and the cover offered them straight back in. The local sign out needs
+       no network. */
+    signOut: function () {
+      return normalize(client.auth.signOut()).then(function (r) {
+        if (r.ok) return r;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return r; });
+      });
+    },
     schedule: schedule,
     push: push,
     pullAll: pullAll,
