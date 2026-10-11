@@ -2188,6 +2188,73 @@ async function runCloudTests() {
     reasons: { missing: 'captcha', refused: 'captcha' }, origin: 'https://challenges.cloudflare.com', script: true, frame: true, connectUnchanged: true
   }, { reasons: capReasons, origin: tsOrigin, script: dir('script-src').indexOf(tsOrigin) !== -1, frame: dir('frame-src').indexOf(tsOrigin) !== -1,
     connectUnchanged: dir('connect-src').indexOf(tsOrigin) === -1 });
+
+  /* ---- K54-K55: Contact Support and the two legal pages, 11 October 2026.
+     The Terms and the Privacy Policy name Contact Support as the way to reach
+     the operator, cancel, and make a privacy or deletion request, so the call
+     has to work with nobody signed in, say what was wrong in words, and send
+     exactly three fields: topic, email and message. Nothing the reader types
+     may choose a user id or a status; the table refuses both as well
+     (server/support.sql). */
+  var sent = [];
+  var fakeFetch = function (answer) {
+    return function (url, init) { sent.push({ url: url, init: init }); return Promise.resolve(answer); };
+  };
+  var okAns = { ok: true, status: 201, text: function () { return Promise.resolve(''); } };
+  var rateAns = { ok: false, status: 400, text: function () { return Promise.resolve('{"code":"P0001","message":"support_rate"}'); } };
+  var goneAns = { ok: false, status: 404, text: function () { return Promise.resolve('{"code":"PGRST205","message":"Could not find the table"}'); } };
+  var sOk = await CL.supportSend({ topic: 'delete', email: ' reader@k54.invalid ', message: 'Please delete my account and data.', user_id: 'x', status: 'answered' }, { fetch: fakeFetch(okAns) });
+  var body = sent[0] ? JSON.parse(sent[0].init.body) : {};
+  var hdr = sent[0] ? sent[0].init.headers : {};
+  var sBadTopic = await CL.supportSend({ topic: 'spam', email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(okAns) });
+  var sentTopic = sent[1] ? JSON.parse(sent[1].init.body).topic : null;
+  var before = sent.length;
+  var reasons = {
+    email: (await CL.supportSend({ email: 'not an address', message: 'A message long enough.' }, { fetch: fakeFetch(okAns) })).reason,
+    short: (await CL.supportSend({ email: 'a@k54.invalid', message: 'hi' }, { fetch: fakeFetch(okAns) })).reason,
+    long: (await CL.supportSend({ email: 'a@k54.invalid', message: new Array(5002).join('x') }, { fetch: fakeFetch(okAns) })).reason
+  };
+  var sentForInvalid = sent.length - before;
+  reasons.rate = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(rateAns) })).reason;
+  reasons.notSetUp = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(goneAns) })).reason;
+  reasons.offline = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: function () { return Promise.reject(new Error('net')); } })).reason;
+  t('K54', 'Contact Support sends topic, email and message and nothing else to support_requests, works signed out with the public key, refuses a bad address or an empty message before sending, and names a throttle, a missing table and no connection in words', {
+    ok: true, url: true, keys: ['email', 'message', 'topic'], trimmed: 'reader@k54.invalid', anon: true, badTopicFallsBack: 'general',
+    invalidSentNothing: 0, reasons: { email: 'email', short: 'short', long: 'long', rate: 'rate', notSetUp: 'notSetUp', offline: 'offline' }
+  }, {
+    ok: !!sOk.ok && !!sBadTopic.ok, url: !!sent[0] && /\/rest\/v1\/support_requests$/.test(sent[0].url),
+    keys: Object.keys(body).sort(), trimmed: body.email,
+    anon: !!hdr && hdr.Authorization === 'Bearer ' + hdr.apikey && /^eyJ/.test(hdr.apikey || ''),
+    badTopicFallsBack: sentTopic, invalidSentNothing: sentForInvalid, reasons: reasons
+  });
+
+  var termsSrc = fs.readFileSync(path.join(repo, 'app', 'terms.html'), 'utf8');
+  var privSrc = fs.readFileSync(path.join(repo, 'app', 'privacy.html'), 'utf8');
+  var appSrcK = fs.readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  var orderOk = function (src) {
+    var t1 = src.indexOf('./terms.html'), p1 = src.indexOf('./privacy.html');
+    return t1 !== -1 && p1 !== -1 && t1 < p1;
+  };
+  var dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']|&[mn]dash;');
+  var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
+  var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings and at the Luminary purchase; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+    cover: true, appLinks: 6, appOrderEachTime: true, operator: true, florida: true, age16: true,
+    oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
+  }, {
+    cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
+    appOrderEachTime: appSrcK.split('href="./terms.html"').slice(1).every(function (chunk) { return chunk.indexOf('href="./privacy.html"') !== -1 && chunk.indexOf('href="./privacy.html"') < 900; }),
+    operator: /Nathaniel J\. Figueroa/.test(termsSrc) && /Nathaniel J\. Figueroa/.test(privSrc),
+    florida: /State of Florida/.test(termsSrc), age16: /at least <strong>16 years old<\/strong>/.test(termsSrc) && /under 16/.test(privSrc),
+    oracleSent: /first name on your profile/.test(privSrc) && /Moonshot AI/.test(privSrc),
+    oracleNotSent: /birth date, birth time and birth place are not sent/.test(privSrc),
+    moonshot: /Moonshot AI/.test(termsSrc),
+    supportRoute: /#\/support/.test(termsSrc) && /#\/support/.test(privSrc) && /seg\[0\] === 'support'/.test(appSrcK),
+    renewal: /renews automatically/i.test(termsSrc) && /Renews automatically each month or year/.test(appSrcK),
+    noDash: !dashRe.test(termsSrc) && !dashRe.test(privSrc),
+    mfaCovers: /'support_requests'/.test(mfaSrc),
+    sqlInsertOnly: /for insert to anon, authenticated/.test(sqlSrc) && !/for select|for update|for delete|for all/.test(sqlSrc)
+  });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */

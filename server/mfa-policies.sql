@@ -34,7 +34,7 @@ declare
 begin
   foreach t in array array[
     'accounts', 'profiles', 'memories', 'throughline_entries', 'oki_messages',
-    'consent_events', 'pairs', 'oracle_readings', 'subscriptions'
+    'consent_events', 'pairs', 'oracle_readings', 'subscriptions', 'support_requests'
   ] loop
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists "two-step sign in, when turned on" on public.%I', t);

@@ -2242,6 +2242,104 @@ states, accessible names and the sentences that say what a calculation cannot do
 (`availability()`, the missing birth time note) are not subheaders. Those exist
 so a reader is not misled, and they stay.
 
+## No disclaimers, and no line saying how a reading is made
+Decided by the owner on 11 October 2026, and it widens the section above. Small
+grey text that tells the reader what a screen is, how a number was worked out,
+where a reading came from, what leaves the device, or what a reading is not, is
+gone from both shells. The owner's words: "they give away the math/process
+behind this. We don't do that."
+
+**What went.** The Oracle's consent paragraph (`orPrivacy`) and its heading; the
+availability note and "Left uncomputed" (`btAvailNote`, `btAvailList`); "What
+this wheel is drawn from" (`chartSummary`); the "Read from ..." lines under the
+three daily readings; orb tables and transit notes on a placement page; the
+degree withheld sentence (`plNoSabianWhy`); every footer that said a reading is
+the tradition's, was not quoted, or was computed on the device (Astropedia,
+the Atlas, the Book of Changes, tarot, the dream registry and journal,
+Synchronicities, numerology); "Calculated from"; the bodygraph gloss
+(`bgNote`); the connection row caution, the Circle caution and its precision
+and footer lines, the one sided synastry note and `synCaveat`; the privacy
+notes beside saving a person and sending a card; the Settings explanations of
+consent, memory, deletion, the PIN, the picture and analytics; the Library and
+Today card descriptions; the "Worth remembering" and "What this is not"
+reading sections and the Astropedia method and caution sections.
+
+**What stays, and why.** Crisis and safety copy (the Get Help lines, "If you are
+in immediate danger", the practice risk levels and their caution), errors,
+empty states, field labels, the two-step setup instructions, the payment terms
+beside the Luminary button (cancellation terms are owed at the point of sale),
+and the sample banner, shortened. The modules still return `CONFIG_CAUTION`,
+`GROUP_CAUTION` and `availability().note`; the screen no longer draws them.
+
+**This overrides earlier sections where they disagree**: the availability line
+above the wheel ("The birth moment has three states"), the gloss ("The
+wiring"), the caution rendered beside the row ("Connection charts" and
+"Circles"), `otherNote` ("Anything Else logs and does not interpret"), and the
+consent sentence on the Oracle. Harness rows N18b and N33 assert the absence
+now, with the owner's approval of 11 October 2026.
+
+**What a disclaimer said now lives in the legal pages**, which is where the
+owner put it: see "The Terms, the Privacy Policy and Contact Support" below.
+The Oracle's consent paragraph is Privacy Policy section 6, nearly word for
+word, and the button that sends is still the reader's own press.
+
+**Do not add a line of this kind back.** Before writing a sentence under a
+title, ask whether it explains the screen, the method or the source. If it
+does, it does not ship.
+
+## The Terms, the Privacy Policy and Contact Support
+Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
+policy, a generic and accurate About that discloses no method, folded into
+Terms & Conditions, and the Terms "right above the privacy policy". The owner's
+answers decide four facts written into both pages: **Nathaniel J. Figueroa, an
+individual in Florida**, until an LLC is formed; **Florida law and courts**;
+**16** as the minimum age (a parent's permission to subscribe under 18); and
+**Contact Support** as the contact route, because there is no domain for an
+email address yet. `docs/LEGAL-SETUP.md` is the owner's half, including what a
+lawyer should read before launch.
+
+**Two plain pages, `app/terms.html` and `app/privacy.html`.** No script, no web
+font and no third party request, so reading the privacy policy sends nothing
+anywhere, and they print. `build-bundle.js` copies both beside `index.html`,
+rewrites their way back to `./app.html`, refuses a dash, and refuses a cover
+that links the Privacy Policy above the Terms. `_headers` revalidates both.
+
+**The Terms sit directly above the Privacy Policy everywhere they are linked**:
+the cover (`.legal.links`, shown only once the form is open), Settings in both
+shells twice (Support & legal, under the crisis rows, and again in the page's
+`<footer>` above the credit line, the owner's request of 11 October 2026), and
+the Luminary purchase, where the automatic renewal sentence sits beside them
+because Florida and California both want renewal terms before the purchase.
+The cover's Create New Account mode shows `.agree`, the line that makes signing
+up an agreement to both. H5 counts the cover's links outside `.legal`, because
+those two are not ways in.
+
+**The pages describe the build, so they move with it.** A new outside service,
+anything new sent to the Oracle, a price or plan, the SMS provider, the LLC or
+the domain each needs both pages and the date changed in the same change. K55
+holds the facts that would drift first: the operator, Florida, 16, the Oracle's
+sent and not sent lists, the support route, the renewal sentence, the link
+order in the app and on the cover, and no dash.
+
+**Contact Support writes one row to `support_requests` (`server/support.sql`).**
+Anybody may insert, nobody may read back through the API, user_id and status
+cannot be chosen by the sender, and a trigger throttles five per address per day
+and two hundred an hour. `supportSend()` in `incommon-cloud.js` posts to the
+REST API directly, with the reader's token when fully signed in and the anon key
+otherwise, because the client is absent for a reader who never signed in and a
+session held for its two-step code would be refused by the restrictive policy
+(the table is in `server/mfa-policies.sql`'s list). It sends topic, email and
+message and nothing else (K54). `#/support` lands on Settings with the dialog
+open, which is the address both pages link. Driven against the real SQL on
+Postgres 16: anonymous and signed in sends land, a forged user id or status is
+refused, an aal1 session with a factor is refused, nothing reads back, and the
+sixth send from one address is refused.
+
+**The About card says what inCommon is and nothing about how.** The old card
+named the safety gate, the claim tags and the device storage, two of which were
+no longer true. The Settings card and the Terms carry the same opening; the
+disclaimers went to the Terms, sections 3 and 4.
+
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the
 six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
@@ -2287,9 +2385,10 @@ stays clear of the dock on a short phone.
 ## The credit line is the last thing on the Settings page
 "Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
 Settings page in both shells, centred, in the smallest type in the app (7px,
-below the 7.5px badges). It used to head the About card. It is `margin-top: auto`
-inside the column so it stays at the bottom whatever the content above it
-grows to.
+below the 7.5px badges). It used to head the About card. It sits inside the
+page's `<footer>`, under the Terms and Privacy Policy links, and the footer
+carries `margin-top: auto` inside the column so it stays at the bottom whatever
+the content above it grows to.
 
 ## The security headers, and where a new outside service has to be named
 Added 11 October 2026, before launch. `docs/SECURITY.md` is the review and the
@@ -2374,6 +2473,19 @@ is good once, so the widget is reset after every call (`captchaSpent()`) and a
 run already in flight is waited for rather than started twice. And
 `challenges.cloudflare.com` is in `script-src` and `frame-src` in
 `deploy/v6.4/_headers`; K53 holds the cover's origin and the policy equal.
+
+**Typed by hand, the check is shown; filled in, it is not** (the owner, 11
+October 2026). The widget starts `interaction-only`; the first trusted `input`
+event of a typing, pasting or deleting kind (`HAND`) in the address or the
+password removes it and draws it again as `always`, because appearance is fixed
+at render. Autofill and password managers fire no such event. Nothing is said
+beside it: the "One more step" sentence is gone, and a hidden widget that wants
+a tick just brings its slot into the row (`.captcha.shown`). The slot is taken
+out of the flow while hidden, never left as an empty row, because Cloudflare
+puts a frame in it and that row pushed Sign in off the password's line. A press
+still waiting on the check has sent nothing, so choosing another mode withdraws
+it (`sendGen`, `preSend`); before that, "Sign in instead" did nothing while a
+Create New Account press waited for a tick.
 
 **Deploy the page before switching the check on in Supabase.** The reverse
 order refuses every sign in until the page arrives. Driven in a browser with
@@ -3690,7 +3802,22 @@ profile and the birth page opens, which is what deleting the only profile means
 to the person doing it. A fresh profile is made and made active BEFORE the old
 one is deleted, so the refusal never fires.
 
-**Log Out signs out and keeps everything on the device.** `accountLogOut()`
+**Log Out signs out and keeps everything on the device, and Back cannot undo
+it.** It marks the tab (`incommon.signin.out` in sessionStorage) and goes to
+the cover as a new history entry. A plain script at the top of the app sends
+any app page reached through history (`back_forward`, or a back-forward cache
+`pageshow`) in a marked tab to the cover, hidden until it goes, so Back after
+Log Out brings the home screen up rather than the app. It is a new entry and
+not a replacement, because a replacement left nothing of the site behind the
+cover and Back left the site. The cover reloads itself to its first screen when
+restored from that cache in a marked tab. Any other way into the app clears the
+mark. The other half is on the cover: a cover reached through history by a
+reader who is signed in and owes no code goes straight back into the app on
+Today (`backIn()`), so Back from Today after signing in reads as Today
+refreshing rather than as being signed out. A marked tab is never sent in. And
+`signOut()` in `incommon-cloud.js` falls back to a local sign out when the
+server cannot be told, because supabase-js keeps the stored session on a
+network failure and the cover would then offer the reader straight back in. `accountLogOut()`
 calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
 is `./` in the bundle and `./cover.html` in the source shell, because the app
 is `app.html` in one and the long name in the other. The line beside it names

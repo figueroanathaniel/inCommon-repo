@@ -48,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.6.0';
+  var VERSION = '2.7.1';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1186,6 +1186,51 @@
     });
   }
 
+  /* ---------- Contact Support ----------
+
+     A support request is one row in public.support_requests
+     (server/support.sql). It is written straight to the REST API rather than
+     through the client, because a reader who never made an account has no
+     client and is exactly the reader most likely to need help, and because a
+     session held for its two-step code must not be the one sending it: the
+     restrictive policy in server/mfa-policies.sql would refuse that token. So a
+     signed in reader sends with their own token, which stamps user_id, and
+     anybody else sends with the public anon key. Nobody can read the table
+     back: there is no select policy, and the owner reads it in the dashboard.
+     The topics and the bounds are the table's own checks, repeated here so a
+     reader is told what is wrong before anything is sent. */
+  var SUPPORT_TOPICS = ['general', 'account', 'billing', 'privacy', 'delete', 'problem'];
+  function supportSend(req, opts) {
+    req = req || {};
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    var topic = String(req.topic || 'general');
+    var email = String(req.email || '').trim();
+    var message = String(req.message || '').trim();
+    if (SUPPORT_TOPICS.indexOf(topic) === -1) topic = 'general';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return Promise.resolve({ ok: false, reason: 'email' });
+    if (message.length < 10) return Promise.resolve({ ok: false, reason: 'short' });
+    if (message.length > 5000) return Promise.resolve({ ok: false, reason: 'long' });
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    var token = session && session.access_token ? session.access_token : key;
+    return Promise.resolve().then(function () {
+      return doFetch(url + '/rest/v1/support_requests', {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ topic: topic, email: email, message: message })
+      });
+    }).then(function (res) {
+      if (res && res.ok) return { ok: true };
+      return Promise.resolve(res ? res.text() : '').catch(function () { return ''; }).then(function (t) {
+        var st = res ? res.status : 0;
+        if (/support_rate/.test(t)) return { ok: false, reason: 'rate' };
+        if (st === 404 || /PGRST205|42P01|support_requests/.test(t) && /does not exist|Could not find/.test(t)) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || st === 403) return { ok: false, reason: 'refused' };
+        return { ok: false, reason: 'error', error: String(t || st).slice(0, 200) };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   /* ---------- status ---------- */
 
   function status() {
@@ -1245,7 +1290,18 @@
     onSessionChange: function (cb) { if (typeof cb === 'function') listeners.push(cb); },
     signUp: function (email, password) { return normalize(client.auth.signUp({ email: email, password: password })); },
     signIn: function (email, password) { return normalize(client.auth.signInWithPassword({ email: email, password: password })); },
-    signOut: function () { return normalize(client.auth.signOut()); },
+    /* Signing out has to end the session on THIS device even when the server
+       cannot be told. supabase-js keeps the stored session when its sign out
+       request fails for any reason but a 401, 403 or 404 (no signal, a
+       timeout), so a Log Out on a weak connection left the reader signed in
+       and the cover offered them straight back in. The local sign out needs
+       no network. */
+    signOut: function () {
+      return normalize(client.auth.signOut()).then(function (r) {
+        if (r.ok) return r;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return r; });
+      });
+    },
     schedule: schedule,
     push: push,
     pullAll: pullAll,
@@ -1267,6 +1323,8 @@
     rememberSet: rememberSet,
     normPhone: normPhone,
     oracleRead: oracleRead,
+    supportSend: supportSend,
+    SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,

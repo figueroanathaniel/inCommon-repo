@@ -500,6 +500,30 @@ for (const [f, q] of SIGNIN_FILES) {
   fs.copyFileSync(from, path.join(BUNDLE, f));
 }
 
+/* THE TERMS AND THE PRIVACY POLICY, two plain pages beside index.html.
+
+   They are linked from the cover's sign in form, from Settings in both shells
+   and from the Luminary purchase, always as ./terms.html then ./privacy.html,
+   the Terms directly above. Each carries a way back to the app, written as
+   the source shell's address, so it is rewritten here the same way the
+   cover's is. A bundle missing either page is a sign up form agreeing to
+   documents that 404, which is the one failure a legal link must not have. */
+const LEGAL_FILES = ['terms.html', 'privacy.html'];
+for (const f of LEGAL_FILES) {
+  const from = path.join(appDir, f);
+  if (!fs.existsSync(from)) die('missing ' + from + '; the cover, Settings and the Luminary purchase all link to it');
+  let page = fs.readFileSync(from, 'utf8');
+  if (DASHES.test(page)) die(f + ' contains an em or en dash; this repo has none anywhere');
+  page = page.split(APP_ADDR).join('./app.html');
+  if (page.indexOf('inCommonApp') !== -1) die(f + ' still names the source app after the rewrite');
+  fs.writeFileSync(path.join(BUNDLE, f), page, 'utf8');
+}
+{
+  const t = cover.indexOf('./terms.html'), p = cover.indexOf('./privacy.html');
+  if (t === -1 || p === -1) die('the cover no longer links the Terms and the Privacy Policy');
+  if (t > p) die('the cover links the Privacy Policy above the Terms; the Terms go directly above it');
+}
+
 const coverOut = path.join(BUNDLE, 'index.html');
 const coverStamp = '<!-- inCommon ' + VERSION + ' cover  |  built ' +
   new Date().toISOString().slice(0, 10) + ' -->';
