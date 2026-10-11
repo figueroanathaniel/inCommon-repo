@@ -2306,7 +2306,8 @@ that links the Privacy Policy above the Terms. `_headers` revalidates both.
 
 **The Terms sit directly above the Privacy Policy everywhere they are linked**:
 the cover (`.legal.links`, shown only once the form is open), Settings in both
-shells (Support & legal, under the crisis rows and above the credit line), and
+shells twice (Support & legal, under the crisis rows, and again in the page's
+`<footer>` above the credit line, the owner's request of 11 October 2026), and
 the Luminary purchase, where the automatic renewal sentence sits beside them
 because Florida and California both want renewal terms before the purchase.
 The cover's Create New Account mode shows `.agree`, the line that makes signing
@@ -2384,9 +2385,10 @@ stays clear of the dock on a short phone.
 ## The credit line is the last thing on the Settings page
 "Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
 Settings page in both shells, centred, in the smallest type in the app (7px,
-below the 7.5px badges). It used to head the About card. It is `margin-top: auto`
-inside the column so it stays at the bottom whatever the content above it
-grows to.
+below the 7.5px badges). It used to head the About card. It sits inside the
+page's `<footer>`, under the Terms and Privacy Policy links, and the footer
+carries `margin-top: auto` inside the column so it stays at the bottom whatever
+the content above it grows to.
 
 ## The security headers, and where a new outside service has to be named
 Added 11 October 2026, before launch. `docs/SECURITY.md` is the review and the

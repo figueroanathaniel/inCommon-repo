@@ -2239,7 +2239,7 @@ async function runCloudTests() {
   var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
   var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
   t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings and at the Luminary purchase; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
-    cover: true, appLinks: 4, appOrderEachTime: true, operator: true, florida: true, age16: true,
+    cover: true, appLinks: 6, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
