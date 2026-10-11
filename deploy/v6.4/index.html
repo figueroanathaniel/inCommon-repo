@@ -830,6 +830,9 @@
   function captchaSpent() {
     ts.running = false;
     if (window.turnstile && ts.id != null) { try { window.turnstile.reset(ts.id); } catch (e) {} }
+    /* The box is on screen, and a reset one sits blank until it runs, so it
+       runs again now and the next press usually finds its token waiting. */
+    capRun();
   }
   /* Asked early, in case the form gained focus some way other than opening. */
   form.addEventListener('focusin', function warm() {
