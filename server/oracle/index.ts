@@ -76,6 +76,24 @@ function reply(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 }
 
+// TWO-STEP SIGN IN. A reader who turned it on is served only on a session that
+// entered the code: a password alone makes a session at aal1, and the code
+// lifts it to aal2. auth.getUser() has just checked this token with the auth
+// server, so its claims can be read here without checking it again, and the
+// factors come from that same live answer rather than from anything the page
+// sent. A token that cannot be read owes the code: the side to fail on is the
+// closed one.
+function owesCode(req: Request, user: { factors?: { status?: string }[] | null }): boolean {
+  if (!(user.factors ?? []).some((f) => f.status === "verified")) return false;
+  try {
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+    const p = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(p + "===".slice((p.length + 3) % 4))).aal !== "aal2";
+  } catch {
+    return true;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // The shape of a reading. The same fields the Codex's Oracle rendered, so the
 // page can lay it out the same way; the in-depth reading adds four.
@@ -259,6 +277,7 @@ Deno.serve(async (req) => {
   const { data: who } = await asReader.auth.getUser();
   const user = who?.user;
   if (!user) return reply(401, { code: "SIGNED_OUT" });
+  if (owesCode(req, user)) return reply(401, { code: "MFA_REQUIRED" });
 
   // The table is written only from here. A reader may read their own rows and
   // nothing else, so nobody can add, change or remove the rows the daily limit

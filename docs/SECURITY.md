@@ -63,6 +63,16 @@ this repository.
    registering it got paid readings free. Both functions now also require
    `email_confirmed_at`. **Redeploy both functions** for this to take effect
    (see `docs/ORACLE-SETUP.md` and `docs/LUMINARY-SETUP.md`).
+3. **Two-step sign in, optional for readers** (11 October 2026). A reader can
+   turn it on in the profile card; from then on the cover asks for a 6 digit
+   code from an authenticator app after the password. A stolen password alone
+   is refused in three places: the app treats that session as signed out, the
+   two server functions answer `MFA_REQUIRED`, and `server/mfa-policies.sql`
+   refuses it at every table. The last of those is the one that counts, and it
+   is the owner's to run: see `docs/TWO-STEP-SETUP.md`. Tested against a real
+   Postgres with Supabase's own `auth.uid()` and `auth.jwt()`: an account with
+   two-step on and a password only reads nothing and writes nothing; with the
+   code it reads and writes its own rows; accounts without it are unchanged.
 
 ## The owner's checklist
 
@@ -126,6 +136,12 @@ must fail to write into A's profile.
   target for "SMS pumping" fraud, which bills you for texts to premium numbers.
 - **Rate Limits:** leave the defaults or tighten them; do not raise them for
   launch without CAPTCHA on.
+
+### Step 2b. Two-step sign in for readers
+
+Follow `docs/TWO-STEP-SETUP.md`: check authenticator apps are allowed, run
+`server/mfa-policies.sql`, redeploy both functions. Until the SQL is run,
+two-step sign in protects the app and the functions but not the database.
 
 ### Step 3. The accounts that own everything
 

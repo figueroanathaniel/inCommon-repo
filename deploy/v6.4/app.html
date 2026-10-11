@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4  |  built 2026-10-10  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4  |  built 2026-10-11  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16502,8 +16502,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
  *   1. It never touches the network without a session, with one exception
  *      the reader asks for by pressing a button: signing in, making an
  *      account or asking for a new password on the cover, by email or by
- *      phone, checking a code a text brought, and taking the session an
- *      emailed link brings back. None of those calls carries any local state;
+ *      phone, checking a code a text brought or an authenticator app shows,
+ *      and taking the session an emailed link brings back. None of those calls carries any local state;
  *      the record only moves once the app's own client exists.
  *   2. It never sends a memory whose consent gate is closed. The gate is read
  *      per push, per profile, from ProfileManager's own consent record, so a
@@ -16536,7 +16536,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.4.0';
+  var VERSION = '2.5.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -16601,6 +16601,11 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   var cfg = null;       // { url, anonKey, storage, core, pm }
   var client = null;
   var session = null;
+  /* A session whose password passed and whose code has not been entered yet
+     (two-step sign in, below). It is kept here rather than in session, so
+     every call that asks for a session finds none, and the app reads as
+     signed out until the cover has the code. */
+  var held = null;
   var listeners = [];
   var timer = null;
   var lastPushAt = 0;
@@ -17050,6 +17055,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (code === 'phone_provider_disabled' || /unsupported phone provider|phone (signups|logins|provider)[^.]*disabled/i.test(m)) return 'phoneOff';
     if (code === 'sms_send_failed' || /error sending (confirmation |phone change |recovery )?(sms|otp)/i.test(m)) return 'smsFailed';
     if (code === 'otp_expired' || /token has expired or is invalid/i.test(m)) return 'badCode';
+    if (code === 'mfa_verification_failed' || code === 'mfa_challenge_expired' || /invalid totp code/i.test(m)) return 'badCode';
+    if (code === 'insufficient_aal' || /aal2 (session )?(is )?required/i.test(m)) return 'needsCode';
+    if (/^mfa_.*not_enabled$/.test(code)) return 'mfaOff';
     if (code === 'phone_not_confirmed' || /phone not confirmed/i.test(m)) return 'phoneUnconfirmed';
     if (code === 'phone_exists' || /phone number has already been registered/i.test(m)) return 'phoneTaken';
     if (/invalid phone/i.test(m)) return 'invalid';
@@ -17082,7 +17090,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, email: (s.user && s.user.email) || id.email || null, phone: phoneOfUser(s.user) || id.phone || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || id.email || null, phone: phoneOfUser(s.user) || id.phone || null });
     });
   }
 
@@ -17195,7 +17203,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, phone: phoneOfUser(s.user) || p, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, phone: phoneOfUser(s.user) || p, email: (s.user && s.user.email) || null });
     });
   }
   /* Another code, for the reason the first one was sent. A sign up asks
@@ -17332,7 +17340,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       if (res && res.error) return refused(res);
       var s = res && res.data && res.data.session;
       if (!s) return { ok: false, reason: 'error', error: 'no session returned' };
-      return { ok: true, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || null });
     });
   }
 
@@ -17360,8 +17368,160 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return Promise.resolve().then(function () { return c.auth.exchangeCodeForSession(code); }).then(function (res) {
       var s = res && res.data && res.data.session;
       if (res.error || !s) return { ok: false, reason: 'error', error: res.error && res.error.message };
-      return { ok: true, email: (s.user && s.user.email) || null };
+      return gate(s, { ok: true, email: (s.user && s.user.email) || null });
     }).catch(function (e) { return { ok: false, reason: 'error', error: e && e.message }; });
+  }
+
+  /* ---------- two-step sign in ----------
+
+     The owner asked on 11 October 2026 for two-step sign in, optional. A
+     reader who turns it on adds inCommon to an authenticator app (a TOTP
+     factor, which Supabase offers on every plan; a texted code would need the
+     SMS provider docs/PHONE-SETUP.md has not switched on), and from then on a
+     password alone is not enough: every sign in asks for the six digits the
+     app is showing.
+
+     A PASSWORD THAT PASSED STILL MAKES A SESSION, and that is the part to
+     hold. Supabase signs the reader in at aal1 and expects the code to lift it
+     to aal2, so between the two there is a real session for an account whose
+     owner asked for more than a password. Three places refuse it, and all
+     three are needed. This module holds it aside (owesCode) and the app treats
+     it as signed out, which is courtesy. server/oracle and server/billing
+     answer it MFA_REQUIRED. And server/mfa-policies.sql refuses it at every
+     table, which is the wall: without it a stolen password would read the
+     reader's record straight from the REST API with the cover never asked.
+
+     owesCode reads two things the session already carries: whether the user
+     has a verified factor, and the aal claim inside the access token. A
+     token that cannot be read owes the code, because the side to fail on is
+     the closed one. Nothing here is a reason to trust the token: the server
+     checks it on every call, and this only decides what the page offers. */
+  function b64urlText(s) {
+    var A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    s = String(s || '').replace(/-/g, '+').replace(/_/g, '/').replace(/=+$/, '');
+    var out = '', bits = 0, acc = 0;
+    for (var i = 0; i < s.length; i++) {
+      var v = A.indexOf(s.charAt(i));
+      if (v < 0) return null;
+      acc = (acc << 6) | v; bits += 6;
+      if (bits >= 8) { bits -= 8; out += String.fromCharCode((acc >> bits) & 255); }
+    }
+    try { return decodeURIComponent(escape(out)); } catch (e) { return out; }
+  }
+  function tokenClaims(token) {
+    try { return JSON.parse(b64urlText(String(token || '').split('.')[1]) || 'null'); } catch (e) { return null; }
+  }
+  function owesCode(s) {
+    var f = s && s.user && s.user.factors;
+    if (!Array.isArray(f) || !f.some(function (x) { return x && x.status === 'verified'; })) return false;
+    var c = tokenClaims(s.access_token);
+    return !(c && c.aal === 'aal2');
+  }
+  /* A sign in on the cover that still owes its code says so, and the cover
+     asks for it before going on. */
+  function gate(s, out) { if (owesCode(s)) out.mfa = true; return out; }
+  /* Six digits, as every authenticator app shows them; spaces are allowed
+     because some apps print the code as two groups of three. */
+  function totpOf(raw) { var t = String(raw || '').replace(/\s/g, ''); return /^\d{6}$/.test(t) ? t : null; }
+  /* The one verified authenticator, from the server's own list, which
+     supabase-js reads fresh from the user rather than from the session. */
+  function verifiedFactor(c) {
+    return authCall(function () { return c.auth.mfa.listFactors(); }).then(function (res) {
+      if (res && res.error) return { error: res.error };
+      var t = res && res.data && res.data.totp;
+      return { factor: Array.isArray(t) && t.length ? t[0] : null, all: (res && res.data && res.data.all) || [] };
+    });
+  }
+  function codeCheck(c, code, factorId) {
+    var t = totpOf(code);
+    if (!t) return Promise.resolve({ ok: false, reason: 'badCode' });
+    var found = factorId ? Promise.resolve({ factor: { id: factorId } }) : verifiedFactor(c);
+    return found.then(function (f) {
+      if (f.error) return refused(f);
+      if (!f.factor) return { ok: false, reason: 'error', error: 'no authenticator on this account' };
+      return authCall(function () {
+        return c.auth.mfa.challengeAndVerify({ factorId: f.factor.id, code: t });
+      }).then(function (res) {
+        return res && res.error ? refused(res) : { ok: true, factorId: f.factor.id };
+      });
+    });
+  }
+  /* The cover's half: the code that finishes a sign in. The session it lifts
+     is the one the password made, so it is stored where the app's client
+     reads it, already at aal2. */
+  function mfaVerify(code) {
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: false, reason: 'off' });
+    return codeCheck(c, code);
+  }
+  /* "Use another account" from the code step leaves nothing half signed in
+     on this device. Local scope, so the reader's other devices stay as they
+     were. */
+  function coverSignOut() {
+    var c = coverLib();
+    if (!c) return Promise.resolve({ ok: true });
+    return authCall(function () { return c.auth.signOut({ scope: 'local' }); }).then(function () { return { ok: true }; });
+  }
+
+  /* The app's half, on the session the app already holds: whether it is on,
+     turning it on, and turning it off. Turning it on is two steps, because an
+     authenticator that has never shown a code is not proven to hold the
+     secret: enroll returns the QR code and the key, and the first code the
+     app shows confirms it (and lifts this session to aal2 as it does).
+     Turning it off asks for a current code first, so a phone left unlocked is
+     not enough to take the second step away. */
+  function appReady() {
+    if (!client) return { ok: false, reason: 'off' };
+    if (!session) return { ok: false, reason: 'signedOut' };
+    return null;
+  }
+  function mfaStatus() {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return verifiedFactor(client).then(function (f) {
+      return f.error ? refused(f) : { ok: true, on: !!f.factor };
+    });
+  }
+  function mfaEnrollStart() {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return verifiedFactor(client).then(function (f) {
+      if (f.error) return refused(f);
+      if (f.factor) return { ok: false, reason: 'already' };
+      /* A setup that was started and never confirmed leaves an unverified
+         factor behind, and Supabase caps how many there may be, so those go
+         first. They never counted for anything: only a verified one asks
+         for a code. */
+      var stale = f.all.filter(function (x) { return x && x.factor_type === 'totp' && x.status !== 'verified'; });
+      return stale.reduce(function (p, x) {
+        return p.then(function () { return authCall(function () { return client.auth.mfa.unenroll({ factorId: x.id }); }); });
+      }, Promise.resolve()).then(function () {
+        return authCall(function () {
+          return client.auth.mfa.enroll({ factorType: 'totp', issuer: 'inCommon', friendlyName: 'inCommon ' + Date.now() });
+        });
+      }).then(function (res) {
+        if (res && res.error) return refused(res);
+        var d = (res && res.data) || {}, t = d.totp || {};
+        if (!d.id || !t.qr_code || !t.secret) return { ok: false, reason: 'error', error: 'no authenticator returned' };
+        return { ok: true, factorId: d.id, qr: t.qr_code, secret: t.secret, uri: t.uri || null };
+      });
+    });
+  }
+  function mfaEnrollVerify(factorId, code) {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    if (!factorId) return Promise.resolve({ ok: false, reason: 'error', error: 'no authenticator to confirm' });
+    return codeCheck(client, code, factorId);
+  }
+  function mfaDisable(code) {
+    var no = appReady();
+    if (no) return Promise.resolve(no);
+    return codeCheck(client, code).then(function (r) {
+      if (!r.ok) return r;
+      return authCall(function () { return client.auth.mfa.unenroll({ factorId: r.factorId }); }).then(function (res) {
+        return res && res.error ? refused(res) : { ok: true };
+      });
+    });
   }
 
   /* ---------- the Oracle ---------- */
@@ -17430,7 +17590,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
            counts toward the limit, and it is not the same as a refusal. */
         if (code === 'TIMEOUT' || st === 504) return { ok: false, reason: 'timeout' };
         if (st === 404 || code === 'NOT_SET_UP') return { ok: false, reason: 'notSetUp' };
-        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        /* MFA_REQUIRED is a session that never entered its code; to the page
+           it is signed out, and the cover asks for the code. */
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (st === 429 || code === 'LIMIT') return { ok: false, reason: 'limit' };
         if (st === 503) return { ok: false, reason: 'silent' };
         if (st === 409 || code === 'PENDING') return { ok: false, reason: 'pending' };
@@ -17467,7 +17629,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
         if (code === 'ALREADY') return { ok: false, reason: 'already' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
-        if (st === 401 || code === 'SIGNED_OUT') return { ok: false, reason: 'signedOut' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
         return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
       });
@@ -17497,6 +17659,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
+      owesCode: !!held,
       lastPushAt: lastPushAt || null,
       pendingOps: loadOutbox().length,
       VERSION: VERSION
@@ -17532,7 +17695,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
     client.auth.onAuthStateChange(function (_event, s) {
       var had = !!session;
-      session = s || null;
+      held = owesCode(s) ? s : null;
+      session = held ? null : (s || null);
       notify();
       if (session && !had) push();
     });
@@ -17571,6 +17735,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    mfaVerify: mfaVerify,
+    coverSignOut: coverSignOut,
+    mfaStatus: mfaStatus,
+    mfaEnrollStart: mfaEnrollStart,
+    mfaEnrollVerify: mfaEnrollVerify,
+    mfaDisable: mfaDisable,
+    owesCode: owesCode,
     /* inspect() reports what the plan would push, without pushing. Run it
        against a live session in step 4: counts that read zero where the app
        plainly has data are a consent gate working as designed, and counts
@@ -17593,7 +17764,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     /* Test hooks: run-module-tests.js injects these instead of the vendored
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
-    _setClientForTests: function (c, s) { client = c; session = s || null; },
+    _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
     _setConfigForTests: function (o) { cfg = o; }
   };
 
@@ -23486,6 +23657,10 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
+      <button onClick="{{ menuMfaGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Two-step sign in</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuMfaNote }}</span>
+      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
@@ -23737,6 +23912,72 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ phStepDone }}" hint-placeholder-val="{{ false }}">
         <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
         <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<!-- TWO-STEP SIGN IN, optional. Signed out, it says so and offers the cover;
+     signed in, it reads whether it is on, then turns it on (a QR code and the
+     setup key, then the first code) or off (a current code first). -->
+<sc-if value="{{ mfOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ mfClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="{{ mfTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ mfTitle }}</div>
+      <sc-if value="{{ mfSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Two-step sign in belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to turn it on.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfLoading }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--mut)">Checking this account.</div>
+      </sc-if>
+      <sc-if value="{{ mfStepUnknown }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfRetryGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Try again</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOff }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Off for this account. With it on, signing in asks for the password and then a 6 digit code from an authenticator app on your phone, so a stolen password is not enough on its own. It is optional.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy and others.</div>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfStartLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
+        <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
+        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+          <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
+          <button onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
+        </div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+          <button onClick="{{ mfConfirmGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfConfirmLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfDisableGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">{{ mfDisableLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ mfMsg }}</div>
+        <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
       </sc-if>
     </div>
   </div>
@@ -27934,6 +28175,10 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
+      <button onClick="{{ menuMfaGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Two-step sign in</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuMfaNote }}</span>
+      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
@@ -28244,6 +28489,72 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- TWO-STEP SIGN IN, optional. Signed out, it says so and offers the cover;
+     signed in, it reads whether it is on, then turns it on (a QR code and the
+     setup key, then the first code) or off (a current code first). -->
+<sc-if value="{{ mfOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ mfClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
+    <div role="dialog" aria-modal="true" aria-label="{{ mfTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ mfTitle }}</div>
+      <sc-if value="{{ mfSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Two-step sign in belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to turn it on.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfLoading }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--mut)">Checking this account.</div>
+      </sc-if>
+      <sc-if value="{{ mfStepUnknown }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfRetryGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Try again</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOff }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Off for this account. With it on, signing in asks for the password and then a 6 digit code from an authenticator app on your phone, so a stolen password is not enough on its own. It is optional.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy and others.</div>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfStartLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
+        <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
+        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+          <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
+          <button onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
+        </div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+          <button onClick="{{ mfConfirmGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfConfirmLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfDisableGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">{{ mfDisableLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ mfMsg }}</div>
+        <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ delOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ delClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
     <div role="dialog" aria-label="Confirm delete" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
@@ -28450,6 +28761,7 @@ class Component extends DCLogic {
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
+    mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
@@ -36770,6 +37082,115 @@ class Component extends DCLogic {
       phClose: () => this.setState({ phOpen: false, phStep: 'num', phCode: '', phBusy: false, phMsg: '' })
     };
   }
+  /* TWO-STEP SIGN IN, OPTIONAL. The owner asked on 11 October 2026. A reader
+     who turns it on adds inCommon to an authenticator app, and from then on
+     the cover asks for the app's six digits after the password. Off is the
+     default and nothing changes for a reader who leaves it there.
+
+     The dialog sits beside Phone number in the profile card, in both shells,
+     and follows its shape: signed out it says so and offers the cover;
+     signed in it reads whether two-step is on, then offers to turn it on (a
+     QR code and the setup key, then the first code to prove the app holds
+     it) or off (a current code first, so an unlocked phone is not enough).
+     Every call is the cloud module's: this method only decides what to say.
+
+     The QR code is Supabase's own SVG, drawn as a background image the way
+     the avatar is, on a white square because a scanner needs dark on light
+     whatever the theme. The setup key is shown as well and the reader is
+     asked to keep it: Supabase has no backup codes, and the key is what puts
+     the account on a new phone if this one is lost. */
+  /* The address carries no semicolon, because the runtime splits a style
+     attribute into declarations at every one: Supabase's own
+     "data:image/svg+xml;utf-8," was cut there and painted a blank square.
+     encodeURIComponent turns any semicolon inside the SVG into %3B. */
+  mfaQrBg(qr) {
+    const raw = String(qr || '');
+    const at = raw.indexOf(',');
+    if (raw.slice(0, 19) !== 'data:image/svg+xml;' && raw.slice(0, 19) !== 'data:image/svg+xml,' || at < 0) return 'none';
+    let svg = raw.slice(at + 1);
+    if (/;base64/i.test(raw.slice(0, at))) { try { svg = atob(svg); } catch (e) { return 'none'; } }
+    else { try { svg = decodeURIComponent(svg); } catch (e) { /* it was not encoded */ } }
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+  }
+  mfaVals() {
+    const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
+    const signedIn = !!(C && cs.mode === 'cloud');
+    const WHY = {
+      badCode: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
+      mfaOff: 'Two-step sign in is not switched on for inCommon accounts yet.',
+      already: 'Two-step sign in is already on for this account.',
+      rate: 'Too many tries in a short time. Wait a minute and try again.',
+      offline: 'There is no connection.',
+      signedOut: 'This device is not signed in any more. Sign in on the cover, then come back here.',
+      off: 'The sign in files did not load.'
+    };
+    const why = r => WHY[r && r.reason] || 'That did not finish. Try again in a moment.';
+    const look = () => {
+      if (!C || !C.mfaStatus) return;
+      this.setState({ mfStep: 'load', mfBusy: true, mfMsg: '' });
+      C.mfaStatus().then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: r.on, mfStep: 'status' }
+        : { mfBusy: false, mfStep: 'status', mfMsg: why(r) }));
+    };
+    const start = () => {
+      if (!C || st.mfBusy) return;
+      this.setState({ mfBusy: true, mfMsg: 'Setting up.' });
+      C.mfaEnrollStart().then(r => this.setState(r.ok
+        ? { mfBusy: false, mfStep: 'setup', mfFactor: r.factorId, mfQr: r.qr, mfSecret: r.secret, mfCode: '', mfMsg: '' }
+        : r.reason === 'already' ? { mfBusy: false, mfOn: true, mfStep: 'status', mfMsg: why(r) }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const confirm = () => {
+      if (!C || st.mfBusy) return;
+      if (!String(st.mfCode).trim()) { this.setState({ mfMsg: 'Enter the 6 digit code your authenticator app is showing.' }); return; }
+      this.setState({ mfBusy: true, mfMsg: 'Checking the code.' });
+      C.mfaEnrollVerify(st.mfFactor, st.mfCode).then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: true, mfStep: 'done', mfCode: '', mfQr: '', mfSecret: '', mfFactor: null,
+            mfMsg: 'Two-step sign in is on. The next time this account signs in, the cover will ask for a code from your authenticator app after the password.' }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const disable = () => {
+      if (!C || st.mfBusy) return;
+      if (!String(st.mfCode).trim()) { this.setState({ mfMsg: 'Enter the 6 digit code your authenticator app is showing.' }); return; }
+      this.setState({ mfBusy: true, mfMsg: 'Checking the code.' });
+      C.mfaDisable(st.mfCode).then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: false, mfStep: 'done', mfCode: '', mfMsg: 'Two-step sign in is off. A password alone signs this account in again.' }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const copy = () => {
+      const key = st.mfSecret;
+      if (!key) return;
+      const done = () => this.setState({ mfMsg: 'The setup key is copied.' });
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(key).then(done).catch(() => {}); }
+      } catch (e) { /* the key is on screen to copy by hand */ }
+    };
+    const enter = go => e => { if (e && e.key === 'Enter') { e.preventDefault(); go(); } };
+    const shut = { mfOpen: false, mfStep: 'load', mfCode: '', mfBusy: false, mfMsg: '', mfQr: '', mfSecret: '', mfFactor: null };
+    const step = signedIn ? st.mfStep : 'out';
+    return {
+      menuMfaGo: () => { this.setState({ quickOpen: false, mfOpen: true, mfStep: 'load', mfCode: '', mfMsg: '', mfQr: '', mfSecret: '', mfFactor: null }); if (signedIn) look(); },
+      menuMfaNote: !signedIn ? 'sign in first' : st.mfOn === true ? 'on' : st.mfOn === false ? 'off' : 'optional',
+      mfOpen: !!st.mfOpen, mfSignedOut: !signedIn,
+      mfTitle: 'Two-step sign in',
+      mfLoading: step === 'load',
+      mfStepOff: step === 'status' && st.mfOn === false,
+      mfStepOn: step === 'status' && st.mfOn === true,
+      mfStepUnknown: step === 'status' && st.mfOn !== true && st.mfOn !== false,
+      mfStepSetup: step === 'setup', mfStepDone: step === 'done',
+      mfQrBg: this.mfaQrBg(st.mfQr),
+      mfSecret: String(st.mfSecret || '').replace(/(.{4})(?=.)/g, '$1 '),
+      mfCode: st.mfCode, mfCodeType: e => this.setState({ mfCode: e.target.value, mfMsg: '' }),
+      mfConfirmKey: enter(confirm), mfDisableKey: enter(disable),
+      mfMsg: st.mfMsg,
+      mfStartGo: start, mfStartLabel: st.mfBusy ? 'Setting up' : 'Turn on',
+      mfConfirmGo: confirm, mfConfirmLabel: st.mfBusy ? 'Checking' : 'Confirm',
+      mfDisableGo: disable, mfDisableLabel: st.mfBusy ? 'Checking' : 'Turn off',
+      mfRetryGo: look, mfCopyGo: copy,
+      mfSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+      mfClose: () => this.setState(shut)
+    };
+  }
   firstRunDone(patch) {
     this.writeLS(this.FIRSTRUN_KEY, true);
     this.authGo(null, { af: {}, ...(patch || {}) });
@@ -38712,7 +39133,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, pmenuOpen: false, callOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, pmenuOpen: false, callOpen: false,
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -39934,6 +40355,7 @@ class Component extends DCLogic {
         };
       })(),
       ...this.phoneVals(),
+      ...this.mfaVals(),
       ...this.profileMenuVals(),
       ...(() => {
         if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',

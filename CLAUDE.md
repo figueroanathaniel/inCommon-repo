@@ -2313,6 +2313,46 @@ server functions requires `email_confirmed_at` as well as a match in
 `LUMINARY_ADMIN_EMAILS`. Matching the address alone gave paid readings to
 whoever registered a listed address first.
 
+## Two-step sign in is optional, and a password alone is refused in three places
+The owner asked on 11 October 2026 for two-step sign in, optional. A reader
+turns it on in the profile card (`mfaVals()`, beside Phone number in both
+shells): a QR code and the setup key from `mfaEnrollStart()`, then the first
+code (`mfaEnrollVerify()`). Turning it off asks for a current code first
+(`mfaDisable()`). The factor is TOTP, an authenticator app, because Supabase
+offers it on every plan and a texted code needs the SMS provider. The owner's
+half is `docs/TWO-STEP-SETUP.md`.
+
+**A password that passed still makes a session**, at aal1, and the code lifts
+it to aal2. So three places refuse an aal1 session for an account with a
+verified authenticator, and each is needed. `incommon-cloud.js` holds it in
+`held` rather than `session`, so every call that asks for a session finds none
+and the app reads as signed out (courtesy). `server/oracle` and
+`server/billing` answer `MFA_REQUIRED`, which the module reads as signedOut.
+And `server/mfa-policies.sql` is a restrictive policy on every table, which is
+the wall: without it a stolen password reads the record straight from the REST
+API. **A table added later has to be added to that file's list.**
+
+`owesCode()` is the rule in the module and a copy of it is in the cover's plain
+script, which reads the stored session before the module loads; K46 holds the
+two equal. A token that cannot be read owes the code: fail closed. Every way the
+cover makes a session (password, emailed link, old sign in link, texted code)
+returns `mfa: true` when it owes, and the cover's `mfa` mode asks for the code
+and then goes on to what the sign in was for (`afterMfa`: the app, a replace
+from an email return, or choosing a new password after a recovery link).
+"Use another account" from that step signs the half session out of the browser.
+
+**Two traps this build hit.** supabase-js prefixes the server's raw SVG with
+`data:image/svg+xml;utf-8,`, and the template runtime splits a style attribute
+at every semicolon, so the QR code painted blank until `mfaQrBg()` rebuilt the
+address without one. And the cover's raytracer starves a software renderer, so
+a browser drive of the sign in steps reads as a hang under SwiftShader; drive
+them with WebGL off, where the plain sign in script runs exactly the same.
+
+K46 to K51 hold the module and the cover's copy of the rule; the rest was
+driven in a browser against a fake auth server, and the database rule against
+a real Postgres. The dialog and the cover's code step measured clean in all 32
+theme cases at 1440 and 375, and at 320x568.
+
 ## Zero em dash
 No em dash or en dash anywhere: not in app copy, not in generated readings, not
 in comments, not in the docs. Use a comma, a colon, or a full stop. The rule is

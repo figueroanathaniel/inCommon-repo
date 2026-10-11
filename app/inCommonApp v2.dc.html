@@ -4604,6 +4604,10 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
+      <button onClick="{{ menuMfaGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Two-step sign in</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuMfaNote }}</span>
+      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
@@ -4855,6 +4859,72 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ phStepDone }}" hint-placeholder-val="{{ false }}">
         <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
         <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<!-- TWO-STEP SIGN IN, optional. Signed out, it says so and offers the cover;
+     signed in, it reads whether it is on, then turns it on (a QR code and the
+     setup key, then the first code) or off (a current code first). -->
+<sc-if value="{{ mfOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ mfClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="{{ mfTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ mfTitle }}</div>
+      <sc-if value="{{ mfSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Two-step sign in belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to turn it on.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfLoading }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--mut)">Checking this account.</div>
+      </sc-if>
+      <sc-if value="{{ mfStepUnknown }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfRetryGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Try again</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOff }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Off for this account. With it on, signing in asks for the password and then a 6 digit code from an authenticator app on your phone, so a stolen password is not enough on its own. It is optional.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy and others.</div>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfStartLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
+        <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
+        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+          <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
+          <button onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
+        </div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+          <button onClick="{{ mfConfirmGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfConfirmLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfDisableGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">{{ mfDisableLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ mfMsg }}</div>
+        <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
       </sc-if>
     </div>
   </div>
@@ -9052,6 +9122,10 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Phone number</span>
         <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuPhoneNote }}</span>
       </button>
+      <button onClick="{{ menuMfaGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid var(--bd);border-radius:12px;padding:0 14px">
+        <span style="flex:1;font:600 12px var(--fu);color:var(--tx);text-align:left">Two-step sign in</span>
+        <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">{{ menuMfaNote }}</span>
+      </button>
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
@@ -9362,6 +9436,72 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- TWO-STEP SIGN IN, optional. Signed out, it says so and offers the cover;
+     signed in, it reads whether it is on, then turns it on (a QR code and the
+     setup key, then the first code) or off (a current code first). -->
+<sc-if value="{{ mfOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ mfClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
+    <div role="dialog" aria-modal="true" aria-label="{{ mfTitle }}" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ mfTitle }}</div>
+      <sc-if value="{{ mfSignedOut }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Two-step sign in belongs to an account, and this device is not signed in to one. Sign in on the cover first, then come back here to turn it on.</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfLoading }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--mut)">Checking this account.</div>
+      </sc-if>
+      <sc-if value="{{ mfStepUnknown }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfRetryGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Try again</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOff }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Off for this account. With it on, signing in asks for the password and then a 6 digit code from an authenticator app on your phone, so a stolen password is not enough on its own. It is optional.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy and others.</div>
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfStartGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfStartLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
+        <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
+        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+          <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
+          <button onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
+        </div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+          <button onClick="{{ mfConfirmGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">{{ mfConfirmLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
+        <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
+        <input value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
+          <button onClick="{{ mfDisableGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">{{ mfDisableLabel }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mfStepDone }}" hint-placeholder-val="{{ false }}">
+        <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ mfMsg }}</div>
+        <button onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ delOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ delClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:16">
     <div role="dialog" aria-label="Confirm delete" onClick="{{ swallow }}" style="width:100%;box-sizing:border-box;background:var(--sf);border:1px solid rgba(224,141,125,.4);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
@@ -9568,6 +9708,7 @@ class Component extends DCLogic {
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
+    mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
@@ -17888,6 +18029,115 @@ class Component extends DCLogic {
       phClose: () => this.setState({ phOpen: false, phStep: 'num', phCode: '', phBusy: false, phMsg: '' })
     };
   }
+  /* TWO-STEP SIGN IN, OPTIONAL. The owner asked on 11 October 2026. A reader
+     who turns it on adds inCommon to an authenticator app, and from then on
+     the cover asks for the app's six digits after the password. Off is the
+     default and nothing changes for a reader who leaves it there.
+
+     The dialog sits beside Phone number in the profile card, in both shells,
+     and follows its shape: signed out it says so and offers the cover;
+     signed in it reads whether two-step is on, then offers to turn it on (a
+     QR code and the setup key, then the first code to prove the app holds
+     it) or off (a current code first, so an unlocked phone is not enough).
+     Every call is the cloud module's: this method only decides what to say.
+
+     The QR code is Supabase's own SVG, drawn as a background image the way
+     the avatar is, on a white square because a scanner needs dark on light
+     whatever the theme. The setup key is shown as well and the reader is
+     asked to keep it: Supabase has no backup codes, and the key is what puts
+     the account on a new phone if this one is lost. */
+  /* The address carries no semicolon, because the runtime splits a style
+     attribute into declarations at every one: Supabase's own
+     "data:image/svg+xml;utf-8," was cut there and painted a blank square.
+     encodeURIComponent turns any semicolon inside the SVG into %3B. */
+  mfaQrBg(qr) {
+    const raw = String(qr || '');
+    const at = raw.indexOf(',');
+    if (raw.slice(0, 19) !== 'data:image/svg+xml;' && raw.slice(0, 19) !== 'data:image/svg+xml,' || at < 0) return 'none';
+    let svg = raw.slice(at + 1);
+    if (/;base64/i.test(raw.slice(0, at))) { try { svg = atob(svg); } catch (e) { return 'none'; } }
+    else { try { svg = decodeURIComponent(svg); } catch (e) { /* it was not encoded */ } }
+    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+  }
+  mfaVals() {
+    const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
+    const signedIn = !!(C && cs.mode === 'cloud');
+    const WHY = {
+      badCode: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
+      mfaOff: 'Two-step sign in is not switched on for inCommon accounts yet.',
+      already: 'Two-step sign in is already on for this account.',
+      rate: 'Too many tries in a short time. Wait a minute and try again.',
+      offline: 'There is no connection.',
+      signedOut: 'This device is not signed in any more. Sign in on the cover, then come back here.',
+      off: 'The sign in files did not load.'
+    };
+    const why = r => WHY[r && r.reason] || 'That did not finish. Try again in a moment.';
+    const look = () => {
+      if (!C || !C.mfaStatus) return;
+      this.setState({ mfStep: 'load', mfBusy: true, mfMsg: '' });
+      C.mfaStatus().then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: r.on, mfStep: 'status' }
+        : { mfBusy: false, mfStep: 'status', mfMsg: why(r) }));
+    };
+    const start = () => {
+      if (!C || st.mfBusy) return;
+      this.setState({ mfBusy: true, mfMsg: 'Setting up.' });
+      C.mfaEnrollStart().then(r => this.setState(r.ok
+        ? { mfBusy: false, mfStep: 'setup', mfFactor: r.factorId, mfQr: r.qr, mfSecret: r.secret, mfCode: '', mfMsg: '' }
+        : r.reason === 'already' ? { mfBusy: false, mfOn: true, mfStep: 'status', mfMsg: why(r) }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const confirm = () => {
+      if (!C || st.mfBusy) return;
+      if (!String(st.mfCode).trim()) { this.setState({ mfMsg: 'Enter the 6 digit code your authenticator app is showing.' }); return; }
+      this.setState({ mfBusy: true, mfMsg: 'Checking the code.' });
+      C.mfaEnrollVerify(st.mfFactor, st.mfCode).then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: true, mfStep: 'done', mfCode: '', mfQr: '', mfSecret: '', mfFactor: null,
+            mfMsg: 'Two-step sign in is on. The next time this account signs in, the cover will ask for a code from your authenticator app after the password.' }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const disable = () => {
+      if (!C || st.mfBusy) return;
+      if (!String(st.mfCode).trim()) { this.setState({ mfMsg: 'Enter the 6 digit code your authenticator app is showing.' }); return; }
+      this.setState({ mfBusy: true, mfMsg: 'Checking the code.' });
+      C.mfaDisable(st.mfCode).then(r => this.setState(r.ok
+        ? { mfBusy: false, mfOn: false, mfStep: 'done', mfCode: '', mfMsg: 'Two-step sign in is off. A password alone signs this account in again.' }
+        : { mfBusy: false, mfMsg: why(r) }));
+    };
+    const copy = () => {
+      const key = st.mfSecret;
+      if (!key) return;
+      const done = () => this.setState({ mfMsg: 'The setup key is copied.' });
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(key).then(done).catch(() => {}); }
+      } catch (e) { /* the key is on screen to copy by hand */ }
+    };
+    const enter = go => e => { if (e && e.key === 'Enter') { e.preventDefault(); go(); } };
+    const shut = { mfOpen: false, mfStep: 'load', mfCode: '', mfBusy: false, mfMsg: '', mfQr: '', mfSecret: '', mfFactor: null };
+    const step = signedIn ? st.mfStep : 'out';
+    return {
+      menuMfaGo: () => { this.setState({ quickOpen: false, mfOpen: true, mfStep: 'load', mfCode: '', mfMsg: '', mfQr: '', mfSecret: '', mfFactor: null }); if (signedIn) look(); },
+      menuMfaNote: !signedIn ? 'sign in first' : st.mfOn === true ? 'on' : st.mfOn === false ? 'off' : 'optional',
+      mfOpen: !!st.mfOpen, mfSignedOut: !signedIn,
+      mfTitle: 'Two-step sign in',
+      mfLoading: step === 'load',
+      mfStepOff: step === 'status' && st.mfOn === false,
+      mfStepOn: step === 'status' && st.mfOn === true,
+      mfStepUnknown: step === 'status' && st.mfOn !== true && st.mfOn !== false,
+      mfStepSetup: step === 'setup', mfStepDone: step === 'done',
+      mfQrBg: this.mfaQrBg(st.mfQr),
+      mfSecret: String(st.mfSecret || '').replace(/(.{4})(?=.)/g, '$1 '),
+      mfCode: st.mfCode, mfCodeType: e => this.setState({ mfCode: e.target.value, mfMsg: '' }),
+      mfConfirmKey: enter(confirm), mfDisableKey: enter(disable),
+      mfMsg: st.mfMsg,
+      mfStartGo: start, mfStartLabel: st.mfBusy ? 'Setting up' : 'Turn on',
+      mfConfirmGo: confirm, mfConfirmLabel: st.mfBusy ? 'Checking' : 'Confirm',
+      mfDisableGo: disable, mfDisableLabel: st.mfBusy ? 'Checking' : 'Turn off',
+      mfRetryGo: look, mfCopyGo: copy,
+      mfSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+      mfClose: () => this.setState(shut)
+    };
+  }
   firstRunDone(patch) {
     this.writeLS(this.FIRSTRUN_KEY, true);
     this.authGo(null, { af: {}, ...(patch || {}) });
@@ -19830,7 +20080,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, pmenuOpen: false, callOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, pmenuOpen: false, callOpen: false,
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -21052,6 +21302,7 @@ class Component extends DCLogic {
         };
       })(),
       ...this.phoneVals(),
+      ...this.mfaVals(),
       ...this.profileMenuVals(),
       ...(() => {
         if (!PM || !prof) return { hasProfile: false, profiles: [], actName: 'this profile', actInitials: '?', actColor: 'var(--ac)', actBirth: '', hasOthers: false, canAddProfile: false, atCapacity: false, soloProfile: false, quickOpen: false, switchOpen: false, formOpen: false, delOpen: false, needsBirthTime: false, profCountLabel: '', shareRows: [], vProfiles: '\u2717',
