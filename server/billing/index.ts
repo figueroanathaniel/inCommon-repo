@@ -38,6 +38,10 @@ const PRICES = {
 } as const;
 const ACTIVE = new Set(["active", "trialing"]);
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+// Confirmed addresses only, the same rule as server/oracle: an unconfirmed
+// address proves nothing about who holds it.
+const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
+  !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 
 type Plan = keyof typeof LOOKUP;
 type Row = {
@@ -131,7 +135,7 @@ async function syncCustomer(s: Stripe, customerId: string): Promise<void> {
 // Reads a reader's status, and asks Stripe again when the row is stale, so it
 // comes right even if the webhook was never set up. The Codex's rule: stale
 // when not active, when the paid period has ended, or when six hours old.
-async function statusFor(user: { id: string; email?: string }, force: boolean) {
+async function statusFor(user: { id: string; email?: string; email_confirmed_at?: string | null }, force: boolean) {
   let row = await rowFor(user.id);
   if (row && stripe) {
     const stale = force ||
@@ -148,7 +152,7 @@ async function statusFor(user: { id: string; email?: string }, force: boolean) {
       }
     }
   }
-  const admin = ADMINS.includes(String(user.email ?? "").toLowerCase());
+  const admin = isAdmin(user);
   return {
     isPremium: admin || (!!row && ACTIVE.has(row.status)),
     plan: row?.plan ?? null,

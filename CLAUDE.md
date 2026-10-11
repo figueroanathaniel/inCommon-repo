@@ -2291,6 +2291,28 @@ below the 7.5px badges). It used to head the About card. It is `margin-top: auto
 inside the column so it stays at the bottom whatever the content above it
 grows to.
 
+## The security headers, and where a new outside service has to be named
+Added 11 October 2026, before launch. `docs/SECURITY.md` is the review and the
+owner's dashboard checklist; this is the part a code change can break.
+
+**`deploy/v6.4/_headers` sends a Content-Security-Policy on every page**, and
+`connect-src` names every origin the pages may talk to: this site, the
+project's Supabase (https and wss) and the Nominatim place search. **A new
+outside service has to be added there**, or the browser refuses the request
+with a console error naming the policy and the feature fails while the code
+looks correct. Fonts are `style-src` and `font-src`. `'unsafe-inline'` and
+`'unsafe-eval'` stay because `support.js` compiles templates with
+`new Function` and the pages carry inline scripts; do not remove them without a
+build step that replaces both. `frame-ancestors 'self'` is what lets the
+verification harness frame the app and nobody else. The file is hand written:
+`build-bundle.js` leaves `_headers` alone, so it moves by hand with the folder
+at a version bump. Dragging the repository root does not serve it.
+
+**The free Luminary list counts confirmed addresses only.** `isAdmin()` in both
+server functions requires `email_confirmed_at` as well as a match in
+`LUMINARY_ADMIN_EMAILS`. Matching the address alone gave paid readings to
+whoever registered a listed address first.
+
 ## Zero em dash
 No em dash or en dash anywhere: not in app copy, not in generated readings, not
 in comments, not in the docs. Use a comma, a colon, or a full stop. The rule is

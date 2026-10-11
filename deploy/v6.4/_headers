@@ -14,6 +14,28 @@
 # has to reach, so both are listed: a must-revalidate cover in front of a
 # stale app is a fresh door onto an old room.
 
+# Security headers, on every response. Added 11 October 2026.
+#
+# Content-Security-Policy is the second wall behind React's escaping: if script
+# ever did get into a page, connect-src and img-src leave it nowhere to send a
+# birth record or a session token except this site, the project's own
+# Supabase, and the place search. The runtime compiles templates with new
+# Function and the pages carry inline scripts and styles, so 'unsafe-eval' and
+# 'unsafe-inline' stay until that changes; the policy earns its keep on where
+# data may go and who may frame the page, not on which scripts may run.
+# frame-ancestors 'self' stops another site framing the sign in form to steal
+# clicks, and still lets the verification harness frame the app from this
+# origin. Anything new the app has to reach is added to connect-src here, or it
+# is refused in the browser with a console error naming this policy.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://lkzcybzhjjxdqetwwdrx.supabase.co wss://lkzcybzhjjxdqetwwdrx.supabase.co https://nominatim.openstreetmap.org; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000
+  Cross-Origin-Opener-Policy: same-origin
+
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
 /app.html

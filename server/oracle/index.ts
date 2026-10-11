@@ -53,6 +53,11 @@ const DAILY_LIMIT = Number(Deno.env.get("ORACLE_DAILY_LIMIT") ?? "6");
 // The owner's own addresses read in depth without a subscription, which is
 // how the Codex's admin role passed its paywall.
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+// An address counts only once it is confirmed. Matching the address alone let
+// anybody who reached it first, while Confirm email was off or before the owner
+// had signed up with it, read in depth for free.
+const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
+  !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 const ACTIVE = new Set(["active", "trialing"]);
 
 function thinkingFor(model: string, level: Thinking): Record<string, unknown> {
@@ -282,7 +287,7 @@ Deno.serve(async (req) => {
   // stored one is looked up, as the Codex did: a subscription that has lapsed
   // does not keep reading what it paid for on another device. The row is kept
   // current by the billing function (server/billing), from Stripe.
-  if (deep && !ADMINS.includes(String(user.email ?? "").toLowerCase())) {
+  if (deep && !isAdmin(user)) {
     const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
     const end = sub.data?.current_period_end ? Date.parse(sub.data.current_period_end) : null;
     const paid = !!sub.data && ACTIVE.has(sub.data.status) && (end === null || end > Date.now());
