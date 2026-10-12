@@ -761,7 +761,13 @@
      form still closed, sends nothing to Cloudflare; a phone opens the form at
      once, so a phone loads it on arrival. Nothing is said in words: the
      widget speaks for itself. */
-  var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
+  /* EMPTY ON PURPOSE, 12 October 2026: Cloudflare's outage left the check
+     looping and nobody could sign in, so it is switched off here and in
+     Supabase (Authentication, Attack Protection) together. An empty key draws
+     no widget and sends no token, the fallback this script was built with.
+     Restore '0x4AAAAAAFTyLTEb-YanyrEh' and switch Supabase's CAPTCHA back on,
+     page first, as "Deploy the page before switching the check on" says. */
+  var TURNSTILE_SITE_KEY = '';
   var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
   var capBox = form.querySelector('.captcha');
   var ts = { loading: null, id: null, wait: null, timer: null, running: false };
