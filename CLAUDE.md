@@ -4004,6 +4004,18 @@ the Codex's, so pointing it at the Stripe account the Codex used can never pick
 up or re-price the Codex's product. The first checkout makes the product
 ("Codex Luminary") and both prices.
 
+**Managed Payments is switched off on every checkout.** Stripe turns it on by
+default for a new account, which makes Stripe the seller of record and refuses
+any product without a tax code; on `2025-02-24.acacia`, the version `stripe@17`
+pins, it refuses the session outright ("Managed Payments is not supported on
+API version"). That is how checkout first failed in the sandbox on 12 October
+2026: the customer and both prices were made and no session came back. inCommon
+is the seller (the Terms, the EU and UK hold, `LUMINARY_TAX`), so the checkout
+sends `managed_payments: { enabled: false }` itself rather than trusting a
+dashboard default, through a widened params type because `stripe@17`'s types
+predate the field. Turning it on would make Stripe the merchant of record and
+is the owner's decision, with the legal pages changed in the same change.
+
 **The paywall is the Oracle function, not the page.** The page's gate is
 courtesy; `server/oracle` reads `subscriptions` itself and answers 402
 PREMIUM_REQUIRED before it looks up a stored reading, as the Codex's

@@ -457,7 +457,15 @@ Deno.serve(async (req) => {
       const cur = curFor(country);
       const prices = await ensurePrices(stripe, cur);
       const euUk = cur !== "usd";
-      const session = await stripe.checkout.sessions.create({
+      // Managed Payments off, always. Stripe switches it on by default for a
+      // new account, and under it Stripe is the seller of record and refuses
+      // any product without a tax code; on the API version stripe@17 pins it
+      // refuses the session outright. inCommon is the seller (the Terms, the
+      // EU and UK hold, LUMINARY_TAX), so the checkout says so itself rather
+      // than depending on a dashboard default. stripe@17's types predate the
+      // field, hence the widened params type.
+      const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
+        managed_payments: { enabled: false },
         mode: "subscription",
         customer,
         line_items: [{ price: prices[plan], quantity: 1 }],
@@ -478,7 +486,8 @@ Deno.serve(async (req) => {
           consent_collection: { terms_of_service: "required" as const },
           custom_text: { terms_of_service_acceptance: { message: WITHDRAWAL_WAIVER } },
         } : {}),
-      });
+      };
+      const session = await stripe.checkout.sessions.create(params);
       return reply(200, { url: session.url });
     } catch (e) {
       console.error("billing: checkout failed", e);
