@@ -19017,6 +19017,45 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     });
   }
 
+  /* ---------- Deleting the account ----------
+
+     The App Store and Google Play require an app with accounts to let the
+     reader delete theirs from inside it (docs/ACCOUNT-DELETION.md). The work is
+     server/account/index.ts: Luminary cancelled at Stripe first, then every row,
+     then the sign in itself. confirm is the word the reader typed, and the
+     server checks it again, so no stray call deletes anything.
+
+     After the server answers yes, this device forgets the account too: the
+     sync map and the outbox go, because the map records rows as already
+     uploaded and a later sign in to a new account would otherwise skip them,
+     the remembered login goes, and the session is signed out locally, since
+     the server no longer has a user to sign out. What is on the device stays,
+     unless the page also erases it. */
+  function accountDelete(confirm) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('account', { body: { action: 'delete', confirm: String(confirm || '') } });
+    }).then(function (res) {
+      if (res && !res.error && res.data && res.data.deleted) {
+        try { root.localStorage.removeItem(MAP_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(OUTBOX_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(REMEMBER_KEY); } catch (e) {}
+        session = null;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return { ok: true }; }, function () { return { ok: true }; });
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'STRIPE') return { ok: false, reason: 'stripe' };
+        if (code === 'BAD_REQUEST') return { ok: false, reason: 'confirm' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   /* ---------- Contact Support ----------
 
      A support request is one row in public.support_requests
@@ -19159,6 +19198,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    accountDelete: accountDelete,
     mfaVerify: mfaVerify,
     coverSignOut: coverSignOut,
     mfaStatus: mfaStatus,
@@ -24969,6 +25009,11 @@ input[type="date"]{color-scheme:dark}
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
+      <sc-if value="{{ menuAcctDelOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ menuAcctDelGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
+          <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete account</span>
+        </button>
+      </sc-if>
       <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Close</button>
     </div>
   </div>
@@ -25205,6 +25250,30 @@ input[type="date"]{color-scheme:dark}
         <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
         <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
       </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<!-- DELETING THE ACCOUNT. Drawn while signed in, from the profile card.
+     server/account/index.ts does the work; the reader types delete first. -->
+<sc-if value="{{ adOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
+      <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+        <span style="flex:1;min-width:0;font:600 12px var(--fu);color:var(--tx);text-align:left">Also erase everything on this device</span>
+        <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ adWipeBg }};border:1px solid {{ adWipeBd }};display:flex;align-items:center;transition:background-color .2s">
+          <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ adWipeX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+        </span>
+      </button>
+      <input value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+      <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ adMsg }}</div>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ adClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+        <button onClick="{{ adGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ adBtnBg }};color:{{ adBtnC }};font:700 13px var(--fu)">{{ adLabel }}</button>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -29390,6 +29459,11 @@ input[type="date"]{color-scheme:dark}
       <button onClick="{{ menuDelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
         <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete this profile</span>
       </button>
+      <sc-if value="{{ menuAcctDelOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ menuAcctDelGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;gap:11px;border:1px solid rgba(224,141,125,.45);border-radius:12px;padding:0 14px">
+          <span style="flex:1;font:600 12px var(--fu);color:var(--warn);text-align:left">Delete account</span>
+        </button>
+      </sc-if>
       <button onClick="{{ quickClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12.5px var(--fu);color:var(--tx)">Close</button>
     </div>
   </div>
@@ -29680,6 +29754,30 @@ input[type="date"]{color-scheme:dark}
         <div role="status" aria-live="polite" style="font:400 12px/1.6 var(--fb);color:var(--tx)">{{ phMsg }}</div>
         <button onClick="{{ phClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu)">Done</button>
       </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<!-- DELETING THE ACCOUNT. Drawn while signed in, from the profile card.
+     server/account/index.ts does the work; the reader types delete first. -->
+<sc-if value="{{ adOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
+    <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
+      <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+        <span style="flex:1;min-width:0;font:600 12px var(--fu);color:var(--tx);text-align:left">Also erase everything on this device</span>
+        <span aria-hidden="true" style="flex:none;width:48px;height:28px;box-sizing:border-box;border-radius:999px;background:{{ adWipeBg }};border:1px solid {{ adWipeBd }};display:flex;align-items:center;transition:background-color .2s">
+          <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ adWipeX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+        </span>
+      </button>
+      <input value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+      <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ adMsg }}</div>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ adClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
+        <button onClick="{{ adGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ adBtnBg }};color:{{ adBtnC }};font:700 13px var(--fu)">{{ adLabel }}</button>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -29984,6 +30082,7 @@ class Component extends DCLogic {
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
+    adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false };
@@ -38324,6 +38423,74 @@ class Component extends DCLogic {
       callEm: EM[cc] || '', callEmHref: EM[cc] ? 'tel:' + EM[cc] : ''
     };
   }
+  /* DELETING THE ACCOUNT, FROM THE PROFILE CARD. The App Store and Google Play
+     require it inside the app (docs/ACCOUNT-DELETION.md), the owner asked for
+     it on 12 October 2026, and server/account/index.ts does the work: Luminary
+     cancelled at Stripe first, then every row, then the sign in. The item is
+     drawn only while signed in, because with no account there is nothing to
+     delete. The reader types "delete", which the server checks again.
+
+     What is on this device is a separate choice, off unless the reader turns
+     it on: the account going does not have to take the journal with it, and
+     inCommon works without an account. Erasing removes every inCommon key from
+     this browser's storage, so the next visit is a first visit. Either way the
+     reader lands on the cover, signed out, through the same marked tab Log Out
+     uses, so Back cannot bring a signed in screen back. */
+  accountDeleteVals() {
+    const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
+    const signedIn = !!(C && cs.mode === 'cloud');
+    const shown = p => String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3');
+    const who = cs.email || shown(cs.phone) || 'this account';
+    const ready = String(st.adText || '').trim().toLowerCase() === 'delete';
+    const WHY = {
+      stripe: 'Your Codex Luminary subscription could not be cancelled just now, so nothing was deleted. Try again in a moment.',
+      notSetUp: 'Deleting an account from here is not switched on yet. Use Contact Support and choose Delete my account, and it will be done for you.',
+      signedOut: 'This device needs to sign in again before the account can be deleted. Sign in on the cover, with your two-step code if you use one, then try again.',
+      confirm: 'Type delete to confirm.',
+      offline: 'There is no connection. Nothing was deleted.',
+      off: 'The sign in files did not load. Nothing was deleted.'
+    };
+    const shut = { adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '' };
+    const wipe = () => {
+      try {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^incommon[._]/.test(k || '')) keys.push(k); }
+        keys.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
+    };
+    const go = () => {
+      if (!C || typeof C.accountDelete !== 'function' || st.adBusy) return;
+      if (!ready) { this.setState({ adMsg: WHY.confirm }); return; }
+      this.setState({ adBusy: true, adMsg: 'Deleting your account.' });
+      C.accountDelete(st.adText).then(r => {
+        if (!r || !r.ok) {
+          this.setState({ adBusy: false, adMsg: WHY[r && r.reason] || 'That did not finish. Try again in a moment; nothing more will be deleted than you asked for.' });
+          return;
+        }
+        this.speak('Your account is deleted.', 'assertive');
+        if (st.adWipe) wipe();
+        try { sessionStorage.setItem('incommon.signin.out', '1'); } catch (e) {}
+        location.href = this.coverHref();
+      });
+    };
+    return {
+      menuAcctDelOn: signedIn,
+      menuAcctDelGo: () => this.setState({ ...shut, quickOpen: false, adOpen: true }),
+      adOpen: !!st.adOpen,
+      adWho: who,
+      adText: st.adText, adType: e => this.setState({ adText: e.target.value, adMsg: '' }),
+      adKey: e => { if (e.key === 'Enter') go(); },
+      adWipeOn: st.adWipe ? 'true' : 'false',
+      adWipeGo: () => { if (!st.adBusy) this.setState({ adWipe: !st.adWipe }); },
+      adWipeBg: st.adWipe ? 'rgba(224,141,125,.35)' : 'var(--sf)', adWipeBd: st.adWipe ? 'rgba(224,141,125,.75)' : 'var(--bd)',
+      adWipeX: st.adWipe ? '20px' : '0px',
+      adBd: st.adText && !ready ? 'var(--warn)' : 'var(--bd)',
+      adBtnBg: ready ? 'var(--warn)' : 'var(--sf2)', adBtnC: ready ? '#05060a' : 'var(--dim)',
+      adGo: go, adLabel: st.adBusy ? 'Deleting…' : 'Delete account',
+      adMsg: st.adMsg,
+      adClose: () => { if (!st.adBusy) this.setState(shut); }
+    };
+  }
   phoneVals() {
     const st = this.state, C = this.cloud, cs = st.cloudStatus || {};
     const signedIn = !!(C && cs.mode === 'cloud'), has = cs.phone || '';
@@ -40528,6 +40695,7 @@ class Component extends DCLogic {
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false,
+      ...(this.state.adBusy ? {} : { adOpen: false }),
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
@@ -41744,6 +41912,7 @@ class Component extends DCLogic {
         };
       })(),
       ...this.phoneVals(),
+      ...this.accountDeleteVals(),
       ...this.mfaVals(),
       ...this.supportVals(),
       ...this.profileMenuVals(),

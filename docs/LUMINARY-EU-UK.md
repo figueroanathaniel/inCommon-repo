@@ -54,10 +54,10 @@ Two Supabase secrets on the billing function, both off unless set to `on`:
 
 With both on, a reader in the EU or the UK:
 
-- is shown and charged a price in **euros or pounds with VAT included** (EU and
-  UK consumer law want the price shown to be the price paid). The prices are
-  `LOCAL` near the top of `server/billing/index.ts`: **placeholders**, currently
-  EUR 12.99 / 119.99 and GBP 11.99 / 109.99. Set them before opening;
+- pays the **same price as the US before tax**, in euros or pounds, **plus their
+  own country's VAT**, and is shown the total with VAT in it before they pay
+  (EU and UK consumer law want the price shown to be the price paid). See
+  "The prices" below;
 - gets a box at checkout to tick: "I ask for the in-depth readings to be
   available as soon as I subscribe, and I understand that I lose my 14 day right
   to withdraw once they are." Terms section 7 already says this, and EU law wants
@@ -66,6 +66,40 @@ With both on, a reader in the EU or the UK:
 
 The EUR and GBP prices are created on the existing Codex Luminary product the
 first time someone checks out there, the same way the US prices were.
+
+## The prices
+
+Set by the owner on 12 October 2026: **equal to the US price before tax**,
+converted at that day's rates (1 USD = 0.891841 EUR and 0.754808 GBP), with each
+country's VAT added on top, the way US sales tax is added to the US price.
+
+| | Before tax | Monthly with VAT | Yearly with VAT |
+|---|---|---|---|
+| United States | | $12.99 + any sales tax | $119.99 + any sales tax |
+| Every EU country | EUR 11.59 / 107.01 | | |
+| Germany (19%) | | EUR 13.79 | EUR 127.34 |
+| France, Austria, Monaco (20%) | | EUR 13.91 | EUR 128.41 |
+| Ireland, Poland, Portugal (23%) | | EUR 14.26 | EUR 131.62 |
+| Hungary (27%), the highest | | EUR 14.72 | EUR 135.90 |
+| Luxembourg (17%), the lowest | | EUR 13.56 | EUR 125.20 |
+| United Kingdom, Isle of Man (20%) | GBP 9.80 / 90.57 | GBP 11.76 | GBP 108.68 |
+
+The before tax amounts are `LOCAL` in `server/billing/index.ts`, and Stripe holds
+them as tax exclusive prices. Stripe Tax adds the VAT at checkout. The page shows
+the total for the reader's country from the `VAT` table beside `LOCAL`, rounded
+the way Stripe rounds, so the number on the button is the number charged.
+
+**Two things to keep up:**
+
+- **A VAT rate changes.** Update `VAT` in the same week, or the page shows one
+  total and checkout charges another. The rates were checked against published
+  2026 tables on 12 October 2026.
+- **The exchange rate drifts.** A Stripe price never changes once made, so to
+  re-price: make new prices in Stripe (Products, Codex Luminary, Add price, tax
+  exclusive) with "transfer lookup key" from the old one
+  (`incommon_luminary_monthly_eur` and the rest), archive the old ones, and
+  update `LOCAL` to match. Existing subscribers stay on the price they bought
+  until you move them.
 
 ## Opening the EU and the UK, when the time comes
 
@@ -90,13 +124,12 @@ Do these in order.
 3. **Give Stripe the Terms address.** Settings, Business, Public details, Terms of
    service URL: the address of `terms.html` on the real domain. Checkout cannot
    show the withdrawal box without it.
-4. **Set the prices** in `LOCAL` in `server/billing/index.ts` and deploy the
-   function. Do this before the first EU or UK checkout: a price is created
-   once, and changing the number later means making a new price in Stripe and
-   moving its lookup key across (Stripe lets a new price take a lookup key
-   over with "transfer lookup key").
+4. **Check the prices** in `LOCAL` and the rates in `VAT` (see "The prices"
+   above): if the exchange rate has moved a lot since 12 October 2026, re-run
+   the conversion before the first EU or UK checkout, because a price is made
+   once.
 5. **Update the legal pages in the same change**, and move their dates:
-   - Terms section 7: add the EUR and GBP prices, VAT included;
+   - Terms section 7: add the EUR and GBP prices, plus VAT at the buyer's rate;
    - Privacy Policy: name an **EU and a UK representative** (GDPR Article 27).
      Once inCommon is sold there it is plainly offered there, and the exemption
      for occasional processing no longer fits. Representative services cost

@@ -2481,10 +2481,16 @@ older server sells exactly as before.
 
 **The rest is built and switched off.** `LUMINARY_TAX` turns on Stripe Tax for
 every checkout; `LUMINARY_SELL_EU_UK` opens the two markets and is refused unless
-`LUMINARY_TAX` is on too. Open, an EU or UK reader is quoted and charged a
-VAT inclusive EUR or GBP price (`LOCAL`, placeholders until the owner sets
-them), created on the same product under `incommon_luminary_<plan>_<cur>`, with
-VAT number collection and the 14 day withdrawal waiver as a required tick.
+`LUMINARY_TAX` is on too. Open, an EU or UK reader pays the US price before tax,
+converted at the 12 October 2026 rates (`LOCAL`, EUR 11.59 / 107.01 and GBP
+9.80 / 90.57, the owner's choice), plus their own country's VAT, exactly as the
+US price is plus sales tax. Stripe holds those as tax exclusive prices under
+`incommon_luminary_<plan>_<cur>` on the same product and Stripe Tax adds the VAT;
+the page is shown the total for the guessed country from `VAT`, rounded the way
+Stripe rounds, because EU and UK law want the price shown to be the price paid.
+**A VAT rate that changes has to change in `VAT` the same week**, or the page
+and checkout disagree. VAT number collection and the 14 day withdrawal waiver
+come with it as a required tick.
 The page formats whatever price the status quotes (`lumPriceRows()`), and falls
 back to `LUM_PLANS`; the server's US quote formats identically to it. With both
 switches off, a US checkout sends Stripe exactly the fields it always did: that
@@ -2494,14 +2500,49 @@ country "because the page already hid the button": the page is courtesy.
 
 ## The app stores
 The owner confirmed on 12 October 2026 that inCommon ships on the App Store and
-Google Play as well as the web. `docs/APP-STORE-SETUP.md` is the requirement list
-and nothing in it is built yet. The three things that block a first submission
-are in-app account deletion (both stores; today it is a Contact Support request),
-an on screen disclosure naming Moonshot AI before the Oracle sends anything
-(Apple 5.1.2(i), which reverses the "no disclaimers" rule for that one screen,
-so it is the owner's call), and how Luminary is paid for inside the apps. The
-Apple EULA terms are drafted there for the Terms, to be added in the change that
-ships the first app build, not before.
+Google Play as well as the web. `docs/APP-STORE-SETUP.md` is the requirement list.
+Of the three things that block a first submission, **in-app account deletion is
+built** (next section). **The Oracle's on screen disclosure is not**: Privacy
+Policy section 6 says what is sent and to whom, but Apple 5.1.2(i) wants it on
+screen before the first send, and putting a sentence back beside Consult the
+Oracle reverses the "no disclaimers" rule for that screen, so it waits for the
+owner. **Luminary in the apps is the stores' own billing**, decided 12 October
+2026, through RevenueCat into the same `subscriptions` table with a `source`
+column, and it is not built until a native wrapper exists to build it in. The
+Apple EULA terms are drafted in that doc for the Terms, to be added in the change
+that ships the first app build, not before.
+
+## Deleting an account is the reader's own button
+Built 12 October 2026 at the owner's request, because both stores require it
+(`docs/ACCOUNT-DELETION.md`). **Delete account** sits under Delete this profile in
+the profile card, both shells, drawn only while signed in (`menuAcctDelOn`), and
+opens one dialog (`accountDeleteVals()`, state `adOpen`): what goes, a switch to
+erase this device too (off by default, because the account going does not have to
+take the journal with it), and the word `delete` typed to arm the button, which
+wears `--warn`, never `--crisis`: deleting an account is not a safety control.
+
+**The order is the design.** `server/account/index.ts` cancels Luminary at Stripe
+and deletes the Stripe customer FIRST, because that is the one step that can keep
+charging, and if Stripe fails nothing is deleted; then every row, children before
+parents so it is right whether or not the project's keys cascade; then the auth
+user LAST, so a failure above leaves the reader able to sign in and retry. Every
+step is safe to run twice. A table the project never created is skipped, any
+other error stops the run. The server checks the typed word again, and refuses an
+aal1 session on an account with a verified authenticator, like billing and the
+Oracle. Support requests stay, unlinked, as the Privacy Policy says.
+
+**On the device, success forgets the account**: `accountDelete()` removes the sync
+map, the outbox and the remembered login and signs out locally. The map matters
+most: it records rows as uploaded, and a later sign in to a new account would
+otherwise skip them. With the switch on, every `incommon.` and `incommon_` key
+goes too. Either way the reader reaches the cover through the marked tab Log Out
+uses. K56 holds the module half; the function was driven against a fake Stripe
+and an in memory database (only the reader's rows go, Stripe down deletes
+nothing, a failing table keeps the sign in). `delete-account.html` is the public
+page Google asks for, built like the legal pages and copied by `LEGAL_FILES`; the
+Terms (sections 7 and 17) and the Privacy Policy (sections 15 and 16) name the
+button, dated 12 October 2026. If what the function deletes changes, that page
+and those sections change with it.
 
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the

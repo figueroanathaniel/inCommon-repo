@@ -1194,6 +1194,45 @@
     });
   }
 
+  /* ---------- Deleting the account ----------
+
+     The App Store and Google Play require an app with accounts to let the
+     reader delete theirs from inside it (docs/ACCOUNT-DELETION.md). The work is
+     server/account/index.ts: Luminary cancelled at Stripe first, then every row,
+     then the sign in itself. confirm is the word the reader typed, and the
+     server checks it again, so no stray call deletes anything.
+
+     After the server answers yes, this device forgets the account too: the
+     sync map and the outbox go, because the map records rows as already
+     uploaded and a later sign in to a new account would otherwise skip them,
+     the remembered login goes, and the session is signed out locally, since
+     the server no longer has a user to sign out. What is on the device stays,
+     unless the page also erases it. */
+  function accountDelete(confirm) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('account', { body: { action: 'delete', confirm: String(confirm || '') } });
+    }).then(function (res) {
+      if (res && !res.error && res.data && res.data.deleted) {
+        try { root.localStorage.removeItem(MAP_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(OUTBOX_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(REMEMBER_KEY); } catch (e) {}
+        session = null;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return { ok: true }; }, function () { return { ok: true }; });
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'STRIPE') return { ok: false, reason: 'stripe' };
+        if (code === 'BAD_REQUEST') return { ok: false, reason: 'confirm' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   /* ---------- Contact Support ----------
 
      A support request is one row in public.support_requests
@@ -1336,6 +1375,7 @@
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    accountDelete: accountDelete,
     mfaVerify: mfaVerify,
     coverSignOut: coverSignOut,
     mfaStatus: mfaStatus,

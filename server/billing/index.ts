@@ -63,9 +63,10 @@ const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
 //     is in the EU or the UK. That is the line that holds; the other two are
 //     courtesy, so nobody is charged to be told no.
 //
-// With it on, an EU or UK reader is sold the EUR or GBP price, VAT included
-// (consumer law there wants the price shown to be the price paid), Stripe Tax
-// works out the VAT, and Checkout asks the reader to agree that the in-depth
+// With it on, an EU or UK reader is sold the EUR or GBP price plus their own
+// country's VAT, and is SHOWN the total with VAT in it before they pay
+// (consumer law there wants the price shown to be the price paid). Stripe Tax
+// adds the VAT at checkout, and Checkout asks the reader to agree that the in-depth
 // readings start at once and the 14 day right to withdraw ends with that,
 // which Terms section 7 already says and EU law wants as an explicit tick.
 // Selling there without Stripe Tax would sell without charging the VAT that is
@@ -85,22 +86,40 @@ const SELL_EU_UK = Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && TAX;
 if (Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && !TAX) {
   console.error("billing: LUMINARY_SELL_EU_UK is on but LUMINARY_TAX is not; the EU and the UK stay closed until both are on");
 }
-// The prices there. PLACEHOLDERS until the owner sets them: these are the US
-// numbers in the local currency, VAT included. Changing an amount here does not
-// change a price Stripe already holds; see the doc for how to re-price.
+// The prices there, set by the owner on 12 October 2026: the same money as the
+// US price before tax, converted at that day's rates (1 USD = 0.891841 EUR and
+// 0.754808 GBP), so a sale in Paris or London earns what a sale in Ohio does.
+// They are NET, like the US price, and each reader pays their own country's VAT
+// on top: the US price is "plus any applicable taxes" too, so this is the same
+// price everywhere rather than a cheaper one where VAT is high. Changing an
+// amount here does not change a price Stripe already holds; see the doc for how
+// to re-price when the exchange rate has moved.
 const LOCAL = {
-  eur: { monthly: 1299, annual: 11999 },
-  gbp: { monthly: 1199, annual: 10999 },
+  eur: { monthly: 1159, annual: 10701 },
+  gbp: { monthly: 980, annual: 9057 },
 } as const;
+// Standard VAT rates, for SHOWING the total before checkout; Stripe Tax decides
+// what is actually charged. Checked against published 2026 tables on 12 October
+// 2026. An astrology reading is an electronically supplied service, which takes
+// the standard rate everywhere. If a country changes its rate, change it here
+// in the same week, or the page shows one total and Checkout charges another.
+// Monaco is inside the French VAT area and the Isle of Man inside the UK's.
+const VAT: Record<string, number> = {
+  AT: 20, BE: 21, BG: 20, HR: 25, CY: 19, CZ: 21, DK: 25, EE: 24, FI: 25.5, FR: 20, DE: 19, GR: 24, HU: 27,
+  IE: 23, IT: 22, LV: 21, LT: 21, LU: 17, MT: 18, NL: 21, PL: 23, PT: 23, RO: 21, SK: 23, SI: 22, ES: 21,
+  SE: 25, MC: 20, GB: 20, IM: 20,
+};
+// The way Stripe Tax rounds it: the tax on the net amount, to the cent.
+const withVat = (net: number, country: string) => net + Math.round(net * (VAT[country] ?? 0) / 100);
 type Cur = "usd" | "eur" | "gbp";
 const lookupFor = (cur: Cur, plan: keyof typeof LOOKUP) => cur === "usd" ? LOOKUP[plan] : LOOKUP[plan] + "_" + cur;
 const curFor = (country: string | null): Cur =>
   !country || !SELL_EU_UK || !EU_UK.has(country) ? "usd" : UK.has(country) ? "gbp" : "eur";
 const countryOf = (v: unknown): string | null => /^[A-Z]{2}$/.test(String(v ?? "")) ? String(v) : null;
 const closedTo = (country: string | null) => !!country && EU_UK.has(country) && !SELL_EU_UK;
-const priceShown = (cur: Cur) => cur === "usd"
+const priceShown = (cur: Cur, country: string | null) => cur === "usd" || !country
   ? { currency: "usd", monthly: PRICES.monthly.amount, annual: PRICES.annual.amount, taxIncluded: false }
-  : { currency: cur, monthly: LOCAL[cur].monthly, annual: LOCAL[cur].annual, taxIncluded: true };
+  : { currency: cur, monthly: withVat(LOCAL[cur].monthly, country), annual: withVat(LOCAL[cur].annual, country), taxIncluded: true };
 // What the reader ticks at checkout in the EU and the UK. Stripe shows it beside
 // the terms of service box; the Terms link itself is set in the Stripe dashboard.
 const WITHDRAWAL_WAIVER =
@@ -162,6 +181,7 @@ async function rowFor(userId: string): Promise<Row | null> {
 }
 
 // The US prices are made exactly as they always were, on the first checkout.
+// The EUR and GBP ones are NET (tax_behavior exclusive), the same as the US.
 // The EUR and GBP ones are made the same way the first time somebody in the EU
 // or the UK checks out with selling there switched on, on the SAME product, so
 // Stripe holds one Luminary in three currencies rather than three products.
@@ -194,8 +214,8 @@ async function ensurePrices(s: Stripe, cur: Cur = "usd"): Promise<Record<Plan, s
       recurring: { interval: PRICES[plan].interval },
       lookup_key: keys[plan],
       transfer_lookup_key: true,
-      // EU and UK prices are shown and charged with VAT in them.
-      ...(cur === "usd" ? {} : { tax_behavior: "inclusive" as const }),
+      // Net, like the US price: Stripe Tax adds the buyer's own VAT on top.
+      ...(cur === "usd" ? {} : { tax_behavior: "exclusive" as const }),
     });
     ids[plan] = price.id;
   }
@@ -263,7 +283,7 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     // Whether Luminary is sold in the country the page guessed, and at what
     // price there. A page that sent no country is quoted the US price.
     regionOpen: !closedTo(country),
-    price: priceShown(curFor(country)),
+    price: priceShown(curFor(country), country),
   };
 }
 

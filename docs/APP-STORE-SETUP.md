@@ -41,55 +41,57 @@ same section added.
 
 ## What has to be built before the first submission
 
-### 1. Deleting an account from inside the app (both stores, required)
+### 1. Deleting an account from inside the app (both stores): BUILT
 
-Apple (guideline 5.1.1(v)) and Google both require an app that lets people make
-an account to let them **start deleting it inside the app**. Today deletion is a
-Contact Support request that the owner carries out by hand
-(`docs/LEGAL-SETUP.md`), and a "contact us to delete" route is the commonest
-reason apps are rejected under this rule. Google also wants a **public web page**
-where someone who has uninstalled the app can ask for deletion, linked from the
-Play Console's Data safety form.
-
-What it takes: a server function that, for the signed in reader, cancels any
-Luminary subscription, deletes their rows and their auth user, plus a "Delete
-account" control in the profile card, and a small public page explaining how to
-ask for deletion without the app. **This is the biggest piece of work on this
-list.**
+Built on 12 October 2026: **Delete account** in the profile card while signed in,
+and the public page `delete-account.html` for Google's web link. The function
+has to be deployed before it works: `docs/ACCOUNT-DELETION.md`.
 
 ### 2. Telling the reader, on screen, before the Oracle sends anything (Apple, required)
 
-Apple's guideline 5.1.2(i), tightened in November 2025, requires an app to
-**disclose on screen what personal data goes to a third party AI, and to whom,
-and to get explicit permission before sending it.** A privacy policy paragraph
-is not enough. The Oracle sends a chart summary and the first name to Moonshot
-AI. The press of Consult the Oracle is the permission, but the sentence beside it
-that said what is sent and to whom was removed on 11 October 2026 under the "no
-disclaimers" rule. For the iPhone app it has to come back, at least once, before
-the first reading: one short panel naming Moonshot AI and what is and is not
-sent, with the button under it. **This is a product decision for the owner**,
-because it reverses that rule for this one screen.
+**The disclosure is in the Privacy Policy, section 6, and that is not enough for
+Apple.** Guideline 5.1.2(i), tightened in November 2025, asks for three things
+before personal data goes to a third party AI: say what is sent, say who it goes
+to, and get permission first, **on screen**. Reviewers have rejected apps whose
+only disclosure was in their privacy policy. The press of Consult the Oracle is
+the permission; what is missing is the sentence beside it, which was removed on
+11 October 2026 under the "no disclaimers" rule.
 
-### 3. How Luminary is paid for inside the apps (both stores, a decision)
+The panel it sat in still exists (the first Consult the Oracle press, shown once
+per profile), so putting a sentence back is small: for example, "Consulting the
+Oracle sends your first name and a summary of your chart to Moonshot AI, which
+writes the reading. Your birth date, time, place and journal are not sent," with
+a link to Privacy Policy section 6. It could appear in the store apps only, or
+everywhere. **Not done: it reverses the owner's rule for this one screen, so it
+waits for the owner's word.**
 
-Selling a digital unlock inside an app normally has to go through the store's
-own billing (Apple's In-App Purchase, Google Play Billing), which takes 15% for
-a small developer. The current Stripe checkout cannot simply be reused. The
-choices:
+### 3. How Luminary is paid for inside the apps: the stores' own billing
 
-- **Use the stores' billing in the apps** and Stripe on the web, with both
-  feeding the same `subscriptions` table. Most work, works everywhere, and the
-  stores collect and pay VAT themselves, which also opens the EU and the UK in
-  the apps without a VAT registration (`docs/LUMINARY-EU-UK.md`).
-- **In the United States only, link out to the web checkout.** Court orders in
-  2025 made both stores allow a link or button to an outside purchase for US
-  users (Apple from May 2025, Google from 29 October 2025, the Google order
-  running to November 2027). Both are still being appealed and the commission
-  terms have been moving, so confirm the current position before relying on it.
-  Outside the US the link is not allowed.
-- **Ship the apps without selling Luminary in them** at first. In depth readings
-  would show as unavailable in the app. The simplest start, but Apple does not
-  allow the app to tell readers to go and buy it on the web, outside the US.
+**Decided by the owner on 12 October 2026: in-app purchases**, Apple's In-App
+Purchase on iPhone and Google Play Billing on Android, with Stripe staying on the
+web. Each store takes 15% under its small developer programme, and each charges
+and pays the VAT itself, so the apps can sell Luminary in the EU and the UK even
+while the web cannot (`docs/LUMINARY-EU-UK.md`).
+
+The plan, for when the wrapper (item 4) exists to build it in:
+
+- **RevenueCat** between the apps and the stores, rather than talking to StoreKit
+  and the Play Developer API directly. It verifies receipts for both stores and
+  sends one kind of webhook for both, and it is free until a few thousand
+  dollars a month of app revenue, which is the stage inCommon is at.
+- **One table, three sources.** `subscriptions` gains a `source` column (`stripe`,
+  `apple`, `google`); RevenueCat's webhook writes apple and google rows the way
+  Stripe's writes stripe rows, so the Oracle's paywall check does not change.
+- **Manage billing points at the right place.** A reader who bought on an iPhone
+  cancels in their Apple account, not in Stripe's portal; the page shows the
+  store's subscription settings for those rows instead.
+- **The same products in both stores**: monthly and yearly, priced to match the
+  US $12.99 and $119.99 as closely as each store's price points allow, with the
+  stores' own local prices elsewhere.
+- **The Terms** take the last paragraph of the draft below once this ships.
+
+**Not built yet**, because a purchase flow can only be built and tested inside a
+real app build, and none exists until item 4 does.
 
 ### 4. Wrapping the app (both stores)
 
@@ -160,8 +162,8 @@ data that leaves the device:
 | Location | No | | | A birth place is typed, not read from the device |
 | Advertising or tracking | No | | | |
 
-Encrypted in transit: yes. Deletion can be requested: yes, once item 1 above is
-built.
+Encrypted in transit: yes. Deletion can be requested: yes, in the app and at
+`delete-account.html` (item 1).
 
 ## Draft section for the Terms
 

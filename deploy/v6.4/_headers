@@ -53,3 +53,5 @@
   Cache-Control: public, max-age=0, must-revalidate
 /accessibility.html
   Cache-Control: public, max-age=0, must-revalidate
+/delete-account.html
+  Cache-Control: public, max-age=0, must-revalidate

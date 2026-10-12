@@ -43,7 +43,9 @@ the address in the row, then set `status` to `answered`.
 
 - **Privacy requests and account deletion: answer within 30 days.** The Privacy
   Policy promises that, and it is the legal deadline in the EU and UK.
-- **Deleting an account**: Authentication, Users, delete the user. Then check
+- **Deleting an account**: readers can do this themselves now, in the app's
+  profile card (`docs/ACCOUNT-DELETION.md`). For a request that arrives here
+  instead: Authentication, Users, delete the user. Then check
   that their rows in `accounts`, `profiles`, `memories`, `throughline_entries`,
   `consent_events`, `pairs` and `oki_messages` are gone; `oracle_readings` and
   `subscriptions` delete themselves with the user. If they subscribed, cancel

@@ -617,7 +617,7 @@ for (const [f, q] of SIGNIN_FILES) {
    the source shell's address, so it is rewritten here the same way the
    cover's is. A bundle missing either page is a sign up form agreeing to
    documents that 404, which is the one failure a legal link must not have. */
-const LEGAL_FILES = ['terms.html', 'privacy.html', 'accessibility.html'];
+const LEGAL_FILES = ['terms.html', 'privacy.html', 'accessibility.html', 'delete-account.html'];
 for (const f of LEGAL_FILES) {
   const from = path.join(appDir, f);
   if (!fs.existsSync(from)) die('missing ' + from + '; the cover, Settings and the Luminary purchase all link to it');
