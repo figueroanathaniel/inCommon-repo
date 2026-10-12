@@ -571,6 +571,11 @@
     phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
     phoneTaken: 'That number is already on an account.',
     captcha: 'The sign in check did not finish. Try again.' + ANYWAY,
+    /* The email that confirms a new account, or carries a reset link, could
+       not be sent, so nothing was made or sent. Said plainly, because the only
+       other thing on screen is the check starting again for the next press. */
+    mailOff: 'The confirmation email could not be sent, so the account was not made yet. Try again later.' + ANYWAY,
+    mailOffReset: 'The email could not be sent just now. Try again later.' + ANYWAY,
     nomfa: 'Enter the 6 digit code your authenticator app is showing.',
     mfaBad: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
     mfaAsk: 'Two-step sign in is on for this account. Enter the 6 digit code your authenticator app is showing.'
@@ -852,7 +857,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.7.1'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.7.2'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -1144,7 +1149,7 @@
          reader is taken to the code, and asks for one when ready: a text is
          sent only when somebody presses for it. */
       if (r.reason === 'phoneUnconfirmed' && Cmod && Cmod.normPhone(login)) { toCode(Cmod.normPhone(login), 'signup', WHY.phoneUnconfirmed); return; }
-      say(m === 'mfa' && r.reason === 'badCode' ? WHY.mfaBad : WHY[r.reason] || WHY.error);
+      say(m === 'mfa' && r.reason === 'badCode' ? WHY.mfaBad : m === 'forgot' && r.reason === 'mailOff' ? WHY.mailOffReset : WHY[r.reason] || WHY.error);
       if (r.reason === 'invalid') addr.focus();
       else if (r.reason === 'badCode') codeIn.focus();
       else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();

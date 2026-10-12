@@ -1704,6 +1704,19 @@ async function runCloudTests() {
   refusals.mailRate = (await oauthHarness({ resetError: { status: 429, code: 'over_email_send_rate_limit', message: 'email rate limit exceeded' } }).C.passwordResetStart('reader@k22.invalid', 'https://cover.k22.invalid/')).reason;
   var thrower = loadIsolatedCloud({ createClient: function () { return { auth: { signInWithPassword: function () { throw new Error('Failed to fetch'); } } }; } });
   refusals.thrown = (await thrower.passwordSignIn('reader@k22.invalid', 'correct horse')).reason;
+  /* K22b: an email that could not be sent is its own reason. Supabase's built
+     in sender refuses every address outside the project's team, and read as
+     "error" a new account looked like the Cloudflare check cycling. */
+  var mailOff = {
+    notAuthorized: (await oauthHarness({ upError: { status: 400, code: 'email_address_not_authorized', message: 'Email address "reader@k22.invalid" cannot be used as it is not authorized' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason,
+    notAuthorizedOld: (await oauthHarness({ upError: { status: 400, message: 'Email address not authorized' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason,
+    smtpFailed: (await oauthHarness({ upError: { status: 500, code: 'unexpected_failure', message: 'Error sending confirmation email' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason,
+    resetFailed: (await oauthHarness({ resetError: { status: 500, message: 'Error sending recovery email' } }).C.passwordResetStart('reader@k22.invalid', 'https://cover.k22.invalid/')).reason,
+    smsStill: (await oauthHarness({ upError: { status: 500, code: 'sms_send_failed', message: 'Error sending confirmation sms' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason
+  };
+  t('K22b', 'an email that could not be sent, the built in sender refusing an address outside the team or a custom sender failing, reads as mailOff, and a failed text is still smsFailed', {
+    notAuthorized: 'mailOff', notAuthorizedOld: 'mailOff', smtpFailed: 'mailOff', resetFailed: 'mailOff', smsStill: 'smsFailed'
+  }, mailOff);
   t('K22', 'every refusal comes back as a reason the cover can say, by the code where there is one and the message where there is not, and the same password is not read as a weak one', {
     wrong: 'wrong', unconfirmed: 'unconfirmed', rate: 'rate', offline: 'offline', oldWrong: 'wrong', weak: 'weak', closed: 'closed', same: 'same', mailRate: 'rate', thrown: 'offline'
   }, refusals);

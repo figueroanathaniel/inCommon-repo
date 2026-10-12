@@ -48,7 +48,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.7.1';
+  var VERSION = '2.7.2';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -563,6 +563,14 @@
   function authReason(e) {
     var m = String((e && e.message) || ''), code = String((e && e.code) || '');
     if (e && e.status === 429 || /rate limit|too many/i.test(m) || /rate_limit/.test(code)) return 'rate';
+    /* The email could not be sent, so the account it was for was not made (or
+       the reset link was not sent). Supabase's built in sender delivers only to
+       the project's own team, and refuses anybody else with
+       email_address_not_authorized until a custom SMTP sender is set up; a
+       custom sender that fails reads as "Error sending ... email". Read as
+       anything else this was "could not finish", and the reader saw only the
+       check starting again. */
+    if (code === 'email_address_not_authorized' || /email address (is )?not authorized|error sending (confirmation|recovery|magic link|invite|email change|reauthentication)? ?(e-?mail|mail)/i.test(m)) return 'mailOff';
     if (e && (e.name === 'AuthRetryableFetchError' || /failed to fetch|network/i.test(m))) return 'offline';
     if (code === 'phone_provider_disabled' || /unsupported phone provider|phone (signups|logins|provider)[^.]*disabled/i.test(m)) return 'phoneOff';
     if (code === 'sms_send_failed' || /error sending (confirmation |phone change |recovery )?(sms|otp)/i.test(m)) return 'smsFailed';
