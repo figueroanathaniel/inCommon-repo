@@ -2623,8 +2623,12 @@ Oracle. Support requests stay, unlinked, as the Privacy Policy says.
 **On the device, success forgets the account**: `accountDelete()` removes the sync
 map, the outbox and the remembered login and signs out locally. The map matters
 most: it records rows as uploaded, and a later sign in to a new account would
-otherwise skip them. With the switch on, every `incommon.` and `incommon_` key
-goes too. Either way the reader reaches the cover through the marked tab Log Out
+otherwise skip them. With the switch on, this account's profiles and every key
+scoped to them go too (`PM.accountStorageKeys()`), and nothing of any other
+account on the browser; with it off they become the guest's
+(`PM.releaseToGuest()`), which is what "you can keep using inCommon without an
+account" needs now that a deleted account's own store could never be opened
+again. See "Each account has its own profiles on a device". Either way the reader reaches the cover through the marked tab Log Out
 uses. K56 holds the module half; the function was driven against a fake Stripe
 and an in memory database (only the reader's rows go, Stripe down deletes
 nothing, a failing table keeps the sign in). `delete-account.html` is the public
@@ -2632,6 +2636,53 @@ page Google asks for, built like the legal pages and copied by `LEGAL_FILES`; th
 Terms (sections 7 and 17) and the Privacy Policy (sections 15 and 16) name the
 button, dated 12 October 2026. If what the function deletes changes, that page
 and those sections change with it.
+
+## Each account has its own profiles on a device
+The owner reported on 12 October 2026 that three accounts signed in on one
+browser all opened onto the same birth data. The profile list was one device
+wide store, `incommon.profiles.v1`, and every account and the guest read it.
+Everything else a reader owns is already keyed by profile id (memories,
+journal, consents, Oracle readings, saved people, theme), so scoping that ONE
+store by account separates all of it, and the cloud push follows because
+`buildPlan()` reads the store.
+
+**`scope()` in `profile-manager.js` decides, once per page, at the first read of
+the store.** It reads the session supabase-js left in localStorage
+(`sb-<ref>-auth-token`), which is how anybody becomes signed in: on the cover,
+then by navigating here. Signing out and deleting an account navigate away, so
+no page changes owner while it is open, and caching the answer is correct. A
+signed in account's store is `incommon.profiles.v1.u.<userId>`; signed out it is
+the plain key, the guest's. A session the browser has closed (the remember me
+mark without its cookie) and one still owing its two-step code read as signed
+out, as they do everywhere, so a password alone opens nothing. That module's
+`owesCode` is the third copy of the rule and K46 holds all three equal. It
+lives in this module rather than calling the cloud module because helmet
+scripts load async and the store is read before that module is sure to exist.
+
+**Five device wide keys hold one reader's data and move with the account**
+(`ACCOUNT_KEYS`): first run, the sample marker, received cards, the adverse
+log and archived memories. The app reaches them through `acctKey()`, which is
+why those five are getters on the logic class now rather than string fields.
+Device preferences (`incommon.theme.device`, the sidebar, the section) stay
+device wide on purpose.
+
+**The first account to open the app on a device that already holds profiles
+takes them**, with the `ACCOUNT_KEYS`. Nothing in the old store says whose it
+was, so this is the only rule available offline, and it is right for the common
+case of one reader per device. Every account after that opens onto a blank
+store and the birth page, and the guest store is blank once claimed. An
+account's blank store does not inherit the pre-profile legacy keys either:
+`migrateLegacyProfile()` copies those only into the guest's.
+
+**Log Out keeps the account's data on the device under its key**, and it comes
+back at the next sign in. Deleting an account hands it to the guest unless the
+reader erases it (see "Deleting an account is the reader's own button").
+
+O1 to O7 in `run-module-tests.js` load the real module once per page over one
+shared storage, which is how a browser moves between the cover and the app, and
+all six that test separation go red with the owner forced to null. Driven in
+the built bundle too: a device holding a guest profile, then account A (takes
+it), account B (the birth page), A again (its own profile), signed out (blank).
 
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the

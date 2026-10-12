@@ -2132,12 +2132,109 @@ async function runCloudTests() {
   var CM = loadIsolatedCloud({ createClient: function () { return {}; } });
   var coverOwesSrc = (coverSrc.match(/function owesCode\(st\) \{[\s\S]*?\n  \}/) || [])[0];
   var coverOwes = coverOwesSrc ? vm.runInNewContext('(' + coverOwesSrc + ')', { atob: function (s) { return Buffer.from(s, 'base64').toString('binary'); }, JSON: JSON, Array: Array, String: String }) : null;
-  var modOwes = {}, covOwes = {};
-  Object.keys(owesCases).forEach(function (k) { modOwes[k] = CM.owesCode(owesCases[k]); covOwes[k] = coverOwes ? coverOwes(owesCases[k]) : 'missing'; });
+  /* The third copy: profile-manager.js reads the stored session to choose
+     whose profiles to open, before the cloud module has loaded. */
+  var pmSrcK46 = fs.readFileSync(path.join(repo, 'app', 'profile-manager.js'), 'utf8');
+  var pmOwesSrc = (pmSrcK46.match(/function owesCode\(st\) \{[\s\S]*?\n  \}/) || [])[0];
+  var pmOwes = pmOwesSrc ? vm.runInNewContext('(' + pmOwesSrc + ')', { atob: function (s) { return Buffer.from(s, 'base64').toString('binary'); }, JSON: JSON, Array: Array, String: String }) : null;
+  var modOwes = {}, covOwes = {}, pmOwesOut = {};
+  Object.keys(owesCases).forEach(function (k) { modOwes[k] = CM.owesCode(owesCases[k]); covOwes[k] = coverOwes ? coverOwes(owesCases[k]) : 'missing'; pmOwesOut[k] = pmOwes ? pmOwes(owesCases[k]) : 'missing'; });
   t('K46', 'a session owes its two-step code exactly when the user has a verified authenticator and the token is not aal2, an unreadable token owes it, and the cover reads stored sessions by the same rule as the module', {
     module: { nothing: false, noUser: false, noFactors: false, unverifiedOnly: false, verifiedAal1: true, verifiedAal2: false, verifiedNoToken: true, verifiedBadToken: true },
-    coverSame: true
-  }, { module: modOwes, coverSame: JSON.stringify(modOwes) === JSON.stringify(covOwes) });
+    coverSame: true, profileManagerSame: true
+  }, { module: modOwes, coverSame: JSON.stringify(modOwes) === JSON.stringify(covOwes), profileManagerSame: JSON.stringify(modOwes) === JSON.stringify(pmOwesOut) });
+
+  /* ---- O1-O7: each account has its own profiles on a device, the owner's
+     request of 12 October 2026 after three accounts on one browser all opened
+     onto the same birth data. Each pmPage() is one page load: a fresh copy of
+     profile-manager.js over the same storage, which is what a browser does
+     between the cover and the app. */
+  function ownerStore() {
+    var m = {};
+    return {
+      _m: m,
+      get length() { return Object.keys(m).length; },
+      key: function (i) { return Object.keys(m)[i] || null; },
+      getItem: function (k) { return k in m ? m[k] : null; },
+      setItem: function (k, v) { m[k] = String(v); },
+      removeItem: function (k) { delete m[k]; }
+    };
+  }
+  var SB = 'sb-lkzcybzhjjxdqetwwdrx-auth-token';
+  function signIn(store, id, factors, aal) {
+    store.setItem(SB, JSON.stringify({ access_token: jwtOf({ sub: id, aal: aal || 'aal1' }), refresh_token: 'r', user: { id: id, factors: factors } }));
+  }
+  function pmPage(store, cookie) {
+    var win = {};
+    vm.runInNewContext(pmSrcK46, { window: win, localStorage: store, document: { cookie: cookie || '' }, atob: function (x) { return Buffer.from(x, 'base64').toString('binary'); },
+      JSON: JSON, Math: Math, Date: Date, String: String, Array: Array, Object: Object, Error: Error, isNaN: isNaN, parseFloat: parseFloat });
+    return win.ProfileManager;
+  }
+  var ROOTK = 'incommon.profiles.v1', UA = 'aaaaaaaa-0000-4000-8000-00000000000a', UB = 'bbbbbbbb-0000-4000-8000-00000000000b';
+  var dev = ownerStore();
+  var g0 = pmPage(dev);
+  var gp = g0.createProfile({ name: 'Nate', birthDate: '1990-05-01' });
+  dev.setItem('incommon.firstrun', 'true');
+  dev.setItem('incommon.friends', JSON.stringify([{ id: 'f1', name: 'Card' }]));
+  t('O1', 'signed out, the profiles are the guest store under the plain key, and the device wide keys stay plain', {
+    owner: null, inRoot: true, firstrunKey: 'incommon.firstrun'
+  }, { owner: g0.owner(), inRoot: (JSON.parse(dev.getItem(ROOTK) || '{}').profiles || []).some(function (p) { return p.id === gp.id; }), firstrunKey: g0.accountKey('incommon.firstrun') });
+
+  signIn(dev, UA);
+  var pa = pmPage(dev);
+  var aList = pa.listProfiles().map(function (p) { return p.name; });
+  t('O2', 'the first account to open the app on a device that holds profiles takes them, with its first run, sample, friends, adverse log and archive, and the guest store is left empty', {
+    owner: UA, profiles: ['Nate'], rootGone: true, firstrunMoved: true, friendsMoved: true, plainGone: true
+  }, { owner: pa.owner(), profiles: aList, rootGone: dev.getItem(ROOTK) === null, firstrunMoved: dev.getItem('incommon.firstrun.u.' + UA) === 'true',
+    friendsMoved: !!dev.getItem('incommon.friends.u.' + UA), plainGone: dev.getItem('incommon.firstrun') === null && dev.getItem('incommon.friends') === null });
+
+  dev.setItem('incommon.throughline.manual', JSON.stringify([{ t: 'before profiles' }]));
+  signIn(dev, UB);
+  var pb = pmPage(dev);
+  var bBefore = pb.count();
+  var mig = pb.migrateLegacyProfile({ name: 'Default Profile', birthDate: '1992-07-02' });
+  var bp = pb.getActiveProfile();
+  t('O3', 'a second account on the same device opens onto no profiles, makes its own under its own key, and inherits none of the device history from before profiles', {
+    before: 0, after: 1, ownKey: true, aUntouched: ['Nate'], legacyNotCopied: true, firstrunKey: 'incommon.firstrun.u.' + UB, firstrunUnset: true
+  }, { before: bBefore, after: pb.count(), ownKey: (JSON.parse(dev.getItem(ROOTK + '.u.' + UB) || '{}').profiles || []).some(function (p) { return p.id === bp.id; }),
+    aUntouched: (JSON.parse(dev.getItem(ROOTK + '.u.' + UA) || '{}').profiles || []).map(function (p) { return p.name; }),
+    legacyNotCopied: dev.getItem('incommon.p.' + bp.id + '.throughline') === null && (mig.moved || []).length === 0,
+    firstrunKey: pb.accountKey('incommon.firstrun'), firstrunUnset: dev.getItem(pb.accountKey('incommon.firstrun')) === null });
+
+  signIn(dev, UA);
+  var pa2 = pmPage(dev);
+  t('O4', 'signing back in as the first account opens its own profiles again, and not the second account\'s', {
+    owner: UA, profiles: ['Nate']
+  }, { owner: pa2.owner(), profiles: pa2.listProfiles().map(function (p) { return p.name; }) });
+
+  signIn(dev, UA, VER, 'aal1');
+  /* owner() is read straight after each load: the scope is settled at the
+     first read of the store, and a real page reads it before anything could
+     change the stored session under it. */
+  var owing = pmPage(dev).owner();
+  signIn(dev, UA);
+  dev.setItem('incommon.signin.ephemeral', '1');
+  var closed = pmPage(dev, '').owner(), open = pmPage(dev, 'incommon_signin_live=1').owner();
+  dev.removeItem('incommon.signin.ephemeral');
+  t('O5', 'a session that still owes its two-step code, and one the browser has closed, open the guest store rather than the account\'s', {
+    owesCode: null, browserClosed: null, browserOpen: UA
+  }, { owesCode: owing, browserClosed: closed, browserOpen: open });
+
+  var pa3 = pmPage(dev);
+  var aKeys = pa3.accountStorageKeys();
+  t('O6', 'erasing an account from the device names its store, its scoped keys and its profiles\' keys, and nothing of the other account\'s', {
+    hasStore: true, hasFirstrun: true, hasProfileKey: true, noneOfB: true
+  }, { hasStore: aKeys.indexOf(ROOTK + '.u.' + UA) !== -1, hasFirstrun: aKeys.indexOf('incommon.firstrun.u.' + UA) !== -1,
+    hasProfileKey: aKeys.some(function (k) { return k.indexOf(gp.id) !== -1 && k !== ROOTK + '.u.' + UA; }),
+    noneOfB: aKeys.every(function (k) { return k.indexOf(UB) === -1 && k.indexOf(bp.id) === -1; }) });
+
+  var released = pa3.releaseToGuest();
+  dev.removeItem(SB);
+  var guest = pmPage(dev);
+  t('O7', 'an account deleted without erasing hands its profiles and keys to the guest store, so the reader keeps them signed out, and the other account keeps its own', {
+    released: true, guestProfiles: ['Nate'], firstrunPlain: 'true', scopedGone: true, bKept: true
+  }, { released: released, guestProfiles: guest.listProfiles().map(function (p) { return p.name; }), firstrunPlain: dev.getItem('incommon.firstrun'),
+    scopedGone: dev.getItem(ROOTK + '.u.' + UA) === null && dev.getItem('incommon.firstrun.u.' + UA) === null, bKept: dev.getItem(ROOTK + '.u.' + UB) !== null });
 
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
@@ -2378,7 +2475,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['U', 'master numbers'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
