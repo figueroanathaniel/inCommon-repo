@@ -2013,6 +2013,101 @@ async function runCloudTests() {
   var bThrow = await CO.billingPortal('https://x.invalid/');
   t('K34', 'a thrown billing call comes back as offline', { ok: false, reason: 'offline' }, { ok: bThrow.ok, reason: bThrow.reason });
 
+  /* K56: deleting the account from inside the app (docs/ACCOUNT-DELETION.md).
+     The call is never made without a session, carries the typed word to the
+     account function, and on the server's yes forgets the account on this
+     device: the sync map, the outbox and the remembered login go, and the
+     session is signed out locally, because the map would otherwise mark rows
+     as uploaded to an account that no longer exists. Each refusal is a reason,
+     and a Stripe failure is told apart, because then nothing was deleted. */
+  var adMem = { incommon_cloud_map_v2: '{"hashes":{"profiles":{"p1":"h"}}}', incommon_cloud_outbox_v2: '[{"op":"x"}]',
+    'incommon.signin.remember': 'reader@k56.invalid', 'incommon.p.p1.birthName': 'Kept On Device' };
+  var adStore = { getItem: function (k) { return k in adMem ? adMem[k] : null; }, setItem: function (k, v) { adMem[k] = String(v); }, removeItem: function (k) { delete adMem[k]; } };
+  var AD = loadIsolatedCloud({ createClient: function () { return {}; } }, null, { localStorage: adStore });
+  var adCalls = [], adSignOut = [];
+  var adClient = function (answer) {
+    return { functions: { invoke: function (name, opts) { adCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } },
+      auth: { signOut: function (o) { adSignOut.push(o && o.scope); return Promise.resolve({ error: null }); } } };
+  };
+  AD._setClientForTests(adClient({ data: { deleted: true }, error: null }), null);
+  var adNo = await AD.accountDelete('delete');
+  var adCallsSignedOut = adCalls.length;
+  AD._setClientForTests(adClient({ data: { deleted: true }, error: null }), { user: { id: 'u1' } });
+  var adOk = await AD.accountDelete('delete');
+  var adReasons = {};
+  var adCases = [['stripe', httpErr(502, 'STRIPE')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['confirm', httpErr(400, 'BAD_REQUEST')], ['500', httpErr(500, 'STORE')]];
+  for (var ai = 0; ai < adCases.length; ai++) {
+    AD._setClientForTests(adClient({ data: null, error: adCases[ai][1] }), { user: { id: 'u1' } });
+    adReasons[adCases[ai][0]] = (await AD.accountDelete('delete')).reason;
+  }
+  t('K56', 'account deletion is not asked without a session, sends the typed word to the account function, forgets the account on this device on success and keeps what the device holds, and names each failure', {
+    signedOut: 'signedOut', callsSignedOut: 0, ok: true, fn: 'account', action: 'delete', confirm: 'delete',
+    mapGone: true, outboxGone: true, rememberGone: true, deviceKept: true, localSignOut: 'local',
+    reasons: { stripe: 'stripe', '404': 'notSetUp', mfa: 'signedOut', confirm: 'confirm', '500': 'error' }
+  }, {
+    signedOut: adNo.reason, callsSignedOut: adCallsSignedOut, ok: !!adOk.ok, fn: adCalls[0] && adCalls[0].name,
+    action: adCalls[0] && adCalls[0].body.action, confirm: adCalls[0] && adCalls[0].body.confirm,
+    mapGone: !('incommon_cloud_map_v2' in adMem), outboxGone: !('incommon_cloud_outbox_v2' in adMem),
+    rememberGone: !('incommon.signin.remember' in adMem), deviceKept: adMem['incommon.p.p1.birthName'] === 'Kept On Device',
+    localSignOut: adSignOut[0], reasons: adReasons
+  });
+
+  /* K57: Luminary bought inside the apps (docs/REVENUECAT-SETUP.md). After a
+     store purchase or a restore the app asks the store function to read the
+     purchase from RevenueCat. The call is never made without a session and
+     carries nothing but the action, because the server reads the reader from
+     the token and the purchase from RevenueCat, never from the page. status()
+     names the user id, which the app hands RevenueCat as the app user id. And
+     an account deletion that could not reach RevenueCat is told apart. */
+  var stCalls = [];
+  var stClient = function (answer) {
+    return { functions: { invoke: function (name, opts) { stCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } } };
+  };
+  var ST = loadIsolatedCloud({ createClient: function () { return {}; } });
+  ST._setClientForTests(stClient({ data: { active: true }, error: null }), null);
+  var stNo = await ST.storeSync();
+  var stCallsSignedOut = stCalls.length;
+  ST._setClientForTests(stClient({ data: { active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z', extra: 'x' }, error: null }), { user: { id: 'u57' } });
+  var stOk = await ST.storeSync();
+  var stUid = ST.status().userId;
+  var stReasons = {};
+  var stCases = [['503', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['502', httpErr(502, 'UPSTREAM')]];
+  for (var si = 0; si < stCases.length; si++) {
+    ST._setClientForTests(stClient({ data: null, error: stCases[si][1] }), { user: { id: 'u57' } });
+    stReasons[stCases[si][0]] = (await ST.storeSync()).reason;
+  }
+  AD._setClientForTests(adClient({ data: null, error: httpErr(502, 'REVENUECAT') }), { user: { id: 'u1' } });
+  var stDel = (await AD.accountDelete('delete')).reason;
+  t('K57', 'the store sync is not asked without a session, sends only its action to the store function, returns the four fields, names each failure, status() carries the user id, and a deletion that could not reach RevenueCat says so', {
+    signedOut: 'signedOut', callsSignedOut: 0, fn: 'store', body: '{"action":"sync"}',
+    ok: { ok: true, active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z' },
+    userId: 'u57', reasons: { '503': 'notConfigured', '404': 'notSetUp', mfa: 'signedOut', '502': 'error' }, deleteReason: 'revenuecat'
+  }, {
+    signedOut: stNo.reason, callsSignedOut: stCallsSignedOut, fn: stCalls[0] && stCalls[0].name, body: stCalls[0] && JSON.stringify(stCalls[0].body),
+    ok: stOk, userId: stUid, reasons: stReasons, deleteReason: stDel
+  });
+
+  /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
+     travels with the status and the checkout as two capital letters or not at
+     all, and the server's refusal of a country it does not sell to yet comes
+     back as its own reason, so the page can say so rather than "try again". */
+  var bCo = oracleClient(function (name, opts) {
+    return opts.body.action === 'status' ? { data: { status: { isPremium: false } }, error: null } : { data: { url: 'https://stripe.k34b.invalid/' }, error: null };
+  });
+  CO._setClientForTests(bCo.client, { user: { id: 'u1' } });
+  await CO.billingStatus({ country: 'FR' });
+  await CO.billingStatus({ country: 'france' });
+  await CO.billingCheckout('annual', 'https://x.invalid/', 'GB');
+  await CO.billingCheckout('annual', 'https://x.invalid/');
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'REGION') }; }).client, { user: { id: 'u1' } });
+  var bRegion = await CO.billingCheckout('annual', 'https://x.invalid/', 'DE');
+  t('K34b', 'the country guess is sent with the status and the checkout only as two capital letters, and a country not sold to yet comes back as region', {
+    status: 'FR', badDropped: true, checkout: 'GB', noneDropped: true, region: 'region'
+  }, {
+    status: bCo.calls[0].body.country, badDropped: !('country' in bCo.calls[1].body) || bCo.calls[1].body.country === undefined,
+    checkout: bCo.calls[2].body.country, noneDropped: bCo.calls[3].body.country === undefined, region: bRegion.reason
+  });
+
   /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
      October 2026. A password that passed on an account with an authenticator
      makes a session at aal1 that still owes its code: the cover asks for it,

@@ -25,6 +25,13 @@
  * sheet asks it to hold at.
  *
  * Usage: node tools/build-icons.js [--out <dir>]
+ *        node tools/build-icons.js --native
+ *
+ * --native draws the store apps' sources instead, into native/assets/, at the
+ * sizes @capacitor/assets cuts every iPhone and Android icon and splash from:
+ * a 1024 icon (the App Store's own size, with no transparency, which the store
+ * refuses), the adaptive icon's two layers, and a 2732 square splash. Then, in
+ * native/: npx @capacitor/assets generate (docs/NATIVE-APP.md).
  */
 'use strict';
 
@@ -34,9 +41,10 @@ const zlib = require('zlib');
 
 const repo = path.resolve(__dirname, '..');
 const outFlag = process.argv.indexOf('--out');
+const NATIVE = process.argv.indexOf('--native') !== -1;
 const OUT = outFlag !== -1 && process.argv[outFlag + 1]
   ? path.resolve(process.argv[outFlag + 1])
-  : path.join(repo, 'deploy');
+  : NATIVE ? path.join(repo, 'native', 'assets') : path.join(repo, 'deploy');
 
 /* ---- the identity, from inCommon Logo / 02 horizontal lockup ---- */
 const RINGS = [0x8b, 0x5c, 0xf6];   /* #8b5cf6, the two wholes */
@@ -75,6 +83,11 @@ function render(w, h, bg, markFrac) {
   const r = R0 * MARK_SCALE, dx = DX0 * MARK_SCALE, hw = SW0 * MARK_SCALE / 2;
   const cx = w / 2, cy = h / 2;
   const buf = Buffer.alloc(w * h * 3);
+  /* A markFrac of 0 is the adaptive icon's background layer: the field alone. */
+  if (!markFrac) {
+    for (let i = 0; i < w * h; i++) { buf[i * 3] = bg[0]; buf[i * 3 + 1] = bg[1]; buf[i * 3 + 2] = bg[2]; }
+    return buf;
+  }
 
   /* A prominent bloom around the lens, matching the raytracer glow on the cover. */
   const glowR = (r + 0.25);
@@ -147,7 +160,15 @@ function png(w, h, rgb) {
   ]);
 }
 
-const JOBS = [
+const JOBS = NATIVE ? [
+  /* The same frac as the PWA icons, so the mark sits inside the adaptive
+     icon's safe circle as it sits inside the maskable one. */
+  { file: 'icon-only.png',       w: 1024, h: 1024, bg: FIELD, frac: 0.62 },
+  { file: 'icon-foreground.png', w: 1024, h: 1024, bg: FIELD, frac: 0.62 },
+  { file: 'icon-background.png', w: 1024, h: 1024, bg: FIELD, frac: 0 },
+  { file: 'splash.png',          w: 2732, h: 2732, bg: APPBG, frac: 0.22 },
+  { file: 'splash-dark.png',     w: 2732, h: 2732, bg: APPBG, frac: 0.22 }
+] : [
   { file: 'icon-192.png', w: 192,  h: 192,  bg: FIELD, frac: 0.62 },
   { file: 'icon-512.png', w: 512,  h: 512,  bg: FIELD, frac: 0.62 },
   { file: 'splash.png',   w: 1170, h: 2532, bg: APPBG, frac: 0.42 }

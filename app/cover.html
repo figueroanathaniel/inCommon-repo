@@ -75,9 +75,13 @@
 })();
 </script>
 <title>inCommon</title>
+<!-- fonts:google  The wordmark's face. tools/build-bundle.js replaces everything
+     between this marker and the closing one with a link to ./fonts/fonts.css
+     when it is run with --fonts self, so keep both markers. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+<!-- /fonts:google -->
 <!-- THREE IS VENDORED, AND THE INTEGRITY BLOCK IS GONE WITH THE CDN.
 
      The design reference pulled three@0.184.0 from unpkg with SRI hashes. On a

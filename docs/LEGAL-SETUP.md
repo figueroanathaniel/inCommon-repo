@@ -5,6 +5,9 @@ Added 11 October 2026. The site now carries two legal pages and a support form:
 - `app/terms.html`: Terms & Conditions, opening with the About section.
 - `app/privacy.html`: Privacy Policy, with section 6 on exactly what the
   Oracle sends and keeps.
+- `app/accessibility.html`: the accessibility statement (added 12 October
+  2026), linked under the Privacy Policy. It promises a reply within 10 working
+  days to anything sent under "Something is not working".
 - Contact Support: Settings, Support & legal, in both shells, and at the
   address `#/support`. It works signed out. The two pages name it as the way
   to reach you, cancel, ask for a copy of data, or have an account deleted.
@@ -40,7 +43,9 @@ the address in the row, then set `status` to `answered`.
 
 - **Privacy requests and account deletion: answer within 30 days.** The Privacy
   Policy promises that, and it is the legal deadline in the EU and UK.
-- **Deleting an account**: Authentication, Users, delete the user. Then check
+- **Deleting an account**: readers can do this themselves now, in the app's
+  profile card (`docs/ACCOUNT-DELETION.md`). For a request that arrives here
+  instead: Authentication, Users, delete the user. Then check
   that their rows in `accounts`, `profiles`, `memories`, `throughline_entries`,
   `consent_events`, `pairs` and `oki_messages` are gone; `oracle_readings` and
   `subscriptions` delete themselves with the user. If they subscribed, cancel
@@ -114,3 +119,6 @@ add one (a registered agent or mailbox service is fine) when you have it.
    law, with consumer rights elsewhere preserved. A lawyer may want an
    arbitration clause; it was left out on purpose, because a badly drafted one
    is worse than none.
+8. **Selling outside the US, the app stores and the business name** have pages
+   of their own: `docs/LUMINARY-EU-UK.md`, `docs/APP-STORE-SETUP.md` and
+   `docs/BUSINESS-SETUP.md`.

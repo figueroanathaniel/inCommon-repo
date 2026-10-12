@@ -22,3 +22,9 @@
 [build]
   publish = "deploy/v6.4"
   command = ""
+
+# Unpublished previews, built with tools/build-bundle.js --preview. Each is
+# served only as a branch deploy of the branch named after its folder.
+
+[context."preview-fonts-self"]
+  publish = "preview/fonts-self"

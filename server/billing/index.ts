@@ -22,9 +22,14 @@
 // WHY IT IS NOT UNDER supabase/functions: see server/oracle/index.ts.
 //
 // Secrets it reads: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET (both needed
-// before anybody can pay). LUMINARY_ADMIN_EMAILS is optional. SUPABASE_URL,
+// before anybody can pay). LUMINARY_ADMIN_EMAILS is optional. LUMINARY_TAX and
+// LUMINARY_SELL_EU_UK are both off unless set to "on": see "THE EU AND THE UK"
+// below and docs/LUMINARY-EU-UK.md. SUPABASE_URL,
 // SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
-// The table it writes is `subscriptions`, in server/oracle/schema.sql.
+// The table it writes is `subscriptions`, in server/oracle/schema.sql. It
+// also reads `store_subscriptions` (server/store/schema.sql), the purchases
+// made inside the apps, so the page is told one status wherever Luminary was
+// bought, and a reader who bought it in an app is not offered it again here.
 
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -42,6 +47,86 @@ const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) 
 // address proves nothing about who holds it.
 const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
   !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
+
+// THE EU AND THE UK: NOT SOLD YET, AND READY FOR THE DAY THEY ARE.
+//
+// A seller outside the EU owes EU VAT on a digital service sold to a consumer
+// there from the very first sale, and the UK is the same; there is no small
+// seller threshold for either. The owner decided on 12 October 2026 not to sell
+// Luminary in either until volume pays for the registrations, and to have the
+// rest prepared so that turning it on is setting two secrets.
+//
+// So, while LUMINARY_SELL_EU_UK is off (the default):
+//   * status tells the page the country it guessed is closed, and the gate says
+//     Luminary is not available there yet instead of offering a plan;
+//   * checkout refuses that country with REGION before Stripe is asked;
+//   * and because the page's country is only a guess from the time zone, the
+//     webhook looks at what Stripe actually collected, the billing address and
+//     the card's country, and cancels and refunds a subscription where either
+//     is in the EU or the UK. That is the line that holds; the other two are
+//     courtesy, so nobody is charged to be told no.
+//
+// With it on, an EU or UK reader is sold the EUR or GBP price plus their own
+// country's VAT, and is SHOWN the total with VAT in it before they pay
+// (consumer law there wants the price shown to be the price paid). Stripe Tax
+// adds the VAT at checkout, and Checkout asks the reader to agree that the in-depth
+// readings start at once and the 14 day right to withdraw ends with that,
+// which Terms section 7 already says and EU law wants as an explicit tick.
+// Selling there without Stripe Tax would sell without charging the VAT that is
+// owed, so LUMINARY_SELL_EU_UK is refused unless LUMINARY_TAX is on too.
+//
+// LUMINARY_TAX on its own turns on Stripe Tax for every checkout, for the day
+// US states (or anywhere else) need it. It only charges tax where the Stripe
+// account has a registration added, so switching it on does nothing until one
+// is. It needs the US prices' tax behaviour set in Stripe: see the doc.
+const EU_UK = new Set([
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT",
+  "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "MC", "GB", "IM",
+]);
+const UK = new Set(["GB", "IM"]);
+const TAX = Deno.env.get("LUMINARY_TAX") === "on";
+const SELL_EU_UK = Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && TAX;
+if (Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && !TAX) {
+  console.error("billing: LUMINARY_SELL_EU_UK is on but LUMINARY_TAX is not; the EU and the UK stay closed until both are on");
+}
+// The prices there, set by the owner on 12 October 2026: the same money as the
+// US price before tax, converted at that day's rates (1 USD = 0.891841 EUR and
+// 0.754808 GBP), so a sale in Paris or London earns what a sale in Ohio does.
+// They are NET, like the US price, and each reader pays their own country's VAT
+// on top: the US price is "plus any applicable taxes" too, so this is the same
+// price everywhere rather than a cheaper one where VAT is high. Changing an
+// amount here does not change a price Stripe already holds; see the doc for how
+// to re-price when the exchange rate has moved.
+const LOCAL = {
+  eur: { monthly: 1159, annual: 10701 },
+  gbp: { monthly: 980, annual: 9057 },
+} as const;
+// Standard VAT rates, for SHOWING the total before checkout; Stripe Tax decides
+// what is actually charged. Checked against published 2026 tables on 12 October
+// 2026. An astrology reading is an electronically supplied service, which takes
+// the standard rate everywhere. If a country changes its rate, change it here
+// in the same week, or the page shows one total and Checkout charges another.
+// Monaco is inside the French VAT area and the Isle of Man inside the UK's.
+const VAT: Record<string, number> = {
+  AT: 20, BE: 21, BG: 20, HR: 25, CY: 19, CZ: 21, DK: 25, EE: 24, FI: 25.5, FR: 20, DE: 19, GR: 24, HU: 27,
+  IE: 23, IT: 22, LV: 21, LT: 21, LU: 17, MT: 18, NL: 21, PL: 23, PT: 23, RO: 21, SK: 23, SI: 22, ES: 21,
+  SE: 25, MC: 20, GB: 20, IM: 20,
+};
+// The way Stripe Tax rounds it: the tax on the net amount, to the cent.
+const withVat = (net: number, country: string) => net + Math.round(net * (VAT[country] ?? 0) / 100);
+type Cur = "usd" | "eur" | "gbp";
+const lookupFor = (cur: Cur, plan: keyof typeof LOOKUP) => cur === "usd" ? LOOKUP[plan] : LOOKUP[plan] + "_" + cur;
+const curFor = (country: string | null): Cur =>
+  !country || !SELL_EU_UK || !EU_UK.has(country) ? "usd" : UK.has(country) ? "gbp" : "eur";
+const countryOf = (v: unknown): string | null => /^[A-Z]{2}$/.test(String(v ?? "")) ? String(v) : null;
+const closedTo = (country: string | null) => !!country && EU_UK.has(country) && !SELL_EU_UK;
+const priceShown = (cur: Cur, country: string | null) => cur === "usd" || !country
+  ? { currency: "usd", monthly: PRICES.monthly.amount, annual: PRICES.annual.amount, taxIncluded: false }
+  : { currency: cur, monthly: withVat(LOCAL[cur].monthly, country), annual: withVat(LOCAL[cur].annual, country), taxIncluded: true };
+// What the reader ticks at checkout in the EU and the UK. Stripe shows it beside
+// the terms of service box; the Terms link itself is set in the Stripe dashboard.
+const WITHDRAWAL_WAIVER =
+  "I ask for the in-depth readings to be available as soon as I subscribe, and I understand that I lose my 14 day right to withdraw once they are.";
 
 type Plan = keyof typeof LOOKUP;
 type Row = {
@@ -98,25 +183,63 @@ async function rowFor(userId: string): Promise<Row | null> {
   return (data as Row | null) ?? null;
 }
 
-async function ensurePrices(s: Stripe): Promise<Record<Plan, string>> {
-  const existing = await s.prices.list({ lookup_keys: Object.values(LOOKUP), active: true, limit: 10 });
+type StoreRow = {
+  source: "apple" | "google" | "promotional";
+  status: string;
+  plan: Plan | null;
+  current_period_end: string | null;
+  will_renew: boolean;
+  management_url: string | null;
+};
+
+// A live app purchase for this reader, or null. The row is read, never written
+// here: server/store owns it. A project that has not run server/store/schema.sql
+// has no such table, and that reads as no app purchase rather than an error.
+async function storeRowFor(userId: string): Promise<StoreRow | null> {
+  const { data } = await db.from("store_subscriptions")
+    .select("source, status, plan, current_period_end, will_renew, management_url")
+    .eq("user_id", userId).maybeSingle();
+  const r = (data as StoreRow | null) ?? null;
+  if (!r || r.status !== "active") return null;
+  return r.current_period_end && Date.parse(r.current_period_end) <= Date.now() ? null : r;
+}
+
+// The US prices are made exactly as they always were, on the first checkout.
+// The EUR and GBP ones are NET (tax_behavior exclusive), the same as the US.
+// The EUR and GBP ones are made the same way the first time somebody in the EU
+// or the UK checks out with selling there switched on, on the SAME product, so
+// Stripe holds one Luminary in three currencies rather than three products.
+async function ensurePrices(s: Stripe, cur: Cur = "usd"): Promise<Record<Plan, string>> {
+  const keys = { monthly: lookupFor(cur, "monthly"), annual: lookupFor(cur, "annual") };
+  const existing = await s.prices.list({ lookup_keys: Object.values(keys), active: true, limit: 10 });
   const byKey = new Map(existing.data.map((p) => [p.lookup_key, p.id]));
-  if (byKey.size === 2) return { monthly: byKey.get(LOOKUP.monthly)!, annual: byKey.get(LOOKUP.annual)! };
-  const product = await s.products.create({
-    name: "Codex Luminary",
-    description: "In-depth Oracle readings: long-form daily, weekly and monthly readings from the whole chart, with timing windows, shadow work and journal prompts.",
-  });
+  if (byKey.size === 2) return { monthly: byKey.get(keys.monthly)!, annual: byKey.get(keys.annual)! };
+  let productId: string | null = null;
+  if (cur !== "usd") {
+    const usd = await s.prices.list({ lookup_keys: Object.values(LOOKUP), limit: 1 });
+    const p = usd.data[0]?.product;
+    productId = typeof p === "string" ? p : p?.id ?? null;
+  }
+  if (!productId) {
+    const product = await s.products.create({
+      name: "Codex Luminary",
+      description: "In-depth Oracle readings: long-form daily, weekly and monthly readings from the whole chart, with timing windows, shadow work and journal prompts.",
+    });
+    productId = product.id;
+  }
   const ids = {} as Record<Plan, string>;
   for (const plan of ["monthly", "annual"] as const) {
-    const had = byKey.get(LOOKUP[plan]);
+    const had = byKey.get(keys[plan]);
     if (had) { ids[plan] = had; continue; }
     const price = await s.prices.create({
-      product: product.id,
-      currency: "usd",
-      unit_amount: PRICES[plan].amount,
+      product: productId,
+      currency: cur,
+      unit_amount: cur === "usd" ? PRICES[plan].amount : LOCAL[cur][plan],
       recurring: { interval: PRICES[plan].interval },
-      lookup_key: LOOKUP[plan],
+      lookup_key: keys[plan],
       transfer_lookup_key: true,
+      // Net, like the US price: Stripe Tax adds the buyer's own VAT on top.
+      ...(cur === "usd" ? {} : { tax_behavior: "exclusive" as const }),
     });
     ids[plan] = price.id;
   }
@@ -153,7 +276,7 @@ async function syncCustomer(s: Stripe, customerId: string): Promise<void> {
 // Reads a reader's status, and asks Stripe again when the row is stale, so it
 // comes right even if the webhook was never set up. The Codex's rule: stale
 // when not active, when the paid period has ended, or when six hours old.
-async function statusFor(user: { id: string; email?: string; email_confirmed_at?: string | null }, force: boolean) {
+async function statusFor(user: { id: string; email?: string; email_confirmed_at?: string | null }, force: boolean, country: string | null = null) {
   let row = await rowFor(user.id);
   if (row && stripe) {
     const stale = force ||
@@ -171,16 +294,29 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     }
   }
   const admin = isAdmin(user);
+  const paid = !!row && ACTIVE.has(row.status);
+  // An app purchase, kept current by server/store from RevenueCat. When a
+  // reader holds both, the Stripe one is the one described, because it is
+  // the one this page can manage; the app one is still counted.
+  const app = paid ? null : await storeRowFor(user.id);
   return {
-    isPremium: admin || (!!row && ACTIVE.has(row.status)),
-    plan: row?.plan ?? null,
-    status: row?.status ?? null,
-    currentPeriodEnd: row?.current_period_end ?? null,
-    cancelAtPeriodEnd: row?.cancel_at_period_end ?? false,
+    isPremium: admin || paid || !!app,
+    plan: app ? app.plan : row?.plan ?? null,
+    status: app ? "active" : row?.status ?? null,
+    currentPeriodEnd: app ? app.current_period_end : row?.current_period_end ?? null,
+    cancelAtPeriodEnd: app ? !app.will_renew : row?.cancel_at_period_end ?? false,
+    // Where it was bought, so the page sends the reader to the right place to
+    // manage it: Stripe's portal, or Apple's or Google's own settings.
+    source: app ? app.source : row ? "stripe" : null,
+    manageUrl: app ? app.management_url : null,
     billingConfigured: !!stripe,
     // An admin passes the paywall without a subscription, so there is nothing
     // of theirs to manage and the page should not offer to.
     hasAccount: !!row,
+    // Whether Luminary is sold in the country the page guessed, and at what
+    // price there. A page that sent no country is quoted the US price.
+    regionOpen: !closedTo(country),
+    price: priceShown(curFor(country), country),
   };
 }
 
@@ -216,6 +352,47 @@ function withQuery(u: URL, key: string, value: string): string {
   return x.toString();
 }
 
+// THE BACKSTOP. A completed checkout whose billing address or card is in the EU
+// or the UK, while selling there is off, is cancelled at once and its first
+// payment refunded in full. The page's country guess and the REGION refusal are
+// meant to stop this before it starts; this is for the reader the guess missed
+// (a VPN, a traveller, a zone set by hand). Stripe emails the refund receipt.
+// Every step tolerates being run twice, because Stripe retries a webhook that
+// failed and may deliver one more than once.
+async function refuseIfClosed(s: Stripe, session: Stripe.Checkout.Session): Promise<void> {
+  if (SELL_EU_UK || session.mode !== "subscription" || !session.subscription) return;
+  const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+  const sub = await s.subscriptions.retrieve(subId, { expand: ["default_payment_method", "latest_invoice"] });
+  const pm = sub.default_payment_method as Stripe.PaymentMethod | string | null;
+  const card = pm && typeof pm !== "string" ? pm.card?.country ?? null : null;
+  const billing = session.customer_details?.address?.country ?? null;
+  if (!closedTo(billing) && !closedTo(card)) return;
+  console.error("billing: refusing a Luminary checkout from a country not yet sold to", { subId, billing, card });
+  if (sub.status !== "canceled") {
+    await s.subscriptions.update(subId, { metadata: { refused: "eu_uk_not_sold_yet" } });
+    await s.subscriptions.cancel(subId);
+  }
+  // The invoice names its payment as payment_intent on the API version this
+  // function is pinned to, and as charge on older ones; either can be refunded.
+  const inv = sub.latest_invoice as (Stripe.Invoice & { payment_intent?: string | { id: string } | null; charge?: string | { id: string } | null }) | string | null;
+  const invoice = inv && typeof inv !== "string" ? inv : null;
+  const idOf = (v: string | { id: string } | null | undefined) => typeof v === "string" ? v : v?.id ?? null;
+  const pi = idOf(invoice?.payment_intent), ch = idOf(invoice?.charge);
+  if (!invoice || (!pi && !ch) || !(invoice.amount_paid > 0)) {
+    if (invoice && invoice.amount_paid > 0) console.error("billing: REFUND BY HAND, no payment found on invoice", invoice.id);
+    return;
+  }
+  try {
+    await s.refunds.create(
+      { ...(pi ? { payment_intent: pi } : { charge: ch! }), reason: "requested_by_customer", metadata: { why: "eu_uk_not_sold_yet", subscription: subId } },
+      { idempotencyKey: "eu-uk-refund-" + invoice.id },
+    );
+  } catch (e) {
+    // Already refunded is the one failure that means the work is done.
+    if (!/already been refunded|charge_already_refunded/i.test(String((e as Error).message))) throw e;
+  }
+}
+
 async function webhook(req: Request): Promise<Response> {
   const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
   if (!stripe || !secret) {
@@ -235,6 +412,7 @@ async function webhook(req: Request): Promise<Response> {
   const customerId = typeof obj.customer === "string" ? obj.customer : obj.customer?.id;
   if (customerId && (event.type.startsWith("customer.subscription.") || event.type === "checkout.session.completed" || event.type.startsWith("invoice."))) {
     try {
+      if (event.type === "checkout.session.completed") await refuseIfClosed(stripe, event.data.object as Stripe.Checkout.Session);
       await syncCustomer(stripe, customerId);
     } catch (e) {
       // A 500 makes Stripe send it again later, which is what should happen.
@@ -262,7 +440,8 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }
   const action = String(body.action ?? "");
 
-  if (action === "status") return reply(200, { status: await statusFor(user, body.sync === true) });
+  const country = countryOf(body.country);
+  if (action === "status") return reply(200, { status: await statusFor(user, body.sync === true, country) });
 
   if (action === "checkout") {
     const plan = String(body.plan ?? "");
@@ -270,11 +449,14 @@ Deno.serve(async (req) => {
     const back = returnAddress(body.returnTo);
     if (!back) return reply(400, { code: "BAD_REQUEST" });
     if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
+    if (closedTo(country)) return reply(403, { code: "REGION" });
     const current = await statusFor(user, true);
     if (current.isPremium) return reply(409, { code: "ALREADY" });
     try {
       const customer = await customerFor(stripe, user);
-      const prices = await ensurePrices(stripe);
+      const cur = curFor(country);
+      const prices = await ensurePrices(stripe, cur);
+      const euUk = cur !== "usd";
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         customer,
@@ -283,6 +465,19 @@ Deno.serve(async (req) => {
         success_url: withQuery(back, "luminary", "success"),
         cancel_url: withQuery(back, "luminary", "cancelled"),
         subscription_data: { metadata: { userId: user.id } },
+        // Stripe Tax needs an address to place the buyer, and saves the one
+        // collected onto the customer so renewals are taxed where they live.
+        ...(TAX ? {
+          automatic_tax: { enabled: true },
+          billing_address_collection: "required" as const,
+          customer_update: { address: "auto" as const, name: "auto" as const },
+        } : {}),
+        // A business buying in the EU or UK may give its VAT number and pay none.
+        ...(euUk ? {
+          tax_id_collection: { enabled: true },
+          consent_collection: { terms_of_service: "required" as const },
+          custom_text: { terms_of_service_acceptance: { message: WITHDRAWAL_WAIVER } },
+        } : {}),
       });
       return reply(200, { url: session.url });
     } catch (e) {

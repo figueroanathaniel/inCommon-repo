@@ -1,0 +1,2257 @@
+<!-- inCommon incommon-v6.4 cover  |  built 2026-10-12  |  PREVIEW, not a release  |  fonts: self -->
+<!DOCTYPE html>
+<!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
+
+     The shader half is the design and is ported from the handoff reference
+     rather than retyped. VERT, COMMON, BRIGHT_FRAG, DOWN_FRAG and UP_FRAG are
+     unedited, and the constants in them are physical rather than art directed.
+
+     Two shaders differ, and each differs in one direction only.
+
+     MAIN_FRAG gains the violet rim on the horizon, at the very end, after the
+     photon ring and the shimmer. Nothing above that is touched: the geodesic integration, the disk,
+     the jets and the starfield are the reference's. The mark is drawn in this
+     pass rather than the final one so the bright pass sees it, which is what
+     makes it bloom and take the aberration with everything else instead of
+     sitting on top as a decal.
+
+     FINAL_FRAG differs by a removal:
+     the two layer film grain is gone, asked for and taken out whole rather
+     than turned down to zero. A uGrain of 0.0 is a dial somebody restores by
+     accident; an absent pass is a decision. The uniform, the uSeed that
+     reseeded it per frame and the h21 hash that generated it went with it,
+     along with the max(c, 0.0) that existed only to stop grain subtracting a
+     near black pixel below zero. Chromatic aberration, bloom, vignette and
+     the ACES fit are untouched.
+
+     The four corner brackets went in the same pass, DOM and both CSS blocks.
+
+     The page also scrolls now, which the reference did not. Every layer is
+     still position:fixed, so the scroll moves nothing: it drives one number,
+     which fades the wordmark out and brings the mark in. b_crit = 3*sqrt(3)/2 falls out of the geodesic integration and
+     is not tunable; the disk bounds, the step clamp and the four star shells
+     are measured values. Retyping any of it from a description does not
+     reproduce the image.
+
+     What is NOT from the reference, and why, is marked at each site: the
+     import map is local, the two comment em dashes are gone because this repo
+     has none anywhere, and the hash forward below exists because the app's
+     router is the hash.
+
+     The app's address is the one thing that differs between this file and
+     the shipped bundle: it is the href on "enter here" and the target of the
+     hash forward. Here it is the app source; tools/build-bundle.js rewrites
+     both occurrences to ./app.html and fails loudly if it does not find
+     exactly two. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05060a">
+<link rel="manifest" href="./manifest.json">
+
+<!-- A LINK THAT NAMES A SCREEN GOES TO THE SCREEN, NOT TO THE COVER.
+
+     The app's router is the hash, so /#/spirit/dreams reaches the server as
+     "/" and the server answers with this page. Every address written before
+     the cover existed has that shape: bookmarks, shared links, the addresses
+     CLAUDE.md itself names. Without this they all land here, one click from
+     where they were going and with nothing on screen saying so, which is the
+     same failure as a Library card writing an address whose screen is
+     somewhere else.
+
+     Synchronous, and first, so a deep link never paints the cover at all.
+     location.replace rather than assignment: the cover should not become a
+     back-button stop on the way to a screen the reader asked for by name.
+
+     One kind of hash is not an address and stays here: the one an emailed
+     link from this page comes back with, carrying a session's tokens or the
+     reason it could not. The sign in script below takes it and drops it.
+     Forwarded, it would reach the app as a route and the tokens would sit in
+     its address bar. -->
+<script>
+(function () {
+  var h = location.hash;
+  if (h && h.length > 1 && !/(^#|&)(access_token|error_code|error)=/.test(h)) location.replace('./app.html' + location.search + h);
+})();
+</script>
+<title>inCommon</title>
+<!-- fonts:self  served from ./fonts/ beside this page; built with --fonts self -->
+<link href="./fonts/fonts.css" rel="stylesheet">
+<!-- THREE IS VENDORED, AND THE INTEGRITY BLOCK IS GONE WITH THE CDN.
+
+     The design reference pulled three@0.184.0 from unpkg with SRI hashes. On a
+     page whose entire promise is that nothing leaves the device, a landing
+     screen that calls a third party before the visitor has clicked anything is
+     the wrong first contact, so both files are committed beside the vendored
+     React they sit next to.
+
+     The hashes are not carried over. SRI answers "did a CDN I do not control
+     hand me the bytes I asked for", and these bytes are served from this
+     origin now, so the question no longer has a subject. What replaced it is
+     provenance: the two files were downloaded from the pinned URLs and checked
+     against those exact hashes before they were committed, and both matched.
+
+     Upstream filenames are kept on purpose. three.module.js imports
+     ./three.core.js by that name, so renaming either one means editing
+     vendored source, and an edit to vendored source is an edit the next
+     re-vendor silently drops. The version lives in three.core.js as
+     REVISION = '184'. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./three.module.js"
+  }
+}
+</script>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* THE PAGE SCROLLS, AND NOTHING SCROLLS WITH IT.
+
+     Every layer on this cover is position:fixed, so the scroll moves no pixels
+     of its own. What it does is drive one number, and that number cross fades
+     the wordmark out and the mark in. The height is what makes the gesture
+     available at all: with overflow hidden there is no scroll to link to, and
+     a wheel handler faking one would take the scrollbar away from keyboard and
+     assistive users to animate an opacity. */
+  html { background: #05060a; }
+  body { min-height: 300vh; background: #05060a; overflow-x: hidden; }
+  a { color: #a5b4cf; text-decoration: none; }
+  a:hover { color: #fff8e7; }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #veil {
+    position: fixed; inset: 0; background: #05060a; pointer-events: none;
+    opacity: 1; transition: opacity 1400ms cubic-bezier(.4,0,.2,1);
+  }
+  body.live #veil { opacity: 0; }
+  /* THE REVEAL AND THE SCROLL FADE ARE TWO OPACITIES, ON PURPOSE.
+
+     .markwrap carries the reveal, which is a CSS transition fired once by
+     body.live. .mark carries the scroll fade, which JS writes on every scroll
+     event. They are on nested elements so the browser multiplies them, and
+     neither has to know the other exists. Put both on one element and the
+     per frame write and the 2600ms transition fight over the property: the
+     fade then lags the scrollbar by whatever is left of the reveal. */
+  .markwrap {
+    position: fixed; inset: 0; display: grid; place-content: center;
+    pointer-events: none; opacity: 0;
+    transition: opacity 2600ms ease 800ms;
+  }
+  body.live .markwrap { opacity: 1; }
+  .mark {
+    text-align: center;
+    font-family: "Marcellus", "Times New Roman", serif; font-weight: 400;
+    font-size: clamp(44px, 11.6vw, 196px); line-height: 1;
+    letter-spacing: .15em; color: #fff8e7; opacity: .96;
+    text-shadow: 0 0 34px rgba(5,6,10,.72), 0 0 100px rgba(5,6,10,.92), 0 0 150px rgba(139,92,246,.30);
+    transition: letter-spacing 3200ms cubic-bezier(.2,.7,.2,1) 800ms;
+  }
+  body.live .mark { letter-spacing: .055em; }
+  /* THE WAY IN IS A SUBTITLE, AND IT WAITS FOR THE TITLE.
+
+     It hangs from the middle of the screen by half the title's own height, so
+     the title stays exactly where it was instead of being pushed up by a
+     second row. It begins at 3.2s, as the title's reveal completes, and takes
+     2.8s to arrive: the title is the first thing and the invitation is the
+     second. Three opacities are in play and each has one owner: .markwrap the
+     reveal of both, .sub this later one, and .enter the scroll fade, which
+     scrollFade writes inline.
+
+     Cream and violet, never --ac: the cover is outside the theme system, and
+     a green word here would be the action colour borrowed for a cover. The
+     glow breathes in text-shadow only, so the link's own opacity stays at 1
+     and the contrast gate measures the colour it will actually paint. */
+  .sub {
+    position: absolute; left: 0; right: 0;
+    top: calc(50% + clamp(22px, 5.8vw, 98px) + clamp(10px, 1.5vw, 26px));
+    display: flex; flex-direction: column; align-items: center; gap: clamp(10px, 1.4vw, 18px);
+    opacity: 0; transition: opacity 2800ms cubic-bezier(.4,0,.2,1) 3200ms;
+  }
+  body.live .sub { opacity: 1; }
+  /* Sent here to sign in (?signin=1, from the app's Oracle): the field is what
+     the reader came for, so the way in does not wait out the title's staging. */
+  body.asked .sub { transition: opacity 900ms ease 500ms; }
+  .enter {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px;
+    padding: 0 .9em 0 1.24em;
+    font-family: "Marcellus", "Times New Roman", serif; font-weight: 400;
+    font-size: clamp(15px, 1.75vw, 30px); line-height: 1; letter-spacing: .34em;
+    color: #fff8e7; border-radius: 999px;
+    text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55);
+    animation: enter-glow 4200ms ease-in-out 6000ms infinite both;
+  }
+  .enter:hover, .enter:focus-visible {
+    color: #fff; animation: none;
+    text-shadow: 0 0 6px rgba(255,255,255,.95), 0 0 22px rgba(183,155,255,.9), 0 0 54px rgba(139,92,246,.9);
+  }
+  .enter:focus-visible { outline: 1px solid rgba(255,248,231,.5); outline-offset: 2px; }
+  @keyframes enter-glow {
+    0%, 100% { text-shadow: 0 0 4px rgba(255,248,231,.55), 0 0 14px rgba(183,155,255,.55), 0 0 32px rgba(139,92,246,.55); }
+    50%      { text-shadow: 0 0 6px rgba(255,248,231,.85), 0 0 20px rgba(183,155,255,.78), 0 0 46px rgba(139,92,246,.78); }
+  }
+  /* THE WAY TO AN ACCOUNT. The form's one button wears a quiet dark style, so
+     it never competes with "enter here" above it. An email and a password
+     since 29 September 2026; the emailed sign in link and Google sign in were
+     both here before it, and CLAUDE.md says why each went. */
+  .signin {
+    pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
+    min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px; cursor: pointer;
+    background: #131314; border: 1px solid #8e918f; color: #e3e3e3;
+    font: 500 14px/1 Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .01em;
+  }
+  .signin:hover { background: #1c1c1e; border-color: #b3b6b4; }
+  .signin:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 3px; }
+  .signin[aria-busy="true"] { cursor: progress; opacity: .7; }
+  .signin svg { width: 18px; height: 18px; flex: none; display: block; }
+  .signin[hidden], .mailform[hidden], .skip[hidden] { display: none; }
+  /* The way on without an account, once "enter here" has opened the email
+     field. Quiet on purpose: it is the same door the link always was, and it
+     should not read as a second, louder choice beside the one being offered. */
+  .skip, .mode {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
+    background: none; border: 0; cursor: pointer; color: #cfd5e2;
+    font: 400 13px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .02em;
+    text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 0 12px rgba(5,6,10,.9);
+  }
+  .skip:hover, .mode:hover { color: #fff8e7; }
+  .skip:focus-visible, .mode:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  /* OPEN, THE TITLE AND THE WAY IN ARE ONE CENTRED COLUMN. At rest the way in
+     hangs below the middle so the title sits over the hole. A form of four
+     rows hung the same way ran off the bottom of a phone, so opening it puts
+     the subtitle back in the flow and the two are centred together, the title
+     rising by half of what opened under it. Safe centring starts at the top
+     when the column is taller than the screen, and a very short screen, a
+     phone on its side, may scroll it. */
+  body.open .markwrap { align-content: safe center; }
+  body.open .sub { position: static; margin-top: clamp(10px, 1.5vw, 26px); padding-bottom: 12px; }
+  /* Pressed once, "enter here" has done its job: the form is open and the way on is Sign in or Continue without an account. It leaves the page rather than sitting above the form. display:none still lets those two buttons click it, which is how they go through. */
+  body.open .enter { display: none; }
+  @media (max-height: 560px) { body.open .markwrap { overflow-y: auto; } }
+  .mailform {
+    pointer-events: auto; display: flex; flex-wrap: wrap; gap: 8px; width: min(88vw, 380px);
+  }
+  /* Which rows show is the mode, and the mode is data-mode on the form: in
+     (sign in), up (make an account), forgot (a link to choose a new password)
+     and set (choosing it). The button shares a row with the last field while
+     that field is short enough to leave room, and takes its own row, centred,
+     while an account is being made, where the password's hint needs the
+     width. */
+  .mailform [hidden] { display: none !important; }
+  .mailform .modes { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 4px; }
+  .mailform[data-mode="up"] .signin { margin: 0 auto; }
+  /* Making an account is a button in its own right, named the way the owner
+     asked for it, and its own row under Sign in: a small underlined link read
+     as something secondary, and it is one of the two things this form is for. */
+  .mailform .signin.alt { flex: 1 1 100%; justify-content: center; }
+  /* The newsletter box, ticked to start with and one press to untick. It is a
+     label around a native checkbox, so the whole line is the target and a
+     screen reader hears a checkbox with its own name, and the violet is the
+     cover's own rather than a new colour. */
+  .mailform .news {
+    flex-basis: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
+    min-height: 44px; cursor: pointer; color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
+    font: 400 13px/1.35 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .mailform .news input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: #8b5cf6; cursor: pointer; }
+  /* Remember me wears the newsletter box's clothes and sits under the button
+     it belongs to. What it keeps is written beside the sign in script. */
+  .mailform .keep { min-height: 44px; }
+  .mailform .field {
+    flex: 1 1 100%; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 0 16px;
+    border-radius: 999px; border: 1px solid #8e918f; background: #131314; color: #e3e3e3;
+    font: 400 16px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .mailform[data-mode="in"] .pw, .mailform[data-mode="set"] .pw,
+  .mailform[data-mode="forgot"] #mailaddr, .mailform[data-mode="code"] #mailcode,
+  .mailform[data-mode="mfa"] #mailcode { flex: 1 1 0; }
+  /* Already signed in, the form is one button, Continue, the width of the
+     fields it stands in for. */
+  .mailform[data-mode="back"] .signin { flex: 1 1 100%; justify-content: center; }
+  /* THE EYE. The password field carries a button at its right end that shows
+     what was typed and hides it again, the owner's request of 30 September
+     2026: a slashed eye while it is hidden, an open eye while it shows. It is
+     a 44px target inside the field, the field leaves it room, and pressing it
+     does not take focus out of the field, so the keyboard on a phone stays
+     up. aria-pressed carries the state under one fixed name. */
+  .mailform .pw { position: relative; display: flex; flex: 1 1 100%; min-width: 0; }
+  .mailform .pw .field { flex: 1 1 auto; padding-right: 48px; }
+  .mailform .eye {
+    position: absolute; top: 0; right: 0; width: 44px; height: 44px; padding: 0; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: 0; border-radius: 999px; cursor: pointer; color: #cfd5e2;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mailform .eye:hover { color: #fff8e7; }
+  .mailform .eye:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: -4px; }
+  .mailform .eye svg { width: 20px; height: 20px; display: block; }
+  .mailform .eye[aria-pressed="true"] .shut, .mailform .eye[aria-pressed="false"] .seen { display: none; }
+  /* Turnstile's slot. The check is drawn as soon as the form opens (the
+     owner, 11 October 2026), and only in the modes whose call carries a
+     token, so a reader choosing a new password or entering an authenticator
+     code is not shown a check that guards nothing there. */
+  .mailform .captcha { flex-basis: 100%; display: flex; justify-content: center; min-width: 0; }
+  /* Until the widget is drawn the slot is out of the row, so a frame
+     Cloudflare has not filled yet never makes a zero height row that pushes
+     Sign in off the password's line. */
+  .mailform .captcha:not(.shown) {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); pointer-events: none;
+  }
+  .mailform .captcha:empty,
+  .mailform[data-mode="set"] .captcha, .mailform[data-mode="mfa"] .captcha,
+  .mailform[data-mode="back"] .captcha { display: none; }
+  .mailform .field::placeholder { color: #9aa0a6; }
+  .mailform .field:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .mailform .signin { padding: 0 18px; flex: none; }
+  .sr {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  /* THE TERMS AND THE PRIVACY POLICY, the Terms directly above. They show
+     only once the form is open, because at rest the cover is the title and
+     one way in, and they are not ways in: H5 counts the links outside .legal.
+     Making an account says it agrees to both, beside the button that does it,
+     and that line shows in the up mode alone. */
+  body:not(.open) .legal { display: none; }
+  .legal[hidden] { display: none; }
+  .legal.links { display: flex; flex-direction: column; align-items: center; margin-top: 2px; }
+  body:not(.open) .legal.links { display: none; }
+  .legal.links a {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
+    color: #cfd5e2; font: 400 13px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .02em;
+    text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 0 12px rgba(5,6,10,.9);
+  }
+  .legal.links a:hover { color: #fff8e7; }
+  .legal.links a:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  .agree {
+    margin: 0; max-width: min(88vw, 380px); text-align: center; color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
+    font: 400 12.5px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .authmsg {
+    min-height: 1.5em; max-width: min(88vw, 440px); text-align: center;
+    font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .markwrap { transition: opacity 1200ms ease 600ms; }
+    .mark { letter-spacing: .055em; transition: none; }
+    .sub { transition: opacity 1200ms ease 1400ms; }
+    .enter { animation: none; }
+  }
+  /* THE DECORATED I, SET INSIDE THE SHADOW.
+
+     Sized and placed from the render rather than from the viewport: JS writes
+     a transform every frame from uHoleS and uHoleR, so it sits in the hole and
+     drifts with it. The box is centred on the viewport by left/top/margin and
+     the transform is the offset from there, which keeps the maths in one place
+     and lets transform-origin stay at the box centre so the scale is about the
+     letter itself.
+
+     It is the last thing to arrive, after both rims, and it is aria-hidden:
+     the accessible name of this page is the h1 that says inCommon, and a
+     decorative initial announcing itself as a letter I would be noise. */
+  .glyph {
+    position: fixed; left: 50%; top: 50%; width: 120px; height: 200px;
+    margin: -100px 0 0 -60px; pointer-events: none; opacity: 0;
+    filter: drop-shadow(0 0 9px rgba(139,92,246,.38));
+    will-change: transform, opacity;
+  }
+  .glyph svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  #fallback, #notice {
+    position: fixed; left: 30px; right: 30px; bottom: 26px; text-align: left;
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 300; letter-spacing: .16em; color: #64748b;
+    text-shadow: 0 0 18px rgba(5,6,10,.9);
+    opacity: 0; transition: opacity 600ms ease; pointer-events: none;
+  }
+  #notice { line-height: 2; text-wrap: pretty; }
+
+  /* TWO OWNERS, AND THE CSS ONE IS THE FALLBACK.
+
+     scrollFade() writes .mark's opacity inline and already folds this dim in,
+     and an inline style beats this rule, so while the module is alive this is
+     inert. It matters when the module is NOT alive: with no WebGL at all the
+     THREE.WebGLRenderer constructor throws, everything below it in the module
+     never runs, and scrollFade is never defined. The 9 second fallback timer
+     still fires, because it is a plain script in the head for exactly this
+     reason, and without this rule the wordmark would then sit at full strength
+     on top of the SIGNAL LOST message it is supposed to defer to. */
+  body.signal-lost .mark { opacity: .18; }
+  /* With no renderer, body.live never arrives, and the reveal it carries never
+     ran: the title and the whole way in sat at opacity 0 under the SIGNAL LOST
+     message, so a device without WebGL could not sign in or go in at all.
+     The 9 second fallback's class brings them up instead. */
+  body.signal-lost .markwrap, body.signal-lost .sub { opacity: 1; }
+  /* ON A PHONE THE FORM IS THE WAY IN, with no "enter here" in front of it
+     (the owner, 30 September 2026). body.phone is set by the sign in script,
+     not by a media query, so that with the script dead the link is still
+     there and still navigates: hiding it by width alone would leave a phone
+     with no way in at all. The link stays in the markup either way, because
+     Sign in and Continue without an account go on through it. The form does
+     not wait out the title's staging here, since it is what the page is. */
+  body.phone .enter { display: none; }
+  body.phone .sub { transition: opacity 900ms ease 500ms; }
+  @media (max-width: 640px) {
+    .mark { font-size: clamp(34px, 13.5vw, 96px); }
+    #fallback, #notice { left: 18px; right: 18px; bottom: 18px; font-size: 10px; letter-spacing: .13em; }
+    body.live .mark { letter-spacing: .04em; }
+    .sub { top: calc(50% + clamp(17px, 6.75vw, 48px) + clamp(8px, 2.6vw, 18px)); }
+    .enter { font-size: clamp(14px, 3.9vw, 20px); letter-spacing: .3em; padding: 0 .8em 0 1.1em; }
+  }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="veil"></div>
+<div class="markwrap">
+  <h1 class="mark">inCommon</h1>
+  <div class="sub">
+    <a class="enter" href="./app.html">enter here</a>
+    <form id="mailform" class="mailform" data-mode="in" hidden novalidate>
+      <label class="sr" for="mailaddr">Email or phone number</label>
+      <input class="field" id="mailaddr" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or phone" required>
+      <label class="sr" for="mailcode" hidden>Code from the text</label>
+      <input class="field" id="mailcode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" hidden>
+      <label class="sr" for="mailpass">Password</label>
+      <span class="pw">
+        <input class="field" id="mailpass" name="password" type="password" autocomplete="current-password" placeholder="Password" required>
+        <button class="eye" type="button" aria-controls="mailpass" aria-pressed="false" aria-label="Show password">
+          <svg class="shut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+          <svg class="seen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </span>
+      <label class="news" hidden><input id="newsopt" type="checkbox" checked> Send me the inCommon newsletter</label>
+      <div class="captcha" aria-live="polite"></div>
+      <button class="signin" type="submit">Sign in</button>
+      <label class="news keep"><input id="rememberopt" type="checkbox" checked> Remember me</label>
+      <button class="signin alt" type="button" data-to="up">Create New Account</button>
+      <div class="modes">
+        <button class="mode resend" type="button" hidden>Text me a new code</button>
+        <button class="mode" type="button" data-to="forgot">Forgot password?</button>
+        <button class="mode" type="button" data-to="in" hidden>Sign in instead</button>
+      </div>
+    </form>
+    <button class="skip" type="button" hidden>Continue without an account</button>
+    <p class="authmsg" role="status" aria-live="polite"></p>
+    <p class="agree legal" hidden>By creating an account, you agree to the Terms &amp; Conditions and the Privacy Policy below.</p>
+    <nav class="legal links" aria-label="Legal">
+      <a href="./terms.html">Terms &amp; Conditions</a>
+      <a href="./privacy.html">Privacy Policy</a>
+    </nav>
+  </div>
+</div>
+<div class="glyph" aria-hidden="true">
+  <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#8b5cf6" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round">
+      <line x1="24" y1="23" x2="96" y2="23"></line>
+      <line x1="24" y1="177" x2="96" y2="177"></line>
+    </g>
+    <g fill="#8b5cf6" fill-opacity=".55">
+      <path d="M60 6 66 13 60 20 54 13Z"></path>
+      <path d="M60 180 66 187 60 194 54 187Z"></path>
+      <circle cx="34" cy="100" r="2.2"></circle>
+      <circle cx="86" cy="100" r="2.2"></circle>
+    </g>
+    <g fill="#fff8e7">
+      <rect x="31" y="35" width="58" height="10" rx="1.5"></rect>
+      <rect x="31" y="155" width="58" height="10" rx="1.5"></rect>
+      <rect x="53.5" y="41" width="13" height="118"></rect>
+    </g>
+  </svg>
+</div>
+<div id="fallback">SIGNAL LOST // RENDERER UNAVAILABLE OFFLINE</div>
+<div id="notice"></div>
+<script>
+  setTimeout(function () {
+    if (!window.__EH_LIVE) {
+      document.getElementById('fallback').style.opacity = '1';
+      document.body.classList.add('signal-lost');
+    }
+  }, 9000);
+</script>
+<!-- SIGNING IN, ON THIS PAGE, WITH A PASSWORD.
+
+     "enter here" is the way to it. The first press opens the form in place,
+     with "Continue without an account" under it, and that control is the same
+     door the link always was: it goes on through the link, so the exit the
+     module runs and the address the build rewrites are unchanged. A second
+     press of "enter here" goes on through too. The link stays a real anchor
+     with a real href, so with this script dead it simply navigates, which is
+     the way in the cover has always had.
+
+     An email and a password, since 29 September 2026. The emailed sign in
+     link it replaced finished only in the browser that asked for it, and an
+     email is often opened somewhere else: on the phone, or in a mail app's
+     own browser. The two emails left, confirming a new address and choosing
+     a new password, come back with the session's tokens after the #, which
+     need nothing kept in the browser that asked, so they work wherever they
+     are opened. The hash forward above leaves that hash here; this script
+     takes it, drops it from the address before anything else happens, and
+     has the server check it (adoptSession in incommon-cloud.js).
+
+     A plain script rather than part of the module, for the reason the 9 second
+     fallback above is one: with no WebGL the module dies at the renderer, and
+     a way in that died with it would be a second failure on top of the first.
+
+     Nothing is fetched until the reader asks. The two files are loaded on the
+     first submit, or on the return from an emailed link, and every call to
+     Supabase goes through incommon-cloud.js, the one module allowed to talk
+     to it. Once signed in the session sits in this browser's storage and the
+     reader goes on through the same address "enter here" holds. That address
+     is read off the link rather than written here: the build rewrites it and
+     asserts there are exactly two copies of it. -->
+<script>
+(function () {
+  var form = document.getElementById('mailform');
+  var addr = document.getElementById('mailaddr');
+  var pass = document.getElementById('mailpass');
+  var codeIn = document.getElementById('mailcode');
+  var newsBox = document.getElementById('newsopt');
+  var keepBox = document.getElementById('rememberopt');
+  var skip = document.querySelector('button.skip');
+  var msg = document.querySelector('.authmsg');
+  var agree = document.querySelector('.agree');
+  var enter = document.querySelector('a.enter');
+  if (!form || !addr || !pass || !codeIn || !newsBox || !keepBox || !skip || !msg || !enter) return;
+  var sendBtn = form.querySelector('button[type="submit"]');
+  var news = newsBox.parentNode, keepRow = keepBox.parentNode;
+  var addrLabel = form.querySelector('label[for="mailaddr"]');
+  var passLabel = form.querySelector('label[for="mailpass"]');
+  var codeLabel = form.querySelector('label[for="mailcode"]');
+  var pw = form.querySelector('.pw');
+  var eye = form.querySelector('button.eye');
+  var resendBtn = form.querySelector('button.resend');
+  var modeBtns = form.querySelectorAll('button[data-to]');
+  var busy = false, loading = null, opened = false, through = false, mode = 'in';
+  /* A press that is still waiting for the sign in files or for Cloudflare's
+     check has sent nothing yet, so it can be withdrawn: choosing another mode
+     while it waits (Sign in instead, Back to sign in, Forgot password?) lets
+     it go rather than doing nothing. Before this, a Create New Account press
+     held behind a check left those buttons dead until the check finished, and
+     "Sign in instead" read as broken. Once the call has gone it is answered as
+     before. */
+  var sendGen = 0, preSend = false, WITHDRAWN = {};
+  /* The module once it has loaded; the number a code was texted to, and why;
+     and who is signed in already, when somebody is. */
+  var Cmod = null, codeFor = null, backAs = null;
+  /* What a sign in goes on to once its two-step code is in: the app, the
+     app by replacing this page (a return from an email), or choosing a new
+     password (a recovery that owed a code). */
+  var afterMfa = null;
+  var ANYWAY = ' You can still continue without an account.';
+  var LINK_AGAIN = ' Sign in with your password, or choose “Forgot password?” for a new link.';
+  var WHY = {
+    offline: 'There is no connection to sign in with.' + ANYWAY,
+    off: 'The sign in files did not load.' + ANYWAY,
+    error: 'Sign in could not finish.' + ANYWAY,
+    rate: 'Too many tries in a short time. Wait a few minutes and try again.' + ANYWAY,
+    invalid: 'Enter an email address or a phone number. Outside the US and Canada, start the number with + and its country code.',
+    nopassword: 'Enter your password.',
+    short: 'Choose a password of 8 or more characters.',
+    weak: 'That password is too easy to guess. Choose a longer one.',
+    same: 'That is the password the account already has. Choose a different one.',
+    wrong: 'That email or phone number and password do not match. If you used to sign in with an emailed link, choose “Forgot password?” to set a password.',
+    unconfirmed: 'That address is not confirmed yet. Open the link in the email sent when the account was made, in any browser, then sign in here. If it never came, choose “Create New Account” with the same address to have it sent again.',
+    exists: 'That email or phone number already has an account. Sign in with its password, or choose “Forgot password?” to set one.',
+    closed: 'New accounts are not being made right now.' + ANYWAY,
+    confirm: 'Check your email for a link to confirm your address. It works in any browser, and once it is opened you can sign in here with your password.',
+    resetSent: 'If that address has an account, a link to choose a new password is on its way. It works in any browser.',
+    saved: 'Your password is saved.',
+    expired: 'That link has expired or was already used.' + LINK_AGAIN,
+    unfinished: 'That link did not finish.' + LINK_AGAIN,
+    phoneOff: 'Signing in by phone is not switched on yet. Use your email address for now.' + ANYWAY,
+    smsFailed: 'The text could not be sent. Check the number, or use your email address.',
+    nocode: 'Enter the code from the text.',
+    badCode: 'That code is not right or has expired. Check the text, or choose “Text me a new code”.',
+    phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
+    phoneTaken: 'That number is already on an account.',
+    captcha: 'The sign in check did not finish. Try again.' + ANYWAY,
+    nomfa: 'Enter the 6 digit code your authenticator app is showing.',
+    mfaBad: 'That code is not right. The code changes every 30 seconds, so enter the one showing now.',
+    mfaAsk: 'Two-step sign in is on for this account. Enter the 6 digit code your authenticator app is showing.'
+  };
+  /* What each mode shows, says and asks the password manager for. A mode is
+     a set of rows, never a second form, so the address typed in one is still
+     there in the next. */
+  /* code is the text's code, for finishing a phone sign up or starting a new
+     password by phone; back is the reader who is signed in already, which a
+     remembered session makes the usual case for somebody coming back. */
+  var MODES = {
+    in: { button: 'Sign in', busy: 'Signing you in.', pass: true, passAuto: 'current-password',
+      passLabel: 'Password', passHint: 'Password', keep: true, to: ['up', 'forgot'] },
+    up: { button: 'Create New Account', busy: 'Making your account.', pass: true, passAuto: 'new-password',
+      passLabel: 'Choose a password, 8 or more characters', passHint: 'Choose a password, 8 or more', news: true, to: ['in'], back: 'Sign in instead' },
+    forgot: { button: 'Send reset link', phoneButton: 'Text me a code', busy: 'Sending the link.', phoneBusy: 'Sending the code.',
+      pass: false, to: ['in'], back: 'Back to sign in' },
+    set: { button: 'Save password', busy: 'Saving your password.', pass: true, passAuto: 'new-password',
+      passLabel: 'New password, 8 or more characters', passHint: 'New password, 8 or more', noAddr: true, noSkip: true, to: [] },
+    code: { button: 'Verify', busy: 'Checking the code.', pass: false, noAddr: true, code: true, keep: true, resend: true,
+      codeLabel: 'Code from the text', codeHint: 'Code from the text', to: ['in'], back: 'Back to sign in' },
+    /* Two-step sign in: the password passed and the account asks for the code
+       its authenticator app shows as well. "Use another account" signs the
+       half finished session out of this browser rather than leaving it. */
+    mfa: { button: 'Verify', busy: 'Checking the code.', pass: false, noAddr: true, code: true,
+      codeLabel: 'Code from your authenticator app', codeHint: '6 digit code', to: ['in'], back: 'Use another account' },
+    back: { button: 'Continue', pass: false, noAddr: true, noSkip: true, to: ['in'], back: 'Use another account' }
+  };
+  /* A phone is digits and the punctuation people write numbers with. This only
+     chooses a label and whether the newsletter box shows; the module decides
+     what the number is. */
+  /* A number is shown the way people read one where the grouping is certain,
+     which for the US and Canada it is; any other stays as it was sent. */
+  function showPhone(p) { return String(p || '').replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '+1 $1 $2 $3'); }
+  function isPhone(v) { v = String(v || '').trim(); return /^[+\d\s().-]+$/.test(v) && v.replace(/\D/g, '').length >= 7; }
+  /* The newsletter is read by email, so a sign up by phone is not asked, and a
+     new password by phone is a text rather than a link. */
+  function fitLogin() {
+    var d = MODES[mode], ph = isPhone(addr.value);
+    sendBtn.textContent = ph && d.phoneButton || d.button;
+    news.hidden = !d.news || ph;
+  }
+  addr.addEventListener('input', fitLogin);
+  function setMode(m, focus) {
+    var d = MODES[m];
+    mode = m;
+    form.setAttribute('data-mode', m);
+    addr.hidden = addrLabel.hidden = !!d.noAddr;
+    pw.hidden = passLabel.hidden = !d.pass;
+    codeIn.hidden = codeLabel.hidden = !d.code;
+    if (d.code) { codeIn.setAttribute('placeholder', d.codeHint); codeLabel.textContent = d.codeLabel; }
+    if (d.pass) {
+      pass.setAttribute('autocomplete', d.passAuto);
+      pass.setAttribute('placeholder', d.passHint);
+      passLabel.textContent = d.passLabel;
+    }
+    keepRow.hidden = !d.keep;
+    agree.hidden = m !== 'up';
+    resendBtn.hidden = !d.resend;
+    fitLogin();
+    for (var i = 0; i < modeBtns.length; i++) {
+      var b = modeBtns[i], to = b.getAttribute('data-to');
+      b.hidden = d.to.indexOf(to) === -1;
+      if (to === 'in' && d.back) b.textContent = d.back;
+    }
+    /* Signed in already, or by a recovery link, the reader has an account in
+       hand, so the way on without one would be the wrong sentence. */
+    skip.hidden = !opened || !!d.noSkip;
+    if (m === 'back') say('Signed in as ' + backAs + '.');
+    if (m === 'mfa' && backAs && !msg.textContent) say('Signed in as ' + backAs + '. ' + WHY.mfaAsk);
+    /* Focus goes to the first thing still to do: the code, the address, the
+       password, the newsletter box nobody has seen yet, then the button. */
+    if (focus) (d.code ? codeIn : d.noAddr ? (d.pass ? pass : sendBtn) : !addr.value ? addr
+      : d.pass && !pass.value ? pass : !news.hidden ? newsBox : sendBtn).focus();
+  }
+  /* What was typed stays typed: somebody who filled in both fields and then
+     pressed Create New Account has chosen their password already. */
+  for (var mi = 0; mi < modeBtns.length; mi++) {
+    modeBtns[mi].addEventListener('click', function () {
+      if (busy && !preSend) return;
+      if (busy) { sendGen++; preSend = false; settle(); }
+      say('');
+      if (mode === 'mfa') { afterMfa = null; backAs = null; cloud().then(function (C) { return C.coverSignOut(); }, function () {}); }
+      setMode(this.getAttribute('data-to'), true);
+    });
+  }
+  /* The key the emailed link used to leave, which nothing reads any more. */
+  try { localStorage.removeItem('incommon.signin.via'); } catch (e) {}
+
+  /* REMEMBER ME. What it keeps is the login, here, and the session, which is
+     staying signed in; the password is the browser's to keep, in its own
+     password manager, never this page's (keep(), below, hands it over). The
+     module writes these keys and init() in the app clears an unremembered
+     session the same way this does; K38 holds the two to the same names.
+     Nothing here touches the network: it is this browser's own storage, read
+     before the reader has asked for anything. */
+  var REMEMBER_KEY = 'incommon.signin.remember', EPHEMERAL_KEY = 'incommon.signin.ephemeral';
+  var LIVE_COOKIE = 'incommon_signin_live', SESSION_KEY = 'sb-lkzcybzhjjxdqetwwdrx-auth-token';
+  (function () {
+    try {
+      var v = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null'), on = !v || v.on !== false;
+      keepBox.checked = on;
+      if (on && v && v.login) addr.value = String(v.login);
+    } catch (e) {}
+  })();
+  /* A sign in that asked not to be remembered ends with the browser session
+     it was made in: the mark is there and the session cookie is gone. */
+  function signedInAs() {
+    try {
+      if (localStorage.getItem(EPHEMERAL_KEY) === '1'
+          && !new RegExp('(^|;\\s*)' + LIVE_COOKIE + '=1(;|$)').test(document.cookie)) {
+        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(EPHEMERAL_KEY);
+        return null;
+      }
+      var st = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'), u = st && st.user;
+      if (!st || !st.refresh_token || !u) return null;
+      storedOwes = owesCode(st);
+      return u.email || (u.phone ? showPhone('+' + String(u.phone).replace(/^\+/, '')) : '') || 'your account';
+    } catch (e) { return null; }
+  }
+  /* A stored session that passed its password and never entered its code.
+     The same rule as owesCode() in incommon-cloud.js, which this page cannot
+     call before the reader asks for anything, and K46 holds the two equal:
+     a verified authenticator on the user, and a token whose aal is not aal2.
+     A token that cannot be read owes the code. */
+  function owesCode(st) {
+    try {
+      var f = st && st.user && st.user.factors;
+      if (!Array.isArray(f) || !f.some(function (x) { return x && x.status === 'verified'; })) return false;
+      var p = String(st.access_token || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(p + '==='.slice((p.length + 3) % 4))).aal !== 'aal2';
+    } catch (e) { return true; }
+  }
+  var storedOwes = false;
+  var signedIn = signedInAs();
+  /* After a sign in: the preference and the login go to the module, and with
+     the box ticked the password goes to the browser's password manager, which
+     is what fills it next time. PasswordCredential exists in Chromium; Safari
+     and Firefox offer to save from the form itself, which is why the fields
+     carry autocomplete names. */
+  function keep(login, secret) {
+    var on = keepBox.checked;
+    if (Cmod && Cmod.rememberSet) Cmod.rememberSet(on, login);
+    if (!on || !login || !secret) return;
+    try {
+      if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+        navigator.credentials.store(new PasswordCredential({ id: login, password: secret, name: login })).catch(function () {});
+      }
+    } catch (e) {}
+  }
+  function say(text) { msg.textContent = text; }
+  function hold() { busy = true; sendBtn.setAttribute('aria-busy', 'true'); }
+  function settle() { busy = false; sendBtn.removeAttribute('aria-busy'); }
+  function clean() { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+  function load(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error(src)); };
+      document.head.appendChild(s);
+    });
+  }
+  /* CLOUDFLARE TURNSTILE (11 October 2026). Supabase's CAPTCHA protection asks
+     for a token on the five calls that can be scripted to make accounts or
+     send email and texts: sign in, sign up, the reset email, a text code and
+     a resend. The widget comes from Cloudflare, so it is the one third party
+     script on this page, and it is not loaded until the reader starts using
+     the form: a visitor who only looks at the cover sends nothing anywhere.
+
+     The site key below is public by design (it names the widget, and the page
+     cannot work without showing it); the secret key lives only in the Supabase
+     dashboard. Empty means the check is off and every call goes as before.
+     With the key set and CAPTCHA protection still off in Supabase, the token
+     is sent and ignored, which is how this page ships before the project
+     switches the check on. The
+     order matters, and docs/TURNSTILE-SETUP.md says so: this key first, then
+     CAPTCHA protection in Supabase, never the other way round.
+
+     The widget is run on demand (execute) and reset after every call, because
+     a token is good once. It is drawn where it can be seen (always) the moment
+     the form opens, typed or filled in, the owner's call of 11 October 2026:
+     shown only to hand typed details, it was hidden from everybody whose
+     browser filled the form, which read as no check at all. Opening the form
+     also starts the run, so the token is usually waiting by the time the
+     reader presses the button. A plain visit to the desktop cover, with the
+     form still closed, sends nothing to Cloudflare; a phone opens the form at
+     once, so a phone loads it on arrival. Nothing is said in words: the
+     widget speaks for itself. */
+  var TURNSTILE_SITE_KEY = '0x4AAAAAAFTyLTEb-YanyrEh';
+  var TS_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  var capBox = form.querySelector('.captcha');
+  var ts = { loading: null, id: null, wait: null, timer: null, running: false };
+  function capSettle(ok, val) {
+    var w = ts.wait;
+    ts.running = false;
+    if (!w) return;
+    ts.wait = null;
+    clearTimeout(ts.timer);
+    if (ok) w.ok(val); else w.fail(val);
+  }
+  /* Flexible is 300px at least, so a form narrower than that (a 320px phone)
+     takes the compact widget rather than running off the edge. */
+  function capDraw(T) {
+    capBox.classList.add('shown');
+    ts.id = T.render(capBox, {
+      sitekey: TURNSTILE_SITE_KEY, action: 'signin', theme: 'dark',
+      size: form.clientWidth && form.clientWidth < 300 ? 'compact' : 'flexible',
+      execution: 'execute', appearance: 'always', 'response-field': false,
+      callback: function (t) { capSettle(true, t); },
+      'error-callback': function () { capSettle(false); return true; },
+      /* A token lasts five minutes. One that runs out while the form sits open
+         is fetched again, so the box on screen never shows a spent check. */
+      'expired-callback': function () { ts.running = false; try { T.reset(ts.id); } catch (e) {} capRun(); }
+    });
+  }
+  function capLoad() {
+    return ts.loading || (ts.loading = load(TS_SRC).then(function () {
+      var T = window.turnstile;
+      if (!T || typeof T.render !== 'function') throw new Error('turnstile missing');
+      capDraw(T);
+      return T;
+    }).catch(function (e) { ts.loading = null; throw e; }));
+  }
+  /* Load the widget and run it, unless a run is under way or a token is
+     waiting. Called when the form opens, on the first focus inside it, and
+     when a token runs out. */
+  function capRun() {
+    if (!TURNSTILE_SITE_KEY) return;
+    capLoad().then(function (T) {
+      if (ts.running || T.getResponse(ts.id)) return;
+      ts.running = true;
+      try { T.execute(ts.id); } catch (e) { ts.running = false; }
+    }, function () {});
+  }
+  /* A token for one call: the one waiting if it is still fresh, otherwise a
+     new run of the widget. Two minutes is long enough for somebody who has to
+     tick the box, and short enough that a blocked widget says so. */
+  function captchaToken() {
+    if (!TURNSTILE_SITE_KEY) return Promise.resolve(null);
+    return capLoad().then(function (T) {
+      var have = ts.id != null && T.getResponse(ts.id);
+      if (have && !(T.isExpired && T.isExpired(ts.id))) return have;
+      return new Promise(function (ok, fail) {
+        /* A run already under way (the early one, from the first focus) is
+           waited for rather than started again. */
+        var running = ts.running;
+        if (ts.wait) { var old = ts.wait; ts.wait = null; clearTimeout(ts.timer); old.fail(); }
+        ts.wait = { ok: ok, fail: fail };
+        ts.timer = setTimeout(function () { capSettle(false); }, 120000);
+        if (running) return;
+        ts.running = true;
+        try { T.execute(ts.id); } catch (e) { try { T.reset(ts.id); T.execute(ts.id); } catch (e2) { capSettle(false); } }
+      });
+    }).catch(function () { var e = new Error('captcha'); e.captcha = true; throw e; });
+  }
+  /* Spent: the token went with a call, so the widget starts again for the
+     next one. */
+  function captchaSpent() {
+    ts.running = false;
+    if (window.turnstile && ts.id != null) { try { window.turnstile.reset(ts.id); } catch (e) {} }
+    /* The box is on screen, and a reset one sits blank until it runs, so it
+       runs again now and the next press usually finds its token waiting. */
+    capRun();
+  }
+  /* Asked early, in case the form gained focus some way other than opening. */
+  form.addEventListener('focusin', function warm() {
+    form.removeEventListener('focusin', warm);
+    capRun();
+  });
+  /* The five calls the server asks a token of. */
+  function needsToken(m) { return m === 'in' || m === 'up' || m === 'forgot'; }
+  /* A failed load is forgotten, so the next press tries again rather than
+     failing at once on the first attempt's broken promise. The module is asked
+     for by its VERSION, because the deployed worker keeps it cache first: a
+     plain name would hand a device the copy it cached for an older cover, one
+     without the functions this one calls. build-bundle.js refuses a ?v= that
+     is not the module's own. */
+  function cloud() {
+    return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
+      .then(function () { return load('./incommon-cloud.js?v=2.7.1'); })
+      .then(function () {
+        if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
+        return (Cmod = window.InCommonCloud);
+      })
+      .catch(function (e) { loading = null; throw e; }));
+  }
+  var here = location.origin + location.pathname;
+  /* In, the way "Continue without an account" goes: through the link, so the
+     module's exit runs, or the anchor navigates if the module is dead. */
+  function goIn() { through = true; enter.click(); }
+
+  /* What an emailed link brought back is read for what it means and never
+     echoed. Anybody can write a link to this page with any error_description
+     in it, and a sentence of theirs painted on this cover would read as ours;
+     error_code is a fixed vocabulary, so it may choose the sentence and is
+     still never shown. Tokens are dropped from the address before the server
+     is asked about them, so a reload or a copied address cannot carry them. */
+  var q = new URLSearchParams(location.search);
+  var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var code = q.get('code');
+  var tokens = h.get('access_token') ? { at: h.get('access_token'), rt: h.get('refresh_token'), kind: h.get('type') } : null;
+  var failedCode = h.get('error_code') || q.get('error_code');
+  var failed = !!(h.get('error') || failedCode || q.get('error'));
+  var returning = !!(code || tokens);
+  /* A return is what the reader came for, so its line does not wait out the
+     title's staging (body.asked), and the form opens only when something is
+     left to do: a new password to choose, or a link that did not work. */
+  if (returning || failed) document.body.classList.add('asked');
+  if (tokens) {
+    clean();
+    hold();
+    say('Signing you in.');
+    cloud().then(function (C) { return C.adoptSession(tokens.at, tokens.rt); }).then(function (r) {
+      settle();
+      if (r.ok && r.mfa) { toMfa(tokens.kind === 'recovery' ? { kind: 'set', who: r.email } : { kind: 'link', login: r.email || '' }); return; }
+      if (r.ok && tokens.kind === 'recovery') {
+        /* A link to choose a new password: the reader is signed in now, and
+           the one thing left is the password itself. */
+        if (r.email) addr.value = r.email;
+        open(false);
+        setMode('set', true);
+        say(r.email ? 'Choose a new password for ' + r.email + '.' : 'Choose a new password.');
+        return;
+      }
+      if (r.ok) { keep(r.email || '', ''); location.replace(enter.getAttribute('href')); return; }
+      if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
+      open(false);
+      say(r.reason === 'offline' ? WHY.offline : WHY.unfinished);
+    }, function () { settle(); open(false); say(WHY.off); });
+  } else if (code) {
+    /* A sign in link sent before the password came in, still in somebody's
+       inbox, comes back as ?code= and is finished the way it always was. */
+    hold();
+    say('Signing you in.');
+    cloud().then(function (C) { return C.oauthFinish(code); }).then(function (r) {
+      clean();
+      if (r.ok && r.mfa) { settle(); toMfa({ kind: 'link', login: r.email || '' }); return; }
+      if (r.ok) { keep(r.email || '', ''); location.replace(enter.getAttribute('href')); return; }
+      if (r.error && window.console) console.warn('Sign in did not finish:', r.error);
+      settle();
+      open(false);
+      say(WHY.unfinished);
+    }, function () { clean(); settle(); open(false); say(WHY.off); });
+  } else if (failed) {
+    clean();
+    open(false);
+    say(failedCode === 'otp_expired' ? WHY.expired : WHY.unfinished);
+  } else if (q.get('signin') === '1') {
+    /* The app sends a signed out reader here from the Oracle. The form opens
+       at once rather than waiting for a press on "enter here", and the query
+       is dropped so a reload is an ordinary visit. */
+    clean();
+    document.body.classList.add('asked');
+    /* The app sends a reader here too when its session still owes its
+       two-step code, and then the code is what is left to do. */
+    if (signedIn && storedOwes) { backAs = signedIn; afterMfa = { kind: 'go' }; mode = 'mfa'; }
+    open(true);
+    if (mode === 'mfa') say('Signed in as ' + backAs + '. ' + WHY.mfaAsk);
+  } else if (signedIn && storedOwes) {
+    /* Signed in with the password and never with the code: the code is the
+       way on, not Continue. */
+    backAs = signedIn;
+    afterMfa = { kind: 'go' };
+    mode = 'mfa';
+  } else if (signedIn) {
+    /* Somebody who is signed in already is offered the way on, not the form
+       they filled in last time. The Oracle's ?signin=1 is left out on
+       purpose: it means the app found no session, so a stored one is stale. */
+    backAs = signedIn;
+    mode = 'back';
+  }
+
+  /* A return through the back button restores this page from the
+     back-forward cache with the button still held, so it is let go here. */
+  /* BACK FROM THE APP, SIGNED IN (the owner, 11 October 2026). Signing in
+     goes on through the link, so the cover stays one step behind the app in
+     the tab's history, and Back from Today used to land here looking signed
+     out. A cover reached through history, by a reader who is signed in and
+     owes no code, goes straight back into the app instead, on Today, so Back
+     reads as the page refreshing. A tab that logged out (the app's mark) is
+     never sent in: that reader asked to leave. */
+  function loggedOut() { try { return sessionStorage.getItem('incommon.signin.out') === '1'; } catch (x) { return false; } }
+  function backIn() {
+    storedOwes = false;
+    if (loggedOut() || !signedInAs() || storedOwes) return false;
+    document.documentElement.style.visibility = 'hidden';
+    location.replace(enter.getAttribute('href') + '#/today');
+    return true;
+  }
+  var navKind = null;
+  try { navKind = performance.getEntriesByType('navigation')[0].type; } catch (x) {}
+  if (navKind === 'back_forward' && !returning) backIn();
+  addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    if (!returning && backIn()) return;
+    /* Back to a cover kept from before the reader logged out: it may still
+       be open on a form or say "Signed in as", so it is loaded again and
+       starts from its first screen. */
+    if (loggedOut()) { location.reload(); return; }
+    if (!returning) { settle(); say(''); }
+  });
+
+  /* "enter here" opens the form and does nothing else, the owner's call of 30
+     September 2026: the way in without an account is "Continue without an
+     account", and a second press of the link now takes the reader back to
+     the first empty field rather than into the app. This listener is
+     registered before the module's, because a plain script runs while the
+     page is parsed and a module runs after, so it can stop the exit from
+     starting; it steps aside only when Sign in or Continue without an account
+     sends the reader on through the link (through). aria-expanded is written
+     here rather than in the markup because only while this script runs does
+     the link open anything, and with the script dead the anchor simply
+     navigates, which is the way in the cover has always had. */
+  function open(focus) {
+    if (opened) { if (focus) setMode(mode, true); return; }
+    opened = true;
+    document.body.classList.add('open');
+    enter.setAttribute('aria-expanded', 'true');
+    form.hidden = false;
+    setMode(mode, focus);
+    capRun();
+  }
+  enter.setAttribute('aria-controls', 'mailform');
+  enter.setAttribute('aria-expanded', opened ? 'true' : 'false');
+  enter.addEventListener('click', function (ev) {
+    if (through) return;
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    open(true);
+  });
+  skip.addEventListener('click', goIn);
+
+  /* The eye. Pressing it must not move focus out of the field, or a phone
+     drops its keyboard, so the press is cancelled and the click still lands.
+     The field goes back to hidden when the form is sent, so a password
+     manager sees a password field when it offers to save. */
+  function reveal(on) {
+    pass.type = on ? 'text' : 'password';
+    eye.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  eye.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+  eye.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  eye.addEventListener('click', function () { reveal(pass.type === 'password'); });
+
+  /* On a phone the form is open from the start and "enter here" is not shown
+     (body.phone). A phone is what the app calls one, narrower than 820, or a
+     touch screen under 500 tall, which is the same phone held on its side: at
+     844 wide it would otherwise get the desktop's link. */
+  var small = window.matchMedia ? window.matchMedia('(max-width: 819px), (pointer: coarse) and (max-height: 500px)') : null;
+  function fitWidth() {
+    var on = !!(small && small.matches);
+    document.body.classList.toggle('phone', on);
+    if (on) open(false);
+  }
+  fitWidth();
+  if (small) { if (small.addEventListener) small.addEventListener('change', fitWidth); else if (small.addListener) small.addListener(fitWidth); }
+
+  /* The code step. The number is the one the module normalised, so the
+     sentence names it the way it was sent, country code and all. A new
+     password by text says "if", exactly as the email does, so the page never
+     tells anybody whose number has an account. */
+  function toCode(phone, purpose, text) {
+    codeFor = { phone: phone, purpose: purpose };
+    codeIn.value = '';
+    setMode('code', true);
+    say(text || (purpose === 'signup'
+      ? 'A code is on its way to ' + showPhone(phone) + '. Enter it here to finish making your account.'
+      : 'If ' + showPhone(phone) + ' has an account, a code is on its way to it. Enter it here, then choose a new password.'));
+  }
+  /* The two-step code. The session the password (or the link, or the text)
+     made is in this browser already, at aal1; the code lifts it to aal2, and
+     then the reader goes on to whatever the sign in was for. */
+  function toMfa(after) {
+    afterMfa = after;
+    codeIn.value = '';
+    open(false);
+    setMode('mfa', true);
+    say(WHY.mfaAsk);
+  }
+  resendBtn.addEventListener('click', function () {
+    if (busy || !codeFor) return;
+    hold();
+    say('Sending another code.');
+    Promise.all([cloud(), captchaToken()]).then(function (a) {
+      return a[0].phoneCodeResend(codeFor.phone, codeFor.purpose, { captchaToken: a[1] });
+    }).then(function (r) {
+      settle();
+      captchaSpent();
+      say(r.ok ? 'Another code is on its way to ' + showPhone(codeFor.phone) + '.' : WHY[r.reason] || WHY.error);
+      codeIn.focus();
+    }, function (e) { settle(); captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off); });
+  });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (busy) return;
+    var m = mode, d = MODES[m];
+    if (m === 'back') { goIn(); return; }
+    if (m === 'code' && !codeIn.value.trim()) { say(WHY.nocode); codeIn.focus(); return; }
+    if (m === 'mfa' && !codeIn.value.trim()) { say(WHY.nomfa); codeIn.focus(); return; }
+    var login = addr.value.trim(), ph = isPhone(login);
+    reveal(false);
+    hold();
+    say(ph && d.phoneBusy || d.busy);
+    var tokenFor = needsToken(m), ticket = ++sendGen;
+    preSend = true;
+    Promise.all([cloud(), tokenFor ? captchaToken() : null]).then(function (a) {
+      if (ticket !== sendGen) throw WITHDRAWN;
+      preSend = false;
+      var C = a[0], capt = { captchaToken: a[1] };
+      if (m === 'in') return C.passwordSignIn(login, pass.value, capt);
+      /* The newsletter answer goes with the sign up, and only there. Supabase
+         keeps it only when this call creates the account, which is when the
+         owner asked for it to be asked. A phone has no address to write to. */
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? capt : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken });
+      if (m === 'forgot') return C.passwordResetStart(login, here, capt);
+      if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
+      if (m === 'mfa') return C.mfaVerify(codeIn.value);
+      return C.passwordSet(pass.value);
+    }).then(function (r) {
+      settle();
+      if (tokenFor) captchaSpent();
+      /* The password, or the text's code, passed and the account asks for its
+         two-step code as well. The password is held only until then, for the
+         browser's password manager, and the field is cleared now. */
+      if (r.ok && r.mfa) {
+        var recovering = m === 'code' && codeFor && codeFor.purpose === 'recover';
+        toMfa(recovering ? { kind: 'set', who: r.email || showPhone(r.phone) }
+          : { kind: 'in', login: login || (codeFor && codeFor.phone) || r.email || '', secret: pass.value });
+        pass.value = '';
+        return;
+      }
+      if (r.ok && m === 'mfa') {
+        var a = afterMfa || { kind: 'go' };
+        afterMfa = null;
+        codeIn.value = '';
+        if (a.kind === 'set') {
+          setMode('set', true);
+          say(a.who ? 'Choose a new password for ' + a.who + '.' : 'Choose a new password.');
+          return;
+        }
+        keep(a.login || '', a.secret || '');
+        say('Signed in.');
+        if (a.kind === 'link') location.replace(enter.getAttribute('href'));
+        else goIn();
+        return;
+      }
+      /* A sign up or a new password by phone goes on to the code the text
+         brings; a new password by phone then comes back here to choose it. */
+      if (r.ok && r.via === 'phone') { toCode(r.phone, m === 'up' ? 'signup' : 'recover'); return; }
+      if (r.ok && r.confirm) { pass.value = ''; setMode('in', false); say(WHY.confirm); return; }
+      if (r.ok && m === 'forgot') { say(WHY.resetSent); return; }
+      if (r.ok && m === 'code' && codeFor.purpose === 'recover') {
+        codeIn.value = '';
+        pass.value = '';
+        setMode('set', true);
+        say('Choose a new password for ' + (r.email || showPhone(r.phone)) + '.');
+        return;
+      }
+      if (r.ok) {
+        keep(login || (codeFor && codeFor.phone) || r.email || '', pass.value);
+        pass.value = '';
+        codeIn.value = '';
+        say(m === 'set' ? WHY.saved : 'Signed in.');
+        goIn();
+        return;
+      }
+      /* A number that was never confirmed signs in to nothing yet, so the
+         reader is taken to the code, and asks for one when ready: a text is
+         sent only when somebody presses for it. */
+      if (r.reason === 'phoneUnconfirmed' && Cmod && Cmod.normPhone(login)) { toCode(Cmod.normPhone(login), 'signup', WHY.phoneUnconfirmed); return; }
+      say(m === 'mfa' && r.reason === 'badCode' ? WHY.mfaBad : WHY[r.reason] || WHY.error);
+      if (r.reason === 'invalid') addr.focus();
+      else if (r.reason === 'badCode') codeIn.focus();
+      else if (/^(nopassword|short|weak|same|wrong)$/.test(r.reason)) pass.focus();
+    }, function (e) {
+      if (e === WITHDRAWN) return;
+      preSend = false;
+      settle(); if (tokenFor) captchaSpent(); say(e && e.captcha ? WHY.captcha : WHY.off);
+    });
+  });
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ------------------------------------------------------------------ *
+ *  Schwarzschild raytracer.  rs = 1, disk in the y = 0 plane,
+ *  photon geodesics integrated from  d²r/dλ² = -3/2 · h² · r / r⁵
+ *  (exact orbit equation for null geodesics; h = |r × v| is conserved,
+ *  so b_crit falls out at 3√3/2 · rs as it should).
+ * ------------------------------------------------------------------ */
+
+const VERT = `
+varying vec2 vUv;
+void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+`;
+
+const COMMON = `
+precision highp float;
+varying vec2 vUv;
+
+vec3 lin(vec3 c){ return c*c*(0.6 + 0.4*c); }
+
+float h1(vec3 p){
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+vec3 h3(vec3 p){
+  vec3 q = vec3(dot(p, vec3(127.1, 311.7, 74.7)),
+                dot(p, vec3(269.5, 183.3, 246.1)),
+                dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(q) * 43758.5453123);
+}
+float vn(vec3 x){
+  vec3 i = floor(x), f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h1(i),                h1(i + vec3(1,0,0)), f.x),
+                 mix(h1(i + vec3(0,1,0)),  h1(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h1(i + vec3(0,0,1)),  h1(i + vec3(1,0,1)), f.x),
+                 mix(h1(i + vec3(0,1,1)),  h1(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+float fbm(vec3 p, int oct){
+  float a = 0.5, s = 0.0;
+  for (int i = 0; i < 5; i++){
+    if (i >= oct) break;
+    s += a * vn(p);
+    p = p * 2.02 + 7.31;
+    a *= 0.5;
+  }
+  return s;
+}
+`;
+
+/* THE MARK IS ONE FUNCTION, AND TWO PASSES DRAW IT.
+
+   markLight() draws the horizon rim at rest and the logo that rim becomes on
+   the way out. At rest MAIN_FRAG draws it, inside the picture, so the rim
+   blooms and takes the aberration with everything else. Once the exit starts
+   it crossfades into FINAL_FRAG, which renders at the screen's own pixel
+   density, so the logo that lands is drawn once per device pixel rather than
+   upscaled from a scene buffer capped at 1.6 and cut further on a slow GPU.
+   Its colours sit below the bloom threshold, so leaving the bloom behind costs
+   nothing visible.
+
+   It is its own string rather than part of COMMON because COMMON is ported
+   byte for byte and the three bloom shaders have no use for this.
+
+   aa is the stroke's edge width in screen units: the final pass hands it
+   three quarters of a device pixel, and the scene pass hands -1 and keeps the
+   proportional edge it always had. glow is how much violet halo to draw, and
+   it is zero at rest: the glow belongs to the logo, not to the rim sitting in
+   the picture. The function returns light with no presence applied, so each
+   caller weights it. */
+const MARK = `
+vec3 markLight(vec2 s, vec2 hole, float holeR, float aspect, float e, float aa, float glow){
+  /* THE LOGO LANDS AT A SIZE THE FRAME CAN HOLD.
+
+     It used to finish at twice the hole's radius, and the mark is three radii
+     wide, so a portrait phone landed it at 118% of the screen's width. It now
+     finishes at the smallest of 1.7 hole radii, 0.43 of the half width and
+     0.60 of the half height: about 68% of a portrait phone's width and 54% of
+     a desktop's, with the glow still inside the frame. At e = 0 the radius is
+     still exactly the hole's, so the rim at rest has not moved. */
+  vec2  ctr  = mix(hole, vec2(0.0), e);
+  float Rend = min(holeR * 1.7, min(0.43 * aspect, 0.60));
+  float R    = mix(holeR, Rend, e);
+  float DX   = R * 0.5 * e;
+  float hw   = mix(holeR * 0.0435, R * 0.0865, e);
+  float edge = aa < 0.0 ? hw * 0.15 : aa;
+
+  vec2  mk = s - ctr;
+  float d1 = length(mk - vec2(-DX, 0.0));
+  float d2 = length(mk - vec2( DX, 0.0));
+  float b1 = 1.0 - smoothstep(hw - edge, hw + edge, abs(d1 - R));
+  float b2 = 1.0 - smoothstep(hw - edge, hw + edge, abs(d2 - R));
+  float in1 = 1.0 - smoothstep(R - hw, R + hw, d1);
+  float in2 = 1.0 - smoothstep(R - hw, R + hw, d2);
+  float lensIn = in1 * in2;
+
+  /* split gates the green boundary from 0.15 to 0.75, because at e = 0 the
+     two circles are coincident and arcs would otherwise claim half of the
+     single ring: the first version read as a ring half violet and half green
+     before anything had moved. fill is the last move: the lens goes solid and
+     the green boundary hands back to violet, so what lands is the mark as the
+     identity sheet draws it, two whole violet rings with a filled green lens.
+     Green filling the lens is the colour doing exactly the job the logo README
+     reserves it for, which is naming what two wholes share. */
+  float split = smoothstep(0.15, 0.75, e);
+  float fill  = smoothstep(0.55, 1.00, e);
+  float arcs  = max(b1 * in2, b2 * in1) * split * (1.0 - fill);
+  float outer = max(max(b1, b2) - arcs, 0.0);
+  float ring  = max(b1, b2);
+
+  float near = min(abs(d1 - R), abs(d2 - R));
+  float halo = exp(-pow(near / (hw * 3.0), 2.0));
+
+  /* The desaturation eases off as the mark arrives, so what lands at the end
+     is the identity's own #8b5cf6 rather than the muted version the rim wears
+     while it is sitting in the picture. */
+  vec3 vio = lin(vec3(0.545, 0.361, 0.965));
+  vio = mix(vio, vec3(dot(vio, vec3(0.2126, 0.7152, 0.0722))), 0.45 * (1.0 - e));
+  vec3 col = vio * (outer * 0.95 + halo * 0.06 * (1.0 - lensIn));
+
+  /* THE GLOW IS VIOLET, AND IT OWNS ONLY THE DARK.
+
+     Two falloffs from the stroke's outer edge, a tight one that reads as the
+     line lit and a wide one that reads as light on the dark around it, both
+     scaled by R so the glow keeps its proportion at every size. It is kept
+     off the stroke by (1 - ring) and out of the lens by (1 - lensIn), because
+     two additive lights in the same pixels sum toward white: violet over the
+     violet stroke would bleach the line, and violet over the green lens would
+     turn it cyan, which is the fault this block has hit three times already. */
+  float go = max(near - hw, 0.0);
+  float lit = exp(-pow(go / (R * 0.045), 2.0)) * 0.50 + exp(-pow(go / (R * 0.20), 2.0)) * 0.20;
+  col += vio * lit * (1.0 - lensIn) * (1.0 - ring) * glow;
+
+  vec3 grn = lin(vec3(0.184, 1.000, 0.561));
+  float bleed = exp(-pow(near / (hw * 1.5), 2.0)) * lensIn;
+  /* The fill stops where the ring band is, so the violet stroke passes over
+     the green lens instead of summing with it. */
+  col += grn * (arcs * 0.82 + bleed * 0.10 * split * (1.0 - fill)
+                + lensIn * fill * 0.80 * (1.0 - ring));
+
+  /* The thin inner rim is the rim's own green and has nowhere to go once the
+     lens exists, so it leaves over the first half of the move. */
+  float inner = 1.0 - smoothstep(0.0, 0.45, e);
+  float dg = length(mk) - (R - hw * 2.1);
+  col += grn * exp(-pow(dg / (hw * 0.50), 2.0)) * 0.40 * inner;
+  return col;
+}
+`;
+
+const MAIN_FRAG = COMMON + MARK + `
+uniform vec2  uRes;
+uniform float uTime;
+uniform vec3  uCam;
+uniform vec3  uRight;
+uniform vec3  uUp;
+uniform vec3  uFwd;
+uniform vec2  uHoleS;
+uniform float uTan;
+uniform float uAspect;
+uniform float uSpin;
+uniform float uDiskGain;
+uniform float uMotion;
+uniform int   uSteps;
+uniform float uRim;
+uniform float uHoleR;
+uniform float uExit;
+
+#define RS    1.0
+#define DIN   3.0
+#define DOUT  10.5
+#define BCRIT 2.5980762
+#define ESC   44.0
+#define MAXSTEPS 260
+
+/* accretion disk temperature ramp: outer violet-purple -> inner ancient white */
+vec3 diskPal(float x){
+  x = clamp(x, 0.0, 1.0);
+  vec3 c = mix(lin(vec3(0.176,0.106,0.306)), lin(vec3(0.482,0.173,0.749)), smoothstep(0.00, 0.30, x));
+  c = mix(c, lin(vec3(0.600,0.000,1.000)), smoothstep(0.26, 0.54, x));
+  c = mix(c, lin(vec3(1.000,0.000,0.800)), smoothstep(0.50, 0.74, x));
+  c = mix(c, lin(vec3(1.000,0.894,0.882)), smoothstep(0.72, 0.90, x));
+  c = mix(c, lin(vec3(1.000,0.973,0.906)), smoothstep(0.88, 1.00, x));
+  c += lin(vec3(1.0,0.843,0.0)) * 0.17 * exp(-pow((x - 0.46) / 0.13, 2.0));
+  return c;
+}
+
+/* turbulent sheet + relativistic beaming at one disk crossing */
+void diskAt(vec3 p, vec3 rd, out vec3 em, out float al){
+  float r = length(p.xz);
+  float t = clamp((r - DIN) / (DOUT - DIN), 0.0, 1.0);
+  float prof = smoothstep(0.0, 0.055, t) * (1.0 - smoothstep(0.50, 1.0, t));
+
+  float ang = atan(p.z, p.x);
+  float om  = uSpin * 1.35 / (r * sqrt(r));          /* keplerian: inner rings run faster */
+  float ph  = ang - om * uTime;
+  float lr  = log(r) * 2.4;
+
+  vec3 q = vec3(cos(ph) * 3.2, sin(ph) * 3.2, lr);
+  float n1  = fbm(q * 1.35 + vec3(0.0, 0.0,  uTime * 0.020 * uMotion), 4);
+  float n2  = fbm(q * 3.60 + vec3(0.0, 0.0, -uTime * 0.055 * uMotion), 3);
+  float fil = pow(1.0 - abs(n2 * 2.0 - 1.0), 3.5);   /* plasma filaments */
+  float arms = 0.5 + 0.5 * sin(lr * 4.6 - ph * 2.0 + n1 * 5.0);
+  float fine = 0.86 + 0.28 * sin(lr * 19.0 + n2 * 7.0);        /* shear striations */
+
+  float dens = prof * (0.16 + 1.15 * n1) * (0.38 + 0.92 * arms) * (0.62 + 1.15 * fil) * fine;
+  float bright = pow(1.0 - t, 2.6) * 1.45 + 0.055;
+  float temp = clamp(pow(1.0 - t, 1.25) * 0.86 + n1 * 0.12 + fil * 0.14 - 0.06, 0.0, 1.0);
+
+  /* doppler beaming + gravitational redshift */
+  vec3  rh = normalize(vec3(p.x, 0.0, p.z));
+  vec3  vh = normalize(cross(vec3(0.0, 1.0, 0.0), rh)) * uSpin;
+  float v   = sqrt(0.5 * RS / r);
+  float gam = 1.0 / sqrt(max(0.02, 1.0 - v * v));
+  float mu  = dot(vh, -rd);
+  float D   = 1.0 / (gam * max(0.10, 1.0 - v * mu));
+  float grv = sqrt(max(0.05, 1.0 - RS / r));
+  float sh  = clamp(D * grv, 0.34, 2.40);
+  float beam = pow(sh, 2.4);
+
+  temp = clamp(temp + (sh - 1.0) * 0.34, 0.0, 1.0);
+  vec3 col = diskPal(temp);
+  float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  col = mix(col, lin(vec3(0.80,0.89,1.00)) * max(lum, 0.30), clamp((sh - 1.0) * 0.85, 0.0, 0.50));
+  col = mix(col, lin(vec3(0.46,0.17,0.60)) * (0.55 + lum), clamp((1.0 - sh) * 1.05, 0.0, 0.45));
+
+  em = col * bright * beam * uDiskGain;
+  al = clamp(dens * 1.25, 0.0, 1.0);
+}
+
+/* ---- procedural deep field ---- */
+vec3 starLayer(vec3 d, float sc, float thr, vec3 tint, float gain, float px){
+  vec3 p  = d * sc;
+  vec3 id = floor(p);
+  vec3 f  = p - id - 0.5;
+  vec3 rn = h3(id);
+  if (rn.x < thr) return vec3(0.0);
+  vec3 o = (h3(id + 19.7) - 0.5) * 0.62;
+  float dist = length(f - o);
+  float sz   = max(0.050, 1.55 * sc * px);
+  float core = smoothstep(sz, 0.0, dist);
+  float halo = exp(-dist * dist / (sz * sz * 9.0));
+  float mag  = pow((rn.x - thr) / (1.0 - thr), 1.7);
+  float tw   = 0.88 + 0.12 * sin(uTime * 0.45 * uMotion + rn.z * 44.0);
+  vec3  c    = mix(lin(vec3(1.0,0.973,0.906)), tint, rn.y * 0.85);
+  return c * (core * 2.4 + halo * 0.35) * mag * gain * tw;
+}
+
+vec3 galaxies(vec3 d, float px){
+  vec3 p  = d * 30.0;
+  vec3 id = floor(p);
+  vec3 f  = p - id - 0.5;
+  vec3 rn = h3(id);
+  if (rn.x < 0.9980) return vec3(0.0);
+  vec3 o = (h3(id + 3.7) - 0.5) * 0.66;
+  vec3 u = normalize(h3(id + 8.1) - 0.5 + 1e-4);
+  vec3 q = f - o;
+  q -= u * dot(q, u) * 0.26;                       /* squash into an ellipse */
+  float dd = length(q) / max(0.048, 30.0 * px * 3.0);
+  float core = exp(-dd * dd * 2.6);
+  float halo = exp(-dd * dd * 0.80) * 0.34;
+  vec3 c = mix(lin(vec3(1.00,0.843,0.32)), lin(vec3(0.86,0.90,1.00)), step(0.55, rn.y));
+  return c * (core * 0.80 + halo) * 0.80;
+}
+
+vec3 sky(vec3 d){
+  float px = 2.0 * uTan / uRes.y;
+  float n  = fbm(d * 2.4, 4);
+  float n2 = fbm(d * 7.3 + 13.0, 3);
+  float zg = 0.5 + 0.5 * dot(d, normalize(vec3(0.34, 0.52, -0.78)));   /* redshift gradient */
+  vec3 cool = mix(lin(vec3(0.043,0.063,0.149)), lin(vec3(0.086,0.125,0.267)), n);
+  vec3 warm = mix(lin(vec3(0.102,0.043,0.180)), lin(vec3(0.176,0.106,0.306)), n);
+  vec3 bg = mix(cool, warm, smoothstep(0.10, 0.92, zg));
+  bg *= 0.48 + 1.20 * pow(n, 1.7);
+  bg += lin(vec3(0.35,0.18,0.42)) * pow(n2, 3.0) * 0.13;
+
+  vec3 c = bg * 1.35;
+  c += starLayer(d,  62.0, 0.9860, lin(vec3(1.00,0.894,0.882)), 1.85, px);
+  c += starLayer(d, 118.0, 0.9880, lin(vec3(1.00,0.843,0.350)), 1.00, px);
+  c += starLayer(d, 205.0, 0.9925, lin(vec3(0.80,0.880,1.000)), 0.50, px);
+  c += starLayer(d, 340.0, 0.9945, lin(vec3(1.00,0.973,0.906)), 0.30, px);
+  c += galaxies(d, px);
+  return c;
+}
+
+void main(){
+  vec2 s = vUv * 2.0 - 1.0;
+  s.x *= uAspect;
+  vec3 rd  = normalize(uRight * (s.x * uTan) + uUp * (s.y * uTan) + uFwd);
+  vec3 pos = uCam;
+  vec3 vel = rd;
+
+  vec3  hv = cross(pos, vel);
+  float h2 = dot(hv, hv);
+  float b  = sqrt(h2);                 /* impact parameter (|vel| = 1) */
+
+  vec4 acc = vec4(0.0);                /* disk sheet, front-to-back */
+  vec3 vol = vec3(0.0);                /* volumetrics: disk halo + jets */
+  bool escaped = false;
+  int  crossings = 0;
+  vec3 jetc = lin(vec3(0.58,0.40,1.00));
+
+  /* THE STEP BUDGET IS SPENT, NOT SHORTENED.
+
+     The ladder cuts uSteps from 235 to 62 to buy frame time. Cutting the count
+     alone leaves each step the same length, so a ray that needs about 190 steps
+     to cross the disk zone and leave is abandoned a third of the way: the upper
+     and lower arcs of the disk vanish and the sky is read from rays still deep
+     in flight, which smears it into streaks. So the step LENGTH grows as the
+     count falls and every ray still finishes its journey, at a coarser step.
+     The scale is 1.0 at 190 steps and above, so the top three rungs, which a
+     capable machine sits on, are exactly what they were. */
+  float dts = max(1.0, 190.0 / float(uSteps));
+
+  for (int i = 0; i < MAXSTEPS; i++){
+    if (i >= uSteps) break;
+    float r2 = dot(pos, pos);
+    float r  = sqrt(r2);
+    if (r < RS * 1.02) break;                                   /* captured */
+    if (r > ESC && dot(pos, vel) > 0.0){ escaped = true; break; }
+
+    float rho = length(pos.xz);
+    float dt  = clamp(0.050 * r, 0.022, 1.70);
+    if (abs(pos.y) < 1.15 && rho < DOUT + 1.5) dt = min(dt, 0.20);
+    dt = min(dt * dts, 4.0);
+
+    vec3 p0 = pos;
+    vec3 a0 = -1.5 * h2 * pos / (r2 * r2 * r);
+    vec3 vm = vel + a0 * (dt * 0.5);
+    vec3 pn = pos + vm * dt;
+    float n2r = dot(pn, pn);
+    vec3 a1 = -1.5 * h2 * pn / (n2r * n2r * sqrt(n2r));
+    vel = vm + a1 * (dt * 0.5);
+    pos = pn;
+
+    /* disk crossing -> emissive sheet */
+    if (p0.y * pos.y < 0.0 && crossings < 4){
+      float fr = p0.y / (p0.y - pos.y);
+      vec3 cp = mix(p0, pos, fr);
+      float cr = length(cp.xz);
+      if (cr > DIN - 0.15 && cr < DOUT + 0.6){
+        vec3 em; float al;
+        diskAt(cp, normalize(vel), em, al);
+        acc.rgb += (1.0 - acc.a) * em * al;
+        acc.a   += (1.0 - acc.a) * al;
+        crossings++;
+      }
+    }
+
+    /* scattered light above and below the sheet: gives the disk thickness */
+    if (rho > DIN - 0.7 && rho < DOUT + 1.0 && abs(pos.y) < 1.7){
+      float t  = clamp((rho - DIN) / (DOUT - DIN), 0.0, 1.0);
+      float pr = smoothstep(0.0, 0.10, t) * (1.0 - smoothstep(0.48, 1.0, t));
+      float vt = exp(-pos.y * pos.y * 4.6);
+      vec3  rh = normalize(vec3(pos.x, 0.0, pos.z));
+      vec3  vv = normalize(cross(vec3(0.0, 1.0, 0.0), rh)) * uSpin;
+      float vm2 = sqrt(0.5 * RS / max(rho, DIN));
+      float dd  = 1.0 / max(0.18, 1.0 - vm2 * dot(vv, -normalize(vel)));
+      vol += diskPal(clamp(pow(1.0 - t, 1.2), 0.0, 1.0)) * pr * vt * pow(dd, 2.2) * dt * 0.019 * uDiskGain;
+    }
+
+    /* faint relativistic jets along the poles */
+    float ay = abs(pos.y);
+    if (ay > 0.55 && rho < 0.45 + ay * 0.22){
+      float cr2 = 0.17 + ay * 0.115;
+      float rad = exp(-(rho * rho) / (cr2 * cr2));
+      float axl = 1.0 / (1.0 + ay * 0.62);
+      float fl  = 0.55 + 0.55 * vn(vec3(rho * 4.0, ay * 1.1 - uTime * 0.55 * uMotion, uTime * 0.13 * uMotion));
+      vol += jetc * rad * axl * fl * dt * 0.055;
+    }
+  }
+
+  /* A RAY THAT RAN OUT OF STEPS IS NOT A RAY THAT WAS CAPTURED.
+
+     The quality ladder cuts uSteps from 235 to as few as 62, and a ray that
+     passes the hole spends most of its budget crawling through the disk zone
+     at dt 0.20. At the low rungs it was still in flight when the loop ended,
+     was neither captured nor escaped, and took no sky at all: a solid black
+     saucer around the hole and the outer lobes of the disk, which is what a
+     wide or dense desktop display on an integrated GPU saw once the ladder had
+     fallen. A ray whose impact parameter is above BCRIT is never captured, so
+     one that ran out of budget was bound for the sky, and the direction it has
+     now is close enough to the one it would have reached: the sky is diffuse
+     noise and a small error in where it is read from cannot be seen. A ray
+     below BCRIT is captured by definition and stays black, and so does anything
+     inside r 3.0, which is the photon sphere's own trapped light; the ring is
+     drawn over it below. Nothing at the top of the ladder changes, where rays end
+     before the budget does. */
+  if (!escaped && b > BCRIT && length(pos) > 3.0) escaped = true;
+
+  vec3 col = acc.rgb + vol;
+  if (escaped) col += sky(normalize(vel)) * (1.0 - acc.a);
+
+  /* photon ring: trapped light at the critical impact parameter,
+     dispersed per channel so the rim carries its own chromatic fringe */
+  vec2  dq = s - uHoleS;
+  float az = atan(dq.y, dq.x);
+  float ax = cos(az);
+  float dr = b - BCRIT;
+  float w  = 0.040;
+  vec3 ringC = vec3(exp(-pow((dr + 0.0012) / w, 2.0)),
+                    exp(-pow((dr         ) / w, 2.0)),
+                    exp(-pow((dr - 0.0012) / w, 2.0)));
+  float amp = (0.14 + 1.05 * pow(abs(ax), 2.1)) * (1.0 + 0.45 * uSpin * ax);
+  col += ringC * lin(vec3(1.00,0.95,0.90)) * amp * 0.20;
+
+  /* holographic shimmer hugging the inside of the silhouette */
+  float rim = exp(-pow((dr + 0.17) / 0.21, 2.0));
+  float sph = vn(vec3(cos(az) * 3.0, sin(az) * 3.0, uTime * 0.22 * uMotion)) * 3.0 + az * 2.0;
+  vec3 shim = 0.5 + 0.5 * cos(6.2831853 * (vec3(0.0, 0.33, 0.67) + sph));
+  col += shim * rim * 0.042;
+
+  /* THE HORIZON WEARS THE MARK'S VIOLET, AND THAT IS THE WHOLE OF IT.
+
+     For one revision this was the entire mark: two circles of its own
+     proportions with the silhouette lying in their shared lens, and green on
+     the lens boundary. It was correct and it read as a graphic sitting on the
+     picture, which is the one thing this was supposed not to be. What is left
+     is the part that never sat on anything.
+
+     A violet ring on the silhouette's own edge, at uHoleR, which is the photon
+     ring's radius. The boundary of the shadow is not a drawn circle: it is
+     where the last light that could reach the camera came round, so this rides
+     on light that is already there rather than being laid over it. It is
+     centred on uHoleS, the hole's projected screen position, which the camera
+     already hands both shaders every frame, so it tracks the drift instead of
+     sitting at the middle of the viewport. And it is drawn in this pass rather
+     than the final one so the bright pass sees it: it blooms, catches the
+     vignette and takes the chromatic aberration with everything else, which is
+     the difference between merged and pasted on.
+
+     The stroke is 0.173 of the radius, the mark's own ratio from
+     tools/build-icons.js, applied to the one circle that is left. That is the
+     only number here that is not free.
+
+     THE GREEN IS A SECOND LINE NOW, NOT A SHARED LENS.
+
+     inCommon Logo/README.md reserves #2fff8f for what two wholes share and
+     says it is never decoration. With one circle on screen nothing is being
+     shared, so this green is not carrying that meaning: it is a second rim,
+     chosen for the cover. That is a deliberate departure and it is recorded
+     rather than quietly taken, because the rule it departs from is a real one
+     and the next person reading this file should not have to guess whether it
+     was noticed.
+
+     Two things keep it honest. It is thin, so it is a line and not a shape
+     competing with the one control on the page, which is the cream "enter
+     here" and stays cream. And it is the only green on the cover, so nothing
+     else can start borrowing it. */
+  /* THE SCENE LEAVES AND THE MARK STAYS.
+
+     Multiplying col here rather than fading a DOM veil over the canvas: the
+     veil sits above the canvas and below the wordmark, so raising it would
+     black out the mark along with everything else, and the mark is drawn IN
+     the canvas. Everything above this line is the render, so this one line
+     takes the disk, the jets, the starfield and the sky to black together and
+     leaves the mark, which is added below it, untouched. */
+  col *= 1.0 - uExit;
+
+  /* THE RIM BECOMES THE MARK, AND THE MARK MOVES TO THE LAST PASS.
+
+     At uExit 0 markLight() is exactly the horizon rim: two circles of the
+     hole's radius with their centres coincident, which draws as one. As the
+     exit runs the centres separate, the radius grows, the stroke thickens to
+     the mark's own 0.173R, and the whole thing walks from the hole to the
+     middle of the screen. The mark is not drawn over the rim, it is the rim,
+     moved.
+
+     xf hands it to FINAL_FRAG over the first 18% of the exit, so the logo that
+     lands is drawn at the screen's density rather than the scene buffer's. The
+     two weights are (1 - xf) here and xf there, so the handover changes where
+     it is drawn and not how bright it is. */
+  float pres = max(uRim, uExit);
+  float xf = smoothstep(0.0, 0.18, uExit);
+  if (pres * (1.0 - xf) > 0.0015)
+    col += markLight(s, uHoleS, uHoleR, uAspect, uExit, -1.0, smoothstep(0.3, 1.0, uExit)) * pres * (1.0 - xf);
+
+
+  gl_FragColor = vec4(max(col, 0.0), 1.0);
+}
+`;
+
+const BRIGHT_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform float uThr;
+uniform float uKnee;
+void main(){
+  vec3 c = texture2D(tSrc, vUv).rgb;
+  float l = max(c.r, max(c.g, c.b));
+  float soft = clamp(l - uThr + uKnee, 0.0, 2.0 * uKnee);
+  soft = soft * soft / (4.0 * uKnee + 1e-4);
+  float mul = max(soft, l - uThr) / max(l, 1e-4);
+  gl_FragColor = vec4(c * mul, 1.0);
+}
+`;
+
+const DOWN_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform vec2 uTexel;
+vec3 T(vec2 o){ return texture2D(tSrc, vUv + o * uTexel).rgb; }
+void main(){
+  vec3 a = T(vec2(-2, 2)), b = T(vec2(0, 2)), c = T(vec2(2, 2));
+  vec3 d = T(vec2(-2, 0)), e = T(vec2(0, 0)), f = T(vec2(2, 0));
+  vec3 g = T(vec2(-2,-2)), h = T(vec2(0,-2)), i = T(vec2(2,-2));
+  vec3 j = T(vec2(-1, 1)), k = T(vec2(1, 1)), l = T(vec2(-1,-1)), m = T(vec2(1,-1));
+  vec3 o = e * 0.125 + (a + c + g + i) * 0.03125 + (b + d + f + h) * 0.0625 + (j + k + l + m) * 0.125;
+  gl_FragColor = vec4(o, 1.0);
+}
+`;
+
+const UP_FRAG = COMMON + `
+uniform sampler2D tSrc;
+uniform vec2 uTexel;
+uniform float uRadius;
+vec3 T(vec2 o){ return texture2D(tSrc, vUv + o * uTexel * uRadius).rgb; }
+void main(){
+  vec3 o = (T(vec2(-1, 1)) + T(vec2(1, 1)) + T(vec2(-1,-1)) + T(vec2(1,-1)))
+         + (T(vec2( 0, 1)) + T(vec2(0,-1)) + T(vec2(-1, 0)) + T(vec2(1, 0))) * 2.0
+         +  T(vec2( 0, 0)) * 4.0;
+  gl_FragColor = vec4(o / 16.0, 1.0);
+}
+`;
+
+const FINAL_FRAG = COMMON + MARK + `
+uniform sampler2D tScene;
+uniform sampler2D tBloom;
+uniform vec2  uHoleS;
+uniform float uAspect;
+uniform float uRingS;
+uniform float uCA;
+uniform float uBloom;
+uniform float uVig;
+uniform float uRim;
+uniform float uExit;
+uniform float uPx;
+
+const mat3 ACESin = mat3(0.59719, 0.07600, 0.02840,
+                         0.35458, 0.90834, 0.13383,
+                         0.04823, 0.01566, 0.83777);
+const mat3 ACESout = mat3( 1.60475, -0.10208, -0.00327,
+                          -0.53108,  1.10813, -0.07276,
+                          -0.07367, -0.00605,  1.07602);
+vec3 rrt(vec3 v){
+  vec3 a = v * (v + 0.0245786) - 0.000090537;
+  vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
+  return a / b;
+}
+vec3 aces(vec3 c){ return clamp(ACESout * rrt(ACESin * c), 0.0, 1.0); }
+
+void main(){
+  vec2 q = vUv * 2.0 - 1.0;
+  q.x *= uAspect;
+  vec2 dq = q - uHoleS;
+  float rq = length(dq);
+  float ring = exp(-pow((rq - uRingS) / (uRingS * 0.085 + 1e-4), 2.0));
+  vec2 dir = rq > 1e-5 ? dq / rq : vec2(0.0);
+  vec2 off = dir * uCA * (0.35 + 2.0 * ring);
+
+  vec3 c;
+  c.r = texture2D(tScene, vUv + off).r;
+  c.g = texture2D(tScene, vUv).g;
+  c.b = texture2D(tScene, vUv - off).b;
+
+  vec3 bl;
+  bl.r = texture2D(tBloom, vUv + off * 0.6).r;
+  bl.g = texture2D(tBloom, vUv).g;
+  bl.b = texture2D(tBloom, vUv - off * 0.6).b;
+  c += bl * uBloom;
+
+  /* The logo, once the exit has started, drawn here at one sample per device
+     pixel with an edge of three quarters of one. It goes in before the
+     vignette and the tone curve so it is graded exactly as it was in the scene
+     pass, and after the aberration so its edges stay single. */
+  float xf = smoothstep(0.0, 0.18, uExit);
+  float pres = max(uRim, uExit) * xf;
+  if (pres > 0.0015)
+    c += markLight(q, uHoleS, uRingS, uAspect, uExit, uPx * 0.75, smoothstep(0.3, 1.0, uExit)) * pres;
+
+  c *= 1.0 - uVig * pow(clamp(rq / (0.95 + uAspect * 0.35), 0.0, 1.0), 2.4);
+  c = aces(c * 1.02);
+
+  c = mix(c * 12.92, 1.055 * pow(max(c, 1e-5), vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
+  gl_FragColor = vec4(c, 1.0);
+}
+`;
+
+/* ------------------------------ pipeline ------------------------------ */
+
+const canvas = document.getElementById('view');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+renderer.autoClear = false;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+
+const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const quadGeo = new THREE.PlaneGeometry(2, 2);
+const passScene = new THREE.Scene();
+const passMesh = new THREE.Mesh(quadGeo, null);
+passMesh.frustumCulled = false;
+passScene.add(passMesh);
+
+function mat(frag, uniforms, additive) {
+  return new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: frag, uniforms,
+    depthTest: false, depthWrite: false,
+    blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+    transparent: !!additive
+  });
+}
+
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const mainU = {
+  uRes:   { value: new THREE.Vector2(1, 1) },
+  uTime:  { value: 0 },
+  uCam:   { value: new THREE.Vector3() },
+  uRight: { value: new THREE.Vector3() },
+  uUp:    { value: new THREE.Vector3() },
+  uFwd:   { value: new THREE.Vector3() },
+  uHoleS: { value: new THREE.Vector2() },
+  uTan:   { value: 0.24 },
+  uAspect:{ value: 1.78 },
+  uSpin:  { value: 1.0 },
+  uDiskGain: { value: 0.46 },
+  uMotion:{ value: REDUCE ? 0.35 : 1.0 },
+  uSteps: { value: 190 },
+  uRim:   { value: 0 },
+  uHoleR: { value: 0.2 },
+  uExit:  { value: 0 }
+};
+const brightU = { tSrc: { value: null }, uThr: { value: 1.25 }, uKnee: { value: 0.55 } };
+const downU   = { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } };
+const upU     = { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uRadius: { value: 1.0 } };
+const finalU = {
+  tScene: { value: null }, tBloom: { value: null },
+  uHoleS: { value: new THREE.Vector2() }, uAspect: { value: 1.78 },
+  uRingS: { value: 0.35 }, uCA: { value: 0.00085 }, uBloom: { value: 0.44 },
+  uVig: { value: 0.34 },
+  /* The same uniform objects as the scene pass, not copies: the two passes
+     draw one mark between them, so there is one rim value and one exit value
+     and nothing to keep in step. uPx is one device pixel in screen units. */
+  uRim: mainU.uRim, uExit: mainU.uExit, uPx: { value: 0.002 }
+};
+
+const mainMat   = mat(MAIN_FRAG, mainU);
+const brightMat = mat(BRIGHT_FRAG, brightU);
+const downMat   = mat(DOWN_FRAG, downU);
+const upMat     = mat(UP_FRAG, upU, true);
+const finalMat  = mat(FINAL_FRAG, finalU);
+
+function makeRT(w, h) {
+  return new THREE.WebGLRenderTarget(Math.max(2, w | 0), Math.max(2, h | 0), {
+    type: THREE.HalfFloatType,
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+    wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping,
+    depthBuffer: false, stencilBuffer: false, generateMipmaps: false
+  });
+}
+
+const LEVELS = 5;
+let rtScene = null;
+const rtB = [];
+let W = 2, H = 2, DPR = 1;
+
+/* THE FLOOR IS LOWER THAN A GOOD GPU WILL EVER NEED, BECAUSE A WEAK ONE DOES.
+
+   The ladder used to stop at 0.58 and 116 steps, and on an Intel UHD 600 that
+   floor still cost about 98ms a frame. Held there, the machine logged three
+   igfx driver resets in five minutes and Chrome then disabled WebGL for the
+   whole profile. A tier ladder whose last rung still kills the driver has no
+   last rung.
+
+   Cost here is pixels times steps, and both halves come down together, so
+   0.28/62 is roughly an eighth of the old floor rather than half of it. The
+   top of the ladder is unchanged: nothing about a capable GPU's experience
+   moves. */
+const QL = [
+  { ss: 1.30, steps: 235 },
+  { ss: 1.12, steps: 212 },
+  { ss: 1.00, steps: 190 },
+  { ss: 0.86, steps: 166 },
+  { ss: 0.72, steps: 140 },
+  { ss: 0.58, steps: 116 },
+  { ss: 0.46, steps: 96 },
+  { ss: 0.36, steps: 78 },
+  { ss: 0.28, steps: 62 }
+];
+let qi = 2;
+
+/* THE SCENE NEVER RENDERS BELOW 720p, WHATEVER RUNG THE LADDER IS ON.
+
+   The ladder's scale used to be free to fall to 0.28 of the screen, so a
+   machine that could not hold the frame rate was shown the picture at a
+   fraction of 720p and it read as soft and blocky. That was reported
+   ("the resolution is shotty, at least 720p"). The shorter side of the scene
+   buffer is held at 720 device pixels, or at the canvas's own size where the
+   screen is smaller than that, and what a slow machine gives up is steps
+   instead: the step count falls with the rung and the step length grows to
+   match (dts in the shader), which costs detail in the disk's far side and not
+   the sharpness of the whole frame. Cost is pixels times steps: 720p at 62 steps
+   is about 57 million, against 81 million for the old 0.58 floor at 116 steps
+   on a 1080p screen and 207 million at a density of 1.6, and that old floor is
+   the one that took an Intel UHD 600's driver down. It is more than the old
+   bottom rung asked for (26 million), so a machine that survived only because
+   of that rung is the one to watch. */
+const MIN_SIDE = 720;
+
+function buildScene() {
+  const ss = QL[qi].ss;
+  const cap = 4.6e6;
+  let sw = W * ss, sh = H * ss;
+  const nat = renderer.domElement;
+  const want = Math.min(MIN_SIDE, Math.min(nat.width, nat.height));
+  const short = Math.min(sw, sh);
+  if (short < want) { const k = (want + 1) / short; sw *= k; sh *= k; }
+  const over = (sw * sh) / cap;
+  if (over > 1) { const k = Math.sqrt(over); sw /= k; sh /= k; }
+  if (rtScene) rtScene.dispose();
+  rtScene = makeRT(sw, sh);
+  mainU.uRes.value.set(rtScene.width, rtScene.height);
+  mainU.uSteps.value = QL[qi].steps;
+}
+
+/* THE BLOOM CHAIN IS SIZED OFF THE SCENE BUFFER, NOT THE CANVAS.
+
+   This was built from W and H, which are the full device resolution, so the
+   nine bloom passes cost exactly the same at the bottom of the ladder as at
+   the top: dropping a tier bought nothing back from a third of the frame. It
+   is the reason lowering the floor alone did not help. The chain is sampled by
+   UV in the final pass, so its absolute size is free to follow the tier; the
+   only visible effect is a slightly softer bloom on a machine that is already
+   choosing softness over stalling. */
+function buildBloom() {
+  for (const t of rtB) t.dispose();
+  rtB.length = 0;
+  const bw = rtScene ? rtScene.width : W, bh = rtScene ? rtScene.height : H;
+  for (let i = 0; i < LEVELS; i++) rtB.push(makeRT(bw / Math.pow(2, i + 1), bh / Math.pow(2, i + 1)));
+}
+
+/* The render box is documentElement.clientWidth, never window.innerWidth.
+   Every layer on this page is position: fixed with inset: 0, so the canvas
+   element's box is the client box, which excludes a classic scrollbar, and
+   body { min-height: 300vh } guarantees there is one on every platform that
+   reserves space for it. setSize is called with updateStyle false, so a buffer
+   sized from innerWidth is the scrollbar's width wider than the box it is
+   scaled into, and the whole image is squashed horizontally: about 1.2% at
+   1280 and 2% at 768. A slightly oval event horizon is the kind of wrong that
+   reads as a design choice. Mobile is unaffected, because overlay scrollbars
+   take no space, which is why this survives a phone check.
+
+   TWO DENSITIES. The scene buffer is capped at 1.6 device pixels per CSS
+   pixel, because the raytracer's cost is pixels times steps. The canvas is
+   not: it takes the screen's own density up to 3, because the final pass is a
+   handful of texture reads and it is where the logo is drawn on the way out.
+   Sized at 1.6, a phone at 3x scaled the whole canvas up by nearly two and the
+   mark's edges came out soft; sized here, it is drawn once per device pixel.
+   The picture itself is the same bilinear upscale it always was, done by the
+   GPU instead of the compositor. */
+function resize() {
+  const doc = document.documentElement;
+  DPR = Math.min(window.devicePixelRatio || 1, 1.6);
+  const cw = Math.max(2, doc.clientWidth), ch = Math.max(2, doc.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
+  renderer.setSize(cw, ch, false);
+  finalU.uPx.value = 2 / Math.max(2, renderer.domElement.height);
+  W = Math.max(2, Math.floor(cw * DPR));
+  H = Math.max(2, Math.floor(ch * DPR));
+  const aspect = W / H;
+  mainU.uAspect.value = aspect;
+  finalU.uAspect.value = aspect;
+  /* uTan is the VERTICAL half-FOV; the horizontal one is uTan * aspect. The
+     disk is nearly edge on and spreads sideways (DOUT 10.5 at a distance of
+     about 30.5, so about 0.34 either side before lensing), so the horizontal
+     half-FOV has to stay near 0.425. The old cap of 0.47 let it fall with the
+     width below an aspect of 0.9 and cropped the disk on every phone. The cap
+     is 0.95 now: at 390x844 the horizontal half-FOV is 0.425, the same as a
+     16:9 desktop, so the whole disk is in frame, and the hole is smaller on a
+     tall screen by the same factor (a larger tangent is a wider view, which
+     shrinks everything in it). */
+  mainU.uTan.value = Math.min(0.95, Math.max(0.235, 0.425 / aspect));
+  finalU.uCA.value = 0.00075 + 0.0004 / Math.max(1, aspect);
+  buildScene();
+  buildBloom();
+}
+
+/* --------------------------- camera drift --------------------------- */
+
+const BCRIT = 2.5980762;
+const WUP = new THREE.Vector3(0, 1, 0);
+const cam = new THREE.Vector3(), tgt = new THREE.Vector3();
+const fwd = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3(), dv = new THREE.Vector3();
+
+function updateCamera(t) {
+  const drift = REDUCE ? 0.35 : 1.0;
+  const az   = 1.02 + (Math.sin(t * 0.037) * 0.085 + Math.sin(t * 0.0143 + 1.7) * 0.050) * drift;
+  const inc  = 0.178 + Math.sin(t * 0.029 + 0.4) * 0.030 * drift;
+  const dist = 30.5 + Math.sin(t * 0.021 + 2.1) * 1.10 * drift;
+  const ci = Math.cos(inc), si = Math.sin(inc);
+  cam.set(dist * ci * Math.cos(az), dist * si, dist * ci * Math.sin(az));
+  tgt.set(Math.sin(t * 0.0173) * 0.50 * drift, Math.sin(t * 0.0231 + 1.1) * 0.22 * drift, Math.cos(t * 0.0191 + 0.6) * 0.50 * drift);
+
+  fwd.copy(tgt).sub(cam).normalize();
+  right.crossVectors(fwd, WUP).normalize();
+  up.crossVectors(right, fwd).normalize();
+
+  mainU.uCam.value.copy(cam);
+  mainU.uRight.value.copy(right);
+  mainU.uUp.value.copy(up);
+  mainU.uFwd.value.copy(fwd);
+
+  dv.copy(cam).negate().normalize();
+  const zf = Math.max(1e-3, dv.dot(fwd)), tn = mainU.uTan.value;
+  mainU.uHoleS.value.set(dv.dot(right) / (zf * tn), dv.dot(up) / (zf * tn));
+  finalU.uHoleS.value.copy(mainU.uHoleS.value);
+  finalU.uRingS.value = Math.tan(Math.asin(Math.min(0.98, BCRIT / dist))) / tn;
+
+  /* The rim is the hole's own screen radius, so it is a size the render
+     decides and cannot drift from the thing it outlines. There is nothing to
+     fit to the frame any more: the ring is never wider than the shadow, so it
+     is never in danger of running off the edges the way the mark's outer
+     circles were on a portrait phone. */
+  mainU.uHoleR.value = finalU.uRingS.value;
+
+  /* The glyph is placed from the same two numbers the rim is drawn from, so it
+     cannot drift away from the hole it sits in.
+
+     uHoleS is in the shader's screen space, where y runs up and x has already
+     been multiplied by the aspect, so x spans plus and minus uAspect while y
+     spans plus and minus one. Converting: the horizontal offset from the
+     centre of the viewport is uHoleS.x * W / (2 * aspect), and the vertical is
+     -uHoleS.y * H / 2, negated because CSS pixels run down. The hole's radius
+     in pixels is uHoleR * H / 2 by the same reasoning, and the glyph's 200 unit
+     box is scaled to 1.7 of that radius so the letter sits inside the shadow
+     with room around it.
+
+     W and H are the client box for the same reason resize() reads it: the
+     letter is placed inside the canvas's box, not inside the window. */
+  if (glyphEl) {
+    const doc = document.documentElement;
+    const W = doc.clientWidth, H = doc.clientHeight;
+    const gx = mainU.uHoleS.value.x * W / (2 * mainU.uAspect.value);
+    const gy = -mainU.uHoleS.value.y * H / 2;
+    const gk = (finalU.uRingS.value * H / 2) * 1.7 / 200;
+    glyphEl.style.transform =
+      'translate(' + gx.toFixed(1) + 'px,' + gy.toFixed(1) + 'px) scale(' + gk.toFixed(4) + ')';
+  }
+}
+
+/* ------------------------------- loop ------------------------------- */
+
+function blit(material, target, clear) {
+  passMesh.material = material;
+  renderer.setRenderTarget(target);
+  if (clear) renderer.clear(true, false, false);
+  renderer.render(passScene, quadCam);
+}
+
+let T = 0, last = performance.now(), acc = 0, frames = 0, cooldown = 0, live = false;
+let rafId = 0, lost = false, panic = 0;
+const notice = document.getElementById('notice');
+
+/* Both callers rebuild the bloom chain as well as the scene, because the chain
+   is sized off the scene buffer now and a tier change that moved one without
+   the other would leave the two disagreeing until the next resize. */
+function drop(raw) {
+  if (qi >= QL.length - 1) return;
+  const over = Math.max(2, raw / 0.030);
+  const jump = Math.max(1, Math.min(QL.length - 1 - qi, Math.round(Math.log2(over))));
+  qi += jump;
+  buildScene(); buildBloom();
+  panic = 0; acc = 0; frames = 0; cooldown = 4;
+}
+
+function frame(now) {
+  rafId = 0;
+  if (lost) return;
+  /* THE CLOCK STEP AND THE FRAME TIME ARE TWO DIFFERENT NUMBERS.
+
+     raw is clamped to 50ms so a tab that was backgrounded for a minute does
+     not jump the animation a minute forward when it comes back. Reusing it to
+     judge performance is what made every tier guard below unreachable: raw
+     cannot exceed 0.05, so "raw > 0.060" was dead code, in this build and in
+     the reference it was ported from. The only demotion that ever ran was the
+     50 frame average, one rung per window plus a three window cooldown, which
+     on a machine at 6fps is about 25 seconds a rung. That is how a starved GPU
+     had time to take the display driver down before the ladder reached a tier
+     it could survive.
+
+     dt is the honest frame time and the guards read it. A frame over a second
+     is a tab returning from the background rather than a slow GPU, so it is
+     not counted at all. */
+  const dt = (now - last) / 1000;
+  const raw = Math.min(0.05, dt);
+  const perf = dt < 1.0 ? dt : 0;
+  last = now;
+  T += raw * (REDUCE ? 0.4 : 1.0);
+  mainU.uTime.value = T;
+  updateCamera(T);
+
+  blit(mainMat, rtScene, true);
+
+  brightU.tSrc.value = rtScene.texture;
+  blit(brightMat, rtB[0], true);
+  for (let i = 1; i < LEVELS; i++) {
+    downU.tSrc.value = rtB[i - 1].texture;
+    downU.uTexel.value.set(1 / rtB[i - 1].width, 1 / rtB[i - 1].height);
+    blit(downMat, rtB[i], true);
+  }
+  for (let i = LEVELS - 1; i > 0; i--) {
+    upU.tSrc.value = rtB[i].texture;
+    upU.uTexel.value.set(1 / rtB[i].width, 1 / rtB[i].height);
+    blit(upMat, rtB[i - 1], false);
+  }
+
+  finalU.tScene.value = rtScene.texture;
+  finalU.tBloom.value = rtB[0].texture;
+  blit(finalMat, null, true);
+
+  if (!live) {
+    live = true;
+    window.__EH_LIVE = true;
+    requestAnimationFrame(() => document.body.classList.add('live'));
+  }
+
+  /* keep the frame budget: trade supersampling and step count for fps */
+  if (perf > 0) {
+  acc += perf * 1000; frames++;
+  if (perf > 0.150) {
+    /* ONE CATASTROPHIC FRAME IS ENOUGH, AND ONE RUNG IS NOT.
+
+       Falling a single tier per two slow frames took six slow frames to reach
+       the old floor, and on a machine already timing out its display driver
+       those six frames are the ones that lose the context. The drop is sized
+       from how far over budget the frame actually was, so a 400ms frame falls
+       four rungs and a 160ms frame falls two. */
+    drop(perf);
+  } else if (perf > 0.060) {
+    panic++;
+    if (panic >= 2) drop(perf);
+  } else if (frames >= 50) {
+    const avg = acc / frames;
+    acc = 0; frames = 0; panic = 0;
+    if (cooldown > 0) cooldown--;
+    else if (avg > 21.0 && qi < QL.length - 1) { qi++; buildScene(); buildBloom(); cooldown = 3; }
+    else if (avg < 12.5 && qi > 0) { qi--; buildScene(); buildBloom(); cooldown = 3; }
+  }
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+/* context loss: stop the loop, say so, rebuild on restore */
+canvas.addEventListener('webglcontextlost', (e) => {
+  e.preventDefault();
+  lost = true;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  notice.textContent = 'SIGNAL LOST // REACQUIRING APERTURE';
+  notice.style.opacity = '1';
+  document.body.classList.add('signal-lost');
+}, false);
+
+canvas.addEventListener('webglcontextrestored', () => {
+  lost = false;
+  qi = Math.min(QL.length - 1, qi + 1);      /* come back cheaper than we left */
+  panic = 0; acc = 0; frames = 0; cooldown = 4;
+  resize();
+  notice.style.opacity = '0';
+  document.body.classList.remove('signal-lost');
+  last = performance.now();
+  if (!rafId) rafId = requestAnimationFrame(frame);
+}, false);
+
+setInterval(() => {
+  if (lost || !renderer.getContext().isContextLost()) return;
+  /* lost without an event, or never restored: surface it instead of a black frame */
+  lost = true;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  notice.textContent = 'SIGNAL LOST // RELOAD TO RESUME OBSERVATION';
+  notice.style.opacity = '1';
+  document.body.classList.add('signal-lost');
+}, 2000);
+
+/* ONE NUMBER, READ FROM THE SCROLLBAR, DRIVING TWO THINGS.
+
+   The wordmark leaves over the first stretch and the mark arrives over the
+   second, with an overlap in the middle so the screen is never empty of both.
+   Neither curve is eased in JS: the scrollbar is the easing, and a scroll
+   linked fade that runs its own timing feels detached from the finger.
+
+   This is deliberately NOT inside frame(). It has to keep working when the
+   renderer does not: with no WebGL the canvas is a black rectangle and the
+   9 second fallback message appears over it, and a wordmark that then refused
+   to move while the page scrolled would look like a second failure. */
+const markEl = document.querySelector('.mark');
+const glyphEl = document.querySelector('.glyph');
+const enterEl = document.querySelector('a.enter');
+/* Every way in, and the line that reports on the sign in, leave together. */
+const wayEls = [enterEl, document.getElementById('mailform'),
+  document.querySelector('button.skip'), document.querySelector('.authmsg'),
+  document.querySelector('.agree'), document.querySelector('.legal.links')].filter(Boolean);
+
+/* Declared here rather than beside the click handler below, because
+   scrollFade reads it and scrollFade is called at module scope before that
+   line would have been reached: a let in the temporal dead zone throws a
+   ReferenceError, and it would have taken the whole module with it. */
+let exiting = false;
+
+function scrollFade() {
+  if (exiting) return;
+  const doc = document.documentElement;
+  const span = Math.max(1, doc.scrollHeight - window.innerHeight);
+  const t = Math.min(1, Math.max(0, window.scrollY / span));
+
+  /* THREE BEATS, IN ORDER, OFF ONE NUMBER.
+
+     The wordmark leaves, the rims arrive, and the letter is set into the hole
+     last. Each overlaps the one before it so the screen is never empty of
+     everything, but the letter does not begin until the rims are done: it is
+     the thing the rims were making room for, and starting it early would read
+     as three things fading at once rather than a sequence. The page is 300vh
+     rather than 260 for the same reason, which is one more beat of scroll and
+     not a longer one. */
+  const outT = Math.min(1, t / 0.42);
+  const wordmark = (1 - outT * outT) * (document.body.classList.contains('signal-lost') ? 0.18 : 0.96);
+  markEl.style.opacity = wordmark.toFixed(4);
+
+  /* The way in is the title's subtitle, so it leaves with the title. It does
+     not take the signal-lost dim, because with the renderer gone the link is
+     the only thing on the page still doing its job. Hidden once it is gone,
+     so a keyboard cannot tab to a control nobody can see. */
+  const way = 1 - outT * outT;
+  for (const el of wayEls) {
+    el.style.opacity = way.toFixed(4);
+    el.style.visibility = way < 0.02 ? 'hidden' : '';
+  }
+
+  const inT = Math.min(1, Math.max(0, (t - 0.14) / 0.41));
+  mainU.uRim.value = inT * inT * (3.0 - 2.0 * inT);
+
+  const gT = Math.min(1, Math.max(0, (t - 0.62) / 0.30));
+  glyphEl.style.opacity = (gT * gT * (3.0 - 2.0 * gT)).toFixed(4);
+}
+
+addEventListener('scroll', scrollFade, { passive: true });
+scrollFade();
+
+/* THE WAY OUT, AND WHY THE LINK STILL WORKS WITHOUT IT.
+
+   preventDefault is called only once this has decided it can actually run the
+   transition: the first frame has landed, the context is alive, and no exit is
+   already in flight. Any other state falls through and the anchor navigates
+   the way an anchor does, which is also what happens with the module dead, and
+   is why the href is real markup rather than something JS assigns.
+
+   The DOM layers are faded by writing their opacity here rather than through a
+   class, because scrollFade already owns those properties inline and an inline
+   style beats a rule. scrollFade returns early while exiting for the same
+   reason: without that, a scroll event mid transition would put the wordmark
+   back.
+
+   The reveal transition on .markwrap has to be switched off first. It applies
+   to inline writes as much as to the class, so without that every write here
+   arrived 800ms late and 2600ms slow, and the title was still at half strength
+   over the finished logo when the page went. The fade starts from whatever the
+   reveal had reached, so a click before it finished does not jump the title
+   up. */
+const wrapEl = document.querySelector('.markwrap');
+
+enterEl.addEventListener('click', function (ev) {
+  if (exiting || lost || !live) return;
+  ev.preventDefault();
+  exiting = true;
+
+  const href = enterEl.getAttribute('href');
+  const dur = REDUCE ? 620 : 2200;
+  const g0 = parseFloat(glyphEl.style.opacity || '0') || 0;
+  const w0 = parseFloat(getComputedStyle(wrapEl).opacity) || 0;
+  wrapEl.style.transition = 'none';
+  const t0 = performance.now();
+
+  (function step(now) {
+    const u = Math.min(1, Math.max(0, (now - t0) / dur));
+    const eased = u * u * (3.0 - 2.0 * u);
+    mainU.uExit.value = eased;
+
+    const k = 1 - eased;
+    wrapEl.style.opacity = (w0 * k).toFixed(4);
+    glyphEl.style.opacity = (g0 * k).toFixed(4);
+
+    if (u < 1) requestAnimationFrame(step);
+    /* a beat on the finished mark before the page goes */
+    else setTimeout(function () { location.href = href; }, 420);
+  })(t0);
+});
+
+let rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (!lost) resize(); scrollFade(); }, 140); });
+resize();
+rafId = requestAnimationFrame(frame);
+</script>
+</body>
+</html>

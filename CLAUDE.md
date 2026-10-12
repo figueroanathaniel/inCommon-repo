@@ -2358,6 +2358,10 @@ word, and the button that sends is still the reader's own press.
 title, ask whether it explains the screen, the method or the source. If it
 does, it does not ship.
 
+**One exception, and only in the store apps**: the Oracle names Moonshot AI in a
+one line footer there, because Apple requires it (owner, 12 October 2026; see
+"The app stores"). The website still carries no such line.
+
 ## The Terms, the Privacy Policy and Contact Support
 Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
 policy, a generic and accurate About that discloses no method, folded into
@@ -2410,6 +2414,224 @@ sixth send from one address is refused.
 named the safety gate, the claim tags and the device storage, two of which were
 no longer true. The Settings card and the Terms carry the same opening; the
 disclaimers went to the Terms, sections 3 and 4.
+
+## The accessibility statement is the third legal page
+Asked for by the owner on 12 October 2026. `app/accessibility.html` is built the
+same way as the Terms and the Privacy Policy (no script, no web font, no third
+party request) and `build-bundle.js` copies it with them (`LEGAL_FILES`). It is
+linked in Settings in both shells, in the Support & legal list and in the footer,
+**directly under the Privacy Policy**, and from the two legal pages. K55's order
+rule is untouched: the Terms still sit directly above the Privacy Policy, and the
+statement comes after both.
+
+**Every claim on it is measured, not hoped.** The 4.5:1 floor in every theme,
+the Higher contrast setting, zoom left on, the skip link, focus held and returned
+by dialogs, arrow keys in menus, announcements, the two chart summaries, 44px
+targets, and reduced motion. It says "partially conformant" because there has
+been no independent audit, and it names the known limits: the wheel's house
+numbers (the `[data-chart]` exemption), the cover's WebGL image, the theme sweep
+measuring Today only, and the third party pages. **If a change makes a sentence
+on it untrue, change the page and its date in the same change.** Feedback goes
+through Contact Support under "Something is not working": no new topic was added,
+because `server/support.sql` checks the topic list and a new one would fail until
+the owner ran the SQL again.
+
+## The fonts can be swapped, and the real site still uses Google
+Added 12 October 2026 (`docs/FONTS.md`). The four faces live in `app/fonts/`
+(WOFF2, OFL 1.1, Google's own `@font-face` rules pointed at local files).
+**Every published build still loads Google Fonts.** `build-bundle.js --fonts
+self` swaps a build to the local copy: the block between `<!-- fonts:google -->`
+and `<!-- /fonts:google -->` in the app and the cover becomes one link to
+`./fonts/fonts.css`, the app's `FONTS = 'google'` becomes `'self'` (which
+`faceHref()` reads for Dawn's Petrona), the fonts are copied in, the service
+worker precaches the first screen's faces, and the two Google origins leave the
+CSP. The build refuses if either marker or the `FONTS` word goes missing, so the
+swap cannot quietly stop being possible, and it refuses a self build that still
+names Google anywhere except `faceHref()`'s own Google branch (`FACE_GOOGLE`).
+
+**`--preview <dir>` builds a whole site into its own folder and touches nothing
+else**: no write to `deploy/`, no root `_redirects`, no `netlify.toml`. It is
+seeded from the bundle folder's hand written files and adds `X-Robots-Tag:
+noindex`. It refuses to write inside `deploy/` or `app/`. `preview/fonts-self/`
+is the committed result, and `netlify.toml` gives each `preview/<name>` a branch
+deploy context, `preview-<name>`, so pushing that branch serves it at its own
+address. `check-competitor-surface` skips `preview/`, as it skips `deploy/`.
+
+**Switching the real site is `FONTS_DEFAULT` plus the Privacy Policy, together.**
+A production build refuses a self hosted bundle while `privacy.html` names Google
+Fonts, and a Google bundle once it stops naming it. A google build also puts the
+CSP origins back and takes the font lines out of `sw.js`, so the word can be
+flipped either way and every file follows; on the current bundle it changes none
+of them.
+
+## Luminary is not sold in the EU or the UK yet
+Decided by the owner on 12 October 2026 (`docs/LUMINARY-EU-UK.md`): a seller
+outside them owes VAT from the first sale, so the purchase is held there until
+volume pays for the registrations. Everything else stays free and open.
+
+**Three layers, and only the last one is the wall.** The page guesses a country
+from the time zone (`lumCountry()`, the EU 27, Monaco, the UK and the Isle of
+Man, and nothing else) and sends it with the status and the checkout; the server
+answers `regionOpen: false` and the gate shows "Codex Luminary is not available
+in your country yet." in the existing note slot, with no plans and no button;
+a checkout for that country is refused with `REGION` (reason `region`, K34b)
+before Stripe is asked. And because a time zone is only a guess, the webhook
+reads the billing address and the card's issuing country on
+`checkout.session.completed` and **cancels and refunds** a subscription where
+either is in the EU or the UK (`refuseIfClosed()`). Every step tolerates a
+retried webhook: the cancel is skipped once cancelled, and the refund carries an
+idempotency key. Only an explicit `regionOpen: false` closes the page, so an
+older server sells exactly as before.
+
+**The rest is built and switched off.** `LUMINARY_TAX` turns on Stripe Tax for
+every checkout; `LUMINARY_SELL_EU_UK` opens the two markets and is refused unless
+`LUMINARY_TAX` is on too. Open, an EU or UK reader pays the US price before tax,
+converted at the 12 October 2026 rates (`LOCAL`, EUR 11.59 / 107.01 and GBP
+9.80 / 90.57, the owner's choice), plus their own country's VAT, exactly as the
+US price is plus sales tax. Stripe holds those as tax exclusive prices under
+`incommon_luminary_<plan>_<cur>` on the same product and Stripe Tax adds the VAT;
+the page is shown the total for the guessed country from `VAT`, rounded the way
+Stripe rounds, because EU and UK law want the price shown to be the price paid.
+**A VAT rate that changes has to change in `VAT` the same week**, or the page
+and checkout disagree. VAT number collection and the 14 day withdrawal waiver
+come with it as a required tick.
+The page formats whatever price the status quotes (`lumPriceRows()`), and falls
+back to `LUM_PLANS`; the server's US quote formats identically to it. With both
+switches off, a US checkout sends Stripe exactly the fields it always did: that
+was checked against a fake Stripe, along with the refusal, the refund, the
+retried webhook and both switches on. Do not let a checkout through for a closed
+country "because the page already hid the button": the page is courtesy.
+
+## The app stores
+The owner confirmed on 12 October 2026 that inCommon ships on the App Store and
+Google Play as well as the web. `docs/APP-STORE-SETUP.md` is the requirement list.
+In-app account deletion is built (next section). **The Oracle's disclosure is
+built, in the store apps only**: Apple 5.1.2(i) wants the third party AI named on
+screen before anything is sent, and the owner chose (12 October 2026) one line
+in small type as a footer on the Oracle page, "Your first name and a chart
+summary are sent to Moonshot AI to write each reading.", drawn only when
+`nativeApp()` is true (`orAiNoteOn`). **It is the one exception to "No
+disclaimers"** and it does not reach the website; do not widen it to the web or
+lengthen it without the owner. **Luminary in the apps is the stores' own
+billing, through RevenueCat**, built and switched off until its keys are set:
+see "Luminary in the apps is RevenueCat's" below. The apps never show Stripe.
+Apple's minimum EULA terms are Terms section 22, "Apps from Apple and Google"
+(added 12 October 2026 at the owner's request), which still owes the
+developer's postal address before the first submission.
+
+## The store apps are a Capacitor shell around the bundle
+Started 12 October 2026 (`docs/NATIVE-APP.md`). `native/` is Capacitor 8.5.3,
+pinned, with `ios/` (Swift Package Manager) and `android/` generated by the
+Capacitor CLI and committed; `native/www/` and each platform's copy of it are
+generated and ignored. **The app carries its files, never the website**, because
+Apple rejects a remote site in a shell (4.2) and files on the phone are what work
+offline. `tools/build-native.js` makes `www` from `deploy/<version>/`: the app is
+`index.html` (Capacitor opens it, and the app should open on the app), the cover
+is `cover.html`, every link back to the app is rewritten to `./index.html` with
+the count asserted, and the service worker and the host's files are left out. It
+refuses a bundle older than the app source and a bundle without the native check.
+
+**`nativeApp()` asks Capacitor, and four things hang on it and nothing else**:
+the Oracle footer above; Luminary never through Stripe in the app (`lumBuy()` and
+`lumManage()` go to the store through RevenueCat, and with no RevenueCat key the
+gate is closed: `lumShut`, the note "not available in the app yet", no plans, no
+button, no renewal line); no service worker registered; and `coverHref()`
+answering `./cover.html`. Driven in a browser with
+`window.Capacitor` stubbed, and without it: every one of those in the shell, none
+of them on the web; the footer measured clean in all eight themes at 375 and
+1440. `tools/build-icons.js --native` draws the icon and splash sources into
+`native/assets/` from the same definition as every other icon, and
+`@capacitor/assets` cuts the platform sizes from them; the default run is
+unchanged, byte for byte. **The app id `com.incommon.app` is a placeholder** and
+becomes permanent at the first upload, so it is the owner's to choose before
+then.
+
+## Luminary in the apps is RevenueCat's
+Asked for by the owner on 12 October 2026 ("start the in-app purchases with
+RevenueCat"); `docs/REVENUECAT-SETUP.md` is the owner's half. Inside the apps
+Luminary is bought with Apple's In-App Purchase and Google Play Billing, with
+`@revenuecat/purchases-capacitor` 13.7.3 pinned in `native/` and nothing else
+native. **`RC_KEYS` is the switch**: RevenueCat's two PUBLIC app keys, made to
+ship in an app, and while the one for a platform is empty `rcOn()` is false and
+the app sells nothing, exactly as before this existed. The secret key lives only
+in Supabase.
+
+**The plugin is reached through the bridge by name**, `rcCall()` calling
+`Capacitor.nativePromise('Purchases', method, args)`, because this app has no
+bundler to load the plugin's JavaScript wrapper and the wrapper is only that
+call plus error tidying. The method names and arguments were read out of the
+plugin's own Swift and Kotlin for 13.7.3; a version bump means reading them
+again. A cancel on the store's sheet is code 1 and says nothing.
+
+**The page decides nothing about who paid.** The reader's Supabase user id is
+RevenueCat's app user id (`status().userId`). After a purchase or a restore the
+app calls `storeSync()`, which carries only `{ action: 'sync' }` (K57); the
+`store` function (`server/store/index.ts`, JWT verification off like billing)
+asks RevenueCat's REST API about the reader its token names and writes
+`store_subscriptions` (`server/store/schema.sql`). RevenueCat's webhook, believed
+only on the exact `REVENUECAT_WEBHOOK_AUTH` header, does the same for every
+uuid an event names and nothing else: a webhook body is a list of whom to look
+up, never a statement of what they bought. Billing's status and the Oracle's
+paywall read both tables, so a Luminary is a Luminary wherever they paid, and a
+Stripe checkout is refused for a reader who already holds an app subscription.
+**A table of its own, not a source column**: a `subscriptions` row is a Stripe
+customer, and a reader can hold one of each.
+
+**Each subscription is managed where it was bought.** In the app: the store's
+prices in the reader's currency (`rcPlanRows()`), Restore purchases (Apple
+requires it), renewal terms naming the Apple or Google account, and Manage
+subscription opening the store's own settings. On the website an app subscriber
+sees the plan line marked App Store or Google Play and no Manage billing. The
+website's EU and UK hold does not apply in the apps, because the stores are the
+seller and pay the VAT.
+
+**The legal pages were written ahead of the keys**, by the owner's request of
+12 October 2026: Terms section 7 (an app subscription is priced, cancelled and
+refunded by the store, and deleting the account does not cancel it), section
+12 and section 22 (Apple's minimum terms, Google Play, store billing; Contact
+is 23 now); Privacy Policy sections 2, 7, 11 and 15 (RevenueCat named, with
+what it receives and returns); and `delete-account.html`. If what the store
+function stores or what RevenueCat is sent changes, those change with it.
+Driven with the plugin stubbed, both shells and both platforms: the configure
+call with the user id, offerings, buy, cancel, a failed buy, restore with and
+without a purchase, the member line, Manage, the deletion dialog's store line,
+no key, and the website unchanged; the gate, the member line and the dialog
+measured clean in all 16 theme cases at 1440 and 375. The function was run
+against a fake RevenueCat and database for 27 cases and typechecked strict.
+
+## Deleting an account is the reader's own button
+Built 12 October 2026 at the owner's request, because both stores require it
+(`docs/ACCOUNT-DELETION.md`). **Delete account** sits under Delete this profile in
+the profile card, both shells, drawn only while signed in (`menuAcctDelOn`), and
+opens one dialog (`accountDeleteVals()`, state `adOpen`): what goes, a switch to
+erase this device too (off by default, because the account going does not have to
+take the journal with it), and the word `delete` typed to arm the button, which
+wears `--warn`, never `--crisis`: deleting an account is not a safety control.
+
+**The order is the design.** `server/account/index.ts` cancels Luminary at Stripe
+and deletes the Stripe customer FIRST, because that is the one step that can keep
+charging, and if Stripe fails nothing is deleted; then RevenueCat's customer, when
+it is set up (an app subscription is the store's to cancel, and the dialog says
+so before the reader deletes: `adStoreOn`); then every row, children before
+parents so it is right whether or not the project's keys cascade; then the auth
+user LAST, so a failure above leaves the reader able to sign in and retry. Every
+step is safe to run twice. A table the project never created is skipped, any
+other error stops the run. The server checks the typed word again, and refuses an
+aal1 session on an account with a verified authenticator, like billing and the
+Oracle. Support requests stay, unlinked, as the Privacy Policy says.
+
+**On the device, success forgets the account**: `accountDelete()` removes the sync
+map, the outbox and the remembered login and signs out locally. The map matters
+most: it records rows as uploaded, and a later sign in to a new account would
+otherwise skip them. With the switch on, every `incommon.` and `incommon_` key
+goes too. Either way the reader reaches the cover through the marked tab Log Out
+uses. K56 holds the module half; the function was driven against a fake Stripe
+and an in memory database (only the reader's rows go, Stripe down deletes
+nothing, a failing table keeps the sign in). `delete-account.html` is the public
+page Google asks for, built like the legal pages and copied by `LEGAL_FILES`; the
+Terms (sections 7 and 17) and the Privacy Policy (sections 15 and 16) name the
+button, dated 12 October 2026. If what the function deletes changes, that page
+and those sections change with it.
 
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the
@@ -4058,7 +4280,7 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds thirty one scripts. Twenty one are gates and are worth running
+`tools/` holds thirty two scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -4067,8 +4289,8 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
 `check-astral-bodies.js`, `check-timing-lexicon.js`.
-Seven generate:
-`build-bundle.js`, `build-icons.js`,
+Eight generate:
+`build-bundle.js`, `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
 and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
@@ -4077,7 +4299,7 @@ is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
 
 `drift-check.js` is none of the three above and does not run cold the way
-the other twenty-nine do. It is the only script in `tools/` that drives a
+the other thirty do. It is the only script in `tools/` that drives a
 real browser, because it exists to answer a different question:
 `check-deployed.js` asks whether the live site matches what was built, and
 this asks whether the current `deploy/<version>/` itself still matches the bytes the seven

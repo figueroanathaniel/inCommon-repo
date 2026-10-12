@@ -1163,6 +1163,7 @@
         if (code === 'NO_ACCOUNT') return { ok: false, reason: 'noAccount' };
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
         if (code === 'ALREADY') return { ok: false, reason: 'already' };
+        if (code === 'REGION') return { ok: false, reason: 'region' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
@@ -1170,13 +1171,20 @@
       });
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
+  /* country is the page's guess at where the reader is, from the device's time
+     zone, as two letters or nothing. The server uses it to say whether
+     Luminary is sold there and at what price, and refuses a checkout for a
+     country it does not sell to yet. It is a guess and the server treats it as
+     one: what Stripe collects at checkout is what it acts on in the end. */
   function billingStatus(opts) {
-    return billingCall({ action: 'status', sync: !!(opts && opts.sync) }).then(function (r) {
+    var country = opts && /^[A-Z]{2}$/.test(String(opts.country || '')) ? opts.country : undefined;
+    return billingCall({ action: 'status', sync: !!(opts && opts.sync), country: country }).then(function (r) {
       return r.ok ? { ok: true, status: r.data.status || null } : r;
     });
   }
-  function billingCheckout(plan, returnTo) {
-    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo }).then(function (r) {
+  function billingCheckout(plan, returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo, country: country }).then(function (r) {
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }
@@ -1184,6 +1192,78 @@
     return billingCall({ action: 'portal', returnTo: returnTo }).then(function (r) {
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
+  }
+
+  /* ---------- Luminary bought inside the apps ----------
+
+     The iPhone and Android apps sell Luminary through the stores, with
+     RevenueCat checking the receipts (docs/REVENUECAT-SETUP.md). After a
+     purchase or a restore the app asks the store function to read what this
+     reader holds from RevenueCat and record it, so the billing status and the
+     Oracle's paywall see it at once rather than when the webhook lands. It
+     sends nothing about the purchase: the server asks RevenueCat about the
+     reader its token names. Answers { ok, active, source, plan,
+     currentPeriodEnd } or a reason: off, signedOut, notSetUp (not deployed),
+     notConfigured (deployed, no RevenueCat key yet), offline or error. */
+  function storeSync() {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('store', { body: { action: 'sync' } });
+    }).then(function (res) {
+      if (res && !res.error && res.data) {
+        var d = res.data;
+        return { ok: true, active: !!d.active, source: d.source || null, plan: d.plan || null, currentPeriodEnd: d.currentPeriodEnd || null };
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
+  /* ---------- Deleting the account ----------
+
+     The App Store and Google Play require an app with accounts to let the
+     reader delete theirs from inside it (docs/ACCOUNT-DELETION.md). The work is
+     server/account/index.ts: Luminary cancelled at Stripe first, then every row,
+     then the sign in itself. confirm is the word the reader typed, and the
+     server checks it again, so no stray call deletes anything.
+
+     After the server answers yes, this device forgets the account too: the
+     sync map and the outbox go, because the map records rows as already
+     uploaded and a later sign in to a new account would otherwise skip them,
+     the remembered login goes, and the session is signed out locally, since
+     the server no longer has a user to sign out. What is on the device stays,
+     unless the page also erases it. */
+  function accountDelete(confirm) {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('account', { body: { action: 'delete', confirm: String(confirm || '') } });
+    }).then(function (res) {
+      if (res && !res.error && res.data && res.data.deleted) {
+        try { root.localStorage.removeItem(MAP_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(OUTBOX_KEY); } catch (e) {}
+        try { root.localStorage.removeItem(REMEMBER_KEY); } catch (e) {}
+        session = null;
+        return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return { ok: true }; }, function () { return { ok: true }; });
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'STRIPE') return { ok: false, reason: 'stripe' };
+        if (code === 'REVENUECAT') return { ok: false, reason: 'revenuecat' };
+        if (code === 'BAD_REQUEST') return { ok: false, reason: 'confirm' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
 
   /* ---------- Contact Support ----------
@@ -1239,6 +1319,9 @@
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
+      /* The store apps hand this to RevenueCat as the app user id, so a
+         purchase is filed under the same reader the server knows. */
+      userId: uid(),
       owesCode: !!held,
       lastPushAt: lastPushAt || null,
       pendingOps: loadOutbox().length,
@@ -1328,6 +1411,8 @@
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    accountDelete: accountDelete,
+    storeSync: storeSync,
     mfaVerify: mfaVerify,
     coverSignOut: coverSignOut,
     mfaStatus: mfaStatus,
