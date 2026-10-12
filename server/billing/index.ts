@@ -42,6 +42,11 @@ const PRICES = {
   annual: { amount: 11999, interval: "year" },
 } as const;
 const ACTIVE = new Set(["active", "trialing"]);
+// The free trial, the owner's decision of 12 October 2026: seven days on
+// either plan, card taken at checkout, charged when the trial ends unless the
+// reader cancels first. Once per reader: anybody who has ever held a Luminary
+// subscription, here or in the apps, pays from the first day.
+const TRIAL_DAYS = 7;
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 // Confirmed addresses only, the same rule as server/oracle: an unconfirmed
 // address proves nothing about who holds it.
@@ -192,6 +197,17 @@ type StoreRow = {
   management_url: string | null;
 };
 
+// Whether this reader may start the free trial: nothing in Stripe's history
+// for them (syncCustomer keeps stripe_subscription_id once any subscription
+// has existed, cancelled ones included, since Stripe lists those too) and no
+// app purchase of any status. The page reads it to word the button; checkout
+// asks Stripe itself before it grants one.
+async function trialOpen(userId: string, row: Row | null): Promise<boolean> {
+  if (row && row.stripe_subscription_id) return false;
+  const { data } = await db.from("store_subscriptions").select("user_id").eq("user_id", userId).maybeSingle();
+  return !data;
+}
+
 // A live app purchase for this reader, or null. The row is read, never written
 // here: server/store owns it. A project that has not run server/store/schema.sql
 // has no such table, and that reads as no app purchase rather than an error.
@@ -317,6 +333,9 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     // price there. A page that sent no country is quoted the US price.
     regionOpen: !closedTo(country),
     price: priceShown(curFor(country), country),
+    // Days of free trial a checkout would start for this reader now, 0 when
+    // they have had one or already pay.
+    trialDays: !admin && !paid && !app && await trialOpen(user.id, row) ? TRIAL_DAYS : 0,
   };
 }
 
@@ -454,6 +473,11 @@ Deno.serve(async (req) => {
     if (current.isPremium) return reply(409, { code: "ALREADY" });
     try {
       const customer = await customerFor(stripe, user);
+      // Stripe is the record of who has subscribed before, so it is asked
+      // directly rather than trusting the row, which a missed webhook can
+      // leave behind.
+      const before = await stripe.subscriptions.list({ customer, status: "all", limit: 1 });
+      const trial = before.data.length === 0 && await trialOpen(user.id, null);
       const cur = curFor(country);
       const prices = await ensurePrices(stripe, cur);
       const euUk = cur !== "usd";
@@ -472,7 +496,7 @@ Deno.serve(async (req) => {
         allow_promotion_codes: true,
         success_url: withQuery(back, "luminary", "success"),
         cancel_url: withQuery(back, "luminary", "cancelled"),
-        subscription_data: { metadata: { userId: user.id } },
+        subscription_data: { metadata: { userId: user.id }, ...(trial ? { trial_period_days: TRIAL_DAYS } : {}) },
         // Stripe Tax needs an address to place the buyer, and saves the one
         // collected onto the customer so renewals are taxed where they live.
         ...(TAX ? {

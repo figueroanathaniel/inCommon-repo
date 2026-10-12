@@ -4004,6 +4004,21 @@ the Codex's, so pointing it at the Stripe account the Codex used can never pick
 up or re-price the Codex's product. The first checkout makes the product
 ("Codex Luminary") and both prices.
 
+**A 7-day free trial, once per reader, card taken at checkout** (the owner's
+decision of 12 October 2026, both plans). The billing function grants it:
+`trialOpen()` is false for anybody whose row carries a `stripe_subscription_id`
+(syncCustomer keeps one once any subscription has existed, cancelled ones
+included) or who has a `store_subscriptions` row of any status, and checkout
+asks Stripe's own subscription list before adding `trial_period_days`, so a
+missed webhook cannot hand out a second trial. The status carries `trialDays`,
+and the page words the button and the terms beside it from that alone
+("Start your 7-day free trial", the charge date and amount, how to cancel);
+`trialing` already counted as paid in billing and the Oracle. Terms has a
+"Free trial" part under "Price and automatic renewal". The apps' trials are
+store introductory offers, so the page shows none of this in the apps. A
+closed EU or UK country's trial is cancelled by `refuseIfClosed()` with
+nothing to refund, since its first invoice is zero.
+
 **Managed Payments is switched off on every checkout.** Stripe turns it on by
 default for a new account, which makes Stripe the seller of record and refuses
 any product without a tax code; on `2025-02-24.acacia`, the version `stripe@17`

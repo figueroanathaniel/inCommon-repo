@@ -19515,6 +19515,13 @@ class Component extends DCLogic {
     const storeWord = native ? this.rcStore() : lum && lum.source === 'google' ? 'Google Play' : 'App Store';
     const storeThe = storeWord === 'App Store' ? 'the App Store' : storeWord;
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
+    /* The free trial (seven days, card at checkout, once per reader) is the
+       server's to grant: trialDays is 0 for anybody who has had a subscription,
+       here or in the apps. The apps sell through the stores, whose offers are
+       set there, so this wording is the website's alone. */
+    const trialDays = !native && lum && lum.trialDays > 0 ? lum.trialDays : 0;
+    const trialEnd = trialDays ? new Date(Date.now() + trialDays * 864e5).toLocaleDateString() : '';
+    const trialing = !!lum && lum.status === 'trialing';
     return {
       orIcon: this.uiIcon('oracle'),
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
@@ -19548,7 +19555,7 @@ class Component extends DCLogic {
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
       orLumMember: deepish && canDeep && !!lum.plan,
-      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') + (appSub ? ' · ' + storeWord : '') : '',
+      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (trialing ? (lum.cancelAtPeriodEnd ? 'free trial, ends ' : 'free trial until ') : lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') + (appSub ? ' · ' + storeWord : '') : '',
       /* Each subscription is managed where it was bought: an app one in the
          store's settings, from the app; a Stripe one in Stripe's portal, from
          the website. The website cannot open Apple's or Google's settings for
@@ -19569,8 +19576,10 @@ class Component extends DCLogic {
       orLumRenewOn: !lumShut && (!native || sellable),
       orLumRenewText: native
         ? 'Renews automatically each month or year at the price shown until you cancel. Payment is charged to your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple') + ' account. Cancel anytime in your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple account') + ' settings, at least a day before it renews.'
+        : trialDays
+        ? 'Free for ' + trialDays + ' days. Your card is charged ' + planRow[5] + ' on ' + trialEnd + ' unless you cancel before then, and the plan renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.'
         : 'Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.',
-      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : 'Become a Luminary · ' + planRow[5],
+      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : trialDays ? 'Start your ' + trialDays + '-day free trial' : 'Become a Luminary · ' + planRow[5],
       orLumBuy: () => this.lumBuy(),
       orLumRestoreOn: !!lum && rcLive,
       orLumRestoreLabel: st.lumBusy === 'restore' ? 'Restoring…' : 'Restore purchases',
