@@ -1812,6 +1812,77 @@ clicked, because the failure this surface can have is the one that reads as
 correct. N37b names all thirteen groups one query at a time, so a shelf that
 silently drops out of the index is a red row rather than a quiet absence.
 
+## The Timing Lexicon, and why the Together slide reads from it
+The owner reported on 12 October 2026 that the Custom buttons on Today's
+Together slide "don't change much", and asked for a full body of original
+explanations for every transit, gate and number. Both were true and they were
+one problem. Measured by clicking every button in a browser: with the wording
+that shipped, **all ten transit buttons produced the identical paragraph**,
+because `horoTogether()` read `d.hits[0]`, the live sky, rather than
+`dv.hits[0]`, the reader's choice. Gate clicks moved about 12% of the words
+and number clicks 5%, because a choice only dropped a gate name or a three
+word essence into frames picked by a hash of the date.
+
+**`app/timing-lexicon.js` is the corpus, interpretation layer, global
+`TimingLexicon`.** It reads nothing: no ephemeris, no clock, no storage. A
+transit is three pieces written for it: `MOVE[mover][aspect]` (60), what this
+body does at this angle; `MEET[mover][point]` (192), what it does to this
+natal point, naming the return or cycle where a body meets its own place; and
+`PLACE[point][c|e|h]` (48 questions), one per point per kind of contact. Twelve
+movers, five aspects and sixteen natal points are 960 contacts and every one
+reads differently. A gate is `GATE[n]` (`sky`, `held`, `open`, `ask`),
+`GATE_LINE[n][0..5]` (all 384 lines, each written for its own gate) and
+`CHANNEL` (the 36 pairs, read when a transit completes one with a natal gate).
+`LINE[1..6]` stays as the description of what each position is, returned as
+`lineKind`, and is the fallback only if a gate's line were ever missing. A number is `NUMBER[v][role]` for day, month, year, Life
+Path, Challenge (0 to 8) and Pinnacle, masters included where the role can
+reach them. No origin or method field, by the owner's rule of 11 October.
+
+**The 384 lines are each written, not composed, and they are held to it.**
+The owner asked on 12 October 2026 for every gate line to be written. The six
+positions are read as six ways of meeting the gate's theme (the groundwork, the
+gift that works unwatched, the lesson by trial, the door through people, the
+public view others project onto, the long view), and the first draft leaned on
+one sentence frame per position: "comes naturally here, and others..." opened
+about thirty second lines and "seen from a height... were the ones that..."
+about thirty sixth lines. 131 were rewritten for that, and the rule that came
+out of it is the one to keep: **a frame that repeats under the six word cap is
+still a template**, so check four word runs across the lines before believing a
+pass is finished. None of the 384 is a rendering of the oracle text or of
+anybody's line keynotes. TL15 reads the I11 and I12 fixtures out of
+`run-module-tests.js` rather than retyping them, and refuses any six word run
+shared with `iching.js`'s own hexagram lines, because hexagram N is gate N and
+a gate line that leaned on the hexagram line beside it would be one text
+wearing two names. TL6b holds all 384 distinct, six per gate, returned for
+their own gate and line, and free of any span ("this week", "today").
+
+**Gate text is time neutral on purpose.** A gate on this slide can be carried
+by the Moon for hours or Pluto for years, so a gate entry that said "this week"
+was false for most carriers. The span belongs to the mover (`PACE`), never to
+the gate.
+
+**`horoTogetherLexicon()` composes the slide** and returns null when the
+module is missing or a key is unknown, so the old wording still answers. Its
+salt carries the choice, so sentence order moves with what was picked rather
+than with the date alone. The paragraph is drawn as paragraphs
+(`alignTogetherParas`): the transit and where it lands first, the design and
+the number in the seeded order, and the question last. The question follows
+the system the reader last changed (`alignLast`), so a number chosen by hand
+is answered with the number's question. Measured after: ten of ten transit
+paragraphs distinct, about a third of the words changing per transit click,
+38% per gate click now that each line is its own, and 16% per number click.
+
+**`tools/check-timing-lexicon.js` is the gate.** It reads the key sets out of
+the app (`PLNS`, `ASPECTS`, `anglePoints()`) and out of `hd-topology.js`
+rather than typing them, so a body or angle the app starts producing without
+an entry fails rather than quietly falling back. It asserts 960 distinct
+readings, distinct pieces, the six word phrase cap of three the app holds
+itself to, no dash, no "you are", astral body rather than planet, no rating
+vocabulary, and that every question is one. Its detectors are tested on
+planted fixtures first (TL0). Add to the corpus by adding to the module and
+running the gate; a new entry that repeats an old one's phrasing is the fault
+this whole pass removed.
+
 ## Aspects teach what the contact offers
 Five tables, and each has one job. `ASP_MEAN` is the short gloss inside
 generated sentences. `ASP_SHORT` is one sentence, used as a row subtitle and at
@@ -2389,6 +2460,15 @@ below the 7.5px badges). It used to head the About card. It sits inside the
 page's `<footer>`, under the Terms and Privacy Policy links, and the footer
 carries `margin-top: auto` inside the column so it stays at the bottom whatever
 the content above it grows to.
+
+**That footer is the shell's `contentinfo` landmark, and it says so.** G5 asks
+for one. It used to be the method footer on Today, which went with the
+disclaimers on 11 October, and the shell shipped with none: G5 went red on the
+live v6.4 bundle. A `<footer>` nested inside a section or `main` has no
+implicit landmark role, so the attribute is written out (`role="contentinfo"`)
+in both shells. The Terms, the Privacy Policy and the credit line are exactly
+what that landmark is for; do not move the role back onto anything that
+explains a reading.
 
 ## The security headers, and where a new outside service has to be named
 Added 11 October 2026, before launch. `docs/SECURITY.md` is the review and the
@@ -3978,7 +4058,7 @@ The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 copies inside `deploy/` are build output, because a deploy directory is
 uploaded whole.
 
-`tools/` holds thirty scripts. Twenty are gates and are worth running
+`tools/` holds thirty one scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -3986,7 +4066,7 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
-`check-astral-bodies.js`.
+`check-astral-bodies.js`, `check-timing-lexicon.js`.
 Seven generate:
 `build-bundle.js`, `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`

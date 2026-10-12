@@ -79,6 +79,8 @@ const MODULES = [
   'minor-body-elements.js',
   'placement-content.js',
   'numerology-content.js',
+  /* The Timing Lexicon: transit, gate and number readings. Reads nothing. */
+  'timing-lexicon.js',
   'today-integration.js',
   'angel-numbers.js',
   /* The other half of Synchronicities. Reads nothing from the modules above,

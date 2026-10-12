@@ -48,7 +48,7 @@ var PRECACHE = [
   './manifest.json', '../inCommon%20Logo/icons/icon-192.png', '../inCommon%20Logo/icons/icon-512.png', '../inCommon%20Logo/icons/splash.png',
   './incommon-core.js', './safety-router.js', './oki-prompt-builder.js',
   './oki-post-processor.js', './oki-api.js', './practice-library.js', './memory-store.js',
-  './profile-manager.js', './placement-content.js', './numerology-content.js', './angel-numbers.js', './animal-symbolism.js',
+  './profile-manager.js', './placement-content.js', './numerology-content.js', './timing-lexicon.js', './angel-numbers.js', './animal-symbolism.js',
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js', './minor-body-elements.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
   './birth-time.js', './astronomy-engine-2.1.19.min.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',

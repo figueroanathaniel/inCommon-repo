@@ -68,7 +68,7 @@
       return supplied ? this.minorLon(supplied, t) : null;
     }
 
-    /* Mercury–Pluto: from stored elements PL_EL */
+    /* Mercury to Pluto: from stored elements PL_EL */
     var PL_EL = {
       Mercury: [252.25084, 4.09233445, 0.20563, 77.456, 0.38710],
       Venus: [181.97973, 1.60213034, 0.00677, 131.564, 0.72333],
