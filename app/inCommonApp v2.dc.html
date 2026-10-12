@@ -180,6 +180,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./minor-body-elements.js"></script>
 <script src="./placement-content.js"></script>
 <script src="./numerology-content.js"></script>
+<script src="./timing-lexicon.js"></script>
 <script src="./today-integration.js"></script>
 <script src="./angel-numbers.js"></script>
 <script src="./animal-symbolism.js"></script>
@@ -581,7 +582,11 @@ input[type="date"]{color-scheme:dark}
                 </sc-if>
                 <sc-if value="{{ hpIsTog }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;flex-direction:column;gap:9px;animation:fadeUp .22s ease">
-                    <span style="font:400 var(--rdd)/var(--rddlh) var(--fd);color:var(--tx);text-wrap:pretty">{{ alignTogether }}</span>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <sc-for list="{{ alignTogetherParas }}" as="p" hint-placeholder-count="3">
+                        <span style="font:400 var(--rdd)/var(--rddlh) var(--fd);color:var(--tx);text-wrap:pretty">{{ p.t }}</span>
+                      </sc-for>
+                    </div>
                     <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How Together is calculated" style="display:flex;gap:5px">
                       <sc-for list="{{ alignModes }}" as="m" hint-placeholder-count="3">
                         <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:{{ m.bg }};color:{{ m.c }};font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase">{{ m.label }}</button>
@@ -5178,7 +5183,11 @@ input[type="date"]{color-scheme:dark}
                   </sc-if>
                   <sc-if value="{{ hpIsTog }}" hint-placeholder-val="{{ false }}">
                     <div style="display:flex;flex-direction:column;gap:10px;animation:dtIn .22s ease">
-                      <span style="font:400 var(--rdd)/var(--rddlh) var(--fd);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ alignTogether }}</span>
+                      <div style="display:flex;flex-direction:column;gap:11px;max-width:62ch">
+                        <sc-for list="{{ alignTogetherParas }}" as="p" hint-placeholder-count="3">
+                          <span style="font:400 var(--rdd)/var(--rddlh) var(--fd);color:var(--tx);text-wrap:pretty">{{ p.t }}</span>
+                        </sc-for>
+                      </div>
                       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How Together is calculated" style="display:flex;gap:6px;flex-wrap:wrap">
                         <sc-for list="{{ alignModes }}" as="m" hint-placeholder-count="3">
                           <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1 1 104px;min-width:104px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:{{ m.bg }};color:{{ m.c }};font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase">{{ m.label }}</button>
@@ -9499,7 +9508,7 @@ class Component extends DCLogic {
     welcomeFor: null, welcomePick: {}, makeDefault: null,
     chartMode: 'basic', openBody: null, placeSel: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
     chartExpandOpen: false, chartExpandSearch: '', chartExpandGroup: true, chartExpandSortBy: 'lon', chartExpandSortDir: 'asc',
-    alignMode: 'today', alignHit: null, alignGate: null, alignNum: null, alignSeed: 0,
+    alignMode: 'today', alignHit: null, alignGate: null, alignNum: null, alignLast: null, alignSeed: 0,
     libView: null, lexQuery: '', lexSign: null, lexMode: 'mandala', lexDeg: null,
     themeKey: 'deepfield', themeHC: false, themeProf: null, themeFaceOffline: false,
     ypCat: null, ypAll: false, ypCountry: undefined, ypPick: false, pnotes: {}, revealPI: false, memSel: null, memPin: '', memPinOK: false, memPinErr: '',
@@ -13611,6 +13620,8 @@ class Component extends DCLogic {
     const hs = lon => (lon == null || !natalSun) ? null : this.houseOf(lon, natalSun, asc);
     const ord = n => n == null ? '' : n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
     const theme = n => (n == null ? 'that part of your life' : (this.HOUSE_THEMES[n - 1] || 'that part of your life'));
+    const lex = this.horoTogetherLexicon(d, dv, vnum, hs, ord, theme);
+    if (lex) return lex;
     const top = d.hits[0], k = top ? String(top.asp).toLowerCase() : '';
     const tone = top ? this.toneOf(top.a.name, k, 't') : '';
     const gtheme = String(this.GATE_NAMES[dv.sunGate.gate] || '').toLowerCase();
@@ -13674,6 +13685,54 @@ class Component extends DCLogic {
     ]);
     return this.dprose('t', [head], [moon, design, tempo], [tail]);
   }
+  /* THE TOGETHER SLIDE, READ FROM THE TIMING LEXICON. The wording above picks
+     its frames from a hash of the date and lets a choice change only the words
+     dropped into them: the transit gave a tone keyed on the moving body and
+     whether the contact was hard, the gate gave its name, the number gave three
+     words. So two contacts from one body read alike, the natal point did not
+     count at all, and the Custom buttons barely moved the paragraph. Here every
+     part is a piece written for exactly what was chosen: the mover at this
+     angle, the mover on this point, the gate as held or open in this chart and
+     on this line, the channel it completes, and the number in the role it
+     plays. A different choice is a different paragraph. The salt carries the
+     choice too, so the sentence order moves with it rather than with the date
+     alone. Null when the module is missing or a key is unknown, and the
+     wording above answers instead. */
+  horoTogetherLexicon(d, dv, vnum, hs, ord, theme) {
+    const TL = window.TimingLexicon;
+    if (!TL || !dv || !dv.sunGate) return null;
+    const top = dv.hits && dv.hits[0];
+    const tr = top ? TL.transit(top.a.name, top.asp, top.b.name) : null;
+    if (top && !tr) return null;
+    const gx = TL.gate(dv.sunGate.gate, dv.sunGate.line, { held: !!dv.natalHasGate, partner: dv.chan ? dv.partner : null });
+    const role = !vnum || vnum.id === 'day' ? 'day' : /^pin/.test(vnum.id) ? 'pinnacle' : vnum.id;
+    const nx = TL.number(vnum && vnum.value != null ? vnum.value : d.pdV, role);
+    if (!gx || !nx) return null;
+    const th = top ? hs(top.b.lon) : null;
+    const salt = 'tl|' + (top ? top.a.name + top.asp + top.b.name : '-') + '|' + dv.sunGate.gate + '.' + dv.sunGate.line + '|' + role + nx.value;
+    const head = tr ? tr.move : this.dpick('t.tailnone', [
+      'Nothing in the sky is touching your chart closely, which leaves the design and the numbers to set the day on their own.',
+      'No transit is in orb, so the day is described by the design and the numbers rather than pressed on by the sky.'
+    ]);
+    const meet = tr ? tr.meet + (th ? ' In your chart it lands in the ' + ord(th) + ' house, among ' + theme(th) + '.' : '') : '';
+    const design = this.horoCap(this.horoSky1(gx.sky)) + ' ' + gx.personal + ' ' + gx.line +
+      (gx.channel ? ' Meeting a gate already in your chart, it completes a channel for as long as it is held: ' + gx.channel + '.' : '');
+    /* The closing question follows the system the reader last changed, so a
+       number or a gate chosen by hand is answered with its own question rather
+       than the transit's. Today and Shuffle close on the transit. */
+    const last = this.state.alignMode === 'custom' ? this.state.alignLast : null;
+    const ask = last === 'num' ? nx.ask : last === 'gate' || !tr ? gx.ask : tr.ask;
+    /* Paragraphs rather than one block: on a phone eleven sentences in one
+       run read as a wall. The transit and where it lands stay together and
+       first, the design and the number change places by the same seeded
+       order the rest of Today uses, and the question closes. alignBrief()
+       splits on the blank line. */
+    const first = [head, meet].filter(Boolean).join(' ');
+    return [first].concat(this.dorder(salt + '|order', [design, nx.text]), [ask]).join('\n\n');
+  }
+  /* The first sentence of a gate's sky line, which is the part that describes
+     the field; the second elaborates and would crowd a paragraph of five. */
+  horoSky1(s) { return (String(s || '').split(/(?<=\.)\s+/)[0] || '').trim(); }
   horoCap(s) { s = String(s || ''); return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
   horoAngle(k) { const r = this.ASPECTS.find(x => x[1] === String(k).toLowerCase()); return r ? r[0] : 0; }
   horoSep(a, b) { const x = Math.abs(this.norm360(a - b)); return x > 180 ? 360 - x : x; }
@@ -15712,7 +15771,7 @@ class Component extends DCLogic {
       dropToggle: () => this.setState({ dropOpen: !st.dropOpen }) };
     if (!d) return { ...base, dropTeaser: 'Add a birth date in Settings and today unfolds on its own.',
       todaySections: [], ...this.todayIntegration(null), alignStamp: '',
-      alignRows: [], alignTogether: '', hasAlignBrief: false, noAlignBrief: true,
+      alignRows: [], alignTogether: '', alignTogetherParas: [], hasAlignBrief: false, noAlignBrief: true,
       alignSourceLine: '', alignModes: [], alignIsShuffle: false, alignIsCustom: false,
       alignHits: [], alignGateOpts: [], alignNumOpts: [], alignReroll: () => {}, ...this.horoVals(),
       okiTodayGo: () => this.send('What do you need from me before you can read today?') };
@@ -15769,7 +15828,8 @@ class Component extends DCLogic {
     const centerTxt = dv.center ? 'your ' + (dv.definedCenter ? 'defined' : 'open') + ' ' + dv.center + ' center' : 'your bodygraph';
     const influence = 'Gate ' + dv.sunGate.gate + '.' + dv.sunGate.line + ', ' + vgname + ', works through ' +
       centerTxt + ', which handles ' + this.centerTheme(dv.center) + '; ' + vnum.label + ' sets the tempo: ' + vnum.essence + '.';
-    const tog = this.horoTogether(d, dv, vnum);
+    const togParas = String(this.horoTogether(d, dv, vnum) || '').split('\n\n').filter(Boolean);
+    const tog = togParas.join(' ');
     const combo = (c.hit ? c.hit.label : 'no live contact to your chart') +
       (c.gate ? ' with Gate ' + c.gate.gate + '.' + c.gate.line + ', ' + (this.GATE_NAMES[c.gate.gate] || '') + ', carried by ' + c.gate.by : ' with no gate') +
       (c.num ? ', read against ' + c.num.label : '');
@@ -15796,6 +15856,7 @@ class Component extends DCLogic {
         groups: open ? groups() : [] };
     };
     return { hasAlignBrief: true, noAlignBrief: false, alignTogether: tog, alignSourceLine: source,
+      alignTogetherParas: togParas.map(t => ({ t: t })),
       alignModes: [['today', 'Today'], ['shuffle', 'Shuffle'], ['custom', 'Custom']].map(([id, label]) => ({
         label: label, on: c.mode === id,
         bg: c.mode === id ? 'var(--ac)' : 'transparent',
@@ -15805,13 +15866,13 @@ class Component extends DCLogic {
       alignReroll: () => this.setState({ alignSeed: (this.state.alignSeed || 0) + 1 }),
       alignHits: c.pool.map(p => ({ label: p.label, meta: p.meta, on: !!(c.hit && c.hit.id === p.id),
         ...chip(!!(c.hit && c.hit.id === p.id)),
-        go: () => this.setState({ alignMode: 'custom', alignHit: p.id }) })),
+        go: () => this.setState({ alignMode: 'custom', alignHit: p.id, alignLast: 'hit' }) })),
       alignGateOpts: c.gates.map(g => ({ label: g.label, meta: g.meta, on: !!(c.gate && c.gate.gate === g.gate),
         ...chip(!!(c.gate && c.gate.gate === g.gate)),
-        go: () => this.setState({ alignMode: 'custom', alignGate: g.gate }) })),
+        go: () => this.setState({ alignMode: 'custom', alignGate: g.gate, alignLast: 'gate' }) })),
       alignNumOpts: c.nums.map(n => ({ label: n.label, meta: n.meta, on: !!(c.num && c.num.id === n.id),
         ...chip(!!(c.num && c.num.id === n.id)),
-        go: () => this.setState({ alignMode: 'custom', alignNum: n.id }) })),
+        go: () => this.setState({ alignMode: 'custom', alignNum: n.id, alignLast: 'num' }) })),
       alignRows: [
       row('astro', 'Astrology', '\u2609', '#2fff8f', horo,
         'Where this reading comes from \u2192', this.holeEnter('astro'),
