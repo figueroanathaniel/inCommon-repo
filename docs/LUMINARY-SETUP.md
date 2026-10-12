@@ -89,6 +89,16 @@ In Stripe, Settings, Billing, Customer portal: choose what a customer may do
 Oracle opens this portal, and Stripe refuses to open one that has never been
 saved.
 
+### 5b. The free trial reminder
+
+Luminary starts with a 7-day free trial on the website, once per reader, with
+the card taken at checkout (the owner's decision of 12 October 2026; Terms,
+"Free trial"). In Stripe, Settings, Billing, Subscriptions and emails, turn on
+the email sent before a free trial ends. Several states expect a reminder
+before a trial turns into a charge, and Stripe sends it; the app does not.
+The billing function decides who gets a trial: nobody who has held a
+subscription before, on the website or in the apps.
+
 ### 6. Try it
 
 1. Sign in on the cover, open The Oracle, and press In-Depth. The gate shows the

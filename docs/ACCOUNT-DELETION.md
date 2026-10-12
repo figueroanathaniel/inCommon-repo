@@ -43,7 +43,11 @@ stops the run and is reported.
 
 On the device, a successful deletion forgets the account (the sync map, the
 outbox and the remembered login) and signs out. What the reader wrote on the
-device stays unless they turned on "Also erase everything on this device".
+device stays, and becomes the signed out (guest) profiles so they can keep
+using it, unless they turned on "Also erase it from this device". Erasing
+removes only this account's profiles and the keys that belong to them: since
+12 October 2026 each account on a browser keeps its own, and another
+account's are left alone.
 
 ## Setting it up
 
