@@ -65,7 +65,9 @@ const EXTS = new Set(['.js', '.jsx', '.html', '.json', '.md', '.css', '.txt', '.
 /* CLAUDE.md, "Zero em dash", names the same four out of scope for its own
    sweep, for the same reasons: two are build output that regenerates from
    source, one is the reader's own file, and the rest are vendored. */
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'deploy', 'deploy1.1', 'uploads']);
+/* preview/ is build output too: tools/build-bundle.js --preview writes a whole
+   site there from the same source, so it regenerates exactly like deploy/. */
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'deploy', 'deploy1.1', 'preview', 'uploads']);
 const VENDORED = new Set([
   'app/support.js',
   'app/doc-page.js',

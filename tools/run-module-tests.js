@@ -2013,6 +2013,27 @@ async function runCloudTests() {
   var bThrow = await CO.billingPortal('https://x.invalid/');
   t('K34', 'a thrown billing call comes back as offline', { ok: false, reason: 'offline' }, { ok: bThrow.ok, reason: bThrow.reason });
 
+  /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
+     travels with the status and the checkout as two capital letters or not at
+     all, and the server's refusal of a country it does not sell to yet comes
+     back as its own reason, so the page can say so rather than "try again". */
+  var bCo = oracleClient(function (name, opts) {
+    return opts.body.action === 'status' ? { data: { status: { isPremium: false } }, error: null } : { data: { url: 'https://stripe.k34b.invalid/' }, error: null };
+  });
+  CO._setClientForTests(bCo.client, { user: { id: 'u1' } });
+  await CO.billingStatus({ country: 'FR' });
+  await CO.billingStatus({ country: 'france' });
+  await CO.billingCheckout('annual', 'https://x.invalid/', 'GB');
+  await CO.billingCheckout('annual', 'https://x.invalid/');
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'REGION') }; }).client, { user: { id: 'u1' } });
+  var bRegion = await CO.billingCheckout('annual', 'https://x.invalid/', 'DE');
+  t('K34b', 'the country guess is sent with the status and the checkout only as two capital letters, and a country not sold to yet comes back as region', {
+    status: 'FR', badDropped: true, checkout: 'GB', noneDropped: true, region: 'region'
+  }, {
+    status: bCo.calls[0].body.country, badDropped: !('country' in bCo.calls[1].body) || bCo.calls[1].body.country === undefined,
+    checkout: bCo.calls[2].body.country, noneDropped: bCo.calls[3].body.country === undefined, region: bRegion.reason
+  });
+
   /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
      October 2026. A password that passed on an account with an authenticator
      makes a session at aal1 that still owes its code: the cover asks for it,

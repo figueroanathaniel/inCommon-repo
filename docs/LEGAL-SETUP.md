@@ -5,6 +5,9 @@ Added 11 October 2026. The site now carries two legal pages and a support form:
 - `app/terms.html`: Terms & Conditions, opening with the About section.
 - `app/privacy.html`: Privacy Policy, with section 6 on exactly what the
   Oracle sends and keeps.
+- `app/accessibility.html`: the accessibility statement (added 12 October
+  2026), linked under the Privacy Policy. It promises a reply within 10 working
+  days to anything sent under "Something is not working".
 - Contact Support: Settings, Support & legal, in both shells, and at the
   address `#/support`. It works signed out. The two pages name it as the way
   to reach you, cancel, ask for a copy of data, or have an account deleted.
@@ -114,3 +117,6 @@ add one (a registered agent or mailbox service is fine) when you have it.
    law, with consumer rights elsewhere preserved. A lawyer may want an
    arbitration clause; it was left out on purpose, because a badly drafted one
    is worse than none.
+8. **Selling outside the US, the app stores and the business name** have pages
+   of their own: `docs/LUMINARY-EU-UK.md`, `docs/APP-STORE-SETUP.md` and
+   `docs/BUSINESS-SETUP.md`.

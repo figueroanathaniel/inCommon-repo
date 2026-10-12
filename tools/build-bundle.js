@@ -32,7 +32,14 @@
  * rather than shipping a file that boots most of an app.
  *
  * Usage:  node tools/build-bundle.js [--out <path>] [--check]
+ *                                     [--fonts google|self] [--preview <dir>]
  *         --check writes nothing and reports what would be produced.
+ *         --fonts chooses where the type comes from (see FONTS below).
+ *         --preview builds the whole site into <dir> instead of the bundle
+ *         folder, for an unpublished deploy, and touches nothing else.
+ *
+ * The self hosted fonts are tried this way, and docs/FONTS.md is the how to:
+ *         node tools/build-bundle.js --fonts self --preview preview/fonts-self
  */
 'use strict';
 
@@ -53,11 +60,60 @@ const srcPath = path.join(appDir, 'inCommonApp v2.dc.html');
    release. */
 const BUNDLE = path.join(repo, 'deploy', 'v6.4');
 
+/* WHERE THE TYPE COMES FROM, AND THE ONE WORD THAT SWAPS IT.
+
+   'google' loads Marcellus, Newsreader, Karla and Dawn's Petrona from Google
+   Fonts, which is what every published build has done. 'self' serves the
+   copies in app/fonts/ from this site instead, so no visitor's address reaches
+   Google for a typeface. The default is the published choice; --fonts
+   overrides it for one build. Switching what is PUBLISHED is changing this
+   word, and the Privacy Policy has to change with it: a production build
+   refuses a policy that names Google Fonts while the fonts are self hosted,
+   and one that does not name it while they are not (docs/FONTS.md). */
+const FONTS_DEFAULT = 'google';
+const fontsFlag = process.argv.indexOf('--fonts');
+const FONTS = fontsFlag !== -1 ? String(process.argv[fontsFlag + 1] || '') : FONTS_DEFAULT;
+if (FONTS !== 'google' && FONTS !== 'self') die('--fonts takes google or self, not "' + FONTS + '"');
+
+/* A PREVIEW IS A WHOLE SITE IN ITS OWN FOLDER, AND NOTHING ELSE MOVES.
+
+   It is seeded from the bundle folder (the service worker, the headers, the
+   manifest and the icons, which are written by hand there), built into, and
+   left alone: no root _redirects, no netlify.toml, no change to the bundle
+   folder. That is what makes it safe to try a change in an unpublished deploy
+   and throw it away. It may not sit inside deploy/, which is the shelf of
+   shipped bundles, and check-deployed and drift-check read that shelf. */
+const previewFlag = process.argv.indexOf('--preview');
+const PREVIEW = previewFlag === -1 ? null
+  : process.argv[previewFlag + 1] ? path.resolve(process.argv[previewFlag + 1]) : die('--preview needs a folder');
+if (PREVIEW) {
+  const rel = path.relative(repo, PREVIEW).split(path.sep).join('/');
+  if (!rel || rel === 'deploy' || rel.indexOf('deploy/') === 0 || rel === 'app' || rel.indexOf('app/') === 0) {
+    die('a preview goes in a folder of its own, such as preview/fonts-self, not in ' + (rel || 'the repository root'));
+  }
+}
+const OUT = PREVIEW || BUNDLE;
+
 const outFlag = process.argv.indexOf('--out');
 const outPath = outFlag !== -1 && process.argv[outFlag + 1]
   ? path.resolve(process.argv[outFlag + 1])
-  : path.join(BUNDLE, 'app.html');
+  : path.join(OUT, 'app.html');
 const checkOnly = process.argv.indexOf('--check') !== -1;
+
+/* What the Privacy Policy says about Google Fonts has to match what a
+   PUBLISHED build does. A preview is not published, so it is not held to it. */
+if (!PREVIEW) {
+  const priv = fs.readFileSync(path.join(repo, 'app', 'privacy.html'), 'utf8');
+  const names = /Google Fonts/.test(priv);
+  if (FONTS === 'self' && names) {
+    die('the fonts are self hosted in this build but app/privacy.html still names Google Fonts.\n' +
+        '  Take Google out of sections 3 and 11 and move the date, in the same change (docs/FONTS.md).');
+  }
+  if (FONTS === 'google' && !names) {
+    die('this build loads Google Fonts but app/privacy.html no longer says so.\n' +
+        '  Put the typefaces back in sections 3 and 11, or build with --fonts self.');
+  }
+}
 
 /* The modules, in the order the helmet loads them. Several read globals set
    by earlier ones, so this order is part of the contract, not a preference. */
@@ -218,8 +274,43 @@ if (fs.existsSync(devSwPath)) {
   }
 }
 
+if (PREVIEW && !checkOnly) {
+  fs.mkdirSync(PREVIEW, { recursive: true });
+  for (const f of fs.readdirSync(BUNDLE)) {
+    const from = path.join(BUNDLE, f);
+    if (!fs.statSync(from).isFile() || /\.building$/.test(f) || /^README/i.test(f)) continue;
+    fs.copyFileSync(from, path.join(PREVIEW, f));
+  }
+}
+
+/* THE FONT SWAP. Both pages carry their Google links between two markers, and
+   the app carries one word, FONTS, that themeFace() reads for Dawn's face. The
+   markers are checked on every build, google included, so the swap cannot
+   quietly stop being possible; in a self build the block becomes one link to
+   ./fonts/fonts.css and the word becomes 'self'. */
+const FONT_OPEN = '<!-- fonts:google', FONT_SHUT = '<!-- /fonts:google -->';
+const GOOGLE_FONT_HOSTS = /fonts\.(googleapis|gstatic)\.com/;
+function swapFonts(page, label) {
+  const a = page.indexOf(FONT_OPEN), b = page.indexOf(FONT_SHUT);
+  if (a === -1 || b === -1 || b < a || page.indexOf(FONT_OPEN, a + 1) !== -1 || page.indexOf(FONT_SHUT, b + 1) !== -1) {
+    die(label + ' does not carry exactly one <!-- fonts:google --> ... <!-- /fonts:google --> block;\n' +
+        '  the font swap needs both markers around the Google links');
+  }
+  if (FONTS === 'google') return page;
+  const out = page.slice(0, a) +
+    '<!-- fonts:self  served from ./fonts/ beside this page; built with --fonts self -->\n' +
+    '<link href="./fonts/fonts.css" rel="stylesheet">' + page.slice(b + FONT_SHUT.length);
+  return out;
+}
+
 let html = fs.readFileSync(srcPath, 'utf8');
 const report = { react: [], support: false, modules: [], lang: false, style: false };
+html = swapFonts(html, 'the app');
+{
+  const word = "  FONTS = 'google';";
+  if (html.split(word).length - 1 !== 1) die('the app no longer declares ' + word.trim() + ' exactly once; themeFace() reads it');
+  if (FONTS === 'self') html = html.replace(word, () => "  FONTS = 'self';");
+}
 
 /* 0. Establish the invariant on the SOURCE, not on the output.
       Two of the files being inlined document their own script tag in a
@@ -372,15 +463,27 @@ if (inlinedCount !== expectCount) {
 
 const bytes = Buffer.byteLength(html, 'utf8');
 
+/* faceHref() keeps its Google branch in every build, because one source serves
+   both: with FONTS = 'self' that branch is never taken. It is the one Google
+   address a self build may still contain, and it is removed only for the
+   question, never from the bundle. Anything else naming Google is a page that
+   would still call it, and the preview's CSP would refuse that call anyway. */
+const FACE_GOOGLE = ": 'https://fonts.googleapis.com/css2?family=' + face[1] + '&display=swap';";
+if (html.split(FACE_GOOGLE).length - 1 !== 1) die('faceHref() no longer carries its Google branch in the expected form; update FACE_GOOGLE to match');
+if (FONTS === 'self' && GOOGLE_FONT_HOSTS.test(html.split(FACE_GOOGLE).join(''))) {
+  die('the app still names a Google Fonts address after the swap; a self hosted build would still call Google');
+}
+
 if (checkOnly) {
-  console.log(JSON.stringify({ mode: 'check', wouldWrite: outPath, bytes, report }, null, 2));
+  console.log(JSON.stringify({ mode: 'check', wouldWrite: outPath, fonts: FONTS, preview: PREVIEW, bytes, report }, null, 2));
   process.exit(0);
 }
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 /* Stamped on the first line, so it is the first thing in the file rather
    than something to go looking for. */
-const STAMP = '<!-- inCommon ' + VERSION + '  |  built ' + new Date().toISOString().slice(0, 10) +
+const NOTE = (PREVIEW ? '  |  PREVIEW, not a release' : '') + (FONTS !== FONTS_DEFAULT || PREVIEW ? '  |  fonts: ' + FONTS : '');
+const STAMP = '<!-- inCommon ' + VERSION + '  |  built ' + new Date().toISOString().slice(0, 10) + NOTE +
   '  |  deploy this together with a sw.js showing the same version -->';
 html = STAMP + '\n' + html;
 
@@ -440,6 +543,10 @@ if (addrCount !== 2) {
       '  and whose deep links go nowhere, which nothing on screen would report.');
 }
 cover = cover.split(APP_ADDR).join('./app.html');
+cover = swapFonts(cover, 'the cover');
+if (FONTS === 'self' && GOOGLE_FONT_HOSTS.test(cover)) {
+  die('the cover still names a Google Fonts address after the swap');
+}
 
 /* The cover is a canvas and one control. If either is gone, something has
    replaced the page rather than edited it. */
@@ -471,7 +578,7 @@ for (const f of THREE_FILES) {
         '  screen is the SIGNAL LOST message on a machine perfectly capable of\n' +
         '  drawing it. Both files are vendored in app/ beside the vendored React.');
   }
-  fs.copyFileSync(from, path.join(BUNDLE, f));
+  fs.copyFileSync(from, path.join(OUT, f));
 }
 
 /* The cover's sign in loads these two on the first submit, or on the return
@@ -499,7 +606,7 @@ for (const [f, q] of SIGNIN_FILES) {
   }
   const from = path.join(appDir, f);
   if (!fs.existsSync(from)) die('missing ' + from + '; the cover loads it for the email sign in');
-  fs.copyFileSync(from, path.join(BUNDLE, f));
+  fs.copyFileSync(from, path.join(OUT, f));
 }
 
 /* THE TERMS AND THE PRIVACY POLICY, two plain pages beside index.html.
@@ -510,7 +617,7 @@ for (const [f, q] of SIGNIN_FILES) {
    the source shell's address, so it is rewritten here the same way the
    cover's is. A bundle missing either page is a sign up form agreeing to
    documents that 404, which is the one failure a legal link must not have. */
-const LEGAL_FILES = ['terms.html', 'privacy.html'];
+const LEGAL_FILES = ['terms.html', 'privacy.html', 'accessibility.html'];
 for (const f of LEGAL_FILES) {
   const from = path.join(appDir, f);
   if (!fs.existsSync(from)) die('missing ' + from + '; the cover, Settings and the Luminary purchase all link to it');
@@ -518,7 +625,7 @@ for (const f of LEGAL_FILES) {
   if (DASHES.test(page)) die(f + ' contains an em or en dash; this repo has none anywhere');
   page = page.split(APP_ADDR).join('./app.html');
   if (page.indexOf('inCommonApp') !== -1) die(f + ' still names the source app after the rewrite');
-  fs.writeFileSync(path.join(BUNDLE, f), page, 'utf8');
+  fs.writeFileSync(path.join(OUT, f), page, 'utf8');
 }
 {
   const t = cover.indexOf('./terms.html'), p = cover.indexOf('./privacy.html');
@@ -526,9 +633,67 @@ for (const f of LEGAL_FILES) {
   if (t > p) die('the cover links the Privacy Policy above the Terms; the Terms go directly above it');
 }
 
-const coverOut = path.join(BUNDLE, 'index.html');
+/* THE FONTS THEMSELVES, and the two hand written files that name them.
+
+   A self build copies app/fonts/ in as fonts/, precaches the faces the first
+   screen needs so an offline launch still has its type, and takes the two
+   Google origins out of the Content-Security-Policy, which is what proves the
+   swap is complete: a page that still reached for Google would be refused in
+   the browser with a console error naming the policy. A google build undoes
+   all three, so the word can be flipped back and forth and every file follows.
+   On the current published bundle a google build changes none of them. */
+const fontsOut = path.join(OUT, 'fonts');
+const fontFiles = fs.readdirSync(path.join(appDir, 'fonts')).filter(f => /\.(css|woff2|txt)$/.test(f));
+if (FONTS === 'self') {
+  for (const need of ['fonts.css', 'petrona.css']) {
+    if (fontFiles.indexOf(need) === -1) die('app/fonts/' + need + ' is missing; a self hosted build has no type without it');
+  }
+  fs.mkdirSync(fontsOut, { recursive: true });
+  for (const f of fontFiles) fs.copyFileSync(path.join(appDir, 'fonts', f), path.join(fontsOut, f));
+  for (const css of ['fonts.css', 'petrona.css']) {
+    const text = fs.readFileSync(path.join(appDir, 'fonts', css), 'utf8');
+    for (const m of text.match(/url\(\.\/([^)]+)\)/g) || []) {
+      const f = m.slice(6, -1);
+      if (fontFiles.indexOf(f) === -1) die('app/fonts/' + css + ' names ' + f + ', which is not in app/fonts/');
+    }
+  }
+} else if (fs.existsSync(fontsOut)) {
+  fs.rmSync(fontsOut, { recursive: true });
+}
+
+const SW_FONTS = "  './fonts/fonts.css', './fonts/marcellus-normal-latin.woff2', './fonts/karla-normal-latin.woff2'," +
+  " './fonts/newsreader-normal-latin.woff2', './fonts/newsreader-italic-latin.woff2',";
+function writeIfChanged(file, before, after) { if (after !== before) fs.writeFileSync(file, after, 'utf8'); }
+{
+  const swOut = path.join(OUT, 'sw.js');
+  const before = fs.readFileSync(swOut, 'utf8');
+  let after = before.replace(/\n[ \t]*'\.\/fonts\/[^\n]*/g, '');
+  if (FONTS === 'self') {
+    if (!/var PRECACHE = \[\n/.test(after)) die(path.relative(repo, swOut) + ' has no PRECACHE list to add the fonts to');
+    after = after.replace(/var PRECACHE = \[\n/, m => m + SW_FONTS + '\n');
+  }
+  writeIfChanged(swOut, before, after);
+
+  const hdrOut = path.join(OUT, '_headers');
+  const hBefore = fs.readFileSync(hdrOut, 'utf8');
+  const csp = /Content-Security-Policy: [^\n]*/;
+  if (!csp.test(hBefore)) die(path.relative(repo, hdrOut) + ' carries no Content-Security-Policy to adjust for the fonts');
+  let hAfter = hBefore.replace(csp, line => {
+    let l = line.replace(/ https:\/\/fonts\.googleapis\.com/g, '').replace(/ https:\/\/fonts\.gstatic\.com/g, '');
+    if (FONTS === 'google') {
+      l = l.replace(/(style-src [^;]*)/, '$1 https://fonts.googleapis.com').replace(/(font-src [^;]*)/, '$1 https://fonts.gstatic.com');
+    }
+    return l;
+  });
+  /* A preview is a real site on a real address, so it asks not to be indexed:
+     two copies of the app in a search engine is one too many. */
+  if (PREVIEW && !/X-Robots-Tag/.test(hAfter)) hAfter = hAfter.replace(/\n\/\*\n/, m => m + '  X-Robots-Tag: noindex\n');
+  writeIfChanged(hdrOut, hBefore, hAfter);
+}
+
+const coverOut = path.join(OUT, 'index.html');
 const coverStamp = '<!-- inCommon ' + VERSION + ' cover  |  built ' +
-  new Date().toISOString().slice(0, 10) + ' -->';
+  new Date().toISOString().slice(0, 10) + NOTE + ' -->';
 const coverTmp = coverOut + '.building';
 try {
   fs.writeFileSync(coverTmp, coverStamp + '\n' + cover, 'utf8');
@@ -567,6 +732,7 @@ try {
    the icons and the service worker all 404 while the page itself loads. */
 const assets = fs.readdirSync(BUNDLE)
   .filter(f => f !== 'index.html' && f !== '_redirects' && f !== '_headers' && !/\.md$/i.test(f))
+  .map(f => fs.statSync(path.join(BUNDLE, f)).isDirectory() ? f + '/*' : f)
   .sort();
 
 function writeRedirects(atDir, label, why) {
@@ -586,7 +752,7 @@ function writeRedirects(atDir, label, why) {
     '# The bare address is the cover. Everything else is the app.',
     rule('/', 'index.html'),
     rule('/index.html', 'index.html')
-  ].concat(assets.map(a => rule('/' + a, a)))
+  ].concat(assets.map(a => /\/\*$/.test(a) ? rule('/' + a, a.slice(0, -1) + ':splat') : rule('/' + a, a)))
     .concat([
       '',
       '# Every other address is a hash route, so it resolves to the app rather',
@@ -600,7 +766,7 @@ function writeRedirects(atDir, label, why) {
   return { label: label, rules: assets.length + 3, to: to };
 }
 
-const redirectsWritten = [
+const redirectsWritten = PREVIEW ? [] : [
   writeRedirects(repo, 'repo root',
     'Serves the app when the REPOSITORY itself is the deploy. The repo root has no index.html and never will: deploy/ is a shelf holding one folder per build.'),
   writeRedirects(path.join(repo, 'deploy'), 'deploy/',
@@ -625,6 +791,22 @@ const redirectsWritten = [
 
    The file is rewritten rather than patched in place, because a regex over
    somebody else's edit is how a generator corrupts a file it does not own. */
+/* Each folder under preview/ is an unpublished deploy waiting to be tried, and
+   a git connected site serves one only as a BRANCH deploy of the branch named
+   after it: preview/fonts-self is the branch preview-fonts-self. The site's own
+   publish directory never names a preview, so pushing that branch cannot change
+   what the public address serves (docs/FONTS.md). */
+function previewContexts() {
+  const root = path.join(repo, 'preview');
+  if (!fs.existsSync(root)) return [];
+  const dirs = fs.readdirSync(root).filter(d => fs.existsSync(path.join(root, d, 'index.html'))).sort();
+  if (!dirs.length) return [];
+  return ['# Unpublished previews, built with tools/build-bundle.js --preview. Each is',
+    '# served only as a branch deploy of the branch named after its folder.']
+    .concat(...dirs.map(d => ['', '[context."preview-' + d + '"]', '  publish = "preview/' + d + '"']))
+    .concat(['']);
+}
+
 function writeNetlifyToml() {
   const dir = path.relative(repo, BUNDLE).split(path.sep).join('/');
   const out = [
@@ -653,16 +835,17 @@ function writeNetlifyToml() {
     '  publish = "' + dir + '"',
     '  command = ""',
     ''
-  ].join('\n');
+  ].concat(previewContexts()).join('\n');
   const at = path.join(repo, 'netlify.toml');
   const before = fs.existsSync(at) ? fs.readFileSync(at, 'utf8') : '';
   fs.writeFileSync(at, out, 'utf8');
   const wasDir = (/publish\s*=\s*"([^"]+)"/.exec(before) || [])[1];
   return { dir: dir, moved: wasDir && wasDir !== dir ? wasDir : null };
 }
-const netlify = writeNetlifyToml();
+const netlify = PREVIEW ? null : writeNetlifyToml();
 
-console.log('build-bundle: wrote ' + outPath);
+console.log('build-bundle: wrote ' + outPath + (PREVIEW ? '   (PREVIEW: the bundle folder, the root _redirects and netlify.toml were not touched)' : ''));
+console.log('  fonts:           ' + FONTS + (FONTS === 'self' ? '   (app/fonts/ copied to ' + path.relative(repo, fontsOut) + '/, Google removed from the CSP)' : '   (Google Fonts)'));
 console.log('  cover:           ' + coverOut + '  (+ ' + THREE_FILES.join(', ') + ')');
 console.log('  version:         ' + VERSION + '   (line 1 of the bundle, taken from the sw.js beside it)');
 console.log('  ' + bytes.toLocaleString() + ' bytes');
@@ -672,5 +855,7 @@ console.log('  modules inlined: ' + report.modules.length + ' of ' + (VENDORED.l
 console.log('  html lang="en":  ' + report.lang);
 console.log('  stylesheet:      ' + report.style);
 redirectsWritten.forEach(r => console.log('  _redirects:      ' + r.rules + ' rules at ' + r.label + ', pointing at ' + r.to + '/'));
-console.log('  netlify.toml:    publish = ' + netlify.dir +
-  (netlify.moved ? '   (was ' + netlify.moved + ', which would have served the previous bundle)' : ''));
+if (netlify) {
+  console.log('  netlify.toml:    publish = ' + netlify.dir +
+    (netlify.moved ? '   (was ' + netlify.moved + ', which would have served the previous bundle)' : ''));
+}

@@ -18986,6 +18986,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         if (code === 'NO_ACCOUNT') return { ok: false, reason: 'noAccount' };
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
         if (code === 'ALREADY') return { ok: false, reason: 'already' };
+        if (code === 'REGION') return { ok: false, reason: 'region' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
@@ -18993,13 +18994,20 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       });
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
+  /* country is the page's guess at where the reader is, from the device's time
+     zone, as two letters or nothing. The server uses it to say whether
+     Luminary is sold there and at what price, and refuses a checkout for a
+     country it does not sell to yet. It is a guess and the server treats it as
+     one: what Stripe collects at checkout is what it acts on in the end. */
   function billingStatus(opts) {
-    return billingCall({ action: 'status', sync: !!(opts && opts.sync) }).then(function (r) {
+    var country = opts && /^[A-Z]{2}$/.test(String(opts.country || '')) ? opts.country : undefined;
+    return billingCall({ action: 'status', sync: !!(opts && opts.sync), country: country }).then(function (r) {
       return r.ok ? { ok: true, status: r.data.status || null } : r;
     });
   }
-  function billingCheckout(plan, returnTo) {
-    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo }).then(function (r) {
+  function billingCheckout(plan, returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo, country: country }).then(function (r) {
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }
@@ -20616,8 +20624,12 @@ input[type="date"]{color-scheme:dark}
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="inCommon">
 <meta name="theme-color" content="#05060a">
+<!-- fonts:google  Where the three interface faces come from. tools/build-bundle.js
+     replaces everything between this marker and the closing one with a link to
+     ./fonts/fonts.css when it is run with --fonts self, so keep both markers. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
+<!-- /fonts:google -->
 
 
 
@@ -23743,7 +23755,9 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
         </div>
@@ -24150,6 +24164,7 @@ input[type="date"]{color-scheme:dark}
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
+        <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Accessibility</a>
       </nav>
     </div>
     <!-- The Settings footer: the Terms directly above the Privacy Policy again,
@@ -24160,6 +24175,7 @@ input[type="date"]{color-scheme:dark}
       <nav aria-label="Legal, footer" style="display:flex;flex-direction:column;align-items:center">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
+        <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -28486,7 +28502,9 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+          </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
         </div>
@@ -28887,6 +28905,7 @@ input[type="date"]{color-scheme:dark}
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
+        <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Accessibility</a>
       </nav>
     </div>
     <!-- The Settings footer: the Terms directly above the Privacy Policy again,
@@ -28897,6 +28916,7 @@ input[type="date"]{color-scheme:dark}
       <nav aria-label="Legal, footer" style="display:flex;flex-direction:column;align-items:center">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
+        <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -35775,6 +35795,18 @@ class Component extends DCLogic {
      only, so a theme switched with no signal keeps its colour and falls back to
      the interface face for type. The row says so rather than leaving it to look
      like a bug. */
+  /* Where a theme's face is fetched from. 'google' in the source and in every
+     published build. tools/build-bundle.js --fonts self rewrites this one word,
+     and the face is then read from the copy in ./fonts/ beside the page, which
+     is how the self hosted fonts are tried in an unpublished deploy
+     (docs/FONTS.md). The build asserts it found the word, so rename it there
+     too if it is ever renamed here. */
+  FONTS = 'google';
+  faceHref(face) {
+    return this.FONTS === 'self'
+      ? './fonts/' + face[0].toLowerCase() + '.css'
+      : 'https://fonts.googleapis.com/css2?family=' + face[1] + '&display=swap';
+  }
   themeFace(key) {
     const t = this.THEMES[key];
     if (!t || !t.face) return;
@@ -35785,7 +35817,7 @@ class Component extends DCLogic {
     try {
       const l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'https://fonts.googleapis.com/css2?family=' + t.face[1] + '&display=swap';
+      l.href = this.faceHref(t.face);
       l.onload = () => { this._faces[fam] = 'ready'; if (this.state.themeFaceOffline) this.setState({ themeFaceOffline: false }); };
       l.onerror = () => { this._faces[fam] = 'failed'; if (this.state.themeKey === key) this.setState({ themeFaceOffline: true }); };
       document.head.appendChild(l);
@@ -39442,6 +39474,51 @@ class Component extends DCLogic {
     else setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
   }
   lumReturnTo() { return location.origin + location.pathname + '#/oracle'; }
+  /* WHERE THE READER IS, FOR LUMINARY ONLY: the two letter country the device's
+     time zone names, or the language's region when the zone says nothing
+     (UTC), or null. Only the countries that decide what Luminary may do are
+     named: the twenty seven of the EU, Monaco (inside the French VAT area), and
+     the United Kingdom with the Isle of Man (inside the UK's). Luminary is not
+     sold there yet, by the owner's decision of 12 October 2026, because a
+     seller outside them owes VAT from the first sale; the server holds the
+     switch and says per country whether it is on (docs/LUMINARY-EU-UK.md).
+     This is a guess, which is why the server also checks the address and the
+     card Stripe collects, and refunds a payment the guess let through. Jersey
+     and Guernsey are left out on purpose: neither is in the UK's VAT area. */
+  LUM_TZ = {
+    Vienna: 'AT', Brussels: 'BE', Sofia: 'BG', Zagreb: 'HR', Nicosia: 'CY', Famagusta: 'CY', Prague: 'CZ',
+    Copenhagen: 'DK', Tallinn: 'EE', Helsinki: 'FI', Mariehamn: 'FI', Paris: 'FR', Berlin: 'DE', Busingen: 'DE',
+    Athens: 'GR', Budapest: 'HU', Dublin: 'IE', Rome: 'IT', Vatican: 'IT', Riga: 'LV', Vilnius: 'LT',
+    Luxembourg: 'LU', Malta: 'MT', Amsterdam: 'NL', Warsaw: 'PL', Lisbon: 'PT', Madeira: 'PT', Azores: 'PT',
+    Bucharest: 'RO', Bratislava: 'SK', Ljubljana: 'SI', Madrid: 'ES', Ceuta: 'ES', Canary: 'ES', Stockholm: 'SE',
+    Monaco: 'MC', London: 'GB', Belfast: 'GB', Isle_of_Man: 'IM'
+  };
+  lumCountry() {
+    let tz = '', loc = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    try { loc = String(navigator.language || ''); } catch (e) {}
+    if (/^(GB|GB-Eire)$/.test(tz)) return 'GB';
+    if (tz === 'Eire') return 'IE';
+    const m = /^(?:Europe|Atlantic|Africa|Asia)\/(\w+)$/.exec(tz);
+    if (m && this.LUM_TZ[m[1]]) return this.LUM_TZ[m[1]];
+    if (tz && tz !== 'UTC' && tz !== 'Etc/UTC') return null;
+    const r = (/[-_]([A-Za-z]{2})$/.exec(loc) || [])[1];
+    const code = r ? r.toUpperCase() : '';
+    return Object.keys(this.LUM_TZ).some(k => this.LUM_TZ[k] === code) ? code : null;
+  }
+  /* The price the server quoted for this reader's country, formatted here, or
+     null when it quoted none (an older server), in which case LUM_PLANS stands. */
+  lumPriceRows(lum) {
+    const p = lum && lum.price;
+    if (!p || !p.currency || !(p.monthly > 0) || !(p.annual > 0)) return null;
+    let fmt;
+    try { fmt = new Intl.NumberFormat('en', { style: 'currency', currency: String(p.currency).toUpperCase() }); } catch (e) { return null; }
+    const f = c => fmt.format(c / 100);
+    const save = Math.round((1 - p.annual / (12 * p.monthly)) * 100);
+    const tax = p.taxIncluded ? ' incl. VAT' : '';
+    return [['monthly', 'Monthly', f(p.monthly), 'per month' + tax, '', f(p.monthly) + '/mo'],
+      ['annual', 'Yearly', f(p.annual), 'per year \u00b7 ' + f(p.annual / 12) + '/mo' + tax, save > 0 ? 'Save ' + save + '%' : '', f(p.annual) + '/yr']];
+  }
   lumAuto() {
     const cs = this.state.cloudStatus, C = this.cloud;
     const who = cs && cs.mode === 'cloud' ? String(cs.email || 'signed in') : null;
@@ -39462,7 +39539,7 @@ class Component extends DCLogic {
     const C = this.cloud;
     if (!C || typeof C.billingStatus !== 'function') return;
     clearTimeout(this._lumT);
-    C.billingStatus({ sync: !!sync }).then(r => {
+    C.billingStatus({ sync: !!sync, country: this.lumCountry() }).then(r => {
       const was = this.state.lum;
       const lum = r && r.ok && r.status ? { ...r.status }
         : { isPremium: false, billingConfigured: false, failed: r && ['notSetUp', 'notConfigured'].indexOf(r.reason) === -1 ? (r.reason || 'error') : null };
@@ -39484,11 +39561,12 @@ class Component extends DCLogic {
     const C = this.cloud;
     if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
     this.setState({ lumBusy: 'checkout' });
-    C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo()).then(r => {
+    C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo(), this.lumCountry()).then(r => {
       if (r && r.ok) { location.href = r.url; return; }
       this.setState({ lumBusy: null });
       const reason = (r && r.reason) || 'error';
       if (reason === 'already') { this.toastMsg('You already have Codex Luminary. Manage it from the billing portal.'); this.lumFetch(true, 0); return; }
+      if (reason === 'region') { this.lumFetch(false, 0); return; }
       this.toastMsg(reason === 'notConfigured' || reason === 'notSetUp' ? 'Payments are being set up. Check back soon.'
         : reason === 'signedOut' ? 'Sign in again to continue.' : 'Checkout could not open. Please try again.');
     });
@@ -39544,7 +39622,12 @@ class Component extends DCLogic {
     const ov = r ? paras(r.overview) : [];
     const blocked = sample || off || !!r || locked || lumWait || deepGate;
     const waiting = !blocked && !err && signedIn && consented;
-    const plan = st.lumPlan || 'annual', planRow = this.LUM_PLANS.find(x => x[0] === plan);
+    /* regionOpen is the server's answer for the country the page guessed. Only
+       an explicit false closes the gate, so an older server that never sends
+       it sells exactly as before. */
+    const lumShut = !!lum && lum.regionOpen === false;
+    const plans = this.lumPriceRows(lum) || this.LUM_PLANS;
+    const plan = st.lumPlan || 'annual', planRow = plans.find(x => x[0] === plan);
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
     return {
       orIcon: this.uiIcon('oracle'),
@@ -39585,15 +39668,19 @@ class Component extends DCLogic {
       orLumManage: () => this.lumManage(),
       orLumGate: locked,
       orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
-      orLumPlansOn: !!(lum && lum.billingConfigured),
-      orLumPlans: this.LUM_PLANS.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
+      orLumPlansOn: !!(lum && lum.billingConfigured) && !lumShut,
+      orLumPlans: plans.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
         bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
-      orLumBuyOn: !!(lum && lum.billingConfigured),
+      orLumBuyOn: !!(lum && lum.billingConfigured) && !lumShut,
+      /* The renewal terms stand beside a purchase; where none is offered they would
+         describe one that is not there. */
+      orLumRenewOn: !lumShut,
       orLumCta: st.lumBusy === 'checkout' ? 'Opening secure checkout…' : 'Become a Luminary · ' + planRow[5],
       orLumBuy: () => this.lumBuy(),
-      orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured),
+      orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured || lumShut),
       orLumNote: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : lumShut ? 'Codex Luminary is not available in your country yet.'
         : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
       orLumRetryOn: !!(lum && lum.failed),
       orLumRetry: () => this.lumFetch(true, 0),

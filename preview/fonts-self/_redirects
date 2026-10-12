@@ -1,0 +1,31 @@
+# The bare address is the cover. Every other address is the app.
+#
+# There are two pages in this folder. index.html is the Event Horizon cover,
+# which is what a visitor meets, and app.html is the app itself, which is what
+# the arrow on the cover leads to.
+#
+# The router is the hash: a screen is /app.html#/spirit/tarot, and the server
+# never sees the part after the #. What the server does see is whatever someone
+# typed, pasted or bookmarked before it, and with no rule here a host answers
+# 404 for anything that is not a file in this folder. That is the broken link:
+# the site is deployed, complete and correct, and every address but the bare
+# one lands on the host's not-found page.
+#
+# THE CATCH-ALL POINTS AT THE APP, NOT AT THE COVER. An address that names a
+# screen is a reader asking for that screen, and answering it with the cover is
+# one more click and nothing on the page saying why. The cover is only what you
+# get when you asked for nothing in particular.
+#
+# The one case no rule here can reach is a hash on the bare address, which is
+# the shape every link written before this cover existed has: /#/spirit/dreams
+# arrives as "/" and there is nothing in the request to distinguish it. The
+# cover forwards that itself, in a synchronous script above the renderer, so
+# the reader never sees it.
+#
+# 200 rather than 301, so the address the reader typed stays in the bar and
+# the app can still read it.
+
+/                /index.html   200
+/index.html      /index.html   200
+
+/*               /app.html     200

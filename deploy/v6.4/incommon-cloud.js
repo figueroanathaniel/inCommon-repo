@@ -1163,6 +1163,7 @@
         if (code === 'NO_ACCOUNT') return { ok: false, reason: 'noAccount' };
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
         if (code === 'ALREADY') return { ok: false, reason: 'already' };
+        if (code === 'REGION') return { ok: false, reason: 'region' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
         if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
@@ -1170,13 +1171,20 @@
       });
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
+  /* country is the page's guess at where the reader is, from the device's time
+     zone, as two letters or nothing. The server uses it to say whether
+     Luminary is sold there and at what price, and refuses a checkout for a
+     country it does not sell to yet. It is a guess and the server treats it as
+     one: what Stripe collects at checkout is what it acts on in the end. */
   function billingStatus(opts) {
-    return billingCall({ action: 'status', sync: !!(opts && opts.sync) }).then(function (r) {
+    var country = opts && /^[A-Z]{2}$/.test(String(opts.country || '')) ? opts.country : undefined;
+    return billingCall({ action: 'status', sync: !!(opts && opts.sync), country: country }).then(function (r) {
       return r.ok ? { ok: true, status: r.data.status || null } : r;
     });
   }
-  function billingCheckout(plan, returnTo) {
-    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo }).then(function (r) {
+  function billingCheckout(plan, returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo, country: country }).then(function (r) {
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }

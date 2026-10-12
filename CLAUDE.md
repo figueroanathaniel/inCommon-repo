@@ -2411,6 +2411,98 @@ named the safety gate, the claim tags and the device storage, two of which were
 no longer true. The Settings card and the Terms carry the same opening; the
 disclaimers went to the Terms, sections 3 and 4.
 
+## The accessibility statement is the third legal page
+Asked for by the owner on 12 October 2026. `app/accessibility.html` is built the
+same way as the Terms and the Privacy Policy (no script, no web font, no third
+party request) and `build-bundle.js` copies it with them (`LEGAL_FILES`). It is
+linked in Settings in both shells, in the Support & legal list and in the footer,
+**directly under the Privacy Policy**, and from the two legal pages. K55's order
+rule is untouched: the Terms still sit directly above the Privacy Policy, and the
+statement comes after both.
+
+**Every claim on it is measured, not hoped.** The 4.5:1 floor in every theme,
+the Higher contrast setting, zoom left on, the skip link, focus held and returned
+by dialogs, arrow keys in menus, announcements, the two chart summaries, 44px
+targets, and reduced motion. It says "partially conformant" because there has
+been no independent audit, and it names the known limits: the wheel's house
+numbers (the `[data-chart]` exemption), the cover's WebGL image, the theme sweep
+measuring Today only, and the third party pages. **If a change makes a sentence
+on it untrue, change the page and its date in the same change.** Feedback goes
+through Contact Support under "Something is not working": no new topic was added,
+because `server/support.sql` checks the topic list and a new one would fail until
+the owner ran the SQL again.
+
+## The fonts can be swapped, and the real site still uses Google
+Added 12 October 2026 (`docs/FONTS.md`). The four faces live in `app/fonts/`
+(WOFF2, OFL 1.1, Google's own `@font-face` rules pointed at local files).
+**Every published build still loads Google Fonts.** `build-bundle.js --fonts
+self` swaps a build to the local copy: the block between `<!-- fonts:google -->`
+and `<!-- /fonts:google -->` in the app and the cover becomes one link to
+`./fonts/fonts.css`, the app's `FONTS = 'google'` becomes `'self'` (which
+`faceHref()` reads for Dawn's Petrona), the fonts are copied in, the service
+worker precaches the first screen's faces, and the two Google origins leave the
+CSP. The build refuses if either marker or the `FONTS` word goes missing, so the
+swap cannot quietly stop being possible, and it refuses a self build that still
+names Google anywhere except `faceHref()`'s own Google branch (`FACE_GOOGLE`).
+
+**`--preview <dir>` builds a whole site into its own folder and touches nothing
+else**: no write to `deploy/`, no root `_redirects`, no `netlify.toml`. It is
+seeded from the bundle folder's hand written files and adds `X-Robots-Tag:
+noindex`. It refuses to write inside `deploy/` or `app/`. `preview/fonts-self/`
+is the committed result, and `netlify.toml` gives each `preview/<name>` a branch
+deploy context, `preview-<name>`, so pushing that branch serves it at its own
+address. `check-competitor-surface` skips `preview/`, as it skips `deploy/`.
+
+**Switching the real site is `FONTS_DEFAULT` plus the Privacy Policy, together.**
+A production build refuses a self hosted bundle while `privacy.html` names Google
+Fonts, and a Google bundle once it stops naming it. A google build also puts the
+CSP origins back and takes the font lines out of `sw.js`, so the word can be
+flipped either way and every file follows; on the current bundle it changes none
+of them.
+
+## Luminary is not sold in the EU or the UK yet
+Decided by the owner on 12 October 2026 (`docs/LUMINARY-EU-UK.md`): a seller
+outside them owes VAT from the first sale, so the purchase is held there until
+volume pays for the registrations. Everything else stays free and open.
+
+**Three layers, and only the last one is the wall.** The page guesses a country
+from the time zone (`lumCountry()`, the EU 27, Monaco, the UK and the Isle of
+Man, and nothing else) and sends it with the status and the checkout; the server
+answers `regionOpen: false` and the gate shows "Codex Luminary is not available
+in your country yet." in the existing note slot, with no plans and no button;
+a checkout for that country is refused with `REGION` (reason `region`, K34b)
+before Stripe is asked. And because a time zone is only a guess, the webhook
+reads the billing address and the card's issuing country on
+`checkout.session.completed` and **cancels and refunds** a subscription where
+either is in the EU or the UK (`refuseIfClosed()`). Every step tolerates a
+retried webhook: the cancel is skipped once cancelled, and the refund carries an
+idempotency key. Only an explicit `regionOpen: false` closes the page, so an
+older server sells exactly as before.
+
+**The rest is built and switched off.** `LUMINARY_TAX` turns on Stripe Tax for
+every checkout; `LUMINARY_SELL_EU_UK` opens the two markets and is refused unless
+`LUMINARY_TAX` is on too. Open, an EU or UK reader is quoted and charged a
+VAT inclusive EUR or GBP price (`LOCAL`, placeholders until the owner sets
+them), created on the same product under `incommon_luminary_<plan>_<cur>`, with
+VAT number collection and the 14 day withdrawal waiver as a required tick.
+The page formats whatever price the status quotes (`lumPriceRows()`), and falls
+back to `LUM_PLANS`; the server's US quote formats identically to it. With both
+switches off, a US checkout sends Stripe exactly the fields it always did: that
+was checked against a fake Stripe, along with the refusal, the refund, the
+retried webhook and both switches on. Do not let a checkout through for a closed
+country "because the page already hid the button": the page is courtesy.
+
+## The app stores
+The owner confirmed on 12 October 2026 that inCommon ships on the App Store and
+Google Play as well as the web. `docs/APP-STORE-SETUP.md` is the requirement list
+and nothing in it is built yet. The three things that block a first submission
+are in-app account deletion (both stores; today it is a Contact Support request),
+an on screen disclosure naming Moonshot AI before the Oracle sends anything
+(Apple 5.1.2(i), which reverses the "no disclaimers" rule for that one screen,
+so it is the owner's call), and how Luminary is paid for inside the apps. The
+Apple EULA terms are drafted there for the Terms, to be added in the change that
+ships the first app build, not before.
+
 ## Swiping on the phone is one chain, read left to right
 The order is Today, the three charts (Human Design, Astrology, Numerology), the
 six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
