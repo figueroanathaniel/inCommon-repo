@@ -19,9 +19,11 @@ obligations, and so on).
 Google" section to the Terms** with Apple's ten minimum terms in it. The Terms
 are what a reader agrees to on sign up, on every platform, so they stay the
 agreement that matters; the section makes them safe to use with either EULA and
-covers the day you upload a custom one. The text is drafted at the end of this
-page. Add it to `app/terms.html` in the same change that ships the first app
-build, with the date moved, because the pages describe the build as it is.
+covers the day you upload a custom one. **It is in the Terms now, as section
+22** (added 12 October 2026 with the store billing), and the draft is kept at
+the end of this page for reference. One thing is still owed before the first
+submission: Apple wants the developer's postal address in it, and it says only
+"Florida, United States" until there is one.
 
 **Google Play** has no EULA requirement. The Terms apply as they are, with the
 same section added.
@@ -84,8 +86,8 @@ function and its table, the legal pages, then the two public keys.
 - **Restore purchases** sits in the gate, as Apple requires.
 - **The same products in both stores**: monthly and yearly at US $12.99 and
   $119.99, with the stores' own local prices elsewhere.
-- **The Terms** take the last paragraph of the draft below, and the Privacy
-  Policy names RevenueCat, in the change that fills in the keys.
+- **The Terms** carry the draft below as section 22, and the Privacy Policy
+  names RevenueCat (sections 7, 11 and 15), both added 12 October 2026.
 
 **Switched off until the keys are set.** With `RC_KEYS` empty the apps sell
 nothing: the gate says Luminary is not available in the app yet, and Stripe is
@@ -156,10 +158,10 @@ Encrypted in transit: yes. Deletion can be requested: yes, in the app and at
 
 ## Draft section for the Terms
 
-To add to `app/terms.html` when the first app build ships, as its own section
-before "Changes to these Terms", with the table of contents and the date
-updated. Fill in the address once there is one: Apple requires the developer's
-name and address in it.
+Added to `app/terms.html` on 12 October 2026 as section 22, before Contact, with
+a sentence naming RevenueCat appended to the last paragraph. Kept here as the
+reference text. Fill in the address once there is one: Apple requires the
+developer's name and address in it.
 
 > **Apps from Apple and Google**
 >
@@ -199,4 +201,4 @@ name and address in it.
 > refunds for that purchase. You manage and cancel it in your Apple or Google
 > account settings, not in Manage billing.
 
-The last paragraph only belongs once the stores' billing is used (item 3).
+The last paragraph is the store billing one (item 3), which is built.

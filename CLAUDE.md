@@ -2515,8 +2515,9 @@ disclaimers"** and it does not reach the website; do not widen it to the web or
 lengthen it without the owner. **Luminary in the apps is the stores' own
 billing, through RevenueCat**, built and switched off until its keys are set:
 see "Luminary in the apps is RevenueCat's" below. The apps never show Stripe.
-The Apple EULA terms are drafted in that doc for the Terms, to be added in the
-change that ships the first app build, not before.
+Apple's minimum EULA terms are Terms section 22, "Apps from Apple and Google"
+(added 12 October 2026 at the owner's request), which still owes the
+developer's postal address before the first submission.
 
 ## The store apps are a Capacitor shell around the bundle
 Started 12 October 2026 (`docs/NATIVE-APP.md`). `native/` is Capacitor 8.5.3,
@@ -2584,9 +2585,13 @@ sees the plan line marked App Store or Google Play and no Manage billing. The
 website's EU and UK hold does not apply in the apps, because the stores are the
 seller and pay the VAT.
 
-**The legal pages change with the keys, not before**: nothing reaches RevenueCat
-while `RC_KEYS` is empty, so the Privacy Policy does not name it yet. The doc
-drafts the paragraph, the provider row and the Terms section for that change.
+**The legal pages were written ahead of the keys**, by the owner's request of
+12 October 2026: Terms section 7 (an app subscription is priced, cancelled and
+refunded by the store, and deleting the account does not cancel it), section
+12 and section 22 (Apple's minimum terms, Google Play, store billing; Contact
+is 23 now); Privacy Policy sections 2, 7, 11 and 15 (RevenueCat named, with
+what it receives and returns); and `delete-account.html`. If what the store
+function stores or what RevenueCat is sent changes, those change with it.
 Driven with the plugin stubbed, both shells and both platforms: the configure
 call with the user id, offerings, buy, cancel, a failed buy, restore with and
 without a purchase, the member line, Manage, the deletion dialog's store line,

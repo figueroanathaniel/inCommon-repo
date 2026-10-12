@@ -104,29 +104,26 @@ and `annual` (or `year`) in them, because that is how the plan is read.
    billing and oracle read the new table, and account deletes the reader's
    RevenueCat record and their row.
 
-### 4. The legal pages, in the same change as the keys
+### 4. The legal pages: DONE, except one line
 
-The pages describe the build, so the change that fills in `RC_KEYS` also
-updates them, with their dates:
+Added on 12 October 2026, at the owner's request, ahead of the keys:
 
-- **Terms**: add the "Apps from Apple and Google" section drafted at the end of
-  `docs/APP-STORE-SETUP.md`, including its last paragraph about store billing.
-- **Privacy Policy**, section 7 (Codex Luminary payments), add:
+- **Terms** section 7 says how an app subscription is priced, cancelled and
+  refunded (by the store), and that deleting the account does not cancel it;
+  section 12 names Apple, Google and RevenueCat; **section 22, "Apps from Apple
+  and Google"**, carries Apple's minimum EULA terms, Google Play's line, and the
+  store billing paragraph. Contact moved to section 23.
+- **Privacy Policy** section 2 covers the iPhone and Android apps; section 7
+  names RevenueCat and what it receives and returns; section 11 has rows for
+  Apple and Google and for RevenueCat; section 15 says deleting the account
+  deletes the RevenueCat record and does not cancel a store subscription.
+- **`delete-account.html`** says the same.
 
-  > In the iPhone and Android apps, Codex Luminary is bought through Apple's
-  > App Store or Google Play, which take the payment under their own terms and
-  > privacy policies. We use RevenueCat to check those purchases: RevenueCat
-  > receives your account's user identifier and the purchase records the store
-  > provides. From it we receive and keep which store sold the subscription,
-  > your plan, whether it is active, when the current period ends, whether it
-  > renews, and where you manage it.
-
-- **Privacy Policy**, section 11 (Service providers), add a row: RevenueCat,
-  "Checks Codex Luminary purchases made in the apps", "Your user identifier;
-  purchase records from Apple or Google".
-- **Privacy Policy**, sections 15 and 16, and `delete-account.html`: deleting
-  the account also deletes the RevenueCat record, and a store subscription is
-  cancelled in the store's settings, not by deleting the account.
+**The one line left:** Apple's terms want the developer's **postal address** in
+section 22, and it says only "Florida, United States" because there is no
+address to give yet. Put the full address there (or the LLC's, once it exists:
+`docs/BUSINESS-SETUP.md`) before the first App Store submission, and move the
+date on both pages.
 
 ### 5. The keys, and a test
 
