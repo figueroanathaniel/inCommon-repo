@@ -30,6 +30,8 @@ const repo = path.resolve(__dirname, '..');
 const LEX = path.join(repo, 'app', 'timing-lexicon.js');
 const APP = path.join(repo, 'app', 'inCommonApp v2.dc.html');
 const TOPO = path.join(repo, 'app', 'hd-topology.js');
+const ICHING = path.join(repo, 'app', 'iching.js');
+const MODTESTS = path.join(repo, 'tools', 'run-module-tests.js');
 
 let fails = 0, passes = 0;
 function row(id, label, ok, detail) {
@@ -49,7 +51,7 @@ function strings() {
     if (typeof o === 'string') out.push({ at: at, s: o });
     else if (o && typeof o === 'object') Object.keys(o).forEach(k => walk(o[k], at + '.' + k));
   };
-  ['PACE', 'MOVE', 'MEET', 'PLACE', 'GATE', 'LINE', 'CHANNEL', 'NUMBER'].forEach(k => walk(L[k], k));
+  ['PACE', 'MOVE', 'MEET', 'PLACE', 'GATE', 'LINE', 'GATE_LINE', 'CHANNEL', 'NUMBER'].forEach(k => walk(L[k], k));
   return out;
 }
 
@@ -139,6 +141,19 @@ const lines = new Set(Object.values(L.LINE));
 row('TL6', '64 gates, each with a distinct sky, held, open and question, and six distinct lines',
   gOk && Object.keys(parts).every(k => parts[k].size === 64) && lines.size === 6);
 
+/* TL6b: every gate has six lines of its own, and the reading returns them. */
+let glOk = true;
+const glAll = [];
+for (let g = 1; g <= 64; g++) {
+  const ls = L.GATE_LINE[g];
+  if (!Array.isArray(ls) || ls.length !== 6 || ls.some(x => typeof x !== 'string' || x.split(/\s+/).length < 8)) { glOk = false; continue; }
+  for (let l = 1; l <= 6; l++) { glAll.push(ls[l - 1]); if (L.gate(g, l, {}).line !== ls[l - 1]) glOk = false; }
+}
+const TIMEBOUND = /\b(this week|today|tonight|these days|the days)\b/i;
+row('TL6b', '384 gate lines, six per gate, all distinct, each returned for its own gate and line, none tied to a span',
+  glOk && glAll.length === 384 && new Set(glAll).size === 384 && !glAll.some(x => TIMEBOUND.test(x)),
+  glAll.filter(x => TIMEBOUND.test(x)).slice(0, 3).join(' | '));
+
 /* TL7: the held and open readings are what the caller asked for. */
 const g34 = L.gate(34, 2, { held: true }), g34o = L.gate(34, 2, { held: false, partner: 20 });
 row('TL7', 'a held gate reads held, an open one reads open, and a partner names its channel',
@@ -167,6 +182,26 @@ Object.keys(L.NUMBER).forEach(k => asks.push(L.NUMBER[k].ask));
 row('TL12', asks.length + ' questions, each ending in a question mark, none repeated',
   asks.every(q => /\?$/.test(q)) && new Set(asks).size === asks.length);
 
+/* TL15: nothing borrowed. The phrasing distinctive to the Wilhelm and Baynes
+   translation, and the sentences the Book of Changes room had to rewrite, are
+   read out of run-module-tests.js (rows I11 and I12) rather than retyped, so the
+   two lists cannot drift. Then no six word run may be shared with any of the
+   app's own hexagram line readings: hexagram N is gate N, and a gate line that
+   leaned on the hexagram line beside it would be one text wearing two names. */
+const mt = fs.readFileSync(MODTESTS, 'utf8');
+const listOf = name => { const m = mt.match(new RegExp('const ' + name + ' = \\[([\\s\\S]*?)\\];')); return m ? (m[1].match(/'([^']+)'/g) || []).map(x => x.slice(1, -1)) : []; };
+const barred = listOf('WILHELM').concat(listOf('RESTORED'));
+const lexLow = all.map(x => x.s.toLowerCase()).join(' \n ');
+const borrowed = barred.filter(q => lexLow.indexOf(q) !== -1);
+const IC = require(ICHING);
+const six = s => { const w = s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean); const out = new Set(); for (let j = 0; j + 6 <= w.length; j++) out.add(w.slice(j, j + 6).join(' ')); return out; };
+const icSix = new Set();
+IC.all().forEach(h => (h.lines || []).forEach(t => six(String(t)).forEach(k => icSix.add(k))));
+const shared = [];
+glAll.forEach(t => six(t).forEach(k => { if (icSix.has(k)) shared.push(k); }));
+row('TL15', 'no translation phrasing (' + barred.length + ' fixtures from I11 and I12) and no six word run shared with the ' + icSix.size + ' in the hexagram lines',
+  barred.length >= 15 && icSix.size > 1000 && borrowed.length === 0 && shared.length === 0, borrowed.concat(shared).slice(0, 5).join(' | '));
+
 /* TL13: interpretation reads nothing. No ephemeris, no clock, no storage, no network. */
 const reach = ['lonOf', 'Astronomy', 'MinorBodies', 'localStorage', 'sessionStorage', 'indexedDB', 'Date.now', 'new Date', 'fetch(', 'XMLHttpRequest']
   .filter(w => src.indexOf(w) !== -1);
@@ -180,7 +215,7 @@ row('TL14', 'the app loads it, app/sw.js precaches it, build-bundle inlines it',
 
 console.log('');
 console.log('  transits          ' + cov.transits + '  (12 movers x 5 aspects x 16 natal points)');
-console.log('  gate lines        ' + cov.gateLines + '  (64 gates x 6 lines), ' + cov.channels + ' channels');
+console.log('  gate lines        ' + cov.gateLines + '  (64 gates x 6 lines, each written for its gate), ' + cov.channels + ' channels');
 console.log('  number readings   ' + cov.numbers);
 console.log('  entries walked    ' + all.length);
 if (fails) { console.log('check-timing-lexicon: ' + fails + ' failed, ' + passes + ' passed'); process.exit(1); }

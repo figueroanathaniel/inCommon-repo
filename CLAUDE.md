@@ -1830,11 +1830,31 @@ body does at this angle; `MEET[mover][point]` (192), what it does to this
 natal point, naming the return or cycle where a body meets its own place; and
 `PLACE[point][c|e|h]` (48 questions), one per point per kind of contact. Twelve
 movers, five aspects and sixteen natal points are 960 contacts and every one
-reads differently. A gate is `GATE[n]` (`sky`, `held`, `open`, `ask`) plus
-`LINE[1..6]` and `CHANNEL` (the 36 pairs, read when a transit completes one
-with a natal gate). A number is `NUMBER[v][role]` for day, month, year, Life
+reads differently. A gate is `GATE[n]` (`sky`, `held`, `open`, `ask`),
+`GATE_LINE[n][0..5]` (all 384 lines, each written for its own gate) and
+`CHANNEL` (the 36 pairs, read when a transit completes one with a natal gate).
+`LINE[1..6]` stays as the description of what each position is, returned as
+`lineKind`, and is the fallback only if a gate's line were ever missing. A number is `NUMBER[v][role]` for day, month, year, Life
 Path, Challenge (0 to 8) and Pinnacle, masters included where the role can
 reach them. No origin or method field, by the owner's rule of 11 October.
+
+**The 384 lines are each written, not composed, and they are held to it.**
+The owner asked on 12 October 2026 for every gate line to be written. The six
+positions are read as six ways of meeting the gate's theme (the groundwork, the
+gift that works unwatched, the lesson by trial, the door through people, the
+public view others project onto, the long view), and the first draft leaned on
+one sentence frame per position: "comes naturally here, and others..." opened
+about thirty second lines and "seen from a height... were the ones that..."
+about thirty sixth lines. 131 were rewritten for that, and the rule that came
+out of it is the one to keep: **a frame that repeats under the six word cap is
+still a template**, so check four word runs across the lines before believing a
+pass is finished. None of the 384 is a rendering of the oracle text or of
+anybody's line keynotes. TL15 reads the I11 and I12 fixtures out of
+`run-module-tests.js` rather than retyping them, and refuses any six word run
+shared with `iching.js`'s own hexagram lines, because hexagram N is gate N and
+a gate line that leaned on the hexagram line beside it would be one text
+wearing two names. TL6b holds all 384 distinct, six per gate, returned for
+their own gate and line, and free of any span ("this week", "today").
 
 **Gate text is time neutral on purpose.** A gate on this slide can be carried
 by the Moon for hours or Pluto for years, so a gate entry that said "this week"
@@ -1849,8 +1869,8 @@ than with the date alone. The paragraph is drawn as paragraphs
 the number in the seeded order, and the question last. The question follows
 the system the reader last changed (`alignLast`), so a number chosen by hand
 is answered with the number's question. Measured after: ten of ten transit
-paragraphs distinct, about 35% of the words changing per transit or gate click
-and 17% per number click.
+paragraphs distinct, about a third of the words changing per transit click,
+38% per gate click now that each line is its own, and 16% per number click.
 
 **`tools/check-timing-lexicon.js` is the gate.** It reads the key sets out of
 the app (`PLNS`, `ASPECTS`, `anglePoints()`) and out of `hd-topology.js`
