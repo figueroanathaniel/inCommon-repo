@@ -307,10 +307,14 @@ input[type="date"]{color-scheme:dark}
                 <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Time of birth</span>
                 <div style="min-height:48px"><sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
                   <div style="display:flex;gap:6px">
-                    <div role="group" aria-label="Time of birth, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0 6px">
-                      <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:36px;min-height:44px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 16px var(--fu)">
+                    <!-- The two halves fill the box and meet at the colon. They
+                         were 36px each in the middle of it, so a click on the
+                         left of the box, where a field is normally clicked,
+                         landed on the frame and focused nothing. -->
+                    <div role="group" aria-label="Time of birth, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:0">
+                      <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:8px 0 0 8px;text-align:right;color:var(--tx);font:400 16px var(--fu)">
                       <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--mut)">:</span>
-                      <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:36px;min-height:44px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 16px var(--fu)">
+                      <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:0 8px 8px 0;text-align:left;color:var(--tx);font:400 16px var(--fu)">
                     </div>
                     <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="display:flex;gap:4px">
                       <sc-for list="{{ afBmerRows }}" as="m" hint-placeholder-count="3">
@@ -401,10 +405,10 @@ input[type="date"]{color-scheme:dark}
                control everywhere, and BirthTime.parse reads both clocks. -->
           <sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;gap:8px">
-              <div role="group" aria-label="Birth time, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:50px;display:flex;align-items:center;justify-content:center;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 10px">
-                <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:40px;min-height:46px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 17px var(--fu)">
+              <div role="group" aria-label="Birth time, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:50px;display:flex;align-items:center;justify-content:center;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0">
+                <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:12px 0 0 12px;text-align:right;color:var(--tx);font:400 17px var(--fu)">
                 <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--mut)">:</span>
-                <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;width:40px;min-height:46px;background:transparent;border:none;text-align:center;color:var(--tx);font:400 17px var(--fu)">
+                <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:0 12px 12px 0;text-align:left;color:var(--tx);font:400 17px var(--fu)">
               </div>
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="display:flex;gap:5px">
                 <sc-for list="{{ afBmerRows }}" as="m" hint-placeholder-count="3">
@@ -18551,13 +18555,13 @@ class Component extends DCLogic {
       afBtimeH: (this.af('btime').split(':')[0] || ''),
       afBtimeM: (this.af('btime').split(':')[1] || ''),
       typeBtimeH: e => {
-        const h = String(e.target.value || '').replace(/D/g, '').slice(0, 2);
+        const h = String(e.target.value || '').replace(/\D/g, '').slice(0, 2);
         const m = this.af('btime').split(':')[1] || '';
         this.afSet('btime', (h || m) ? h + ':' + m : '');
         this.afClearErr('btime');
       },
       typeBtimeM: e => {
-        const m = String(e.target.value || '').replace(/D/g, '').slice(0, 2);
+        const m = String(e.target.value || '').replace(/\D/g, '').slice(0, 2);
         const h = this.af('btime').split(':')[0] || '';
         this.afSet('btime', (h || m) ? h + ':' + m : '');
         this.afClearErr('btime');
