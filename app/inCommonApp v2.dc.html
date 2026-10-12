@@ -3299,8 +3299,11 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
+          <sc-if value="{{ orLumRestoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRestore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ orLumRestoreLabel }}</button>
+          </sc-if>
           <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orLumRenewText }}</p>
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
@@ -4771,6 +4774,7 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
       <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
         <span style="flex:1;min-width:0;font:600 12px var(--fu);color:var(--tx);text-align:left">Also erase everything on this device</span>
@@ -8081,8 +8085,11 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
+          <sc-if value="{{ orLumRestoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ orLumRestore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ orLumRestoreLabel }}</button>
+          </sc-if>
           <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.</p>
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orLumRenewText }}</p>
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
@@ -9281,6 +9288,7 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
       <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
         <span style="flex:1;min-width:0;font:600 12px var(--fu);color:var(--tx);text-align:left">Also erase everything on this device</span>
@@ -17974,6 +17982,7 @@ class Component extends DCLogic {
     const ready = String(st.adText || '').trim().toLowerCase() === 'delete';
     const WHY = {
       stripe: 'Your Codex Luminary subscription could not be cancelled just now, so nothing was deleted. Try again in a moment.',
+      revenuecat: 'The record of your app purchases could not be reached just now, so nothing was deleted. Try again in a moment.',
       notSetUp: 'Deleting an account from here is not switched on yet. Use Contact Support and choose Delete my account, and it will be done for you.',
       signedOut: 'This device needs to sign in again before the account can be deleted. Sign in on the cover, with your two-step code if you use one, then try again.',
       confirm: 'Type delete to confirm.',
@@ -18003,7 +18012,16 @@ class Component extends DCLogic {
         location.href = this.coverHref();
       });
     };
+    /* A subscription bought in an app is Apple's or Google's to cancel: no
+       seller can cancel one, so deleting the account would leave it renewing.
+       The reader is told before they delete, by the store that holds it when
+       the status says, and in the app whenever the status is not known. */
+    const lum = st.lum, src = lum && lum.isPremium ? lum.source : null;
+    const storeSub = src === 'apple' || src === 'google' || (!lum && this.rcOn());
+    const storeName = src === 'google' || (!src && this.rcPlatform() === 'android') ? 'Google Play' : 'the App Store';
     return {
+      adStoreOn: signedIn && storeSub,
+      adStoreText: 'A Codex Luminary subscription bought in ' + storeName + ' is not cancelled by this. Cancel it in your ' + (storeName === 'Google Play' ? 'Google Play' : 'Apple account') + ' settings first, or it keeps renewing.',
       menuAcctDelOn: signedIn,
       menuAcctDelGo: () => this.setState({ ...shut, quickOpen: false, adOpen: true }),
       adOpen: !!st.adOpen,
@@ -19223,6 +19241,7 @@ class Component extends DCLogic {
       if (this._lumFor) { this._lumFor = null; clearTimeout(this._lumT); this.setState({ lum: null }); }
       return;
     }
+    if (cs.userId && this.rcOn()) this.rcStart(cs.userId);
     if (this._lumFor === who) return;
     if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success' && !this.readLS(this.oracleDeepKey(), false)) return;
     this._lumFor = who;
@@ -19249,6 +19268,9 @@ class Component extends DCLogic {
           this._lumT = setTimeout(() => this.lumFetch(true, (tries || 0) + 1), 2500);
         } else {
           this.setState({ lumReturn: null });
+          /* An app purchase has been taken by the store by now; what is late
+             is the record of it, which the webhook will still bring. */
+          if (this.nativeApp() && !lum.failed) this.toastMsg('Your purchase went through. Codex Luminary opens here as soon as the store confirms it.');
         }
       }
       if (lum.isPremium && !(was && was.isPremium)) this.speak('Codex Luminary is open.', 'polite');
@@ -19256,7 +19278,7 @@ class Component extends DCLogic {
   }
   lumBuy() {
     const C = this.cloud;
-    if (this.nativeApp()) return;
+    if (this.nativeApp()) { if (this.rcOn()) this.rcBuy(); return; }
     if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
     this.setState({ lumBusy: 'checkout' });
     C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo(), this.lumCountry()).then(r => {
@@ -19271,7 +19293,7 @@ class Component extends DCLogic {
   }
   lumManage() {
     const C = this.cloud;
-    if (this.nativeApp()) return;
+    if (this.nativeApp()) { if (this.rcOn()) this.rcManage(); return; }
     if (this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
     this.setState({ lumBusy: 'portal' });
     C.billingPortal(this.lumReturnTo()).then(r => {
@@ -19279,6 +19301,155 @@ class Component extends DCLogic {
       this.setState({ lumBusy: null });
       this.toastMsg(r && r.reason === 'noAccount' ? 'There is no billing account on this sign in.' : 'The billing portal could not open. Please try again.');
     });
+  }
+  /* LUMINARY IN THE APPS: the stores' own billing, through RevenueCat.
+     Decided by the owner on 12 October 2026: inside the iPhone and Android
+     apps Luminary is bought with Apple's In-App Purchase or Google Play
+     Billing, never Stripe, and RevenueCat sits between the app and the two
+     stores (docs/REVENUECAT-SETUP.md). Its Capacitor plugin is installed in
+     native/ and answers to the name Purchases.
+
+     This app has no bundler, so the plugin's JavaScript wrapper is not loaded:
+     rcCall() asks the native side directly through Capacitor's bridge, which
+     is what the wrapper does underneath. The method names and arguments are
+     the plugin's own (configure, logIn, getOfferings, purchasePackage,
+     restorePurchases, getCustomerInfo), checked against version 13.7.3.
+
+     The keys are RevenueCat's PUBLIC app keys, one per store, which are made
+     to ship inside an app; the secret key never leaves the server. While a key
+     is empty the app sells nothing and says Luminary is not available in the
+     app yet, exactly as before this was built, so filling the keys is the
+     switch. The reader's Supabase user id is RevenueCat's app user id, so a
+     purchase is filed under the reader the server already knows, and the page
+     still decides nothing: after a purchase or a restore it asks the store
+     function to read the purchase from RevenueCat, then asks billing for the
+     status like any other reader. */
+  RC_KEYS = { ios: '', android: '' };
+  RC_ENTITLEMENT = 'luminary';
+  rcPlatform() {
+    try { const p = window.Capacitor.getPlatform(); return p === 'ios' || p === 'android' ? p : null; }
+    catch (e) { return null; }
+  }
+  rcOn() {
+    const p = this.nativeApp() ? this.rcPlatform() : null;
+    return !!(p && this.RC_KEYS[p] && window.Capacitor && typeof window.Capacitor.nativePromise === 'function');
+  }
+  rcStore() { return this.rcPlatform() === 'android' ? 'Google Play' : 'App Store'; }
+  rcCall(method, opts) {
+    const cap = window.Capacitor, plug = cap && cap.Plugins && cap.Plugins.Purchases;
+    try {
+      if (plug && typeof plug[method] === 'function') return Promise.resolve(plug[method](opts || {}));
+      if (cap && typeof cap.nativePromise === 'function') return cap.nativePromise('Purchases', method, opts || {});
+    } catch (e) { return Promise.reject(e); }
+    return Promise.reject(new Error('Purchases is not available'));
+  }
+  rcEntitled(info) {
+    const a = info && info.entitlements && info.entitlements.active;
+    return !!(a && a[this.RC_ENTITLEMENT]);
+  }
+  /* A press of Cancel on the store's own sheet is the reader changing their
+     mind, not an error, and is answered with nothing. RevenueCat's code for it
+     is 1, and the bridge carries it as a string. */
+  rcCancelled(e) { return !!e && (e.userCancelled === true || String(e.code) === '1' || !!(e.data && e.data.userCancelled)); }
+  /* Configured once per launch, for the reader signed in; a different reader
+     later is a logIn, which moves RevenueCat to their purchases. Then the
+     offering is asked for, and the reader's own purchases are looked at once,
+     so a purchase the server has not heard about (a webhook not set up yet, or
+     one that failed) is recorded now rather than never. */
+  rcStart(userId) {
+    if (this._rcFor === userId) return;
+    this._rcFor = userId;
+    const step = this._rcConf
+      ? this.rcCall('logIn', { appUserID: userId })
+      : this.rcCall('configure', { apiKey: this.RC_KEYS[this.rcPlatform()], appUserID: userId }).then(() => { this._rcConf = true; });
+    step.then(() => {
+      if (this._rcFor !== userId) return;
+      this.rcOfferings();
+      return this.rcCall('getCustomerInfo').then(r => {
+        const lum = this.state.lum;
+        if (this._rcFor === userId && this.rcEntitled(r && r.customerInfo) && !(lum && lum.isPremium)) this.rcRecord(false);
+      });
+    }).catch(() => { if (this._rcFor === userId) this.setState({ rcPkgs: null, rcErr: 'store' }); });
+  }
+  /* Check again: a launch whose configure failed starts over; one that was
+     configured only asks for the offering again. */
+  rcRetry() {
+    const cs = this.state.cloudStatus, id = cs && cs.userId;
+    if (this._rcConf) { this.rcOfferings(); return; }
+    if (!id) return;
+    this._rcFor = null;
+    this.rcStart(id);
+  }
+  rcOfferings() {
+    this.setState({ rcErr: null });
+    return this.rcCall('getOfferings').then(o => {
+      const cur = o && o.current, pk = cur && Array.isArray(cur.availablePackages) ? cur.availablePackages : [];
+      const find = t => pk.find(p => p && p.packageType === t && p.product) || null;
+      const monthly = find('MONTHLY'), annual = find('ANNUAL');
+      this.setState(monthly || annual ? { rcPkgs: { monthly, annual }, rcErr: null } : { rcPkgs: null, rcErr: 'empty' });
+    }, () => this.setState({ rcPkgs: null, rcErr: 'store' }));
+  }
+  /* The plans as the store prices them, in the reader's own currency and with
+     the store's own tax: Apple and Google set the local price and charge and
+     pay the VAT themselves, which is why the apps need none of the EU and UK
+     arrangements the website does. Same row shape as LUM_PLANS. */
+  rcPlanRows() {
+    const pk = this.state.rcPkgs;
+    if (!pk) return null;
+    const m = pk.monthly && pk.monthly.product, a = pk.annual && pk.annual.product, rows = [];
+    if (m) rows.push(['monthly', 'Monthly', m.priceString, 'per month', '', m.priceString + '/mo']);
+    if (a) {
+      const save = m && m.price > 0 && a.price > 0 ? Math.round((1 - a.price / (12 * m.price)) * 100) : 0;
+      rows.push(['annual', 'Yearly', a.priceString, 'per year' + (a.pricePerMonthString ? ' · ' + a.pricePerMonthString + '/mo' : ''), save > 0 ? 'Save ' + save + '%' : '', a.priceString + '/yr']);
+    }
+    return rows.length ? rows : null;
+  }
+  rcBuy() {
+    const st = this.state, pk = st.rcPkgs;
+    const pkg = pk && (pk[st.lumPlan || 'annual'] || pk.annual || pk.monthly);
+    if (st.lumBusy || !pkg) return;
+    this.setState({ lumBusy: 'checkout' });
+    this.rcCall('purchasePackage', { aPackage: pkg }).then(r => {
+      this.setState({ lumBusy: null });
+      if (this.rcEntitled(r && r.customerInfo)) this.rcRecord(true);
+    }, e => {
+      this.setState({ lumBusy: null });
+      if (this.rcCancelled(e)) return;
+      this.toastMsg(String(e && e.code) === '20' ? 'The purchase is waiting for approval. Codex Luminary opens here once the store confirms it.'
+        : 'The purchase did not finish. Please try again.');
+    });
+  }
+  /* Apple requires a way to restore a purchase made on another device or
+     before a reinstall, and it is RevenueCat's restorePurchases. */
+  rcRestore() {
+    if (this.state.lumBusy) return;
+    this.setState({ lumBusy: 'restore' });
+    this.rcCall('restorePurchases').then(r => {
+      this.setState({ lumBusy: null });
+      if (this.rcEntitled(r && r.customerInfo)) this.rcRecord(true);
+      else this.toastMsg('There is no Codex Luminary purchase to restore on this ' + this.rcStore() + ' account.');
+    }, () => {
+      this.setState({ lumBusy: null });
+      this.toastMsg('Purchases could not be restored just now. Please try again.');
+    });
+  }
+  /* The store took the payment; the server is told to read it from
+     RevenueCat, then the status is asked for, with the same wait a Stripe
+     return has. Quietly (loud false) when it is a catch up at launch. */
+  rcRecord(loud) {
+    const C = this.cloud, go = () => loud ? this.lumFetch(true, 0) : this.lumFetch(false, 0);
+    if (loud) this.setState({ lumReturn: 'success', orDepth: 'deep' });
+    if (C && typeof C.storeSync === 'function') C.storeSync().then(go, go);
+    else go();
+  }
+  /* Where an app subscription is managed and cancelled: the store's own
+     settings, never Stripe's portal. RevenueCat names the address; the two
+     stores' own pages stand in when it does not. */
+  rcManage() {
+    const lum = this.state.lum, u = lum && lum.manageUrl;
+    location.href = /^https:\/\//.test(String(u || '')) ? u
+      : (lum && lum.source === 'google') || this.rcPlatform() === 'android'
+        ? 'https://play.google.com/store/account/subscriptions' : 'https://apps.apple.com/account/subscriptions';
   }
   oracleVals() {
     const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
@@ -19324,10 +19495,17 @@ class Component extends DCLogic {
     /* regionOpen is the server's answer for the country the page guessed. Only
        an explicit false closes the gate, so an older server that never sends
        it sells exactly as before. */
-    const native = this.nativeApp();
-    const lumShut = !!lum && (lum.regionOpen === false || native);
-    const plans = this.lumPriceRows(lum) || this.LUM_PLANS;
-    const plan = st.lumPlan || 'annual', planRow = plans.find(x => x[0] === plan);
+    const native = this.nativeApp(), rcLive = native && this.rcOn(), rcRows = rcLive ? this.rcPlanRows() : null;
+    /* Inside the apps the store sells it, everywhere it has a storefront, so
+       the website's EU and UK hold does not apply there; with no RevenueCat
+       key the app sells nothing at all. */
+    const lumShut = !!lum && (native ? !rcLive : lum.regionOpen === false);
+    const sellable = native ? !!rcRows : !!(lum && lum.billingConfigured);
+    const plans = rcRows || this.lumPriceRows(lum) || this.LUM_PLANS;
+    const plan = st.lumPlan || 'annual', planRow = plans.find(x => x[0] === plan) || plans[0];
+    const appSub = !!lum && (lum.source === 'apple' || lum.source === 'google');
+    const storeWord = native ? this.rcStore() : lum && lum.source === 'google' ? 'Google Play' : 'App Store';
+    const storeThe = storeWord === 'App Store' ? 'the App Store' : storeWord;
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
     return {
       orIcon: this.uiIcon('oracle'),
@@ -19362,30 +19540,42 @@ class Component extends DCLogic {
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
       orLumMember: deepish && canDeep && !!lum.plan,
-      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') : '',
-      orLumManageOn: !native && !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') + (appSub ? ' · ' + storeWord : '') : '',
+      /* Each subscription is managed where it was bought: an app one in the
+         store's settings, from the app; a Stripe one in Stripe's portal, from
+         the website. The website cannot open Apple's or Google's settings for
+         the reader, and the app never shows Stripe. */
+      orLumManageOn: native ? rcLive && appSub : !appSub && !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
       orAiNoteOn: native,
-      orLumManageLabel: st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
+      orLumManageLabel: native ? 'Manage subscription' : st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
       orLumManage: () => this.lumManage(),
       orLumGate: locked,
       orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
-      orLumPlansOn: !!(lum && lum.billingConfigured) && !lumShut,
+      orLumPlansOn: !!lum && sellable && !lumShut,
       orLumPlans: plans.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
         bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
-      orLumBuyOn: !!(lum && lum.billingConfigured) && !lumShut,
+      orLumBuyOn: !!lum && sellable && !lumShut,
       /* The renewal terms stand beside a purchase; where none is offered they would
          describe one that is not there. */
-      orLumRenewOn: !lumShut,
-      orLumCta: st.lumBusy === 'checkout' ? 'Opening secure checkout…' : 'Become a Luminary · ' + planRow[5],
+      orLumRenewOn: !lumShut && (!native || sellable),
+      orLumRenewText: native
+        ? 'Renews automatically each month or year at the price shown until you cancel. Payment is charged to your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple') + ' account. Cancel anytime in your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple account') + ' settings, at least a day before it renews.'
+        : 'Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.',
+      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : 'Become a Luminary · ' + planRow[5],
       orLumBuy: () => this.lumBuy(),
-      orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured || lumShut),
-      orLumNote: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+      orLumRestoreOn: !!lum && rcLive,
+      orLumRestoreLabel: st.lumBusy === 'restore' ? 'Restoring…' : 'Restore purchases',
+      orLumRestore: () => this.rcRestore(),
+      orLumNoteOn: !!lum && (st.lumReturn === 'success' || lumShut || !sellable),
+      orLumNote: st.lumReturn === 'success' ? (native ? 'Confirming your purchase…' : 'Confirming your payment with Stripe…')
         : lumShut && native ? 'Codex Luminary is not available in the app yet.'
         : lumShut ? 'Codex Luminary is not available in your country yet.'
+        : native ? (st.rcErr === 'empty' ? 'Codex Luminary is not available in the app yet.'
+          : st.rcErr ? storeThe.charAt(0).toUpperCase() + storeThe.slice(1) + ' could not be reached just now.' : 'Asking ' + storeThe + ' for its prices…')
         : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
-      orLumRetryOn: !!(lum && lum.failed),
-      orLumRetry: () => this.lumFetch(true, 0),
+      orLumRetryOn: !!(lum && lum.failed) || (rcLive && st.rcErr === 'store'),
+      orLumRetry: () => { if (rcLive && st.rcErr === 'store') this.rcRetry(); if (lum && lum.failed) this.lumFetch(true, 0); },
       orMoreOn: !!partial && !!r,
       orMoreText: err && !busy ? (this.ORACLE_ERR[err] || 'The rest of the reading could not be written just now.')
         : 'The chapters, timing windows, shadow work and journal prompts are still being written…',

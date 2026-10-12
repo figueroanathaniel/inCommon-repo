@@ -18,7 +18,11 @@
 //      or not the project's foreign keys cascade: the four tables keyed by
 //      profile (memories, throughline_entries, oki_messages, consent_events),
 //      then pairs and profiles (keyed by account), oracle_readings and
-//      subscriptions (keyed by user), then the accounts row itself.
+//      subscriptions and store_subscriptions (keyed by user), then the
+//      accounts row itself. Between Stripe and the rows, RevenueCat's record
+//      of the reader is deleted too when RevenueCat is set up (see
+//      closeRevenueCat below); a subscription bought in an app is the store's
+//      to cancel, and the page says so before the reader deletes.
 //   3. The auth user, last, because it is what the reader signs in with: if
 //      anything above failed they can still sign in and try again, and every
 //      step is safe to run twice.
@@ -35,6 +39,7 @@
 // this). Secrets: SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY
 // are provided by Supabase; STRIPE_SECRET_KEY is the one billing already uses,
 // and without it the Stripe step is skipped (no Stripe, nothing to cancel).
+// REVENUECAT_SECRET_KEY is the one server/store uses, skipped the same way.
 // Setup: docs/ACCOUNT-DELETION.md.
 
 import Stripe from "npm:stripe@17";
@@ -84,6 +89,23 @@ async function del(table: string, column: string, values: string | string[]): Pr
 
 const LIVE = new Set(["active", "trialing", "past_due", "unpaid", "incomplete", "paused"]);
 
+// A purchase made inside the apps cannot be cancelled from here: Apple allows
+// no seller to cancel a subscription, and the page tells the reader to cancel
+// it in their Apple or Google account settings before they delete. What can go
+// is RevenueCat's record of them, which holds their user id and purchase
+// history: its customer is deleted, the same way the Stripe customer is. Not
+// found means already gone. Without REVENUECAT_SECRET_KEY there is no
+// RevenueCat to ask, and the step is skipped.
+const rcKey = Deno.env.get("REVENUECAT_SECRET_KEY") ?? "";
+async function closeRevenueCat(userId: string): Promise<void> {
+  if (!rcKey) return;
+  const res = await fetch("https://api.revenuecat.com/v1/subscribers/" + encodeURIComponent(userId), {
+    method: "DELETE",
+    headers: { Authorization: "Bearer " + rcKey, Accept: "application/json" },
+  });
+  if (!res.ok && res.status !== 404) throw new Error("RevenueCat answered " + res.status);
+}
+
 async function closeStripe(userId: string): Promise<void> {
   if (!stripe) return;
   const { data, error } = await db.from("subscriptions").select("stripe_customer_id").eq("user_id", userId).maybeSingle();
@@ -129,6 +151,12 @@ Deno.serve(async (req) => {
     console.error("account: Stripe could not be closed; nothing was deleted", (e as Error).message);
     return reply(502, { code: "STRIPE" });
   }
+  try {
+    await closeRevenueCat(uid);
+  } catch (e) {
+    console.error("account: RevenueCat could not be reached; no row was deleted", (e as Error).message);
+    return reply(502, { code: "REVENUECAT" });
+  }
 
   try {
     const { data: profs, error } = await db.from("profiles").select("id").eq("account_id", uid);
@@ -139,6 +167,7 @@ Deno.serve(async (req) => {
     await del("profiles", "account_id", uid);
     await del("oracle_readings", "user_id", uid);
     await del("subscriptions", "user_id", uid);
+    await del("store_subscriptions", "user_id", uid);
     await del("accounts", "id", uid);
   } catch (e) {
     console.error("account: a table could not be cleared", (e as Error).message);

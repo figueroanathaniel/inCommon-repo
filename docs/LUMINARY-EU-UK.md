@@ -154,6 +154,7 @@ Do these in order.
   Canada (C$30,000), Australia (A$75,000), Switzerland (CHF 100,000 worldwide)
   and Norway (NOK 50,000). Monitoring covers these too.
 - **The app stores.** A purchase made through Apple's or Google's own billing is
-  sold by Apple or Google, who charge and pay the VAT themselves. If Luminary
-  is sold in the iPhone and Android apps that way, EU and UK readers there need
-  none of the above. See `docs/APP-STORE-SETUP.md`.
+  sold by Apple or Google, who charge and pay the VAT themselves. Luminary in
+  the iPhone and Android apps is sold that way (`docs/REVENUECAT-SETUP.md`), so
+  EU and UK readers there need none of the above, and the app ignores the
+  website's EU and UK hold.

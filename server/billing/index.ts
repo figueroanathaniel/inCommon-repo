@@ -26,7 +26,10 @@
 // LUMINARY_SELL_EU_UK are both off unless set to "on": see "THE EU AND THE UK"
 // below and docs/LUMINARY-EU-UK.md. SUPABASE_URL,
 // SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
-// The table it writes is `subscriptions`, in server/oracle/schema.sql.
+// The table it writes is `subscriptions`, in server/oracle/schema.sql. It
+// also reads `store_subscriptions` (server/store/schema.sql), the purchases
+// made inside the apps, so the page is told one status wherever Luminary was
+// bought, and a reader who bought it in an app is not offered it again here.
 
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -180,6 +183,27 @@ async function rowFor(userId: string): Promise<Row | null> {
   return (data as Row | null) ?? null;
 }
 
+type StoreRow = {
+  source: "apple" | "google" | "promotional";
+  status: string;
+  plan: Plan | null;
+  current_period_end: string | null;
+  will_renew: boolean;
+  management_url: string | null;
+};
+
+// A live app purchase for this reader, or null. The row is read, never written
+// here: server/store owns it. A project that has not run server/store/schema.sql
+// has no such table, and that reads as no app purchase rather than an error.
+async function storeRowFor(userId: string): Promise<StoreRow | null> {
+  const { data } = await db.from("store_subscriptions")
+    .select("source, status, plan, current_period_end, will_renew, management_url")
+    .eq("user_id", userId).maybeSingle();
+  const r = (data as StoreRow | null) ?? null;
+  if (!r || r.status !== "active") return null;
+  return r.current_period_end && Date.parse(r.current_period_end) <= Date.now() ? null : r;
+}
+
 // The US prices are made exactly as they always were, on the first checkout.
 // The EUR and GBP ones are NET (tax_behavior exclusive), the same as the US.
 // The EUR and GBP ones are made the same way the first time somebody in the EU
@@ -270,12 +294,21 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     }
   }
   const admin = isAdmin(user);
+  const paid = !!row && ACTIVE.has(row.status);
+  // An app purchase, kept current by server/store from RevenueCat. When a
+  // reader holds both, the Stripe one is the one described, because it is
+  // the one this page can manage; the app one is still counted.
+  const app = paid ? null : await storeRowFor(user.id);
   return {
-    isPremium: admin || (!!row && ACTIVE.has(row.status)),
-    plan: row?.plan ?? null,
-    status: row?.status ?? null,
-    currentPeriodEnd: row?.current_period_end ?? null,
-    cancelAtPeriodEnd: row?.cancel_at_period_end ?? false,
+    isPremium: admin || paid || !!app,
+    plan: app ? app.plan : row?.plan ?? null,
+    status: app ? "active" : row?.status ?? null,
+    currentPeriodEnd: app ? app.current_period_end : row?.current_period_end ?? null,
+    cancelAtPeriodEnd: app ? !app.will_renew : row?.cancel_at_period_end ?? false,
+    // Where it was bought, so the page sends the reader to the right place to
+    // manage it: Stripe's portal, or Apple's or Google's own settings.
+    source: app ? app.source : row ? "stripe" : null,
+    manageUrl: app ? app.management_url : null,
     billingConfigured: !!stripe,
     // An admin passes the paywall without a subscription, so there is nothing
     // of theirs to manage and the page should not offer to.

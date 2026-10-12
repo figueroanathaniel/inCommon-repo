@@ -1194,6 +1194,38 @@
     });
   }
 
+  /* ---------- Luminary bought inside the apps ----------
+
+     The iPhone and Android apps sell Luminary through the stores, with
+     RevenueCat checking the receipts (docs/REVENUECAT-SETUP.md). After a
+     purchase or a restore the app asks the store function to read what this
+     reader holds from RevenueCat and record it, so the billing status and the
+     Oracle's paywall see it at once rather than when the webhook lands. It
+     sends nothing about the purchase: the server asks RevenueCat about the
+     reader its token names. Answers { ok, active, source, plan,
+     currentPeriodEnd } or a reason: off, signedOut, notSetUp (not deployed),
+     notConfigured (deployed, no RevenueCat key yet), offline or error. */
+  function storeSync() {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+    return Promise.resolve().then(function () {
+      return client.functions.invoke('store', { body: { action: 'sync' } });
+    }).then(function (res) {
+      if (res && !res.error && res.data) {
+        var d = res.data;
+        return { ok: true, active: !!d.active, source: d.source || null, plan: d.plan || null, currentPeriodEnd: d.currentPeriodEnd || null };
+      }
+      var e = res && res.error, st = e && e.context && e.context.status;
+      return oracleCode(e).then(function (code) {
+        if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
+        if (st === 404) return { ok: false, reason: 'notSetUp' };
+        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
+        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
+        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
+
   /* ---------- Deleting the account ----------
 
      The App Store and Google Play require an app with accounts to let the
@@ -1224,6 +1256,7 @@
       var e = res && res.error, st = e && e.context && e.context.status;
       return oracleCode(e).then(function (code) {
         if (code === 'STRIPE') return { ok: false, reason: 'stripe' };
+        if (code === 'REVENUECAT') return { ok: false, reason: 'revenuecat' };
         if (code === 'BAD_REQUEST') return { ok: false, reason: 'confirm' };
         if (st === 404) return { ok: false, reason: 'notSetUp' };
         if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
@@ -1286,6 +1319,9 @@
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
+      /* The store apps hand this to RevenueCat as the app user id, so a
+         purchase is filed under the same reader the server knows. */
+      userId: uid(),
       owesCode: !!held,
       lastPushAt: lastPushAt || null,
       pendingOps: loadOutbox().length,
@@ -1376,6 +1412,7 @@
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
     accountDelete: accountDelete,
+    storeSync: storeSync,
     mfaVerify: mfaVerify,
     coverSignOut: coverSignOut,
     mfaStatus: mfaStatus,

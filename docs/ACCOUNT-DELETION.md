@@ -24,10 +24,17 @@ nothing breaks in the meantime.
    Stripe customer is deleted. This goes first because it is the one step that
    can keep charging: if Stripe cannot be reached, **nothing is deleted** and
    the reader is told to try again.
-2. **Every row**, children before parents: `memories`, `throughline_entries`,
+2. **RevenueCat's record of the reader**, when RevenueCat is set up
+   (`docs/REVENUECAT-SETUP.md`): their customer is deleted. A subscription bought
+   in the iPhone or Android app is **not** cancelled: no seller can cancel an
+   Apple subscription, so the dialog tells the reader to cancel it in their
+   Apple or Google settings first. If RevenueCat cannot be reached, no row is
+   deleted and the reader is told to try again.
+3. **Every row**, children before parents: `memories`, `throughline_entries`,
    `oki_messages` and `consent_events` for the account's profiles, then
-   `pairs`, `profiles`, `oracle_readings`, `subscriptions` and `accounts`.
-3. **The sign in itself** (the auth user), last, so a failure above leaves the
+   `pairs`, `profiles`, `oracle_readings`, `subscriptions`,
+   `store_subscriptions` and `accounts`.
+4. **The sign in itself** (the auth user), last, so a failure above leaves the
    reader able to sign in and try again. Every step is safe to run twice.
 
 Support requests are kept, unlinked from the account, as the Privacy Policy
@@ -45,8 +52,9 @@ device stays unless they turned on "Also erase everything on this device".
 2. **Leave JWT verification ON** for this one. (Billing has it off because
    Stripe calls it; nothing but the app calls this.)
 3. Secrets: nothing new. It uses `SUPABASE_SERVICE_ROLE_KEY`, which Supabase
-   provides, and `STRIPE_SECRET_KEY`, which billing already set. Without the
-   Stripe key it skips the Stripe step.
+   provides, `STRIPE_SECRET_KEY`, which billing already set, and
+   `REVENUECAT_SECRET_KEY`, which the store function uses. Without either key
+   it skips that step.
 4. **Test it on a throwaway account**: make one on the cover, sign in, add a
    profile so something syncs, then delete it from the profile card. In
    Supabase, Authentication, Users, the user should be gone, and the Table

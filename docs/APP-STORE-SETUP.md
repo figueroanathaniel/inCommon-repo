@@ -61,7 +61,7 @@ as a footer on the Oracle page.** It reads:
 Consult the Oracle is the permission. The website does not show it, by the
 owner's no disclaimers rule.
 
-### 3. How Luminary is paid for inside the apps: the stores' own billing
+### 3. How Luminary is paid for inside the apps: the stores' own billing: BUILT, switched off
 
 **Decided by the owner on 12 October 2026: in-app purchases**, Apple's In-App
 Purchase on iPhone and Google Play Billing on Android, with Stripe staying on the
@@ -69,26 +69,28 @@ web. Each store takes 15% under its small developer programme, and each charges
 and pays the VAT itself, so the apps can sell Luminary in the EU and the UK even
 while the web cannot (`docs/LUMINARY-EU-UK.md`).
 
-The plan, now that the wrapper (item 4) exists to build it in:
+Built on 12 October 2026, with **RevenueCat** between the apps and the stores:
+it verifies receipts for both and sends one kind of webhook for both, and it is
+free until a few thousand dollars a month of app revenue. **`docs/REVENUECAT-SETUP.md`
+is the setup**, in order: the products in each store, RevenueCat, the `store`
+function and its table, the legal pages, then the two public keys.
 
-- **RevenueCat** between the apps and the stores, rather than talking to StoreKit
-  and the Play Developer API directly. It verifies receipts for both stores and
-  sends one kind of webhook for both, and it is free until a few thousand
-  dollars a month of app revenue, which is the stage inCommon is at.
-- **One table, three sources.** `subscriptions` gains a `source` column (`stripe`,
-  `apple`, `google`); RevenueCat's webhook writes apple and google rows the way
-  Stripe's writes stripe rows, so the Oracle's paywall check does not change.
-- **Manage billing points at the right place.** A reader who bought on an iPhone
-  cancels in their Apple account, not in Stripe's portal; the page shows the
-  store's subscription settings for those rows instead.
-- **The same products in both stores**: monthly and yearly, priced to match the
-  US $12.99 and $119.99 as closely as each store's price points allow, with the
-  stores' own local prices elsewhere.
-- **The Terms** take the last paragraph of the draft below once this ships.
+- **A table of its own**, `store_subscriptions`, rather than a `source` column
+  on `subscriptions` as first planned: a Stripe row cannot exist without a
+  Stripe customer, and one reader can hold a website and an app subscription
+  at once. The billing status and the Oracle's paywall read both.
+- **Manage subscription opens the store's own settings** for an app purchase;
+  the website shows no Stripe portal for one.
+- **Restore purchases** sits in the gate, as Apple requires.
+- **The same products in both stores**: monthly and yearly at US $12.99 and
+  $119.99, with the stores' own local prices elsewhere.
+- **The Terms** take the last paragraph of the draft below, and the Privacy
+  Policy names RevenueCat, in the change that fills in the keys.
 
-**Not built yet.** Until it is, the apps sell nothing: the Luminary gate says it
-is not available in the app yet, and Stripe is never shown or linked there.
-Readers who subscribed on the website still get in-depth readings in the app.
+**Switched off until the keys are set.** With `RC_KEYS` empty the apps sell
+nothing: the gate says Luminary is not available in the app yet, and Stripe is
+never shown or linked there. Readers who subscribed on the website still get
+in-depth readings in the app.
 
 ### 4. Wrapping the app (both stores): STARTED
 
@@ -142,7 +144,7 @@ data that leaves the device:
 | User ID | Yes, with an account | Yes | Account | |
 | Birth date, time, place, profile name and photo | Yes, when signed in | Yes | App functionality | Synced profiles |
 | Journal and other user content | Only kinds the reader switches on | Yes | App functionality | May contain health or belief data: answer "sensitive info" yes |
-| Purchase history | Yes, for Luminary | Yes | App functionality | Plan and status only, from Stripe |
+| Purchase history | Yes, for Luminary | Yes | App functionality | Plan and status only, from Stripe on the web and from RevenueCat in the apps |
 | Chart summary sent to Moonshot AI | Yes, when the Oracle is used | Yes | App functionality | Shared with a third party (Google's form: "shared") |
 | Support messages and their email | Yes, when sent | Yes | Customer support | |
 | Usage data | No | | | The usage count stays on the device |

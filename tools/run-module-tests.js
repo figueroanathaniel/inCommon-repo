@@ -2052,6 +2052,41 @@ async function runCloudTests() {
     localSignOut: adSignOut[0], reasons: adReasons
   });
 
+  /* K57: Luminary bought inside the apps (docs/REVENUECAT-SETUP.md). After a
+     store purchase or a restore the app asks the store function to read the
+     purchase from RevenueCat. The call is never made without a session and
+     carries nothing but the action, because the server reads the reader from
+     the token and the purchase from RevenueCat, never from the page. status()
+     names the user id, which the app hands RevenueCat as the app user id. And
+     an account deletion that could not reach RevenueCat is told apart. */
+  var stCalls = [];
+  var stClient = function (answer) {
+    return { functions: { invoke: function (name, opts) { stCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } } };
+  };
+  var ST = loadIsolatedCloud({ createClient: function () { return {}; } });
+  ST._setClientForTests(stClient({ data: { active: true }, error: null }), null);
+  var stNo = await ST.storeSync();
+  var stCallsSignedOut = stCalls.length;
+  ST._setClientForTests(stClient({ data: { active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z', extra: 'x' }, error: null }), { user: { id: 'u57' } });
+  var stOk = await ST.storeSync();
+  var stUid = ST.status().userId;
+  var stReasons = {};
+  var stCases = [['503', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['502', httpErr(502, 'UPSTREAM')]];
+  for (var si = 0; si < stCases.length; si++) {
+    ST._setClientForTests(stClient({ data: null, error: stCases[si][1] }), { user: { id: 'u57' } });
+    stReasons[stCases[si][0]] = (await ST.storeSync()).reason;
+  }
+  AD._setClientForTests(adClient({ data: null, error: httpErr(502, 'REVENUECAT') }), { user: { id: 'u1' } });
+  var stDel = (await AD.accountDelete('delete')).reason;
+  t('K57', 'the store sync is not asked without a session, sends only its action to the store function, returns the four fields, names each failure, status() carries the user id, and a deletion that could not reach RevenueCat says so', {
+    signedOut: 'signedOut', callsSignedOut: 0, fn: 'store', body: '{"action":"sync"}',
+    ok: { ok: true, active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z' },
+    userId: 'u57', reasons: { '503': 'notConfigured', '404': 'notSetUp', mfa: 'signedOut', '502': 'error' }, deleteReason: 'revenuecat'
+  }, {
+    signedOut: stNo.reason, callsSignedOut: stCallsSignedOut, fn: stCalls[0] && stCalls[0].name, body: stCalls[0] && JSON.stringify(stCalls[0].body),
+    ok: stOk, userId: stUid, reasons: stReasons, deleteReason: stDel
+  });
+
   /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
      travels with the status and the checkout as two capital letters or not at
      all, and the server's refusal of a country it does not sell to yet comes

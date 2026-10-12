@@ -2513,10 +2513,10 @@ summary are sent to Moonshot AI to write each reading.", drawn only when
 `nativeApp()` is true (`orAiNoteOn`). **It is the one exception to "No
 disclaimers"** and it does not reach the website; do not widen it to the web or
 lengthen it without the owner. **Luminary in the apps is the stores' own
-billing**, through RevenueCat into the same `subscriptions` table with a
-`source` column, not built yet; until it is, the apps sell nothing and never
-show Stripe. The Apple EULA terms are drafted in that doc for the Terms, to be
-added in the change that ships the first app build, not before.
+billing, through RevenueCat**, built and switched off until its keys are set:
+see "Luminary in the apps is RevenueCat's" below. The apps never show Stripe.
+The Apple EULA terms are drafted in that doc for the Terms, to be added in the
+change that ships the first app build, not before.
 
 ## The store apps are a Capacitor shell around the bundle
 Started 12 October 2026 (`docs/NATIVE-APP.md`). `native/` is Capacitor 8.5.3,
@@ -2531,10 +2531,11 @@ the count asserted, and the service worker and the host's files are left out. It
 refuses a bundle older than the app source and a bundle without the native check.
 
 **`nativeApp()` asks Capacitor, and four things hang on it and nothing else**:
-the Oracle footer above; Luminary closed in the app (`lumShut`, the note "not
-available in the app yet", no plans, no button, no renewal line, no Manage
-billing, and `lumBuy()`/`lumManage()` refuse); no service worker registered; and
-`coverHref()` answering `./cover.html`. Driven in a browser with
+the Oracle footer above; Luminary never through Stripe in the app (`lumBuy()` and
+`lumManage()` go to the store through RevenueCat, and with no RevenueCat key the
+gate is closed: `lumShut`, the note "not available in the app yet", no plans, no
+button, no renewal line); no service worker registered; and `coverHref()`
+answering `./cover.html`. Driven in a browser with
 `window.Capacitor` stubbed, and without it: every one of those in the shell, none
 of them on the web; the footer measured clean in all eight themes at 375 and
 1440. `tools/build-icons.js --native` draws the icon and splash sources into
@@ -2543,6 +2544,55 @@ of them on the web; the footer measured clean in all eight themes at 375 and
 unchanged, byte for byte. **The app id `com.incommon.app` is a placeholder** and
 becomes permanent at the first upload, so it is the owner's to choose before
 then.
+
+## Luminary in the apps is RevenueCat's
+Asked for by the owner on 12 October 2026 ("start the in-app purchases with
+RevenueCat"); `docs/REVENUECAT-SETUP.md` is the owner's half. Inside the apps
+Luminary is bought with Apple's In-App Purchase and Google Play Billing, with
+`@revenuecat/purchases-capacitor` 13.7.3 pinned in `native/` and nothing else
+native. **`RC_KEYS` is the switch**: RevenueCat's two PUBLIC app keys, made to
+ship in an app, and while the one for a platform is empty `rcOn()` is false and
+the app sells nothing, exactly as before this existed. The secret key lives only
+in Supabase.
+
+**The plugin is reached through the bridge by name**, `rcCall()` calling
+`Capacitor.nativePromise('Purchases', method, args)`, because this app has no
+bundler to load the plugin's JavaScript wrapper and the wrapper is only that
+call plus error tidying. The method names and arguments were read out of the
+plugin's own Swift and Kotlin for 13.7.3; a version bump means reading them
+again. A cancel on the store's sheet is code 1 and says nothing.
+
+**The page decides nothing about who paid.** The reader's Supabase user id is
+RevenueCat's app user id (`status().userId`). After a purchase or a restore the
+app calls `storeSync()`, which carries only `{ action: 'sync' }` (K57); the
+`store` function (`server/store/index.ts`, JWT verification off like billing)
+asks RevenueCat's REST API about the reader its token names and writes
+`store_subscriptions` (`server/store/schema.sql`). RevenueCat's webhook, believed
+only on the exact `REVENUECAT_WEBHOOK_AUTH` header, does the same for every
+uuid an event names and nothing else: a webhook body is a list of whom to look
+up, never a statement of what they bought. Billing's status and the Oracle's
+paywall read both tables, so a Luminary is a Luminary wherever they paid, and a
+Stripe checkout is refused for a reader who already holds an app subscription.
+**A table of its own, not a source column**: a `subscriptions` row is a Stripe
+customer, and a reader can hold one of each.
+
+**Each subscription is managed where it was bought.** In the app: the store's
+prices in the reader's currency (`rcPlanRows()`), Restore purchases (Apple
+requires it), renewal terms naming the Apple or Google account, and Manage
+subscription opening the store's own settings. On the website an app subscriber
+sees the plan line marked App Store or Google Play and no Manage billing. The
+website's EU and UK hold does not apply in the apps, because the stores are the
+seller and pay the VAT.
+
+**The legal pages change with the keys, not before**: nothing reaches RevenueCat
+while `RC_KEYS` is empty, so the Privacy Policy does not name it yet. The doc
+drafts the paragraph, the provider row and the Terms section for that change.
+Driven with the plugin stubbed, both shells and both platforms: the configure
+call with the user id, offerings, buy, cancel, a failed buy, restore with and
+without a purchase, the member line, Manage, the deletion dialog's store line,
+no key, and the website unchanged; the gate, the member line and the dialog
+measured clean in all 16 theme cases at 1440 and 375. The function was run
+against a fake RevenueCat and database for 27 cases and typechecked strict.
 
 ## Deleting an account is the reader's own button
 Built 12 October 2026 at the owner's request, because both stores require it
@@ -2555,7 +2605,9 @@ wears `--warn`, never `--crisis`: deleting an account is not a safety control.
 
 **The order is the design.** `server/account/index.ts` cancels Luminary at Stripe
 and deletes the Stripe customer FIRST, because that is the one step that can keep
-charging, and if Stripe fails nothing is deleted; then every row, children before
+charging, and if Stripe fails nothing is deleted; then RevenueCat's customer, when
+it is set up (an app subscription is the store's to cancel, and the dialog says
+so before the reader deletes: `adStoreOn`); then every row, children before
 parents so it is right whether or not the project's keys cascade; then the auth
 user LAST, so a failure above leaves the reader able to sign in and retry. Every
 step is safe to run twice. A table the project never created is skipped, any

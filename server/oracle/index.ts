@@ -305,11 +305,20 @@ Deno.serve(async (req) => {
   // In depth is the Codex's Luminary reading, and it is asked for before the
   // stored one is looked up, as the Codex did: a subscription that has lapsed
   // does not keep reading what it paid for on another device. The row is kept
-  // current by the billing function (server/billing), from Stripe.
+  // current by the billing function (server/billing), from Stripe; a purchase
+  // made inside the apps is in store_subscriptions, kept current by the store
+  // function (server/store) from RevenueCat, and counts the same.
   if (deep && !isAdmin(user)) {
+    const live = (row: { status?: string; current_period_end?: string | null } | null, ok: (s: string) => boolean) => {
+      const end = row?.current_period_end ? Date.parse(row.current_period_end) : null;
+      return !!row && ok(String(row.status)) && (end === null || end > Date.now());
+    };
     const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
-    const end = sub.data?.current_period_end ? Date.parse(sub.data.current_period_end) : null;
-    const paid = !!sub.data && ACTIVE.has(sub.data.status) && (end === null || end > Date.now());
+    let paid = live(sub.data, (s) => ACTIVE.has(s));
+    if (!paid) {
+      const app = await db.from("store_subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
+      paid = live(app.data, (s) => s === "active");
+    }
     if (!paid) return reply(402, { code: "PREMIUM_REQUIRED" });
   }
 
