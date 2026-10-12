@@ -68,6 +68,11 @@ const EXTS = new Set(['.js', '.jsx', '.html', '.json', '.md', '.css', '.txt', '.
 /* preview/ is build output too: tools/build-bundle.js --preview writes a whole
    site there from the same source, so it regenerates exactly like deploy/. */
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'deploy', 'deploy1.1', 'preview', 'uploads']);
+/* The store apps' copies of the bundle, by path rather than by name, because
+   "www" and "public" are names the rest of native/ could use for something that
+   is source: tools/build-native.js writes the first, and Capacitor copies it
+   into the other two on every sync. Everything else in native/ is walked. */
+const SKIP_PATHS = new Set(['native/www', 'native/android/app/src/main/assets/public', 'native/ios/App/App/public']);
 const VENDORED = new Set([
   'app/support.js',
   'app/doc-page.js',
@@ -191,6 +196,7 @@ function walk(dir, out) {
     const abs = path.join(dir, e.name);
     if (e.isDirectory()) {
       if (SKIP_DIRS.has(e.name)) continue;
+      if (SKIP_PATHS.has(path.relative(repo, abs).split(path.sep).join('/'))) continue;
       walk(abs, out);
     } else if (EXTS.has(path.extname(e.name).toLowerCase())) {
       const rel = path.relative(repo, abs).split(path.sep).join('/');

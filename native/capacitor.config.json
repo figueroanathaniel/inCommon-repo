@@ -1,0 +1,18 @@
+{
+  "appId": "com.incommon.app",
+  "appName": "inCommon",
+  "webDir": "www",
+  "backgroundColor": "#05060a",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#05060a"
+  },
+  "android": {
+    "backgroundColor": "#05060a",
+    "allowMixedContent": false
+  }
+}

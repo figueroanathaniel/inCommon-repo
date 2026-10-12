@@ -47,23 +47,19 @@ Built on 12 October 2026: **Delete account** in the profile card while signed in
 and the public page `delete-account.html` for Google's web link. The function
 has to be deployed before it works: `docs/ACCOUNT-DELETION.md`.
 
-### 2. Telling the reader, on screen, before the Oracle sends anything (Apple, required)
+### 2. Telling the reader, on screen, before the Oracle sends anything (Apple, required): BUILT
 
-**The disclosure is in the Privacy Policy, section 6, and that is not enough for
-Apple.** Guideline 5.1.2(i), tightened in November 2025, asks for three things
-before personal data goes to a third party AI: say what is sent, say who it goes
-to, and get permission first, **on screen**. Reviewers have rejected apps whose
-only disclosure was in their privacy policy. The press of Consult the Oracle is
-the permission; what is missing is the sentence beside it, which was removed on
-11 October 2026 under the "no disclaimers" rule.
+Apple's guideline 5.1.2(i) asks an app to say on screen what personal data goes
+to a third party AI and to whom, and to get permission before sending it. The
+Privacy Policy (section 6) alone is not enough for Apple. **Decided by the owner
+on 12 October 2026: in the store apps only, as brief as possible, in small type,
+as a footer on the Oracle page.** It reads:
 
-The panel it sat in still exists (the first Consult the Oracle press, shown once
-per profile), so putting a sentence back is small: for example, "Consulting the
-Oracle sends your first name and a summary of your chart to Moonshot AI, which
-writes the reading. Your birth date, time, place and journal are not sent," with
-a link to Privacy Policy section 6. It could appear in the store apps only, or
-everywhere. **Not done: it reverses the owner's rule for this one screen, so it
-waits for the owner's word.**
+> Your first name and a chart summary are sent to Moonshot AI to write each reading.
+
+10.5px in `--mut`, measured at 4.5:1 or better in every theme. The press of
+Consult the Oracle is the permission. The website does not show it, by the
+owner's no disclaimers rule.
 
 ### 3. How Luminary is paid for inside the apps: the stores' own billing
 
@@ -73,7 +69,7 @@ web. Each store takes 15% under its small developer programme, and each charges
 and pays the VAT itself, so the apps can sell Luminary in the EU and the UK even
 while the web cannot (`docs/LUMINARY-EU-UK.md`).
 
-The plan, for when the wrapper (item 4) exists to build it in:
+The plan, now that the wrapper (item 4) exists to build it in:
 
 - **RevenueCat** between the apps and the stores, rather than talking to StoreKit
   and the Play Developer API directly. It verifies receipts for both stores and
@@ -90,27 +86,18 @@ The plan, for when the wrapper (item 4) exists to build it in:
   stores' own local prices elsewhere.
 - **The Terms** take the last paragraph of the draft below once this ships.
 
-**Not built yet**, because a purchase flow can only be built and tested inside a
-real app build, and none exists until item 4 does.
+**Not built yet.** Until it is, the apps sell nothing: the Luminary gate says it
+is not available in the app yet, and Stripe is never shown or linked there.
+Readers who subscribed on the website still get in-depth readings in the app.
 
-### 4. Wrapping the app (both stores)
+### 4. Wrapping the app (both stores): STARTED
 
-The web app is already self contained, offline capable and installable, so the
-practical route is **Capacitor**, which puts the built `app.html` and its files
-inside a native shell for both platforms. Three things to get right:
-
-- **Ship the files inside the app, do not load the website.** An app that only
-  shows a remote website is rejected by Apple as "minimum functionality"
-  (guideline 4.2). Bundled files also keep the app working offline.
-- **Start the app on the app, not the cover.** The cover's WebGL animation is
-  for the web; in a store app the first screen should be sign in or the app.
-- **Sign in inside the app.** Password sign in works anywhere. The emailed links
-  (confirming an address, choosing a new password) open in the phone's browser,
-  so those finish on the website and the reader then signs in in the app.
-  Cloudflare Turnstile has to have the app's origins added to its allowed
-  hostnames, and Supabase's Redirect URLs may need the app's address too.
-  Service workers do not run inside the iPhone app shell; the app does not need
-  one there, but check it fails quietly.
+`native/` is a Capacitor 8.5.3 project for both stores, with the app's files
+inside it, the app opening on the app rather than the cover, and the mark drawn
+into every icon and splash. **`docs/NATIVE-APP.md` is the how to**, including
+the four things to settle before the first upload: the placeholder app id
+(`com.incommon.app`), signing, version numbers, and testing sign in on a phone
+(Supabase redirect addresses and Turnstile's hostnames).
 
 ### 5. Apple's view of astrology apps
 

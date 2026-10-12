@@ -1,6 +1,6 @@
 {
-  "deploy/v6.4/app.html": "6496d16ddf1183b35ae3a7cd1fedc734dd5acb36d5eb62508174729e2e8211fa",
+  "deploy/v6.4/app.html": "a2e77383c77d638591e090de3d582af15665d5a80827d65d6108df62f06ca10b",
   "deploy/v6.4/index.html": "5f5d9be63a983e8299f8a9e951f73556c8101bd73115e6f7d41d660fc8c9b2a0",
-  "recordedAt": "2026-10-12T12:07:14.153Z",
+  "recordedAt": "2026-10-12T12:34:56.766Z",
   "recordedBy": "a full drift-check sweep that passed all green (M/E/F/G/T/R/N)"
 }

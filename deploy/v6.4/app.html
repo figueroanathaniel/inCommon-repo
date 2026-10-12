@@ -23966,6 +23966,12 @@ input[type="date"]{color-scheme:dark}
           </div>
         </article>
       </sc-if>
+      <!-- THE STORE APPS ONLY: Apple 5.1.2(i) wants the third party AI named on
+           screen before anything is sent; the press of Consult the Oracle is the
+           permission. The web keeps the owner's no disclaimers rule. -->
+      <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -28742,6 +28748,12 @@ input[type="date"]{color-scheme:dark}
           </div>
         </article>
       </sc-if>
+      <!-- THE STORE APPS ONLY: Apple 5.1.2(i) wants the third party AI named on
+           screen before anything is sent; the press of Consult the Oracle is the
+           permission. The web keeps the owner's no disclaimers rule. -->
+      <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -30534,7 +30546,8 @@ class Component extends DCLogic {
     document.addEventListener('keydown', this._onKey);
     this.cardCatch();
     this.setState({ online: navigator.onLine });
-    if ('serviceWorker' in navigator) {
+    if (this.nativeApp()) this.setState({ sw: 'not used inside the app' });
+    else if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js')
         .then(() => this.setState({ sw: 'active \u00b7 shell + modules cached' }))
         .catch(() => this.setState({ sw: 'unavailable in this preview \u00b7 registers on deploy' }));
@@ -38308,7 +38321,20 @@ class Component extends DCLogic {
      would be permanent, and the birth moment is cleared by its own control in
      Settings. The cover lives beside the app: index.html in the bundle, which
      the site root serves, and cover.html beside the source shell. */
-  coverHref() { return /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
+  coverHref() { return this.nativeApp() ? './cover.html' : /app\.html$/.test(location.pathname) ? './' : './cover.html'; }
+  /* INSIDE THE STORE APPS. The Capacitor shell (native/, docs/NATIVE-APP.md)
+     puts window.Capacitor on the page before any script here runs, and says
+     whether it is the iPhone or Android app rather than a browser. Four things
+     differ there and nowhere else: the Oracle names Moonshot AI in a footer
+     (Apple 5.1.2(i)); Luminary is not sold or managed through Stripe, because
+     the stores require their own billing for a digital unlock and that is not
+     built yet; no service worker is registered, because the app's files are
+     already on the device; and the cover is cover.html, because the app is
+     index.html inside the shell. */
+  nativeApp() {
+    try { return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()); }
+    catch (e) { return false; }
+  }
   accountLogOut() {
     this.setState({ quickOpen: false });
     /* The tab is marked, so Back from the cover cannot bring a signed in
@@ -39726,6 +39752,7 @@ class Component extends DCLogic {
   }
   lumBuy() {
     const C = this.cloud;
+    if (this.nativeApp()) return;
     if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
     this.setState({ lumBusy: 'checkout' });
     C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo(), this.lumCountry()).then(r => {
@@ -39740,6 +39767,7 @@ class Component extends DCLogic {
   }
   lumManage() {
     const C = this.cloud;
+    if (this.nativeApp()) return;
     if (this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
     this.setState({ lumBusy: 'portal' });
     C.billingPortal(this.lumReturnTo()).then(r => {
@@ -39792,7 +39820,8 @@ class Component extends DCLogic {
     /* regionOpen is the server's answer for the country the page guessed. Only
        an explicit false closes the gate, so an older server that never sends
        it sells exactly as before. */
-    const lumShut = !!lum && lum.regionOpen === false;
+    const native = this.nativeApp();
+    const lumShut = !!lum && (lum.regionOpen === false || native);
     const plans = this.lumPriceRows(lum) || this.LUM_PLANS;
     const plan = st.lumPlan || 'annual', planRow = plans.find(x => x[0] === plan);
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
@@ -39830,7 +39859,8 @@ class Component extends DCLogic {
         : 'The Oracle is reading the heavens for you…',
       orLumMember: deepish && canDeep && !!lum.plan,
       orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') : '',
-      orLumManageOn: !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      orLumManageOn: !native && !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      orAiNoteOn: native,
       orLumManageLabel: st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
       orLumManage: () => this.lumManage(),
       orLumGate: locked,
@@ -39847,6 +39877,7 @@ class Component extends DCLogic {
       orLumBuy: () => this.lumBuy(),
       orLumNoteOn: !!lum && (st.lumReturn === 'success' || !lum.billingConfigured || lumShut),
       orLumNote: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : lumShut && native ? 'Codex Luminary is not available in the app yet.'
         : lumShut ? 'Codex Luminary is not available in your country yet.'
         : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
       orLumRetryOn: !!(lum && lum.failed),
