@@ -3826,6 +3826,18 @@ esbuild and run on the same births, and the dossiers compared line by line.
   called. The Codex had neither and bounded its bill by caching alone.
 - **No dash reaches the page**, by inCommon's rule: the weekly label says "to"
   where the Codex wrote a dash, and the server strips any the model writes.
+- **Each reading is given an emphasis, a voice and a well of imagery**
+  (owner, 13 October 2026), so two readers with the same chart get readings
+  that differ in what they lead with and how they sound, never in what they
+  say about the sky. `voiceFor()` picks one of 8 lenses, 6 registers and 5
+  image sources from a hash of the reader's id, the period and its key, and
+  adds a line holding every placement, aspect, gate, number and date to the
+  dossier. It rides in the user message, after the request line, so the
+  system message is still the Codex's text word for word and still the part
+  Kimi's cache serves. One reader keeps one pair for a period (both halves of
+  an in-depth reading match) and the next period turns to another. Two
+  readers land on the same three about one time in 240, and the model's own
+  sampling still separates them then. Nothing new leaves the device.
 - **Where the two apps compute a chart differently, the dossier carries
   inCommon's chart**, so a reading cannot contradict the wheel, the wiring or
   the numbers page beside it. Where the Codex computed better, inCommon took

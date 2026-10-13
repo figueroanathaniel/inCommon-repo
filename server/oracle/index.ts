@@ -247,6 +247,50 @@ async function shortHash(text: string) {
   return [...new Uint8Array(buf)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// EMPHASIS AND VOICE (owner, 13 October 2026). Two readers with the same chart
+// are written for separately, and the owner wants that kept and made sure of:
+// two readings of one chart differ in what they lead with and in how they
+// sound, never in what they say about the sky. So each reading is handed one
+// lens, one register and one well of imagery (240 combinations), chosen from a hash of the reader and the period, and
+// a line holding every fact to the dossier. The same reader keeps the same pair
+// for a period, so both halves of an in-depth reading match, and the next
+// period turns to another. It goes in the user message, after the request
+// line: the system message is the Codex's text word for word and stays the
+// part Kimi's cache serves.
+const EMPHASES = [
+  "the transit closest to exact, and what it asks for now",
+  "the Human Design authority, and how decisions land this period",
+  "the personal year, month and day numbers, and the rhythm they set",
+  "the Moon and the emotional tide underneath the period",
+  "the houses and angles the sky is touching, and where in life that falls",
+  "relationships, and what is given and received between people",
+  "vocation, and the work of the hands and the mind",
+  "the body, rest and the pace of the days",
+];
+const VOICES = [
+  "intimate and quiet, like a letter written by lamplight",
+  "bright and kinetic, sentences that move and turn",
+  "measured and scholarly, with an astronomer's calm",
+  "warm and conversational, like a trusted friend across a table",
+  "mythic, drawing on the old stories behind the bodies named",
+  "grounded and spare, letting the sky's own images carry the colour",
+];
+const IMAGERY = [
+  "light, the night sky and the turning of the heavens",
+  "water: tides, rivers, rain and the sea",
+  "the garden and the seasons: seed, root, harvest and fallow",
+  "thresholds and architecture: doors, stairs, rooms and windows",
+  "roads and journeys: maps, crossings and the miles between",
+];
+async function voiceFor(userId: string, period: string, key: string) {
+  const h = await shortHash(`${userId}|${period}|${key}`);
+  const emphasis = EMPHASES[parseInt(h.slice(0, 4), 16) % EMPHASES.length];
+  const voice = VOICES[parseInt(h.slice(4, 8), 16) % VOICES.length];
+  const imagery = IMAGERY[parseInt(h.slice(8, 12), 16) % IMAGERY.length];
+  return `Lead with ${emphasis}, and let that set the order of the reading. Within the style above, write in a voice that is ${voice}, and draw your images mostly from ${imagery}. ` +
+    "This shapes emphasis and voice only: every placement, sign, house, aspect, gate, channel, number and date must be exactly as the dossier states, and nothing may be added that the dossier does not contain.";
+}
+
 // No dash of either kind reaches the page, whatever the model writes. Built
 // from char codes so this file obeys the rule it enforces.
 const EM = String.fromCharCode(8212), EN = String.fromCharCode(8211);
@@ -387,6 +431,7 @@ Deno.serve(async (req) => {
   const model = deep ? DEEP_MODEL : MODEL;
   const schema = !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
   const instructions = !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
+  const voice = await voiceFor(user.id, period, key);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
   let status = 0, raw = "";
@@ -401,7 +446,7 @@ Deno.serve(async (req) => {
         // serves them at a sixth of the price after the first reading.
         messages: [
           { role: "system", content: instructions },
-          { role: "user", content: `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.\n\nDOSSIER:\n${dossier}` },
+          { role: "user", content: `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.\n\n${voice}\n\nDOSSIER:\n${dossier}` },
         ],
         response_format: { type: "json_schema", json_schema: { name: "horoscope", strict: true, schema } },
         max_completion_tokens: deep ? 10000 : 8000,
