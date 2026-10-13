@@ -4207,6 +4207,20 @@ the signed in address or number, or says "back to the cover" when there is
 none. The Settings button that used to say "Log out" cleared birth data, which
 is a different act wearing the same word, so it says "Clear birth data" now.
 
+**Signed out with a blank store lands on sign in, not the birth page** (owner,
+13 October 2026). Log Out, close the site, open the app again: the session is
+gone, the guest store is blank because the account took the profiles, and a
+blank store is first run, so the reader was asked for their birth moment when
+what they had to do was sign in. A session that ended with the browser (no
+Remember me) arrives the same way. `signedOutLanding()` is checked once in
+`boot()`, before `ensureProfiles()` writes anything: no `PM.owner()`, first run
+not done, not framed, and no `incommon.guest.chosen` in sessionStorage, and the
+page goes to `coverHref() + '?signin=1'`. The cover's Continue without an
+account sets that mark for the tab, or it would bring a guest straight back.
+Checked at boot only, so Clear birth data in Settings still opens the birth
+page. The harness is exempt by the frame check, because every phase starts from
+a clean origin and grades the first run.
+
 **The Cloud card is gone from both Settings screens**, replaced by a comment
 where it stood. Signing in happens on the cover now, and a second account door
 in Settings would be a second place for the two to disagree. The cloud

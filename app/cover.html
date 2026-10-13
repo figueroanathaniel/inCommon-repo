@@ -1009,7 +1009,14 @@
     ev.stopImmediatePropagation();
     open(true);
   });
-  skip.addEventListener('click', goIn);
+  /* The app sends a signed out reader with nothing on the device to sign in
+     (signedOutLanding()), so the one who chose to go on as a guest is marked
+     for this tab, or Continue without an account would bring them straight
+     back here. */
+  skip.addEventListener('click', function () {
+    try { sessionStorage.setItem('incommon.guest.chosen', '1'); } catch (e) {}
+    goIn();
+  });
 
   /* The eye. Pressing it must not move focus out of the field, or a phone
      drops its keyboard, so the press is cancelled and the click still lands.

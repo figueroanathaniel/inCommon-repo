@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4  |  built 2026-10-12  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4  |  built 2026-10-13  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30933,6 +30933,7 @@ class Component extends DCLogic {
   }
   boot() {
     if (this.modulesReady()) {
+      if (this.signedOutLanding()) { document.documentElement.style.visibility = 'hidden'; location.replace(this.coverHref() + '?signin=1'); return; }
       this.ensureProfiles();
       this.setState({ ready: true, msgs: this.state.msgs || [this.greetMsg()] });
       if (this._startPath) setTimeout(() => { const p = this._startPath; this._startPath = null; if (p) this.openPath(p); }, 0);
@@ -38466,6 +38467,24 @@ class Component extends DCLogic {
     const st = this.state;
     if (st.auth !== undefined) return st.auth;
     return this.readLS(this.FIRSTRUN_KEY, false) ? null : 'birth';
+  }
+  /* SIGNED OUT, WITH NOTHING ON THIS DEVICE YET, IS THE SIGN IN PAGE (13
+     October 2026). The owner reported that logging out, closing the site and
+     opening it again landed on the birth page: the app was reopened signed out,
+     the guest store is blank (an account takes the profiles it found, see "Each
+     account has its own profiles on a device"), and a blank store is first run.
+     So a reader asked for their birth moment again when what they had to do was
+     sign in. Checked once, at boot, before a profile is made, so clearing the
+     birth data in Settings still lands on the birth page. A guest who pressed
+     Continue without an account on the cover is marked for the tab and is not
+     sent back. A harness frame is left alone, because every phase starts from a
+     clean origin and grades the first run. */
+  signedOutLanding() {
+    const PM = this.PM();
+    if (!PM || typeof PM.owner !== 'function' || PM.owner()) return false;
+    try { if (window.top !== window.self) return false; } catch (e) { return false; }
+    try { if (sessionStorage.getItem('incommon.guest.chosen') === '1') return false; } catch (e) {}
+    return this.authStep() === 'birth';
   }
   af(k) { return (this.state.af || {})[k] || ''; }
   afSet(k, v) { this.setState(s => ({ af: { ...(s.af || {}), [k]: v }, authErr: '' })); }
