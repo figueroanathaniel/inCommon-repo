@@ -4031,6 +4031,16 @@ dashboard default, through a widened params type because `stripe@17`'s types
 predate the field. Turning it on would make Stripe the merchant of record and
 is the owner's decision, with the legal pages changed in the same change.
 
+**The website's gate names no price** (owner, 13 October 2026). It invites:
+the plans read Monthly and Yearly, "Billed monthly" and "Billed yearly", the
+annual one marked Best value where it is cheaper, and the button says Become a
+Luminary or Start your 7-day free trial. The figures are Stripe Checkout's to
+show, and it shows the price and the renewal before anything is paid, so the
+renewal sentence beside the button says "at the price shown at checkout" and a
+trial names its charge date without its amount. The store apps keep the prices,
+because Apple wants the price on the purchase screen (3.1.2). The Terms still
+state both prices; that page is where the figures live.
+
 **The paywall is the Oracle function, not the page.** The page's gate is
 courtesy; `server/oracle` reads `subscriptions` itself and answers 402
 PREMIUM_REQUIRED before it looks up a stored reading, as the Codex's
@@ -4206,6 +4216,20 @@ is `app.html` in one and the long name in the other. The line beside it names
 the signed in address or number, or says "back to the cover" when there is
 none. The Settings button that used to say "Log out" cleared birth data, which
 is a different act wearing the same word, so it says "Clear birth data" now.
+
+**Signed out with a blank store lands on sign in, not the birth page** (owner,
+13 October 2026). Log Out, close the site, open the app again: the session is
+gone, the guest store is blank because the account took the profiles, and a
+blank store is first run, so the reader was asked for their birth moment when
+what they had to do was sign in. A session that ended with the browser (no
+Remember me) arrives the same way. `signedOutLanding()` is checked once in
+`boot()`, before `ensureProfiles()` writes anything: no `PM.owner()`, first run
+not done, not framed, and no `incommon.guest.chosen` in sessionStorage, and the
+page goes to `coverHref() + '?signin=1'`. The cover's Continue without an
+account sets that mark for the tab, or it would bring a guest straight back.
+Checked at boot only, so Clear birth data in Settings still opens the birth
+page. The harness is exempt by the frame check, because every phase starts from
+a clean origin and grades the first run.
 
 **The Cloud card is gone from both Settings screens**, replaced by a comment
 where it stood. Signing in happens on the cover now, and a second account door
