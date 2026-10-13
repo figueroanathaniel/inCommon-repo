@@ -4031,6 +4031,16 @@ dashboard default, through a widened params type because `stripe@17`'s types
 predate the field. Turning it on would make Stripe the merchant of record and
 is the owner's decision, with the legal pages changed in the same change.
 
+**The website's gate names no price** (owner, 13 October 2026). It invites:
+the plans read Monthly and Yearly, "Billed monthly" and "Billed yearly", the
+annual one marked Best value where it is cheaper, and the button says Become a
+Luminary or Start your 7-day free trial. The figures are Stripe Checkout's to
+show, and it shows the price and the renewal before anything is paid, so the
+renewal sentence beside the button says "at the price shown at checkout" and a
+trial names its charge date without its amount. The store apps keep the prices,
+because Apple wants the price on the purchase screen (3.1.2). The Terms still
+state both prices; that page is where the figures live.
+
 **The paywall is the Oracle function, not the page.** The page's gate is
 courtesy; `server/oracle` reads `subscriptions` itself and answers 402
 PREMIUM_REQUIRED before it looks up a stored reading, as the Codex's

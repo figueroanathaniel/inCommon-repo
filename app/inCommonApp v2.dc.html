@@ -3288,7 +3288,7 @@ input[type="date"]{color-scheme:dark}
                 <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
                   <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
                   <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
-                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <sc-if value="{{ pl.priceOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span></sc-if>
                   <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
                 </button>
               </sc-for>
@@ -8074,7 +8074,7 @@ input[type="date"]{color-scheme:dark}
                 <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
                   <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
                   <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
-                  <span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span>
+                  <sc-if value="{{ pl.priceOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span></sc-if>
                   <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
                 </button>
               </sc-for>
@@ -19590,7 +19590,14 @@ class Component extends DCLogic {
       orLumGate: locked,
       orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
       orLumPlansOn: !!lum && sellable && !lumShut,
-      orLumPlans: plans.map(([k, name, price, per, badge]) => ({ name, price, per, badge, badgeOn: !!badge, on: plan === k,
+      /* NO PRICE ON THE WEBSITE'S GATE (owner, 13 October 2026): it invites the
+         reader to subscribe and leaves the figures to Stripe's checkout, which
+         shows the price and the renewal before anything is paid. The store apps
+         keep them, because Apple wants the price on the purchase screen. */
+      orLumPlans: plans.map(([k, name, price, per, badge]) => ({ name,
+        price: native ? price : '', priceOn: native,
+        per: native ? per : k === 'annual' ? 'Billed yearly' : 'Billed monthly',
+        badge: native ? badge : badge ? 'Best value' : '', badgeOn: !!badge, on: plan === k,
         bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
       orLumBuyOn: !!lum && sellable && !lumShut,
@@ -19600,9 +19607,9 @@ class Component extends DCLogic {
       orLumRenewText: native
         ? 'Renews automatically each month or year at the price shown until you cancel. Payment is charged to your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple') + ' account. Cancel anytime in your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple account') + ' settings, at least a day before it renews.'
         : trialDays
-        ? 'Free for ' + trialDays + ' days. Your card is charged ' + planRow[5] + ' on ' + trialEnd + ' unless you cancel before then, and the plan renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.'
-        : 'Renews automatically each month or year at the price shown until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.',
-      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : trialDays ? 'Start your ' + trialDays + '-day free trial' : 'Become a Luminary · ' + planRow[5],
+        ? 'Free for ' + trialDays + ' days. Your card is charged on ' + trialEnd + ' unless you cancel before then, and the plan renews automatically each month or year at the price shown at checkout until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.'
+        : 'Renews automatically each month or year at the price shown at checkout until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.',
+      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : trialDays ? 'Start your ' + trialDays + '-day free trial' : native ? 'Become a Luminary · ' + planRow[5] : 'Become a Luminary',
       orLumBuy: () => this.lumBuy(),
       orLumRestoreOn: !!lum && rcLive,
       orLumRestoreLabel: st.lumBusy === 'restore' ? 'Restoring…' : 'Restore purchases',
