@@ -4050,8 +4050,11 @@ Luminary or Start your 7-day free trial. The figures are Stripe Checkout's to
 show, and it shows the price and the renewal before anything is paid, so the
 renewal sentence beside the button says "at the price shown at checkout" and a
 trial names its charge date without its amount. The store apps keep the prices,
-because Apple wants the price on the purchase screen (3.1.2). The Terms still
-state both prices; that page is where the figures live.
+because Apple wants the price on the purchase screen (3.1.2). The Terms
+name no price either (owner, 13 October 2026): section 7 says the plan's price
+and tax are shown at checkout and confirmed in the receipt, which is why
+Stripe's customer receipts must stay on. A price change still owes 30 days'
+notice, as the Terms promise.
 
 **The paywall is the Oracle function, not the page.** The page's gate is
 courtesy; `server/oracle` reads `subscriptions` itself and answers 402
