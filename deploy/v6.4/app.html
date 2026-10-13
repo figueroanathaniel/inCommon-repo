@@ -3980,7 +3980,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 </script>
 <script>
 /* profile-manager.js: inCommon multi-profile data layer. V1.3.0
-   Pure JavaScript, no UI, no framework. Local-only: localStorage, no cloud sync.
+   Pure JavaScript, no UI, no framework. Local first: everything lives in
+   localStorage, and incommon-cloud.js mirrors it to the reader's account and
+   brings other devices' changes back through importSynced().
    One store per signed in account, and one for the guest: see scope().
    Every profile is fully isolated: consents, memories, conversations, and charts
    are stored under keys scoped by profile id.
@@ -4141,7 +4143,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   var PM = {
-    VERSION: '1.4.0',
+    VERSION: '1.5.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -4431,14 +4433,20 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       if (s.defaultId === id) s.defaultId = s.profiles[0].id;
       if (s.activeId === id) { s.activeId = s.profiles[0].id; this.clearOkiContext(); }
       this._save(s);
-      /* Cascade: every scoped key for this profile is removed. */
+      this._dropProfileKeys(id);
+      this._emit('profile:deleted', { id: id });
+      return this.getActiveProfile();
+    },
+
+    /* Cascade: every scoped key for this profile is removed. Shared by a
+       deletion here and a deletion another device made, which importSynced
+       applies. */
+    _dropProfileKeys: function (id) {
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
         'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
-      this._emit('profile:deleted', { id: id });
-      return this.getActiveProfile();
     },
 
     /* ---------- PIN ---------- */
@@ -4573,7 +4581,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         return false;
       });
       write(k, after);
-      this._emit('memory:deleted', { profileId: pid, type: opts.type || null, removed: before.length - after.length });
+      /* The id travels with the event, so the cloud module deletes that one
+         row remotely rather than every memory the profile has. */
+      this._emit('memory:deleted', { profileId: pid, type: opts.type || null, id: opts.id || null, removed: before.length - after.length });
       return before.length - after.length;
     },
 
@@ -4692,6 +4702,116 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         write(dest, old); moved.push(pair[0]);
       });
       return { migrated: true, profileId: p.id, name: p.name, moved: moved };
+    },
+
+    /* ---------- what another device wrote, brought down by the cloud ----------
+       incommon-cloud.js decides what changed (it holds the record of what
+       this device last synced); this is the one place it is written, so the
+       storage shapes stay this module's. Nothing here is a local act, so it
+       emits sync:pulled and never profile:deleted or memory:deleted: those
+       would queue the same deletion back up to the server.
+
+       d.profiles        full local profile objects, replaced by id or added
+       d.removeProfiles  ids another device deleted (never the last profile)
+       d.activeId        the profile to open, when this device had none of its own
+       d.defaultId       the default, likewise
+       d.pairs           two-person consent records, replaced by key or added
+       d.memories        { pid: { add: [raw rows], remove: [ids] } }
+       d.consents        { pid: [{ ts, id, granted }] } merged into the ledger
+       d.lists           { pid: { throughline: [items], oki: [items] } } appended
+       d.recalc          ids whose birth data changed */
+    importSynced: function (d) {
+      d = d || {};
+      var s = this._store(), self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      (d.removeProfiles || []).forEach(function (id) {
+        if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
+        var before = s.profiles.length;
+        s.profiles = s.profiles.filter(function (p) { return p.id !== id; });
+        if (s.profiles.length === before) return;
+        s.pairs = s.pairs.filter(function (pr) { return pr.a !== id && pr.b !== id; });
+        self._dropProfileKeys(id);
+        out.removed++;
+      });
+      (d.profiles || []).forEach(function (p) {
+        if (!p || !p.id) return;
+        var i = -1;
+        s.profiles.forEach(function (x, j) { if (x.id === p.id) i = j; });
+        if (i !== -1) s.profiles[i] = p;
+        else if (s.profiles.length < MAX_PROFILES) s.profiles.push(p);
+        else return;
+        out.profiles++;
+      });
+      var has = function (id) { return s.profiles.some(function (p) { return p.id === id; }); };
+      if (d.activeId && has(d.activeId)) s.activeId = d.activeId;
+      if (d.defaultId && has(d.defaultId)) s.defaultId = d.defaultId;
+      if (!has(s.activeId)) s.activeId = s.profiles.length ? s.profiles[0].id : null;
+      if (!has(s.defaultId)) s.defaultId = s.activeId;
+      (d.pairs || []).forEach(function (pr) {
+        if (!pr || !pr.key) return;
+        var i = -1;
+        s.pairs.forEach(function (x, j) { if (x.key === pr.key) i = j; });
+        if (i !== -1) s.pairs[i] = pr; else s.pairs.push(pr);
+      });
+      write(scope().root, s);
+
+      var when = function (x) { var t = Date.parse(x); return isNaN(t) ? 0 : t; };
+      Object.keys(d.consents || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        self.initConsents(pid);
+        var k = 'incommon.consent.' + pid, rec = read(k, null), seen = {}, all = [];
+        (rec.events || []).concat(d.consents[pid] || []).forEach(function (e) {
+          if (!e || !e.id) return;
+          var sig = e.id + '@' + e.ts;
+          if (seen[sig]) return;
+          seen[sig] = 1; all.push({ ts: e.ts, id: e.id, granted: !!e.granted });
+        });
+        all.sort(function (a, b) { return when(a.ts) - when(b.ts); });
+        /* The latest event for each consent is its state, whichever device it
+           was made on. */
+        all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
+        rec.events = all.slice(-50);
+        if (all.length) rec.updatedAt = all[all.length - 1].ts;
+        write(k, rec);
+        out.consents++;
+      });
+      Object.keys(d.memories || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        var k = 'incommon.p.' + pid + '.memories', m = d.memories[pid] || {}, gone = {};
+        (m.remove || []).forEach(function (id) { gone[id] = 1; });
+        var list = read(k, []).filter(function (r) { return !gone[r.id]; }), ids = {};
+        list.forEach(function (r) { ids[r.id] = 1; });
+        (m.add || []).forEach(function (r) { if (r && r.id && !ids[r.id]) { ids[r.id] = 1; list.push(r); out.memories++; } });
+        list.sort(function (a, b) { return when(b.created_at) - when(a.created_at); });
+        write(k, list.slice(0, 800));
+      });
+      Object.keys(d.lists || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        ['throughline', 'oki'].forEach(function (which) {
+          var add = (d.lists[pid] || {})[which];
+          if (!add || !add.length) return;
+          var k = 'incommon.p.' + pid + '.' + which, arr = read(k, []);
+          if (!Array.isArray(arr)) arr = arr ? [arr] : [];
+          arr = arr.concat(add);
+          /* Newest first, the order the app writes them in. An entry's time is
+             its at, else its date, else the stamp in its m<time> id. */
+          var at = function (x) {
+            if (!x) return 0;
+            if (typeof x.at === 'number') return x.at;
+            var t = when(x.date || x.created_at);
+            if (t) return t;
+            var n = /^m(\d{10,})$/.exec(String(x.id || ''));
+            return n ? Number(n[1]) : 0;
+          };
+          if (which === 'throughline') arr = arr.map(function (x, i) { return [x, i]; })
+            .sort(function (a, b) { return (at(b[0]) - at(a[0])) || (a[1] - b[1]); }).map(function (p) { return p[0]; });
+          write(k, arr);
+          out.entries += add.length;
+        });
+      });
+      (d.recalc || []).forEach(function (id) { self.invalidateCalculations(id); });
+      this._emit('profiles:changed', {});
+      this._emit('sync:pulled', out);
+      return out;
     },
 
     /* ---------- export ---------- */
@@ -17980,10 +18100,18 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
  *      local id IS the remote primary key, and memory rows carry their local
  *      ids, so sync bookkeeping is a hash cache, not an id map.
  *
- * SYNC MODEL, stated plainly: push is idempotent and consent-gated; pull is
- * whole-record and on demand (first sign-in of an existing device, the
- * migration pass). Multi-device conflict resolution is a later pass; the
- * local record wins by design because this app is local-first.
+ * SYNC MODEL, stated plainly: push is idempotent and consent-gated; pull
+ * brings the whole account down and merges it in, so one account reads the
+ * same on every device it signs in on. sync() is pull then push, run when a
+ * session starts and whenever the app asks (it asks when the page comes back
+ * into view). The merge is three way, and the hash cache is the common base:
+ * a row whose local copy still hashes to what this device last synced has
+ * not been touched here, so the server's copy is newer and is taken; a row
+ * changed here since keeps the local copy, and the push that follows sends
+ * it. A row this device synced before and the server no longer holds was
+ * deleted on another device, and goes here too, except on a device's first
+ * pull (below). Nothing a pull applies is a local act, so it never queues a
+ * deletion back up.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
@@ -17997,7 +18125,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.7.1';
+  var VERSION = '2.8.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -18014,6 +18142,10 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      must not carry hashes, and deleting the app state must not orphan rows
      whose only address lived inside it. */
   var MAP_KEY = 'incommon_cloud_map_v2';
+  /* Rows fetched per request. PostgREST answers at most 1000 rows unless the
+     project raises it, so a pull pages rather than trusting one answer to be
+     the whole account. */
+  var PAGE = 500;
   var OUTBOX_KEY = 'incommon_cloud_outbox_v2';
   var RECOVERY_FLAG = 'incommon_pin_recovery';
 
@@ -18070,6 +18202,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   var listeners = [];
   var timer = null;
   var lastPushAt = 0;
+  var lastPullAt = 0;
+  var pulling = null;   // the pull in flight, which a push waits behind
+  var syncing = null;   // the sync in flight, so two never overlap
 
   function lib() { return (root && root.supabase) || null; }
   function uid() { return session && session.user ? session.user.id : null; }
@@ -18263,6 +18398,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
     var userId = uid();
     if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
+    /* A push that ran while a pull was writing would hash a half merged
+       record. It waits; the pull's own sync:pulled event schedules it anyway. */
+    if (pulling) return pulling.then(function () { return push(); });
 
     var plan = buildPlan();
     return ensureAccountRow(userId).then(function (acc) {
@@ -18299,10 +18437,11 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
   /* ---------- outbox: deletions cannot be outrun ---------- */
 
+  function opSig(x) { return x.op + ':' + (x.pid || '') + ':' + (x.type || '') + ':' + (x.id || ''); }
   function queueOp(op) {
     var o = loadOutbox();
-    var sig = op.op + ':' + (op.pid || '') + ':' + (op.type || '');
-    if (!o.some(function (x) { return (x.op + ':' + (x.pid || '') + ':' + (x.type || '')) === sig; })) {
+    var sig = opSig(op);
+    if (!o.some(function (x) { return opSig(x) === sig; })) {
       o.push(op);
       saveOutbox(o);
     }
@@ -18325,6 +18464,16 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
             return acc;
           });
         }
+        /* One entry, by the id it carries both here and on the server. Before
+           the id travelled with the event, deleting one journal entry queued
+           del-memories with no type, which deleted every memory the profile
+           had on the server. */
+        if (op.op === 'del-memory') {
+          return client.from('memories').delete().eq('profile_id', op.pid).eq('local_id', op.id).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
+            return acc;
+          });
+        }
         if (op.op === 'del-memories') {
           var q = client.from('memories').delete().eq('profile_id', op.pid);
           if (op.type) q = q.eq('memory_type', op.type);
@@ -18339,24 +18488,343 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return chain.then(function (acc) { saveOutbox(remaining); return acc; });
   }
 
-  /* ---------- pull: whole-record fetch, gated the same way push is ---------- */
+  /* ---------- pull: the account, brought down and merged in ----------
 
-  function pullAll() {
-    if (!client) return Promise.resolve(null);
-    if (!uid()) return Promise.resolve(null);
-    var result = { profiles: [], tables: {} };
-    return client.from('profiles').select('*').then(function (res) {
-      if (!res.error && Array.isArray(res.data)) result.profiles = res.data;
-      var chain = Promise.resolve(result);
-      ['consent_events', 'pairs', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
-        chain = chain.then(function () {
-          return client.from(t).select('*').then(function (r2) {
-            result.tables[t] = r2.error ? [] : r2.data;
-          });
-        });
+     Four rules carry the weight.
+
+     A FAILED READ APPLIES NOTHING. Every table is read before anything is
+     written, and one error anywhere returns a reason with the record exactly as
+     it was. A table that failed must never read as a table that is empty,
+     because empty is what a deletion looks like.
+
+     AN EMPTY ACCOUNT DELETES NOTHING. A server holding no profiles is a new
+     account, or one whose rows did not come back; either way it is no evidence
+     that this device's profiles were deleted elsewhere.
+
+     A DEVICE'S FIRST PULL DELETES NOTHING EITHER. Before this version, deleting
+     one journal entry deleted every memory its profile had on the server (see
+     del-memory above), while this device's hash cache still says they were
+     sent. Read as deletions made elsewhere, that bug's damage would spread to
+     this device too. So on the first pull, a row the cache says was sent and
+     the server lacks is sent again rather than deleted: the cache entry is
+     dropped and the push that follows uploads it. From the second pull on, an
+     absence is a deletion.
+
+     A PENDING LOCAL DELETION WINS. The outbox is flushed before reading, and
+     anything still queued is skipped on the way in, so a deletion made offline
+     is not undone by the pull that runs when the signal comes back. */
+  function fetchAll(table, filter) {
+    var rows = [];
+    function page(from) {
+      var q = client.from(table).select('*');
+      if (filter) q = filter(q);
+      var paged = typeof q.range === 'function';
+      if (paged && typeof q.order === 'function') q = q.order('id', { ascending: true });
+      if (paged) q = q.range(from, from + PAGE - 1);
+      return Promise.resolve(q).then(function (res) {
+        if (!res || res.error) throw new Error((res && res.error && res.error.message) || 'no answer');
+        var got = Array.isArray(res.data) ? res.data : [];
+        rows = rows.concat(got);
+        /* Until a page comes back empty, not until one comes back short: a
+           project whose row limit is under PAGE answers every page short. */
+        return paged && got.length ? page(from + got.length) : rows;
       });
-      return chain;
-    }).then(function () { return result; }).catch(function () { return null; });
+    }
+    return page(0);
+  }
+  function iso(x) {
+    var t = Date.parse(x);
+    return isNaN(t) ? (x || new Date().toISOString()) : new Date(t).toISOString();
+  }
+  function str(v) { return v == null ? '' : String(v); }
+  /* The columns a profile row carries, as the local profile spells them. A
+     string the push sent as null comes back as the empty string the local
+     record writes, so a row that only went up and came back reads unchanged. */
+  var PROFILE_TEXT = ['avatar_color', 'avatar_image', 'avatar_sign', 'birth_date', 'birth_time', 'birth_location', 'timezone'];
+  var PROFILE_NUM = ['birth_lat', 'birth_lon', 'tz_offset'];
+  var PROFILE_BOOL = ['location_resolved', 'birth_time_unknown'];
+  var BIRTH = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'tz_offset', 'timezone', 'birth_time_unknown'];
+  function profileFromRow(row, base) {
+    var p = Object.assign({}, base || {}), changed = false;
+    function put(k, v, same) { if (!same(p[k], v)) { p[k] = v; changed = true; } }
+    var txt = function (a, b) { return str(a) === str(b); };
+    var num = function (a, b) { return (a == null ? null : Number(a)) === (b == null ? null : Number(b)); };
+    var bool = function (a, b) { return !!a === !!b; };
+    if (!p.id) { p.id = row.id; changed = true; }
+    if (row.name && row.name !== p.name) { p.name = row.name; changed = true; }
+    PROFILE_TEXT.forEach(function (k) { put(k, str(row[k]), txt); });
+    PROFILE_NUM.forEach(function (k) { put(k, row[k] == null ? null : Number(row[k]), num); });
+    PROFILE_BOOL.forEach(function (k) { put(k, !!row[k], bool); });
+    put('avatar_kind', row.avatar_kind || 'initials', function (a, b) { return (a || 'initials') === b; });
+    put('pin_hash', row.pin_hash || null, function (a, b) { return (a || null) === b; });
+    if (!p.created_at) p.created_at = iso(row.created_at);
+    if (!p.name) p.name = 'Profile';
+    return { profile: p, changed: changed };
+  }
+  function birthMoved(a, b) {
+    return BIRTH.some(function (k) { return str(a && a[k]) !== str(b && b[k]); });
+  }
+  function hydrateRow(r) {
+    var pm = cfg.pm;
+    if (typeof pm._hydrate === 'function') return pm._hydrate(r);
+    var c = r.content; try { c = JSON.parse(r.content); } catch (e) {}
+    return { id: r.id, profileId: r.profile_id, type: r.memory_type, memoryType: r.memory_type, content: c,
+      createdAt: r.created_at, isPrivate: !!r.is_private, consentRequired: r.consent_required || null, kept: !!r.kept };
+  }
+
+  function pull() {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    var userId = uid();
+    if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
+    if (!cfg || !cfg.pm || typeof cfg.pm.importSynced !== 'function') return Promise.resolve({ ok: false, reason: 'off' });
+    if (pulling) return pulling;
+    var remote = {};
+    pulling = flushOutbox().catch(function () {}).then(function () {
+      return fetchAll('profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+    }).then(function (rows) {
+      remote.profiles = rows;
+      var ids = rows.map(function (r) { return r.id; });
+      var byProfile = function (q) { return typeof q.in === 'function' ? q.in('profile_id', ids) : q; };
+      if (!ids.length) { remote.consent_events = []; remote.memories = []; remote.throughline_entries = []; remote.oki_messages = []; }
+      var chain = Promise.resolve();
+      ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+        if (!ids.length) return;
+        chain = chain.then(function () { return fetchAll(t, byProfile).then(function (r) { remote[t] = r; }); });
+      });
+      return chain.then(function () {
+        return fetchAll('pairs', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+      }).then(function (r) { remote.pairs = r; });
+    }).then(function () {
+      var res = merge(remote, userId);
+      lastPullAt = Date.now();
+      notify();
+      if (cfg.onPulled) { try { cfg.onPulled(res); } catch (e) {} }
+      return res;
+    }, function (e) {
+      var msg = (e && e.message) || '';
+      return { ok: false, reason: /fetch|network|offline|Failed/i.test(msg) ? 'offline' : 'error', error: msg };
+    });
+    return pulling.then(function (r) { pulling = null; return r; }, function (e) { pulling = null; throw e; });
+  }
+
+  function merge(remote, userId) {
+    var pm = cfg.pm, store = pm._store(), map = loadMap();
+    /* Per account: a device that pulled for one account has not pulled for
+       the next one to sign in on it. */
+    map.pulled = map.pulled || {};
+    var firstPull = !map.pulled[userId];
+    var cP = hashCache(map, 'profiles'), cM = hashCache(map, 'memories'), cC = hashCache(map, 'consent_events');
+    var cT = hashCache(map, 'throughline_entries'), cO = hashCache(map, 'oki_messages'), cR = hashCache(map, 'pairs');
+    var outbox = loadOutbox();
+    var pendingProfile = {}, pendingMem = {}, pendingType = {};
+    outbox.forEach(function (op) {
+      if (op.op === 'del-profile') pendingProfile[op.pid] = 1;
+      if (op.op === 'del-memory') pendingMem[op.pid + '/' + op.id] = 1;
+      if (op.op === 'del-memories') pendingType[op.pid + '/' + (op.type || '*')] = 1;
+    });
+    var placeholders = [];
+    if (cfg.placeholders) { try { placeholders = cfg.placeholders() || []; } catch (e) { placeholders = []; } }
+    var isPlaceholder = function (id) { return placeholders.indexOf(id) !== -1; };
+
+    var d = { profiles: [], removeProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
+    var res = { ok: true, changed: false, adopted: false, firstPull: firstPull,
+      profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
+
+    /* ---- profiles ---- */
+    var localById = {};
+    store.profiles.forEach(function (p) { localById[p.id] = p; });
+    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
+    var remoteById = {};
+    remoteRows.forEach(function (r) { remoteById[r.id] = r; });
+    var ownBefore = store.profiles.filter(function (p) { return !isPlaceholder(p.id); });
+    var serverHas = remoteRows.length > 0;
+    var room = (pm.MAX_PROFILES || 6) - ownBefore.length;
+    remoteRows.forEach(function (r) {
+      var L = localById[r.id];
+      if (L) {
+        /* Changed here since the last sync: the local copy wins and the push
+           sends it. Untouched here: the server's copy is the newer one. */
+        if (cP[r.id] !== hashOf(L)) return;
+        var m = profileFromRow(r, L);
+        if (!m.changed) return;
+        d.profiles.push(m.profile);
+        if (birthMoved(L, m.profile)) d.recalc.push(r.id);
+        cP[r.id] = hashOf(m.profile);
+        res.profilesUpdated++;
+        return;
+      }
+      if (cP[r.id] && !firstPull) return;  // deleted here; the outbox is carrying it up
+      if (room <= 0) return;
+      var made = profileFromRow(r, null).profile;
+      d.profiles.push(made);
+      cP[r.id] = hashOf(made);
+      room--;
+      res.profilesAdded++;
+    });
+    store.profiles.forEach(function (L) {
+      if (remoteById[L.id] || !serverHas) return;
+      if (isPlaceholder(L.id)) return;
+      if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
+      if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
+      if (cP[L.id] !== hashOf(L)) return;           // changed here since: keep it, the push restores it
+      d.removeProfiles.push(L.id);
+      delete cP[L.id];
+      res.profilesRemoved++;
+    });
+    /* A stand in (the sample a blank device invents) gives way once the account
+       brings a profile of its own. If it ever reached the server, it goes there
+       too. */
+    if (remoteRows.some(function (r) { return !isPlaceholder(r.id); })) {
+      placeholders.forEach(function (id) {
+        if (!localById[id] || remoteById[id]) return;
+        d.removeProfiles.push(id);
+        delete cP[id];
+      });
+    }
+    /* A device with nothing of its own opens on what the account had. */
+    if (!ownBefore.length && res.profilesAdded) {
+      res.adopted = true;
+      var pick = remoteRows.filter(function (r) { return r.is_default; })[0] || remoteRows.filter(function (r) { return r.is_active; })[0] || remoteRows[0];
+      d.activeId = pick.id;
+      d.defaultId = (remoteRows.filter(function (r) { return r.is_default; })[0] || pick).id;
+    }
+    /* Profiles that will exist once this lands. */
+    var gone = {};
+    d.removeProfiles.forEach(function (id) { gone[id] = 1; });
+    var present = {};
+    store.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
+    d.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
+
+    /* ---- consent ledger: union by event, the latest event decides ---- */
+    remote.consent_events.forEach(function (r) {
+      if (!present[r.profile_id] || !r.scope) return;
+      var e = { ts: iso(r.ts), id: String(r.scope), granted: r.action === 'grant' };
+      (d.consents[r.profile_id] = d.consents[r.profile_id] || []).push(e);
+      cC[r.profile_id + '/' + e.id + '/' + e.ts] = hashOf(e);
+    });
+
+    /* ---- memories ---- */
+    var remoteMem = {};
+    remote.memories.forEach(function (r) {
+      if (!present[r.profile_id] || r.local_id == null) return;
+      (remoteMem[r.profile_id] = remoteMem[r.profile_id] || {})[String(r.local_id)] = r;
+    });
+    Object.keys(present).forEach(function (pid) {
+      var local = localById[pid] ? pm.getMemory({ profileId: pid, respectConsent: false }) : [];
+      var have = {}, rm = remoteMem[pid] || {}, add = [], remove = [];
+      local.forEach(function (m) { have[m.id] = m; });
+      Object.keys(rm).forEach(function (id) {
+        if (have[id]) return;
+        var r = rm[id], key = pid + '/' + id;
+        if (pendingMem[key] || pendingType[pid + '/' + r.memory_type] || pendingType[pid + '/*']) return;
+        if (cM[key] && !firstPull) return;  // deleted here
+        var raw = { id: id, profile_id: pid, memory_type: r.memory_type,
+          content: JSON.stringify(r.content == null ? {} : r.content), created_at: iso(r.created_at),
+          is_private: r.is_private ? 1 : 0, consent_required: r.consent_required || null };
+        if (r.kept) raw.kept = 1;
+        add.push(raw);
+        cM[key] = hashOf(hydrateRow(raw));
+      });
+      /* Only for a profile the server still holds: one it no longer holds is
+         either deleted (and goes whole, above) or changed here and kept, and
+         its rows are not the server's to remove. */
+      if (localById[pid] && remoteById[pid]) {
+        local.forEach(function (m) {
+          var key = pid + '/' + m.id;
+          if (rm[m.id] || cM[key] === undefined) return;
+          if (firstPull) { delete cM[key]; return; }
+          if (cM[key] !== hashOf(m)) return;
+          remove.push(m.id);
+          delete cM[key];
+        });
+      }
+      if (add.length || remove.length) {
+        d.memories[pid] = { add: add, remove: remove };
+        res.memoriesAdded += add.length;
+        res.memoriesRemoved += remove.length;
+      }
+    });
+
+    /* ---- Throughline entries and the Oki log: appended, never edited ----
+       Their rows carry the whole item, keyed here by content hash and
+       occurrence, exactly as buildPlan keys them, so what comes down is
+       recorded as already sent and is never uploaded a second time. */
+    [['throughline_entries', 'throughline', cT], ['oki_messages', 'oki', cO]].forEach(function (spec) {
+      var byPid = {};
+      remote[spec[0]].forEach(function (r) {
+        if (!present[r.profile_id] || r.payload == null) return;
+        (byPid[r.profile_id] = byPid[r.profile_id] || []).push(r.payload);
+      });
+      Object.keys(byPid).forEach(function (pid) {
+        var arr = localById[pid] ? readJSON('incommon.p.' + pid + '.' + spec[1], []) : [];
+        if (!Array.isArray(arr)) arr = arr ? [arr] : [];
+        var count = {}, ids = {}, add = [];
+        arr.forEach(function (it) {
+          var h = hashOf(it); count[h] = (count[h] || 0) + 1;
+          if (it && it.id != null) ids[String(it.id)] = 1;
+        });
+        var seenRemote = {};
+        byPid[pid].forEach(function (it) {
+          var h = hashOf(it), n = seenRemote[h] || 0;
+          seenRemote[h] = n + 1;
+          var key = pid + '/' + h + '#' + n;
+          if (n < (count[h] || 0)) { spec[2][key] = h; return; }      // already here
+          if (it && it.id != null && ids[String(it.id)]) { spec[2][key] = h; return; }
+          if (spec[2][key] && !firstPull) return;                      // removed here
+          add.push(it);
+          count[h] = (count[h] || 0) + 1;
+          spec[2][key] = h;
+        });
+        if (add.length) {
+          (d.lists[pid] = d.lists[pid] || {})[spec[1]] = add;
+          res.entriesAdded += add.length;
+        }
+      });
+    });
+
+    /* ---- two-person consent ---- */
+    var localPairs = {};
+    (store.pairs || []).forEach(function (pr) { localPairs[pr.key] = pr; });
+    remote.pairs.forEach(function (r) {
+      if (!r || !r.profile_a || !r.profile_b) return;
+      var key = [r.profile_a, r.profile_b].sort().join('::');
+      var L = localPairs[key];
+      var pr = { key: key, a: r.profile_a, b: r.profile_b, enabled: r.enabled ? 1 : 0,
+        enabled_by: r.enabled_by || null, enabled_at: r.enabled_at ? iso(r.enabled_at) : null };
+      if (L) {
+        if (cR[key] !== hashOf(L)) return;
+        if (!!L.enabled === !!pr.enabled && (L.enabled_by || null) === pr.enabled_by) return;
+        pr.a = L.a; pr.b = L.b;
+      } else if (cR[key] && !firstPull) return;
+      d.pairs.push(pr);
+      cR[key] = hashOf(pr);
+    });
+
+    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
+      res.entriesAdded || Object.keys(d.consents).some(function (pid) { return consentNews(pid, d.consents[pid]); }));
+    if (res.changed) pm.importSynced(d);
+    map.pulled[userId] = new Date().toISOString();
+    saveMap(map);
+    return res;
+  }
+  /* True when the server's ledger holds an event this device has not seen. */
+  function consentNews(pid, events) {
+    var rec = readJSON('incommon.consent.' + pid, null), seen = {}, local = (rec && rec.events) || [];
+    local.forEach(function (e) { seen[e.id + '@' + iso(e.ts)] = 1; });
+    /* The device keeps the last fifty events and the server keeps them all, so
+       an event older than everything kept here was trimmed here, not missed. */
+    var floor = local.length >= 50 ? Math.min.apply(null, local.map(function (e) { return Date.parse(e.ts) || 0; })) : -Infinity;
+    return events.some(function (e) { return !seen[e.id + '@' + e.ts] && Date.parse(e.ts) >= floor; });
+  }
+
+  /* Pull, then push: what the account holds comes down first, so a device
+     never uploads a placeholder over an account it has not read yet. */
+  function sync() {
+    if (syncing) return syncing;
+    syncing = pull().then(function (pr) {
+      return push().then(function (ps) { return { ok: !!(pr.ok && ps.ok), pull: pr, push: ps }; });
+    }).then(function (r) { syncing = null; return r; }, function (e) { syncing = null; return { ok: false, reason: 'error', error: e && e.message }; });
+    return syncing;
   }
 
   /* ---------- PIN recovery through the account email ----------
@@ -19273,6 +19741,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       userId: uid(),
       owesCode: !!held,
       lastPushAt: lastPushAt || null,
+      lastPullAt: lastPullAt || null,
       pendingOps: loadOutbox().length,
       VERSION: VERSION
     };
@@ -19288,7 +19757,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (typeof opts.pm._store !== 'function' || typeof opts.pm.getMemory !== 'function') return null;
     var l = lib();
     if (!l || typeof l.createClient !== 'function') return null; // vendored library absent: stay inert
-    cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm };
+    cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm,
+      /* placeholders(): ids of local profiles that stand in for nobody (the
+         sample a blank device invents), which give way to the account's own.
+         onPulled(result): told after every pull that read the server. */
+      placeholders: typeof opts.placeholders === 'function' ? opts.placeholders : null,
+      onPulled: typeof opts.onPulled === 'function' ? opts.onPulled : null };
     /* Before the client reads the stored session: a sign in that asked not to
        be remembered ends with the browser session it was made in. */
     ephemeralSweep(url, opts.storage);
@@ -19299,8 +19773,10 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        a wipe is never re-uploaded by the debounce that follows it. */
     try {
       opts.pm.subscribe(function (name, detail) {
+        var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
         if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
-        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()), type: detail.type || null });
+        else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
+        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
         schedule();
       });
     } catch (e) {}
@@ -19310,7 +19786,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       held = owesCode(s) ? s : null;
       session = held ? null : (s || null);
       notify();
-      if (session && !had) push();
+      if (session && !had) sync();
     });
     return api;
   }
@@ -19336,7 +19812,10 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     },
     schedule: schedule,
     push: push,
-    pullAll: pullAll,
+    pull: pull,
+    /* The name the app's comments have always used for the pull. */
+    pullAll: pull,
+    sync: sync,
     startPinRecovery: startPinRecovery,
     isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
@@ -19392,7 +19871,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
     _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
-    _setConfigForTests: function (o) { cfg = o; }
+    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; }
   };
 
   return api;
@@ -25064,9 +25543,10 @@ input[type="date"]{color-scheme:dark}
       </button>
       <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
       <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
+           Signing back in brings the account down again, but what this device
+           holds that never synced (memories with their consent off, kept rows)
+           would not come back, so nothing is cleared. The reader goes back to
+           the cover, which is where signing in lives. -->
       <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
@@ -29524,9 +30004,10 @@ input[type="date"]{color-scheme:dark}
       </button>
       <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
       <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
+           Signing back in brings the account down again, but what this device
+           holds that never synced (memories with their consent off, kept rows)
+           would not come back, so nothing is cleared. The reader goes back to
+           the cover, which is where signing in lives. -->
       <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
@@ -30684,10 +31165,16 @@ class Component extends DCLogic {
     window.addEventListener('pageshow', this._onPageShow);
     const IC = typeof window !== 'undefined' && window.InCommonCloud;
     if (IC && window.ProfileManager && window.InCommonCore) {
-      this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage }) || null;
+      this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage,
+        placeholders: () => this.cloudPlaceholders(), onPulled: r => this.cloudPulled(r) }) || null;
       if (this.cloud) {
         this.cloud.onSessionChange(s => this.setState({ cloudStatus: s }));
         this.setState({ cloudStatus: this.cloud.status() });
+        /* The account is read again whenever the page comes back into view,
+           which is when a reader who wrote something on another device
+           expects to find it here. The session start syncs on its own. */
+        this._onVis = () => { if (document.visibilityState === 'visible') this.cloudSync(); };
+        document.addEventListener('visibilitychange', this._onVis);
       }
     }
     /* Analytics, if it was ever switched on. The module writes nothing while
@@ -30712,7 +31199,7 @@ class Component extends DCLogic {
     this.vtBind();
     this._onErr = e => this.setState({ errBanner: 'Something broke quietly: ' + (e.message || 'unknown error') + '. The rest of the app keeps working.' });
     window.addEventListener('error', this._onErr);
-    this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => this.flushOutbox(), 400); };
+    this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => { this.flushOutbox(); this.cloudSync(true); }, 400); };
     window.addEventListener('online', this._onNet); window.addEventListener('offline', this._onNet);
     this._hbuf = [];
     this._onKey = e => { // H three times within 2s opens help, from any screen; never while typing
@@ -30822,6 +31309,7 @@ class Component extends DCLogic {
     clearTimeout(this._bt); clearTimeout(this._tt); clearTimeout(this._pk); clearInterval(this._clk);
     window.removeEventListener('error', this._onErr);
     window.removeEventListener('online', this._onNet); window.removeEventListener('offline', this._onNet);
+    if (this._onVis) { document.removeEventListener('visibilitychange', this._onVis); this._onVis = null; }
     window.removeEventListener('hashchange', this._onHash);
     window.removeEventListener('popstate', this._onPop);
     if (this._vtKey) document.removeEventListener('keydown', this._vtKey);
@@ -30997,6 +31485,48 @@ class Component extends DCLogic {
       if (n) this.toastMsg('Hidden · ' + n + ' ' + (n === 1 ? 'entry' : 'entries') + ' kept for you');
     }
     this.setState({ consentTick: this.state.consentTick + 1 });
+  }
+  /* ONE ACCOUNT READS THE SAME ON EVERY DEVICE. incommon-cloud.js pulls the
+     account down and merges it in when a session starts, and cloudSync() asks
+     again when the page returns to view or the signal comes back, at most once
+     a minute unless forced. The merge itself is the module's; the app supplies
+     the two things only it knows.
+
+     cloudPlaceholders() names the sample profile a blank device invents, while
+     it is still exactly the sample: on a second device the account's own
+     profiles replace it rather than sitting beside a stranger born on the demo
+     date. Edited at all, it is the reader's and is kept.
+
+     cloudPulled() repaints what the pull changed. A device that had nothing of
+     its own and now holds the account's profiles has been set up already,
+     somewhere else, so it is not asked for a birth moment it was given. */
+  cloudPlaceholders() {
+    const PM = this.PM();
+    if (!PM) return [];
+    const id = this.readLS(this.SAMPLE_KEY, '');
+    const p = id && PM.getProfile(id);
+    return p && p.birthDate === this.DOB && !p.birthTime && !p.birthLocation ? [id] : [];
+  }
+  cloudSync(force) {
+    if (!this.cloud || typeof this.cloud.sync !== 'function') return;
+    const st = this.cloud.status();
+    if (!st || st.mode !== 'cloud') return;
+    const now = Date.now();
+    if (!force && now - (this._cloudAskAt || 0) < 60000) return;
+    this._cloudAskAt = now;
+    this.cloud.sync();
+  }
+  cloudPulled(r) {
+    if (!r || !r.ok || !r.changed) return;
+    const patch = {};
+    if (r.adopted) {
+      this.writeLS(this.FIRSTRUN_KEY, true);
+      try { localStorage.removeItem(this.SAMPLE_KEY); } catch (e) {}
+      if (this.state.auth === undefined || this.state.auth === 'birth') patch.auth = null;
+    }
+    this._hd = null; this._hdStamp = null;
+    this.setState({ ...patch, profileTick: (this.state.profileTick || 0) + 1, consentTick: (this.state.consentTick || 0) + 1,
+      memTick: (this.state.memTick || 0) + 1, cloudStatus: this.cloud ? this.cloud.status() : this.state.cloudStatus });
   }
   /* Cloud (v6.3 step 4). This surface never overrides the consent gate; it
      only makes visible what the gate is already deciding. this.cloud is

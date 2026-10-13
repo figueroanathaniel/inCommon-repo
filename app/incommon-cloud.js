@@ -31,10 +31,18 @@
  *      local id IS the remote primary key, and memory rows carry their local
  *      ids, so sync bookkeeping is a hash cache, not an id map.
  *
- * SYNC MODEL, stated plainly: push is idempotent and consent-gated; pull is
- * whole-record and on demand (first sign-in of an existing device, the
- * migration pass). Multi-device conflict resolution is a later pass; the
- * local record wins by design because this app is local-first.
+ * SYNC MODEL, stated plainly: push is idempotent and consent-gated; pull
+ * brings the whole account down and merges it in, so one account reads the
+ * same on every device it signs in on. sync() is pull then push, run when a
+ * session starts and whenever the app asks (it asks when the page comes back
+ * into view). The merge is three way, and the hash cache is the common base:
+ * a row whose local copy still hashes to what this device last synced has
+ * not been touched here, so the server's copy is newer and is taken; a row
+ * changed here since keeps the local copy, and the push that follows sends
+ * it. A row this device synced before and the server no longer holds was
+ * deleted on another device, and goes here too, except on a device's first
+ * pull (below). Nothing a pull applies is a local act, so it never queues a
+ * deletion back up.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
@@ -48,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.7.1';
+  var VERSION = '2.8.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -65,6 +73,10 @@
      must not carry hashes, and deleting the app state must not orphan rows
      whose only address lived inside it. */
   var MAP_KEY = 'incommon_cloud_map_v2';
+  /* Rows fetched per request. PostgREST answers at most 1000 rows unless the
+     project raises it, so a pull pages rather than trusting one answer to be
+     the whole account. */
+  var PAGE = 500;
   var OUTBOX_KEY = 'incommon_cloud_outbox_v2';
   var RECOVERY_FLAG = 'incommon_pin_recovery';
 
@@ -121,6 +133,9 @@
   var listeners = [];
   var timer = null;
   var lastPushAt = 0;
+  var lastPullAt = 0;
+  var pulling = null;   // the pull in flight, which a push waits behind
+  var syncing = null;   // the sync in flight, so two never overlap
 
   function lib() { return (root && root.supabase) || null; }
   function uid() { return session && session.user ? session.user.id : null; }
@@ -314,6 +329,9 @@
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
     var userId = uid();
     if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
+    /* A push that ran while a pull was writing would hash a half merged
+       record. It waits; the pull's own sync:pulled event schedules it anyway. */
+    if (pulling) return pulling.then(function () { return push(); });
 
     var plan = buildPlan();
     return ensureAccountRow(userId).then(function (acc) {
@@ -350,10 +368,11 @@
 
   /* ---------- outbox: deletions cannot be outrun ---------- */
 
+  function opSig(x) { return x.op + ':' + (x.pid || '') + ':' + (x.type || '') + ':' + (x.id || ''); }
   function queueOp(op) {
     var o = loadOutbox();
-    var sig = op.op + ':' + (op.pid || '') + ':' + (op.type || '');
-    if (!o.some(function (x) { return (x.op + ':' + (x.pid || '') + ':' + (x.type || '')) === sig; })) {
+    var sig = opSig(op);
+    if (!o.some(function (x) { return opSig(x) === sig; })) {
       o.push(op);
       saveOutbox(o);
     }
@@ -376,6 +395,16 @@
             return acc;
           });
         }
+        /* One entry, by the id it carries both here and on the server. Before
+           the id travelled with the event, deleting one journal entry queued
+           del-memories with no type, which deleted every memory the profile
+           had on the server. */
+        if (op.op === 'del-memory') {
+          return client.from('memories').delete().eq('profile_id', op.pid).eq('local_id', op.id).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
+            return acc;
+          });
+        }
         if (op.op === 'del-memories') {
           var q = client.from('memories').delete().eq('profile_id', op.pid);
           if (op.type) q = q.eq('memory_type', op.type);
@@ -390,24 +419,343 @@
     return chain.then(function (acc) { saveOutbox(remaining); return acc; });
   }
 
-  /* ---------- pull: whole-record fetch, gated the same way push is ---------- */
+  /* ---------- pull: the account, brought down and merged in ----------
 
-  function pullAll() {
-    if (!client) return Promise.resolve(null);
-    if (!uid()) return Promise.resolve(null);
-    var result = { profiles: [], tables: {} };
-    return client.from('profiles').select('*').then(function (res) {
-      if (!res.error && Array.isArray(res.data)) result.profiles = res.data;
-      var chain = Promise.resolve(result);
-      ['consent_events', 'pairs', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
-        chain = chain.then(function () {
-          return client.from(t).select('*').then(function (r2) {
-            result.tables[t] = r2.error ? [] : r2.data;
-          });
-        });
+     Four rules carry the weight.
+
+     A FAILED READ APPLIES NOTHING. Every table is read before anything is
+     written, and one error anywhere returns a reason with the record exactly as
+     it was. A table that failed must never read as a table that is empty,
+     because empty is what a deletion looks like.
+
+     AN EMPTY ACCOUNT DELETES NOTHING. A server holding no profiles is a new
+     account, or one whose rows did not come back; either way it is no evidence
+     that this device's profiles were deleted elsewhere.
+
+     A DEVICE'S FIRST PULL DELETES NOTHING EITHER. Before this version, deleting
+     one journal entry deleted every memory its profile had on the server (see
+     del-memory above), while this device's hash cache still says they were
+     sent. Read as deletions made elsewhere, that bug's damage would spread to
+     this device too. So on the first pull, a row the cache says was sent and
+     the server lacks is sent again rather than deleted: the cache entry is
+     dropped and the push that follows uploads it. From the second pull on, an
+     absence is a deletion.
+
+     A PENDING LOCAL DELETION WINS. The outbox is flushed before reading, and
+     anything still queued is skipped on the way in, so a deletion made offline
+     is not undone by the pull that runs when the signal comes back. */
+  function fetchAll(table, filter) {
+    var rows = [];
+    function page(from) {
+      var q = client.from(table).select('*');
+      if (filter) q = filter(q);
+      var paged = typeof q.range === 'function';
+      if (paged && typeof q.order === 'function') q = q.order('id', { ascending: true });
+      if (paged) q = q.range(from, from + PAGE - 1);
+      return Promise.resolve(q).then(function (res) {
+        if (!res || res.error) throw new Error((res && res.error && res.error.message) || 'no answer');
+        var got = Array.isArray(res.data) ? res.data : [];
+        rows = rows.concat(got);
+        /* Until a page comes back empty, not until one comes back short: a
+           project whose row limit is under PAGE answers every page short. */
+        return paged && got.length ? page(from + got.length) : rows;
       });
-      return chain;
-    }).then(function () { return result; }).catch(function () { return null; });
+    }
+    return page(0);
+  }
+  function iso(x) {
+    var t = Date.parse(x);
+    return isNaN(t) ? (x || new Date().toISOString()) : new Date(t).toISOString();
+  }
+  function str(v) { return v == null ? '' : String(v); }
+  /* The columns a profile row carries, as the local profile spells them. A
+     string the push sent as null comes back as the empty string the local
+     record writes, so a row that only went up and came back reads unchanged. */
+  var PROFILE_TEXT = ['avatar_color', 'avatar_image', 'avatar_sign', 'birth_date', 'birth_time', 'birth_location', 'timezone'];
+  var PROFILE_NUM = ['birth_lat', 'birth_lon', 'tz_offset'];
+  var PROFILE_BOOL = ['location_resolved', 'birth_time_unknown'];
+  var BIRTH = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'tz_offset', 'timezone', 'birth_time_unknown'];
+  function profileFromRow(row, base) {
+    var p = Object.assign({}, base || {}), changed = false;
+    function put(k, v, same) { if (!same(p[k], v)) { p[k] = v; changed = true; } }
+    var txt = function (a, b) { return str(a) === str(b); };
+    var num = function (a, b) { return (a == null ? null : Number(a)) === (b == null ? null : Number(b)); };
+    var bool = function (a, b) { return !!a === !!b; };
+    if (!p.id) { p.id = row.id; changed = true; }
+    if (row.name && row.name !== p.name) { p.name = row.name; changed = true; }
+    PROFILE_TEXT.forEach(function (k) { put(k, str(row[k]), txt); });
+    PROFILE_NUM.forEach(function (k) { put(k, row[k] == null ? null : Number(row[k]), num); });
+    PROFILE_BOOL.forEach(function (k) { put(k, !!row[k], bool); });
+    put('avatar_kind', row.avatar_kind || 'initials', function (a, b) { return (a || 'initials') === b; });
+    put('pin_hash', row.pin_hash || null, function (a, b) { return (a || null) === b; });
+    if (!p.created_at) p.created_at = iso(row.created_at);
+    if (!p.name) p.name = 'Profile';
+    return { profile: p, changed: changed };
+  }
+  function birthMoved(a, b) {
+    return BIRTH.some(function (k) { return str(a && a[k]) !== str(b && b[k]); });
+  }
+  function hydrateRow(r) {
+    var pm = cfg.pm;
+    if (typeof pm._hydrate === 'function') return pm._hydrate(r);
+    var c = r.content; try { c = JSON.parse(r.content); } catch (e) {}
+    return { id: r.id, profileId: r.profile_id, type: r.memory_type, memoryType: r.memory_type, content: c,
+      createdAt: r.created_at, isPrivate: !!r.is_private, consentRequired: r.consent_required || null, kept: !!r.kept };
+  }
+
+  function pull() {
+    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    var userId = uid();
+    if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
+    if (!cfg || !cfg.pm || typeof cfg.pm.importSynced !== 'function') return Promise.resolve({ ok: false, reason: 'off' });
+    if (pulling) return pulling;
+    var remote = {};
+    pulling = flushOutbox().catch(function () {}).then(function () {
+      return fetchAll('profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+    }).then(function (rows) {
+      remote.profiles = rows;
+      var ids = rows.map(function (r) { return r.id; });
+      var byProfile = function (q) { return typeof q.in === 'function' ? q.in('profile_id', ids) : q; };
+      if (!ids.length) { remote.consent_events = []; remote.memories = []; remote.throughline_entries = []; remote.oki_messages = []; }
+      var chain = Promise.resolve();
+      ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+        if (!ids.length) return;
+        chain = chain.then(function () { return fetchAll(t, byProfile).then(function (r) { remote[t] = r; }); });
+      });
+      return chain.then(function () {
+        return fetchAll('pairs', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+      }).then(function (r) { remote.pairs = r; });
+    }).then(function () {
+      var res = merge(remote, userId);
+      lastPullAt = Date.now();
+      notify();
+      if (cfg.onPulled) { try { cfg.onPulled(res); } catch (e) {} }
+      return res;
+    }, function (e) {
+      var msg = (e && e.message) || '';
+      return { ok: false, reason: /fetch|network|offline|Failed/i.test(msg) ? 'offline' : 'error', error: msg };
+    });
+    return pulling.then(function (r) { pulling = null; return r; }, function (e) { pulling = null; throw e; });
+  }
+
+  function merge(remote, userId) {
+    var pm = cfg.pm, store = pm._store(), map = loadMap();
+    /* Per account: a device that pulled for one account has not pulled for
+       the next one to sign in on it. */
+    map.pulled = map.pulled || {};
+    var firstPull = !map.pulled[userId];
+    var cP = hashCache(map, 'profiles'), cM = hashCache(map, 'memories'), cC = hashCache(map, 'consent_events');
+    var cT = hashCache(map, 'throughline_entries'), cO = hashCache(map, 'oki_messages'), cR = hashCache(map, 'pairs');
+    var outbox = loadOutbox();
+    var pendingProfile = {}, pendingMem = {}, pendingType = {};
+    outbox.forEach(function (op) {
+      if (op.op === 'del-profile') pendingProfile[op.pid] = 1;
+      if (op.op === 'del-memory') pendingMem[op.pid + '/' + op.id] = 1;
+      if (op.op === 'del-memories') pendingType[op.pid + '/' + (op.type || '*')] = 1;
+    });
+    var placeholders = [];
+    if (cfg.placeholders) { try { placeholders = cfg.placeholders() || []; } catch (e) { placeholders = []; } }
+    var isPlaceholder = function (id) { return placeholders.indexOf(id) !== -1; };
+
+    var d = { profiles: [], removeProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
+    var res = { ok: true, changed: false, adopted: false, firstPull: firstPull,
+      profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
+
+    /* ---- profiles ---- */
+    var localById = {};
+    store.profiles.forEach(function (p) { localById[p.id] = p; });
+    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
+    var remoteById = {};
+    remoteRows.forEach(function (r) { remoteById[r.id] = r; });
+    var ownBefore = store.profiles.filter(function (p) { return !isPlaceholder(p.id); });
+    var serverHas = remoteRows.length > 0;
+    var room = (pm.MAX_PROFILES || 6) - ownBefore.length;
+    remoteRows.forEach(function (r) {
+      var L = localById[r.id];
+      if (L) {
+        /* Changed here since the last sync: the local copy wins and the push
+           sends it. Untouched here: the server's copy is the newer one. */
+        if (cP[r.id] !== hashOf(L)) return;
+        var m = profileFromRow(r, L);
+        if (!m.changed) return;
+        d.profiles.push(m.profile);
+        if (birthMoved(L, m.profile)) d.recalc.push(r.id);
+        cP[r.id] = hashOf(m.profile);
+        res.profilesUpdated++;
+        return;
+      }
+      if (cP[r.id] && !firstPull) return;  // deleted here; the outbox is carrying it up
+      if (room <= 0) return;
+      var made = profileFromRow(r, null).profile;
+      d.profiles.push(made);
+      cP[r.id] = hashOf(made);
+      room--;
+      res.profilesAdded++;
+    });
+    store.profiles.forEach(function (L) {
+      if (remoteById[L.id] || !serverHas) return;
+      if (isPlaceholder(L.id)) return;
+      if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
+      if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
+      if (cP[L.id] !== hashOf(L)) return;           // changed here since: keep it, the push restores it
+      d.removeProfiles.push(L.id);
+      delete cP[L.id];
+      res.profilesRemoved++;
+    });
+    /* A stand in (the sample a blank device invents) gives way once the account
+       brings a profile of its own. If it ever reached the server, it goes there
+       too. */
+    if (remoteRows.some(function (r) { return !isPlaceholder(r.id); })) {
+      placeholders.forEach(function (id) {
+        if (!localById[id] || remoteById[id]) return;
+        d.removeProfiles.push(id);
+        delete cP[id];
+      });
+    }
+    /* A device with nothing of its own opens on what the account had. */
+    if (!ownBefore.length && res.profilesAdded) {
+      res.adopted = true;
+      var pick = remoteRows.filter(function (r) { return r.is_default; })[0] || remoteRows.filter(function (r) { return r.is_active; })[0] || remoteRows[0];
+      d.activeId = pick.id;
+      d.defaultId = (remoteRows.filter(function (r) { return r.is_default; })[0] || pick).id;
+    }
+    /* Profiles that will exist once this lands. */
+    var gone = {};
+    d.removeProfiles.forEach(function (id) { gone[id] = 1; });
+    var present = {};
+    store.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
+    d.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
+
+    /* ---- consent ledger: union by event, the latest event decides ---- */
+    remote.consent_events.forEach(function (r) {
+      if (!present[r.profile_id] || !r.scope) return;
+      var e = { ts: iso(r.ts), id: String(r.scope), granted: r.action === 'grant' };
+      (d.consents[r.profile_id] = d.consents[r.profile_id] || []).push(e);
+      cC[r.profile_id + '/' + e.id + '/' + e.ts] = hashOf(e);
+    });
+
+    /* ---- memories ---- */
+    var remoteMem = {};
+    remote.memories.forEach(function (r) {
+      if (!present[r.profile_id] || r.local_id == null) return;
+      (remoteMem[r.profile_id] = remoteMem[r.profile_id] || {})[String(r.local_id)] = r;
+    });
+    Object.keys(present).forEach(function (pid) {
+      var local = localById[pid] ? pm.getMemory({ profileId: pid, respectConsent: false }) : [];
+      var have = {}, rm = remoteMem[pid] || {}, add = [], remove = [];
+      local.forEach(function (m) { have[m.id] = m; });
+      Object.keys(rm).forEach(function (id) {
+        if (have[id]) return;
+        var r = rm[id], key = pid + '/' + id;
+        if (pendingMem[key] || pendingType[pid + '/' + r.memory_type] || pendingType[pid + '/*']) return;
+        if (cM[key] && !firstPull) return;  // deleted here
+        var raw = { id: id, profile_id: pid, memory_type: r.memory_type,
+          content: JSON.stringify(r.content == null ? {} : r.content), created_at: iso(r.created_at),
+          is_private: r.is_private ? 1 : 0, consent_required: r.consent_required || null };
+        if (r.kept) raw.kept = 1;
+        add.push(raw);
+        cM[key] = hashOf(hydrateRow(raw));
+      });
+      /* Only for a profile the server still holds: one it no longer holds is
+         either deleted (and goes whole, above) or changed here and kept, and
+         its rows are not the server's to remove. */
+      if (localById[pid] && remoteById[pid]) {
+        local.forEach(function (m) {
+          var key = pid + '/' + m.id;
+          if (rm[m.id] || cM[key] === undefined) return;
+          if (firstPull) { delete cM[key]; return; }
+          if (cM[key] !== hashOf(m)) return;
+          remove.push(m.id);
+          delete cM[key];
+        });
+      }
+      if (add.length || remove.length) {
+        d.memories[pid] = { add: add, remove: remove };
+        res.memoriesAdded += add.length;
+        res.memoriesRemoved += remove.length;
+      }
+    });
+
+    /* ---- Throughline entries and the Oki log: appended, never edited ----
+       Their rows carry the whole item, keyed here by content hash and
+       occurrence, exactly as buildPlan keys them, so what comes down is
+       recorded as already sent and is never uploaded a second time. */
+    [['throughline_entries', 'throughline', cT], ['oki_messages', 'oki', cO]].forEach(function (spec) {
+      var byPid = {};
+      remote[spec[0]].forEach(function (r) {
+        if (!present[r.profile_id] || r.payload == null) return;
+        (byPid[r.profile_id] = byPid[r.profile_id] || []).push(r.payload);
+      });
+      Object.keys(byPid).forEach(function (pid) {
+        var arr = localById[pid] ? readJSON('incommon.p.' + pid + '.' + spec[1], []) : [];
+        if (!Array.isArray(arr)) arr = arr ? [arr] : [];
+        var count = {}, ids = {}, add = [];
+        arr.forEach(function (it) {
+          var h = hashOf(it); count[h] = (count[h] || 0) + 1;
+          if (it && it.id != null) ids[String(it.id)] = 1;
+        });
+        var seenRemote = {};
+        byPid[pid].forEach(function (it) {
+          var h = hashOf(it), n = seenRemote[h] || 0;
+          seenRemote[h] = n + 1;
+          var key = pid + '/' + h + '#' + n;
+          if (n < (count[h] || 0)) { spec[2][key] = h; return; }      // already here
+          if (it && it.id != null && ids[String(it.id)]) { spec[2][key] = h; return; }
+          if (spec[2][key] && !firstPull) return;                      // removed here
+          add.push(it);
+          count[h] = (count[h] || 0) + 1;
+          spec[2][key] = h;
+        });
+        if (add.length) {
+          (d.lists[pid] = d.lists[pid] || {})[spec[1]] = add;
+          res.entriesAdded += add.length;
+        }
+      });
+    });
+
+    /* ---- two-person consent ---- */
+    var localPairs = {};
+    (store.pairs || []).forEach(function (pr) { localPairs[pr.key] = pr; });
+    remote.pairs.forEach(function (r) {
+      if (!r || !r.profile_a || !r.profile_b) return;
+      var key = [r.profile_a, r.profile_b].sort().join('::');
+      var L = localPairs[key];
+      var pr = { key: key, a: r.profile_a, b: r.profile_b, enabled: r.enabled ? 1 : 0,
+        enabled_by: r.enabled_by || null, enabled_at: r.enabled_at ? iso(r.enabled_at) : null };
+      if (L) {
+        if (cR[key] !== hashOf(L)) return;
+        if (!!L.enabled === !!pr.enabled && (L.enabled_by || null) === pr.enabled_by) return;
+        pr.a = L.a; pr.b = L.b;
+      } else if (cR[key] && !firstPull) return;
+      d.pairs.push(pr);
+      cR[key] = hashOf(pr);
+    });
+
+    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
+      res.entriesAdded || Object.keys(d.consents).some(function (pid) { return consentNews(pid, d.consents[pid]); }));
+    if (res.changed) pm.importSynced(d);
+    map.pulled[userId] = new Date().toISOString();
+    saveMap(map);
+    return res;
+  }
+  /* True when the server's ledger holds an event this device has not seen. */
+  function consentNews(pid, events) {
+    var rec = readJSON('incommon.consent.' + pid, null), seen = {}, local = (rec && rec.events) || [];
+    local.forEach(function (e) { seen[e.id + '@' + iso(e.ts)] = 1; });
+    /* The device keeps the last fifty events and the server keeps them all, so
+       an event older than everything kept here was trimmed here, not missed. */
+    var floor = local.length >= 50 ? Math.min.apply(null, local.map(function (e) { return Date.parse(e.ts) || 0; })) : -Infinity;
+    return events.some(function (e) { return !seen[e.id + '@' + e.ts] && Date.parse(e.ts) >= floor; });
+  }
+
+  /* Pull, then push: what the account holds comes down first, so a device
+     never uploads a placeholder over an account it has not read yet. */
+  function sync() {
+    if (syncing) return syncing;
+    syncing = pull().then(function (pr) {
+      return push().then(function (ps) { return { ok: !!(pr.ok && ps.ok), pull: pr, push: ps }; });
+    }).then(function (r) { syncing = null; return r; }, function (e) { syncing = null; return { ok: false, reason: 'error', error: e && e.message }; });
+    return syncing;
   }
 
   /* ---------- PIN recovery through the account email ----------
@@ -1324,6 +1672,7 @@
       userId: uid(),
       owesCode: !!held,
       lastPushAt: lastPushAt || null,
+      lastPullAt: lastPullAt || null,
       pendingOps: loadOutbox().length,
       VERSION: VERSION
     };
@@ -1339,7 +1688,12 @@
     if (typeof opts.pm._store !== 'function' || typeof opts.pm.getMemory !== 'function') return null;
     var l = lib();
     if (!l || typeof l.createClient !== 'function') return null; // vendored library absent: stay inert
-    cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm };
+    cfg = { url: url, anonKey: anonKey, storage: opts.storage, core: opts.core, pm: opts.pm,
+      /* placeholders(): ids of local profiles that stand in for nobody (the
+         sample a blank device invents), which give way to the account's own.
+         onPulled(result): told after every pull that read the server. */
+      placeholders: typeof opts.placeholders === 'function' ? opts.placeholders : null,
+      onPulled: typeof opts.onPulled === 'function' ? opts.onPulled : null };
     /* Before the client reads the stored session: a sign in that asked not to
        be remembered ends with the browser session it was made in. */
     ephemeralSweep(url, opts.storage);
@@ -1350,8 +1704,10 @@
        a wipe is never re-uploaded by the debounce that follows it. */
     try {
       opts.pm.subscribe(function (name, detail) {
+        var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
         if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
-        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()), type: detail.type || null });
+        else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
+        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
         schedule();
       });
     } catch (e) {}
@@ -1361,7 +1717,7 @@
       held = owesCode(s) ? s : null;
       session = held ? null : (s || null);
       notify();
-      if (session && !had) push();
+      if (session && !had) sync();
     });
     return api;
   }
@@ -1387,7 +1743,10 @@
     },
     schedule: schedule,
     push: push,
-    pullAll: pullAll,
+    pull: pull,
+    /* The name the app's comments have always used for the pull. */
+    pullAll: pull,
+    sync: sync,
     startPinRecovery: startPinRecovery,
     isRecoveryPending: isRecoveryPending,
     isRecoverySession: isRecoverySession,
@@ -1443,7 +1802,7 @@
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
     _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
-    _setConfigForTests: function (o) { cfg = o; }
+    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; }
   };
 
   return api;

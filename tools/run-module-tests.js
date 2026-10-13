@@ -2144,6 +2144,232 @@ async function runCloudTests() {
     coverSame: true, profileManagerSame: true
   }, { module: modOwes, coverSame: JSON.stringify(modOwes) === JSON.stringify(covOwes), profileManagerSame: JSON.stringify(modOwes) === JSON.stringify(pmOwesOut) });
 
+  /* ---- K58-K68: one account reads the same on every device. Two devices,
+     each the REAL profile-manager.js over its own storage and its own copy of
+     the cloud module, share one in memory database that answers the way
+     PostgREST does: upserts on the named conflict columns, an identity id for
+     the child tables, timestamps returned as +00:00, and pages by range. ---- */
+  function memDB() {
+    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [] },
+      seq: 1, failSelect: null, failDelete: false, maxRows: 1000 };
+    var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    var pgTime = function (r) {
+      ['ts', 'created_at', 'enabled_at'].forEach(function (k) { if (typeof r[k] === 'string') r[k] = r[k].replace(/Z$/, '+00:00'); });
+      return r;
+    };
+    db.client = { from: function (table) {
+      var q = { _f: [], _op: 'select' };
+      q.select = function () { q._op = 'select'; return q; };
+      q.insert = function (row) { q._op = 'insert'; q._row = row; return q; };
+      q.upsert = function (row, o) { q._op = 'upsert'; q._row = row; q._on = String((o && o.onConflict) || 'id').split(','); return q; };
+      q.delete = function () { q._op = 'delete'; return q; };
+      q.eq = function (c, v) { q._f.push(function (r) { return r[c] === v; }); return q; };
+      q.in = function (c, vs) { q._f.push(function (r) { return vs.indexOf(r[c]) !== -1; }); return q; };
+      q.order = function (c) { q._order = c; return q; };
+      q.range = function (a, b) { q._range = [a, b]; return q; };
+      q.then = function (res, rej) {
+        var rows = db.t[table], out = { data: null, error: null };
+        var match = function (x) { return q._f.every(function (f) { return f(x); }); };
+        if (q._op === 'select') {
+          if (db.failSelect === table) out.error = { message: 'fake read failure' };
+          else {
+            var r = rows.filter(match).map(function (x) { return pgTime(clone(x)); });
+            if (q._order) r.sort(function (a, b) { return a[q._order] < b[q._order] ? -1 : a[q._order] > b[q._order] ? 1 : 0; });
+            if (q._range) r = r.slice(q._range[0], q._range[1] + 1);
+            out.data = r.slice(0, db.maxRows);  // PostgREST's max-rows, whatever was asked for
+          }
+        } else if (q._op === 'insert') {
+          if (rows.some(function (x) { return x.id === q._row.id; })) out.error = { code: '23505', message: 'duplicate key value' };
+          else rows.push(clone(q._row));
+        } else if (q._op === 'upsert') {
+          var row = clone(q._row);
+          var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
+          if (hit) Object.assign(hit, row);
+          else { if (row.id === undefined) row.id = db.seq++; rows.push(row); }
+        } else if (q._op === 'delete') {
+          if (db.failDelete) out.error = { message: 'Failed to fetch' };
+          else db.t[table] = rows.filter(function (x) { return !match(x); });
+        }
+        return Promise.resolve(out).then(res, rej);
+      };
+      return q;
+    } };
+    return db;
+  }
+  /* These rows read expected first, then actual. */
+  var ts = function (id, desc, expected, actual) { t(id, desc, actual, expected); };
+  var SYNC_SB = 'sb-lkzcybzhjjxdqetwwdrx-auth-token', SU = 'cccccccc-0000-4000-8000-00000000000c';
+  function syncDevice(db, userId, opts) {
+    opts = opts || {};
+    var store = (function () {
+      var m = {};
+      return { _m: m, get length() { return Object.keys(m).length; }, key: function (i) { return Object.keys(m)[i] || null; },
+        getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } };
+    })();
+    store.setItem(SYNC_SB, JSON.stringify({ access_token: jwtOf({ sub: userId, aal: 'aal1' }), refresh_token: 'r', user: { id: userId } }));
+    var win = {};
+    vm.runInNewContext(pmSrcK46, { window: win, localStorage: store, document: { cookie: '' }, atob: function (x) { return Buffer.from(x, 'base64').toString('binary'); },
+      JSON: JSON, Math: Math, Date: Date, String: String, Array: Array, Object: Object, Error: Error, isNaN: isNaN, parseFloat: parseFloat });
+    var pm = win.ProfileManager;
+    var C = loadIsolatedCloud({ createClient: function () { return {}; } });
+    var dev = { store: store, pm: pm, C: C, pulled: [], placeholders: [] };
+    C._setConfigForTests({ storage: store, pm: pm, core: null,
+      placeholders: function () { return dev.placeholders; }, onPulled: function (r) { dev.pulled.push(r); } });
+    C._setClientForTests(db.client, { user: { id: userId } });
+    /* The module subscribes in init(); the test seam skips init(), so the
+       deletion events are routed into the outbox here the same way. */
+    pm.subscribe(function (name, d) {
+      var o = JSON.parse(store.getItem('incommon_cloud_outbox_v2') || '[]');
+      if (name === 'profile:deleted') o.push({ op: 'del-profile', pid: d.id });
+      else if (name === 'memory:deleted' && d.id) o.push({ op: 'del-memory', pid: d.profileId, id: String(d.id) });
+      else if (name === 'memory:deleted') o.push({ op: 'del-memories', pid: d.profileId, type: d.type || null });
+      else return;
+      store.setItem('incommon_cloud_outbox_v2', JSON.stringify(o));
+    });
+    return dev;
+  }
+  var tl = function (dev, pid) { return JSON.parse(dev.store.getItem('incommon.p.' + pid + '.throughline') || '[]'); };
+  var counts = function (db) { var o = {}; Object.keys(db.t).forEach(function (k) { o[k] = db.t[k].length; }); return o; };
+
+  var sdb = memDB();
+  var devA = syncDevice(sdb, SU);
+  var nate = devA.pm.createProfile({ name: 'Nate', birthDate: '1990-05-01', birthTime: '07:30', birthLocation: '38.9,-77.0' });
+  devA.pm.setConsent('journal', true, nate.id);
+  var j1 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'first entry' } }).id;
+  var j2 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'second entry' } }).id;
+  devA.store.setItem('incommon.p.' + nate.id + '.throughline', JSON.stringify([{ id: 'm1790000000000', date: '2026-09-01', type: 'event', title: 'Moved', manual: true }]));
+  var syncA1 = await devA.C.sync();
+
+  var devB = syncDevice(sdb, SU);
+  var sample = devB.pm.createProfile({ name: 'Default Profile', birthDate: '1992-07-02' });
+  devB.placeholders = [sample.id];
+  var syncB1 = await devB.C.sync();
+  var bProfiles = devB.pm.listProfiles();
+  var bMem = devB.pm.getMemory({ profileId: nate.id }).map(function (m) { return m.content.t; }).sort();
+  ts('K58', 'a second device signing in to the account takes its profiles, journal, consents and Throughline, opens on them, and drops the sample it invented rather than sending it up', {
+    aOk: true, bOk: true, adopted: true, names: ['Nate'], active: nate.id, birthTime: '07:30', lat: 38.9,
+    journal: ['first entry', 'second entry'], journalConsent: true, throughline: ['Moved'], sampleOnServer: false, tlOnServer: 1
+  }, {
+    aOk: syncA1.ok, bOk: syncB1.ok, adopted: syncB1.pull.adopted, names: bProfiles.map(function (p) { return p.name; }),
+    active: devB.pm.activeId(), birthTime: devB.pm.getProfile(nate.id).birthTime, lat: devB.pm._store().profiles[0].birth_lat,
+    journal: bMem, journalConsent: devB.pm.getConsents(nate.id).journal, throughline: tl(devB, nate.id).map(function (e) { return e.title; }),
+    sampleOnServer: sdb.t.profiles.some(function (r) { return r.id === sample.id; }), tlOnServer: sdb.t.throughline_entries.length
+  });
+
+  var before59 = counts(sdb);
+  var a2 = await devA.C.sync(), b2 = await devB.C.sync();
+  ts('K59', 'syncing again on both devices changes nothing anywhere: no duplicate rows reach the server and neither device reports a change', {
+    rows: before59, aChanged: false, bChanged: false, bTl: 1
+  }, { rows: counts(sdb), aChanged: a2.pull.changed, bChanged: b2.pull.changed, bTl: tl(devB, nate.id).length });
+
+  devB.pm.updateProfile(nate.id, { birthTime: '09:15' });
+  await devB.C.sync();
+  var a3 = await devA.C.sync();
+  ts('K60', 'a birth time corrected on one device reaches the other, which had not touched the profile, and its charts are marked for recalculation', {
+    changed: true, updated: 1, birthTime: '09:15'
+  }, { changed: a3.pull.changed, updated: a3.pull.profilesUpdated, birthTime: devA.pm.getProfile(nate.id).birthTime });
+
+  devB.pm.updateProfile(nate.id, { birthTime: '10:00' });
+  await devB.C.sync();
+  devA.pm.updateProfile(nate.id, { name: 'Nathaniel' });
+  await devA.C.sync();
+  var srv61 = sdb.t.profiles.filter(function (r) { return r.id === nate.id; })[0];
+  ts('K61', 'an edit made here that has not gone up yet is not overwritten by the pull; it goes up after it, so the last device to save the profile is what the server holds', {
+    aName: 'Nathaniel', aTime: '09:15', serverName: 'Nathaniel'
+  }, { aName: devA.pm.getProfile(nate.id).name, aTime: devA.pm.getProfile(nate.id).birthTime, serverName: srv61.name });
+
+  devA.pm.deleteMemory({ profileId: nate.id, id: j1 });
+  await devA.C.sync();
+  var serverMem62 = sdb.t.memories.map(function (r) { return r.local_id; });
+  var b62 = await devB.C.sync();
+  ts('K62', 'deleting one journal entry deletes that one row on the server, not the profile\'s whole history, and the other device removes the same entry and keeps the rest', {
+    server: [j2], bRemoved: 1, bLeft: ['second entry']
+  }, { server: serverMem62, bRemoved: b62.pull.memoriesRemoved, bLeft: devB.pm.getMemory({ profileId: nate.id }).map(function (m) { return m.content.t; }) });
+
+  var partner = devA.pm.createProfile({ name: 'Partner', birthDate: '1991-02-03' });
+  await devA.C.sync();
+  await devB.C.sync();
+  var bHadPartner = !!devB.pm.getProfile(partner.id);
+  devB.pm.deleteProfile(partner.id, 'Partner');
+  await devB.C.sync();
+  var a63 = await devA.C.sync();
+  ts('K63', 'a profile added on one device appears on the other, and deleted there it is deleted on the server and then here, with its keys', {
+    bHadPartner: true, onServer: false, aRemoved: 1, aHas: false, aKeysGone: true
+  }, { bHadPartner: bHadPartner, onServer: sdb.t.profiles.some(function (r) { return r.id === partner.id; }), aRemoved: a63.pull.profilesRemoved,
+    aHas: !!devA.pm.getProfile(partner.id), aKeysGone: devA.store.getItem('incommon.consent.' + partner.id) === null });
+
+  devB.pm.setConsent('journal', false, nate.id);
+  await devB.C.sync();
+  await devA.C.sync();
+  ts('K64', 'a consent revoked on one device is revoked on the other: the ledgers merge and the latest event decides', false, devA.pm.getConsents(nate.id).journal);
+
+  /* The reader's record, without the module's own bookkeeping (its cache
+     and outbox move on every pull, applied or not). */
+  var record = function (dev) { var o = {}; Object.keys(dev.store._m).forEach(function (k) { if (!/^incommon_cloud_/.test(k)) o[k] = dev.store._m[k]; }); return JSON.stringify(o); };
+  var snap65 = record(devA);
+  sdb.failSelect = 'memories';
+  var a65 = await devA.C.pull();
+  sdb.failSelect = null;
+  var emptyDb = memDB();
+  devA.C._setClientForTests(emptyDb.client, { user: { id: SU } });
+  var a65b = await devA.C.pull();
+  devA.C._setClientForTests(sdb.client, { user: { id: SU } });
+  ts('K65', 'a table that fails to read applies nothing, and a server holding no profiles deletes nothing: neither reads as a deletion', {
+    failOk: false, emptyOk: true, emptyChanged: false, untouched: true
+  }, { failOk: a65.ok, emptyOk: a65b.ok, emptyChanged: a65b.changed, untouched: record(devA) === snap65 });
+
+  /* The defect K62 fixes, as an older build left the server: one entry was
+     deleted and the whole history went with it, while the device's cache
+     still says every row was sent. The first pull after this version must
+     put them back rather than delete them here too. */
+  var olddb = memDB();
+  var devC = syncDevice(olddb, 'dddddddd-0000-4000-8000-00000000000d');
+  var cp = devC.pm.createProfile({ name: 'Old', birthDate: '1980-01-01' });
+  devC.pm.setConsent('journal', true, cp.id);
+  devC.pm.addMemory({ profileId: cp.id, type: 'journal', content: { t: 'kept one' } });
+  devC.pm.addMemory({ profileId: cp.id, type: 'journal', content: { t: 'kept two' } });
+  await devC.C.push();
+  olddb.t.memories = [];
+  var c66 = await devC.C.sync();
+  ts('K66', 'on a device\'s first pull, rows its cache says were sent and the server lacks are sent again, not deleted, so an older build\'s wiped history is restored', {
+    firstPull: true, removed: 0, local: 2, server: 2
+  }, { firstPull: c66.pull.firstPull, removed: c66.pull.memoriesRemoved, local: devC.pm.getMemory({ profileId: cp.id }).length, server: olddb.t.memories.length });
+
+  var j3 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'offline delete' } }).id;
+  devA.pm.setConsent('journal', true, nate.id);
+  await devA.C.sync();
+  devA.pm.deleteMemory({ profileId: nate.id, id: j3 });
+  /* As a device's first pull, where nothing but the outbox says the entry
+     was deleted here. */
+  var mapA = JSON.parse(devA.store.getItem('incommon_cloud_map_v2'));
+  delete mapA.pulled;
+  devA.store.setItem('incommon_cloud_map_v2', JSON.stringify(mapA));
+  sdb.failDelete = true;
+  var a67 = await devA.C.sync();
+  var stillQueued = JSON.parse(devA.store.getItem('incommon_cloud_outbox_v2') || '[]').length;
+  var resurrected = devA.pm.getMemory({ profileId: nate.id, respectConsent: false }).some(function (m) { return m.id === j3; });
+  sdb.failDelete = false;
+  await devA.C.sync();
+  ts('K67', 'a deletion made while the server cannot be told stays queued, the pull does not bring the entry back meanwhile, and the next sync carries it up', {
+    resurrected: false, queued: 1, serverAfter: false
+  }, { resurrected: resurrected,
+    queued: stillQueued, serverAfter: sdb.t.memories.some(function (r) { return r.local_id === j3; }) });
+
+  var big = memDB(), devD = syncDevice(big, 'eeeeeeee-0000-4000-8000-00000000000e');
+  var dp = devD.pm.createProfile({ name: 'Writer', birthDate: '1985-03-03' });
+  var dp2 = devD.pm.createProfile({ name: 'Second', birthDate: '1986-04-04' });
+  devD.pm.setConsent('journal', true, dp.id);
+  devD.pm.setConsent('journal', true, dp2.id);
+  for (var bi = 0; bi < 760; bi++) devD.pm.addMemory({ profileId: dp.id, type: 'journal', content: { n: bi }, createdAt: new Date(Date.UTC(2026, 0, 1) + bi * 60000).toISOString() });
+  for (bi = 0; bi < 400; bi++) devD.pm.addMemory({ profileId: dp2.id, type: 'journal', content: { n: bi } });
+  await devD.C.sync();
+  var devE = syncDevice(big, 'eeeeeeee-0000-4000-8000-00000000000e');
+  var e68 = await devE.C.sync();
+  ts('K68', 'an account larger than the server\'s row limit (1,160 memories against 1,000) comes down whole, newest first, and A and B hold the same entries', {
+    ok: true, count: 760, second: 400, newest: 759, same: true
+  }, { ok: e68.ok, count: devE.pm.getMemory({ profileId: dp.id }).length, second: devE.pm.getMemory({ profileId: dp2.id }).length, newest: devE.pm.getMemory({ profileId: dp.id })[0].content.n,
+    same: JSON.stringify(devE.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) === JSON.stringify(devD.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) });
+
   /* ---- O1-O7: each account has its own profiles on a device, the owner's
      request of 12 October 2026 after three accounts on one browser all opened
      onto the same birth data. Each pmPage() is one page load: a fresh copy of
