@@ -39,6 +39,14 @@ of a manual export and is the whole reason they are drawn from a definition.
 from its analytic shape so the icons can never drift from the mark the app
 draws on its own boot screen.
 
+**The icons wear the mark lit, not printed** (owner, 14 October 2026). The app
+icons, the splash and the store sources carry the glow of the inCommon profile
+picture: a violet haze behind the mark, a green bloom that stays inside the
+rings, a violet bloom either side of each ring and a thin lilac rim. It is
+drawn from the same geometry by `build-icons.js`, so it stays reproducible.
+`app/favicon.svg` is the same mark lit in SVG, framed closer (viewBox 25 25 50
+50) so it still reads at tab size.
+
 ## The copies under deploy/
 
 `deploy/v1.7/` carries its own `icon-192.png`, `icon-512.png` and
