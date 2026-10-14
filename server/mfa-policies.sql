@@ -28,6 +28,16 @@
 -- does not exist in this project is skipped rather than failing the run. A
 -- table added later needs adding here, or two-step sign in does not cover it.
 
+-- THE GRANT THE POLICIES BELOW CANNOT RUN WITHOUT. Each policy counts the
+-- caller's verified factors by reading auth.mfa_factors, and a policy
+-- expression runs with the caller's own privileges. Without this grant every
+-- signed-in query on the listed tables fails 42501 "permission denied for
+-- table mfa_factors" instead of returning rows. Found on the live project
+-- 13 October 2026, where it had been failing since the two-step sign-in
+-- work of 11 October; fixed there with this same line. Keep it above the do
+-- block so any re-apply of this file carries it. GRANT is idempotent.
+grant select on auth.mfa_factors to authenticated;
+
 do $$
 declare
   t text;
@@ -35,7 +45,7 @@ begin
   foreach t in array array[
     'accounts', 'profiles', 'memories', 'throughline_entries', 'oki_messages',
     'consent_events', 'pairs', 'oracle_readings', 'subscriptions', 'store_subscriptions',
-    'support_requests'
+    'support_requests', 'cast_counters', 'entitlements'
   ] loop
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists "two-step sign in, when turned on" on public.%I', t);
@@ -67,3 +77,14 @@ end $$;
 -- password alone would want taken:
 --   delete from auth.mfa_factors
 --   where user_id = (select id from auth.users where email = 'their@address');
+
+-- To check it took, after applying: the policy should now list on 13 tables
+-- (the eleven above plus cast_counters and entitlements, added 13 October
+-- 2026 because both were created after this file was written):
+--   select tablename, policyname, permissive from pg_policies
+--   where policyname = 'two-step sign in, when turned on' order by 1;
+-- And a signed-in reader must actually reach their own rows. A 403 whose
+-- body names mfa_factors means the grant at the top of this file is
+-- missing; that exact failure ran undetected on the live project from
+-- 11 October to 13 October 2026:
+--   select id from public.profiles;   -- signed in, expect 200 with rows

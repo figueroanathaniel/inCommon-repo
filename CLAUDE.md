@@ -2637,6 +2637,76 @@ Terms (sections 7 and 17) and the Privacy Policy (sections 15 and 16) name the
 button, dated 12 October 2026. If what the function deletes changes, that page
 and those sections change with it.
 
+## One account reads the same on every device
+Built 13 October 2026 at the owner's request ("build pullAll so accounts sync
+across devices"). Until then the cloud module only pushed: a second phone
+signed in to an account and opened on a blank birth page. `pull()` in
+`incommon-cloud.js` (exported as `pullAll` too) reads the whole account and
+merges it in, and `sync()` is pull then push. It runs when a session starts,
+and the app's `cloudSync()` asks again when the page comes back into view or
+the signal returns, at most once a minute.
+
+**The merge is three way, and the hash cache is the base.** A row whose local
+copy still hashes to what this device last synced was not touched here, so the
+server's copy is taken; a row changed here since keeps the local copy and the
+push after the pull sends it. That is per whole row: two devices editing the
+same profile offline end with the last one to sync. A row this device synced
+and the server no longer holds was deleted elsewhere and is deleted here.
+Throughline entries are append only, so they are only ever added, and a pulled
+one is recorded as sent so it is never uploaded twice.
+
+**Four rules keep a pull from deleting anything it should not**, and each has a
+row that goes red without it (sabotaged and checked): one table that fails to
+read applies nothing (K65); a server holding no profiles deletes nothing (K65);
+a deletion still in the outbox is not undone by the pull (K67); and a device's
+FIRST pull for an account sends an absent row again instead of deleting it
+(K66), because of the bug below. The first pull is recorded per account
+(`map.pulled[userId]`), since one browser can hold several.
+
+**Deleting one memory used to delete them all on the server.**
+`deleteMemory({ id })` emitted `memory:deleted` with no type and no id, and the
+cloud module queued that as `del-memories` for the whole profile. It carries the
+id now and queues `del-memory`, which deletes that row (K62). The first pull
+rule above is what repairs an account an older build already emptied: the
+device that still holds the entries uploads them again.
+
+**ProfileManager writes what came down, through `importSynced()`**, so the
+storage shapes stay its own. It emits `sync:pulled`, never `profile:deleted` or
+`memory:deleted`, because those would queue the same deletion straight back up.
+
+**The sample profile gives way.** `cloudPlaceholders()` names the profile a blank
+device invents while it is still exactly the sample; when the account brings a
+profile of its own the sample is dropped rather than synced, and a device that
+had nothing of its own (`adopted`) skips the birth page, because it was set up
+somewhere else. `cloudPulled()` repaints afterwards.
+
+**Pages, not one answer.** PostgREST returns at most its row limit (1,000 by
+default) whatever is asked, so `fetchAll()` reads by `range()` until a page
+comes back empty (K68 holds a 1,160 memory account against a 1,000 row cap).
+Profiles and pairs are read with `account_id` and the child tables with the
+account's profile ids, on top of RLS rather than instead of it.
+
+**Only the four memory types the server accepts travel** (`SYNC_MEMORY_TYPES`:
+journal, mood, practice_completion, stella_conversation), because
+`public.memories` has a check constraint naming exactly those and one refused
+upsert stops the whole push. The Archive writes `archive_deleted` rows when a
+reader deletes an entry, and until 14 October 2026 that one row stopped every
+later push from that device: no more memories, no Throughline, no deletions.
+Those rows stay on the device. K69 reads the constraint out of
+`server/cloud-schema.sql` and holds the module's list equal to it, so a new
+memory type needs the constraint widened on the server, the schema file and
+the list changed together.
+
+What does not sync, unchanged: memories whose consent is off, `kept` rows, the
+Archive's `archive_deleted` rows, the Oracle's kept readings,
+`incommon.consent.data.<pid>`, saved people, and theme.
+K58 to K68 drive two devices, each the real profile-manager.js and its own copy
+of the cloud module, against one in memory database; the app half was driven in
+Chromium with Supabase faked: a fresh browser signed in, skipped the birth page,
+opened on the account's profile with its journal, consent and Throughline, sent
+no sample up, and picked up an entry written elsewhere when it came back into
+view.
+
 ## Each account has its own profiles on a device
 The owner reported on 12 October 2026 that three accounts signed in on one
 browser all opened onto the same birth data. The profile list was one device
@@ -3529,11 +3599,10 @@ sign in nor go in. `body.signal-lost`, set by the 9 second fallback, brings the
 column up now, the wordmark at the dim its own rule already gave it. Measured
 with WebGL disabled: both at 0 before, both at 1 after.
 
-**The gap it leaves, stated rather than hidden.** `pullAll()` has no caller, so
-signing in on a new device pushes that device's record up and brings nothing
-down. The first run used to say "No account, no sign-in", which contradicted a
-reader who had just signed in on the cover; the Codex page below replaced it and
-does not say it. The tucked away classic form still does, so if it is ever
+**Signing in on a new device brings the account down** (see "One account reads
+the same on every device"). The first run used to say "No account, no sign-in",
+which contradicted a reader who had just signed in on the cover; the Codex page
+below replaced it and does not say it. The tucked away classic form still does, so if it is ever
 brought back, that sentence goes back to the consent language pass.
 
 ## Remember me and the phone

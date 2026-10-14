@@ -31,8 +31,8 @@
 // made inside the apps, so the page is told one status wherever Luminary was
 // bought, and a reader who bought it in an app is not offered it again here.
 
-import Stripe from "npm:stripe@17";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import Stripe from "npm:stripe@17.7.0";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 // inCommon's own lookup keys, not the Codex's, so pointing this at the Stripe
 // account the Codex used cannot pick up or change the Codex's product.
@@ -355,12 +355,21 @@ async function customerFor(s: Stripe, user: { id: string; email?: string }): Pro
 }
 
 // Where Stripe sends the reader back. The page names its own address, so the
-// same function serves the deploy preview, the live site and a local copy. It
-// has to be a web address; http is accepted only for this machine.
+// same function serves the deploy preview, the live site and a local copy.
+// The address must be one of ours; any other https origin is refused.
+// (Tightened in the security pass of 12 October 2026: any https address used
+// to be accepted. Nothing sensitive travels in the return URL, so this was
+// hygiene rather than a hole. Add a custom domain to OWN() the day one
+// exists; the --incommon.netlify.app suffix keeps deploy previews working.)
+const OWN = (u: URL) =>
+  u.hostname === "incommon.netlify.app" ||
+  u.hostname.endsWith("--incommon.netlify.app") ||
+  u.hostname === "localhost" ||
+  u.hostname === "127.0.0.1";
 function returnAddress(v: unknown): URL | null {
   try {
     const u = new URL(String(v ?? ""));
-    if (u.protocol === "https:") return u;
+    if (u.protocol === "https:" && OWN(u)) return u;
     if (u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1")) return u;
   } catch { /* not an address */ }
   return null;

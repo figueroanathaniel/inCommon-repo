@@ -4405,9 +4405,10 @@ input[type="date"]{color-scheme:dark}
       </button>
       <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
       <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
+           Signing back in brings the account down again, but what this device
+           holds that never synced (memories with their consent off, kept rows)
+           would not come back, so nothing is cleared. The reader goes back to
+           the cover, which is where signing in lives. -->
       <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
@@ -8865,9 +8866,10 @@ input[type="date"]{color-scheme:dark}
       </button>
       <div aria-hidden="true" style="height:1px;margin:4px 8px;background:var(--bd)"></div>
       <!-- LOG OUT SIGNS OUT OF THE ACCOUNT AND KEEPS THE DEVICE AS IT IS.
-           The cloud cannot bring a record back down to a device yet (pullAll
-           has no caller), so clearing anything here would be permanent. The
-           reader goes back to the cover, which is where signing in lives. -->
+           Signing back in brings the account down again, but what this device
+           holds that never synced (memories with their consent off, kept rows)
+           would not come back, so nothing is cleared. The reader goes back to
+           the cover, which is where signing in lives. -->
       <button onClick="{{ pmLogOutGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path><path d="M10 16l-4-4 4-4"></path><path d="M6 12h10"></path></svg>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
@@ -10025,10 +10027,16 @@ class Component extends DCLogic {
     window.addEventListener('pageshow', this._onPageShow);
     const IC = typeof window !== 'undefined' && window.InCommonCloud;
     if (IC && window.ProfileManager && window.InCommonCore) {
-      this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage }) || null;
+      this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage,
+        placeholders: () => this.cloudPlaceholders(), onPulled: r => this.cloudPulled(r) }) || null;
       if (this.cloud) {
         this.cloud.onSessionChange(s => this.setState({ cloudStatus: s }));
         this.setState({ cloudStatus: this.cloud.status() });
+        /* The account is read again whenever the page comes back into view,
+           which is when a reader who wrote something on another device
+           expects to find it here. The session start syncs on its own. */
+        this._onVis = () => { if (document.visibilityState === 'visible') this.cloudSync(); };
+        document.addEventListener('visibilitychange', this._onVis);
       }
     }
     /* Analytics, if it was ever switched on. The module writes nothing while
@@ -10053,7 +10061,7 @@ class Component extends DCLogic {
     this.vtBind();
     this._onErr = e => this.setState({ errBanner: 'Something broke quietly: ' + (e.message || 'unknown error') + '. The rest of the app keeps working.' });
     window.addEventListener('error', this._onErr);
-    this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => this.flushOutbox(), 400); };
+    this._onNet = () => { this.setState({ online: navigator.onLine }); if (navigator.onLine) setTimeout(() => { this.flushOutbox(); this.cloudSync(true); }, 400); };
     window.addEventListener('online', this._onNet); window.addEventListener('offline', this._onNet);
     this._hbuf = [];
     this._onKey = e => { // H three times within 2s opens help, from any screen; never while typing
@@ -10163,6 +10171,7 @@ class Component extends DCLogic {
     clearTimeout(this._bt); clearTimeout(this._tt); clearTimeout(this._pk); clearInterval(this._clk);
     window.removeEventListener('error', this._onErr);
     window.removeEventListener('online', this._onNet); window.removeEventListener('offline', this._onNet);
+    if (this._onVis) { document.removeEventListener('visibilitychange', this._onVis); this._onVis = null; }
     window.removeEventListener('hashchange', this._onHash);
     window.removeEventListener('popstate', this._onPop);
     if (this._vtKey) document.removeEventListener('keydown', this._vtKey);
@@ -10338,6 +10347,48 @@ class Component extends DCLogic {
       if (n) this.toastMsg('Hidden · ' + n + ' ' + (n === 1 ? 'entry' : 'entries') + ' kept for you');
     }
     this.setState({ consentTick: this.state.consentTick + 1 });
+  }
+  /* ONE ACCOUNT READS THE SAME ON EVERY DEVICE. incommon-cloud.js pulls the
+     account down and merges it in when a session starts, and cloudSync() asks
+     again when the page returns to view or the signal comes back, at most once
+     a minute unless forced. The merge itself is the module's; the app supplies
+     the two things only it knows.
+
+     cloudPlaceholders() names the sample profile a blank device invents, while
+     it is still exactly the sample: on a second device the account's own
+     profiles replace it rather than sitting beside a stranger born on the demo
+     date. Edited at all, it is the reader's and is kept.
+
+     cloudPulled() repaints what the pull changed. A device that had nothing of
+     its own and now holds the account's profiles has been set up already,
+     somewhere else, so it is not asked for a birth moment it was given. */
+  cloudPlaceholders() {
+    const PM = this.PM();
+    if (!PM) return [];
+    const id = this.readLS(this.SAMPLE_KEY, '');
+    const p = id && PM.getProfile(id);
+    return p && p.birthDate === this.DOB && !p.birthTime && !p.birthLocation ? [id] : [];
+  }
+  cloudSync(force) {
+    if (!this.cloud || typeof this.cloud.sync !== 'function') return;
+    const st = this.cloud.status();
+    if (!st || st.mode !== 'cloud') return;
+    const now = Date.now();
+    if (!force && now - (this._cloudAskAt || 0) < 60000) return;
+    this._cloudAskAt = now;
+    this.cloud.sync();
+  }
+  cloudPulled(r) {
+    if (!r || !r.ok || !r.changed) return;
+    const patch = {};
+    if (r.adopted) {
+      this.writeLS(this.FIRSTRUN_KEY, true);
+      try { localStorage.removeItem(this.SAMPLE_KEY); } catch (e) {}
+      if (this.state.auth === undefined || this.state.auth === 'birth') patch.auth = null;
+    }
+    this._hd = null; this._hdStamp = null;
+    this.setState({ ...patch, profileTick: (this.state.profileTick || 0) + 1, consentTick: (this.state.consentTick || 0) + 1,
+      memTick: (this.state.memTick || 0) + 1, cloudStatus: this.cloud ? this.cloud.status() : this.state.cloudStatus });
   }
   /* Cloud (v6.3 step 4). This surface never overrides the consent gate; it
      only makes visible what the gate is already deciding. this.cloud is
