@@ -29,7 +29,7 @@
 // by Supabase itself. The tables it reads and writes are in schema.sql beside
 // this file.
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
 const KIMI = "https://api.moonshot.ai/v1/chat/completions";
 // kimi-k2.6 for both depths by default: it is the cheaper of Kimi's two
