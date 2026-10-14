@@ -2686,8 +2686,20 @@ comes back empty (K68 holds a 1,160 memory account against a 1,000 row cap).
 Profiles and pairs are read with `account_id` and the child tables with the
 account's profile ids, on top of RLS rather than instead of it.
 
+**Only the four memory types the server accepts travel** (`SYNC_MEMORY_TYPES`:
+journal, mood, practice_completion, stella_conversation), because
+`public.memories` has a check constraint naming exactly those and one refused
+upsert stops the whole push. The Archive writes `archive_deleted` rows when a
+reader deletes an entry, and until 14 October 2026 that one row stopped every
+later push from that device: no more memories, no Throughline, no deletions.
+Those rows stay on the device. K69 reads the constraint out of
+`server/cloud-schema.sql` and holds the module's list equal to it, so a new
+memory type needs the constraint widened on the server, the schema file and
+the list changed together.
+
 What does not sync, unchanged: memories whose consent is off, `kept` rows, the
-Oracle's kept readings, `incommon.consent.data.<pid>`, saved people, and theme.
+Archive's `archive_deleted` rows, the Oracle's kept readings,
+`incommon.consent.data.<pid>`, saved people, and theme.
 K58 to K68 drive two devices, each the real profile-manager.js and its own copy
 of the cloud module, against one in memory database; the app half was driven in
 Chromium with Supabase faked: a fresh browser signed in, skipped the birth page,

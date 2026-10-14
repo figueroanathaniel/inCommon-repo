@@ -2181,6 +2181,9 @@ async function runCloudTests() {
         } else if (q._op === 'insert') {
           if (rows.some(function (x) { return x.id === q._row.id; })) out.error = { code: '23505', message: 'duplicate key value' };
           else rows.push(clone(q._row));
+        } else if (q._op === 'upsert' && table === 'memories' && db.memoryTypes && db.memoryTypes.indexOf(q._row.memory_type) === -1) {
+          /* The live table's check constraint, as the server words it. */
+          out.error = { code: '23514', message: 'new row for relation "memories" violates check constraint "memories_memory_type_check"' };
         } else if (q._op === 'upsert') {
           var row = clone(q._row);
           var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
@@ -2369,6 +2372,38 @@ async function runCloudTests() {
     ok: true, count: 760, second: 400, newest: 759, same: true
   }, { ok: e68.ok, count: devE.pm.getMemory({ profileId: dp.id }).length, second: devE.pm.getMemory({ profileId: dp2.id }).length, newest: devE.pm.getMemory({ profileId: dp.id })[0].content.n,
     same: JSON.stringify(devE.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) === JSON.stringify(devD.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) });
+
+  /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
+     archive_deleted memory, a type the live table's check constraint
+     refuses, and one refused upsert ended the push before the Throughline
+     and the deletion outbox. The fake database enforces the same constraint,
+     read out of server/cloud-schema.sql rather than typed again here. ---- */
+  var schemaSql = fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8');
+  var checkM = /memory_type text not null check \(memory_type in\s*\(([^)]*)\)\)/.exec(schemaSql);
+  var serverTypes = checkM ? checkM[1].split(',').map(function (x) { return x.trim().replace(/^'|'$/g, ''); }) : null;
+  var cdb = memDB();
+  cdb.memoryTypes = serverTypes;
+  var devF = syncDevice(cdb, 'ffffffff-0000-4000-8000-00000000000f');
+  var fp = devF.pm.createProfile({ name: 'Keeper', birthDate: '1988-08-08' });
+  devF.pm.setConsent('journal', true, fp.id);
+  var keep1 = devF.pm.addMemory({ profileId: fp.id, type: 'journal', content: { t: 'stays' } }).id;
+  var gone1 = devF.pm.addMemory({ profileId: fp.id, type: 'journal', content: { t: 'deleted here' } }).id;
+  await devF.C.sync();
+  /* What memDeleteOne() does: an archive record first, then the delete. */
+  devF.pm.addMemory({ profileId: fp.id, type: 'archive_deleted', consentRequired: null, content: { origType: 'journal', deletedAt: new Date().toISOString() } });
+  devF.pm.deleteMemory({ profileId: fp.id, id: gone1 });
+  devF.store.setItem('incommon.p.' + fp.id + '.throughline', JSON.stringify([{ id: 'm1790000000001', date: '2026-10-14', type: 'event', title: 'After the archive', manual: true }]));
+  var f69 = await devF.C.sync();
+  ts('K69', 'an archived entry stays on its device and never reaches the server, so the push goes on: the deletion reaches the server, the Throughline goes up, and the sync module sends exactly the types the server schema accepts', {
+    schemaRead: true, sameTypes: true, ok: true, server: [keep1], archiveOnServer: false, throughline: 1, outbox: 0, archiveKeptLocally: true
+  }, {
+    schemaRead: !!serverTypes, sameTypes: JSON.stringify(serverTypes) === JSON.stringify(devF.C.SYNC_MEMORY_TYPES), ok: f69.ok,
+    server: cdb.t.memories.map(function (r) { return r.local_id; }),
+    archiveOnServer: cdb.t.memories.some(function (r) { return r.memory_type === 'archive_deleted'; }),
+    throughline: cdb.t.throughline_entries.length,
+    outbox: JSON.parse(devF.store.getItem('incommon_cloud_outbox_v2') || '[]').length,
+    archiveKeptLocally: devF.pm.getMemory({ profileId: fp.id, type: 'archive_deleted', respectConsent: false }).length === 1
+  });
 
   /* ---- O1-O7: each account has its own profiles on a device, the owner's
      request of 12 October 2026 after three accounts on one browser all opened

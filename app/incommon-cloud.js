@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.8.0';
+  var VERSION = '2.8.1';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -144,6 +144,18 @@
     listeners.forEach(function (cb) { try { cb(s); } catch (e) {} });
   }
 
+  /* ---------- the memory types the server accepts ----------
+
+     public.memories carries a check constraint naming exactly these four
+     (server/cloud-schema.sql). A row of any other type is refused, and one
+     refused upsert stops the whole push: the memories after it, the
+     Throughline and the deletion outbox never go up. The Archive writes
+     archive_deleted rows, so a reader who deleted one entry stopped syncing
+     for good. Those rows are this device's own record of what was deleted
+     and stay here; only these four types travel. K69 holds this list equal
+     to the constraint, so the two cannot drift apart unnoticed. */
+  var SYNC_MEMORY_TYPES = ['journal', 'mood', 'practice_completion', 'stella_conversation'];
+
   /* ---------- consent gate ----------
 
      Read live from ProfileManager on every push. birthData is not a toggle:
@@ -205,6 +217,7 @@
          false on purpose: the sync layer applies its own gate and must see
          every row to decide, rather than inheriting the view filter. */
       pm.getMemory({ profileId: p.id, respectConsent: false }).forEach(function (m) {
+        if (SYNC_MEMORY_TYPES.indexOf(m.memoryType) === -1) return;
         if (!memoryAllowed(pm, p.id, m.memoryType, m.consentRequired, m.kept)) return;
         plan.memories.push({
           _key: p.id + '/' + m.id,
@@ -1767,6 +1780,7 @@
     oracleRead: oracleRead,
     supportSend: supportSend,
     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
+    SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
