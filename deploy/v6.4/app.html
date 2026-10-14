@@ -18125,7 +18125,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.8.1';
+  var VERSION = '2.8.2';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -19069,6 +19069,20 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      anybody: the only tell is a user with no identities, which is reported
      as exists so the reader is sent to sign in rather than told to check an
      email that will never come. */
+
+  /* Where a sign up came from: the utm tags the cover kept, cleaned again
+     here because the module must not trust its caller. Four known keys,
+     short plain words, or nothing at all. K25b. */
+  function fromOf(opts) {
+    var f = opts && opts.from, out = {}, any = false;
+    if (!f || typeof f !== 'object') return null;
+    ['source', 'medium', 'campaign', 'content'].forEach(function (k) {
+      var v = typeof f[k] === 'string' ? f[k].toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, 40) : '';
+      if (v) { out[k] = v; any = true; }
+    });
+    return any ? out : null;
+  }
+
   function passwordSignUp(login, password, redirectTo, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
@@ -19082,6 +19096,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       return authCall(function () {
         var up = { phone: id.phone, password: String(password) };
         if (cap(opts)) up.options = { captchaToken: cap(opts) };
+        if (fromOf(opts)) { up.options = up.options || {}; up.options.data = { signup_from: fromOf(opts) }; }
         return c.auth.signUp(up);
       }).then(function (res) {
         if (res && res.error) return refused(res);
@@ -19097,6 +19112,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (opts && typeof opts.newsletter === 'boolean') {
       options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
+    if (fromOf(opts)) { options.data = options.data || {}; options.data.signup_from = fromOf(opts); }
     return authCall(function () {
       return c.auth.signUp({ email: addr, password: String(password), options: options });
     }).then(function (res) {

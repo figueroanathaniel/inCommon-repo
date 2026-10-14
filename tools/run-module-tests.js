@@ -1733,6 +1733,21 @@ async function runCloudTests() {
   t('K25', 'a sign up that is not asked about the newsletter records nothing about it', {
     data: 'none'
   }, { data: gUp.up[0] && gUp.up[0].options.data ? 'present' : 'none' });
+  /* ---- K25b: where a sign up came from rides along as signup_from, cleaned
+     again in the module, on email and phone sign ups alike; with no tags it
+     records nothing. (owner, 14 October 2026) */
+  var gFrom = oauthHarness(), gFromPh = oauthHarness(), gFromBad = oauthHarness();
+  await gFrom.C.passwordSignUp('reader@k25b.invalid', 'correct horse', 'https://cover.k25b.invalid/', { newsletter: true, from: { source: 'meta', medium: 'paid', campaign: 'launch', content: 'Carousel' } });
+  await gFromPh.C.passwordSignUp('+15551234567', 'correct horse', 'https://cover.k25b.invalid/', { from: { source: 'meta', content: 'reel' } });
+  await gFromBad.C.passwordSignUp('reader@k25b.invalid', 'correct horse', 'https://cover.k25b.invalid/', { from: { source: '<script>', name: 'Jane Doe', content: 'x'.repeat(90) } });
+  var fE = gFrom.up[0] && gFrom.up[0].options && gFrom.up[0].options.data, fP = gFromPh.up[0] && gFromPh.up[0].options && gFromPh.up[0].options.data, fB = gFromBad.up[0] && gFromBad.up[0].options && gFromBad.up[0].options.data;
+  t('K25b', 'the ad a sign up came from is saved as signup_from beside the newsletter answer, on phone sign ups too, cleaned to four known keys of short plain words', {
+    email: { source: 'meta', medium: 'paid', campaign: 'launch', content: 'carousel' }, newsletterKept: true, phone: { source: 'meta', content: 'reel' },
+    cleaned: { source: 'script', content: 40, keys: ['content', 'source'] }
+  }, {
+    email: fE ? fE.signup_from : 'none', newsletterKept: !!(fE && fE.newsletter === true), phone: fP ? fP.signup_from : 'none',
+    cleaned: fB && fB.signup_from ? { source: fB.signup_from.source, content: (fB.signup_from.content || '').length, keys: Object.keys(fB.signup_from).sort() } : 'none'
+  });
   var gHas = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [] }, session: null } });
   var upHas = await gHas.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
   var gAuto = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [{ id: 'i1' }] }, session: { user: { email: 'reader@k35.invalid' } } } });
