@@ -858,7 +858,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.8.1'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.8.2'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -877,6 +877,25 @@
      still never shown. Tokens are dropped from the address before the server
      is asked about them, so a reload or a copied address cannot carry them. */
   var q = new URLSearchParams(location.search);
+  /* WHERE A NEW READER CAME FROM (owner, 14 October 2026). An ad's link
+     carries utm tags; the first ones seen in this tab are kept for the tab
+     and go with a sign up as account metadata, so the owner can count which
+     ad brought an account in. Only the four tags, only short plain words,
+     nothing about the reader, and nothing is sent anywhere until the reader
+     creates an account themselves. The Privacy Policy, section 4, says so. */
+  var fromTags = (function () {
+    var KEY = 'incommon.signup.from', seen = null;
+    try { seen = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (seen) return seen;
+    var t = {}, any = false;
+    ['source', 'medium', 'campaign', 'content'].forEach(function (k) {
+      var v = (q.get('utm_' + k) || '').toLowerCase().replace(/[^a-z0-9_.-]/g, '').slice(0, 40);
+      if (v) { t[k] = v; any = true; }
+    });
+    if (!any) return null;
+    try { sessionStorage.setItem(KEY, JSON.stringify(t)); } catch (e) {}
+    return t;
+  })();
   var h = new URLSearchParams(location.hash.replace(/^#/, ''));
   var code = q.get('code');
   var tokens = h.get('access_token') ? { at: h.get('access_token'), rt: h.get('refresh_token'), kind: h.get('type') } : null;
@@ -1100,7 +1119,7 @@
       /* The newsletter answer goes with the sign up, and only there. Supabase
          keeps it only when this call creates the account, which is when the
          owner asked for it to be asked. A phone has no address to write to. */
-      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? capt : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken });
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? { captchaToken: capt.captchaToken, from: fromTags } : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken, from: fromTags });
       if (m === 'forgot') return C.passwordResetStart(login, here, capt);
       if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
       if (m === 'mfa') return C.mfaVerify(codeIn.value);
