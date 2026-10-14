@@ -50,7 +50,8 @@ const OUT = outFlag !== -1 && process.argv[outFlag + 1]
 const RINGS = [0x8b, 0x5c, 0xf6];   /* #8b5cf6, the two wholes */
 const LENS  = [0x2f, 0xff, 0x8f];   /* #2fff8f, reserved for what they share */
 const FIELD = [0x0b, 0x09, 0x10];   /* #0b0910, the icon field */
-const APPBG = [0x05, 0x06, 0x0a];   /* the app's own --bg, so the splash seam is invisible */
+const APPBG = [0x05, 0x06, 0x0a];
+const LILAC = [0xb7, 0x9b, 0xff];   /* --ac2-hi, the rim of the lit ring */   /* the app's own --bg, so the splash seam is invisible */
 
 /* Proportions in unit space, taken from the mark the app draws: r 0.26 with
    centres 0.13 either side of the middle, stroke 0.045. */
@@ -89,8 +90,15 @@ function render(w, h, bg, markFrac) {
     return buf;
   }
 
-  /* A prominent bloom around the lens, matching the raytracer glow on the cover. */
-  const glowR = (r + 0.25);
+  /* THE GLOW, from the profile picture of 14 October 2026: the icon is the
+     mark as it looks lit, not as it looks printed. Four layers, each a pure
+     function of the geometry so the icons stay reproducible byte for byte:
+     a violet haze behind the whole mark, a green bloom spilling out of the
+     lens, a wide violet bloom either side of each ring, and a thin lilac rim
+     hugging the stroke. They are blended over the field, never added, because
+     two additive lights in the same pixels sum toward white (CLAUDE.md, the
+     cover section). The solid lens and rings are laid over all four. */
+  const HAZE_S = 0.55, GREEN_S = 0.085, VIOLET_S = 0.045, RIM_S = 0.012;
 
   for (let py = 0; py < h; py++) {
     for (let px = 0; px < w; px++) {
@@ -106,11 +114,16 @@ function render(w, h, bg, markFrac) {
       const n = SS * SS;
       let c = bg;
       const ux = (px + 0.5 - cx) / unit, uy = (py + 0.5 - cy) / unit;
-      const gd = Math.hypot(ux, uy);
-      if (gd < glowR) {
-        const t = 1 - gd / glowR;
-        c = mix(c, LENS, 0.28 * t * t);
-      }
+      const d1 = Math.hypot(ux + dx, uy), d2 = Math.hypot(ux - dx, uy);
+      const haze = Math.exp(-Math.pow(Math.hypot(ux, uy) / HAZE_S, 2));
+      c = mix(c, RINGS, 0.12 * haze);
+      const lensOut = Math.max(0, Math.max(d1 - r, d2 - r));
+      /* the green stays inside the rings: past both of them it is the field's */
+      const inside = Math.exp(-Math.pow(Math.max(0, Math.min(d1, d2) - r) / 0.02, 2));
+      c = mix(c, LENS, 0.40 * inside * Math.exp(-Math.pow(lensOut / GREEN_S, 2)));
+      const ringOut = Math.max(0, Math.min(Math.abs(d1 - r), Math.abs(d2 - r)) - hw);
+      c = mix(c, RINGS, 0.40 * Math.exp(-Math.pow(ringOut / VIOLET_S, 2)));
+      c = mix(c, LILAC, 0.22 * Math.exp(-Math.pow(ringOut / RIM_S, 2)));
       if (lensHits) c = mix(c, LENS, lensHits / n);
       if (ringHits) c = mix(c, RINGS, ringHits / n);
       const o = (py * w + px) * 3;
