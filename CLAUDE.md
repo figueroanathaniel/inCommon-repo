@@ -4464,7 +4464,12 @@ that a later change is most likely to break:
 The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 `app/sw.js` and the app helmet point at it by `../inCommon%20Logo/icons/`. The
 copies inside `deploy/` are build output, because a deploy directory is
-uploaded whole.
+uploaded whole. The bundle's `app.html` and `manifest.json` name those copies
+as `./icon-192.png` and so on: `build-bundle.js` rewrites the app's three
+`../inCommon%20Logo/icons/` addresses and refuses if the count is not three.
+Until 15 October 2026 they shipped unrewritten, and from a site root that
+address is answered by the catch all with the app, so a home screen icon was
+an HTML page.
 
 `tools/` holds thirty two scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
@@ -4553,3 +4558,23 @@ a pattern three exactly-conjunct points can never produce.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.
+
+## Search engines are given the cover and the legal pages, nothing else
+Added 15 October 2026. The cover is a canvas, so what a crawler read of the
+home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST
+line. Its head now carries a title, a description, a canonical address, Open
+Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
+`inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
+WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
+timer rather than sitting in the markup.
+
+**`app.html` carries `noindex, follow`.** The catch all answers every unknown
+path with it, so indexing it puts one unfilled template under every address
+anybody links. The legal pages keep `index, follow`.
+
+**The site's address is written out in three places**: the head of
+`app/cover.html`, `deploy/<version>/robots.txt` and
+`deploy/<version>/sitemap.xml`. It is `https://incommon.netlify.app` while
+that is where the site is served. When incommonspace.com is connected, change
+all three in the same change, then submit the sitemap in Search Console.
+Description copy follows the voice rules: no method, no fate, no dash.
