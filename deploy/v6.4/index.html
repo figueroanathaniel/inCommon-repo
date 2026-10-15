@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4 cover  |  built 2026-10-14 -->
+<!-- inCommon incommon-v6.4 cover  |  built 2026-10-15 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -75,7 +75,40 @@
   if (h && h.length > 1 && !/(^#|&)(access_token|error_code|error)=/.test(h)) location.replace('./app.html' + location.search + h);
 })();
 </script>
-<title>inCommon</title>
+<title>inCommon · Astrology, Human Design and Numerology</title>
+<!-- WHAT A SEARCH ENGINE AND A SHARED LINK SEE.
+
+     The cover is the one page of the site meant to be found: app.html carries
+     noindex, because every address the catch all answers is the same app, and
+     the legal pages carry their own descriptions. The image is a canvas, so
+     without these lines a crawler reads the wordmark, "enter here" and nothing
+     else, and a link pasted into a message shows a bare address.
+
+     The site's address is written out here, in robots.txt and in sitemap.xml
+     beside the bundle, and in nothing else. It is the Netlify address while
+     that is where the site is served; when incommonspace.com is connected,
+     change all three in the same change. -->
+<meta name="description" content="Self-knowledge that stays yours. Your astrology, Human Design and numerology charts, with tarot, dreams, a journal and the Oracle, in one place. Free to begin.">
+<link rel="canonical" href="https://incommon.netlify.app/">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="inCommon">
+<meta property="og:title" content="inCommon">
+<meta property="og:description" content="Self-knowledge that stays yours. Astrology, Human Design and numerology, in one place.">
+<meta property="og:url" content="https://incommon.netlify.app/">
+<meta property="og:image" content="https://incommon.netlify.app/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The inCommon mark, two violet rings with a green lens, beside the wordmark.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebSite","name":"inCommon","url":"https://incommon.netlify.app/"},
+{"@type":"Organization","name":"inCommon","legalName":"INCOMMON LLC","url":"https://incommon.netlify.app/","logo":"https://incommon.netlify.app/icon-512.png","sameAs":["https://www.instagram.com/incommonofficial/"]}
+]}
+</script>
 <!-- fonts:google  The wordmark's face. tools/build-bundle.js replaces everything
      between this marker and the closing one with a link to ./fonts/fonts.css
      when it is run with --fonts self, so keep both markers. -->
@@ -465,12 +498,16 @@
     </g>
   </svg>
 </div>
-<div id="fallback">SIGNAL LOST // RENDERER UNAVAILABLE OFFLINE</div>
+<!-- Written by the timer below rather than into the markup, so a crawler
+     reading the page does not take the failure message for its first line. -->
+<div id="fallback"></div>
 <div id="notice"></div>
 <script>
   setTimeout(function () {
     if (!window.__EH_LIVE) {
-      document.getElementById('fallback').style.opacity = '1';
+      var lost = document.getElementById('fallback');
+      lost.textContent = 'SIGNAL LOST // RENDERER UNAVAILABLE OFFLINE';
+      lost.style.opacity = '1';
       document.body.classList.add('signal-lost');
     }
   }, 9000);

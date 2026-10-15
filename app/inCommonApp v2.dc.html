@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The app is not a page to be found. Every address but the bare one and the
+     legal pages answers with this same file, so indexing it would put one
+     document under every path anybody ever linked, and what a crawler can read
+     of it is an unfilled template. The cover is the page search engines are
+     given; see the block above its title. -->
+<meta name="robots" content="noindex, follow">
 <script>
 /* React and ReactDOM are vendored into this directory instead of being fetched
    from unpkg at runtime. support.js already resolves both through

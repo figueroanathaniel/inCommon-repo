@@ -1,9 +1,15 @@
-<!-- inCommon incommon-v6.4  |  built 2026-10-14  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4  |  built 2026-10-15  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The app is not a page to be found. Every address but the bare one and the
+     legal pages answers with this same file, so indexing it would put one
+     document under every path anybody ever linked, and what a crawler can read
+     of it is an unfilled template. The cover is the page search engines are
+     given; see the block above its title. -->
+<meta name="robots" content="noindex, follow">
 <script>
 /* React and ReactDOM are vendored into this directory instead of being fetched
    from unpkg at runtime. support.js already resolves both through
@@ -21328,9 +21334,9 @@ input[type="date"]{color-scheme:dark}
 <link rel="manifest" href="./manifest.json">
 <!-- The mark with glow effect, matching the raytracer glow on the cover. -->
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-<link rel="apple-touch-icon" href="../inCommon%20Logo/icons/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="../inCommon%20Logo/icons/icon-512.png">
-<link rel="apple-touch-startup-image" href="../inCommon%20Logo/icons/splash.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-startup-image" href="./splash.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

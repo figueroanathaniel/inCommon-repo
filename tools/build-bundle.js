@@ -336,6 +336,24 @@ if (declared.length !== expected.length) {
   die('expected ' + expected.length + ' local scripts in the source, found ' + declared.length);
 }
 
+/* THE ICONS ARE BESIDE THE BUNDLE, NOT A FOLDER ABOVE IT.
+
+   The source shell points its touch icons and startup image at the one copy
+   of the mark, ../inCommon%20Logo/icons/, which is right from app/ and wrong
+   from a site root: there it resolves to /inCommon%20Logo/icons/..., the
+   catch all answers with the app, and a phone saving the site to its home
+   screen gets an HTML page where its icon should be. The bundle folder holds
+   its own copies of all three files, so the address is rewritten to them. */
+{
+  const ICONS = '../inCommon%20Logo/icons/';
+  const n = html.split(ICONS).length - 1;
+  if (n !== 3) die('the app names ' + ICONS + ' ' + n + ' times, expected 3 (two touch icons and the startup image); update this rewrite to match');
+  html = html.split(ICONS).join('./');
+  for (const f of ['icon-192.png', 'icon-512.png', 'splash.png']) {
+    if (!fs.existsSync(path.join(OUT, f))) die('the app points at ./' + f + ' and there is none beside it in ' + OUT);
+  }
+}
+
 /* 1. lang on the document element. The app sets it at runtime too, but the
       served file has to carry it before any script runs. */
 if (/<html\s+lang=/i.test(html)) {
