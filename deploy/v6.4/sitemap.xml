@@ -4,9 +4,9 @@
      site's, written out here, in robots.txt and in the head of the cover;
      change all three together. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://incommon.netlify.app/</loc></url>
-  <url><loc>https://incommon.netlify.app/terms.html</loc></url>
-  <url><loc>https://incommon.netlify.app/privacy.html</loc></url>
-  <url><loc>https://incommon.netlify.app/accessibility.html</loc></url>
-  <url><loc>https://incommon.netlify.app/delete-account.html</loc></url>
+  <url><loc>https://incommonspace.com/</loc></url>
+  <url><loc>https://incommonspace.com/terms.html</loc></url>
+  <url><loc>https://incommonspace.com/privacy.html</loc></url>
+  <url><loc>https://incommonspace.com/accessibility.html</loc></url>
+  <url><loc>https://incommonspace.com/delete-account.html</loc></url>
 </urlset>

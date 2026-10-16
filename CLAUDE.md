@@ -4574,7 +4574,9 @@ anybody links. The legal pages keep `index, follow`.
 
 **The site's address is written out in three places**: the head of
 `app/cover.html`, `deploy/<version>/robots.txt` and
-`deploy/<version>/sitemap.xml`. It is `https://incommon.netlify.app` while
-that is where the site is served. When incommonspace.com is connected, change
-all three in the same change, then submit the sitemap in Search Console.
+`deploy/<version>/sitemap.xml`. It is `https://incommonspace.com`, the apex,
+since the domain was connected on 16 October 2026; incommon.netlify.app should
+answer with a 301 to it (Netlify does that once the apex is the primary domain).
+If the address ever moves, change all three in the same change, then submit the
+sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.

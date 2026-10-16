@@ -8,4 +8,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://incommon.netlify.app/sitemap.xml
+Sitemap: https://incommonspace.com/sitemap.xml
