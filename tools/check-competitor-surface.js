@@ -157,6 +157,8 @@ const ALLOW = [
     why: 'States this rule and has to name the terms it bars.' },
   { term: '*', path: 'tools/check-competitor-surface.js',
     why: 'This gate. Same reason.' },
+  { term: '*', path: 'tools/build-learn-pages.js',
+    why: 'Writes the public pages into deploy/, which this gate skips, so it asserts the same marks over its own output and has to name them.' },
 
   { term: '*', path: 'docs/CROSS-CHECK-2026-08-28.md',
     why: 'The record of the 28 August terminology audit. It names the five terms it weighed and the counts it found.' },

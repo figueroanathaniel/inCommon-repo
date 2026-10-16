@@ -748,6 +748,16 @@ try {
    are relative. index.html asks for ./manifest.json, which resolves at the
    site root, and that has to be rewritten into the bundle or the manifest,
    the icons and the service worker all 404 while the page itself loads. */
+/* THE PUBLIC REFERENCE PAGES AND THE SITEMAP, written beside the bundle.
+
+   tools/build-learn-pages.js reads the app's own reference modules and writes
+   learn/ and sitemap.xml, so a crawler can read what the hash routed app
+   cannot show it. It runs here, before the _redirects below list the folder,
+   so learn/ is served from a dragged repository as well as a git deploy. It
+   refuses on a dash, a barred mark, a dead link, or a site address that the
+   cover and robots.txt do not share. */
+const learnBuilt = require('./build-learn-pages.js').run(OUT);
+
 const assets = fs.readdirSync(BUNDLE)
   .filter(f => f !== 'index.html' && f !== '_redirects' && f !== '_headers' && !/\.md$/i.test(f))
   .map(f => fs.statSync(path.join(BUNDLE, f)).isDirectory() ? f + '/*' : f)
@@ -864,6 +874,7 @@ const netlify = PREVIEW ? null : writeNetlifyToml();
 
 console.log('build-bundle: wrote ' + outPath + (PREVIEW ? '   (PREVIEW: the bundle folder, the root _redirects and netlify.toml were not touched)' : ''));
 console.log('  fonts:           ' + FONTS + (FONTS === 'self' ? '   (app/fonts/ copied to ' + path.relative(repo, fontsOut) + '/, Google removed from the CSP)' : '   (Google Fonts)'));
+console.log('  learn/:          ' + learnBuilt.pages + ' pages, sitemap.xml with ' + learnBuilt.urls + ' addresses');
 console.log('  cover:           ' + coverOut + '  (+ ' + THREE_FILES.join(', ') + ')');
 console.log('  version:         ' + VERSION + '   (line 1 of the bundle, taken from the sw.js beside it)');
 console.log('  ' + bytes.toLocaleString() + ' bytes');
