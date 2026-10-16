@@ -361,6 +361,19 @@
   }
   .legal.links a:hover { color: #fff8e7; }
   .legal.links a:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
+  /* THE LEARN LINK. The reference pages (the gates, the hexagrams, the
+     numbers, the dreams and the animals) at plain addresses, for a reader who
+     wants to read before signing in and for a crawler, which reads nothing on
+     a canvas. It is not a way into the app, so H5 leaves it out as it leaves
+     out .legal, and it leaves with the way in when the page scrolls. */
+  .learn { display: flex; justify-content: center; margin-top: 2px; }
+  .learn a {
+    pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
+    color: #cfd5e2; font: 400 13px/1 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; letter-spacing: .04em;
+    text-decoration: underline; text-underline-offset: 3px; text-shadow: 0 0 12px rgba(5,6,10,.9);
+  }
+  .learn a:hover { color: #fff8e7; }
+  .learn a:focus-visible { outline: 1px solid rgba(255,248,231,.6); outline-offset: 2px; }
   .agree {
     margin: 0; max-width: min(88vw, 380px); text-align: center; color: #cfd5e2; text-shadow: 0 0 12px rgba(5,6,10,.9);
     font: 400 12.5px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -476,6 +489,9 @@
     <nav class="legal links" aria-label="Legal">
       <a href="./terms.html">Terms &amp; Conditions</a>
       <a href="./privacy.html">Privacy Policy</a>
+    </nav>
+    <nav class="learn" aria-label="Reference">
+      <a href="./learn/">Learn: gates, hexagrams, numbers, dreams</a>
     </nav>
   </div>
 </div>
@@ -2226,7 +2242,8 @@ const enterEl = document.querySelector('a.enter');
 /* Every way in, and the line that reports on the sign in, leave together. */
 const wayEls = [enterEl, document.getElementById('mailform'),
   document.querySelector('button.skip'), document.querySelector('.authmsg'),
-  document.querySelector('.agree'), document.querySelector('.legal.links')].filter(Boolean);
+  document.querySelector('.agree'), document.querySelector('.legal.links'),
+  document.querySelector('.learn')].filter(Boolean);
 
 /* Declared here rather than beside the click handler below, because
    scrollFade reads it and scrollFade is called at module scope before that

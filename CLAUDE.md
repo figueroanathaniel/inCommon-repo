@@ -2386,8 +2386,8 @@ shells twice (Support & legal, under the crisis rows, and again in the page's
 the Luminary purchase, where the automatic renewal sentence sits beside them
 because Florida and California both want renewal terms before the purchase.
 The cover's Create New Account mode shows `.agree`, the line that makes signing
-up an agreement to both. H5 counts the cover's links outside `.legal`, because
-those two are not ways in.
+up an agreement to both. H5 counts the cover's links outside `.legal` and
+`.learn`, because neither is a way in.
 
 **The pages describe the build, so they move with it.** A new outside service,
 anything new sent to the Oracle, a price or plan, the SMS provider, the LLC or
@@ -4567,6 +4567,11 @@ Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
 `inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
 WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
 timer rather than sitting in the markup.
+
+**The cover links them, once, under the legal links** (`.learn`, the owner,
+16 October 2026), so a reader can read before signing in and a crawler, which
+reads nothing on a canvas, has a link to follow. It shows at rest and with the
+form open, leaves with the way in on scroll (`wayEls`), and is not a way in.
 
 **`app.html` carries `noindex, follow`.** The catch all answers every unknown
 path with it, so indexing it puts one unfilled template under every address
