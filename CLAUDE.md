@@ -4590,6 +4590,19 @@ dash, a mark `check-competitor-surface.js` bars (it skips `deploy/`, so the
 marks are asserted over the output), bodygraph in a heading, and any `/learn/`
 link that was not built. **Change the writing in the module, never in a page.**
 
+**Every Learn page opens the same entry inside the app** (the owner, 17
+October 2026), because the app's screens live after the `#` and no search
+engine can index them, so a Learn page is the only way in from a search. The
+button is `/app.html?from=learn#<entry>`, the entry addresses are
+`/library/human-design-atlas/gate/<n>`, `/library/i-ching/hexagram/<n>`,
+`/library/dreams/<category>/<key>`, `/library/synchronicities/number/<n>` and
+`/library/synchronicities/animal/<slug>`, resolved in `openPath()`, and one it
+cannot find lands on its room. `learnGuest()` lets that visitor straight in for
+the tab: no sign in page, no birth page, the sample chart behind them and Use
+mine on the banner. It writes nothing else, so a later visit that did not come
+from a Learn page meets the first run as before. Every one of the 354 links was
+driven in a browser to its entry.
+
 **The site's address is written once in the generator and twice beside it**:
 `SITE` in `tools/build-learn-pages.js`, the head of `app/cover.html`, and
 `deploy/<version>/robots.txt`. The generator refuses to build when the cover's

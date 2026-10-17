@@ -37,6 +37,7 @@ const path = require('path');
 const repo = path.resolve(__dirname, '..');
 const appDir = path.join(repo, 'app');
 const SITE = 'https://incommonspace.com';
+const APP = '/app.html';
 
 function die(msg) { console.error('build-learn-pages: ' + msg); process.exit(1); }
 
@@ -120,7 +121,11 @@ const CSS = `
 `;
 
 function page(o) {
-  /* o: { path, title, desc, crumbs:[[label, path]], body, type } */
+  /* o: { path, title, desc, crumbs:[[label, path]], body, type, app, appLabel }
+     app is the address of the same entry inside the app, after its #. The
+     button opens it with ?from=learn, which lets the visitor straight in as a
+     guest rather than at the sign in or the birth page (see learnGuest() in the
+     app). */
   const url = SITE + o.path;
   const crumbs = [['inCommon', '/'], ['Learn', '/learn/']].concat(o.crumbs || []);
   const ld = { '@context': 'https://schema.org', '@graph': [
@@ -161,7 +166,7 @@ function page(o) {
 ${o.body}
 <section class="cta" aria-label="inCommon">
 <p>inCommon reads your astrology, Human Design and numerology together, with tarot, the Book of Changes, a dream journal and a private record of your own. Free to begin.</p>
-<a class="btn" href="/">Open inCommon</a>
+<a class="btn" href="${APP}?from=learn#${o.app || '/library'}">${esc(o.appLabel || 'Open the Library in inCommon')}</a>
 </section>
 <footer>
 <a href="/learn/">Learn</a><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a><a href="/accessibility.html">Accessibility</a>
@@ -193,7 +198,7 @@ function build(M) {
     const lines = h.lines.map((l, j) => '<li><b>Line ' + (j + 1) + '</b>' + esc(l) + '</li>').join('');
     const prev = i ? ['Hexagram ' + (i), hexPath(i)] : null;
     const next = i < 63 ? ['Hexagram ' + (i + 2), hexPath(i + 2)] : null;
-    add({ path: hexPath(h.number), type: 'Article',
+    add({ path: hexPath(h.number), type: 'Article', app: '/library/i-ching/hexagram/' + h.number, appLabel: 'Open hexagram ' + h.number + ' in inCommon',
       title: 'I Ching Hexagram ' + h.number + ', ' + h.name,
       h1: 'Hexagram ' + h.number + ': ' + h.name,
       desc: clip('I Ching hexagram ' + h.number + ', ' + h.name + ' (' + h.pinyin + '). ' + h.judgment, 158),
@@ -211,7 +216,7 @@ function build(M) {
         ' is <a href="' + gatePath(h.number) + '">Gate ' + h.number + ', ' + esc(M.HD.GATES[h.number][0]) + '</a>.</p>' +
         pn(prev, next) });
   });
-  add({ path: '/learn/i-ching/', type: 'CollectionPage', title: 'The I Ching: All 64 Hexagrams',
+  add({ path: '/learn/i-ching/', type: 'CollectionPage', app: '/library/i-ching', appLabel: 'Open the Book of Changes in inCommon', title: 'The I Ching: All 64 Hexagrams',
     h1: 'The Book of Changes', desc: 'All sixty four hexagrams of the I Ching, the Book of Changes, each with its judgment, its image and its six lines, written for inCommon.',
     crumbs: [['The Book of Changes', '/learn/i-ching/']],
     body: '<p class="kicker">The I Ching</p><h1>The Book of Changes</h1>' +
@@ -226,7 +231,7 @@ function build(M) {
     const chans = (M.HD.channelsFor(n) || []).map(c => '<li><a href="' + gatePath(c.partner) + '"><strong>' + esc(c.name) +
       ' \u00b7 ' + esc(c.key) + '</strong><span>' + esc(c.theme) + '. ' + esc(c.meaning) + ' With Gate ' + c.partner + ', ' + esc(G[c.partner][0]) + '.</span></a></li>').join('');
     const lines = gl.map((l, j) => '<li><b>Line ' + (j + 1) + (M.HD.LINES[j + 1] ? ', ' + esc(M.HD.LINES[j + 1].name) : '') + '</b>' + esc(l) + '</li>').join('');
-    add({ path: gatePath(n), type: 'Article',
+    add({ path: gatePath(n), type: 'Article', app: '/library/human-design-atlas/gate/' + n, appLabel: 'Open Gate ' + n + ' in inCommon',
       title: 'Human Design Gate ' + n + ', ' + g[0], h1: 'Gate ' + n + ': ' + g[0],
       desc: clip('Human Design Gate ' + n + ', ' + g[0] + ', in the ' + g[1] + ' center. ' + g[2] + ' ' + (t.sky || ''), 158),
       crumbs: [['Human Design gates', '/learn/human-design/gates/']],
@@ -244,7 +249,7 @@ function build(M) {
   }
   const byCentre = {};
   for (let n = 1; n <= 64; n++) (byCentre[G[n][1]] = byCentre[G[n][1]] || []).push(n);
-  add({ path: '/learn/human-design/gates/', type: 'CollectionPage', title: 'Human Design Gates: All 64',
+  add({ path: '/learn/human-design/gates/', type: 'CollectionPage', app: '/library/human-design-atlas', appLabel: 'Open the Human Design Atlas in inCommon', title: 'Human Design Gates: All 64',
     h1: 'The 64 gates of Human Design', desc: 'All sixty four Human Design gates, grouped by center, each with its theme, its six lines and the channels it completes.',
     crumbs: [['Human Design gates', '/learn/human-design/gates/']],
     body: '<p class="kicker">Human Design</p><h1>The 64 gates</h1><p class="lede">Each gate is one of the sixty four hexagrams, placed in one of the nine centers.</p>' +
@@ -259,7 +264,7 @@ function build(M) {
     if (!r || r.composed) return;
     const digits = r.digits.filter((d, j, a) => a.findIndex(x => x.d === d.d) === j)
       .map(d => '<li><b>' + d.d + '</b>' + esc(d.short.charAt(0).toUpperCase() + d.short.slice(1)) + '</li>').join('');
-    add({ path: anPath(n), type: 'Article', title: 'Angel Number ' + n + ' Meaning', h1: 'Angel number ' + n,
+    add({ path: anPath(n), type: 'Article', app: '/library/synchronicities/number/' + n, appLabel: 'Open ' + n + ' in inCommon', title: 'Angel Number ' + n + ' Meaning', h1: 'Angel number ' + n,
       desc: clip('What angel number ' + n + ' means when it keeps appearing. ' + r.traditional + ' ' + r.possibility, 158),
       crumbs: [['Angel numbers', '/learn/angel-numbers/']],
       body: '<p class="kicker">Angel numbers</p><h1>Angel number ' + n + '</h1><p class="lede">' + esc(r.traditional) + '</p>' +
@@ -268,7 +273,7 @@ function build(M) {
         '<h2>Keep a record of it</h2><p>A repeating number becomes a pattern only once it is dated. The Synchronicities page in inCommon keeps each sighting in one run with the animals and anything else that repeats.</p>' +
         pn(i ? ['Angel number ' + nums[i - 1], anPath(nums[i - 1])] : null, i < nums.length - 1 ? ['Angel number ' + nums[i + 1], anPath(nums[i + 1])] : null) });
   });
-  add({ path: '/learn/angel-numbers/', type: 'CollectionPage', title: 'Angel Numbers and Their Meanings',
+  add({ path: '/learn/angel-numbers/', type: 'CollectionPage', app: '/library/synchronicities', appLabel: 'Open Synchronicities in inCommon', title: 'Angel Numbers and Their Meanings',
     h1: 'Angel numbers', desc: 'Meanings for repeating numbers, from 1 to 5555: 111, 222, 333, 444, 555, 1111, 1212 and more, each with a question to bring to it.',
     crumbs: [['Angel numbers', '/learn/angel-numbers/']],
     body: '<p class="kicker">Synchronicities</p><h1>Angel numbers</h1><p class="lede">A number that keeps turning up, on a clock, a receipt or a licence plate.</p>' +
@@ -281,7 +286,7 @@ function build(M) {
   const drTitle = e => e.name.replace(/^(A|An|The) /, '');
   dreams.forEach((e, i) => {
     const variants = (e.variants || []).map(v => '<h3>' + esc(v.label) + '</h3>' + p(v.text)).join('');
-    add({ path: drPath(e), type: 'Article', title: drTitle(e) + ' in a Dream: Meaning', h1: e.name,
+    add({ path: drPath(e), type: 'Article', app: '/library/dreams/' + e.category + '/' + e.key, appLabel: 'Open this dream symbol in inCommon', title: drTitle(e) + ' in a Dream: Meaning', h1: e.name,
       desc: clip('Dreaming of ' + e.name.toLowerCase() + '. ' + e.meaning, 158),
       crumbs: [['Dream symbols', '/learn/dreams/']],
       body: '<p class="kicker">Dream symbols \u00b7 ' + esc(e.categoryLabel) + (e.archetypeLabel ? ' \u00b7 ' + esc(e.archetypeLabel) : '') + '</p>' +
@@ -291,7 +296,7 @@ function build(M) {
         '<div class="ask">' + esc(e.possibility) + '</div>' +
         pn(i ? [dreams[i - 1].name, drPath(dreams[i - 1])] : null, i < dreams.length - 1 ? [dreams[i + 1].name, drPath(dreams[i + 1])] : null) });
   });
-  add({ path: '/learn/dreams/', type: 'CollectionPage', title: 'Dream Symbols and Their Meanings',
+  add({ path: '/learn/dreams/', type: 'CollectionPage', app: '/library/dreams', appLabel: 'Open Dream Symbols in inCommon', title: 'Dream Symbols and Their Meanings',
     h1: 'Dream symbols', desc: 'What common dream images can mean: falling, being chased, teeth, water, houses, snakes, storms and more, each with a question only the dreamer can answer.',
     crumbs: [['Dream symbols', '/learn/dreams/']],
     body: '<p class="kicker">The Dream Journal</p><h1>Dream symbols</h1><p class="lede">Images read as dream images: every figure first as a part of the person dreaming it.</p>' +
@@ -302,7 +307,7 @@ function build(M) {
   const animals = M.AS.names.map(nm => M.AS.lookup(nm)).filter(Boolean);
   const anmPath = a => '/learn/animals/' + slug(a.name) + '/';
   animals.forEach((a, i) => {
-    add({ path: anmPath(a), type: 'Article', title: a.name.replace(/\b[a-z]/g, c => c.toUpperCase()) + ' Symbolism and Meaning', h1: a.name,
+    add({ path: anmPath(a), type: 'Article', app: '/library/synchronicities/animal/' + slug(a.name), appLabel: 'Open the ' + a.name.toLowerCase() + ' in inCommon', title: a.name.replace(/\b[a-z]/g, c => c.toUpperCase()) + ' Symbolism and Meaning', h1: a.name,
       desc: clip('What it can mean when you keep seeing a ' + a.name.toLowerCase() + '. ' + a.tradition, 158),
       crumbs: [['Animal symbolism', '/learn/animals/']],
       body: '<p class="kicker">Animal symbolism</p><h1>' + esc(a.name) + '</h1>' +
@@ -311,7 +316,7 @@ function build(M) {
         '<div class="ask">' + esc(a.possibility) + '</div>' +
         pn(i ? [animals[i - 1].name, anmPath(animals[i - 1])] : null, i < animals.length - 1 ? [animals[i + 1].name, anmPath(animals[i + 1])] : null) });
   });
-  add({ path: '/learn/animals/', type: 'CollectionPage', title: 'Animal Symbolism: What Seeing an Animal Can Mean',
+  add({ path: '/learn/animals/', type: 'CollectionPage', app: '/library/synchronicities', appLabel: 'Open Synchronicities in inCommon', title: 'Animal Symbolism: What Seeing an Animal Can Mean',
     h1: 'Animal symbolism', desc: 'Seventy two animals people report noticing, from crows and cardinals to deer and dragonflies: what each tradition holds, and where that reading came from.',
     crumbs: [['Animal symbolism', '/learn/animals/']],
     body: '<p class="kicker">Synchronicities</p><h1>Animal symbolism</h1><p class="lede">The animals people actually report noticing, each read in three parts kept apart.</p>' +
