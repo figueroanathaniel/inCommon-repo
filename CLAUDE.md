@@ -2386,8 +2386,8 @@ shells twice (Support & legal, under the crisis rows, and again in the page's
 the Luminary purchase, where the automatic renewal sentence sits beside them
 because Florida and California both want renewal terms before the purchase.
 The cover's Create New Account mode shows `.agree`, the line that makes signing
-up an agreement to both. H5 counts the cover's links outside `.legal`, because
-those two are not ways in.
+up an agreement to both. H5 counts the cover's links outside `.legal` and
+`.learn`, because neither is a way in.
 
 **The pages describe the build, so they move with it.** A new outside service,
 anything new sent to the Oracle, a price or plan, the SMS provider, the LLC or
@@ -4464,9 +4464,14 @@ that a later change is most likely to break:
 The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 `app/sw.js` and the app helmet point at it by `../inCommon%20Logo/icons/`. The
 copies inside `deploy/` are build output, because a deploy directory is
-uploaded whole.
+uploaded whole. The bundle's `app.html` and `manifest.json` name those copies
+as `./icon-192.png` and so on: `build-bundle.js` rewrites the app's three
+`../inCommon%20Logo/icons/` addresses and refuses if the count is not three.
+Until 15 October 2026 they shipped unrewritten, and from a site root that
+address is answered by the catch all with the app, so a home screen icon was
+an HTML page.
 
-`tools/` holds thirty two scripts. Twenty one are gates and are worth running
+`tools/` holds thirty three scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -4475,8 +4480,8 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
 `check-astral-bodies.js`, `check-timing-lexicon.js`.
-Eight generate:
-`build-bundle.js`, `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
+Nine generate:
+`build-bundle.js`, `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
 and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
@@ -4553,3 +4558,45 @@ a pattern three exactly-conjunct points can never produce.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.
+
+## Search engines are given the cover, the legal pages and the Learn pages
+Added 15 October 2026. The cover is a canvas, so what a crawler read of the
+home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST
+line. Its head now carries a title, a description, a canonical address, Open
+Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
+`inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
+WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
+timer rather than sitting in the markup.
+
+**The cover links them, once, under the legal links** (`.learn`, the owner,
+16 October 2026), so a reader can read before signing in and a crawler, which
+reads nothing on a canvas, has a link to follow. It shows at rest and with the
+form open, leaves with the way in on scroll (`wayEls`), and is not a way in.
+
+**`app.html` carries `noindex, follow`.** The catch all answers every unknown
+path with it, so indexing it puts one unfilled template under every address
+anybody links. The legal pages keep `index, follow`.
+
+**`/learn/` is the app's reference writing at plain addresses** (the owner,
+16 October 2026): the 64 gates, the 64 hexagrams, the written angel numbers,
+the dream registry and the animals, 355 pages. `tools/build-learn-pages.js`
+writes them into the bundle from the same modules the app reads, and
+`build-bundle.js` runs it before listing the folder for `_redirects`, so they
+are rebuilt with every bundle and cannot disagree with the app. They are not a
+fork: no script, no chart, no state, only text, styled like the legal pages.
+The modules' caution and method fields are not drawn, by "No disclaimers", and
+an angel number the module only composes gets no page. The build refuses a
+dash, a mark `check-competitor-surface.js` bars (it skips `deploy/`, so the
+marks are asserted over the output), bodygraph in a heading, and any `/learn/`
+link that was not built. **Change the writing in the module, never in a page.**
+
+**The site's address is written once in the generator and twice beside it**:
+`SITE` in `tools/build-learn-pages.js`, the head of `app/cover.html`, and
+`deploy/<version>/robots.txt`. The generator refuses to build when the cover's
+canonical or the robots `Sitemap:` line disagrees with `SITE`, and it writes
+`sitemap.xml` itself (the cover, the legal pages and every Learn page; never
+app.html). It is `https://incommonspace.com`, the apex, since the domain was
+connected on 16 October 2026; incommon.netlify.app should answer with a 301 to
+it once the apex is the primary domain in Netlify. If the address moves, change
+the three together, then submit the sitemap again in Search Console.
+Description copy follows the voice rules: no method, no fate, no dash.

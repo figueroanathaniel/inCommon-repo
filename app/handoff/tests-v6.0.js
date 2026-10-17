@@ -2707,8 +2707,10 @@
       onStep('cover: the one control');
       var a = d.querySelector('a.enter');
       /* The Terms and Privacy links under the sign in form are not ways in, so
-         they are not counted: the row is about the one way into the app. */
-      var links = [].slice.call(d.querySelectorAll('a[href]')).filter(function (x) { return !x.closest('.legal'); });
+         they are not counted: the row is about the one way into the app. The
+         Learn link goes to the reference pages, not the app, and is left out
+         for the same reason. */
+      var links = [].slice.call(d.querySelectorAll('a[href]')).filter(function (x) { return !x.closest('.legal, .learn'); });
       var box = a ? a.getBoundingClientRect() : { width: 0, height: 0 };
       /* The way in is named by its own text now, so the accessible name and
          what a sighted reader sees are the same words and cannot drift. An svg
