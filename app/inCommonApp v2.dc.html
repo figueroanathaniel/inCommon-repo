@@ -10061,6 +10061,9 @@ class Component extends DCLogic {
     this._annSnap = this.announceSnap();
     // Read before boot(): with the modules already cached, boot() completes
     // synchronously further down this method and would find nothing to open.
+    if (this.learnGuest() && /(^|[?&])from=learn/.test(location.search)) {
+      try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (e) {}
+    }
     this._bootHash = location.hash || '';
     this._startPath = this.hashPath() || null;
     this.dtBind();
@@ -10272,6 +10275,33 @@ class Component extends DCLogic {
        it was a tab still land on the record. */
     if (seg[0] === 'throughline' || (seg[0] === 'library' && seg[1] === 'throughline')) {
       return go({ tab: 'library', libSub: 'throughline', libView: null, selId: null });
+    }
+    /* One entry inside a room, which is what a Learn page links to: a gate in the
+       Atlas, a hexagram, a dream image, a repeating number or an animal. The room
+       is the one its own address names, so the address the app then writes is the
+       room's, and an entry it cannot find lands on the room rather than nowhere. */
+    if (seg[0] === 'library' && seg.length >= 4) {
+      const room = seg[1], kind = seg[2], key = seg.slice(3).join('/');
+      if (room === 'human-design-atlas' && kind === 'gate' && /^\d{1,2}$/.test(key)) {
+        return go({ tab: 'library', libSub: 'study', libView: 'hdatlas', atlasSec: 'gates', atlasItem: this.atlasSlug('g' + Number(key)) });
+      }
+      if (room === 'i-ching' && kind === 'hexagram' && /^\d{1,2}$/.test(key) && Number(key) >= 1 && Number(key) <= 64) {
+        return go({ tab: 'library', libSub: 'readings', libView: 'iching', icSec: null, icHex: Number(key), icQuery: String(Number(key)) });
+      }
+      if (room === 'dreams' && kind) {
+        const DS = this.DSY(), e = DS && key ? (DS.byCategory(kind) || []).find(x => x.key === key) : null;
+        if (e) return go({ tab: 'library', libSub: 'study', libView: 'dreams', dlSec: null, dlQuery: e.symbol, dlOpen: e.category + ':' + e.key });
+      }
+      if (room === 'synchronicities' && kind === 'number' && /^\d{1,6}$/.test(key)) {
+        const AN = window.AngelNumbers, r = AN ? AN.lookup(key) : null;
+        if (r) return go({ tab: 'library', libSub: 'journal', libView: 'angel', sightMode: 'number', angelInput: String(r.number), angelResult: r, angelSaved: false });
+      }
+      if (room === 'synchronicities' && kind === 'animal' && key) {
+        const AS = window.AnimalSymbolism, name = AS ? (AS.names || []).find(n => this.slug(n) === key) : null;
+        if (name) { this.animalPick(name); return go({ tab: 'library', libSub: 'journal', libView: 'angel', sightMode: 'animal' }); }
+      }
+      const base = '/library/' + room;
+      if (Object.keys(this.LIB_PATHS).some(k => this.LIB_PATHS[k] === base)) return this.openPath(base);
     }
     if (seg[0] === 'library') {
       const view = Object.keys(this.LIB_PATHS).find(k => this.LIB_PATHS[k] === '/' + seg.join('/')) || null;
@@ -17864,7 +17894,29 @@ class Component extends DCLogic {
   authStep() {
     const st = this.state;
     if (st.auth !== undefined) return st.auth;
+    if (this.learnGuest()) return null;
     return this.readLS(this.FIRSTRUN_KEY, false) ? null : 'birth';
+  }
+  /* A VISITOR FROM A LEARN PAGE GOES STRAIGHT IN (owner, 17 October 2026). The
+     Learn pages are what a search engine can show, and each one links to the
+     same entry inside the app as `app.html?from=learn#/library/...`. Somebody
+     who arrived reading about Gate 34 is sent neither to the sign in page nor
+     to the birth page: they land on Gate 34 with the sample chart behind it, and
+     the sample banner's Use mine is how they give their own. It lasts for the
+     tab, in sessionStorage, and writes nothing else: the first run is not marked
+     done, so a later visit that did not come from a Learn page meets the first
+     run as before. The query is dropped from the address on arrival. */
+  learnGuest() {
+    if (this._learnGuest !== undefined) return this._learnGuest;
+    let on = false;
+    try { on = new URLSearchParams(location.search).get('from') === 'learn'; } catch (e) {}
+    try {
+      if (on) { sessionStorage.setItem('incommon.learn.guest', '1'); sessionStorage.setItem('incommon.guest.chosen', '1'); }
+      else on = sessionStorage.getItem('incommon.learn.guest') === '1';
+    } catch (e) {}
+    try { if (window.top !== window.self) on = false; } catch (e) { on = false; }
+    this._learnGuest = on;
+    return on;
   }
   /* SIGNED OUT, WITH NOTHING ON THIS DEVICE YET, IS THE SIGN IN PAGE (13
      October 2026). The owner reported that logging out, closing the site and
