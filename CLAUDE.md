@@ -4609,7 +4609,11 @@ driven in a browser to its entry.
 canonical or the robots `Sitemap:` line disagrees with `SITE`, and it writes
 `sitemap.xml` itself (the cover, the legal pages and every Learn page; never
 app.html). It is `https://incommonspace.com`, the apex, since the domain was
-connected on 16 October 2026; incommon.netlify.app should answer with a 301 to
-it once the apex is the primary domain in Netlify. If the address moves, change
+connected on 16 October 2026; incommon.netlify.app answers with a 301 to it,
+path and query kept, by the first rule in `deploy/<version>/_redirects`
+(hand written, so it moves with the folder at a version bump): setting the
+apex as primary in Netlify forwards www but leaves the Netlify address
+serving the site, and that address cannot be removed. Deploy previews and
+branch deploys are other hosts and are not redirected. If the address moves, change
 the three together, then submit the sitemap again in Search Console.
 Description copy follows the voice rules: no method, no fate, no dash.
