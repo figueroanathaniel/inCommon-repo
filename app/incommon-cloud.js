@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.8.2';
+  var VERSION = '2.9.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1570,6 +1570,43 @@
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }
+  /* THE CYCLE AUDIT IS OPENED ONCE, at an amount the reader chooses on
+     Stripe's own page, so the page sends no amount: only where to come back
+     to and the country it guessed. The answer is the Checkout address, or
+     already (this account has opened it), region, or the reasons above. */
+  function billingUnlock(returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'unlock', returnTo: returnTo, country: country }).then(function (r) {
+      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
+    });
+  }
+  /* A GIFT NEEDS NO ACCOUNT. It buys nothing, so the billing function opens
+     its Checkout without naming anybody, and it is asked straight through the
+     functions address with the public anon key, the way Contact Support writes,
+     because a reader who never signed in has no client to ask with. Nothing
+     but where to come back to is sent. */
+  function billingSupport(returnTo, opts) {
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    return Promise.resolve().then(function () {
+      return doFetch(url + '/functions/v1/billing', {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'support', returnTo: returnTo })
+      });
+    }).then(function (res) {
+      return Promise.resolve(res ? res.json() : null).catch(function () { return null; }).then(function (b) {
+        if (res && res.ok && b && b.url) return { ok: true, url: b.url };
+        var st = res ? res.status : 0, code = b && b.code;
+        if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
+        /* A gift is answered before anybody is named, so SIGNED_OUT can only
+           come from a billing function deployed before gifts existed. */
+        if (st === 404 || st === 401) return { ok: false, reason: 'notSetUp' };
+        return { ok: false, reason: 'error', error: String(code || st) };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
 
   /* ---------- Luminary bought inside the apps ----------
 
@@ -1800,6 +1837,8 @@
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    billingUnlock: billingUnlock,
+    billingSupport: billingSupport,
     accountDelete: accountDelete,
     storeSync: storeSync,
     mfaVerify: mfaVerify,

@@ -17,6 +17,15 @@
 // a Luminary (the Codex's paid tier), and otherwise asks Kimi with the Codex's
 // own instructions and schema, and returns the JSON the page renders.
 //
+// THE CYCLE AUDIT is a fourth period, "cycle" (owner, 18 October 2026): the
+// long passages Saturn, Uranus, Neptune and Pluto make across the chart in
+// the years ahead, found on the device and sent as dated contacts, each read
+// as what it asks the reader to set down (the Tax) and what it builds (the
+// Dividend). It is inCommon's own reading, so it has its own instructions and
+// schema below rather than the Codex's. On the website it is opened by a
+// payment of the reader's choosing (server/billing, cycle_unlocks); in the
+// apps it is free.
+//
 // WHO WRITES. Kimi, Moonshot AI's model, asked through its own API, which the
 // owner chose on 29 September 2026. It is called with fetch rather than a
 // client library: the API is one POST, and the one thing a library would add
@@ -146,6 +155,30 @@ const DEEP_SCHEMA = {
   },
 };
 
+// The Cycle Audit's shape: one entry per passage the dossier names, each with
+// its Tax, its Dividend and three questions, and a long view across them.
+const CYCLE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "epigraph", "overview", "passages", "longView", "mantra"],
+  properties: {
+    title: str,
+    epigraph: str,
+    overview: str,
+    passages: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["contact", "window", "tax", "dividend", "prompts"],
+        properties: { contact: str, window: str, tax: str, dividend: str, prompts: { type: "array", items: str } },
+      },
+    },
+    longView: str,
+    mantra: str,
+  },
+};
+
 // An in-depth reading is written in two calls, because one call for all of it
 // ran past what the function may take. Part a is the standard fields written
 // deeper; part b is the four fields only the in-depth reading has. The page asks
@@ -201,6 +234,22 @@ THIS IS THE SECOND HALF OF AN IN-DEPTH LUMINARY READING. The first half (title, 
 - shadowWork: one paragraph of compassionate shadow work tied to Lilith, Chiron, Pluto, or a challenging aspect in the dossier.
 - journalPrompts: 3-5 probing questions.`;
 
+// The Cycle Audit's instructions are inCommon's, written for it on 18 October
+// 2026, and they carry the app's rules for interpretive writing: a reading says
+// what a contact offers and asks, never what the reader is, and its questions
+// are ones only the reader can close.
+const CYCLE_INSTRUCTIONS = `You are the Oracle of the Celestial Codex, writing a Cycle Audit: a reading of the long passages the slow astral bodies (Saturn, Uranus, Neptune and Pluto) make across one person's natal chart in the years ahead. Every passage in the dossier is a real contact with real dates. Write about those passages and nothing else.
+Write in second person, in luminous, precise prose, grounding every image in a placement, house, aspect or date the dossier names. Call the bodies by name or call them astral bodies; never use the word planet.
+Each passage is read in two directions. The Tax is what a passage of this kind traditionally asks a person to set down: habits, defences and certainties the contact presses on. The Dividend is what it builds in their place once that work is done. Write both as what the passage offers and asks, never as a verdict on the person. Do not diagnose. Do not say what the reader is, has been or has done; never write "you are". Do not assume the reader carries the habit being named: offer it as a possibility they may recognise or set aside.
+Never call a passage good or bad. A hard aspect is pressure that builds something; an easy one is a gift that asks to be used. Never predict death, illness, accident, separation or disaster, and never give medical, legal or financial directives.
+Field guidance:
+- title: a poetic 3-7 word title for the whole cycle.
+- epigraph: one lyrical sentence.
+- overview: 2 paragraphs (separate with a blank line) on the arc the passages make together, in the order they arrive.
+- passages: one item for each passage in the dossier, in the dossier's order. contact: the passage's name exactly as the dossier writes it. window: its dates in words, as the dossier gives them. tax: one paragraph, what it asks to be surrendered. dividend: one paragraph, what it builds. prompts: exactly 3 journal questions specific to this passage, each one a question only the reader can answer, none of them leading toward an answer.
+- longView: one paragraph on how the earlier passages prepare the ground for the later ones, naming them and their years.
+- mantra: one short line.`;
+
 // ---------------------------------------------------------------------------
 // The period: the Codex's horoscopePeriod, from the local date the page sends.
 // The daily key is the date, the weekly key the Monday that starts the week,
@@ -212,6 +261,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 function periodOf(period: string, localDate: string) {
   const [y, m, d] = localDate.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d, 12));
+  if (period === "cycle") return { key: "cycle", label: "The Cycle Audit" };
   if (period === "daily") return { key: localDate, label: `${MONTHS[m - 1]} ${d}, ${y}` };
   if (period === "monthly") return { key: `${y}-${String(m).padStart(2, "0")}`, label: `${MONTHS[m - 1]} ${y}` };
   const dow = (date.getUTCDay() + 6) % 7;
@@ -303,6 +353,16 @@ function clean(v: unknown): unknown {
   return v;
 }
 
+// THE APPS READ THE CYCLE AUDIT FREE, by the owner's decision of 18 October
+// 2026, and what tells this function a request came from one is the origin
+// Capacitor gives its web view: capacitor://localhost on iOS and
+// https://localhost on Android (native/capacitor.config.json). A browser page
+// cannot write that header, so the website is held to the payment. A script
+// outside a browser can, and that is accepted on purpose: what it would get is
+// what installing the app gives anybody for nothing.
+const APP_ORIGINS = new Set(["capacitor://localhost", "https://localhost"]);
+const fromApp = (req: Request) => APP_ORIGINS.has(req.headers.get("Origin") ?? "");
+
 // ---------------------------------------------------------------------------
 
 Deno.serve(async (req) => {
@@ -338,7 +398,9 @@ Deno.serve(async (req) => {
   const depth = String(body.depth ?? "standard");
   const localDate = String(body.localDate ?? "");
   const dossier = String(body.dossier ?? "");
-  if (!["daily", "weekly", "monthly"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
+  if (!["daily", "weekly", "monthly", "cycle"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
+  const cycle = period === "cycle";
+  if (cycle && depth !== "standard") return reply(400, { code: "BAD_REQUEST" });
   if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
   const deep = depth === "deep";
@@ -364,6 +426,14 @@ Deno.serve(async (req) => {
       paid = live(app.data, (s) => s === "active");
     }
     if (!paid) return reply(402, { code: "PREMIUM_REQUIRED" });
+  }
+
+  // The Cycle Audit on the website is opened by one payment of the reader's
+  // choosing, recorded by the billing function, and the row is asked for here
+  // before anything else, for the same reason the subscription is.
+  if (cycle && !isAdmin(user) && !fromApp(req)) {
+    const unlock = await db.from("cycle_unlocks").select("user_id").eq("user_id", user.id).maybeSingle();
+    if (!unlock.data) return reply(402, { code: "PREMIUM_REQUIRED" });
   }
 
   const { key, label } = periodOf(period, localDate);
@@ -429,8 +499,10 @@ Deno.serve(async (req) => {
   const fail = () => mine().update({ status: "failed" }).eq("id", rowId);
 
   const model = deep ? DEEP_MODEL : MODEL;
-  const schema = !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
-  const instructions = !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
+  const schema = cycle ? CYCLE_SCHEMA : !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
+  const instructions = cycle ? CYCLE_INSTRUCTIONS : !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
+  const ask = cycle ? "Compose the CYCLE AUDIT."
+    : `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.`;
   const voice = await voiceFor(user.id, period, key);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
@@ -446,9 +518,9 @@ Deno.serve(async (req) => {
         // serves them at a sixth of the price after the first reading.
         messages: [
           { role: "system", content: instructions },
-          { role: "user", content: `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.\n\n${voice}\n\nDOSSIER:\n${dossier}` },
+          { role: "user", content: `${ask}\n\n${voice}\n\nDOSSIER:\n${dossier}` },
         ],
-        response_format: { type: "json_schema", json_schema: { name: "horoscope", strict: true, schema } },
+        response_format: { type: "json_schema", json_schema: { name: cycle ? "cycle_audit" : "horoscope", strict: true, schema } },
         max_completion_tokens: deep ? 10000 : 8000,
         ...thinkingFor(model, deep ? DEEP_THINKING : "off"),
       }),

@@ -5,9 +5,12 @@
 // paid tier, and in inCommon the one thing it unlocks is the in-depth Oracle
 // reading. The prices are the Codex's: $12.99 a month or $119.99 a year.
 //
-// ONE FUNCTION, FOUR JOBS. The page posts { action } to it: "status" reads a
+// ONE FUNCTION, SIX JOBS. The page posts { action } to it: "status" reads a
 // reader's subscription, "checkout" opens a Stripe Checkout page, "portal"
-// opens Stripe's billing portal. And Stripe itself posts its webhook here,
+// opens Stripe's billing portal, "unlock" opens a one time Checkout for the
+// Cycle Audit at an amount the reader chooses, and "support" opens one for a
+// gift, which is the only action that needs no sign in. And Stripe itself
+// posts its webhook here,
 // which is told apart by the stripe-signature header it always carries. The
 // Codex had four handlers because it had a router; here one function means one
 // thing to deploy, one address to give Stripe, and one copy of the code that
@@ -26,13 +29,32 @@
 // LUMINARY_SELL_EU_UK are both off unless set to "on": see "THE EU AND THE UK"
 // below and docs/LUMINARY-EU-UK.md. SUPABASE_URL,
 // SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
-// The table it writes is `subscriptions`, in server/oracle/schema.sql. It
+// The tables it writes are `subscriptions` and `cycle_unlocks`, both in
+// server/oracle/schema.sql. It
 // also reads `store_subscriptions` (server/store/schema.sql), the purchases
 // made inside the apps, so the page is told one status wherever Luminary was
 // bought, and a reader who bought it in an app is not offered it again here.
 
 import Stripe from "npm:stripe@17.7.0";
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+
+// THE CYCLE AUDIT, PAY WHAT YOU WANT (owner, 18 October 2026). One payment,
+// of an amount the reader chooses at Stripe's checkout, opens the Cycle Audit
+// for the account for good: every passage it reads, now and as new ones come.
+// The floor is $3, which leaves something after Stripe's fee, and the box
+// starts at $12. The ceiling is only there to catch a slipped finger. It is a
+// single custom amount price under its own lookup key, made on the first
+// unlock, the way the Luminary prices are. A cycle_unlocks row records it
+// (server/oracle/schema.sql), and the Oracle reads that row before it writes a
+// Cycle Audit on the website. Inside the apps the audit is free, by the
+// owner's decision, so nothing here is sold there.
+const CYCLE = { lookup: "incommon_cycle_audit_pwyw", min: 300, preset: 1200, max: 50000 } as const;
+// A GIFT TO SUPPORT INCOMMON, the owner's donate button for the apps (18
+// October 2026). It buys nothing and unlocks nothing, so it needs no account:
+// a reader who never signed in can give. It is called a gift rather than a
+// donation on every surface, because inCommon is not a charity and a gift to it
+// is not tax deductible, and "donate" says otherwise to most people.
+const SUPPORT = { lookup: "incommon_support_gift", min: 100, preset: 500, max: 50000 } as const;
 
 // inCommon's own lookup keys, not the Codex's, so pointing this at the Stripe
 // account the Codex used cannot pick up or change the Codex's product.
@@ -262,6 +284,80 @@ async function ensurePrices(s: Stripe, cur: Cur = "usd"): Promise<Record<Plan, s
   return ids;
 }
 
+// A price whose amount the reader types at checkout, made once under its
+// lookup key on its own product. Stripe shows the box with the preset in it
+// and refuses anything outside the floor and the ceiling.
+async function ensureCustomPrice(s: Stripe, p: { lookup: string; min: number; preset: number; max: number }, name: string, description: string): Promise<string> {
+  const had = await s.prices.list({ lookup_keys: [p.lookup], active: true, limit: 1 });
+  if (had.data[0]) return had.data[0].id;
+  const product = await s.products.create({ name, description });
+  const price = await s.prices.create({
+    product: product.id,
+    currency: "usd",
+    custom_unit_amount: { enabled: true, minimum: p.min, preset: p.preset, maximum: p.max },
+    lookup_key: p.lookup,
+    transfer_lookup_key: true,
+  });
+  return price.id;
+}
+
+async function unlockedRow(userId: string): Promise<boolean> {
+  const { data } = await db.from("cycle_unlocks").select("user_id").eq("user_id", userId).maybeSingle();
+  return !!data;
+}
+
+// Records a paid Cycle Audit checkout, or refunds it when it came from a
+// country not sold to yet (the same backstop the subscription has: the page's
+// country is a guess, and the address and card Stripe collected are not).
+// Safe to run twice, because Stripe retries webhooks and the status sync may
+// find the same session: the row is keyed by reader and the refund carries an
+// idempotency key.
+async function recordUnlock(s: Stripe, session: Stripe.Checkout.Session): Promise<boolean> {
+  const userId = session.metadata?.userId;
+  if (session.metadata?.kind !== "cycle_unlock" || !userId || session.payment_status !== "paid") return false;
+  const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+  let card: string | null = null;
+  if (pi && !SELL_EU_UK) {
+    try {
+      const intent = await s.paymentIntents.retrieve(pi, { expand: ["payment_method"] });
+      const pm = intent.payment_method as Stripe.PaymentMethod | string | null;
+      card = pm && typeof pm !== "string" ? pm.card?.country ?? null : null;
+    } catch (e) { console.error("billing: the unlock's card could not be read", (e as Error).message); }
+  }
+  const billing = session.customer_details?.address?.country ?? null;
+  if (closedTo(billing) || closedTo(card)) {
+    console.error("billing: refusing a Cycle Audit unlock from a country not yet sold to", { session: session.id, billing, card });
+    if (pi) {
+      try {
+        await s.refunds.create({ payment_intent: pi, reason: "requested_by_customer", metadata: { why: "eu_uk_not_sold_yet", session: session.id } },
+          { idempotencyKey: "eu-uk-unlock-refund-" + session.id });
+      } catch (e) {
+        if (!/already been refunded|charge_already_refunded/i.test(String((e as Error).message))) throw e;
+      }
+    }
+    return false;
+  }
+  const { error } = await db.from("cycle_unlocks").upsert({
+    user_id: userId,
+    stripe_session_id: session.id,
+    amount: session.amount_total ?? 0,
+    currency: session.currency ?? "usd",
+  }, { onConflict: "user_id", ignoreDuplicates: true });
+  if (error) throw error;
+  return true;
+}
+
+// The webhook can be missed, as with the subscription, so a status asked with
+// a sync looks at this reader's recent completed checkouts at Stripe and
+// records an unlock it finds there.
+async function recoverUnlock(s: Stripe, customerId: string): Promise<boolean> {
+  const list = await s.checkout.sessions.list({ customer: customerId, status: "complete", limit: 20 });
+  for (const sess of list.data) {
+    if (sess.metadata?.kind === "cycle_unlock" && sess.payment_status === "paid" && await recordUnlock(s, sess)) return true;
+  }
+  return false;
+}
+
 // Newer Stripe API versions moved the period end from the subscription onto
 // its items; the Codex read both, and so does this.
 function periodEnd(sub: Stripe.Subscription): string | null {
@@ -311,6 +407,11 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
   }
   const admin = isAdmin(user);
   const paid = !!row && ACTIVE.has(row.status);
+  let unlocked = admin || await unlockedRow(user.id);
+  if (!unlocked && force && row && stripe) {
+    try { unlocked = await recoverUnlock(stripe, row.stripe_customer_id); }
+    catch (e) { console.error("billing: the unlock sync failed", e); }
+  }
   // An app purchase, kept current by server/store from RevenueCat. When a
   // reader holds both, the Stripe one is the one described, because it is
   // the one this page can manage; the app one is still counted.
@@ -336,6 +437,10 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     // Days of free trial a checkout would start for this reader now, 0 when
     // they have had one or already pay.
     trialDays: !admin && !paid && !app && await trialOpen(user.id, row) ? TRIAL_DAYS : 0,
+    // The Cycle Audit, opened once by a payment of the reader's choosing. It
+    // is sold where Luminary is, so regionOpen above answers for it too.
+    cycleUnlocked: unlocked,
+    cycleFloor: CYCLE.min,
   };
 }
 
@@ -359,9 +464,15 @@ async function customerFor(s: Stripe, user: { id: string; email?: string }): Pro
 // The address must be one of ours; any other https origin is refused.
 // (Tightened in the security pass of 12 October 2026: any https address used
 // to be accepted. Nothing sensitive travels in the return URL, so this was
-// hygiene rather than a hole. Add a custom domain to OWN() the day one
-// exists; the --incommon.netlify.app suffix keeps deploy previews working.)
+// hygiene rather than a hole. The --incommon.netlify.app suffix keeps deploy
+// previews working.)
+// incommonspace.com became the site's address on 16 October 2026 and
+// incommon.netlify.app answers it with a 301, so a checkout opened from the
+// live site names incommonspace.com. Until 18 October it was not on this list
+// and every checkout from the live site was refused as BAD_REQUEST.
 const OWN = (u: URL) =>
+  u.hostname === "incommonspace.com" ||
+  u.hostname === "www.incommonspace.com" ||
   u.hostname === "incommon.netlify.app" ||
   u.hostname.endsWith("--incommon.netlify.app") ||
   u.hostname === "localhost" ||
@@ -440,7 +551,11 @@ async function webhook(req: Request): Promise<Response> {
   const customerId = typeof obj.customer === "string" ? obj.customer : obj.customer?.id;
   if (customerId && (event.type.startsWith("customer.subscription.") || event.type === "checkout.session.completed" || event.type.startsWith("invoice."))) {
     try {
-      if (event.type === "checkout.session.completed") await refuseIfClosed(stripe, event.data.object as Stripe.Checkout.Session);
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await refuseIfClosed(stripe, session);
+        await recordUnlock(stripe, session);
+      }
       await syncCustomer(stripe, customerId);
     } catch (e) {
       // A 500 makes Stripe send it again later, which is what should happen.
@@ -456,6 +571,38 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return reply(405, { code: "METHOD" });
   if (req.headers.get("stripe-signature")) return webhook(req);
 
+  let body: Record<string, unknown>;
+  try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }
+  const action = String(body.action ?? "");
+
+  // A gift needs no account, so it is answered before anybody is named. It is
+  // a Checkout page with no customer on it: Stripe takes the email for the
+  // receipt, and nothing about the gift is kept here.
+  if (action === "support") {
+    const back = returnAddress(body.returnTo);
+    if (!back) return reply(400, { code: "BAD_REQUEST" });
+    if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
+    try {
+      const price = await ensureCustomPrice(stripe, SUPPORT, "Support inCommon",
+        "A gift toward keeping inCommon running. It buys nothing and unlocks nothing.");
+      const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
+        managed_payments: { enabled: false },
+        mode: "payment",
+        line_items: [{ price, quantity: 1 }],
+        submit_type: "pay",
+        success_url: withQuery(back, "gift", "thanks"),
+        cancel_url: withQuery(back, "gift", "cancelled"),
+        metadata: { kind: "support_gift" },
+        payment_intent_data: { metadata: { kind: "support_gift" } },
+      };
+      const session = await stripe.checkout.sessions.create(params);
+      return reply(200, { url: session.url });
+    } catch (e) {
+      console.error("billing: the gift checkout failed", e);
+      return reply(502, { code: "STRIPE" });
+    }
+  }
+
   const asReader = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
   });
@@ -463,10 +610,6 @@ Deno.serve(async (req) => {
   const user = who?.user;
   if (!user) return reply(401, { code: "SIGNED_OUT" });
   if (owesCode(req, user)) return reply(401, { code: "MFA_REQUIRED" });
-
-  let body: Record<string, unknown>;
-  try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }
-  const action = String(body.action ?? "");
 
   const country = countryOf(body.country);
   if (action === "status") return reply(200, { status: await statusFor(user, body.sync === true, country) });
@@ -524,6 +667,41 @@ Deno.serve(async (req) => {
       return reply(200, { url: session.url });
     } catch (e) {
       console.error("billing: checkout failed", e);
+      return reply(502, { code: "STRIPE" });
+    }
+  }
+
+  if (action === "unlock") {
+    const back = returnAddress(body.returnTo);
+    if (!back) return reply(400, { code: "BAD_REQUEST" });
+    if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
+    if (closedTo(country)) return reply(403, { code: "REGION" });
+    if (isAdmin(user) || await unlockedRow(user.id)) return reply(409, { code: "ALREADY" });
+    try {
+      const customer = await customerFor(stripe, user);
+      const price = await ensureCustomPrice(stripe, CYCLE, "The Cycle Audit",
+        "Opens the Cycle Audit for the account: a reading of every long passage of the slow astral bodies across the chart. Pay what you want, once.");
+      const meta = { userId: user.id, kind: "cycle_unlock" };
+      const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
+        managed_payments: { enabled: false },
+        mode: "payment",
+        customer,
+        line_items: [{ price, quantity: 1 }],
+        submit_type: "pay",
+        success_url: withQuery(back, "cycle", "success"),
+        cancel_url: withQuery(back, "cycle", "cancelled"),
+        metadata: meta,
+        payment_intent_data: { metadata: meta },
+        ...(TAX ? {
+          automatic_tax: { enabled: true },
+          billing_address_collection: "required" as const,
+          customer_update: { address: "auto" as const, name: "auto" as const },
+        } : {}),
+      };
+      const session = await stripe.checkout.sessions.create(params);
+      return reply(200, { url: session.url });
+    } catch (e) {
+      console.error("billing: the unlock checkout failed", e);
       return reply(502, { code: "STRIPE" });
     }
   }

@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4  |  built 2026-10-17  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4  |  built 2026-10-18  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18131,7 +18131,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.8.2';
+  var VERSION = '2.9.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -19645,6 +19645,43 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }
+  /* THE CYCLE AUDIT IS OPENED ONCE, at an amount the reader chooses on
+     Stripe's own page, so the page sends no amount: only where to come back
+     to and the country it guessed. The answer is the Checkout address, or
+     already (this account has opened it), region, or the reasons above. */
+  function billingUnlock(returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'unlock', returnTo: returnTo, country: country }).then(function (r) {
+      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
+    });
+  }
+  /* A GIFT NEEDS NO ACCOUNT. It buys nothing, so the billing function opens
+     its Checkout without naming anybody, and it is asked straight through the
+     functions address with the public anon key, the way Contact Support writes,
+     because a reader who never signed in has no client to ask with. Nothing
+     but where to come back to is sent. */
+  function billingSupport(returnTo, opts) {
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    return Promise.resolve().then(function () {
+      return doFetch(url + '/functions/v1/billing', {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'support', returnTo: returnTo })
+      });
+    }).then(function (res) {
+      return Promise.resolve(res ? res.json() : null).catch(function () { return null; }).then(function (b) {
+        if (res && res.ok && b && b.url) return { ok: true, url: b.url };
+        var st = res ? res.status : 0, code = b && b.code;
+        if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
+        /* A gift is answered before anybody is named, so SIGNED_OUT can only
+           come from a billing function deployed before gifts existed. */
+        if (st === 404 || st === 401) return { ok: false, reason: 'notSetUp' };
+        return { ok: false, reason: 'error', error: String(code || st) };
+      });
+    }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
+  }
 
   /* ---------- Luminary bought inside the apps ----------
 
@@ -19875,6 +19912,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     billingStatus: billingStatus,
     billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    billingUnlock: billingUnlock,
+    billingSupport: billingSupport,
     accountDelete: accountDelete,
     storeSync: storeSync,
     mfaVerify: mfaVerify,
@@ -24430,13 +24469,15 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:6px 18px 28px;animation:fadeUp .25s ease">
     <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ orDepthsOn }}" hint-placeholder-val="{{ true }}">
       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
         <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
           <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
       </div>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
@@ -24485,6 +24526,56 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
+      <!-- THE CYCLE AUDIT: the passages first, free and computed here, then the
+           gate on the website until the account has paid what it chose. -->
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#9796;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Tax and the Dividend</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">What the long passages ask, and what they build</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">The slowest astral bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and the audit stays open on this account as new passages arrive.</p>
+          <sc-if value="{{ cyBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ cyCta }}</button>
+          </sc-if>
+          <sc-if value="{{ cyNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ cyNote }}</p>
+          </sc-if>
+          <sc-if value="{{ cyRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <sc-if value="{{ cyTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cyTermsText }}</p>
+          </sc-if>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
         </div>
       </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
@@ -24648,6 +24739,57 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+              <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ cp.num }}</span>
+              <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ cp.contact }}</h3>
+              <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Surrender &#183; The Tax</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.tax }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Build &#183; The Dividend</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.dividend }}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;padding:2px 4px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                    <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ cq.t }}</li>
+                  </sc-for>
+                </ul>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -24892,6 +25034,14 @@ input[type="date"]{color-scheme:dark}
         <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
         <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
       </button>
+      <!-- A GIFT, IN THE APPS ONLY: beside Contact Support, as the owner asked
+           (18 October 2026), and again in the footer below. -->
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+          <span style="font:600 13px var(--fu);color:var(--tx)">{{ giftLabel }}</span>
+          <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+        </button>
+      </sc-if>
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
@@ -24907,6 +25057,9 @@ input[type="date"]{color-scheme:dark}
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
         <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
+        <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">{{ giftLabel }}</button>
+        </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -25573,6 +25726,12 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+          <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">{{ giftLabel }}</span>
+        </button>
+      </sc-if>
       <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
@@ -25952,7 +26111,7 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
-      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, the Cycle Audit if you opened it, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
       <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
@@ -29217,13 +29376,15 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:18px 18px 32px;animation:fadeUp .25s ease">
     <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ orDepthsOn }}" hint-placeholder-val="{{ true }}">
       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
         <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
           <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
       </div>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
@@ -29272,6 +29433,56 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
           <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+        </div>
+      </sc-if>
+      <!-- THE CYCLE AUDIT: the passages first, free and computed here, then the
+           gate on the website until the account has paid what it chose. -->
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyGate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#9796;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Tax and the Dividend</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">What the long passages ask, and what they build</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">The slowest astral bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and the audit stays open on this account as new passages arrive.</p>
+          <sc-if value="{{ cyBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ cyCta }}</button>
+          </sc-if>
+          <sc-if value="{{ cyNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ cyNote }}</p>
+          </sc-if>
+          <sc-if value="{{ cyRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <sc-if value="{{ cyTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cyTermsText }}</p>
+          </sc-if>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
         </div>
       </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
@@ -29435,6 +29646,57 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+              <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ cp.num }}</span>
+              <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ cp.contact }}</h3>
+              <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Surrender &#183; The Tax</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.tax }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Build &#183; The Dividend</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.dividend }}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;padding:2px 4px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                    <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ cq.t }}</li>
+                  </sc-for>
+                </ul>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -29673,6 +29935,14 @@ input[type="date"]{color-scheme:dark}
         <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
         <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
       </button>
+      <!-- A GIFT, IN THE APPS ONLY: beside Contact Support, as the owner asked
+           (18 October 2026), and again in the footer below. -->
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+          <span style="font:600 13px var(--fu);color:var(--tx)">{{ giftLabel }}</span>
+          <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+        </button>
+      </sc-if>
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
@@ -29688,6 +29958,9 @@ input[type="date"]{color-scheme:dark}
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
         <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
+        <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">{{ giftLabel }}</button>
+        </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -30034,6 +30307,12 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+          <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">{{ giftLabel }}</span>
+        </button>
+      </sc-if>
       <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
@@ -30467,7 +30746,7 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
-      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, the Cycle Audit if you opened it, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
       <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
@@ -39195,6 +39474,11 @@ class Component extends DCLogic {
       pmHelpGo: () => { this.crisisAudit(); this.setState({ ...close, callOpen: true }); },
       pmLogOutGo: () => { this.setState(close); this.accountLogOut(); },
       pmLogOutNote: (cs.mode === 'cloud' && (cs.email || shown(cs.phone))) || '',
+      /* Support inCommon, in the apps only (giftOn): here, beside Contact
+         Support, and in the Settings footer. */
+      giftOn: this.giftOn(),
+      giftGo: () => this.giftGo(),
+      giftLabel: st.giftBusy ? 'Opening…' : 'Support inCommon',
       pmSettingsIcon: this.uiIcon('settings'),
       ...this.profileCardVals(),
       ...this.callVals()
@@ -40117,7 +40401,7 @@ class Component extends DCLogic {
      the device and presses Consult the Oracle. After that the screen behaves as
      the Codex's did. A reading is kept on the device and on the server for the
      period it covers, so opening the screen again costs nothing. */
-  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
+  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month'], ['cycle', 'Cycle Audit']];
   oracleLocalDate(d) {
     d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -40126,6 +40410,9 @@ class Component extends DCLogic {
      instant the sky is read at. The day at noon UTC, the week at its Thursday,
      the month at its fifteenth. The server derives the same key. */
   oraclePeriod(period, localDate) {
+    /* The Cycle Audit has no instant: it is kept under the passages it reads
+       (cycleKey), and the server keys it the same way, by its dossier. */
+    if (period === 'cycle') return { key: this.cycleKey(), at: new Date() };
     const [y, m, d] = localDate.split('-').map(Number);
     const date = new Date(Date.UTC(y, m - 1, d, 12));
     if (period === 'daily') return { key: localDate, at: date };
@@ -40181,6 +40468,7 @@ class Component extends DCLogic {
     return null;
   }
   oracleDossier(period, depth) {
+    if (period === 'cycle') return this.cycleDossier();
     const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
     const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
     const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
@@ -40320,6 +40608,9 @@ class Component extends DCLogic {
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
+    /* The Cycle Audit's slot is the passages it reads, so they are found
+       before the slot is named. */
+    if (period === 'cycle') this.cycleWindows();
     const slot = this.oracleSlot(period, depth), C = this.cloud;
     const held = this._orBusy || (this._orBusy = {});
     this._orQuiet = this._orQuiet || {};
@@ -40338,7 +40629,7 @@ class Component extends DCLogic {
     if (!again) this._orQuiet[slot] = !!quiet;
     this._orFirst = this._orFirst || {};
     if (!again) { delete this._orTry[slot]; delete this._orFirst[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
-    if (!again && !quiet) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
     /* The first half of an in-depth reading is shown the moment it arrives,
        while the second is still being written. It lives in memory only: the
        kept reading is the whole one, so a half is never mistaken for it. */
@@ -40378,7 +40669,7 @@ class Component extends DCLogic {
       /* The server's record of the subscription is the one that counts. The
          page believed this reader was a Luminary and the server did not, so
          the page stops believing it and asks billing again, with a sync. */
-      if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
+      if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), ...(period === 'cycle' ? { cycleUnlocked: false } : { isPremium: false }) } }); this.lumFetch(true); }
       this.setState({ orBusyMap: { ...held }, orWaitMap: waits, orErr: { slot, reason } });
       this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
     });
@@ -40393,6 +40684,9 @@ class Component extends DCLogic {
     /* In depth is never asked for on open. The reader presses Consult the
        Oracle, and a reading prepared ahead (oraclePrepareAuto) is waiting. */
     if (depth === 'deep') return false;
+    /* The Cycle Audit is asked for on open once it is open to this reader and
+       there is a passage to read. */
+    if (period === 'cycle' && (!this.cycleReady() || !this.cycleOpen() || !this.cyclePassages().length)) return false;
     if (this.oracleCached(period, depth)) return false;
     if (this.orNonQuietBusy().length) return false;
     return !(st.orErr && st.orErr.slot === slot);
@@ -40421,7 +40715,7 @@ class Component extends DCLogic {
       return;
     }
     this._orSeen = true;
-    const period = this.state.orPeriod || 'daily', depth = this.state.orDepth || 'standard';
+    const period = this.state.orPeriod || 'daily', depth = period === 'cycle' ? 'standard' : this.state.orDepth || 'standard';
     const want = period + '|' + depth;
     if (this._orAutoFor === want || !this.oracleWillAsk(period, depth)) return;
     this._orAutoFor = want;
@@ -40429,7 +40723,7 @@ class Component extends DCLogic {
     this._orAutoT = setTimeout(() => {
       this._orAutoT = null; this._orAutoFor = null;
       const st = this.state;
-      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
+      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (period === 'cycle' || (st.orDepth || 'standard') === depth) && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
     }, 600);
   }
   /* THE IN-DEPTH READING IS WRITTEN BEFORE IT IS ASKED FOR. A reading of that
@@ -40448,18 +40742,265 @@ class Component extends DCLogic {
     if (!st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
     if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
     if (!(st.lum && st.lum.isPremium)) return;
-    const period = st.orPeriod || 'daily', slot = this.oracleSlot(period, 'deep');
+    /* The Cycle Audit has no in-depth form, so a reader looking at it has
+       today's in-depth reading prepared. */
+    const deepOf = x => x && x !== 'cycle' ? x : 'daily';
+    const period = deepOf(st.orPeriod), slot = this.oracleSlot(period, 'deep');
     this._orPrepTried = this._orPrepTried || {};
     if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
     if (this.orNonQuietBusy().length || (this._orBusy && this._orBusy[slot]) || this._orPrepT) return;
     this._orPrepT = setTimeout(() => {
       this._orPrepT = null;
-      const s2 = this.state, p2 = s2.orPeriod || 'daily', sl2 = this.oracleSlot(p2, 'deep');
+      const s2 = this.state, p2 = deepOf(s2.orPeriod), sl2 = this.oracleSlot(p2, 'deep');
       if (this._orPrepTried[sl2] || this.oracleCached(p2, 'deep') || this.orNonQuietBusy().length || (this._orBusy && this._orBusy[sl2])) return;
       if (!(s2.lum && s2.lum.isPremium) || !s2.ready) return;
       this._orPrepTried[sl2] = true;
       this.oracleAsk(p2, 'deep', false, true);
     }, 4000);
+  }
+  /* ---- The Cycle Audit ----------------------------------------------------
+
+     THE LONG PASSAGES, AND WHAT THEY ASK. Asked for by the owner on 18 October
+     2026: the slow astral bodies stay on a point of the chart for years rather
+     than days, and the audit reads each of those passages in two directions,
+     what it asks the reader to set down (the Tax) and what it builds (the
+     Dividend). It is the Oracle's fourth period, so it lives where the model,
+     the consent and the paywall already are.
+
+     THE DATES ARE FREE AND STAY ON THE DEVICE. cycleWindows() finds every
+     passage of Saturn, Uranus, Neptune and Pluto across the natal bodies and
+     the angles, from the start of last year to twenty years ahead, and that
+     list is drawn for anybody with a chart of their own. A computed date
+     cannot be scarce, so it is not sold. What is opened by a payment, on the
+     website only, is the reading the Oracle writes from those dates.
+
+     A PASSAGE IS EVERY RUN OF ONE CONTACT, joined. A slow body turning
+     retrograde leaves the orb and comes back, often two or three times, and a
+     reader lives that as one season, so runs of the same contact less than
+     CY_JOIN days apart are one passage with several exact dates. Each body is
+     asked of the library every few weeks (CY_STEP) and read daily off a cubic
+     through those positions, and where the distance to an aspect enters the
+     orb, leaves it, or changes sign, the moment is bisected inside that day,
+     so an exact date is good to a few minutes. That is about 1,800 library
+     positions for twenty two years. A two day walk through the grid lonOf
+     reads asked for 8,000 and took over a second.
+
+     THE SCAN IS ANCHORED TO THE CALENDAR YEAR, not to today, so the list and
+     the dossier built from it are the same all year, and the reading the
+     server keeps for that dossier is not written again every morning. */
+  CY_MOVERS = ['Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  CY_ASPECTS = [[0, 'conjunct'], [90, 'square'], [120, 'trine'], [180, 'opposite']];
+  CY_ORB = 1.5; CY_JOIN = 400; CY_AHEAD = 20; CY_MAX = 8;
+  /* Days between library positions, per body. The scan reads each body off a
+     cubic through these, the interpolation lonRaw's own grid uses, and that
+     cubic is within a hundredth of a degree of the library at these spacings,
+     because the slowest bodies turn slowest: their retrograde loops last
+     months, and the samples are weeks apart. */
+  CY_STEP = { Saturn: 20, Uranus: 30, Neptune: 40, Pluto: 40 };
+  /* Which passages the audit reads when there are more than CY_MAX: the ones
+     under way now first, then the slowest bodies, hard contacts before easy
+     ones, longer before shorter. The page then shows them in the order they
+     arrive. */
+  CY_WEIGHT = { Saturn: 2, Uranus: 3, Neptune: 3.5, Pluto: 4 };
+  /* A position for the scan. The library is asked directly when it is here,
+     past the grid and the position cache, because a twenty year walk would
+     otherwise fill both with nodes nothing else will ask for; lonOf answers
+     when it is not. */
+  cyLon(name, t) {
+    const A = typeof window !== 'undefined' && window.Astronomy;
+    if (A && Number.isFinite(t)) { try { return A.Ecliptic(A.GeoVector(name, A.MakeTime(t), true)).elon; } catch (e) { /* the lonOf below */ } }
+    return this.lonOf(name, t);
+  }
+  cycleScanKey() { const p = this.activeProfile(); return new Date().getFullYear() + '|' + (p ? p.birthStamp : 'legacy'); }
+  /* The scan costs a tenth to a fifth of a second, once a year per profile,
+     so it is never run inside the press that opens the Cycle Audit: the page
+     says it is finding the passages and cycleSoon() runs it on the next tick. */
+  cycleReady() { return this._cyKey === this.cycleScanKey() && !!this._cy; }
+  cycleSoon() {
+    if (this._cySoonT) return;
+    this._cySoonT = setTimeout(() => { this._cySoonT = null; this.cycleWindows(); this.setState({ orTick: (this.state.orTick || 0) + 1 }); }, 40);
+  }
+  cycleWindows() {
+    const key = this.cycleScanKey();
+    if (this._cyKey === key && this._cy) return this._cy;
+    const today = new Date(), year = today.getFullYear(); today.setHours(12, 0, 0, 0);
+    let natal = [];
+    try {
+      const names = this.PLNS.slice(0, 10).map(x => x[0]);
+      natal = this.chartAt(this.natalDate()).filter(x => names.indexOf(x.name) !== -1)
+        .concat(this.anglePoints().filter(a => a.name === 'Ascendant' || a.name === 'Midheaven'));
+    } catch (e) { natal = []; }
+    const asc = natal.length ? this.ascendant() : null;
+    const start = new Date(year - 1, 0, 1, 12), end = new Date(year + this.CY_AHEAD + 1, 0, 1, 12);
+    const t0 = this.t2000(start), t1 = this.t2000(end), toDate = t => new Date((t + 2451545.0 - 2440587.5) * 864e5);
+    /* One target per side of each aspect: a square is met waxing and waning,
+       years apart, and both are the same contact by name. */
+    const targets = [];
+    natal.forEach((n, ni) => this.CY_ASPECTS.forEach(([ang, asp]) => {
+      (ang === 0 || ang === 180 ? [ang] : [ang, -ang]).forEach(a => targets.push({ ni, asp, lon: this.norm360(n.lon + a) }));
+    }));
+    const signed = (lon, tgt) => { let d = (lon - tgt) % 360; if (d < 0) d += 360; return d > 180 ? d - 360 : d; };
+    /* The moment inside one step where f changes sign, to a few hours. */
+    const bisect = (f, a, b, fa) => {
+      for (let i = 0; i < 8; i++) { const m = (a + b) / 2, fm = f(m); if ((fm < 0) === (fa < 0)) { a = m; fa = fm; } else b = m; }
+      return (a + b) / 2;
+    };
+    const runs = [];
+    this.CY_MOVERS.forEach(mover => {
+      /* The library is asked once per sample, and everything after that is
+         arithmetic on the cubic: the daily walk and every bisection. */
+      const h = this.CY_STEP[mover] || 10, base = t0 - 2 * h, n = Math.ceil((t1 - t0) / h) + 5, L = new Float64Array(n);
+      let ok = true;
+      for (let i = 0; i < n; i++) {
+        let v = this.cyLon(mover, base + i * h);
+        if (v == null || !Number.isFinite(v)) { ok = false; break; }
+        if (i) v -= Math.round((v - L[i - 1]) / 360) * 360;
+        L[i] = v;
+      }
+      if (!ok) return;
+      const at = t => {
+        const x = (t - base) / h, k = Math.min(n - 3, Math.max(1, Math.floor(x))), u = x - k;
+        return L[k - 1] * (-u * (u - 1) * (u - 2) / 6) + L[k] * ((u + 1) * (u - 1) * (u - 2) / 2)
+          + L[k + 1] * (-(u + 1) * u * (u - 2) / 2) + L[k + 2] * ((u + 1) * u * (u - 1) / 6);
+      };
+      /* The walk is every two days, which no passage fits inside (Saturn, the
+         fastest, moves about a quarter of a degree in two), and it is plain
+         loops over flat arrays because it is a few hundred thousand steps. */
+      const orb = this.CY_ORB, nT = targets.length, tg = new Float64Array(nT), prev = new Float64Array(nT);
+      for (let k = 0; k < nT; k++) tg[k] = targets[k].lon;
+      const live = new Array(nT).fill(null);
+      let prevT = null;
+      for (let t = t0; t <= t1; t += 2) {
+        const lon = at(t);
+        for (let k = 0; k < nT; k++) {
+          let d = (lon - tg[k]) % 360; if (d < 0) d += 360; if (d > 180) d -= 360;
+          const off = d < 0 ? -d : d, was = prev[k];
+          let run = live[k];
+          if (off <= orb) {
+            if (!run) {
+              const from = prevT == null ? t : bisect(x => Math.abs(signed(at(x), tg[k])) - orb, prevT, t, 1);
+              run = live[k] = { mover, k, from, to: t, passes: [] };
+            }
+            run.to = t;
+            if (prevT != null && (was < 0) !== (d < 0) && (was < 0 ? -was : was) < 5) run.passes.push(bisect(x => signed(at(x), tg[k]), prevT, t, was));
+          } else if (run) {
+            run.to = bisect(x => Math.abs(signed(at(x), tg[k])) - orb, prevT, t, -1);
+            runs.push(run); live[k] = null;
+          }
+          prev[k] = d;
+        }
+        prevT = t;
+      }
+      live.forEach(r => { if (r) runs.push(r); });
+    });
+    /* Join the runs of one contact into passages. */
+    const byContact = {};
+    runs.sort((a, b) => a.from - b.from).forEach(r => {
+      const t = targets[r.k], id = r.mover + '|' + t.asp + '|' + natal[t.ni].name;
+      const list = byContact[id] || (byContact[id] = []), last = list[list.length - 1];
+      if (last && r.from - last.to < this.CY_JOIN) { last.to = Math.max(last.to, r.to); last.passes = last.passes.concat(r.passes); }
+      else list.push({ id, mover: r.mover, asp: t.asp, n: natal[t.ni], from: r.from, to: r.to, passes: r.passes.slice() });
+    });
+    const yr = this._fmt('cymonth', { month: 'short', year: 'numeric' }), full = this._fmt('cyday', { day: 'numeric', month: 'long', year: 'numeric' });
+    const mY = d => yr ? yr.format(d) : d.toDateString(), dMY = d => full ? full.format(d) : d.toDateString();
+    const out = [];
+    Object.keys(byContact).forEach(id => byContact[id].forEach(w => {
+      const from = toDate(w.from), to = toDate(w.to), passes = w.passes.sort((a, b) => a - b).map(toDate);
+      const openStart = w.from <= t0, house = asc ? Math.floor(this.norm360(w.n.lon - asc.asc) / 30) + 1 : null;
+      const a = (openStart ? 'since before ' : '') + mY(from), b = mY(to);
+      out.push({
+        id: w.id + '|' + from.getFullYear(), mover: w.mover, asp: w.asp, natal: w.n.name, natalLon: w.n.lon, house,
+        from, to, passes, past: to < today, now: from <= today && to >= today,
+        weight: (this.CY_WEIGHT[w.mover] || 1) + (w.asp === 'trine' ? 0 : 1) + (w.to - w.from) / 365.25 + (from <= today && to >= today ? 4 : 0),
+        /* The aspect's own word, which reads as the field writes it: Pluto
+           conjunct your Mars, Saturn opposite your Sun. */
+        label: w.mover + ' ' + w.asp + ' your ' + w.n.name,
+        range: a === b ? a : a + ' to ' + b,
+        passLine: passes.length ? 'exact ' + passes.map(mY).join(', ') : 'close, without reaching exact',
+        passFull: passes.map(dMY).join(', ')
+      });
+    }));
+    this._cyKey = key;
+    this._cy = out.sort((a, b) => a.from - b.from);
+    return this._cy;
+  }
+  /* The passages the audit reads: the ones not yet over, at most CY_MAX so
+     the reading fits the Oracle's time, chosen by CY_WEIGHT and kept in the
+     order they arrive. */
+  cyclePassages() {
+    const ahead = this.cycleWindows().filter(w => !w.past);
+    const keep = ahead.slice().sort((a, b) => b.weight - a.weight).slice(0, this.CY_MAX);
+    return ahead.filter(w => keep.indexOf(w) !== -1);
+  }
+  /* The slot key: which passages, so a passage closing finds no kept reading
+     rather than the one written for the old list. */
+  cycleKey() {
+    if (!this.cycleReady()) return 'cypending';
+    const s = this.cyclePassages().map(w => w.id).join(',');
+    let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+    return 'cy' + h.toString(36);
+  }
+  /* WHAT LEAVES THE DEVICE FOR THE AUDIT: the first name, the natal point each
+     passage touches (sign, degree, house), and the passages with their dates.
+     No birth date, time or place, and nothing that moves with today, so the
+     same chart sends the same dossier all year. */
+  cycleDossier() {
+    const ws = this.cyclePassages(), p = this.activeProfile();
+    const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
+    const first = String(this.birthName() || '').trim().split(/\s+/)[0] ||
+      (p && p.name && p.name !== 'Default Profile' ? String(p.name).trim().split(/\s+/)[0] : '');
+    const lines = [];
+    if (first) lines.push('NAME: ' + first);
+    const seen = {}, pts = [];
+    ws.forEach(w => { if (!seen[w.natal]) { seen[w.natal] = 1; pts.push('Natal ' + w.natal + ' ' + fmt(w.natalLon) + (w.house ? ' (house ' + w.house + ')' : '')); } });
+    lines.push('NATAL POINTS TOUCHED: ' + pts.join('; '));
+    lines.push('PASSAGES (in the order they arrive):');
+    ws.forEach((w, i) => lines.push((i + 1) + '. ' + w.mover + ' ' + w.asp + ' natal ' + w.natal + '. In orb ' + w.range + '. ' +
+      (w.passes.length ? 'Exact on ' + w.passFull + '.' : 'Comes close without reaching exact.')));
+    return lines.join('\n');
+  }
+  /* Whether the audit's reading is open to this reader: free in the apps, and
+     on the website once the account has paid for it. The server decides in
+     the end, as it does for Luminary. */
+  cycleOpen() { return this.nativeApp() || !!(this.state.lum && this.state.lum.cycleUnlocked); }
+  cycleBuy() {
+    const C = this.cloud;
+    if (this.state.lumBusy || !C || typeof C.billingUnlock !== 'function') return;
+    this.setState({ lumBusy: 'unlock' });
+    C.billingUnlock(this.lumReturnTo(), this.lumCountry()).then(r => {
+      if (r && r.ok) { location.href = r.url; return; }
+      this.setState({ lumBusy: null });
+      const reason = (r && r.reason) || 'error';
+      if (reason === 'already') { this.toastMsg('The Cycle Audit is already open on this account.'); this.lumFetch(true, 0); return; }
+      if (reason === 'region') { this.lumFetch(false, 0); return; }
+      this.toastMsg(reason === 'notConfigured' || reason === 'notSetUp' ? 'Payments are being set up. Check back soon.'
+        : reason === 'signedOut' ? 'Sign in again to continue.' : 'Checkout could not open. Please try again.');
+    });
+  }
+  /* ---- A gift, in the apps -------------------------------------------------
+
+     THE OWNER'S DONATE BUTTON (18 October 2026): the apps give the Cycle Audit
+     away, and offer a way to give back beside Contact Support and the legal
+     pages, and in the profile menu. It is called Support inCommon, a gift, on
+     every surface, because inCommon is not a charity and "donate" tells most
+     people a gift is tax deductible. It opens Stripe's own page in the
+     device's browser (Capacitor sends any address that is not the app's to
+     the system browser), needs no account, and comes back to thanks.html on
+     the website. GIFT_IN_APP is the switch: the stores' review may refuse a
+     payment link from inside an app, and turning it off is this one word. */
+  GIFT_IN_APP = true;
+  SITE = 'https://incommonspace.com';
+  giftOn() { return this.nativeApp() && this.GIFT_IN_APP; }
+  giftGo() {
+    const IC = this.cloud || window.InCommonCloud;
+    if (this.state.giftBusy) return;
+    if (!IC || typeof IC.billingSupport !== 'function') { this.toastMsg('The gift page could not open. Please try again.'); return; }
+    this.setState({ giftBusy: true, pmenuOpen: false });
+    IC.billingSupport(this.SITE + '/thanks.html').then(r => {
+      this.setState({ giftBusy: false });
+      if (r && r.ok) { location.href = r.url; return; }
+      this.toastMsg(r && (r.reason === 'notConfigured' || r.reason === 'notSetUp') ? 'Gifts are being set up. Check back soon.' : 'The gift page could not open. Please try again.');
+    });
   }
   /* ---- Codex Luminary ------------------------------------------------------
 
@@ -40484,17 +41025,23 @@ class Component extends DCLogic {
      ?checkout= under a name this app does not already use. It is read once and
      dropped, so a reload cannot replay the welcome. */
   lumReturnRead() {
-    let v = null;
+    let v = null, c = null;
     try {
       const q = new URLSearchParams(location.search);
       v = q.get('luminary');
-      if (!v) return;
-      q.delete('luminary');
+      /* The Cycle Audit's checkout comes back the same way, as ?cycle=. */
+      c = q.get('cycle');
+      if (!v && !c) return;
+      q.delete('luminary'); q.delete('cycle');
       const rest = q.toString();
       history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
     } catch (e) { return; }
     if (v === 'success') this.setState({ lumReturn: 'success', orDepth: 'deep' });
-    else setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+    else if (c === 'success') this.setState({ cyReturn: 'success', orPeriod: 'cycle' });
+    else {
+      if (c) this.setState({ orPeriod: 'cycle' });
+      setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+    }
   }
   lumReturnTo() { return location.origin + location.pathname + '#/oracle'; }
   /* WHERE THE READER IS, FOR LUMINARY ONLY: the two letter country the device's
@@ -40551,9 +41098,10 @@ class Component extends DCLogic {
     }
     if (cs.userId && this.rcOn()) this.rcStart(cs.userId);
     if (this._lumFor === who) return;
-    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success' && !this.readLS(this.oracleDeepKey(), false)) return;
+    const back = this.state.lumReturn === 'success' || this.state.cyReturn === 'success';
+    if (this.curTab() !== 'oracle' && !back && !this.readLS(this.oracleDeepKey(), false)) return;
     this._lumFor = who;
-    this.lumFetch(this.state.lumReturn === 'success', 0);
+    this.lumFetch(back, 0);
   }
   /* After a checkout, Stripe has the subscription before the webhook has
      told anybody, so the status is asked with a sync, and asked again a few
@@ -40568,6 +41116,16 @@ class Component extends DCLogic {
       const lum = r && r.ok && r.status ? { ...r.status }
         : { isPremium: false, billingConfigured: false, failed: r && ['notSetUp', 'notConfigured'].indexOf(r.reason) === -1 ? (r.reason || 'error') : null };
       this.setState({ lum });
+      /* The Cycle Audit's unlock is confirmed the same way, and the two waits
+         share the tries: a reader returns from one checkout at a time. */
+      if (this.state.cyReturn === 'success') {
+        if (lum.cycleUnlocked) {
+          this.setState({ cyReturn: null });
+          this.toastMsg('The Cycle Audit is open. Thank you.');
+        } else if ((tries || 0) < 4 && !lum.failed) {
+          this._lumT = setTimeout(() => this.lumFetch(true, (tries || 0) + 1), 2500);
+        } else this.setState({ cyReturn: null });
+      }
       if (this.state.lumReturn === 'success') {
         if (lum.isPremium) {
           this.setState({ lumReturn: null });
@@ -40760,7 +41318,9 @@ class Component extends DCLogic {
         ? 'https://play.google.com/store/account/subscriptions' : 'https://apps.apple.com/account/subscriptions';
   }
   oracleVals() {
-    const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
+    const st = this.state, period = st.orPeriod || 'daily', cycle = period === 'cycle';
+    /* The Cycle Audit has one depth, so the depth control steps aside for it. */
+    const depth = cycle ? 'standard' : st.orDepth || 'standard';
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const slot = this.oracleSlot(period, depth), cached = this.oracleCached(period, depth);
     /* A reading being prepared ahead is not on the screen until the reader has
@@ -40787,7 +41347,22 @@ class Component extends DCLogic {
     /* In depth is shown only once the reader has pressed Consult the Oracle for
        it, whether it was written a minute ago or is still to be written. */
     const deepGate = deepish && canDeep && consented && !busy && !err && !opened;
-    const r = hit && !locked && !lumWait && !(deepish && !opened) ? hit.reading : null;
+    /* THE CYCLE AUDIT'S GATE. The dates are drawn for any chart of the
+       reader's own; the reading waits on the unlock on the website, and on
+       nothing in the apps, where it is free. With no passage ahead there is
+       nothing to write, and the list says so. */
+    const native = this.nativeApp();
+    const cyReady = cycle && !sample && this.cycleReady();
+    if (cycle && !sample && !cyReady) this.cycleSoon();
+    const cyRows = cyReady ? this.cycleWindows().filter(w => !w.past) : [];
+    /* The list opens on the passages the audit reads, so the gate is not
+       pushed out of sight by a long chart; every passage is one press away. */
+    const cyShown = cyReady && !st.cyAll ? this.cyclePassages() : cyRows;
+    const cyNone = cyReady && !cyRows.length, cyFinding = cycle && !sample && !cyReady;
+    const cyish = cyReady && signedIn && !off && !native && !cyNone;
+    const cyWait = cyish && !lum, cyLocked = cyish && !!lum && !lum.cycleUnlocked;
+    const r = !cycle && hit && !locked && !lumWait && !(deepish && !opened) ? hit.reading : null;
+    const cr = cycle && hit && !cyLocked && !cyWait && !cyNone ? hit.reading : null;
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
@@ -40798,12 +41373,12 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
-    const blocked = sample || off || !!r || locked || lumWait || deepGate;
+    const blocked = sample || off || !!r || !!cr || locked || lumWait || deepGate || cyLocked || cyWait || cyNone || cyFinding;
     const waiting = !blocked && !err && signedIn && consented;
     /* regionOpen is the server's answer for the country the page guessed. Only
        an explicit false closes the gate, so an older server that never sends
        it sells exactly as before. */
-    const native = this.nativeApp(), rcLive = native && this.rcOn(), rcRows = rcLive ? this.rcPlanRows() : null;
+    const rcLive = native && this.rcOn(), rcRows = rcLive ? this.rcPlanRows() : null;
     /* Inside the apps the store sells it, everywhere it has a storefront, so
        the website's EU and UK hold does not apply there; with no RevenueCat
        key the app sells nothing at all. */
@@ -40822,8 +41397,47 @@ class Component extends DCLogic {
     const trialDays = !native && lum && lum.trialDays > 0 ? lum.trialDays : 0;
     const trialEnd = trialDays ? new Date(Date.now() + trialDays * 864e5).toLocaleDateString() : '';
     const trialing = !!lum && lum.status === 'trialing';
+    /* A billing function deployed before the Cycle Audit sends no floor and has
+       no unlock to sell, so the gate says payments are being set up rather than
+       offering a button that cannot open anything. */
+    const cyShut = !!lum && lum.regionOpen === false, cySellable = !!(lum && lum.billingConfigured && lum.cycleFloor > 0);
+    const cyPass = cr ? list(cr.passages).filter(x => x && str(x.contact)) : [];
+    const cyOv = cr ? paras(cr.overview) : [];
     return {
       orIcon: this.uiIcon('oracle'),
+      orDepthsOn: !cycle,
+      /* The passages, free, for any chart of the reader's own. */
+      cyListOn: cycle && !sample,
+      cyNone, cyFinding,
+      cyMoreOn: cyRows.length > this.CY_MAX,
+      cyMoreLabel: st.cyAll ? 'Show the passages the audit reads' : 'Show every passage (' + cyRows.length + ')',
+      cyMoreGo: () => this.setState({ cyAll: !st.cyAll }),
+      cyRows: cyShown.map(w => ({ label: w.label,
+        detail: [w.range, w.passLine].concat(w.house ? [w.house + (w.house === 1 ? 'st' : w.house === 2 ? 'nd' : w.house === 3 ? 'rd' : 'th') + ' house'] : []).join(' \u00b7 '),
+        now: w.now, bd: pick(w.now, 'var(--ac2)', 'var(--bd)') })),
+      cyGate: cyLocked,
+      cyBuyOn: cyLocked && cySellable && !cyShut,
+      cyCta: st.lumBusy === 'unlock' ? 'Opening secure checkout…' : 'Unlock the Cycle Audit',
+      cyBuy: () => this.cycleBuy(),
+      cyTermsOn: cyLocked && !cyShut,
+      /* The floor is the server's (cycleFloor, in cents), so the sentence beside
+         the button cannot name a different one from the checkout's. */
+      cyTermsText: 'One payment, not a subscription. You choose the amount, from $' + ((lum && lum.cycleFloor > 0 ? lum.cycleFloor : 300) / 100).toFixed(lum && lum.cycleFloor % 100 ? 2 : 0) + ', on Stripe\u2019s secure checkout.',
+      cyNoteOn: cyLocked && (st.cyReturn === 'success' || cyShut || !cySellable),
+      cyNote: st.cyReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : cyShut ? 'The Cycle Audit is not available in your country yet.'
+        : lum && lum.failed ? 'Your unlock could not be checked just now.' : 'Payments are being set up. Check back soon.',
+      cyRetryOn: cyLocked && !!(lum && lum.failed),
+      cyRetry: () => this.lumFetch(true, 0),
+      cyShow: !!cr,
+      cyAria: cr ? 'The Oracle, the Cycle Audit: ' + str(cr.title) : '',
+      cyLabel: cr ? str(hit.label) || 'The Cycle Audit' : '',
+      cyTitle: cr ? str(cr.title) : '', cyEpigraph: cr ? str(cr.epigraph) : '',
+      cyOvFirst: cyOv[0] || '', cyOvRest: cyOv.slice(1).map(t => ({ t })),
+      cyPassages: cyPass.map((x, i) => ({ num: ROMAN[i] || String(i + 1), contact: str(x.contact), window: str(x.window),
+        tax: str(x.tax), dividend: str(x.dividend), prompts: list(x.prompts).filter(q => str(q)).map(q => ({ t: q })) })),
+      cyHasLong: !!(cr && str(cr.longView)), cyLong: cr ? str(cr.longView) : '',
+      cyMantra: cr ? str(cr.mantra) : '',
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
@@ -40839,7 +41453,7 @@ class Component extends DCLogic {
       orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
-      orBusy: !r && !locked && (busy || waiting || lumWait),
+      orBusy: !r && !cr && !locked && !cyLocked && (busy || waiting || lumWait || cyWait),
       orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
@@ -40848,9 +41462,11 @@ class Component extends DCLogic {
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
       orLoadingText: lumWait ? 'Checking your Luminary subscription…'
+        : cyWait ? 'Checking your Cycle Audit…'
         : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
         : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
         : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
+        : cycle ? 'The Oracle is reading the long passages across your chart…'
         : depth === 'deep'
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',

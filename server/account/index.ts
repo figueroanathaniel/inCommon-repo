@@ -17,9 +17,9 @@
 //   2. The rows, child tables before parents, so the order is right whether
 //      or not the project's foreign keys cascade: the four tables keyed by
 //      profile (memories, throughline_entries, oki_messages, consent_events),
-//      then pairs and profiles (keyed by account), oracle_readings and
-//      subscriptions and store_subscriptions (keyed by user), then the
-//      accounts row itself. Between Stripe and the rows, RevenueCat's record
+//      then pairs and profiles (keyed by account), oracle_readings,
+//      subscriptions, store_subscriptions and cycle_unlocks (keyed by user),
+//      then the accounts row itself. Between Stripe and the rows, RevenueCat's record
 //      of the reader is deleted too when RevenueCat is set up (see
 //      closeRevenueCat below); a subscription bought in an app is the store's
 //      to cancel, and the page says so before the reader deletes.
@@ -168,6 +168,7 @@ Deno.serve(async (req) => {
     await del("oracle_readings", "user_id", uid);
     await del("subscriptions", "user_id", uid);
     await del("store_subscriptions", "user_id", uid);
+    await del("cycle_unlocks", "user_id", uid);
     await del("accounts", "id", uid);
   } catch (e) {
     console.error("account: a table could not be cleared", (e as Error).message);

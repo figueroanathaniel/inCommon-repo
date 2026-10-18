@@ -440,6 +440,81 @@ if (!hdLine) {
   tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
 })();
 
+/* ------------------------------------------------ Z: the Cycle Audit
+   The owner asked on 18 October 2026 for a reading of the long transits, sold
+   pay what you want on the website and free in the apps. The dates are found
+   on the device by cycleWindows(), lifted out of the app here and run on the
+   vendored astronomy-engine, and the case it was asked for is the fixture:
+   Pluto on a Mars at 15 Aquarius, then on a Sun at 28 Aquarius. Pluto crosses
+   315 degrees five times from April 2032 to December 2033 and 328 degrees five
+   times from April 2041 to December 2042, measured with the same library. */
+(() => {
+  const AE = require(path.join(repo, 'app', 'astronomy-engine-2.1.19.min.js'));
+  const field = name => { const m = new RegExp('\\n  ' + name + ' = [^\\n]*').exec(appSrc); return m ? m[0] : ''; };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + '\n}';
+  /* Today is pinned to the day this was written, so the fixture stays inside
+     the scan however long after that the suite is run. */
+  class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
+  let Zc = null;
+  try { Zc = vm.runInNewContext('(' + src + ')', { Date: Today, Math: Math, String: String, Object: Object, Intl: Intl }); } catch (e) { Zc = null; }
+  tTrue('Z1', 'the Cycle Audit methods lift out of the app and compile', typeof Zc === 'function');
+  if (typeof Zc !== 'function') return;
+  const z = new Zc();
+  const BODY = { Saturn: AE.Body.Saturn, Uranus: AE.Body.Uranus, Neptune: AE.Body.Neptune, Pluto: AE.Body.Pluto };
+  const SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  Object.assign(z, {
+    PLNS: ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].map(n => [n]),
+    activeProfile: () => ({ id: 'p', birthStamp: 'z', name: 'Rowan Vale' }),
+    natalDate: () => new Date(Date.UTC(1990, 0, 1)),
+    chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
+    anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    norm360: x => ((x % 360) + 360) % 360,
+    addDays: (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; },
+    t2000: d => d.getTime() / 86400000 + 2440587.5 - 2451545.0,
+    lonOf: (name, t) => AE.Ecliptic(AE.GeoVector(BODY[name], new Date((t + 2451545.0 - 2440587.5) * 86400000), true)).elon,
+    _fmt: (k, o) => new Intl.DateTimeFormat('en', o),
+    signOf: lon => ({ sign: SIGNS[Math.floor(z.norm360(lon) / 30)], deg: z.norm360(lon) % 30 }),
+    aspName: a => a
+  });
+  const ws = z.cycleWindows();
+  const near = (d, iso) => Math.abs(d - Date.parse(iso + 'T12:00:00Z')) <= 3 * 864e5;
+  const mars = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Mars');
+  const sun = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Sun');
+  const MARS = ['2032-04-15', '2032-06-17', '2033-02-11', '2033-09-04', '2033-12-19'];
+  const SUN = ['2041-04-08', '2041-07-22', '2042-02-15', '2042-10-01', '2042-12-21'];
+  t('Z2', 'Pluto on a Mars at 15 Aquarius is one passage with its five exact dates, each within three days of the measured crossing', {
+    passages: 1, passes: 5, onDates: true, label: 'Pluto conjunct your Mars'
+  }, { passages: mars.length, passes: mars[0] && mars[0].passes.length,
+    onDates: !!mars[0] && mars[0].passes.length === 5 && mars[0].passes.every((d, i) => near(d, MARS[i])), label: mars[0] && mars[0].label });
+  t('Z3', 'Pluto on a Sun at 28 Aquarius is the later passage, nine years after, with its own five', {
+    passages: 1, passes: 5, onDates: true, after: true
+  }, { passages: sun.length, passes: sun[0] && sun[0].passes.length,
+    onDates: !!sun[0] && sun[0].passes.length === 5 && sun[0].passes.every((d, i) => near(d, SUN[i])),
+    after: !!(sun[0] && mars[0]) && ws.indexOf(sun[0]) > ws.indexOf(mars[0]) });
+  tTrue('Z4', 'only the four slow astral bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
+  const dos = z.cycleDossier();
+  const dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  t('Z5', 'the dossier names the first name, the touched points and the passages with their dates, and no birth date, no full name, no dash and no planet', {
+    name: true, points: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
+  }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos), passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
+    noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noPlanet: !/planet/i.test(dos) });
+  const k1 = z.cycleKey(); z._cy = null; z._cyKey = null;
+  const pending = z.cycleKey(); z.cycleWindows();
+  t('Z6', 'the scan is anchored to the calendar year, so the key and the dossier come out the same when asked again, and no key is named before the scan has run', { key: true, dossier: true, pending: 'cypending' },
+    { key: z.cycleKey() === k1 && /^cy[0-9a-z]+$/.test(k1), dossier: z.cycleDossier() === dos, pending });
+  tTrue('Z7', 'the audit reads at most eight passages, in the order they arrive', (() => {
+    const p = z.cyclePassages();
+    return p.length <= 8 && p.every((w, i) => i === 0 || p[i - 1].from <= w.from) && p.every(w => !w.past);
+  })());
+})();
+
 /* ------------------------------------------------ V: the profile menu
    The owner asked on 30 September 2026 for the profile icon to open a menu
    (Profile, Settings, Get Help, Log Out), for the profile card to carry a
@@ -2123,6 +2198,61 @@ async function runCloudTests() {
     checkout: bCo.calls[2].body.country, noneDropped: bCo.calls[3].body.country === undefined, region: bRegion.reason
   });
 
+  /* K34c-K34e: the Cycle Audit, 18 October 2026. Its reading is asked of the
+     Oracle as one call, the period named and no part, and a website reader who
+     has not opened it is refused as premium, which the page reads as the gate.
+     Its unlock is a billing action of its own that carries no amount, because
+     the reader chooses the amount on Stripe's page. A gift needs no account,
+     so it is sent through the functions address with the public key and
+     carries only where to come back to. */
+  var cyOc = oracleClient(function () { return { data: { reading: { title: 'The Long Tide', passages: [] } }, error: null }; });
+  CO._setClientForTests(cyOc.client, { user: { id: 'u1' } });
+  var cyR = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var cyLocked = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  t('K34c', 'a Cycle Audit is one call to the Oracle naming the period and no part, and a reader who has not opened it is refused as premium', {
+    calls: 1, period: 'cycle', part: false, title: 'The Long Tide', locked: 'premium'
+  }, { calls: cyOc.calls.length, period: cyOc.calls[0] && cyOc.calls[0].body.period, part: !!(cyOc.calls[0] && 'part' in cyOc.calls[0].body),
+    title: cyR.reading && cyR.reading.title, locked: cyLocked.reason });
+  var ulOut = oracleClient(function () { return { data: { url: 'https://stripe.k34d.invalid/unlock' }, error: null }; });
+  CO._setClientForTests(ulOut.client, null);
+  var ulNo = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  CO._setClientForTests(ulOut.client, { user: { id: 'u1' } });
+  var ulOk = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  var ulBad = await CO.billingUnlock('https://app.k34d.invalid/', 'usa');
+  var ulReasons = {};
+  var ulCases = [['already', httpErr(409, 'ALREADY')], ['region', httpErr(403, 'REGION')], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)]];
+  for (var ui = 0; ui < ulCases.length; ui++) {
+    var ue = ulCases[ui][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: ue }; }).client, { user: { id: 'u1' } });
+    ulReasons[ulCases[ui][0]] = (await CO.billingUnlock('https://x.invalid/', 'FR')).reason;
+  }
+  t('K34d', 'the unlock is not asked without a session, sends the action, the return address and a two letter country and no amount, comes back as the Checkout address, and names already and region', {
+    signedOut: 'signedOut', calls: 2, url: 'https://stripe.k34d.invalid/unlock', keys: ['action', 'country', 'returnTo'], action: 'unlock', badCountryDropped: true,
+    reasons: { already: 'already', region: 'region', nc: 'notConfigured', '404': 'notSetUp' }
+  }, {
+    signedOut: ulNo.reason, calls: ulOut.calls.length, url: ulOk.url, keys: Object.keys(ulOut.calls[0].body).sort(), action: ulOut.calls[0].body.action,
+    badCountryDropped: ulOut.calls[1].body.country === undefined && !!ulBad.ok, reasons: ulReasons
+  });
+  var gSent = [];
+  var gFetch = function (status, b) { return function (url, init) { gSent.push({ url: url, init: init }); return Promise.resolve({ ok: status < 300, status: status, json: function () { return Promise.resolve(b); } }); }; };
+  CO._setClientForTests(null, null);
+  var gOk = await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(200, { url: 'https://stripe.k34e.invalid/gift' }) });
+  var gBody = gSent[0] ? JSON.parse(gSent[0].init.body) : {}, gHdr = gSent[0] ? gSent[0].init.headers : {};
+  var gReasons = {
+    nc: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(503, { code: 'NOT_CONFIGURED' }) })).reason,
+    '404': (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(404, null) })).reason,
+    older: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(401, { code: 'SIGNED_OUT' }) })).reason,
+    offline: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: function () { return Promise.reject(new Error('net')); } })).reason
+  };
+  t('K34e', 'a gift is asked of the billing function with nobody signed in, with the public key, carrying only the action and where to come back to, and each failure is a reason', {
+    ok: true, url: 'https://stripe.k34e.invalid/gift', endpoint: true, anon: true, body: { action: 'support', returnTo: 'https://incommonspace.com/thanks.html' },
+    reasons: { nc: 'notConfigured', '404': 'notSetUp', older: 'notSetUp', offline: 'offline' }
+  }, {
+    ok: !!gOk.ok, url: gOk.url, endpoint: !!gSent[0] && /\/functions\/v1\/billing$/.test(gSent[0].url),
+    anon: !!gHdr && gHdr.Authorization === 'Bearer ' + gHdr.apikey && /^eyJ/.test(gHdr.apikey || ''), body: gBody, reasons: gReasons
+  });
+
   /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
      October 2026. A password that passed on an account with an authenticator
      makes a session at aal1 that still owes its code: the cover asks for it,
@@ -2706,8 +2836,10 @@ async function runCloudTests() {
   var dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']|&[mn]dash;');
   var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
   var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
-  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings and at the Luminary purchase; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
-    cover: true, appLinks: 6, appOrderEachTime: true, operator: true, florida: true, age16: true,
+  /* Eight links in the app: Settings twice and the Luminary purchase, in each
+     shell, and the Cycle Audit's unlock in each since 18 October 2026. */
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, at the Luminary purchase and at the Cycle Audit unlock; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+    cover: true, appLinks: 8, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
@@ -2751,7 +2883,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
