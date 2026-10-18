@@ -148,9 +148,9 @@
   <p>Consulting the Oracle is entirely optional, and everything else in inCommon works without it. If you have asked for an in-depth reading before, the app may prepare the current period&rsquo;s in-depth reading in advance while you are signed in so that it is ready when you open it; that preparation sends the same summary described above. You can ask us to delete your stored readings at any time through Contact Support.</p>
 
   <h2 id="luminary">7. Payments</h2>
-  <p>Codex Luminary is an optional paid subscription. Payments are taken by <strong>Stripe</strong> on Stripe&rsquo;s own checkout and billing pages. Your card number and billing details are entered with Stripe and are never sent to or stored by us. From Stripe we receive and keep a customer identifier, a subscription identifier, your plan, whether the subscription is active, when the current period ends, and whether it is set to cancel. We use these only to give you access to what you paid for. Stripe&rsquo;s handling of your payment information is governed by Stripe&rsquo;s privacy policy, and Stripe may use it to prevent fraud.</p>
-  <p>In the iPhone and Android apps, Codex Luminary is bought through Apple&rsquo;s App Store or Google Play, which take the payment under their own terms and privacy policies; we never receive your payment details. We use <strong>RevenueCat</strong> to check those purchases: RevenueCat receives your account&rsquo;s user identifier and the purchase records the store provides. From it we receive and keep which store sold the subscription, your plan, whether it is active, when the current period ends, whether it renews, and where you manage it. We use these only to give you access to what you paid for, wherever you use inCommon.</p>
-  <p>On the website the Cycle Audit is opened with a single payment of an amount you choose, taken by Stripe in the same way. From Stripe we keep the checkout identifier, the amount and currency you chose, and when you paid, and use them only to keep the Cycle Audit open on your account. To check that a payment did not come from a country where it is not yet sold, we read the billing country and the card&rsquo;s issuing country Stripe reports, and keep neither.</p>
+  <p>Codex Luminary is an optional single payment, of an amount you choose, that opens the add-ons. It is taken by <strong>Stripe</strong> on Stripe&rsquo;s own checkout page. Your card number and billing details are entered with Stripe and are never sent to or stored by us. From Stripe we keep the checkout identifier, the amount and currency you chose, and when you paid, and use them only to keep Codex Luminary open on your account. To check that a payment did not come from a country where it is not yet sold, we read the billing country and the card&rsquo;s issuing country Stripe reports, and keep neither. Stripe&rsquo;s handling of your payment information is governed by Stripe&rsquo;s privacy policy, and Stripe may use it to prevent fraud.</p>
+  <p>If you took out a Codex Luminary subscription before 18 October 2026, we also keep, from Stripe, a customer identifier, a subscription identifier, your plan, whether the subscription is active, when the current period ends, and whether it is set to cancel, for as long as the subscription lasts and the law requires afterwards.</p>
+  <p>Nothing is sold inside the iPhone and Android apps.</p>
   <p>In the iPhone and Android apps you may give a gift to support inCommon. It opens Stripe&rsquo;s checkout in your device&rsquo;s browser and needs no account. We keep nothing about a gift: Stripe holds the payment record, and the email address you give Stripe for the receipt.</p>
 
   <h2 id="support">8. Support requests</h2>
@@ -173,11 +173,9 @@
   <table>
     <thead><tr><th scope="col">Provider</th><th scope="col">What they do</th><th scope="col">Information involved</th></tr></thead>
     <tbody>
-      <tr><td>Supabase</td><td>Accounts, sign in, our database and server functions</td><td>Account details, synced profiles and records, Oracle readings, subscription status, Cycle Audit payments, support requests</td></tr>
+      <tr><td>Supabase</td><td>Accounts, sign in, our database and server functions</td><td>Account details, synced profiles and records, Oracle readings, Codex Luminary payments and subscription status, support requests</td></tr>
       <tr><td>Moonshot AI</td><td>Writes Oracle readings with its Kimi model</td><td>The chart summary described in section 6</td></tr>
-      <tr><td>Stripe</td><td>Takes and manages Codex Luminary and Cycle Audit payments on the website, and gifts from the apps</td><td>Payment and billing details you give Stripe; your account email, except for a gift</td></tr>
-      <tr><td>Apple and Google</td><td>Sell Codex Luminary in the iPhone and Android apps</td><td>The purchase, under your Apple or Google account; we receive no payment details</td></tr>
-      <tr><td>RevenueCat</td><td>Checks Codex Luminary purchases made in the apps</td><td>Your user identifier; purchase records from Apple or Google</td></tr>
+      <tr><td>Stripe</td><td>Takes Codex Luminary payments on the website, manages subscriptions taken out before 18 October 2026, and takes gifts from the apps</td><td>Payment and billing details you give Stripe; your account email, except for a gift</td></tr>
       <tr><td>Cloudflare</td><td>Turnstile sign in protection</td><td>Browser and device signals, IP address</td></tr>
       <tr><td>Netlify</td><td>Hosts the website</td><td>IP address, browser details, pages requested</td></tr>
       <tr><td>Google</td><td>Supplies typefaces (Google Fonts)</td><td>IP address, browser details</td></tr>
@@ -213,11 +211,11 @@
   <ul>
     <li>Information on your device stays until you delete it or clear your browser&rsquo;s data for this site.</li>
     <li>Your account, the record kept with it and your Oracle readings are kept while your account exists, and deleted when you delete your account in the app or ask us to delete it.</li>
-    <li>Subscription and Cycle Audit payment records are kept while your account exists and afterwards for as long as tax and accounting law requires.</li>
+    <li>Codex Luminary payment and subscription records are kept while your account exists and afterwards for as long as tax and accounting law requires.</li>
     <li>Support requests are kept for as long as needed to resolve them and for up to two years afterwards as a record, unless you ask us to delete them sooner where the law allows.</li>
     <li>Sign in and server logs are kept by our providers for limited periods set by them.</li>
   </ul>
-  <p>Deleting your account in the app (Profile, then Delete account) removes the account and everything kept with it straight away, including the record RevenueCat keeps of your app purchases, and cancels a Codex Luminary subscription bought on the website. A subscription bought in the App Store or Google Play is not cancelled by deleting your account: cancel it in your Apple or Google account settings. <a href="./delete-account.html">How to delete your account</a> explains it, including how to ask us when you cannot use the app. We act on a request to delete your account within 30 days, and copies in backups expire on our providers&rsquo; normal schedule.</p>
+  <p>Deleting your account in the app (Profile, then Delete account) removes the account and everything kept with it straight away, and cancels a Codex Luminary subscription taken out before 18 October 2026. <a href="./delete-account.html">How to delete your account</a> explains it, including how to ask us when you cannot use the app. We act on a request to delete your account within 30 days, and copies in backups expire on our providers&rsquo; normal schedule.</p>
 
   <h2 id="rights">16. Your choices and rights</h2>
   <p>Wherever you live, you can ask us to:</p>

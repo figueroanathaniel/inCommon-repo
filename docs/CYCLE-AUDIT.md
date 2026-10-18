@@ -1,86 +1,98 @@
-# The Cycle Audit: what you need to do
+# Codex Luminary, the Cycle Audit and Omni: what you need to do
 
-Built 18 October 2026 from the "Cosmic Tax Ledger" brief. The Cycle Audit is the
-Oracle's fourth period. The dates of a reader's long passages (Saturn, Uranus,
-Neptune and Pluto across the chart, twenty years ahead) are free and worked out
-on the device. The reading the Oracle writes from them is opened on the website
-by one payment of the reader's choosing, at least $3 with $12 filled in, and
-stays open on that account. In the iPhone and Android apps the reading is free,
-and the apps offer **Support inCommon**, a gift, instead.
+Built 18 October 2026. Three decisions in one change:
 
-Until the steps below are done, the website's gate says "Payments are being set
-up" (the billing function sends no floor yet) and the apps' gift says the same.
-A Cycle Audit asked for in the apps before the Oracle function is redeployed
-comes back as "The stars clouded over", with Ask again.
+- **The Cycle Audit** is the Oracle's fourth period: the dates of a reader's long
+  passages (Saturn, Uranus, Neptune and Pluto across the chart, twenty years
+  ahead) are free and worked out on the device, and the Oracle writes a reading
+  from them.
+- **Codex Luminary is now one payment, of an amount the reader chooses** (at
+  least $3, with $12 filled in), and it opens every add-on for the account for
+  good: in-depth readings, **Omni tarot** and the Cycle Audit's readings, and
+  any add-on after them. The subscription is no longer sold. Anybody who holds
+  one keeps it until they cancel, and it opens the same add-ons while it lasts.
+- **In the iPhone and Android apps every add-on is free**, and the apps offer
+  **Support inCommon**, a gift, instead.
+
+Until the steps below are done, the website's gates say "Payments are being set
+up", the apps' gift says the same, and Omni cannot be read anywhere, because its
+writer now lives in the Oracle function.
 
 ## 1. Run the SQL again
 
 In the Supabase dashboard, SQL Editor, paste and run each file. Both are safe to
 run again.
 
-1. `server/oracle/schema.sql`. It adds the `cycle_unlocks` table and widens the
-   `oracle_readings.period` check to allow `cycle`. **Without the second part
-   every Cycle Audit fails as a store error**, because the row the Oracle claims
-   before writing would break the old check.
-2. `server/mfa-policies.sql`. It adds `cycle_unlocks` to the two-step sign in
+1. `server/oracle/schema.sql`. It adds the `luminary_unlocks` table and widens
+   the `oracle_readings.period` check to allow `cycle`. **Without the second
+   part every Cycle Audit fails as a store error.**
+2. `server/mfa-policies.sql`. It adds `luminary_unlocks` to the two-step sign in
    rule, like every other table.
 
 ## 2. Redeploy three functions
 
-Paste each over the one already in the dashboard, or deploy them with the CLI
-the way `docs/ORACLE-SETUP.md` describes. Keep each function's existing setting
-for JWT verification (billing stays **off**).
+Keep each function's existing setting for JWT verification (billing stays
+**off**).
 
-- `server/oracle/index.ts`: the cycle period, its instructions, and the paywall.
-- `server/billing/index.ts`: the `unlock` and `support` actions, recording the
-  unlock from the webhook, **and the fix for incommonspace.com.** Until this is
-  deployed, every Luminary checkout started on incommonspace.com is refused,
-  because the function only accepted incommon.netlify.app as an address to
-  return to. This is worth deploying today on its own.
-- `server/account/index.ts`: deleting an account also deletes its unlock.
+- **oracle**: `server/oracle/index.ts` **and the two files beside it,
+  `tarot.js` and `tarot-omni.js`**, which it imports. With the CLI, deploying
+  the folder carries all three. In the dashboard editor, add the two files to
+  the function beside `index.ts`. Without them Omni answers a store error.
+- **billing**: `server/billing/index.ts`. The one time unlock, the gift, the
+  retired subscription, **and the fix for incommonspace.com**: until this is
+  deployed, every checkout started on incommonspace.com is refused, because the
+  function only accepted incommon.netlify.app as an address to return to.
+- **account**: `server/account/index.ts`. Deleting an account also deletes its
+  unlock.
 
-No new secrets. The Stripe product and the two custom amount prices ("The Cycle
-Audit" and "Support inCommon") are made by the function the first time somebody
-uses each.
+No new secrets. The Stripe products and the two custom amount prices ("Codex
+Luminary" and "Support inCommon") are made by the function the first time each
+is used.
 
-## 3. Check the Stripe webhook
+## 3. Stripe
 
-Stripe dashboard, Developers, Webhooks, the endpoint pointing at the billing
-function. It must send `checkout.session.completed`, which Luminary already
-needs, so it almost certainly does. That event is what records an unlock. If it
-were missing, the page would still recover the unlock by asking Stripe on the
-reader's return, but the webhook is the reliable path.
-
-Stripe sends a receipt for each payment when customer emails are on (Settings,
-Customer emails, Successful payments). Keep that on: the Terms say the amount
-paid is confirmed by receipt.
+- The webhook must send `checkout.session.completed`, which it already does for
+  Luminary. That is what records a payment. Keep `customer.subscription.*` and
+  `invoice.*` too, for the subscribers you still have.
+- Keep customer receipts on (Settings, Customer emails, Successful payments):
+  the Terms say the amount is confirmed by receipt.
+- **Existing subscribers.** They keep their subscription until they cancel, and
+  Manage billing still works for them. If you would rather end them, cancel them
+  in the Stripe dashboard; the Terms promise a refund of the unused part of the
+  period if you discontinue it. Either is consistent with the Terms as written.
+- The old Luminary products and prices can be archived in Stripe once nobody
+  holds a subscription on them. Nothing in the code creates them any more.
 
 ## 4. Publish the site
 
-The bundle in `deploy/v6.4/` is rebuilt. It includes `thanks.html`, the page a
+The bundle in `deploy/v6.4/` is rebuilt, including `thanks.html`, the page a
 gift returns to.
 
-## 5. The apps, and one risk to know about
+## 5. The apps
 
-The gift opens Stripe's checkout in the phone's browser. **Apple and Google may
-refuse that at review.** Apple allows payment links in apps on the United States
-storefront and treats a tip to a developer as an in-app purchase elsewhere
-(guideline 3.1.1). Google allows outside payment for donations only to
-registered charities. If either store refuses the build, open
-`app/inCommonApp v2.dc.html`, find `GIFT_IN_APP = true`, set it to `false`,
-rebuild the bundle and the native app, and resubmit. Nothing else changes. The
-other route is a set of fixed "tip" products sold through RevenueCat.
-
-The Cycle Audit itself is free in the apps, so it needs nothing from the stores.
+- **Take the RevenueCat plugin out before the next store build.** Nothing is
+  sold in the apps now, and an in-app purchase plugin with no purchases is a
+  question at review. In `native/`: `npm uninstall
+  @revenuecat/purchases-capacitor`, then `npx cap sync`. The App Store Connect
+  and Play Console subscription products can be removed too.
+- **The gift may be refused at review.** Apple allows payment links on the
+  United States storefront and treats a tip to a developer as an in-app
+  purchase elsewhere (guideline 3.1.1); Google allows outside payment for
+  donations only to registered charities. If either refuses the build, set
+  `GIFT_IN_APP = false` in `app/inCommonApp v2.dc.html`, rebuild the bundle and
+  the native app, and resubmit.
+- Every add-on in the apps is free and counts toward the Oracle's daily limit of
+  six readings, which is what bounds what the apps can cost you.
 
 ## 6. Legal pages
 
-Changed and dated 18 October 2026: Terms section 7 (renamed "Payments", with
-"The Cycle Audit" and "Gifts"), Privacy Policy sections 6, 7, 11 and 15, and
-`delete-account.html`. Two points are worth a lawyer's eye before launch:
-pay-what-you-want pricing with a floor, and accepting gifts as an individual
-in Florida. The pages call them gifts rather than donations and say they are
-not tax deductible, because inCommon is not a charity.
+Changed and dated 18 October 2026: Terms section 7 (now "Payments: Codex
+Luminary and gifts": the one time payment, subscriptions from before, refunds,
+gifts) and section 22; Privacy Policy sections 6, 7, 11 and 15 (RevenueCat and
+Apple and Google as sellers are gone); and `delete-account.html`. Worth a
+lawyer's eye before launch: pay what you want pricing with a floor, changing
+from a subscription to a one time payment while subscribers remain, and
+accepting gifts as an individual in Florida.
 
 ## What the brief asked for, and what changed
 
@@ -90,7 +102,7 @@ otherwise, for these reasons:
 
 - **A flag on `profiles` could be set by the reader.** Readers write their own
   profile rows, and an account has several profiles. The unlock is its own
-  table that only the billing function writes, the same way `subscriptions` is.
+  table, `luminary_unlocks`, that only the billing function writes.
 - **Row level security cannot hide text that ships in the app.** The reading is
   written on the server and sent only to a reader the server lets through, which
   is what makes the payment mean something.
@@ -106,8 +118,11 @@ otherwise, for these reasons:
 
 ## Reference copy
 
-What is on the gate (both shells):
+What is on the gate when it stands in front of the Cycle Audit (the same gate is
+worded for In-Depth and for Omni):
 
+> **Codex Luminary**
+>
 > **What the long passages ask, and what they build**
 >
 > The slowest astral bodies stay on a point of your chart for years, not days.
@@ -117,9 +132,10 @@ What is on the gate (both shells):
 > it lasts.
 >
 > *This is an exchange rather than a wall. Pay what it is worth to you, once,
-> and the audit stays open on this account as new passages arrive.*
+> and every add-on opens on this account: in-depth readings, Omni tarot, the
+> Cycle Audit, and whatever comes after them.*
 >
-> **Unlock the Cycle Audit**
+> **Become a Luminary**
 >
 > One payment, not a subscription. You choose the amount, from $3, on Stripe's
 > secure checkout.

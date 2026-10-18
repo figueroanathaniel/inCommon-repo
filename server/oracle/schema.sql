@@ -1,8 +1,9 @@
 -- server/oracle/schema.sql: the three tables behind the Oracle. oracle_readings
--- is written by the Oracle function, and subscriptions and cycle_unlocks by the
--- billing function (server/billing): the first keeps each reader's Luminary
--- subscription as Stripe reports it, the second records who has opened the
--- Cycle Audit with a payment of their own choosing.
+-- is written by the Oracle function, and subscriptions and luminary_unlocks by
+-- the billing function (server/billing): the first keeps the Luminary
+-- subscriptions readers took out before 18 October 2026 as Stripe reports
+-- them, the second records who has opened Codex Luminary with a one time
+-- payment of their own choosing.
 --
 -- Run once, in the Supabase dashboard: SQL Editor, paste, Run. It is safe to
 -- run again; every statement checks before it creates.
@@ -90,20 +91,24 @@ create policy "read own subscription" on public.subscriptions
 -- No insert, update or delete policy here either, for the same reason.
 
 -- ---------------------------------------------------------------------------
--- cycle_unlocks: one row per reader who has paid for the Cycle Audit, the
--- owner's pay what you want unlock of 18 October 2026. One payment, of any
--- amount from the floor up, opens the audit for the account for good, so a
--- reader has one row or none. It holds the Stripe Checkout session that paid,
--- the amount and currency the reader chose, and when. No card and no address.
+-- luminary_unlocks: one row per reader who has opened Codex Luminary, the
+-- owner's one time, pay what you want unlock of 18 October 2026. One payment,
+-- of any amount from the floor up, opens every add-on for the account for
+-- good (the in-depth readings, Omni tarot, the Cycle Audit, and any added
+-- later), so a reader has one row or none. It replaced the Luminary
+-- subscription for new readers; the subscriptions table above still holds the
+-- readers who subscribed before it, and a live subscription still opens the
+-- same add-ons. It holds the Stripe Checkout session that paid, the amount and
+-- currency the reader chose, and when. No card and no address.
 --
 -- The billing function writes it with the service role, from Stripe's own
 -- answer: on the checkout.session.completed webhook, and again when a reader
--- asks for their status with a sync and the webhook has not landed. The
--- Oracle function reads it before it writes a Cycle Audit on the website. A
--- reader may read their own row and nothing else, so nobody unlocks the audit
--- by writing one.
+-- asks for their status with a sync and the webhook has not landed. The Oracle
+-- function reads it before it writes an add-on on the website. A reader may
+-- read their own row and nothing else, so nobody unlocks anything by writing
+-- one.
 
-create table if not exists public.cycle_unlocks (
+create table if not exists public.luminary_unlocks (
   user_id            uuid primary key references auth.users (id) on delete cascade,
   stripe_session_id  text not null unique,
   amount             integer not null check (amount >= 0),
@@ -111,10 +116,10 @@ create table if not exists public.cycle_unlocks (
   created_at         timestamptz not null default now()
 );
 
-alter table public.cycle_unlocks enable row level security;
+alter table public.luminary_unlocks enable row level security;
 
-drop policy if exists "read own cycle unlock" on public.cycle_unlocks;
-create policy "read own cycle unlock" on public.cycle_unlocks
+drop policy if exists "read own luminary unlock" on public.luminary_unlocks;
+create policy "read own luminary unlock" on public.luminary_unlocks
   for select to authenticated using ((select auth.uid()) = user_id);
 
 -- No insert, update or delete policy, for the same reason as the two above.

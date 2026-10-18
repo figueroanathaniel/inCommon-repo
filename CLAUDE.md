@@ -2534,13 +2534,11 @@ the count asserted, and the service worker and the host's files are left out. It
 refuses a bundle older than the app source and a bundle without the native check.
 
 **`nativeApp()` asks Capacitor, and six things hang on it and nothing else**:
-the Oracle footer above; Luminary never through Stripe in the app (`lumBuy()` and
-`lumManage()` go to the store through RevenueCat, and with no RevenueCat key the
-gate is closed: `lumShut`, the note "not available in the app yet", no plans, no
-button, no renewal line); no service worker registered; `coverHref()`
-answering `./cover.html`; the Cycle Audit free (`cycleOpen()`); and Support
-inCommon, the gift (`giftOn()`). The last two are 18 October 2026: see "The
-Cycle Audit". Driven in a browser with
+the Oracle footer above; Luminary never sold in the app (`lumBuy()` and
+`lumManage()` do nothing there, and no gate is drawn); no service worker
+registered; `coverHref()` answering `./cover.html`; every add-on free
+(`addonsOpen()`); and Support inCommon, the gift (`giftOn()`). The first and
+the last two changed on 18 October 2026: see "Codex Luminary is one payment". Driven in a browser with
 `window.Capacitor` stubbed, and without it: every one of those in the shell, none
 of them on the web; the footer measured clean in all eight themes at 375 and
 1440. `tools/build-icons.js --native` draws the icon and splash sources into
@@ -4165,7 +4163,8 @@ it asks to be set down (the Tax) and what it builds (the Dividend), with three
 questions. The owner chose that the Oracle's model writes it on the server,
 that one payment of the reader's choosing opens it for the account for good
 ($3 floor, $12 preset), and that the store apps give it away and carry a gift
-instead. `docs/CYCLE-AUDIT.md` is the owner's half.
+instead. Later the same day that payment became Codex Luminary and opens every
+add-on: see "Codex Luminary is one payment" below. `docs/CYCLE-AUDIT.md` is the owner's half.
 
 **It is the Oracle's fourth period, `cycle`**, beside Today, This Week and This
 Month, because the model, the consent press and the paywall already live there.
@@ -4209,18 +4208,9 @@ never what the reader is, no "you are", never good or bad, no predictions of
 harm, astral body rather than planet, and questions only the reader can close.
 The voice and emphasis line and the dash cleaner apply as to every reading.
 
-**The paywall is the server.** On the website the Oracle refuses a Cycle Audit
-with PREMIUM_REQUIRED unless `cycle_unlocks` holds the reader
-(`server/oracle/schema.sql`), which only the billing function writes: `unlock`
-opens a one time Checkout on a custom amount price (`CYCLE`, lookup
-`incommon_cycle_audit_pwyw`), and `checkout.session.completed` records it,
-refunding instead a payment whose billing or card country is in the EU or the UK
-while those stay closed (`recordUnlock`), exactly as the subscription's backstop
-does. A status asked with a sync finds a paid session the webhook missed
-(`recoverUnlock`). The page shows the gate from `lum.cycleUnlocked`, the floor
-from `cycleFloor`, and returns through `?cycle=success`. A billing function that
-sends no `cycleFloor` is an older one with nothing to sell, and the gate says
-payments are being set up rather than offering a button. **The apps are told
+**The paywall is the server**, and since the same day it is Codex Luminary's
+(see "Codex Luminary is one payment"): the Oracle refuses a Cycle Audit on the
+website with PREMIUM_REQUIRED unless `opened()` finds the reader Luminary. **The apps are told
 apart by the origin Capacitor gives its web view** (`capacitor://localhost`,
 `https://localhost`), which a browser page cannot write. A script outside a
 browser can, and that is accepted on purpose, because what it would get is what
@@ -4249,6 +4239,79 @@ browser drive with the cloud module faked (both shells, website and app, the
 gate, the return, the reading, a closed country, an older billing function,
 the gift, eight theme cases at 1440 and 390), and 13 cases of the billing and Oracle functions run under
 Node against a fake Stripe, Supabase and Kimi, typechecked strict.
+
+## Codex Luminary is one payment, of the reader's choosing, and opens every add-on
+Decided by the owner on 18 October 2026: "all add-ons should assume the cycle
+audit's form of payment. One-time reader's choice. For everything." One
+payment opens every add-on, and the Luminary subscription is retired. **This
+overrides the Luminary sections above where they disagree**: "In depth is
+Codex Luminary, and Stripe takes the payment" (the plans, the prices, the
+trial, the renewal terms, the gate's wording), "Luminary in the apps is
+RevenueCat's" (nothing is sold in the apps now), and the RevenueCat half of
+"The app stores".
+
+**The add-ons are the in-depth Oracle readings, Omni tarot and the Cycle
+Audit's readings**, and any added later joins them. What stays free: every
+chart, the numbers, standard readings, Light and Divine tarot, and the dates of
+every Cycle Audit passage. It keeps the name Codex Luminary, and the gate says
+Become a Luminary.
+
+**One unlock, one table.** The billing function's `unlock` opens a one time
+Checkout on a custom amount price (`LUMINARY`, lookup `incommon_luminary_once`,
+$3 floor, $12 preset), and `checkout.session.completed` writes
+`luminary_unlocks` (`server/oracle/schema.sql`), refunding instead a payment
+whose billing or card country is in the EU or the UK while those stay closed
+(`recordUnlock`). A status asked with a sync finds a paid session the webhook
+missed (`recoverUnlock`). The status says `isPremium` for every add-on, `once`
+for a payment, the plan and its end for a subscription, and `floor`, which the
+page names beside the button; a billing function that sends no floor has
+nothing to sell, and the gate says payments are being set up.
+
+**The subscription is retired, not erased.** `checkout` answers RETIRED. A
+reader who subscribed before keeps it on its terms until they cancel: the row
+is still synced from Stripe, a live one still opens every add-on, the member
+line says when it ends, and Manage billing opens the portal. The trial, the
+EUR and GBP prices, the VAT table and RevenueCat's selling code are gone from
+the app and the billing function. `server/store` and the account function's
+RevenueCat cleanup stay, dormant, for any record that exists; the plugin is
+still installed in `native/` and should come out (`npm uninstall
+@revenuecat/purchases-capacitor` and `npx cap sync`) before the next store
+build.
+
+**`opened()` in the Oracle function is the one check**, for in depth, the
+Cycle Audit and Omni alike: an admin, the apps' origin, a `luminary_unlocks`
+row, or a live subscription in either table. The page mirrors it as
+`addonsOpen()`: native, or `lum.isPremium`.
+
+**One gate, written once per screen.** `lumGateVals(from, p)` words it for the
+add-on the reader reached for (`LUM_GATE`: deep, cycle, omni) and returns
+`gate*` for the Oracle and `tg*` for the tarot room, spelled out so
+check-dead-controls can see them. `lumBuy(from)` sends a return address with
+`?lumfrom=` naming that add-on, because the hash cannot say whether the reader
+was on In-Depth, the Cycle Audit or Omni, and `lumReturnRead()` puts them back
+there. In the Oracle the Cycle Audit's free list stays above the gate.
+
+**Omni is written on the server, so the lock holds.** Its composer moved out of
+`app/tarot.js` into `server/oracle/tarot-omni.js`, and the app's `read()`
+answers null for Omni without one. The Oracle function answers `{ kind:
+"tarot", seed, count, topic }` by running that composer against
+`server/oracle/tarot.js`, which `tools/build-bundle.js` copies from
+`app/tarot.js` on every build and the build refuses an app copy that carries
+the composer again. No model and nothing stored: the same shuffle gives the
+same reading, so nothing is limited or kept. The room deals the cards itself
+from the seed and shows the passages the server returns (`tarotReading()`,
+`tarotOmniSoon()`), with a panel for signing in, the gate, waiting and errors.
+The moved composer was checked against the old one over 342 shuffles with no
+difference. A determined reader can still rebuild it from the helpers
+`app/tarot.js` exports for it (`PARTS`); the composed reading is what the
+lock protects.
+
+Held by J1 to J4 (the composer stays on the server, the copies agree, the
+reading is whole and steady, the bundle carries none of it), K32, K34b to
+K34f and K57 (the cloud calls), K55 (one time terms in place of renewal), 14
+function cases against a fake Stripe, Supabase and Kimi (the unlock, RETIRED,
+the refunds, the sync, a subscriber from before, Omni written exactly as the
+composer writes it and refused without Luminary), and a 56 row browser drive.
 
 ## Master numbers are kept wherever a number is read
 The owner asked on 29 September 2026 for "the rest of the master numbers".

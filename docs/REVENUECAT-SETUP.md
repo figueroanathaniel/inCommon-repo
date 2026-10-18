@@ -1,3 +1,7 @@
+> **Retired on 18 October 2026.** Nothing is sold in the apps now: every add-on
+> is free there. Remove the plugin before the next store build (see
+> `docs/CYCLE-AUDIT.md`, step 5). What follows is the record of how it was set up.
+
 # Codex Luminary in the apps: RevenueCat setup
 
 Started 12 October 2026, at the owner's request. Inside the iPhone and Android

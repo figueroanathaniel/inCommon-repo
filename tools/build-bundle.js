@@ -653,6 +653,22 @@ for (const f of LEGAL_FILES) {
   if (t > p) die('the cover links the Privacy Policy above the Terms; the Terms go directly above it');
 }
 
+/* THE ORACLE FUNCTION'S COPY OF THE TAROT DECK. Omni is written on the
+   server since 18 October 2026 (server/oracle/tarot-omni.js), against the same
+   cards and shared phrases the app reads, so the function carries a copy of
+   app/tarot.js beside it. The copy is written here, every build, and never by
+   hand: a deck edited in one place and not the other would give a reader an
+   Omni reading in words their Light and Divine readings no longer use. The
+   composer itself is server only, and the build refuses an app copy that still
+   carries it. */
+{
+  const deck = fs.readFileSync(path.join(appDir, 'tarot.js'), 'utf8');
+  if (/function omni\(/.test(deck)) die('app/tarot.js carries the Omni composer again; it lives in server/oracle/tarot-omni.js so the lock holds');
+  const out = path.join(repo, 'server', 'oracle', 'tarot.js');
+  const had = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
+  if (had !== deck) fs.writeFileSync(out, deck, 'utf8');
+}
+
 /* THE FONTS THEMSELVES, and the two hand written files that name them.
 
    A self build copies app/fonts/ in as fonts/, precaches the faces the first

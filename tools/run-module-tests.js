@@ -515,6 +515,31 @@ if (!hdLine) {
   })());
 })();
 
+/* ------------------------------------------------ J: Omni lives on the server
+   Omni became a paid add-on on 18 October 2026, written by the Oracle function
+   so the lock holds. Its composer must not come back into the app, the
+   function's copy of the deck must be the app's byte for byte, and the moved
+   composer must write a whole, steady reading from that copy. */
+(() => {
+  const appDeck = fs.readFileSync(path.join(repo, 'app', 'tarot.js'), 'utf8');
+  const srvDeckPath = path.join(repo, 'server', 'oracle', 'tarot.js');
+  const srvDeck = fs.existsSync(srvDeckPath) ? fs.readFileSync(srvDeckPath, 'utf8') : '';
+  const TA = require(path.join(repo, 'app', 'tarot.js'));
+  const OMNI = require(path.join(repo, 'server', 'oracle', 'tarot-omni.js'));
+  tTrue('J1', 'the app\'s tarot.js carries no Omni composer, and asked for Omni without one it answers null', !/function omni\(/.test(appDeck) && TA.read({ count: 9, topic: 'general', depth: 'omni', seed: 3 }) === null);
+  tTrue('J2', 'the Oracle function\'s copy of tarot.js is the app\'s, byte for byte (tools/build-bundle.js writes it)', srvDeck === appDeck);
+  const a = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  const b = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  t('J3', 'the server composer writes seven passages in the tradition\'s order, the same every time for one shuffle', {
+    passages: 7, tags: 'CALCULATED,TRADITIONAL,TRADITIONAL,TRADITIONAL,TRADITIONAL,SYNTHESIS,POSSIBILITY', steady: true, cards: 11
+  }, { passages: a && a.passages.length, tags: a && a.passages.map(x => x.tag).join(','), steady: JSON.stringify(a) === JSON.stringify(b), cards: a && a.count });
+  tTrue('J4', 'the bundle does not carry the composer', (() => {
+    const m = fs.readFileSync(path.join(repo, 'tools', 'build-bundle.js'), 'utf8').match(/const BUNDLE = path\.join\(repo, 'deploy', '([^']+)'\)/);
+    const app = m ? path.join(repo, 'deploy', m[1], 'app.html') : '';
+    return !!app && fs.existsSync(app) && fs.readFileSync(app, 'utf8').indexOf('Woven together, the reading turns on three of its cards') === -1;
+  })());
+})();
+
 /* ------------------------------------------------ V: the profile menu
    The owner asked on 30 September 2026 for the profile icon to open a menu
    (Profile, Settings, Get Help, Log Out), for the profile card to carry a
@@ -2084,17 +2109,19 @@ async function runCloudTests() {
     fn: 'billing', action: 'status', sync1: true, sync2: false, premium: true, plan: 'annual'
   }, { fn: bIn.calls[0].name, action: bIn.calls[0].body.action, sync1: bIn.calls[0].body.sync, sync2: bIn.calls[1].body.sync,
     premium: st1.status && st1.status.isPremium, plan: st2.status && st2.status.plan });
-  var co1 = await CO.billingCheckout('monthly', 'https://app.k31.invalid/app.html#/oracle');
+  /* The subscription checkout was retired on 18 October 2026: the module no
+     longer offers one, and Luminary is the one time unlock (K34d). */
+  var co1 = await CO.billingUnlock('https://app.k31.invalid/app.html?lumfrom=deep#/oracle');
   var po1 = await CO.billingPortal('https://app.k31.invalid/app.html#/oracle');
-  t('K32', 'a checkout and the portal each come back as the address Stripe gave, and send the plan and the return address', {
-    checkout: 'https://stripe.k31.invalid/checkout', portal: 'https://stripe.k31.invalid/portal', plan: 'monthly', returnTo: 'https://app.k31.invalid/app.html#/oracle'
-  }, { checkout: co1.url, portal: po1.url, plan: bIn.calls[2].body.plan, returnTo: bIn.calls[3].body.returnTo });
+  t('K32', 'the unlock and the portal each come back as the address Stripe gave and send the return address, and there is no subscription checkout any more', {
+    unlock: 'https://stripe.k31.invalid/unlock', portal: 'https://stripe.k31.invalid/portal', returnTo: 'https://app.k31.invalid/app.html?lumfrom=deep#/oracle', noCheckout: true
+  }, { unlock: co1.url, portal: po1.url, returnTo: bIn.calls[2].body.returnTo, noCheckout: typeof CO.billingCheckout === 'undefined' });
   var bReasons = {};
   var bCases = [['404', httpErr(404)], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['already', httpErr(409, 'ALREADY')], ['noacct', httpErr(404, 'NO_ACCOUNT')], ['401', httpErr(401, 'SIGNED_OUT')], ['500', httpErr(502, 'STRIPE')]];
   for (var bi = 0; bi < bCases.length; bi++) {
     var be = bCases[bi][1];
     CO._setClientForTests(oracleClient(function () { return { data: null, error: be }; }).client, { user: { id: 'u1' } });
-    bReasons[bCases[bi][0]] = (await CO.billingCheckout('annual', 'https://x.invalid/')).reason;
+    bReasons[bCases[bi][0]] = (await CO.billingUnlock('https://x.invalid/')).reason;
   }
   t('K33', 'each way billing can fail is a reason, and a missing account is told apart from a missing function', {
     '404': 'notSetUp', nc: 'notConfigured', already: 'already', noacct: 'noAccount', '401': 'signedOut', '500': 'error'
@@ -2142,40 +2169,16 @@ async function runCloudTests() {
     localSignOut: adSignOut[0], reasons: adReasons
   });
 
-  /* K57: Luminary bought inside the apps (docs/REVENUECAT-SETUP.md). After a
-     store purchase or a restore the app asks the store function to read the
-     purchase from RevenueCat. The call is never made without a session and
-     carries nothing but the action, because the server reads the reader from
-     the token and the purchase from RevenueCat, never from the page. status()
-     names the user id, which the app hands RevenueCat as the app user id. And
-     an account deletion that could not reach RevenueCat is told apart. */
-  var stCalls = [];
-  var stClient = function (answer) {
-    return { functions: { invoke: function (name, opts) { stCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } } };
-  };
-  var ST = loadIsolatedCloud({ createClient: function () { return {}; } });
-  ST._setClientForTests(stClient({ data: { active: true }, error: null }), null);
-  var stNo = await ST.storeSync();
-  var stCallsSignedOut = stCalls.length;
-  ST._setClientForTests(stClient({ data: { active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z', extra: 'x' }, error: null }), { user: { id: 'u57' } });
-  var stOk = await ST.storeSync();
-  var stUid = ST.status().userId;
-  var stReasons = {};
-  var stCases = [['503', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['502', httpErr(502, 'UPSTREAM')]];
-  for (var si = 0; si < stCases.length; si++) {
-    ST._setClientForTests(stClient({ data: null, error: stCases[si][1] }), { user: { id: 'u57' } });
-    stReasons[stCases[si][0]] = (await ST.storeSync()).reason;
-  }
+  /* K57: an account deletion that could not reach RevenueCat is told apart.
+     The app no longer sells anything through the stores (18 October 2026:
+     every add-on is free in the apps), so the store sync went with it; the
+     account function still closes a RevenueCat record when that service is
+     set up, and its failure must still read as its own reason. */
   AD._setClientForTests(adClient({ data: null, error: httpErr(502, 'REVENUECAT') }), { user: { id: 'u1' } });
   var stDel = (await AD.accountDelete('delete')).reason;
-  t('K57', 'the store sync is not asked without a session, sends only its action to the store function, returns the four fields, names each failure, status() carries the user id, and a deletion that could not reach RevenueCat says so', {
-    signedOut: 'signedOut', callsSignedOut: 0, fn: 'store', body: '{"action":"sync"}',
-    ok: { ok: true, active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z' },
-    userId: 'u57', reasons: { '503': 'notConfigured', '404': 'notSetUp', mfa: 'signedOut', '502': 'error' }, deleteReason: 'revenuecat'
-  }, {
-    signedOut: stNo.reason, callsSignedOut: stCallsSignedOut, fn: stCalls[0] && stCalls[0].name, body: stCalls[0] && JSON.stringify(stCalls[0].body),
-    ok: stOk, userId: stUid, reasons: stReasons, deleteReason: stDel
-  });
+  t('K57', 'a deletion that could not reach RevenueCat says so, and the module no longer carries a store sync', {
+    deleteReason: 'revenuecat', noStoreSync: true
+  }, { deleteReason: stDel, noStoreSync: typeof CO.storeSync === 'undefined' });
 
   /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
      travels with the status and the checkout as two capital letters or not at
@@ -2187,11 +2190,11 @@ async function runCloudTests() {
   CO._setClientForTests(bCo.client, { user: { id: 'u1' } });
   await CO.billingStatus({ country: 'FR' });
   await CO.billingStatus({ country: 'france' });
-  await CO.billingCheckout('annual', 'https://x.invalid/', 'GB');
-  await CO.billingCheckout('annual', 'https://x.invalid/');
+  await CO.billingUnlock('https://x.invalid/', 'GB');
+  await CO.billingUnlock('https://x.invalid/');
   CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'REGION') }; }).client, { user: { id: 'u1' } });
-  var bRegion = await CO.billingCheckout('annual', 'https://x.invalid/', 'DE');
-  t('K34b', 'the country guess is sent with the status and the checkout only as two capital letters, and a country not sold to yet comes back as region', {
+  var bRegion = await CO.billingUnlock('https://x.invalid/', 'DE');
+  t('K34b', 'the country guess is sent with the status and the unlock only as two capital letters, and a country not sold to yet comes back as region', {
     status: 'FR', badDropped: true, checkout: 'GB', noneDropped: true, region: 'region'
   }, {
     status: bCo.calls[0].body.country, badDropped: !('country' in bCo.calls[1].body) || bCo.calls[1].body.country === undefined,
@@ -2252,6 +2255,20 @@ async function runCloudTests() {
     ok: !!gOk.ok, url: gOk.url, endpoint: !!gSent[0] && /\/functions\/v1\/billing$/.test(gSent[0].url),
     anon: !!gHdr && gHdr.Authorization === 'Bearer ' + gHdr.apikey && /^eyJ/.test(gHdr.apikey || ''), body: gBody, reasons: gReasons
   });
+
+  /* K34f: Omni is asked of the Oracle function with the shuffle, the count
+     and the topic and nothing else, and is refused as premium like every
+     add-on. */
+  var omOc = oracleClient(function () { return { data: { reading: { title: 'General \u00b7 Omni \u00b7 9 cards', passages: [{ tag: 'CALCULATED', text: 'x' }] } }, error: null }; });
+  CO._setClientForTests(omOc.client, null);
+  var omNo = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  CO._setClientForTests(omOc.client, { user: { id: 'u1' } });
+  var omOk = await CO.tarotRead({ seed: 7, count: 9, topic: 'general', extra: 'no' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var omLocked = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  t('K34f', 'Omni is not asked without a session, goes to the oracle function as kind tarot with the seed, count and topic only, and a reader without Luminary is refused as premium', {
+    signedOut: 'signedOut', fn: 'oracle', body: { kind: 'tarot', seed: 7, count: 9, topic: 'general' }, ok: true, locked: 'premium'
+  }, { signedOut: omNo.reason, fn: omOc.calls[0] && omOc.calls[0].name, body: omOc.calls[0] && omOc.calls[0].body, ok: !!omOk.ok, locked: omLocked.reason });
 
   /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
      October 2026. A password that passed on an account with an authenticator
@@ -2836,9 +2853,9 @@ async function runCloudTests() {
   var dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']|&[mn]dash;');
   var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
   var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
-  /* Eight links in the app: Settings twice and the Luminary purchase, in each
-     shell, and the Cycle Audit's unlock in each since 18 October 2026. */
-  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, at the Luminary purchase and at the Cycle Audit unlock; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+  /* Eight links in the app, in each shell: Settings twice, the Luminary gate
+     in the Oracle, and the same gate in the tarot room for Omni. */
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
     cover: true, appLinks: 8, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
@@ -2850,7 +2867,7 @@ async function runCloudTests() {
     oracleNotSent: /birth date, birth time and birth place are not sent/.test(privSrc),
     moonshot: /Moonshot AI/.test(termsSrc),
     supportRoute: /#\/support/.test(termsSrc) && /#\/support/.test(privSrc) && /seg\[0\] === 'support'/.test(appSrcK),
-    renewal: /renews automatically/i.test(termsSrc) && /Renews automatically each month or year/.test(appSrcK),
+    renewal: /one time payment/i.test(termsSrc) && /not a subscription/.test(termsSrc) && /One payment, not a subscription/.test(appSrcK) && !/Renews automatically each month or year/.test(appSrcK),
     noDash: !dashRe.test(termsSrc) && !dashRe.test(privSrc),
     mfaCovers: /'support_requests'/.test(mfaSrc),
     sqlInsertOnly: /for insert to anon, authenticated/.test(sqlSrc) && !/for select|for update|for delete|for all/.test(sqlSrc)
@@ -2883,7 +2900,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);

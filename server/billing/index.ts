@@ -1,20 +1,30 @@
 // server/billing/index.ts: Codex Luminary, a Supabase Edge Function.
 //
-// WHAT IT IS. The Celestial Codex's Stripe subscription, ported from its
-// server/lib/stripeServer.ts and its four billing handlers. Luminary is the
-// paid tier, and in inCommon the one thing it unlocks is the in-depth Oracle
-// reading. The prices are the Codex's: $12.99 a month or $119.99 a year.
+// WHAT IT IS. Codex Luminary is inCommon's paid tier, and since 18 October
+// 2026 it is bought once, at an amount the reader chooses: the owner's
+// decision that every add-on takes the Cycle Audit's form of payment, one time
+// and the reader's choice, and that one payment opens all of them. The add-ons
+// are the in-depth Oracle readings, Omni tarot and the Cycle Audit, and any
+// added later. The floor is $3, which leaves something after Stripe's fee, and
+// the box starts at $12. Inside the apps every add-on is free, so nothing here
+// is sold there.
 //
-// ONE FUNCTION, SIX JOBS. The page posts { action } to it: "status" reads a
-// reader's subscription, "checkout" opens a Stripe Checkout page, "portal"
-// opens Stripe's billing portal, "unlock" opens a one time Checkout for the
-// Cycle Audit at an amount the reader chooses, and "support" opens one for a
-// gift, which is the only action that needs no sign in. And Stripe itself
-// posts its webhook here,
-// which is told apart by the stripe-signature header it always carries. The
-// Codex had four handlers because it had a router; here one function means one
-// thing to deploy, one address to give Stripe, and one copy of the code that
-// reads Stripe's answer, rather than two copies that can drift.
+// THE SUBSCRIPTION IS RETIRED, NOT ERASED. Until 18 October Luminary was the
+// Celestial Codex's Stripe subscription ($12.99 a month or $119.99 a year).
+// No new subscription can be started, but a reader who holds one keeps it until
+// it ends: their row in `subscriptions` is still kept current from Stripe, a
+// live one still opens every add-on, and the billing portal still lets them
+// cancel it. A purchase made in the apps through RevenueCat, if one was ever
+// made, counts the same way and is read from `store_subscriptions`.
+//
+// ONE FUNCTION, FIVE JOBS. The page posts { action } to it: "status" says
+// whether the reader has Luminary, "unlock" opens the one time Checkout,
+// "portal" opens Stripe's billing portal for a reader who subscribed before,
+// and "support" opens a Checkout for a gift, which is the only action that
+// needs no sign in. "checkout", the subscription, answers RETIRED. And Stripe
+// itself posts its webhook here, told apart by the stripe-signature header it
+// always carries: one function means one thing to deploy, one address to give
+// Stripe, and one copy of the code that reads Stripe's answer.
 //
 // That is why this function is deployed with JWT verification OFF: Stripe
 // cannot send a Supabase token. Readers are still named from their token, by
@@ -27,48 +37,27 @@
 // Secrets it reads: STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET (both needed
 // before anybody can pay). LUMINARY_ADMIN_EMAILS is optional. LUMINARY_TAX and
 // LUMINARY_SELL_EU_UK are both off unless set to "on": see "THE EU AND THE UK"
-// below and docs/LUMINARY-EU-UK.md. SUPABASE_URL,
-// SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
-// The tables it writes are `subscriptions` and `cycle_unlocks`, both in
-// server/oracle/schema.sql. It
-// also reads `store_subscriptions` (server/store/schema.sql), the purchases
-// made inside the apps, so the page is told one status wherever Luminary was
-// bought, and a reader who bought it in an app is not offered it again here.
+// below and docs/LUMINARY-EU-UK.md. SUPABASE_URL, SUPABASE_ANON_KEY and
+// SUPABASE_SERVICE_ROLE_KEY are provided by Supabase. The tables it writes are
+// `luminary_unlocks` and `subscriptions`, both in server/oracle/schema.sql. It
+// also reads `store_subscriptions` (server/store/schema.sql).
 
 import Stripe from "npm:stripe@17.7.0";
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
-// THE CYCLE AUDIT, PAY WHAT YOU WANT (owner, 18 October 2026). One payment,
-// of an amount the reader chooses at Stripe's checkout, opens the Cycle Audit
-// for the account for good: every passage it reads, now and as new ones come.
-// The floor is $3, which leaves something after Stripe's fee, and the box
-// starts at $12. The ceiling is only there to catch a slipped finger. It is a
-// single custom amount price under its own lookup key, made on the first
-// unlock, the way the Luminary prices are. A cycle_unlocks row records it
-// (server/oracle/schema.sql), and the Oracle reads that row before it writes a
-// Cycle Audit on the website. Inside the apps the audit is free, by the
-// owner's decision, so nothing here is sold there.
-const CYCLE = { lookup: "incommon_cycle_audit_pwyw", min: 300, preset: 1200, max: 50000 } as const;
+// Codex Luminary, once: a single custom amount price under its own lookup key,
+// made on the first unlock on its own product.
+const LUMINARY = { lookup: "incommon_luminary_once", min: 300, preset: 1200, max: 50000 } as const;
 // A GIFT TO SUPPORT INCOMMON, the owner's donate button for the apps (18
 // October 2026). It buys nothing and unlocks nothing, so it needs no account:
 // a reader who never signed in can give. It is called a gift rather than a
 // donation on every surface, because inCommon is not a charity and a gift to it
 // is not tax deductible, and "donate" says otherwise to most people.
 const SUPPORT = { lookup: "incommon_support_gift", min: 100, preset: 500, max: 50000 } as const;
-
-// inCommon's own lookup keys, not the Codex's, so pointing this at the Stripe
-// account the Codex used cannot pick up or change the Codex's product.
+// The retired subscription's lookup keys, kept only to name the plan of a
+// subscription a reader still holds.
 const LOOKUP = { monthly: "incommon_luminary_monthly", annual: "incommon_luminary_annual" } as const;
-const PRICES = {
-  monthly: { amount: 1299, interval: "month" },
-  annual: { amount: 11999, interval: "year" },
-} as const;
 const ACTIVE = new Set(["active", "trialing"]);
-// The free trial, the owner's decision of 12 October 2026: seven days on
-// either plan, card taken at checkout, charged when the trial ends unless the
-// reader cancels first. Once per reader: anybody who has ever held a Luminary
-// subscription, here or in the apps, pays from the first day.
-const TRIAL_DAYS = 7;
 const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 // Confirmed addresses only, the same rule as server/oracle: an unconfirmed
 // address proves nothing about who holds it.
@@ -80,88 +69,47 @@ const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
 // A seller outside the EU owes EU VAT on a digital service sold to a consumer
 // there from the very first sale, and the UK is the same; there is no small
 // seller threshold for either. The owner decided on 12 October 2026 not to sell
-// Luminary in either until volume pays for the registrations, and to have the
-// rest prepared so that turning it on is setting two secrets.
+// in either until volume pays for the registrations.
 //
 // So, while LUMINARY_SELL_EU_UK is off (the default):
 //   * status tells the page the country it guessed is closed, and the gate says
-//     Luminary is not available there yet instead of offering a plan;
-//   * checkout refuses that country with REGION before Stripe is asked;
+//     Luminary is not available there yet instead of offering it;
+//   * an unlock is refused for that country with REGION before Stripe is asked;
 //   * and because the page's country is only a guess from the time zone, the
 //     webhook looks at what Stripe actually collected, the billing address and
-//     the card's country, and cancels and refunds a subscription where either
-//     is in the EU or the UK. That is the line that holds; the other two are
+//     the card's country, and refunds a payment where either is in the EU or
+//     the UK, opening nothing. That is the line that holds; the other two are
 //     courtesy, so nobody is charged to be told no.
 //
-// With it on, an EU or UK reader is sold the EUR or GBP price plus their own
-// country's VAT, and is SHOWN the total with VAT in it before they pay
-// (consumer law there wants the price shown to be the price paid). Stripe Tax
-// adds the VAT at checkout, and Checkout asks the reader to agree that the in-depth
-// readings start at once and the 14 day right to withdraw ends with that,
-// which Terms section 7 already says and EU law wants as an explicit tick.
+// With it on, Stripe Tax adds the reader's VAT at checkout, and Checkout asks
+// them to agree that the add-ons open at once and the 14 day right to withdraw
+// ends with that, which the Terms say and EU law wants as an explicit tick.
 // Selling there without Stripe Tax would sell without charging the VAT that is
 // owed, so LUMINARY_SELL_EU_UK is refused unless LUMINARY_TAX is on too.
-//
-// LUMINARY_TAX on its own turns on Stripe Tax for every checkout, for the day
-// US states (or anywhere else) need it. It only charges tax where the Stripe
-// account has a registration added, so switching it on does nothing until one
-// is. It needs the US prices' tax behaviour set in Stripe: see the doc.
+// LUMINARY_TAX on its own turns on Stripe Tax for every unlock; it only charges
+// tax where the Stripe account has a registration added.
 const EU_UK = new Set([
   "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT",
   "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "MC", "GB", "IM",
 ]);
-const UK = new Set(["GB", "IM"]);
 const TAX = Deno.env.get("LUMINARY_TAX") === "on";
 const SELL_EU_UK = Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && TAX;
 if (Deno.env.get("LUMINARY_SELL_EU_UK") === "on" && !TAX) {
   console.error("billing: LUMINARY_SELL_EU_UK is on but LUMINARY_TAX is not; the EU and the UK stay closed until both are on");
 }
-// The prices there, set by the owner on 12 October 2026: the same money as the
-// US price before tax, converted at that day's rates (1 USD = 0.891841 EUR and
-// 0.754808 GBP), so a sale in Paris or London earns what a sale in Ohio does.
-// They are NET, like the US price, and each reader pays their own country's VAT
-// on top: the US price is "plus any applicable taxes" too, so this is the same
-// price everywhere rather than a cheaper one where VAT is high. Changing an
-// amount here does not change a price Stripe already holds; see the doc for how
-// to re-price when the exchange rate has moved.
-const LOCAL = {
-  eur: { monthly: 1159, annual: 10701 },
-  gbp: { monthly: 980, annual: 9057 },
-} as const;
-// Standard VAT rates, for SHOWING the total before checkout; Stripe Tax decides
-// what is actually charged. Checked against published 2026 tables on 12 October
-// 2026. An astrology reading is an electronically supplied service, which takes
-// the standard rate everywhere. If a country changes its rate, change it here
-// in the same week, or the page shows one total and Checkout charges another.
-// Monaco is inside the French VAT area and the Isle of Man inside the UK's.
-const VAT: Record<string, number> = {
-  AT: 20, BE: 21, BG: 20, HR: 25, CY: 19, CZ: 21, DK: 25, EE: 24, FI: 25.5, FR: 20, DE: 19, GR: 24, HU: 27,
-  IE: 23, IT: 22, LV: 21, LT: 21, LU: 17, MT: 18, NL: 21, PL: 23, PT: 23, RO: 21, SK: 23, SI: 22, ES: 21,
-  SE: 25, MC: 20, GB: 20, IM: 20,
-};
-// The way Stripe Tax rounds it: the tax on the net amount, to the cent.
-const withVat = (net: number, country: string) => net + Math.round(net * (VAT[country] ?? 0) / 100);
-type Cur = "usd" | "eur" | "gbp";
-const lookupFor = (cur: Cur, plan: keyof typeof LOOKUP) => cur === "usd" ? LOOKUP[plan] : LOOKUP[plan] + "_" + cur;
-const curFor = (country: string | null): Cur =>
-  !country || !SELL_EU_UK || !EU_UK.has(country) ? "usd" : UK.has(country) ? "gbp" : "eur";
 const countryOf = (v: unknown): string | null => /^[A-Z]{2}$/.test(String(v ?? "")) ? String(v) : null;
 const closedTo = (country: string | null) => !!country && EU_UK.has(country) && !SELL_EU_UK;
-const priceShown = (cur: Cur, country: string | null) => cur === "usd" || !country
-  ? { currency: "usd", monthly: PRICES.monthly.amount, annual: PRICES.annual.amount, taxIncluded: false }
-  : { currency: cur, monthly: withVat(LOCAL[cur].monthly, country), annual: withVat(LOCAL[cur].annual, country), taxIncluded: true };
 // What the reader ticks at checkout in the EU and the UK. Stripe shows it beside
 // the terms of service box; the Terms link itself is set in the Stripe dashboard.
 const WITHDRAWAL_WAIVER =
-  "I ask for the in-depth readings to be available as soon as I subscribe, and I understand that I lose my 14 day right to withdraw once they are.";
+  "I ask for the add-ons to open as soon as I pay, and I understand that I lose my 14 day right to withdraw once they have.";
 
-type Plan = keyof typeof LOOKUP;
 type Row = {
   user_id: string;
   stripe_customer_id: string;
   stripe_subscription_id: string | null;
   status: string;
-  plan: Plan | null;
+  plan: "monthly" | "annual" | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
   updated_at: string | null;
@@ -213,22 +161,11 @@ async function rowFor(userId: string): Promise<Row | null> {
 type StoreRow = {
   source: "apple" | "google" | "promotional";
   status: string;
-  plan: Plan | null;
+  plan: "monthly" | "annual" | null;
   current_period_end: string | null;
   will_renew: boolean;
   management_url: string | null;
 };
-
-// Whether this reader may start the free trial: nothing in Stripe's history
-// for them (syncCustomer keeps stripe_subscription_id once any subscription
-// has existed, cancelled ones included, since Stripe lists those too) and no
-// app purchase of any status. The page reads it to word the button; checkout
-// asks Stripe itself before it grants one.
-async function trialOpen(userId: string, row: Row | null): Promise<boolean> {
-  if (row && row.stripe_subscription_id) return false;
-  const { data } = await db.from("store_subscriptions").select("user_id").eq("user_id", userId).maybeSingle();
-  return !data;
-}
 
 // A live app purchase for this reader, or null. The row is read, never written
 // here: server/store owns it. A project that has not run server/store/schema.sql
@@ -240,48 +177,6 @@ async function storeRowFor(userId: string): Promise<StoreRow | null> {
   const r = (data as StoreRow | null) ?? null;
   if (!r || r.status !== "active") return null;
   return r.current_period_end && Date.parse(r.current_period_end) <= Date.now() ? null : r;
-}
-
-// The US prices are made exactly as they always were, on the first checkout.
-// The EUR and GBP ones are NET (tax_behavior exclusive), the same as the US.
-// The EUR and GBP ones are made the same way the first time somebody in the EU
-// or the UK checks out with selling there switched on, on the SAME product, so
-// Stripe holds one Luminary in three currencies rather than three products.
-async function ensurePrices(s: Stripe, cur: Cur = "usd"): Promise<Record<Plan, string>> {
-  const keys = { monthly: lookupFor(cur, "monthly"), annual: lookupFor(cur, "annual") };
-  const existing = await s.prices.list({ lookup_keys: Object.values(keys), active: true, limit: 10 });
-  const byKey = new Map(existing.data.map((p) => [p.lookup_key, p.id]));
-  if (byKey.size === 2) return { monthly: byKey.get(keys.monthly)!, annual: byKey.get(keys.annual)! };
-  let productId: string | null = null;
-  if (cur !== "usd") {
-    const usd = await s.prices.list({ lookup_keys: Object.values(LOOKUP), limit: 1 });
-    const p = usd.data[0]?.product;
-    productId = typeof p === "string" ? p : p?.id ?? null;
-  }
-  if (!productId) {
-    const product = await s.products.create({
-      name: "Codex Luminary",
-      description: "In-depth Oracle readings: long-form daily, weekly and monthly readings from the whole chart, with timing windows, shadow work and journal prompts.",
-    });
-    productId = product.id;
-  }
-  const ids = {} as Record<Plan, string>;
-  for (const plan of ["monthly", "annual"] as const) {
-    const had = byKey.get(keys[plan]);
-    if (had) { ids[plan] = had; continue; }
-    const price = await s.prices.create({
-      product: productId,
-      currency: cur,
-      unit_amount: cur === "usd" ? PRICES[plan].amount : LOCAL[cur][plan],
-      recurring: { interval: PRICES[plan].interval },
-      lookup_key: keys[plan],
-      transfer_lookup_key: true,
-      // Net, like the US price: Stripe Tax adds the buyer's own VAT on top.
-      ...(cur === "usd" ? {} : { tax_behavior: "exclusive" as const }),
-    });
-    ids[plan] = price.id;
-  }
-  return ids;
 }
 
 // A price whose amount the reader types at checkout, made once under its
@@ -302,19 +197,18 @@ async function ensureCustomPrice(s: Stripe, p: { lookup: string; min: number; pr
 }
 
 async function unlockedRow(userId: string): Promise<boolean> {
-  const { data } = await db.from("cycle_unlocks").select("user_id").eq("user_id", userId).maybeSingle();
+  const { data } = await db.from("luminary_unlocks").select("user_id").eq("user_id", userId).maybeSingle();
   return !!data;
 }
 
-// Records a paid Cycle Audit checkout, or refunds it when it came from a
-// country not sold to yet (the same backstop the subscription has: the page's
-// country is a guess, and the address and card Stripe collected are not).
-// Safe to run twice, because Stripe retries webhooks and the status sync may
-// find the same session: the row is keyed by reader and the refund carries an
-// idempotency key.
+// Records a paid Luminary checkout, or refunds it when it came from a country
+// not sold to yet: the page's country is a guess, and the address and card
+// Stripe collected are not. Safe to run twice, because Stripe retries webhooks
+// and the status sync may find the same session: the row is keyed by reader and
+// the refund carries an idempotency key.
 async function recordUnlock(s: Stripe, session: Stripe.Checkout.Session): Promise<boolean> {
   const userId = session.metadata?.userId;
-  if (session.metadata?.kind !== "cycle_unlock" || !userId || session.payment_status !== "paid") return false;
+  if (session.metadata?.kind !== "luminary_unlock" || !userId || session.payment_status !== "paid") return false;
   const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
   let card: string | null = null;
   if (pi && !SELL_EU_UK) {
@@ -326,7 +220,7 @@ async function recordUnlock(s: Stripe, session: Stripe.Checkout.Session): Promis
   }
   const billing = session.customer_details?.address?.country ?? null;
   if (closedTo(billing) || closedTo(card)) {
-    console.error("billing: refusing a Cycle Audit unlock from a country not yet sold to", { session: session.id, billing, card });
+    console.error("billing: refusing a Luminary unlock from a country not yet sold to", { session: session.id, billing, card });
     if (pi) {
       try {
         await s.refunds.create({ payment_intent: pi, reason: "requested_by_customer", metadata: { why: "eu_uk_not_sold_yet", session: session.id } },
@@ -337,7 +231,7 @@ async function recordUnlock(s: Stripe, session: Stripe.Checkout.Session): Promis
     }
     return false;
   }
-  const { error } = await db.from("cycle_unlocks").upsert({
+  const { error } = await db.from("luminary_unlocks").upsert({
     user_id: userId,
     stripe_session_id: session.id,
     amount: session.amount_total ?? 0,
@@ -347,13 +241,12 @@ async function recordUnlock(s: Stripe, session: Stripe.Checkout.Session): Promis
   return true;
 }
 
-// The webhook can be missed, as with the subscription, so a status asked with
-// a sync looks at this reader's recent completed checkouts at Stripe and
-// records an unlock it finds there.
+// The webhook can be missed, so a status asked with a sync looks at this
+// reader's recent completed checkouts at Stripe and records an unlock it finds.
 async function recoverUnlock(s: Stripe, customerId: string): Promise<boolean> {
   const list = await s.checkout.sessions.list({ customer: customerId, status: "complete", limit: 20 });
   for (const sess of list.data) {
-    if (sess.metadata?.kind === "cycle_unlock" && sess.payment_status === "paid" && await recordUnlock(s, sess)) return true;
+    if (sess.metadata?.kind === "luminary_unlock" && sess.payment_status === "paid" && await recordUnlock(s, sess)) return true;
   }
   return false;
 }
@@ -385,12 +278,13 @@ async function syncCustomer(s: Stripe, customerId: string): Promise<void> {
   if (error) throw error;
 }
 
-// Reads a reader's status, and asks Stripe again when the row is stale, so it
-// comes right even if the webhook was never set up. The Codex's rule: stale
-// when not active, when the paid period has ended, or when six hours old.
+// Whether every add-on is open to this reader, and what the page needs to say
+// about how. The subscription row is asked of Stripe again when it is stale, as
+// it always was, so a subscriber who cancels sees it end on time; an unlock the
+// webhook missed is looked for when the page asks with a sync.
 async function statusFor(user: { id: string; email?: string; email_confirmed_at?: string | null }, force: boolean, country: string | null = null) {
   let row = await rowFor(user.id);
-  if (row && stripe) {
+  if (row && stripe && row.stripe_subscription_id) {
     const stale = force ||
       !ACTIVE.has(row.status) ||
       (row.current_period_end !== null && Date.parse(row.current_period_end) < Date.now()) ||
@@ -406,41 +300,33 @@ async function statusFor(user: { id: string; email?: string; email_confirmed_at?
     }
   }
   const admin = isAdmin(user);
-  const paid = !!row && ACTIVE.has(row.status);
-  let unlocked = admin || await unlockedRow(user.id);
-  if (!unlocked && force && row && stripe) {
-    try { unlocked = await recoverUnlock(stripe, row.stripe_customer_id); }
+  let once = await unlockedRow(user.id);
+  if (!once && force && row && stripe) {
+    try { once = await recoverUnlock(stripe, row.stripe_customer_id); }
     catch (e) { console.error("billing: the unlock sync failed", e); }
   }
-  // An app purchase, kept current by server/store from RevenueCat. When a
-  // reader holds both, the Stripe one is the one described, because it is
-  // the one this page can manage; the app one is still counted.
-  const app = paid ? null : await storeRowFor(user.id);
+  const subscribed = !!row && ACTIVE.has(row.status);
+  const app = subscribed ? null : await storeRowFor(user.id);
   return {
-    isPremium: admin || paid || !!app,
-    plan: app ? app.plan : row?.plan ?? null,
-    status: app ? "active" : row?.status ?? null,
-    currentPeriodEnd: app ? app.current_period_end : row?.current_period_end ?? null,
-    cancelAtPeriodEnd: app ? !app.will_renew : row?.cancel_at_period_end ?? false,
-    // Where it was bought, so the page sends the reader to the right place to
-    // manage it: Stripe's portal, or Apple's or Google's own settings.
-    source: app ? app.source : row ? "stripe" : null,
+    // Every add-on: in-depth readings, Omni and the Cycle Audit.
+    isPremium: admin || once || subscribed || !!app,
+    // Opened by the one time payment, as against a subscription held from
+    // before, so the page can say which.
+    once,
+    // A subscription from before 18 October, described so the reader can see
+    // when it ends and manage it. Null for everybody else.
+    plan: app ? app.plan : subscribed ? row!.plan : null,
+    status: app ? "active" : subscribed ? row!.status : null,
+    currentPeriodEnd: app ? app.current_period_end : subscribed ? row!.current_period_end : null,
+    cancelAtPeriodEnd: app ? !app.will_renew : subscribed ? row!.cancel_at_period_end : false,
+    source: app ? app.source : subscribed ? "stripe" : null,
     manageUrl: app ? app.management_url : null,
+    hasAccount: !!row && !!row.stripe_subscription_id,
     billingConfigured: !!stripe,
-    // An admin passes the paywall without a subscription, so there is nothing
-    // of theirs to manage and the page should not offer to.
-    hasAccount: !!row,
-    // Whether Luminary is sold in the country the page guessed, and at what
-    // price there. A page that sent no country is quoted the US price.
+    // Whether Luminary is sold in the country the page guessed.
     regionOpen: !closedTo(country),
-    price: priceShown(curFor(country), country),
-    // Days of free trial a checkout would start for this reader now, 0 when
-    // they have had one or already pay.
-    trialDays: !admin && !paid && !app && await trialOpen(user.id, row) ? TRIAL_DAYS : 0,
-    // The Cycle Audit, opened once by a payment of the reader's choosing. It
-    // is sold where Luminary is, so regionOpen above answers for it too.
-    cycleUnlocked: unlocked,
-    cycleFloor: CYCLE.min,
+    // The least a reader may pay, in cents, so the page cannot name another.
+    floor: LUMINARY.min,
   };
 }
 
@@ -462,14 +348,11 @@ async function customerFor(s: Stripe, user: { id: string; email?: string }): Pro
 // Where Stripe sends the reader back. The page names its own address, so the
 // same function serves the deploy preview, the live site and a local copy.
 // The address must be one of ours; any other https origin is refused.
-// (Tightened in the security pass of 12 October 2026: any https address used
-// to be accepted. Nothing sensitive travels in the return URL, so this was
-// hygiene rather than a hole. The --incommon.netlify.app suffix keeps deploy
-// previews working.)
 // incommonspace.com became the site's address on 16 October 2026 and
 // incommon.netlify.app answers it with a 301, so a checkout opened from the
 // live site names incommonspace.com. Until 18 October it was not on this list
-// and every checkout from the live site was refused as BAD_REQUEST.
+// and every checkout from the live site was refused as BAD_REQUEST. The
+// --incommon.netlify.app suffix keeps deploy previews working.
 const OWN = (u: URL) =>
   u.hostname === "incommonspace.com" ||
   u.hostname === "www.incommonspace.com" ||
@@ -491,47 +374,6 @@ function withQuery(u: URL, key: string, value: string): string {
   return x.toString();
 }
 
-// THE BACKSTOP. A completed checkout whose billing address or card is in the EU
-// or the UK, while selling there is off, is cancelled at once and its first
-// payment refunded in full. The page's country guess and the REGION refusal are
-// meant to stop this before it starts; this is for the reader the guess missed
-// (a VPN, a traveller, a zone set by hand). Stripe emails the refund receipt.
-// Every step tolerates being run twice, because Stripe retries a webhook that
-// failed and may deliver one more than once.
-async function refuseIfClosed(s: Stripe, session: Stripe.Checkout.Session): Promise<void> {
-  if (SELL_EU_UK || session.mode !== "subscription" || !session.subscription) return;
-  const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
-  const sub = await s.subscriptions.retrieve(subId, { expand: ["default_payment_method", "latest_invoice"] });
-  const pm = sub.default_payment_method as Stripe.PaymentMethod | string | null;
-  const card = pm && typeof pm !== "string" ? pm.card?.country ?? null : null;
-  const billing = session.customer_details?.address?.country ?? null;
-  if (!closedTo(billing) && !closedTo(card)) return;
-  console.error("billing: refusing a Luminary checkout from a country not yet sold to", { subId, billing, card });
-  if (sub.status !== "canceled") {
-    await s.subscriptions.update(subId, { metadata: { refused: "eu_uk_not_sold_yet" } });
-    await s.subscriptions.cancel(subId);
-  }
-  // The invoice names its payment as payment_intent on the API version this
-  // function is pinned to, and as charge on older ones; either can be refunded.
-  const inv = sub.latest_invoice as (Stripe.Invoice & { payment_intent?: string | { id: string } | null; charge?: string | { id: string } | null }) | string | null;
-  const invoice = inv && typeof inv !== "string" ? inv : null;
-  const idOf = (v: string | { id: string } | null | undefined) => typeof v === "string" ? v : v?.id ?? null;
-  const pi = idOf(invoice?.payment_intent), ch = idOf(invoice?.charge);
-  if (!invoice || (!pi && !ch) || !(invoice.amount_paid > 0)) {
-    if (invoice && invoice.amount_paid > 0) console.error("billing: REFUND BY HAND, no payment found on invoice", invoice.id);
-    return;
-  }
-  try {
-    await s.refunds.create(
-      { ...(pi ? { payment_intent: pi } : { charge: ch! }), reason: "requested_by_customer", metadata: { why: "eu_uk_not_sold_yet", subscription: subId } },
-      { idempotencyKey: "eu-uk-refund-" + invoice.id },
-    );
-  } catch (e) {
-    // Already refunded is the one failure that means the work is done.
-    if (!/already been refunded|charge_already_refunded/i.test(String((e as Error).message))) throw e;
-  }
-}
-
 async function webhook(req: Request): Promise<Response> {
   const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
   if (!stripe || !secret) {
@@ -551,15 +393,11 @@ async function webhook(req: Request): Promise<Response> {
   const customerId = typeof obj.customer === "string" ? obj.customer : obj.customer?.id;
   if (customerId && (event.type.startsWith("customer.subscription.") || event.type === "checkout.session.completed" || event.type.startsWith("invoice."))) {
     try {
-      if (event.type === "checkout.session.completed") {
-        const session = event.data.object as Stripe.Checkout.Session;
-        await refuseIfClosed(stripe, session);
-        await recordUnlock(stripe, session);
-      }
-      await syncCustomer(stripe, customerId);
+      if (event.type === "checkout.session.completed") await recordUnlock(stripe, event.data.object as Stripe.Checkout.Session);
+      else await syncCustomer(stripe, customerId);
     } catch (e) {
       // A 500 makes Stripe send it again later, which is what should happen.
-      console.error("billing: the webhook sync failed", e);
+      console.error("billing: the webhook failed", e);
       return reply(500, { code: "STORE" });
     }
   }
@@ -585,6 +423,9 @@ Deno.serve(async (req) => {
     try {
       const price = await ensureCustomPrice(stripe, SUPPORT, "Support inCommon",
         "A gift toward keeping inCommon running. It buys nothing and unlocks nothing.");
+      // Managed Payments off, always: under it Stripe is the seller of record,
+      // and inCommon is the seller (the Terms, the EU and UK hold). stripe@17's
+      // types predate the field, hence the widened params type.
       const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
         managed_payments: { enabled: false },
         mode: "payment",
@@ -614,88 +455,41 @@ Deno.serve(async (req) => {
   const country = countryOf(body.country);
   if (action === "status") return reply(200, { status: await statusFor(user, body.sync === true, country) });
 
-  if (action === "checkout") {
-    const plan = String(body.plan ?? "");
-    if (plan !== "monthly" && plan !== "annual") return reply(400, { code: "BAD_REQUEST" });
-    const back = returnAddress(body.returnTo);
-    if (!back) return reply(400, { code: "BAD_REQUEST" });
-    if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
-    if (closedTo(country)) return reply(403, { code: "REGION" });
-    const current = await statusFor(user, true);
-    if (current.isPremium) return reply(409, { code: "ALREADY" });
-    try {
-      const customer = await customerFor(stripe, user);
-      // Stripe is the record of who has subscribed before, so it is asked
-      // directly rather than trusting the row, which a missed webhook can
-      // leave behind.
-      const before = await stripe.subscriptions.list({ customer, status: "all", limit: 1 });
-      const trial = before.data.length === 0 && await trialOpen(user.id, null);
-      const cur = curFor(country);
-      const prices = await ensurePrices(stripe, cur);
-      const euUk = cur !== "usd";
-      // Managed Payments off, always. Stripe switches it on by default for a
-      // new account, and under it Stripe is the seller of record and refuses
-      // any product without a tax code; on the API version stripe@17 pins it
-      // refuses the session outright. inCommon is the seller (the Terms, the
-      // EU and UK hold, LUMINARY_TAX), so the checkout says so itself rather
-      // than depending on a dashboard default. stripe@17's types predate the
-      // field, hence the widened params type.
-      const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
-        managed_payments: { enabled: false },
-        mode: "subscription",
-        customer,
-        line_items: [{ price: prices[plan], quantity: 1 }],
-        allow_promotion_codes: true,
-        success_url: withQuery(back, "luminary", "success"),
-        cancel_url: withQuery(back, "luminary", "cancelled"),
-        subscription_data: { metadata: { userId: user.id }, ...(trial ? { trial_period_days: TRIAL_DAYS } : {}) },
-        // Stripe Tax needs an address to place the buyer, and saves the one
-        // collected onto the customer so renewals are taxed where they live.
-        ...(TAX ? {
-          automatic_tax: { enabled: true },
-          billing_address_collection: "required" as const,
-          customer_update: { address: "auto" as const, name: "auto" as const },
-        } : {}),
-        // A business buying in the EU or UK may give its VAT number and pay none.
-        ...(euUk ? {
-          tax_id_collection: { enabled: true },
-          consent_collection: { terms_of_service: "required" as const },
-          custom_text: { terms_of_service_acceptance: { message: WITHDRAWAL_WAIVER } },
-        } : {}),
-      };
-      const session = await stripe.checkout.sessions.create(params);
-      return reply(200, { url: session.url });
-    } catch (e) {
-      console.error("billing: checkout failed", e);
-      return reply(502, { code: "STRIPE" });
-    }
-  }
+  // The subscription was retired on 18 October 2026. A page from before then
+  // still sends this; it is told so rather than sold a subscription.
+  if (action === "checkout") return reply(410, { code: "RETIRED" });
 
   if (action === "unlock") {
     const back = returnAddress(body.returnTo);
     if (!back) return reply(400, { code: "BAD_REQUEST" });
     if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
     if (closedTo(country)) return reply(403, { code: "REGION" });
-    if (isAdmin(user) || await unlockedRow(user.id)) return reply(409, { code: "ALREADY" });
+    if ((await statusFor(user, false)).isPremium) return reply(409, { code: "ALREADY" });
     try {
       const customer = await customerFor(stripe, user);
-      const price = await ensureCustomPrice(stripe, CYCLE, "The Cycle Audit",
-        "Opens the Cycle Audit for the account: a reading of every long passage of the slow astral bodies across the chart. Pay what you want, once.");
-      const meta = { userId: user.id, kind: "cycle_unlock" };
+      const price = await ensureCustomPrice(stripe, LUMINARY, "Codex Luminary",
+        "Opens every inCommon add-on for the account: in-depth Oracle readings, Omni tarot and the Cycle Audit. Pay what you want, once.");
+      const meta = { userId: user.id, kind: "luminary_unlock" };
+      const euUk = !!country && EU_UK.has(country);
       const params: Stripe.Checkout.SessionCreateParams & { managed_payments: { enabled: boolean } } = {
         managed_payments: { enabled: false },
         mode: "payment",
         customer,
         line_items: [{ price, quantity: 1 }],
         submit_type: "pay",
-        success_url: withQuery(back, "cycle", "success"),
-        cancel_url: withQuery(back, "cycle", "cancelled"),
+        success_url: withQuery(back, "luminary", "success"),
+        cancel_url: withQuery(back, "luminary", "cancelled"),
         metadata: meta,
         payment_intent_data: { metadata: meta },
+        // Stripe Tax needs an address to place the buyer.
         ...(TAX ? {
           automatic_tax: { enabled: true },
           billing_address_collection: "required" as const,
           customer_update: { address: "auto" as const, name: "auto" as const },
+        } : {}),
+        ...(euUk ? {
+          consent_collection: { terms_of_service: "required" as const },
+          custom_text: { terms_of_service_acceptance: { message: WITHDRAWAL_WAIVER } },
         } : {}),
       };
       const session = await stripe.checkout.sessions.create(params);
@@ -711,7 +505,7 @@ Deno.serve(async (req) => {
     if (!back) return reply(400, { code: "BAD_REQUEST" });
     if (!stripe) return reply(503, { code: "NOT_CONFIGURED" });
     const row = await rowFor(user.id);
-    if (!row) return reply(404, { code: "NO_ACCOUNT" });
+    if (!row || !row.stripe_subscription_id) return reply(404, { code: "NO_ACCOUNT" });
     try {
       const session = await stripe.billingPortal.sessions.create({ customer: row.stripe_customer_id, return_url: back.toString() });
       return reply(200, { url: session.url });
