@@ -2549,6 +2549,11 @@ becomes permanent at the first upload, so it is the owner's to choose before
 then.
 
 ## Luminary in the apps is RevenueCat's
+**Retired on 18 October 2026, and the plugin is out of `native/`**: nothing is
+sold in the apps (see "Codex Luminary is one payment"). This section is the
+record of what was built. `server/store` stays, dormant, so a store subscription
+that exists keeps counting.
+
 Asked for by the owner on 12 October 2026 ("start the in-app purchases with
 RevenueCat"); `docs/REVENUECAT-SETUP.md` is the owner's half. Inside the apps
 Luminary is bought with Apple's In-App Purchase and Google Play Billing, with
@@ -4273,10 +4278,12 @@ is still synced from Stripe, a live one still opens every add-on, the member
 line says when it ends, and Manage billing opens the portal. The trial, the
 EUR and GBP prices, the VAT table and RevenueCat's selling code are gone from
 the app and the billing function. `server/store` and the account function's
-RevenueCat cleanup stay, dormant, for any record that exists; the plugin is
-still installed in `native/` and should come out (`npm uninstall
-@revenuecat/purchases-capacitor` and `npx cap sync`) before the next store
-build.
+RevenueCat cleanup stay, dormant, for any record that exists, so a store
+subscription that exists still opens every add-on on the website and the
+deletion dialog still says to cancel it with the store. The plugin is out of
+`native/` (package, lockfile, and the generated Android and iOS registrations,
+put back to exactly what they were before it went in), so Capacitor's own three
+packages are the whole native dependency list again.
 
 **`opened()` in the Oracle function is the one check**, for in depth, the
 Cycle Audit and Omni alike: an admin, the apps' origin, a `luminary_unlocks`

@@ -70,11 +70,16 @@ gift returns to.
 
 ## 5. The apps
 
-- **Take the RevenueCat plugin out before the next store build.** Nothing is
-  sold in the apps now, and an in-app purchase plugin with no purchases is a
-  question at review. In `native/`: `npm uninstall
-  @revenuecat/purchases-capacitor`, then `npx cap sync`. The App Store Connect
-  and Play Console subscription products can be removed too.
+- **The RevenueCat plugin is already out of `native/`**, because nothing is
+  sold in the apps now and an in-app purchase plugin with no purchases is a
+  question at review. Run `npm install` in `native/` once so your copy of
+  `node_modules` matches, then build as usual. If you added the In-App Purchase
+  capability in Xcode, remove it. The App Store Connect and Play Console
+  subscription products can be removed too, once nobody holds one.
+- **Existing subscribers keep everything.** A Stripe subscription from before
+  keeps opening every add-on and Manage billing, as above. A store subscription,
+  if one was ever bought, is still read from `store_subscriptions`, so leave the
+  `store` function and its secrets in place until the last one has lapsed.
 - **The gift may be refused at review.** Apple allows payment links on the
   United States storefront and treats a tip to a developer as an in-app
   purchase elsewhere (guideline 3.1.1); Google allows outside payment for
