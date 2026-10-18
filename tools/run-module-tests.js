@@ -458,7 +458,7 @@ if (!hdLine) {
     return appSrc.slice(i, j + 4);
   };
   const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
-    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + '\n}';
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
   /* Today is pinned to the day this was written, so the fixture stays inside
      the scan however long after that the suite is run. */
   class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
@@ -475,6 +475,8 @@ if (!hdLine) {
     natalDate: () => new Date(Date.UTC(1990, 0, 1)),
     chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
     anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    hdChart: () => ({ type: 'Projector', authority: 'Splenic: the body knows' }), numerology: () => ({ lp: 7 }),
+    ORACLE_STRATEGY: { Projector: 'Wait for the invitation' },
     norm360: x => ((x % 360) + 360) % 360,
     addDays: (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; },
     t2000: d => d.getTime() / 86400000 + 2440587.5 - 2451545.0,
@@ -501,9 +503,11 @@ if (!hdLine) {
   tTrue('Z4', 'only the four slow astral bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
   const dos = z.cycleDossier();
   const dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
-  t('Z5', 'the dossier names the first name, the touched points and the passages with their dates, and no birth date, no full name, no dash and no planet', {
-    name: true, points: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
-  }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos), passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
+  t('Z5', 'the dossier names the first name, the touched points, the design and the Life Path its questions are asked through, and the passages with their dates, and no birth date, no full name, no dash and no planet', {
+    name: true, points: true, design: true, lifePath: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
+  }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos),
+    design: /^HUMAN DESIGN: Projector; Strategy: Wait for the invitation; Authority: Splenic$/m.test(dos), lifePath: /^LIFE PATH: 7$/m.test(dos),
+    passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
     noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noPlanet: !/planet/i.test(dos) });
   const k1 = z.cycleKey(); z._cy = null; z._cyKey = null;
   const pending = z.cycleKey(); z.cycleWindows();
@@ -513,6 +517,25 @@ if (!hdLine) {
     const p = z.cyclePassages();
     return p.length <= 8 && p.every((w, i) => i === 0 || p[i - 1].from <= w.from) && p.every(w => !w.past);
   })());
+  /* The ledger layout: what the dashboard says about a passage is the scan's,
+     never the model's, and a reading kept before the layout still draws. */
+  const dm = mars[0] ? z.cyDash({ contact: 'Pluto conjunct natal Mars', window: 'the model\'s words',
+    tax: ['Set down the blade.', 'Let the last word go.'], dividend: ['A voice that need not win.'],
+    prompts: [{ system: 'stars', question: 'What feels at stake?' }, { system: 'design', question: 'What waits?' }, { system: 'numbers', question: 'What does seven ask?' }] }, mars[0], 0) : {};
+  const old = mars[0] ? z.cyDash({ contact: 'x', window: 'w', tax: 'One sentence here. Another one there.', dividend: 'Just this.', prompts: ['A plain question?'] }, mars[0], 0) : {};
+  const anyDash = JSON.stringify(dm) + JSON.stringify(old);
+  t('Z8', 'a passage dashboard takes its title, coordinate, window, years and exact dates from the scan, its lists and questions from the reading, and reads an older paragraph reading too', {
+    title: 'Pluto Conjunct Natal Mars', coord: '15°00′ Aquarius', window: true, years: '2031 · 2032 · 2033 · 2034', nodes: 5, badge: true,
+    tax: 2, sys: 'The Stars|The Design|The Numbers', oldTax: 2, oldPrompt: true, noDash: true
+  }, { title: dm.title, coord: dm.coord, window: dm.window === mars[0].range, years: dm.years, nodes: (dm.nodes || []).length,
+    badge: /Outer Transit/.test(dm.badge || ''), tax: (dm.tax || []).length, sys: (dm.prompts || []).map(q => q.sys).join('|'),
+    oldTax: (old.tax || []).length, oldPrompt: !!old.prompts && old.prompts.length === 1 && old.prompts[0].sysOn === false, noDash: !dashRe.test(anyDash) });
+  /* A block replaced by slicing between two anchors once took the next
+     block's opening sc-if with it, and the page still drew: the runtime
+     forgave the stray closer. Counting is what catches it. */
+  const tags = n => [(appSrc.match(new RegExp('<' + n + '[\\s>]', 'g')) || []).length, (appSrc.match(new RegExp('</' + n + '>', 'g')) || []).length];
+  t('Z9', 'every sc-if and sc-for in the app opens and closes in equal number', { scIf: true, scFor: true },
+    { scIf: tags('sc-if')[0] === tags('sc-if')[1], scFor: tags('sc-for')[0] === tags('sc-for')[1] });
 })();
 
 /* ------------------------------------------------ J: Omni lives on the server
