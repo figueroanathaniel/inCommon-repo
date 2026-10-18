@@ -4229,6 +4229,23 @@ positions come from astronomy-engine, which is not NASA. Its year range used a
 dash, and reads with middle dots. Z8 holds the dashboard against the Pluto
 fixture and an older reading.
 
+**The owner's style sheet was translated into tokens, not pasted.** Inline
+styles only, and the 768px media query became the two shells: two columns in
+the desktop markup, one in the phone's, with the phone's padding at 20px
+rather than 32px because a 390px screen cannot give 64px to padding. Its
+crimson Tax and emerald Dividend became `--ledger-tax` (amber `#e0a458`) and
+`--ledger-div` (teal `#4fb8c4`), fixed hues declared in all three roots like
+the category hues, because crimson sits on `--crisis`, which nothing but
+safety may go near, and emerald on `--ac` and `--ok`, which mean an action and
+a confirmed value. Its ✕ and ✓ markers became a hollow ring and a filled dot
+(set down, built), because a cross and a tick read as wrong and right, and a
+passage is never good or bad. Its violet text (`#c084fc`, `#8b5cf6`) is
+`--ac2-hi`; `system-ui` is `--fu`, the theme's own face, with the prompts in
+`--fb` italic because Karla carries no italic. **Z9 counts every `sc-if` and
+`sc-for` and holds them equal**: the first ledger pass replaced its block by
+slicing between anchors and took the long view's opening `sc-if` with it, and
+the page still drew, because the runtime forgave the stray closer.
+
 **The server writes it with inCommon's own instructions** (`CYCLE_INSTRUCTIONS`
 and `CYCLE_SCHEMA` in `server/oracle/index.ts`), not the Codex's, and they carry
 this file's rules for interpretive writing: what a passage offers and asks,

@@ -530,6 +530,12 @@ if (!hdLine) {
   }, { title: dm.title, coord: dm.coord, window: dm.window === mars[0].range, years: dm.years, nodes: (dm.nodes || []).length,
     badge: /Outer Transit/.test(dm.badge || ''), tax: (dm.tax || []).length, sys: (dm.prompts || []).map(q => q.sys).join('|'),
     oldTax: (old.tax || []).length, oldPrompt: !!old.prompts && old.prompts.length === 1 && old.prompts[0].sysOn === false, noDash: !dashRe.test(anyDash) });
+  /* A block replaced by slicing between two anchors once took the next
+     block's opening sc-if with it, and the page still drew: the runtime
+     forgave the stray closer. Counting is what catches it. */
+  const tags = n => [(appSrc.match(new RegExp('<' + n + '[\\s>]', 'g')) || []).length, (appSrc.match(new RegExp('</' + n + '>', 'g')) || []).length];
+  t('Z9', 'every sc-if and sc-for in the app opens and closes in equal number', { scIf: true, scFor: true },
+    { scIf: tags('sc-if')[0] === tags('sc-if')[1], scFor: tags('sc-for')[0] === tags('sc-for')[1] });
 })();
 
 /* ------------------------------------------------ J: Omni lives on the server
