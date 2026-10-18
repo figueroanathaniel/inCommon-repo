@@ -635,7 +635,9 @@ for (const [f, q] of SIGNIN_FILES) {
    the source shell's address, so it is rewritten here the same way the
    cover's is. A bundle missing either page is a sign up form agreeing to
    documents that 404, which is the one failure a legal link must not have. */
-const LEGAL_FILES = ['terms.html', 'privacy.html', 'accessibility.html', 'delete-account.html'];
+/* thanks.html rides with them: it is where a gift from the apps comes back
+   to, in the device's browser, and it is built the same way. */
+const LEGAL_FILES = ['terms.html', 'privacy.html', 'accessibility.html', 'delete-account.html', 'thanks.html'];
 for (const f of LEGAL_FILES) {
   const from = path.join(appDir, f);
   if (!fs.existsSync(from)) die('missing ' + from + '; the cover, Settings and the Luminary purchase all link to it');
@@ -649,6 +651,22 @@ for (const f of LEGAL_FILES) {
   const t = cover.indexOf('./terms.html'), p = cover.indexOf('./privacy.html');
   if (t === -1 || p === -1) die('the cover no longer links the Terms and the Privacy Policy');
   if (t > p) die('the cover links the Privacy Policy above the Terms; the Terms go directly above it');
+}
+
+/* THE ORACLE FUNCTION'S COPY OF THE TAROT DECK. Omni is written on the
+   server since 18 October 2026 (server/oracle/tarot-omni.js), against the same
+   cards and shared phrases the app reads, so the function carries a copy of
+   app/tarot.js beside it. The copy is written here, every build, and never by
+   hand: a deck edited in one place and not the other would give a reader an
+   Omni reading in words their Light and Divine readings no longer use. The
+   composer itself is server only, and the build refuses an app copy that still
+   carries it. */
+{
+  const deck = fs.readFileSync(path.join(appDir, 'tarot.js'), 'utf8');
+  if (/function omni\(/.test(deck)) die('app/tarot.js carries the Omni composer again; it lives in server/oracle/tarot-omni.js so the lock holds');
+  const out = path.join(repo, 'server', 'oracle', 'tarot.js');
+  const had = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
+  if (had !== deck) fs.writeFileSync(out, deck, 'utf8');
 }
 
 /* THE FONTS THEMSELVES, and the two hand written files that name them.

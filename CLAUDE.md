@@ -2514,7 +2514,9 @@ summary are sent to Moonshot AI to write each reading.", drawn only when
 disclaimers"** and it does not reach the website; do not widen it to the web or
 lengthen it without the owner. **Luminary in the apps is the stores' own
 billing, through RevenueCat**, built and switched off until its keys are set:
-see "Luminary in the apps is RevenueCat's" below. The apps never show Stripe.
+see "Luminary in the apps is RevenueCat's" below. The apps never sell through
+Stripe; the one Stripe page they open is a gift, by the owner's decision of 18
+October 2026 (see "The Cycle Audit").
 Apple's minimum EULA terms are Terms section 22, "Apps from Apple and Google"
 (added 12 October 2026 at the owner's request), which still owes the
 developer's postal address before the first submission.
@@ -2531,12 +2533,12 @@ is `cover.html`, every link back to the app is rewritten to `./index.html` with
 the count asserted, and the service worker and the host's files are left out. It
 refuses a bundle older than the app source and a bundle without the native check.
 
-**`nativeApp()` asks Capacitor, and four things hang on it and nothing else**:
-the Oracle footer above; Luminary never through Stripe in the app (`lumBuy()` and
-`lumManage()` go to the store through RevenueCat, and with no RevenueCat key the
-gate is closed: `lumShut`, the note "not available in the app yet", no plans, no
-button, no renewal line); no service worker registered; and `coverHref()`
-answering `./cover.html`. Driven in a browser with
+**`nativeApp()` asks Capacitor, and six things hang on it and nothing else**:
+the Oracle footer above; Luminary never sold in the app (`lumBuy()` and
+`lumManage()` do nothing there, and no gate is drawn); no service worker
+registered; `coverHref()` answering `./cover.html`; every add-on free
+(`addonsOpen()`); and Support inCommon, the gift (`giftOn()`). The first and
+the last two changed on 18 October 2026: see "Codex Luminary is one payment". Driven in a browser with
 `window.Capacitor` stubbed, and without it: every one of those in the shell, none
 of them on the web; the footer measured clean in all eight themes at 375 and
 1440. `tools/build-icons.js --native` draws the icon and splash sources into
@@ -2547,6 +2549,11 @@ becomes permanent at the first upload, so it is the owner's to choose before
 then.
 
 ## Luminary in the apps is RevenueCat's
+**Retired on 18 October 2026, and the plugin is out of `native/`**: nothing is
+sold in the apps (see "Codex Luminary is one payment"). This section is the
+record of what was built. `server/store` stays, dormant, so a store subscription
+that exists keeps counting.
+
 Asked for by the owner on 12 October 2026 ("start the in-app purchases with
 RevenueCat"); `docs/REVENUECAT-SETUP.md` is the owner's half. Inside the apps
 Luminary is bought with Apple's In-App Purchase and Google Play Billing, with
@@ -4154,6 +4161,165 @@ widths): no pair under 4.5:1 and no control under 44px. The function was run
 under Node against a fake Stripe for 25 cases, webhook signatures included,
 and typechecked strict against `stripe@17`. K30 to K34 hold the cloud calls.
 
+## The Cycle Audit: the long passages, pay what you want on the website
+Asked for by the owner on 18 October 2026 as "the Cosmic Tax Ledger": the
+multi-year passages of the slow astral bodies across a chart, each read as what
+it asks to be set down (the Tax) and what it builds (the Dividend), with three
+questions. The owner chose that the Oracle's model writes it on the server,
+that one payment of the reader's choosing opens it for the account for good
+($3 floor, $12 preset), and that the store apps give it away and carry a gift
+instead. Later the same day that payment became Codex Luminary and opens every
+add-on: see "Codex Luminary is one payment" below. `docs/CYCLE-AUDIT.md` is the owner's half.
+
+**It is the Oracle's fourth period, `cycle`**, beside Today, This Week and This
+Month, because the model, the consent press and the paywall already live there.
+It has one depth (`orDepthsOn` hides the control), and `oraclePrepareAuto`
+prepares today's in-depth reading while a reader sits on it.
+
+**The dates are free and computed on the device; only the reading is sold.**
+`cycleWindows()` finds every passage of Saturn, Uranus, Neptune and Pluto across
+the ten natal bodies, the Ascendant and the Midheaven, from the start of last
+year to twenty years ahead, conjunct, square, trine and opposite at 1.5
+degrees, joining runs of one contact less than 400 days apart into one passage
+with every exact date. A computed date cannot be scarce, by the same rule as the
+month reading, so the list is drawn for any chart of the reader's own. The scan
+reads each body off a cubic through library positions every 20 to 40 days
+(`CY_STEP`, measured within a hundredth of a degree), walks it every two days
+and bisects the edges and exact dates: about 1,800 library positions and a tenth
+to a fifth of a second, once a year per profile. It asks the library directly
+(`cyLon`) so a twenty year walk does not flood lonRaw's grid or the position
+cache, and it is never run inside the press that opens the screen: `cycleSoon()`
+runs it on the next tick and the list says it is finding the passages. **It is
+anchored to the calendar year, not to today**, so the dossier, and the reading
+the server keeps for it, do not change every morning.
+
+**The audit reads at most eight passages** (`CY_MAX`), the ones under way first,
+then by `CY_WEIGHT` (the slowest bodies, hard contacts, longer passages), shown
+in the order they arrive. The list opens on those eight and expands to every
+passage. The Pluto case the owner gave is the fixture: Pluto crosses 15 Aquarius
+five times from April 2032 to December 2033 and 28 Aquarius five times from
+April 2041 to December 2042 (Z2 and Z3). The brief said 2029, which is where
+Pluto stands near 10 Aquarius; the dates come from the library, never from a
+brief.
+
+**What leaves the device** (`cycleDossier()`): the first name, the touched
+natal points with sign, degree and house, and each passage with its dates. No
+birth date, and nothing that moves with today. Privacy Policy section 6 says so.
+
+**The server writes it with inCommon's own instructions** (`CYCLE_INSTRUCTIONS`
+and `CYCLE_SCHEMA` in `server/oracle/index.ts`), not the Codex's, and they carry
+this file's rules for interpretive writing: what a passage offers and asks,
+never what the reader is, no "you are", never good or bad, no predictions of
+harm, astral body rather than planet, and questions only the reader can close.
+The voice and emphasis line and the dash cleaner apply as to every reading.
+
+**The paywall is the server**, and since the same day it is Codex Luminary's
+(see "Codex Luminary is one payment"): the Oracle refuses a Cycle Audit on the
+website with PREMIUM_REQUIRED unless `opened()` finds the reader Luminary. **The apps are told
+apart by the origin Capacitor gives its web view** (`capacitor://localhost`,
+`https://localhost`), which a browser page cannot write. A script outside a
+browser can, and that is accepted on purpose, because what it would get is what
+installing the app gives anybody.
+
+**Support inCommon is the owner's donate button, in the apps only**
+(`GIFT_IN_APP`, `giftOn()`): beside Contact Support, in the Settings footer
+after Accessibility, and in the profile menu. It is called a gift on every
+surface because inCommon is not a charity and "donate" says tax deductible to
+most people. It needs no account (the `support` action is answered before
+anybody is named), opens Stripe in the device's browser, and comes back to
+`thanks.html`, built like the legal pages and noindex. **Apple and Google may
+refuse a payment link inside an app** (Apple 3.1.1 outside the US storefront,
+Google's payments policy for anything but a registered charity); if review
+does, `GIFT_IN_APP = false` is the whole change.
+
+**The return address was refusing the live site.** `OWN()` in the billing
+function named incommon.netlify.app and not incommonspace.com, so from 16 to 18
+October every checkout from the live site came back BAD_REQUEST. Both names are
+on it now, and the function harness reproduced the refusal on the old code
+before the fix.
+
+Held by Z1 to Z7 (the scan, lifted out of the app), K34c to K34e (the cloud
+calls), K55 (eight Terms links now, the unlock gate in each shell), a 42 row
+browser drive with the cloud module faked (both shells, website and app, the
+gate, the return, the reading, a closed country, an older billing function,
+the gift, eight theme cases at 1440 and 390), and 13 cases of the billing and Oracle functions run under
+Node against a fake Stripe, Supabase and Kimi, typechecked strict.
+
+## Codex Luminary is one payment, of the reader's choosing, and opens every add-on
+Decided by the owner on 18 October 2026: "all add-ons should assume the cycle
+audit's form of payment. One-time reader's choice. For everything." One
+payment opens every add-on, and the Luminary subscription is retired. **This
+overrides the Luminary sections above where they disagree**: "In depth is
+Codex Luminary, and Stripe takes the payment" (the plans, the prices, the
+trial, the renewal terms, the gate's wording), "Luminary in the apps is
+RevenueCat's" (nothing is sold in the apps now), and the RevenueCat half of
+"The app stores".
+
+**The add-ons are the in-depth Oracle readings, Omni tarot and the Cycle
+Audit's readings**, and any added later joins them. What stays free: every
+chart, the numbers, standard readings, Light and Divine tarot, and the dates of
+every Cycle Audit passage. It keeps the name Codex Luminary, and the gate says
+Become a Luminary.
+
+**One unlock, one table.** The billing function's `unlock` opens a one time
+Checkout on a custom amount price (`LUMINARY`, lookup `incommon_luminary_once`,
+$3 floor, $12 preset), and `checkout.session.completed` writes
+`luminary_unlocks` (`server/oracle/schema.sql`), refunding instead a payment
+whose billing or card country is in the EU or the UK while those stay closed
+(`recordUnlock`). A status asked with a sync finds a paid session the webhook
+missed (`recoverUnlock`). The status says `isPremium` for every add-on, `once`
+for a payment, the plan and its end for a subscription, and `floor`, which the
+page names beside the button; a billing function that sends no floor has
+nothing to sell, and the gate says payments are being set up.
+
+**The subscription is retired, not erased.** `checkout` answers RETIRED. A
+reader who subscribed before keeps it on its terms until they cancel: the row
+is still synced from Stripe, a live one still opens every add-on, the member
+line says when it ends, and Manage billing opens the portal. The trial, the
+EUR and GBP prices, the VAT table and RevenueCat's selling code are gone from
+the app and the billing function. `server/store` and the account function's
+RevenueCat cleanup stay, dormant, for any record that exists, so a store
+subscription that exists still opens every add-on on the website and the
+deletion dialog still says to cancel it with the store. The plugin is out of
+`native/` (package, lockfile, and the generated Android and iOS registrations,
+put back to exactly what they were before it went in), so Capacitor's own three
+packages are the whole native dependency list again.
+
+**`opened()` in the Oracle function is the one check**, for in depth, the
+Cycle Audit and Omni alike: an admin, the apps' origin, a `luminary_unlocks`
+row, or a live subscription in either table. The page mirrors it as
+`addonsOpen()`: native, or `lum.isPremium`.
+
+**One gate, written once per screen.** `lumGateVals(from, p)` words it for the
+add-on the reader reached for (`LUM_GATE`: deep, cycle, omni) and returns
+`gate*` for the Oracle and `tg*` for the tarot room, spelled out so
+check-dead-controls can see them. `lumBuy(from)` sends a return address with
+`?lumfrom=` naming that add-on, because the hash cannot say whether the reader
+was on In-Depth, the Cycle Audit or Omni, and `lumReturnRead()` puts them back
+there. In the Oracle the Cycle Audit's free list stays above the gate.
+
+**Omni is written on the server, so the lock holds.** Its composer moved out of
+`app/tarot.js` into `server/oracle/tarot-omni.js`, and the app's `read()`
+answers null for Omni without one. The Oracle function answers `{ kind:
+"tarot", seed, count, topic }` by running that composer against
+`server/oracle/tarot.js`, which `tools/build-bundle.js` copies from
+`app/tarot.js` on every build and the build refuses an app copy that carries
+the composer again. No model and nothing stored: the same shuffle gives the
+same reading, so nothing is limited or kept. The room deals the cards itself
+from the seed and shows the passages the server returns (`tarotReading()`,
+`tarotOmniSoon()`), with a panel for signing in, the gate, waiting and errors.
+The moved composer was checked against the old one over 342 shuffles with no
+difference. A determined reader can still rebuild it from the helpers
+`app/tarot.js` exports for it (`PARTS`); the composed reading is what the
+lock protects.
+
+Held by J1 to J4 (the composer stays on the server, the copies agree, the
+reading is whole and steady, the bundle carries none of it), K32, K34b to
+K34f and K57 (the cloud calls), K55 (one time terms in place of renewal), 14
+function cases against a fake Stripe, Supabase and Kimi (the unlock, RETIRED,
+the refunds, the sync, a subscriber from before, Omni written exactly as the
+composer writes it and refused without Luminary), and a 56 row browser drive.
+
 ## Master numbers are kept wherever a number is read
 The owner asked on 29 September 2026 for "the rest of the master numbers".
 `InCommonCore.reduce()` always kept 11, 22 and 33 for the Life Path, the
@@ -4215,7 +4381,9 @@ invalidates every stored pair.
 ## The profile icon opens a menu, and Profile opens the card
 The owner asked on 29 September 2026 for Log Out and Delete in the profile
 icon's sheet, and on 30 September for the icon to open a list instead:
-**Profile, Settings, Get Help, Log Out, in that order.** `profileMenuVals()`
+**Profile, Settings, Get Help, Log Out, in that order**, with Support inCommon
+between Settings and Get Help in the store apps only (18 October 2026, see "The
+Cycle Audit"). `profileMenuVals()`
 holds all four, and the icon in both shells is `pmenuGo`, named "Profile menu"
 with `aria-haspopup` and `aria-expanded`. On the desktop the list drops from the
 icon; on the phone it is a bottom sheet, because `[data-vt-modals]` makes every

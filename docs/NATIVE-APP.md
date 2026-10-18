@@ -16,7 +16,6 @@ working offline.
 | `native/android/` | the Android Studio project |
 | `native/assets/` | the icon and splash sources, drawn by `node tools/build-icons.js --native` from the same definition as every other icon |
 | `tools/build-native.js` | makes `native/www/` from the built bundle |
-| `@revenuecat/purchases-capacitor` 13.7.3 | the one native plugin, pinned in `native/package.json`: Codex Luminary through the stores (`docs/REVENUECAT-SETUP.md`) |
 
 `native/www/` is generated and not committed. So are the copies each platform
 keeps of it.
@@ -29,15 +28,12 @@ sign in; every link back to the app says `./index.html`; and the service worker,
 
 **How the app behaves inside the shell** (`nativeApp()` in the app, which asks
 Capacitor): the Oracle shows one line naming Moonshot AI at the foot of the page
-(Apple 5.1.2(i)); Codex Luminary is sold through the App Store or Google Play
-by RevenueCat, never through Stripe, and while its keys are empty the gate says
-it is not available in the app yet; and no service worker is registered. On the
-website none of that changes.
+(Apple 5.1.2(i)); every add-on is free and nothing is sold; Support inCommon,
+the gift, opens Stripe in the device's browser; and no service worker is
+registered. On the website none of that changes.
 
-The plugin is called without a bundler: the app asks Capacitor's bridge for the
-`Purchases` plugin by name (`rcCall()`), which is what the plugin's own
-JavaScript does underneath. After changing the plugin's version, check its
-method names in `node_modules/@revenuecat/purchases-capacitor/ios/Sources/`.
+There is no native plugin. RevenueCat's was removed on 18 October 2026, when
+the apps stopped selling anything (`docs/CYCLE-AUDIT.md`).
 
 ## Building it
 
@@ -87,11 +83,9 @@ To redraw the icons and splash after the mark changes:
    - **The emailed links** (confirming an address, choosing a new password)
      open in the phone's browser and finish on the website; the reader then
      signs in with their password in the app.
-5. **Luminary in the apps** is the stores' own billing, through RevenueCat:
-   `docs/REVENUECAT-SETUP.md`, which includes adding the **In-App Purchase**
-   capability in Xcode and testing with sandbox and licence tester accounts.
-   Readers who subscribed on the website read in-depth readings in the app too,
-   which Apple allows because the same subscription is also sold in the app.
+5. **Nothing is sold in the apps.** Every add-on is free there, so no In-App
+   Purchase capability is needed. The gift may be refused at review; if it is,
+   `GIFT_IN_APP = false` is the whole change (`docs/CYCLE-AUDIT.md`, step 5).
 6. **The store listing**, privacy forms and age rating: `docs/APP-STORE-SETUP.md`.
 
 ## Not built yet

@@ -2595,6 +2595,56 @@ input[type="date"]{color-scheme:dark}
           </div>
         </sc-if>
 
+        <!-- OMNI, AN ADD-ON (18 October 2026): written on the server once
+             Codex Luminary is open, so the room waits here on a sign in, the
+             gate, or the reading itself. -->
+        <sc-if value="{{ tarotOmniPanel }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+            <sc-if value="{{ tarotOmniSignIn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to read Omni</div>
+                <button onClick="{{ tarotOmniSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniGate }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+                <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+                <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ tgHead }}</h2>
+                <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ tgBody }}</p>
+                <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+                <sc-if value="{{ tgBuyOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ tgBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ tgCta }}</button>
+                </sc-if>
+                <sc-if value="{{ tgNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ tgNote }}</p>
+                </sc-if>
+                <sc-if value="{{ tgRetryOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ tgRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+                </sc-if>
+                <sc-if value="{{ tgTermsOn }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ tgTerms }}</p>
+                </sc-if>
+                <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
+                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: Light and Divine readings, the whole deck, and every chart</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniBusy }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:30px 20px">
+                <span aria-hidden="true" style="width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 40px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+                <p style="margin:0;max-width:44ch;font:italic 400 18px/1.45 var(--fd);color:var(--mut)">{{ tarotOmniBusyText }}</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniErrOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ tarotOmniErrText }}</p>
+                <button onClick="{{ tarotOmniRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+              </div>
+            </sc-if>
+            <button onClick="{{ tarotOmniBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">Choose again</button>
+          </div>
+        </sc-if>
+
         <sc-if value="{{ tarotShowing }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
             <div style="display:flex;flex-direction:column;gap:5px">
@@ -3262,18 +3312,48 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:6px 18px 28px;animation:fadeUp .25s ease">
     <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ orDepthsOn }}" hint-placeholder-val="{{ true }}">
       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
         <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
           <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
       </div>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
         </sc-for>
       </div>
+      <!-- THE CYCLE AUDIT: the passages, free and computed here. The reading
+           waits behind the Luminary gate below on the website. -->
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
       <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
           <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
@@ -3282,41 +3362,30 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
       </sc-if>
-      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+      <!-- CODEX LUMINARY: one payment of the reader's choosing opens every
+           add-on (18 October 2026). The same gate stands in place of an
+           in-depth reading and of the Cycle Audit, worded for each. -->
+      <sc-if value="{{ orGate }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
-          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
-          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
-          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
-            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
-              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
-                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
-                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
-                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
-                  <sc-if value="{{ pl.priceOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span></sc-if>
-                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
-                </button>
-              </sc-for>
-            </div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ gateHead }}</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ gateBody }}</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+          <sc-if value="{{ gateBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ gateBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ gateCta }}</button>
           </sc-if>
-          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          <sc-if value="{{ gateNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ gateNote }}</p>
           </sc-if>
-          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
-            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          <sc-if value="{{ gateRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ gateRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
-          </sc-if>
-          <sc-if value="{{ orLumRestoreOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumRestore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ orLumRestoreLabel }}</button>
-          </sc-if>
-          <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orLumRenewText }}</p>
+          <sc-if value="{{ gateTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ gateTerms }}</p>
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, standard readings, and the dates of every passage</p>
         </div>
       </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
@@ -3480,6 +3549,57 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+              <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ cp.num }}</span>
+              <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ cp.contact }}</h3>
+              <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Surrender &#183; The Tax</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.tax }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Build &#183; The Dividend</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.dividend }}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;padding:2px 4px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                    <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ cq.t }}</li>
+                  </sc-for>
+                </ul>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -3724,6 +3844,14 @@ input[type="date"]{color-scheme:dark}
         <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
         <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
       </button>
+      <!-- A GIFT, IN THE APPS ONLY: beside Contact Support, as the owner asked
+           (18 October 2026), and again in the footer below. -->
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+          <span style="font:600 13px var(--fu);color:var(--tx)">{{ giftLabel }}</span>
+          <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+        </button>
+      </sc-if>
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
@@ -3739,6 +3867,9 @@ input[type="date"]{color-scheme:dark}
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
         <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
+        <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">{{ giftLabel }}</button>
+        </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -4405,6 +4536,12 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+          <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">{{ giftLabel }}</span>
+        </button>
+      </sc-if>
       <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
@@ -4784,7 +4921,7 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
-      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and Codex Luminary, with no refund of what you paid, and any Luminary subscription, which ends now. It cannot be undone.</div>
       <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
@@ -7084,6 +7221,56 @@ input[type="date"]{color-scheme:dark}
           </div>
         </sc-if>
 
+        <!-- OMNI, AN ADD-ON (18 October 2026): written on the server once
+             Codex Luminary is open, so the room waits here on a sign in, the
+             gate, or the reading itself. -->
+        <sc-if value="{{ tarotOmniPanel }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+            <sc-if value="{{ tarotOmniSignIn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to read Omni</div>
+                <button onClick="{{ tarotOmniSignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniGate }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+                <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+                <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ tgHead }}</h2>
+                <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ tgBody }}</p>
+                <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+                <sc-if value="{{ tgBuyOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ tgBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ tgCta }}</button>
+                </sc-if>
+                <sc-if value="{{ tgNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ tgNote }}</p>
+                </sc-if>
+                <sc-if value="{{ tgRetryOn }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ tgRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+                </sc-if>
+                <sc-if value="{{ tgTermsOn }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ tgTerms }}</p>
+                </sc-if>
+                <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
+                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: Light and Divine readings, the whole deck, and every chart</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniBusy }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:30px 20px">
+                <span aria-hidden="true" style="width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 40px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+                <p style="margin:0;max-width:44ch;font:italic 400 18px/1.45 var(--fd);color:var(--mut)">{{ tarotOmniBusyText }}</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tarotOmniErrOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+                <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ tarotOmniErrText }}</p>
+                <button onClick="{{ tarotOmniRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+              </div>
+            </sc-if>
+            <button onClick="{{ tarotOmniBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">Choose again</button>
+          </div>
+        </sc-if>
+
         <sc-if value="{{ tarotShowing }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
             <div style="display:flex;flex-direction:column;gap:5px">
@@ -8049,18 +8236,48 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ isOracle }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="The Oracle" style="flex:1;min-height:0;overflow-y:auto;padding:18px 18px 32px;animation:fadeUp .25s ease">
     <div style="width:100%;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ orDepthsOn }}" hint-placeholder-val="{{ true }}">
       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How deep the reading goes" style="display:flex;gap:8px">
         <sc-for list="{{ orDepths }}" as="d" hint-placeholder-count="2">
           <button onClick="{{ d.go }}" role="radio" aria-checked="{{ d.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.c }};font:600 12px var(--fu);letter-spacing:.04em">{{ d.label }}</button>
         </sc-for>
       </div>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="3">
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
         </sc-for>
       </div>
+      <!-- THE CYCLE AUDIT: the passages, free and computed here. The reading
+           waits behind the Luminary gate below on the website. -->
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
       <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
           <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
@@ -8069,41 +8286,30 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
       </sc-if>
-      <sc-if value="{{ orLumGate }}" hint-placeholder-val="{{ false }}">
+      <!-- CODEX LUMINARY: one payment of the reader's choosing opens every
+           add-on (18 October 2026). The same gate stands in place of an
+           in-depth reading and of the Cycle Audit, worded for each. -->
+      <sc-if value="{{ orGate }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
-          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx)">In-Depth Readings</h2>
-          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orLumTeaser }}</p>
-          <sc-if value="{{ orLumPlansOn }}" hint-placeholder-val="{{ false }}">
-            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which plan" style="width:100%;max-width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:4px">
-              <sc-for list="{{ orLumPlans }}" as="pl" hint-placeholder-count="2">
-                <button onClick="{{ pl.go }}" role="radio" aria-checked="{{ pl.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 6px;border-radius:var(--rad);border:1px solid {{ pl.bd }};background:{{ pl.bg }};text-align:center">
-                  <sc-if value="{{ pl.badgeOn }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ pl.badge }}</span></sc-if>
-                  <span style="font:600 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ pl.name }}</span>
-                  <sc-if value="{{ pl.priceOn }}" hint-placeholder-val="{{ false }}"><span style="font:400 24px/1.1 var(--fd);color:{{ pl.c }}">{{ pl.price }}</span></sc-if>
-                  <span style="font:400 11.5px/1.3 var(--fu);color:var(--mut)">{{ pl.per }}</span>
-                </button>
-              </sc-for>
-            </div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ gateHead }}</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ gateBody }}</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+          <sc-if value="{{ gateBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ gateBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ gateCta }}</button>
           </sc-if>
-          <sc-if value="{{ orLumBuyOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orLumCta }}</button>
+          <sc-if value="{{ gateNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ gateNote }}</p>
           </sc-if>
-          <sc-if value="{{ orLumNoteOn }}" hint-placeholder-val="{{ false }}">
-            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ orLumNote }}</p>
+          <sc-if value="{{ gateRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ gateRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
           </sc-if>
-          <sc-if value="{{ orLumRetryOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
-          </sc-if>
-          <sc-if value="{{ orLumRestoreOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ orLumRestore }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ orLumRestoreLabel }}</button>
-          </sc-if>
-          <sc-if value="{{ orLumRenewOn }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orLumRenewText }}</p>
+          <sc-if value="{{ gateTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ gateTerms }}</p>
           </sc-if>
           <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
-          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, and standard readings</p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, standard readings, and the dates of every passage</p>
         </div>
       </sc-if>
       <sc-if value="{{ orSample }}" hint-placeholder-val="{{ false }}">
@@ -8267,6 +8473,57 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+              <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ cp.num }}</span>
+              <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ cp.contact }}</h3>
+              <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Surrender &#183; The Tax</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.tax }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Build &#183; The Dividend</div>
+                  <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cp.dividend }}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;padding:2px 4px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">For the Journal</div>
+                <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                    <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ cq.t }}</li>
+                  </sc-for>
+                </ul>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -8505,6 +8762,14 @@ input[type="date"]{color-scheme:dark}
         <span style="font:600 13px var(--fu);color:var(--tx)">Contact Support</span>
         <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
       </button>
+      <!-- A GIFT, IN THE APPS ONLY: beside Contact Support, as the owner asked
+           (18 October 2026), and again in the footer below. -->
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 16px">
+          <span style="font:600 13px var(--fu);color:var(--tx)">{{ giftLabel }}</span>
+          <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--tx)">&#8594;</span>
+        </button>
+      </sc-if>
       <nav aria-label="Legal" style="display:flex;flex-direction:column;align-items:flex-start">
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 13px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a>
@@ -8520,6 +8785,9 @@ input[type="date"]{color-scheme:dark}
         <a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Terms &amp; Conditions</a>
         <a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Privacy Policy</a>
         <a href="./accessibility.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-underline-offset:3px">Accessibility</a>
+        <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;font:400 12px var(--fu);color:var(--mut);text-decoration:underline;text-underline-offset:3px">{{ giftLabel }}</button>
+        </sc-if>
       </nav>
       <div style="padding:6px 0 0;text-align:center;font:400 7px/1.5 var(--fu);letter-spacing:.04em;color:var(--mut)">Created and maintained by Nathaniel J. Figueroa.</div>
     </footer>
@@ -8866,6 +9134,12 @@ input[type="date"]{color-scheme:dark}
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--mut);-webkit-mask:{{ pmSettingsIcon }} center/contain no-repeat;mask:{{ pmSettingsIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Settings</span>
       </button>
+      <sc-if value="{{ giftOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ giftGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block;color:var(--mut)"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+          <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">{{ giftLabel }}</span>
+        </button>
+      </sc-if>
       <button onClick="{{ pmHelpGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:10px">
         <span aria-hidden="true" style="flex:none;display:block;width:24px;height:18px;background-color:var(--crisis);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span>
         <span style="flex:1;font:600 13px var(--fu);color:var(--crisis);text-align:left">Get Help</span>
@@ -9299,7 +9573,7 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ adClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.84);display:flex;align-items:center;justify-content:center;padding:20px;z-index:86">
     <div role="dialog" aria-modal="true" aria-label="Delete your account" onClick="{{ swallow }}" style="width:100%;max-width:440px;max-height:100%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease">
       <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">Delete your account</div>
-      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and your Codex Luminary subscription, which ends now with no refund for the rest of the period. It cannot be undone.</div>
+      <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">This deletes {{ adWho }} and everything kept with it: the profiles and journal entries copied to it, your Oracle readings, and Codex Luminary, with no refund of what you paid, and any Luminary subscription, which ends now. It cannot be undone.</div>
       <sc-if value="{{ adStoreOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 12px/1.6 var(--fb);color:var(--tx)">{{ adStoreText }}</div></sc-if>
       <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">What is on this device stays here unless you erase it too. You can keep using inCommon without an account.</div>
       <button onClick="{{ adWipeGo }}" role="switch" aria-checked="{{ adWipeOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
@@ -18027,6 +18301,11 @@ class Component extends DCLogic {
       pmHelpGo: () => { this.crisisAudit(); this.setState({ ...close, callOpen: true }); },
       pmLogOutGo: () => { this.setState(close); this.accountLogOut(); },
       pmLogOutNote: (cs.mode === 'cloud' && (cs.email || shown(cs.phone))) || '',
+      /* Support inCommon, in the apps only (giftOn): here, beside Contact
+         Support, and in the Settings footer. */
+      giftOn: this.giftOn(),
+      giftGo: () => this.giftGo(),
+      giftLabel: st.giftBusy ? 'Opening…' : 'Support inCommon',
       pmSettingsIcon: this.uiIcon('settings'),
       ...this.profileCardVals(),
       ...this.callVals()
@@ -18157,8 +18436,8 @@ class Component extends DCLogic {
        The reader is told before they delete, by the store that holds it when
        the status says, and in the app whenever the status is not known. */
     const lum = st.lum, src = lum && lum.isPremium ? lum.source : null;
-    const storeSub = src === 'apple' || src === 'google' || (!lum && this.rcOn());
-    const storeName = src === 'google' || (!src && this.rcPlatform() === 'android') ? 'Google Play' : 'the App Store';
+    const storeSub = src === 'apple' || src === 'google';
+    const storeName = src === 'google' ? 'Google Play' : 'the App Store';
     return {
       adStoreOn: signedIn && storeSub,
       adStoreText: 'A Codex Luminary subscription bought in ' + storeName + ' is not cancelled by this. Cancel it in your ' + (storeName === 'Google Play' ? 'Google Play' : 'Apple account') + ' settings first, or it keeps renewing.',
@@ -18901,8 +19180,45 @@ class Component extends DCLogic {
   tarotReading() {
     const TA = this.TA(), st = this.state;
     if (!TA || !st.tarotSeed || !st.tarotCount) return null;
+    if (st.tarotDepth === 'omni') {
+      /* Omni comes from the server (tarotOmniAsk); the cards are dealt here
+         from the same seed, so the spread on screen is the one it read. */
+      const hit = this._omni && this._omni[this.tarotOmniKey()];
+      return hit ? { ...hit, depth: 'omni', drawn: TA.draw(st.tarotCount, st.tarotSeed) } : null;
+    }
     return TA.read({ count: st.tarotCount, topic: st.tarotTopic || 'general',
       depth: st.tarotDepth || 'light', seed: st.tarotSeed });
+  }
+  /* OMNI IS AN ADD-ON, written on the server (owner, 18 October 2026). Its
+     composer is not in this build, so the page sends the seed it shuffled
+     with, the card count and the topic, and shows what comes back; the Oracle
+     function checks Codex Luminary first. It is asked once per shuffle and kept
+     in memory for the session, never in storage: keeping the reading is what
+     Keep on the line is for. Asked on the next tick rather than inside a
+     render, the way the Cycle Audit's scan is. */
+  tarotOmniKey() { const st = this.state; return st.tarotSeed + '|' + st.tarotCount + '|' + (st.tarotTopic || 'general'); }
+  tarotOmniSoon() {
+    const st = this.state, cs = st.cloudStatus, key = this.tarotOmniKey();
+    if (this._omniT || (this._omni && this._omni[key]) || st.tarotOmniBusy === key || (st.tarotOmniErr && st.tarotOmniErr.key === key)) return;
+    if (!(cs && cs.mode === 'cloud') || !this.addonsOpen()) return;
+    this._omniT = setTimeout(() => { this._omniT = null; this.tarotOmniAsk(); }, 30);
+  }
+  tarotOmniAsk() {
+    const st = this.state, C = this.cloud, key = this.tarotOmniKey();
+    if (!C || typeof C.tarotRead !== 'function') { this.setState({ tarotOmniErr: { key, reason: 'off' } }); return; }
+    this.setState({ tarotOmniBusy: key, tarotOmniErr: null });
+    C.tarotRead({ seed: st.tarotSeed, count: st.tarotCount, topic: st.tarotTopic || 'general' }).then(r => {
+      if (r && r.ok && r.reading && Array.isArray(r.reading.passages)) {
+        this._omni = this._omni || {};
+        this._omni[key] = r.reading;
+        this.setState({ tarotOmniBusy: null });
+        this.speak('Your Omni reading is here.', 'polite');
+        return;
+      }
+      const reason = (r && r.reason) || 'error';
+      if (reason === 'premium') { this.setState({ lum: { ...(this.state.lum || {}), isPremium: false } }); this.lumFetch(true); }
+      this.setState({ tarotOmniBusy: null, tarotOmniErr: reason === 'premium' ? null : { key, reason } });
+    });
   }
   tarotSave(r) {
     const entry = { id: 'tarot' + Date.now(), date: Component.localDay(), type: 'reading',
@@ -18949,7 +19265,7 @@ class Component extends DCLogic {
      the device and presses Consult the Oracle. After that the screen behaves as
      the Codex's did. A reading is kept on the device and on the server for the
      period it covers, so opening the screen again costs nothing. */
-  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
+  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month'], ['cycle', 'Cycle Audit']];
   oracleLocalDate(d) {
     d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -18958,6 +19274,9 @@ class Component extends DCLogic {
      instant the sky is read at. The day at noon UTC, the week at its Thursday,
      the month at its fifteenth. The server derives the same key. */
   oraclePeriod(period, localDate) {
+    /* The Cycle Audit has no instant: it is kept under the passages it reads
+       (cycleKey), and the server keys it the same way, by its dossier. */
+    if (period === 'cycle') return { key: this.cycleKey(), at: new Date() };
     const [y, m, d] = localDate.split('-').map(Number);
     const date = new Date(Date.UTC(y, m - 1, d, 12));
     if (period === 'daily') return { key: localDate, at: date };
@@ -19013,6 +19332,7 @@ class Component extends DCLogic {
     return null;
   }
   oracleDossier(period, depth) {
+    if (period === 'cycle') return this.cycleDossier();
     const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
     const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
     const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
@@ -19152,6 +19472,9 @@ class Component extends DCLogic {
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
+    /* The Cycle Audit's slot is the passages it reads, so they are found
+       before the slot is named. */
+    if (period === 'cycle') this.cycleWindows();
     const slot = this.oracleSlot(period, depth), C = this.cloud;
     const held = this._orBusy || (this._orBusy = {});
     this._orQuiet = this._orQuiet || {};
@@ -19170,7 +19493,7 @@ class Component extends DCLogic {
     if (!again) this._orQuiet[slot] = !!quiet;
     this._orFirst = this._orFirst || {};
     if (!again) { delete this._orTry[slot]; delete this._orFirst[slot]; this.setState({ orBusyMap: { ...held }, orErr: quiet ? this.state.orErr : null }); }
-    if (!again && !quiet) this.speak(depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
+    if (!again && !quiet) this.speak(period === 'cycle' ? 'The Oracle is reading the long passages across your chart.' : depth === 'deep' ? 'The Oracle is reading every point of your chart.' : 'The Oracle is reading the heavens for you.', 'polite');
     /* The first half of an in-depth reading is shown the moment it arrives,
        while the second is still being written. It lives in memory only: the
        kept reading is the whole one, so a half is never mistaken for it. */
@@ -19225,6 +19548,9 @@ class Component extends DCLogic {
     /* In depth is never asked for on open. The reader presses Consult the
        Oracle, and a reading prepared ahead (oraclePrepareAuto) is waiting. */
     if (depth === 'deep') return false;
+    /* The Cycle Audit is asked for on open once it is open to this reader and
+       there is a passage to read. */
+    if (period === 'cycle' && (!this.cycleReady() || !this.addonsOpen() || !this.cyclePassages().length)) return false;
     if (this.oracleCached(period, depth)) return false;
     if (this.orNonQuietBusy().length) return false;
     return !(st.orErr && st.orErr.slot === slot);
@@ -19253,7 +19579,7 @@ class Component extends DCLogic {
       return;
     }
     this._orSeen = true;
-    const period = this.state.orPeriod || 'daily', depth = this.state.orDepth || 'standard';
+    const period = this.state.orPeriod || 'daily', depth = period === 'cycle' ? 'standard' : this.state.orDepth || 'standard';
     const want = period + '|' + depth;
     if (this._orAutoFor === want || !this.oracleWillAsk(period, depth)) return;
     this._orAutoFor = want;
@@ -19261,7 +19587,7 @@ class Component extends DCLogic {
     this._orAutoT = setTimeout(() => {
       this._orAutoT = null; this._orAutoFor = null;
       const st = this.state;
-      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
+      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (period === 'cycle' || (st.orDepth || 'standard') === depth) && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
     }, 600);
   }
   /* THE IN-DEPTH READING IS WRITTEN BEFORE IT IS ASKED FOR. A reading of that
@@ -19279,56 +19605,297 @@ class Component extends DCLogic {
     const st = this.state, cs = st.cloudStatus, C = this.cloud;
     if (!st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
     if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
-    if (!(st.lum && st.lum.isPremium)) return;
-    const period = st.orPeriod || 'daily', slot = this.oracleSlot(period, 'deep');
+    if (!this.addonsOpen()) return;
+    /* The Cycle Audit has no in-depth form, so a reader looking at it has
+       today's in-depth reading prepared. */
+    const deepOf = x => x && x !== 'cycle' ? x : 'daily';
+    const period = deepOf(st.orPeriod), slot = this.oracleSlot(period, 'deep');
     this._orPrepTried = this._orPrepTried || {};
     if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
     if (this.orNonQuietBusy().length || (this._orBusy && this._orBusy[slot]) || this._orPrepT) return;
     this._orPrepT = setTimeout(() => {
       this._orPrepT = null;
-      const s2 = this.state, p2 = s2.orPeriod || 'daily', sl2 = this.oracleSlot(p2, 'deep');
+      const s2 = this.state, p2 = deepOf(s2.orPeriod), sl2 = this.oracleSlot(p2, 'deep');
       if (this._orPrepTried[sl2] || this.oracleCached(p2, 'deep') || this.orNonQuietBusy().length || (this._orBusy && this._orBusy[sl2])) return;
-      if (!(s2.lum && s2.lum.isPremium) || !s2.ready) return;
+      if (!this.addonsOpen() || !s2.ready) return;
       this._orPrepTried[sl2] = true;
       this.oracleAsk(p2, 'deep', false, true);
     }, 4000);
   }
+  /* ---- The Cycle Audit ----------------------------------------------------
+
+     THE LONG PASSAGES, AND WHAT THEY ASK. Asked for by the owner on 18 October
+     2026: the slow astral bodies stay on a point of the chart for years rather
+     than days, and the audit reads each of those passages in two directions,
+     what it asks the reader to set down (the Tax) and what it builds (the
+     Dividend). It is the Oracle's fourth period, so it lives where the model,
+     the consent and the paywall already are.
+
+     THE DATES ARE FREE AND STAY ON THE DEVICE. cycleWindows() finds every
+     passage of Saturn, Uranus, Neptune and Pluto across the natal bodies and
+     the angles, from the start of last year to twenty years ahead, and that
+     list is drawn for anybody with a chart of their own. A computed date
+     cannot be scarce, so it is not sold. What is opened by a payment, on the
+     website only, is the reading the Oracle writes from those dates.
+
+     A PASSAGE IS EVERY RUN OF ONE CONTACT, joined. A slow body turning
+     retrograde leaves the orb and comes back, often two or three times, and a
+     reader lives that as one season, so runs of the same contact less than
+     CY_JOIN days apart are one passage with several exact dates. Each body is
+     asked of the library every few weeks (CY_STEP) and read daily off a cubic
+     through those positions, and where the distance to an aspect enters the
+     orb, leaves it, or changes sign, the moment is bisected inside that day,
+     so an exact date is good to a few minutes. That is about 1,800 library
+     positions for twenty two years. A two day walk through the grid lonOf
+     reads asked for 8,000 and took over a second.
+
+     THE SCAN IS ANCHORED TO THE CALENDAR YEAR, not to today, so the list and
+     the dossier built from it are the same all year, and the reading the
+     server keeps for that dossier is not written again every morning. */
+  CY_MOVERS = ['Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  CY_ASPECTS = [[0, 'conjunct'], [90, 'square'], [120, 'trine'], [180, 'opposite']];
+  CY_ORB = 1.5; CY_JOIN = 400; CY_AHEAD = 20; CY_MAX = 8;
+  /* Days between library positions, per body. The scan reads each body off a
+     cubic through these, the interpolation lonRaw's own grid uses, and that
+     cubic is within a hundredth of a degree of the library at these spacings,
+     because the slowest bodies turn slowest: their retrograde loops last
+     months, and the samples are weeks apart. */
+  CY_STEP = { Saturn: 20, Uranus: 30, Neptune: 40, Pluto: 40 };
+  /* Which passages the audit reads when there are more than CY_MAX: the ones
+     under way now first, then the slowest bodies, hard contacts before easy
+     ones, longer before shorter. The page then shows them in the order they
+     arrive. */
+  CY_WEIGHT = { Saturn: 2, Uranus: 3, Neptune: 3.5, Pluto: 4 };
+  /* A position for the scan. The library is asked directly when it is here,
+     past the grid and the position cache, because a twenty year walk would
+     otherwise fill both with nodes nothing else will ask for; lonOf answers
+     when it is not. */
+  cyLon(name, t) {
+    const A = typeof window !== 'undefined' && window.Astronomy;
+    if (A && Number.isFinite(t)) { try { return A.Ecliptic(A.GeoVector(name, A.MakeTime(t), true)).elon; } catch (e) { /* the lonOf below */ } }
+    return this.lonOf(name, t);
+  }
+  cycleScanKey() { const p = this.activeProfile(); return new Date().getFullYear() + '|' + (p ? p.birthStamp : 'legacy'); }
+  /* The scan costs a tenth to a fifth of a second, once a year per profile,
+     so it is never run inside the press that opens the Cycle Audit: the page
+     says it is finding the passages and cycleSoon() runs it on the next tick. */
+  cycleReady() { return this._cyKey === this.cycleScanKey() && !!this._cy; }
+  cycleSoon() {
+    if (this._cySoonT) return;
+    this._cySoonT = setTimeout(() => { this._cySoonT = null; this.cycleWindows(); this.setState({ orTick: (this.state.orTick || 0) + 1 }); }, 40);
+  }
+  cycleWindows() {
+    const key = this.cycleScanKey();
+    if (this._cyKey === key && this._cy) return this._cy;
+    const today = new Date(), year = today.getFullYear(); today.setHours(12, 0, 0, 0);
+    let natal = [];
+    try {
+      const names = this.PLNS.slice(0, 10).map(x => x[0]);
+      natal = this.chartAt(this.natalDate()).filter(x => names.indexOf(x.name) !== -1)
+        .concat(this.anglePoints().filter(a => a.name === 'Ascendant' || a.name === 'Midheaven'));
+    } catch (e) { natal = []; }
+    const asc = natal.length ? this.ascendant() : null;
+    const start = new Date(year - 1, 0, 1, 12), end = new Date(year + this.CY_AHEAD + 1, 0, 1, 12);
+    const t0 = this.t2000(start), t1 = this.t2000(end), toDate = t => new Date((t + 2451545.0 - 2440587.5) * 864e5);
+    /* One target per side of each aspect: a square is met waxing and waning,
+       years apart, and both are the same contact by name. */
+    const targets = [];
+    natal.forEach((n, ni) => this.CY_ASPECTS.forEach(([ang, asp]) => {
+      (ang === 0 || ang === 180 ? [ang] : [ang, -ang]).forEach(a => targets.push({ ni, asp, lon: this.norm360(n.lon + a) }));
+    }));
+    const signed = (lon, tgt) => { let d = (lon - tgt) % 360; if (d < 0) d += 360; return d > 180 ? d - 360 : d; };
+    /* The moment inside one step where f changes sign, to a few hours. */
+    const bisect = (f, a, b, fa) => {
+      for (let i = 0; i < 8; i++) { const m = (a + b) / 2, fm = f(m); if ((fm < 0) === (fa < 0)) { a = m; fa = fm; } else b = m; }
+      return (a + b) / 2;
+    };
+    const runs = [];
+    this.CY_MOVERS.forEach(mover => {
+      /* The library is asked once per sample, and everything after that is
+         arithmetic on the cubic: the daily walk and every bisection. */
+      const h = this.CY_STEP[mover] || 10, base = t0 - 2 * h, n = Math.ceil((t1 - t0) / h) + 5, L = new Float64Array(n);
+      let ok = true;
+      for (let i = 0; i < n; i++) {
+        let v = this.cyLon(mover, base + i * h);
+        if (v == null || !Number.isFinite(v)) { ok = false; break; }
+        if (i) v -= Math.round((v - L[i - 1]) / 360) * 360;
+        L[i] = v;
+      }
+      if (!ok) return;
+      const at = t => {
+        const x = (t - base) / h, k = Math.min(n - 3, Math.max(1, Math.floor(x))), u = x - k;
+        return L[k - 1] * (-u * (u - 1) * (u - 2) / 6) + L[k] * ((u + 1) * (u - 1) * (u - 2) / 2)
+          + L[k + 1] * (-(u + 1) * u * (u - 2) / 2) + L[k + 2] * ((u + 1) * u * (u - 1) / 6);
+      };
+      /* The walk is every two days, which no passage fits inside (Saturn, the
+         fastest, moves about a quarter of a degree in two), and it is plain
+         loops over flat arrays because it is a few hundred thousand steps. */
+      const orb = this.CY_ORB, nT = targets.length, tg = new Float64Array(nT), prev = new Float64Array(nT);
+      for (let k = 0; k < nT; k++) tg[k] = targets[k].lon;
+      const live = new Array(nT).fill(null);
+      let prevT = null;
+      for (let t = t0; t <= t1; t += 2) {
+        const lon = at(t);
+        for (let k = 0; k < nT; k++) {
+          let d = (lon - tg[k]) % 360; if (d < 0) d += 360; if (d > 180) d -= 360;
+          const off = d < 0 ? -d : d, was = prev[k];
+          let run = live[k];
+          if (off <= orb) {
+            if (!run) {
+              const from = prevT == null ? t : bisect(x => Math.abs(signed(at(x), tg[k])) - orb, prevT, t, 1);
+              run = live[k] = { mover, k, from, to: t, passes: [] };
+            }
+            run.to = t;
+            if (prevT != null && (was < 0) !== (d < 0) && (was < 0 ? -was : was) < 5) run.passes.push(bisect(x => signed(at(x), tg[k]), prevT, t, was));
+          } else if (run) {
+            run.to = bisect(x => Math.abs(signed(at(x), tg[k])) - orb, prevT, t, -1);
+            runs.push(run); live[k] = null;
+          }
+          prev[k] = d;
+        }
+        prevT = t;
+      }
+      live.forEach(r => { if (r) runs.push(r); });
+    });
+    /* Join the runs of one contact into passages. */
+    const byContact = {};
+    runs.sort((a, b) => a.from - b.from).forEach(r => {
+      const t = targets[r.k], id = r.mover + '|' + t.asp + '|' + natal[t.ni].name;
+      const list = byContact[id] || (byContact[id] = []), last = list[list.length - 1];
+      if (last && r.from - last.to < this.CY_JOIN) { last.to = Math.max(last.to, r.to); last.passes = last.passes.concat(r.passes); }
+      else list.push({ id, mover: r.mover, asp: t.asp, n: natal[t.ni], from: r.from, to: r.to, passes: r.passes.slice() });
+    });
+    const yr = this._fmt('cymonth', { month: 'short', year: 'numeric' }), full = this._fmt('cyday', { day: 'numeric', month: 'long', year: 'numeric' });
+    const mY = d => yr ? yr.format(d) : d.toDateString(), dMY = d => full ? full.format(d) : d.toDateString();
+    const out = [];
+    Object.keys(byContact).forEach(id => byContact[id].forEach(w => {
+      const from = toDate(w.from), to = toDate(w.to), passes = w.passes.sort((a, b) => a - b).map(toDate);
+      const openStart = w.from <= t0, house = asc ? Math.floor(this.norm360(w.n.lon - asc.asc) / 30) + 1 : null;
+      const a = (openStart ? 'since before ' : '') + mY(from), b = mY(to);
+      out.push({
+        id: w.id + '|' + from.getFullYear(), mover: w.mover, asp: w.asp, natal: w.n.name, natalLon: w.n.lon, house,
+        from, to, passes, past: to < today, now: from <= today && to >= today,
+        weight: (this.CY_WEIGHT[w.mover] || 1) + (w.asp === 'trine' ? 0 : 1) + (w.to - w.from) / 365.25 + (from <= today && to >= today ? 4 : 0),
+        /* The aspect's own word, which reads as the field writes it: Pluto
+           conjunct your Mars, Saturn opposite your Sun. */
+        label: w.mover + ' ' + w.asp + ' your ' + w.n.name,
+        range: a === b ? a : a + ' to ' + b,
+        passLine: passes.length ? 'exact ' + passes.map(mY).join(', ') : 'close, without reaching exact',
+        passFull: passes.map(dMY).join(', ')
+      });
+    }));
+    this._cyKey = key;
+    this._cy = out.sort((a, b) => a.from - b.from);
+    return this._cy;
+  }
+  /* The passages the audit reads: the ones not yet over, at most CY_MAX so
+     the reading fits the Oracle's time, chosen by CY_WEIGHT and kept in the
+     order they arrive. */
+  cyclePassages() {
+    const ahead = this.cycleWindows().filter(w => !w.past);
+    const keep = ahead.slice().sort((a, b) => b.weight - a.weight).slice(0, this.CY_MAX);
+    return ahead.filter(w => keep.indexOf(w) !== -1);
+  }
+  /* The slot key: which passages, so a passage closing finds no kept reading
+     rather than the one written for the old list. */
+  cycleKey() {
+    if (!this.cycleReady()) return 'cypending';
+    const s = this.cyclePassages().map(w => w.id).join(',');
+    let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+    return 'cy' + h.toString(36);
+  }
+  /* WHAT LEAVES THE DEVICE FOR THE AUDIT: the first name, the natal point each
+     passage touches (sign, degree, house), and the passages with their dates.
+     No birth date, time or place, and nothing that moves with today, so the
+     same chart sends the same dossier all year. */
+  cycleDossier() {
+    const ws = this.cyclePassages(), p = this.activeProfile();
+    const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
+    const first = String(this.birthName() || '').trim().split(/\s+/)[0] ||
+      (p && p.name && p.name !== 'Default Profile' ? String(p.name).trim().split(/\s+/)[0] : '');
+    const lines = [];
+    if (first) lines.push('NAME: ' + first);
+    const seen = {}, pts = [];
+    ws.forEach(w => { if (!seen[w.natal]) { seen[w.natal] = 1; pts.push('Natal ' + w.natal + ' ' + fmt(w.natalLon) + (w.house ? ' (house ' + w.house + ')' : '')); } });
+    lines.push('NATAL POINTS TOUCHED: ' + pts.join('; '));
+    lines.push('PASSAGES (in the order they arrive):');
+    ws.forEach((w, i) => lines.push((i + 1) + '. ' + w.mover + ' ' + w.asp + ' natal ' + w.natal + '. In orb ' + w.range + '. ' +
+      (w.passes.length ? 'Exact on ' + w.passFull + '.' : 'Comes close without reaching exact.')));
+    return lines.join('\n');
+  }
+  /* Whether the add-ons (in-depth readings, Omni and the Cycle Audit) are open
+     to this reader: free in the apps, and on the website once the account has
+     Codex Luminary. The server decides in the end. */
+  addonsOpen() { return this.nativeApp() || !!(this.state.lum && this.state.lum.isPremium); }
+  /* ---- A gift, in the apps -------------------------------------------------
+
+     THE OWNER'S DONATE BUTTON (18 October 2026): the apps give every add-on
+     away, and offer a way to give back beside Contact Support and the legal
+     pages, and in the profile menu. It is called Support inCommon, a gift, on
+     every surface, because inCommon is not a charity and "donate" tells most
+     people a gift is tax deductible. It opens Stripe's own page in the
+     device's browser (Capacitor sends any address that is not the app's to
+     the system browser), needs no account, and comes back to thanks.html on
+     the website. GIFT_IN_APP is the switch: the stores' review may refuse a
+     payment link from inside an app, and turning it off is this one word. */
+  GIFT_IN_APP = true;
+  SITE = 'https://incommonspace.com';
+  giftOn() { return this.nativeApp() && this.GIFT_IN_APP; }
+  giftGo() {
+    const IC = this.cloud || window.InCommonCloud;
+    if (this.state.giftBusy) return;
+    if (!IC || typeof IC.billingSupport !== 'function') { this.toastMsg('The gift page could not open. Please try again.'); return; }
+    this.setState({ giftBusy: true, pmenuOpen: false });
+    IC.billingSupport(this.SITE + '/thanks.html').then(r => {
+      this.setState({ giftBusy: false });
+      if (r && r.ok) { location.href = r.url; return; }
+      this.toastMsg(r && (r.reason === 'notConfigured' || r.reason === 'notSetUp') ? 'Gifts are being set up. Check back soon.' : 'The gift page could not open. Please try again.');
+    });
+  }
   /* ---- Codex Luminary ------------------------------------------------------
 
-     THE CODEX CHARGED FOR ITS IN-DEPTH READING, AND SO DOES THIS, which the
-     owner asked for on 29 September 2026. The Codex's Luminary subscription
-     is ported whole: its two prices, $12.99 a month and $119.99 a year, its
-     Stripe Checkout and billing portal, its webhook and its lazy re-sync, in
-     server/billing/index.ts, and its words on this page. In inCommon the one
-     thing Luminary unlocks is the in-depth reading. Everything else in the app
-     stays free, which the gate says in a line of its own.
+     ONE PAYMENT, THE READER'S CHOICE, EVERY ADD-ON. The owner decided on 18
+     October 2026 that every add-on takes the Cycle Audit's form of payment,
+     one time and an amount the reader chooses, and that one payment opens all
+     of them: the in-depth Oracle readings, Omni tarot and the Cycle Audit, and
+     any added later. It keeps the name Codex Luminary. The subscription it
+     replaced ($12.99 a month, $119.99 a year, a seven day trial, and the store
+     purchases through RevenueCat) is no longer sold; a reader who holds one
+     keeps it until it ends, with Manage billing to cancel it, and the server
+     counts it as Luminary while it lives. In the apps every add-on is free.
 
-     The page asks whether the reader is a Luminary the first time the Oracle
-     is opened with a session, and never on render: the phone draws every
-     section at once, and a status call per paint would be a Stripe call per
-     paint for anybody whose row has gone stale. The server decides in the
-     end, because the Oracle function checks the row itself before it writes
-     an in-depth reading, so a page that believes the wrong thing costs a
-     refusal and not a reading. */
-  LUM_PLANS = [['monthly', 'Monthly', '$12.99', 'per month', '', '$12.99/mo'], ['annual', 'Yearly', '$119.99', 'per year \u00b7 $10.00/mo', 'Save 23%', '$119.99/yr']];
+     The page asks whether the reader has Luminary the first time a screen
+     that sells it is opened with a session, and never on render: the phone
+     draws every section at once, and a status call per paint would be a Stripe
+     call per paint. The server decides in the end, because the Oracle function
+     checks for itself before it writes an add-on, so a page that believes the
+     wrong thing costs a refusal and not a reading. */
   /* Stripe sends the reader back to the address the page named, with
-     ?luminary=success or ?luminary=cancelled before the hash, the Codex's
-     ?checkout= under a name this app does not already use. It is read once and
-     dropped, so a reload cannot replay the welcome. */
+     ?luminary=success or ?luminary=cancelled before the hash, and ?lumfrom=
+     saying which add-on they were looking at, which the hash cannot carry. It
+     is read once and dropped, so a reload cannot replay the welcome. */
   lumReturnRead() {
-    let v = null;
+    let v = null, from = null;
     try {
       const q = new URLSearchParams(location.search);
-      v = q.get('luminary');
-      if (!v) return;
-      q.delete('luminary');
+      v = q.get('luminary'); from = q.get('lumfrom');
+      if (!v && !from) return;
+      q.delete('luminary'); q.delete('lumfrom');
       const rest = q.toString();
       history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
     } catch (e) { return; }
-    if (v === 'success') this.setState({ lumReturn: 'success', orDepth: 'deep' });
-    else setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+    const where = from === 'cycle' ? { orPeriod: 'cycle' } : from === 'deep' ? { orDepth: 'deep' } : {};
+    if (v === 'success') this.setState({ lumReturn: 'success', ...where });
+    else {
+      this.setState(where);
+      if (v) setTimeout(() => this.toastMsg('Checkout was closed. Nothing was charged.'), 600);
+    }
   }
-  lumReturnTo() { return location.origin + location.pathname + '#/oracle'; }
+  /* Back to the screen the reader paid from, with which add-on it was. */
+  lumReturnTo(from) {
+    const hash = from === 'omni' ? '#/library/readings/tarot' : '#/oracle';
+    return location.origin + location.pathname + (from ? '?lumfrom=' + from : '') + hash;
+  }
   /* WHERE THE READER IS, FOR LUMINARY ONLY: the two letter country the device's
      time zone names, or the language's region when the zone says nothing
      (UTC), or null. Only the countries that decide what Luminary may do are
@@ -19361,36 +19928,23 @@ class Component extends DCLogic {
     const code = r ? r.toUpperCase() : '';
     return Object.keys(this.LUM_TZ).some(k => this.LUM_TZ[k] === code) ? code : null;
   }
-  /* The price the server quoted for this reader's country, formatted here, or
-     null when it quoted none (an older server), in which case LUM_PLANS stands. */
-  lumPriceRows(lum) {
-    const p = lum && lum.price;
-    if (!p || !p.currency || !(p.monthly > 0) || !(p.annual > 0)) return null;
-    let fmt;
-    try { fmt = new Intl.NumberFormat('en', { style: 'currency', currency: String(p.currency).toUpperCase() }); } catch (e) { return null; }
-    const f = c => fmt.format(c / 100);
-    const save = Math.round((1 - p.annual / (12 * p.monthly)) * 100);
-    const tax = p.taxIncluded ? ' incl. VAT' : '';
-    return [['monthly', 'Monthly', f(p.monthly), 'per month' + tax, '', f(p.monthly) + '/mo'],
-      ['annual', 'Yearly', f(p.annual), 'per year \u00b7 ' + f(p.annual / 12) + '/mo' + tax, save > 0 ? 'Save ' + save + '%' : '', f(p.annual) + '/yr']];
-  }
   lumAuto() {
-    const cs = this.state.cloudStatus, C = this.cloud;
+    const st = this.state, cs = st.cloudStatus, C = this.cloud;
     const who = cs && cs.mode === 'cloud' ? String(cs.email || 'signed in') : null;
     if (!who || !C || typeof C.billingStatus !== 'function') {
       if (this._lumFor) { this._lumFor = null; clearTimeout(this._lumT); this.setState({ lum: null }); }
       return;
     }
-    if (cs.userId && this.rcOn()) this.rcStart(cs.userId);
     if (this._lumFor === who) return;
-    if (this.curTab() !== 'oracle' && this.state.lumReturn !== 'success' && !this.readLS(this.oracleDeepKey(), false)) return;
+    const back = st.lumReturn === 'success', selling = this.curTab() === 'oracle' || st.libView === 'reading';
+    if (!selling && !back && !this.readLS(this.oracleDeepKey(), false)) return;
     this._lumFor = who;
-    this.lumFetch(this.state.lumReturn === 'success', 0);
+    this.lumFetch(back, 0);
   }
-  /* After a checkout, Stripe has the subscription before the webhook has
-     told anybody, so the status is asked with a sync, and asked again a few
-     times while it still reads unpaid: the Codex's "Confirming your payment
-     with Stripe" is that wait, said on the page. */
+  /* After a checkout, Stripe has the payment before the webhook has told
+     anybody, so the status is asked with a sync, and asked again a few times
+     while it still reads unpaid: "Confirming your payment with Stripe" is that
+     wait, said on the page. */
   lumFetch(sync, tries) {
     const C = this.cloud;
     if (!C || typeof C.billingStatus !== 'function') return;
@@ -19403,196 +19957,87 @@ class Component extends DCLogic {
       if (this.state.lumReturn === 'success') {
         if (lum.isPremium) {
           this.setState({ lumReturn: null });
-          this.toastMsg('Welcome to Codex Luminary. The whole sky is yours.');
+          this.toastMsg('Codex Luminary is open. Thank you.');
         } else if ((tries || 0) < 4 && !lum.failed) {
           this._lumT = setTimeout(() => this.lumFetch(true, (tries || 0) + 1), 2500);
-        } else {
-          this.setState({ lumReturn: null });
-          /* An app purchase has been taken by the store by now; what is late
-             is the record of it, which the webhook will still bring. */
-          if (this.nativeApp() && !lum.failed) this.toastMsg('Your purchase went through. Codex Luminary opens here as soon as the store confirms it.');
-        }
+        } else this.setState({ lumReturn: null });
       }
       if (lum.isPremium && !(was && was.isPremium)) this.speak('Codex Luminary is open.', 'polite');
     });
   }
-  lumBuy() {
+  /* The one time payment. The amount is chosen on Stripe's page, so nothing
+     but where to come back to is sent; from names the add-on the reader was
+     looking at, so they come back to it. Never in the apps, where every
+     add-on is free and no gate is drawn. */
+  lumBuy(from) {
     const C = this.cloud;
-    if (this.nativeApp()) { if (this.rcOn()) this.rcBuy(); return; }
-    if (this.state.lumBusy || !C || typeof C.billingCheckout !== 'function') return;
-    this.setState({ lumBusy: 'checkout' });
-    C.billingCheckout(this.state.lumPlan || 'annual', this.lumReturnTo(), this.lumCountry()).then(r => {
+    if (this.nativeApp() || this.state.lumBusy || !C || typeof C.billingUnlock !== 'function') return;
+    this.setState({ lumBusy: 'unlock' });
+    C.billingUnlock(this.lumReturnTo(from), this.lumCountry()).then(r => {
       if (r && r.ok) { location.href = r.url; return; }
       this.setState({ lumBusy: null });
       const reason = (r && r.reason) || 'error';
-      if (reason === 'already') { this.toastMsg('You already have Codex Luminary. Manage it from the billing portal.'); this.lumFetch(true, 0); return; }
+      if (reason === 'already') { this.toastMsg('Codex Luminary is already open on this account.'); this.lumFetch(true, 0); return; }
       if (reason === 'region') { this.lumFetch(false, 0); return; }
       this.toastMsg(reason === 'notConfigured' || reason === 'notSetUp' ? 'Payments are being set up. Check back soon.'
         : reason === 'signedOut' ? 'Sign in again to continue.' : 'Checkout could not open. Please try again.');
     });
   }
+  /* Stripe's billing portal, for a reader still holding a subscription from
+     before it was retired, so they can see when it ends and cancel it. */
   lumManage() {
     const C = this.cloud;
-    if (this.nativeApp()) { if (this.rcOn()) this.rcManage(); return; }
-    if (this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
+    if (this.nativeApp() || this.state.lumBusy || !C || typeof C.billingPortal !== 'function') return;
     this.setState({ lumBusy: 'portal' });
-    C.billingPortal(this.lumReturnTo()).then(r => {
+    C.billingPortal(this.lumReturnTo('deep')).then(r => {
       if (r && r.ok) { location.href = r.url; return; }
       this.setState({ lumBusy: null });
       this.toastMsg(r && r.reason === 'noAccount' ? 'There is no billing account on this sign in.' : 'The billing portal could not open. Please try again.');
     });
   }
-  /* LUMINARY IN THE APPS: the stores' own billing, through RevenueCat.
-     Decided by the owner on 12 October 2026: inside the iPhone and Android
-     apps Luminary is bought with Apple's In-App Purchase or Google Play
-     Billing, never Stripe, and RevenueCat sits between the app and the two
-     stores (docs/REVENUECAT-SETUP.md). Its Capacitor plugin is installed in
-     native/ and answers to the name Purchases.
-
-     This app has no bundler, so the plugin's JavaScript wrapper is not loaded:
-     rcCall() asks the native side directly through Capacitor's bridge, which
-     is what the wrapper does underneath. The method names and arguments are
-     the plugin's own (configure, logIn, getOfferings, purchasePackage,
-     restorePurchases, getCustomerInfo), checked against version 13.7.3.
-
-     The keys are RevenueCat's PUBLIC app keys, one per store, which are made
-     to ship inside an app; the secret key never leaves the server. While a key
-     is empty the app sells nothing and says Luminary is not available in the
-     app yet, exactly as before this was built, so filling the keys is the
-     switch. The reader's Supabase user id is RevenueCat's app user id, so a
-     purchase is filed under the reader the server already knows, and the page
-     still decides nothing: after a purchase or a restore it asks the store
-     function to read the purchase from RevenueCat, then asks billing for the
-     status like any other reader. */
-  RC_KEYS = { ios: '', android: '' };
-  RC_ENTITLEMENT = 'luminary';
-  rcPlatform() {
-    try { const p = window.Capacitor.getPlatform(); return p === 'ios' || p === 'android' ? p : null; }
-    catch (e) { return null; }
-  }
-  rcOn() {
-    const p = this.nativeApp() ? this.rcPlatform() : null;
-    return !!(p && this.RC_KEYS[p] && window.Capacitor && typeof window.Capacitor.nativePromise === 'function');
-  }
-  rcStore() { return this.rcPlatform() === 'android' ? 'Google Play' : 'App Store'; }
-  rcCall(method, opts) {
-    const cap = window.Capacitor, plug = cap && cap.Plugins && cap.Plugins.Purchases;
-    try {
-      if (plug && typeof plug[method] === 'function') return Promise.resolve(plug[method](opts || {}));
-      if (cap && typeof cap.nativePromise === 'function') return cap.nativePromise('Purchases', method, opts || {});
-    } catch (e) { return Promise.reject(e); }
-    return Promise.reject(new Error('Purchases is not available'));
-  }
-  rcEntitled(info) {
-    const a = info && info.entitlements && info.entitlements.active;
-    return !!(a && a[this.RC_ENTITLEMENT]);
-  }
-  /* A press of Cancel on the store's own sheet is the reader changing their
-     mind, not an error, and is answered with nothing. RevenueCat's code for it
-     is 1, and the bridge carries it as a string. */
-  rcCancelled(e) { return !!e && (e.userCancelled === true || String(e.code) === '1' || !!(e.data && e.data.userCancelled)); }
-  /* Configured once per launch, for the reader signed in; a different reader
-     later is a logIn, which moves RevenueCat to their purchases. Then the
-     offering is asked for, and the reader's own purchases are looked at once,
-     so a purchase the server has not heard about (a webhook not set up yet, or
-     one that failed) is recorded now rather than never. */
-  rcStart(userId) {
-    if (this._rcFor === userId) return;
-    this._rcFor = userId;
-    const step = this._rcConf
-      ? this.rcCall('logIn', { appUserID: userId })
-      : this.rcCall('configure', { apiKey: this.RC_KEYS[this.rcPlatform()], appUserID: userId }).then(() => { this._rcConf = true; });
-    step.then(() => {
-      if (this._rcFor !== userId) return;
-      this.rcOfferings();
-      return this.rcCall('getCustomerInfo').then(r => {
-        const lum = this.state.lum;
-        if (this._rcFor === userId && this.rcEntitled(r && r.customerInfo) && !(lum && lum.isPremium)) this.rcRecord(false);
-      });
-    }).catch(() => { if (this._rcFor === userId) this.setState({ rcPkgs: null, rcErr: 'store' }); });
-  }
-  /* Check again: a launch whose configure failed starts over; one that was
-     configured only asks for the offering again. */
-  rcRetry() {
-    const cs = this.state.cloudStatus, id = cs && cs.userId;
-    if (this._rcConf) { this.rcOfferings(); return; }
-    if (!id) return;
-    this._rcFor = null;
-    this.rcStart(id);
-  }
-  rcOfferings() {
-    this.setState({ rcErr: null });
-    return this.rcCall('getOfferings').then(o => {
-      const cur = o && o.current, pk = cur && Array.isArray(cur.availablePackages) ? cur.availablePackages : [];
-      const find = t => pk.find(p => p && p.packageType === t && p.product) || null;
-      const monthly = find('MONTHLY'), annual = find('ANNUAL');
-      this.setState(monthly || annual ? { rcPkgs: { monthly, annual }, rcErr: null } : { rcPkgs: null, rcErr: 'empty' });
-    }, () => this.setState({ rcPkgs: null, rcErr: 'store' }));
-  }
-  /* The plans as the store prices them, in the reader's own currency and with
-     the store's own tax: Apple and Google set the local price and charge and
-     pay the VAT themselves, which is why the apps need none of the EU and UK
-     arrangements the website does. Same row shape as LUM_PLANS. */
-  rcPlanRows() {
-    const pk = this.state.rcPkgs;
-    if (!pk) return null;
-    const m = pk.monthly && pk.monthly.product, a = pk.annual && pk.annual.product, rows = [];
-    if (m) rows.push(['monthly', 'Monthly', m.priceString, 'per month', '', m.priceString + '/mo']);
-    if (a) {
-      const save = m && m.price > 0 && a.price > 0 ? Math.round((1 - a.price / (12 * m.price)) * 100) : 0;
-      rows.push(['annual', 'Yearly', a.priceString, 'per year' + (a.pricePerMonthString ? ' · ' + a.pricePerMonthString + '/mo' : ''), save > 0 ? 'Save ' + save + '%' : '', a.priceString + '/yr']);
-    }
-    return rows.length ? rows : null;
-  }
-  rcBuy() {
-    const st = this.state, pk = st.rcPkgs;
-    const pkg = pk && (pk[st.lumPlan || 'annual'] || pk.annual || pk.monthly);
-    if (st.lumBusy || !pkg) return;
-    this.setState({ lumBusy: 'checkout' });
-    this.rcCall('purchasePackage', { aPackage: pkg }).then(r => {
-      this.setState({ lumBusy: null });
-      if (this.rcEntitled(r && r.customerInfo)) this.rcRecord(true);
-    }, e => {
-      this.setState({ lumBusy: null });
-      if (this.rcCancelled(e)) return;
-      this.toastMsg(String(e && e.code) === '20' ? 'The purchase is waiting for approval. Codex Luminary opens here once the store confirms it.'
-        : 'The purchase did not finish. Please try again.');
-    });
-  }
-  /* Apple requires a way to restore a purchase made on another device or
-     before a reinstall, and it is RevenueCat's restorePurchases. */
-  rcRestore() {
-    if (this.state.lumBusy) return;
-    this.setState({ lumBusy: 'restore' });
-    this.rcCall('restorePurchases').then(r => {
-      this.setState({ lumBusy: null });
-      if (this.rcEntitled(r && r.customerInfo)) this.rcRecord(true);
-      else this.toastMsg('There is no Codex Luminary purchase to restore on this ' + this.rcStore() + ' account.');
-    }, () => {
-      this.setState({ lumBusy: null });
-      this.toastMsg('Purchases could not be restored just now. Please try again.');
-    });
-  }
-  /* The store took the payment; the server is told to read it from
-     RevenueCat, then the status is asked for, with the same wait a Stripe
-     return has. Quietly (loud false) when it is a catch up at launch. */
-  rcRecord(loud) {
-    const C = this.cloud, go = () => loud ? this.lumFetch(true, 0) : this.lumFetch(false, 0);
-    if (loud) this.setState({ lumReturn: 'success', orDepth: 'deep' });
-    if (C && typeof C.storeSync === 'function') C.storeSync().then(go, go);
-    else go();
-  }
-  /* Where an app subscription is managed and cancelled: the store's own
-     settings, never Stripe's portal. RevenueCat names the address; the two
-     stores' own pages stand in when it does not. */
-  rcManage() {
-    const lum = this.state.lum, u = lum && lum.manageUrl;
-    location.href = /^https:\/\//.test(String(u || '')) ? u
-      : (lum && lum.source === 'google') || this.rcPlatform() === 'android'
-        ? 'https://play.google.com/store/account/subscriptions' : 'https://apps.apple.com/account/subscriptions';
+  /* THE GATE, ONE FOR EVERY ADD-ON, in the Oracle (in depth and the Cycle
+     Audit) and in the tarot room (Omni). What it offers is the same; only the
+     heading and the sentence under it name the add-on the reader reached for.
+     regionOpen is the server's answer for the country the page guessed, and
+     only an explicit false closes it. A billing function deployed before the
+     one time payment sends no floor and has nothing to sell, so the gate says
+     payments are being set up rather than offering a button. */
+  LUM_GATE = {
+    deep: ['In-Depth Readings', 'Long-form readings of your entire chart, including Chiron, Lilith, the asteroids, the Vertex and minor aspects, with timing windows, shadow work and journal prompts for each period.'],
+    cycle: ['What the long passages ask, and what they build', 'The slowest astral bodies stay on a point of your chart for years, not days. Each passage asks for something to be set down, and builds something in its place. The audit reads every passage ahead of you in both directions: what it asks you to surrender, what it gives back, and three questions to carry while it lasts.'],
+    omni: ['Omni', 'The long study. Nine or eleven cards, every one read against every other, in seven passages, ending in a pattern named clearly enough that you can check it against what actually happens.']
+  };
+  lumGateVals(from, p) {
+    const st = this.state, lum = st.lum;
+    const shut = !!lum && lum.regionOpen === false, sellable = !!(lum && lum.billingConfigured && lum.floor > 0);
+    const floor = lum && lum.floor > 0 ? lum.floor : 300, g = this.LUM_GATE[from] || this.LUM_GATE.deep;
+    const v = {
+      Head: g[0], Body: g[1],
+      BuyOn: !!lum && sellable && !shut,
+      Cta: st.lumBusy === 'unlock' ? 'Opening secure checkout…' : 'Become a Luminary',
+      Buy: () => this.lumBuy(from),
+      TermsOn: !shut,
+      Terms: 'One payment, not a subscription. You choose the amount, from $' + (floor / 100).toFixed(floor % 100 ? 2 : 0) + ', on Stripe\u2019s secure checkout.',
+      NoteOn: !!lum && (st.lumReturn === 'success' || shut || !sellable),
+      Note: st.lumReturn === 'success' ? 'Confirming your payment with Stripe…'
+        : shut ? 'Codex Luminary is not available in your country yet.'
+        : lum && lum.failed ? 'Your Luminary could not be checked just now.' : 'Payments are being set up. Check back soon.',
+      RetryOn: !!(lum && lum.failed),
+      Retry: () => this.lumFetch(true, 0)
+    };
+    /* Two sets of names, because the Oracle's gate and the tarot room's are
+       both in the same values and must not overwrite each other. They are
+       written out rather than built so check-dead-controls can find them. */
+    return p === 'tg'
+      ? { tgHead: v.Head, tgBody: v.Body, tgBuyOn: v.BuyOn, tgCta: v.Cta, tgBuy: v.Buy, tgTermsOn: v.TermsOn, tgTerms: v.Terms,
+        tgNoteOn: v.NoteOn, tgNote: v.Note, tgRetryOn: v.RetryOn, tgRetry: v.Retry }
+      : { gateHead: v.Head, gateBody: v.Body, gateBuyOn: v.BuyOn, gateCta: v.Cta, gateBuy: v.Buy, gateTermsOn: v.TermsOn, gateTerms: v.Terms,
+        gateNoteOn: v.NoteOn, gateNote: v.Note, gateRetryOn: v.RetryOn, gateRetry: v.Retry };
   }
   oracleVals() {
-    const st = this.state, period = st.orPeriod || 'daily', depth = st.orDepth || 'standard';
+    const st = this.state, period = st.orPeriod || 'daily', cycle = period === 'cycle';
+    /* The Cycle Audit has one depth, so the depth control steps aside for it. */
+    const depth = cycle ? 'standard' : st.orDepth || 'standard';
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const slot = this.oracleSlot(period, depth), cached = this.oracleCached(period, depth);
     /* A reading being prepared ahead is not on the screen until the reader has
@@ -19611,15 +20056,30 @@ class Component extends DCLogic {
     /* In depth is Luminary's, as the Codex's was: until the status is in the
        page waits, and a reader who is not a Luminary sees the gate instead of
        any reading, a kept one included, because the Codex showed the gate in
-       its place. */
-    const lum = st.lum, canDeep = !!(lum && lum.isPremium);
-    const deepish = depth === 'deep' && signedIn && !sample && !off;
+       its place. In the apps every add-on is free, so nothing waits there. */
+    const native = this.nativeApp();
+    const lum = st.lum, canDeep = native || !!(lum && lum.isPremium);
+    const deepish = depth === 'deep' && signedIn && !sample && !off && !native;
     const lumWait = deepish && !lum, locked = deepish && !!lum && !canDeep;
     const consented = !!this.readLS(this.oracleConsentKey(), false);
     /* In depth is shown only once the reader has pressed Consult the Oracle for
        it, whether it was written a minute ago or is still to be written. */
-    const deepGate = deepish && canDeep && consented && !busy && !err && !opened;
-    const r = hit && !locked && !lumWait && !(deepish && !opened) ? hit.reading : null;
+    const deepGate = depth === 'deep' && signedIn && !sample && !off && canDeep && consented && !busy && !err && !opened;
+    /* THE CYCLE AUDIT'S GATE. The dates are drawn for any chart of the
+       reader's own; the reading waits on Luminary on the website, and on
+       nothing in the apps, where it is free. With no passage ahead there is
+       nothing to write, and the list says so. */
+    const cyReady = cycle && !sample && this.cycleReady();
+    if (cycle && !sample && !cyReady) this.cycleSoon();
+    const cyRows = cyReady ? this.cycleWindows().filter(w => !w.past) : [];
+    /* The list opens on the passages the audit reads, so the gate is not
+       pushed out of sight by a long chart; every passage is one press away. */
+    const cyShown = cyReady && !st.cyAll ? this.cyclePassages() : cyRows;
+    const cyNone = cyReady && !cyRows.length, cyFinding = cycle && !sample && !cyReady;
+    const cyish = cyReady && signedIn && !off && !native && !cyNone;
+    const cyWait = cyish && !lum, cyLocked = cyish && !!lum && !lum.isPremium;
+    const r = !cycle && hit && !locked && !lumWait && !(depth === 'deep' && !opened) ? hit.reading : null;
+    const cr = cycle && hit && !cyLocked && !cyWait && !cyNone ? hit.reading : null;
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
@@ -19630,32 +20090,39 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
-    const blocked = sample || off || !!r || locked || lumWait || deepGate;
+    const blocked = sample || off || !!r || !!cr || locked || lumWait || deepGate || cyLocked || cyWait || cyNone || cyFinding;
     const waiting = !blocked && !err && signedIn && consented;
-    /* regionOpen is the server's answer for the country the page guessed. Only
-       an explicit false closes the gate, so an older server that never sends
-       it sells exactly as before. */
-    const native = this.nativeApp(), rcLive = native && this.rcOn(), rcRows = rcLive ? this.rcPlanRows() : null;
-    /* Inside the apps the store sells it, everywhere it has a storefront, so
-       the website's EU and UK hold does not apply there; with no RevenueCat
-       key the app sells nothing at all. */
-    const lumShut = !!lum && (native ? !rcLive : lum.regionOpen === false);
-    const sellable = native ? !!rcRows : !!(lum && lum.billingConfigured);
-    const plans = rcRows || this.lumPriceRows(lum) || this.LUM_PLANS;
-    const plan = st.lumPlan || 'annual', planRow = plans.find(x => x[0] === plan) || plans[0];
-    const appSub = !!lum && (lum.source === 'apple' || lum.source === 'google');
-    const storeWord = native ? this.rcStore() : lum && lum.source === 'google' ? 'Google Play' : 'App Store';
-    const storeThe = storeWord === 'App Store' ? 'the App Store' : storeWord;
+    /* A subscription from before the one time payment, still running: the
+       member line says when it ends and Manage billing cancels it. */
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
-    /* The free trial (seven days, card at checkout, once per reader) is the
-       server's to grant: trialDays is 0 for anybody who has had a subscription,
-       here or in the apps. The apps sell through the stores, whose offers are
-       set there, so this wording is the website's alone. */
-    const trialDays = !native && lum && lum.trialDays > 0 ? lum.trialDays : 0;
-    const trialEnd = trialDays ? new Date(Date.now() + trialDays * 864e5).toLocaleDateString() : '';
-    const trialing = !!lum && lum.status === 'trialing';
+    const subbed = !!lum && !!lum.plan && !!lum.status;
+    const cyPass = cr ? list(cr.passages).filter(x => x && str(x.contact)) : [];
+    const cyOv = cr ? paras(cr.overview) : [];
     return {
       orIcon: this.uiIcon('oracle'),
+      orDepthsOn: !cycle,
+      /* The passages, free, for any chart of the reader's own. */
+      cyListOn: cycle && !sample,
+      cyNone, cyFinding,
+      cyMoreOn: cyRows.length > this.CY_MAX,
+      cyMoreLabel: st.cyAll ? 'Show the passages the audit reads' : 'Show every passage (' + cyRows.length + ')',
+      cyMoreGo: () => this.setState({ cyAll: !st.cyAll }),
+      cyRows: cyShown.map(w => ({ label: w.label,
+        detail: [w.range, w.passLine].concat(w.house ? [w.house + (w.house === 1 ? 'st' : w.house === 2 ? 'nd' : w.house === 3 ? 'rd' : 'th') + ' house'] : []).join(' \u00b7 '),
+        now: w.now, bd: pick(w.now, 'var(--ac2)', 'var(--bd)') })),
+      /* One gate for every add-on, worded for the one the reader reached for.
+         In the apps it is never drawn: every add-on is free there. */
+      orGate: locked || cyLocked,
+      ...this.lumGateVals(cycle ? 'cycle' : 'deep'),
+      cyShow: !!cr,
+      cyAria: cr ? 'The Oracle, the Cycle Audit: ' + str(cr.title) : '',
+      cyLabel: cr ? str(hit.label) || 'The Cycle Audit' : '',
+      cyTitle: cr ? str(cr.title) : '', cyEpigraph: cr ? str(cr.epigraph) : '',
+      cyOvFirst: cyOv[0] || '', cyOvRest: cyOv.slice(1).map(t => ({ t })),
+      cyPassages: cyPass.map((x, i) => ({ num: ROMAN[i] || String(i + 1), contact: str(x.contact), window: str(x.window),
+        tax: str(x.tax), dividend: str(x.dividend), prompts: list(x.prompts).filter(q => str(q)).map(q => ({ t: q })) })),
+      cyHasLong: !!(cr && str(cr.longView)), cyLong: cr ? str(cr.longView) : '',
+      cyMantra: cr ? str(cr.mantra) : '',
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
@@ -19671,7 +20138,7 @@ class Component extends DCLogic {
       orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
-      orBusy: !r && !locked && (busy || waiting || lumWait),
+      orBusy: !r && !cr && !locked && !cyLocked && (busy || waiting || lumWait || cyWait),
       orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
@@ -19679,59 +20146,24 @@ class Component extends DCLogic {
       orAskGo: () => { if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
-      orLoadingText: lumWait ? 'Checking your Luminary subscription…'
+      orLoadingText: lumWait || cyWait ? 'Checking your Codex Luminary…'
         : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
         : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
         : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
+        : cycle ? 'The Oracle is reading the long passages across your chart…'
         : depth === 'deep'
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
-      orLumMember: deepish && canDeep && !!lum.plan,
-      orLumPlanLine: lum && lum.plan ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' · ' + (trialing ? (lum.cancelAtPeriodEnd ? 'free trial, ends ' : 'free trial until ') : lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '') + (appSub ? ' · ' + storeWord : '') : '',
-      /* Each subscription is managed where it was bought: an app one in the
-         store's settings, from the app; a Stripe one in Stripe's portal, from
-         the website. The website cannot open Apple's or Google's settings for
-         the reader, and the app never shows Stripe. */
-      orLumManageOn: native ? rcLive && appSub : !appSub && !!(lum && lum.hasAccount && lum.plan && lum.status && lum.billingConfigured),
+      /* Who has Luminary, said once above the reading: a subscription from
+         before the one time payment says when it ends and keeps Manage
+         billing to cancel it; a payment says every add-on is open. */
+      orLumMember: !native && signedIn && !sample && (depth === 'deep' || cycle) && !!lum && !!lum.isPremium,
+      orLumPlanLine: subbed ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' \u00b7 ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '')
+        : 'Every add-on is open on this account.',
+      orLumManageOn: !native && subbed && lum.source === 'stripe' && !!lum.hasAccount && !!lum.billingConfigured,
       orAiNoteOn: native,
-      orLumManageLabel: native ? 'Manage subscription' : st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
+      orLumManageLabel: st.lumBusy === 'portal' ? 'Opening the portal…' : 'Manage billing',
       orLumManage: () => this.lumManage(),
-      orLumGate: locked,
-      orLumTeaser: 'Long-form horoscopes that read your entire chart, including Chiron, Lilith, the asteroids, the Vertex, and minor aspects, with timing windows, shadow work, and journal prompts for each period.',
-      orLumPlansOn: !!lum && sellable && !lumShut,
-      /* NO PRICE ON THE WEBSITE'S GATE (owner, 13 October 2026): it invites the
-         reader to subscribe and leaves the figures to Stripe's checkout, which
-         shows the price and the renewal before anything is paid. The store apps
-         keep them, because Apple wants the price on the purchase screen. */
-      orLumPlans: plans.map(([k, name, price, per, badge]) => ({ name,
-        price: native ? price : '', priceOn: native,
-        per: native ? per : k === 'annual' ? 'Billed yearly' : 'Billed monthly',
-        badge: native ? badge : badge ? 'Best value' : '', badgeOn: !!badge, on: plan === k,
-        bd: pick(plan === k, 'var(--ac2)', 'var(--bd)'), bg: pick(plan === k, 'rgba(var(--atmc),.24)', 'transparent'),
-        c: pick(plan === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ lumPlan: k }) })),
-      orLumBuyOn: !!lum && sellable && !lumShut,
-      /* The renewal terms stand beside a purchase; where none is offered they would
-         describe one that is not there. */
-      orLumRenewOn: !lumShut && (!native || sellable),
-      orLumRenewText: native
-        ? 'Renews automatically each month or year at the price shown until you cancel. Payment is charged to your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple') + ' account. Cancel anytime in your ' + (this.rcPlatform() === 'android' ? 'Google Play' : 'Apple account') + ' settings, at least a day before it renews.'
-        : trialDays
-        ? 'Free for ' + trialDays + ' days. Your card is charged on ' + trialEnd + ' unless you cancel before then, and the plan renews automatically each month or year at the price shown at checkout until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.'
-        : 'Renews automatically each month or year at the price shown at checkout until you cancel. Cancel anytime in Manage billing. Secure payment by Stripe.',
-      orLumCta: st.lumBusy === 'checkout' ? (native ? 'Opening ' + storeThe + '…' : 'Opening secure checkout…') : trialDays ? 'Start your ' + trialDays + '-day free trial' : native ? 'Become a Luminary · ' + planRow[5] : 'Become a Luminary',
-      orLumBuy: () => this.lumBuy(),
-      orLumRestoreOn: !!lum && rcLive,
-      orLumRestoreLabel: st.lumBusy === 'restore' ? 'Restoring…' : 'Restore purchases',
-      orLumRestore: () => this.rcRestore(),
-      orLumNoteOn: !!lum && (st.lumReturn === 'success' || lumShut || !sellable),
-      orLumNote: st.lumReturn === 'success' ? (native ? 'Confirming your purchase…' : 'Confirming your payment with Stripe…')
-        : lumShut && native ? 'Codex Luminary is not available in the app yet.'
-        : lumShut ? 'Codex Luminary is not available in your country yet.'
-        : native ? (st.rcErr === 'empty' ? 'Codex Luminary is not available in the app yet.'
-          : st.rcErr ? storeThe.charAt(0).toUpperCase() + storeThe.slice(1) + ' could not be reached just now.' : 'Asking ' + storeThe + ' for its prices…')
-        : lum && lum.failed ? 'Your subscription could not be checked just now.' : 'Payments are being set up. Check back soon.',
-      orLumRetryOn: !!(lum && lum.failed) || (rcLive && st.rcErr === 'store'),
-      orLumRetry: () => { if (rcLive && st.rcErr === 'store') this.rcRetry(); if (lum && lum.failed) this.lumFetch(true, 0); },
       orMoreOn: !!partial && !!r,
       orMoreText: err && !busy ? (this.ORACLE_ERR[err] || 'The rest of the reading could not be written just now.')
         : 'The chapters, timing windows, shadow work and journal prompts are still being written…',
@@ -20133,13 +20565,30 @@ class Component extends DCLogic {
       bg: sel ? 'rgba(47,255,143,.12)' : 'var(--sf)', c: sel ? 'var(--ac)' : 'var(--tx)' });
     const r = st.tarotStage === 'reading' ? this.tarotReading() : null;
     const seed = () => (Date.now() % 2147483629) + 1;
+    /* Omni waits on the server, on a sign in, or on Codex Luminary. */
+    const cs = st.cloudStatus, signedIn = !!(cs && cs.mode === 'cloud'), native = this.nativeApp(), lum = st.lum;
+    const omniOpen = this.addonsOpen();
+    const omniWait = st.tarotStage === 'reading' && depth === 'omni' && !r;
+    const omniKey = this.tarotOmniKey(), omniErr = st.tarotOmniErr && st.tarotOmniErr.key === omniKey ? st.tarotOmniErr.reason : null;
+    if (omniWait && signedIn && omniOpen && !omniErr) this.tarotOmniSoon();
     const base = {
       libReading: true,
+      tarotOmniPanel: omniWait,
+      tarotOmniSignIn: omniWait && !signedIn,
+      tarotOmniGate: omniWait && signedIn && !native && !!lum && !lum.isPremium,
+      tarotOmniBusy: omniWait && signedIn && !omniErr && (omniOpen || (!native && !lum)),
+      tarotOmniBusyText: !native && !lum ? 'Checking your Codex Luminary…' : 'The cards are being read, every one against every other…',
+      tarotOmniErrOn: omniWait && signedIn && !!omniErr,
+      tarotOmniErrText: omniErr === 'offline' ? 'Omni needs a connection, and this device is offline.' : 'The reading could not be written just now.',
+      tarotOmniRetry: () => { this.setState({ tarotOmniErr: null }); this.tarotOmniAsk(); },
+      tarotOmniSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+      tarotOmniBack: () => this.setState({ tarotStage: 'choose', tarotSaved: false, tarotOpenCard: null }),
+      ...this.lumGateVals('omni', 'tg'),
       readingBack: () => this.setState({ libView: null, libSub: 'readings' }),
       tarotIntro: TA.INTRO.what,
       tarotHow: TA.INTRO.how + ' A reading you keep is written onto the line, where it sits with everything else under Everything.',
       tarotCaution: TA.INTRO.caution,
-      tarotChoosing: !r, tarotShowing: !!r,
+      tarotChoosing: !r && !omniWait, tarotShowing: !!r,
       tarotStack: [0, 1, 2, 3, 4, 5, 6].map(i => ({
         tx: ((i - 3) * 15) + 'px', rot: ((i - 3) * 6) + 'deg', z: String(10 - Math.abs(i - 3)),
         op: String(1 - Math.abs(i - 3) * 0.13),
@@ -20149,7 +20598,7 @@ class Component extends DCLogic {
         go: () => this.setState({ tarotTopic: k, tarotStage: 'choose' }) }; }),
       tarotHasTopic: !!topic,
       tarotDepths: ['light', 'divine', 'omni'].map(k => { const dp = TA.DEPTHS[k], sel = depth === k; return {
-        name: dp.name, blurb: dp.blurb, spread: dp.counts.join(' or ') + ' cards', on: sel, ...chip(sel),
+        name: dp.name, blurb: dp.blurb, spread: dp.counts.join(' or ') + ' cards' + (k === 'omni' && !omniOpen ? ' \u00b7 Luminary' : ''), on: sel, ...chip(sel),
         go: () => this.setState({ tarotDepth: k, tarotCount: dp.counts[0], tarotStage: 'choose' }) }; }),
       tarotHasDepth: !!depth,
       tarotCounts: counts.map(n => { const sel = count === n; return {

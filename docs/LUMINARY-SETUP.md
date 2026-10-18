@@ -1,3 +1,9 @@
+> **Superseded on 18 October 2026.** Codex Luminary is now a single payment of
+> an amount the reader chooses, and the subscription below is no longer sold.
+> Subscribers from before keep theirs until they cancel. See
+> `docs/CYCLE-AUDIT.md` for what to do now; what follows is kept as the record of
+> how the subscription was set up, and for the subscribers who remain.
+
 # Codex Luminary: charging for in-depth readings
 
 Luminary is the Celestial Codex's paid tier, ported with its Stripe code:

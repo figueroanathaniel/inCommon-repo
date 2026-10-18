@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.8.2';
+  var VERSION = '2.9.0';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1514,12 +1514,24 @@
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
 
+  /* ---------- Omni tarot ----------
+
+     Omni is written by the Oracle function since it became a paid add-on, so
+     the app asks for it with the shuffle it drew (the seed), the number of
+     cards and the topic, and nothing else. It comes back through the Oracle's
+     own answers: premium when Codex Luminary is not open to this reader. */
+  function tarotRead(req) {
+    req = req || {};
+    return oracleCall({ kind: 'tarot', seed: req.seed, count: req.count, topic: req.topic });
+  }
+
   /* ---------- Codex Luminary ---------- */
 
   /* THE PAID TIER IS ASKED THROUGH THIS MODULE TOO, and for the same reason.
      server/billing/index.ts holds the Stripe keys and keeps each reader's
-     subscription; the page asks it three things: whether this reader is a
-     Luminary, for a Stripe Checkout address, and for the billing portal's.
+     unlock; the page asks it whether this reader has Codex Luminary, for the
+     one time Checkout's address, for a gift's, and, for a reader who
+     subscribed before the subscription was retired, for the billing portal.
      The page never sees a card, a Stripe key or a price id, only the address
      Stripe gives back, and the reader leaves for it and returns.
 
@@ -1550,7 +1562,7 @@
   }
   /* country is the page's guess at where the reader is, from the device's time
      zone, as two letters or nothing. The server uses it to say whether
-     Luminary is sold there and at what price, and refuses a checkout for a
+     Luminary is sold there, and refuses an unlock for a
      country it does not sell to yet. It is a guess and the server treats it as
      one: what Stripe collects at checkout is what it acts on in the end. */
   function billingStatus(opts) {
@@ -1559,46 +1571,47 @@
       return r.ok ? { ok: true, status: r.data.status || null } : r;
     });
   }
-  function billingCheckout(plan, returnTo, country) {
-    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
-    return billingCall({ action: 'checkout', plan: plan, returnTo: returnTo, country: country }).then(function (r) {
-      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
-    });
-  }
   function billingPortal(returnTo) {
     return billingCall({ action: 'portal', returnTo: returnTo }).then(function (r) {
       return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
     });
   }
-
-  /* ---------- Luminary bought inside the apps ----------
-
-     The iPhone and Android apps sell Luminary through the stores, with
-     RevenueCat checking the receipts (docs/REVENUECAT-SETUP.md). After a
-     purchase or a restore the app asks the store function to read what this
-     reader holds from RevenueCat and record it, so the billing status and the
-     Oracle's paywall see it at once rather than when the webhook lands. It
-     sends nothing about the purchase: the server asks RevenueCat about the
-     reader its token names. Answers { ok, active, source, plan,
-     currentPeriodEnd } or a reason: off, signedOut, notSetUp (not deployed),
-     notConfigured (deployed, no RevenueCat key yet), offline or error. */
-  function storeSync() {
-    if (!client) return Promise.resolve({ ok: false, reason: 'off' });
-    if (!session) return Promise.resolve({ ok: false, reason: 'signedOut' });
+  /* CODEX LUMINARY IS OPENED ONCE, at an amount the reader chooses on
+     Stripe's own page, and it opens every add-on (18 October 2026: the
+     subscription it replaced is no longer sold). The page sends no amount:
+     only where to come back to and the country it guessed. The answer is the
+     Checkout address, or already (this account has it), region, or the
+     reasons above. */
+  function billingUnlock(returnTo, country) {
+    country = /^[A-Z]{2}$/.test(String(country || '')) ? country : undefined;
+    return billingCall({ action: 'unlock', returnTo: returnTo, country: country }).then(function (r) {
+      return r.ok && r.data.url ? { ok: true, url: r.data.url } : (r.ok ? { ok: false, reason: 'error' } : r);
+    });
+  }
+  /* A GIFT NEEDS NO ACCOUNT. It buys nothing, so the billing function opens
+     its Checkout without naming anybody, and it is asked straight through the
+     functions address with the public anon key, the way Contact Support writes,
+     because a reader who never signed in has no client to ask with. Nothing
+     but where to come back to is sent. */
+  function billingSupport(returnTo, opts) {
+    var doFetch = (opts && opts.fetch) || (typeof fetch === 'function' ? fetch : null);
+    if (!doFetch) return Promise.resolve({ ok: false, reason: 'offline' });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
     return Promise.resolve().then(function () {
-      return client.functions.invoke('store', { body: { action: 'sync' } });
+      return doFetch(url + '/functions/v1/billing', {
+        method: 'POST',
+        headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'support', returnTo: returnTo })
+      });
     }).then(function (res) {
-      if (res && !res.error && res.data) {
-        var d = res.data;
-        return { ok: true, active: !!d.active, source: d.source || null, plan: d.plan || null, currentPeriodEnd: d.currentPeriodEnd || null };
-      }
-      var e = res && res.error, st = e && e.context && e.context.status;
-      return oracleCode(e).then(function (code) {
+      return Promise.resolve(res ? res.json() : null).catch(function () { return null; }).then(function (b) {
+        if (res && res.ok && b && b.url) return { ok: true, url: b.url };
+        var st = res ? res.status : 0, code = b && b.code;
         if (code === 'NOT_CONFIGURED') return { ok: false, reason: 'notConfigured' };
-        if (st === 404) return { ok: false, reason: 'notSetUp' };
-        if (st === 401 || code === 'SIGNED_OUT' || code === 'MFA_REQUIRED') return { ok: false, reason: 'signedOut' };
-        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || '')) return { ok: false, reason: 'offline' };
-        return { ok: false, reason: 'error', error: (e && e.message) || 'no answer' };
+        /* A gift is answered before anybody is named, so SIGNED_OUT can only
+           come from a billing function deployed before gifts existed. */
+        if (st === 404 || st === 401) return { ok: false, reason: 'notSetUp' };
+        return { ok: false, reason: 'error', error: String(code || st) };
       });
     }).catch(function (e) { return { ok: false, reason: 'offline', error: e && e.message }; });
   }
@@ -1794,14 +1807,15 @@
     rememberSet: rememberSet,
     normPhone: normPhone,
     oracleRead: oracleRead,
+    tarotRead: tarotRead,
     supportSend: supportSend,
     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
     billingStatus: billingStatus,
-    billingCheckout: billingCheckout,
     billingPortal: billingPortal,
+    billingUnlock: billingUnlock,
+    billingSupport: billingSupport,
     accountDelete: accountDelete,
-    storeSync: storeSync,
     mfaVerify: mfaVerify,
     coverSignOut: coverSignOut,
     mfaStatus: mfaStatus,

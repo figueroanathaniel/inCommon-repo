@@ -17,6 +17,28 @@
 // a Luminary (the Codex's paid tier), and otherwise asks Kimi with the Codex's
 // own instructions and schema, and returns the JSON the page renders.
 //
+// THE CYCLE AUDIT is a fourth period, "cycle" (owner, 18 October 2026): the
+// long passages Saturn, Uranus, Neptune and Pluto make across the chart in
+// the years ahead, found on the device and sent as dated contacts, each read
+// as what it asks the reader to set down (the Tax) and what it builds (the
+// Dividend). It is inCommon's own reading, so it has its own instructions and
+// schema below rather than the Codex's.
+//
+// OMNI TAROT is written here too ({ kind: "tarot" }), with no model: the
+// composer that was in app/tarot.js moved to tarot-omni.js beside this file
+// when the owner made Omni a paid add-on (18 October 2026), so the lock holds.
+// It runs against tarot.js, a copy of app/tarot.js that tools/build-bundle.js
+// writes here, so the cards and the shared phrases are the same text on both
+// sides. A seed, a count and a topic come in; the reading the app's own read()
+// would have written for them goes out.
+//
+// WHO IS LET THROUGH (opened() below). In-depth readings, the Cycle Audit and
+// Omni are the add-ons, and since 18 October 2026 one Codex Luminary payment
+// of the reader's choosing opens all of them (luminary_unlocks, written by
+// server/billing). A Luminary subscription taken out before then opens them
+// while it lives, the owner's admin addresses always do, and the apps read
+// them free.
+//
 // WHO WRITES. Kimi, Moonshot AI's model, asked through its own API, which the
 // owner chose on 29 September 2026. It is called with fetch rather than a
 // client library: the API is one POST, and the one thing a library would add
@@ -30,6 +52,9 @@
 // this file.
 
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+// Both are plain scripts that set a global, the way the app loads them.
+import "./tarot.js";
+import "./tarot-omni.js";
 
 const KIMI = "https://api.moonshot.ai/v1/chat/completions";
 // kimi-k2.6 for both depths by default: it is the cheaper of Kimi's two
@@ -59,6 +84,9 @@ const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) 
 const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
   !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 const ACTIVE = new Set(["active", "trialing"]);
+type TarotRead = (o: Record<string, unknown>) => { title: string; passages: { tag: string; text: string }[]; summary: string; stats: Record<string, number> } | null;
+type TarotModule = { read: TarotRead; DEPTHS: Record<string, { counts: number[] }>; TOPICS: Record<string, unknown> };
+const g = globalThis as unknown as { Tarot?: TarotModule; TarotOmni?: (...a: unknown[]) => unknown };
 
 function thinkingFor(model: string, level: Thinking): Record<string, unknown> {
   if (model.startsWith("kimi-k3")) return { reasoning_effort: level === "off" || level === "on" ? "low" : level };
@@ -146,6 +174,30 @@ const DEEP_SCHEMA = {
   },
 };
 
+// The Cycle Audit's shape: one entry per passage the dossier names, each with
+// its Tax, its Dividend and three questions, and a long view across them.
+const CYCLE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "epigraph", "overview", "passages", "longView", "mantra"],
+  properties: {
+    title: str,
+    epigraph: str,
+    overview: str,
+    passages: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["contact", "window", "tax", "dividend", "prompts"],
+        properties: { contact: str, window: str, tax: str, dividend: str, prompts: { type: "array", items: str } },
+      },
+    },
+    longView: str,
+    mantra: str,
+  },
+};
+
 // An in-depth reading is written in two calls, because one call for all of it
 // ran past what the function may take. Part a is the standard fields written
 // deeper; part b is the four fields only the in-depth reading has. The page asks
@@ -201,6 +253,22 @@ THIS IS THE SECOND HALF OF AN IN-DEPTH LUMINARY READING. The first half (title, 
 - shadowWork: one paragraph of compassionate shadow work tied to Lilith, Chiron, Pluto, or a challenging aspect in the dossier.
 - journalPrompts: 3-5 probing questions.`;
 
+// The Cycle Audit's instructions are inCommon's, written for it on 18 October
+// 2026, and they carry the app's rules for interpretive writing: a reading says
+// what a contact offers and asks, never what the reader is, and its questions
+// are ones only the reader can close.
+const CYCLE_INSTRUCTIONS = `You are the Oracle of the Celestial Codex, writing a Cycle Audit: a reading of the long passages the slow astral bodies (Saturn, Uranus, Neptune and Pluto) make across one person's natal chart in the years ahead. Every passage in the dossier is a real contact with real dates. Write about those passages and nothing else.
+Write in second person, in luminous, precise prose, grounding every image in a placement, house, aspect or date the dossier names. Call the bodies by name or call them astral bodies; never use the word planet.
+Each passage is read in two directions. The Tax is what a passage of this kind traditionally asks a person to set down: habits, defences and certainties the contact presses on. The Dividend is what it builds in their place once that work is done. Write both as what the passage offers and asks, never as a verdict on the person. Do not diagnose. Do not say what the reader is, has been or has done; never write "you are". Do not assume the reader carries the habit being named: offer it as a possibility they may recognise or set aside.
+Never call a passage good or bad. A hard aspect is pressure that builds something; an easy one is a gift that asks to be used. Never predict death, illness, accident, separation or disaster, and never give medical, legal or financial directives.
+Field guidance:
+- title: a poetic 3-7 word title for the whole cycle.
+- epigraph: one lyrical sentence.
+- overview: 2 paragraphs (separate with a blank line) on the arc the passages make together, in the order they arrive.
+- passages: one item for each passage in the dossier, in the dossier's order. contact: the passage's name exactly as the dossier writes it. window: its dates in words, as the dossier gives them. tax: one paragraph, what it asks to be surrendered. dividend: one paragraph, what it builds. prompts: exactly 3 journal questions specific to this passage, each one a question only the reader can answer, none of them leading toward an answer.
+- longView: one paragraph on how the earlier passages prepare the ground for the later ones, naming them and their years.
+- mantra: one short line.`;
+
 // ---------------------------------------------------------------------------
 // The period: the Codex's horoscopePeriod, from the local date the page sends.
 // The daily key is the date, the weekly key the Monday that starts the week,
@@ -212,6 +280,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 function periodOf(period: string, localDate: string) {
   const [y, m, d] = localDate.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d, 12));
+  if (period === "cycle") return { key: "cycle", label: "The Cycle Audit" };
   if (period === "daily") return { key: localDate, label: `${MONTHS[m - 1]} ${d}, ${y}` };
   if (period === "monthly") return { key: `${y}-${String(m).padStart(2, "0")}`, label: `${MONTHS[m - 1]} ${y}` };
   const dow = (date.getUTCDay() + 6) % 7;
@@ -303,6 +372,36 @@ function clean(v: unknown): unknown {
   return v;
 }
 
+// THE APPS READ THE CYCLE AUDIT FREE, by the owner's decision of 18 October
+// 2026, and what tells this function a request came from one is the origin
+// Capacitor gives its web view: capacitor://localhost on iOS and
+// https://localhost on Android (native/capacitor.config.json). A browser page
+// cannot write that header, so the website is held to the payment. A script
+// outside a browser can, and that is accepted on purpose: what it would get is
+// what installing the app gives anybody for nothing.
+const APP_ORIGINS = new Set(["capacitor://localhost", "https://localhost"]);
+const fromApp = (req: Request) => APP_ORIGINS.has(req.headers.get("Origin") ?? "");
+
+// Whether the add-ons are open to this reader: an admin, a request from the
+// apps, a Codex Luminary payment, or a live subscription from before the one
+// time payment replaced it, here or in the apps.
+// The client is the service role one the handler made; only three reads are
+// asked of it here.
+// deno-lint-ignore no-explicit-any
+async function opened(db: any, req: Request, user: { id: string; email?: string; email_confirmed_at?: string | null }): Promise<boolean> {
+  if (isAdmin(user) || fromApp(req)) return true;
+  const once = await db.from("luminary_unlocks").select("user_id").eq("user_id", user.id).maybeSingle();
+  if (once.data) return true;
+  const live = (row: { status?: string; current_period_end?: string | null } | null, ok: (s: string) => boolean) => {
+    const end = row?.current_period_end ? Date.parse(row.current_period_end) : null;
+    return !!row && ok(String(row.status)) && (end === null || end > Date.now());
+  };
+  const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
+  if (live(sub.data as { status?: string; current_period_end?: string | null } | null, (s) => ACTIVE.has(s))) return true;
+  const app = await db.from("store_subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
+  return live(app.data as { status?: string; current_period_end?: string | null } | null, (s) => s === "active");
+}
+
 // ---------------------------------------------------------------------------
 
 Deno.serve(async (req) => {
@@ -311,7 +410,6 @@ Deno.serve(async (req) => {
 
   const started = Date.now();
   const apiKey = Deno.env.get("MOONSHOT_API_KEY");
-  if (!apiKey) return reply(404, { code: "NOT_SET_UP" });
 
   // Who is asking comes from their session token, never from the body.
   const url = Deno.env.get("SUPABASE_URL")!;
@@ -332,13 +430,32 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return reply(400, { code: "BAD_REQUEST" }); }
+
+  // OMNI TAROT. No model and nothing stored: the same seed, count and topic
+  // always give the same reading, so there is nothing to keep or to limit.
+  if (body.kind === "tarot") {
+    const T = g.Tarot, omni = g.TarotOmni;
+    if (!T || typeof omni !== "function") { console.error("oracle: tarot.js or tarot-omni.js did not load"); return reply(500, { code: "STORE" }); }
+    const seed = Number(body.seed), count = Number(body.count), topic = String(body.topic ?? "general");
+    if (!Number.isInteger(seed) || seed < 1 || seed > 2147483647 || T.DEPTHS.omni.counts.indexOf(count) === -1 || !T.TOPICS[topic]) {
+      return reply(400, { code: "BAD_REQUEST" });
+    }
+    if (!(await opened(db, req, user))) return reply(402, { code: "PREMIUM_REQUIRED" });
+    const r = T.read({ count, topic, depth: "omni", seed, omni });
+    if (!r) return reply(500, { code: "STORE" });
+    return reply(200, { reading: { title: r.title, passages: r.passages, summary: r.summary, stats: r.stats, seed, count, topic } });
+  }
+
+  if (!apiKey) return reply(404, { code: "NOT_SET_UP" });
   // The Codex's request: a period, a depth, the reader's local date, and the
   // dossier the page built from the chart.
   const period = String(body.period ?? "");
   const depth = String(body.depth ?? "standard");
   const localDate = String(body.localDate ?? "");
   const dossier = String(body.dossier ?? "");
-  if (!["daily", "weekly", "monthly"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
+  if (!["daily", "weekly", "monthly", "cycle"].includes(period) || !["standard", "deep"].includes(depth)) return reply(400, { code: "BAD_REQUEST" });
+  const cycle = period === "cycle";
+  if (cycle && depth !== "standard") return reply(400, { code: "BAD_REQUEST" });
   if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
   const deep = depth === "deep";
@@ -346,25 +463,14 @@ Deno.serve(async (req) => {
   // part gets the first, whose stored rows are the key old full readings sit on.
   const part: "a" | "b" = deep && body.part === "b" ? "b" : "a";
 
-  // In depth is the Codex's Luminary reading, and it is asked for before the
-  // stored one is looked up, as the Codex did: a subscription that has lapsed
-  // does not keep reading what it paid for on another device. The row is kept
-  // current by the billing function (server/billing), from Stripe; a purchase
-  // made inside the apps is in store_subscriptions, kept current by the store
-  // function (server/store) from RevenueCat, and counts the same.
-  if (deep && !isAdmin(user)) {
-    const live = (row: { status?: string; current_period_end?: string | null } | null, ok: (s: string) => boolean) => {
-      const end = row?.current_period_end ? Date.parse(row.current_period_end) : null;
-      return !!row && ok(String(row.status)) && (end === null || end > Date.now());
-    };
-    const sub = await db.from("subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
-    let paid = live(sub.data, (s) => ACTIVE.has(s));
-    if (!paid) {
-      const app = await db.from("store_subscriptions").select("status, current_period_end").eq("user_id", user.id).maybeSingle();
-      paid = live(app.data, (s) => s === "active");
-    }
-    if (!paid) return reply(402, { code: "PREMIUM_REQUIRED" });
-  }
+  // In depth is an add-on, and it is asked for before the stored reading is
+  // looked up, as the Codex did: a subscription that has lapsed does not keep
+  // reading what it paid for on another device.
+  if (deep && !(await opened(db, req, user))) return reply(402, { code: "PREMIUM_REQUIRED" });
+
+  // The Cycle Audit is an add-on, asked for before anything else like the
+  // in-depth reading above.
+  if (cycle && !(await opened(db, req, user))) return reply(402, { code: "PREMIUM_REQUIRED" });
 
   const { key, label } = periodOf(period, localDate);
   // The Codex keeps one reading per person and deletes them when the birth
@@ -429,8 +535,10 @@ Deno.serve(async (req) => {
   const fail = () => mine().update({ status: "failed" }).eq("id", rowId);
 
   const model = deep ? DEEP_MODEL : MODEL;
-  const schema = !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
-  const instructions = !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
+  const schema = cycle ? CYCLE_SCHEMA : !deep ? SCHEMA : part === "b" ? DEEP_B_SCHEMA : SCHEMA;
+  const instructions = cycle ? CYCLE_INSTRUCTIONS : !deep ? INSTRUCTIONS : part === "b" ? DEEP_B_INSTRUCTIONS : DEEP_A_INSTRUCTIONS;
+  const ask = cycle ? "Compose the CYCLE AUDIT."
+    : `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.`;
   const voice = await voiceFor(user.id, period, key);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), Math.max(10e3, TIME_LIMIT_MS - (Date.now() - started)));
@@ -446,9 +554,9 @@ Deno.serve(async (req) => {
         // serves them at a sixth of the price after the first reading.
         messages: [
           { role: "system", content: instructions },
-          { role: "user", content: `Compose the ${deep ? (part === "b" ? "SECOND HALF OF THE IN-DEPTH " : "FIRST HALF OF THE IN-DEPTH ") : ""}${period.toUpperCase()} horoscope for ${label}.\n\n${voice}\n\nDOSSIER:\n${dossier}` },
+          { role: "user", content: `${ask}\n\n${voice}\n\nDOSSIER:\n${dossier}` },
         ],
-        response_format: { type: "json_schema", json_schema: { name: "horoscope", strict: true, schema } },
+        response_format: { type: "json_schema", json_schema: { name: cycle ? "cycle_audit" : "horoscope", strict: true, schema } },
         max_completion_tokens: deep ? 10000 : 8000,
         ...thinkingFor(model, deep ? DEEP_THINKING : "off"),
       }),

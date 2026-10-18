@@ -527,47 +527,26 @@
     return out;
   }
 
-  function omni(drawn, topic) {
-    var t = tally(drawn), T = TOPICS[topic], out = [], dom = dominantSuit(t);
-    out.push({ tag: 'CALCULATED', text: artN(drawn.length) + ' ' + drawn.length + ' card draw. They are ' + T.lens + '. ' +
-      arcLine(drawn) + ' ' + (t.rev === 0 ? 'Every card fell upright'
-        : t.rev === drawn.length ? 'Every card fell reversed'
-        : (drawn.length - t.rev) + ' cards stand upright and ' + t.rev + ' are reversed') + ', and ' +
-      (t.major === 1 ? 'one of them belongs' : t.major === 0 ? 'none of them belong' : t.major + ' of them belong') + ' to the Major Arcana.' });
-
-    out.push({ tag: 'TRADITIONAL', text: 'Read in sequence, the cards hand on to one another rather than standing apart, and the handovers are where the reading is. ' +
-      chainLine(drawn, topic).join(' ') });
-
-    out.push({ tag: 'TRADITIONAL', text: [suitLine(t, drawn), elementLine(t)].filter(Boolean).join(' ') +
-      (dom ? ' ' + dom.suit.utility : '') });
-
-    out.push({ tag: 'TRADITIONAL', text: orientLine(t, drawn) + ' ' + majorLine(t, drawn) + ' ' +
-      (t.rev ? 'Where a card is reversed, the tradition does not flip its meaning into its opposite. It reads the same force turned inward, delayed, or refused, which is why reversed cards so often describe something you already know and have not yet acted on. Naming it is most of the work.' : '') });
-
-    var num = repeatLine(t), crt = courtLine(t);
-    out.push({ tag: 'TRADITIONAL', text: (num || 'No number repeats in this draw, so no single lesson is being pressed twice; the reading gains its weight from sequence rather than from emphasis.') +
-      ' ' + (crt || 'No court cards appear, which points at a situation you are working out largely by yourself.') +
-      ' ' + (t.aces ? wordN(t.aces) + ' Ace' + (t.aces > 1 ? 's' : '') + ' in the draw marks a genuine beginning inside whatever else is happening.' : 'No Aces fall, so this is a middle rather than a start.') });
-
-    var f = drawn[0], m = drawn[Math.floor(drawn.length / 2)], l = drawn[drawn.length - 1];
-    out.push({ tag: 'SYNTHESIS', text: 'Woven together, the reading turns on three of its cards, and this next part is assembled here rather than quoted from the tradition. ' + label(f) +
-      ' sets the ground. ' + sent(f) + ' ' + label(m) + ' is the pivot. ' + sent(m) +
-      ' ' + label(l) + ' is where it lands. ' + sent(l) + ' ' + linkClause(f, l) });
-
-    out.push({ tag: 'POSSIBILITY', text: 'If the pattern holds, the next stretch looks like this. ' +
-      sent(l) + (topic === 'general' ? '' : ' In this question specifically: ' + cap(strip(topicClause(l, topic))) + '.') +
-      ' ' + (dom && dom.count > 1 ? 'Watch ' + dom.suit.arena.split(',')[0] + ' first; that is where the draw is densest and where a change would show earliest. ' : '') +
-      'This is a prediction in the only sense a spread can offer one: a pattern named clearly enough that you can hold it up against what actually happens, and discard it honestly if it does not hold. A pattern you can see is one you can do something about, and that is the whole of what a spread is for. ' + T.close });
-
-    return out;
-  }
+  /* OMNI IS WRITTEN ON THE SERVER, and its composer is not in this file. The
+     owner made Omni a paid add-on on 18 October 2026 and chose that the lock
+     should hold, which a composer shipped to every browser cannot do: anybody
+     could call it from the console. It lives in server/oracle/tarot-omni.js,
+     which the Oracle function runs after it has checked the reader's Codex
+     Luminary, against a copy of this very file, so the cards, the draw and
+     every shared phrase are the same text on both sides. read() takes it as
+     o.omni and answers null for an Omni reading without it. */
+  var PARTS = { TOPICS: TOPICS, tally: tally, dominantSuit: dominantSuit, arcLine: arcLine, chainLine: chainLine,
+    suitLine: suitLine, elementLine: elementLine, orientLine: orientLine, majorLine: majorLine, repeatLine: repeatLine,
+    courtLine: courtLine, label: label, sent: sent, linkClause: linkClause, topicClause: topicClause,
+    cap: cap, strip: strip, artN: artN, wordN: wordN };
 
   function read(o) {
     var count = o.count, topic = o.topic || 'general', depth = o.depth || 'light';
+    if (depth === 'omni' && typeof o.omni !== 'function') return null;
     var drawn = o.drawn || draw(count, o.seed || 1);
     var passages = (depth === 'light' ? light(drawn, topic)
       : depth === 'divine' ? divine(drawn, topic)
-      : omni(drawn, topic)).map(function (p) {
+      : o.omni(drawn, topic, PARTS)).map(function (p) {
         return { tag: p.tag, text: String(p.text).replace(/\s+/g, ' ').trim() };
       });
     var t = tally(drawn);
@@ -583,7 +562,7 @@
   return {
     VERSION: VERSION, CARDS: CARDS, SUITS: SUITS, RANKS: RANKS, MAJORS: MAJORS,
     POSITIONS: POSITIONS, TOPICS: TOPICS, DEPTHS: DEPTHS,
-    draw: draw, read: read, tally: tally, label: label,
+    draw: draw, read: read, tally: tally, label: label, PARTS: PARTS,
     byName: function (n) { return CARDS.filter(function (c) { return c.name === n; })[0] || null; },
     section: function (key) {
       if (key === 'major') return CARDS.filter(function (c) { return c.arcana === 'major'; });

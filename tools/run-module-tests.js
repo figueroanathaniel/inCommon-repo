@@ -440,6 +440,106 @@ if (!hdLine) {
   tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
 })();
 
+/* ------------------------------------------------ Z: the Cycle Audit
+   The owner asked on 18 October 2026 for a reading of the long transits, sold
+   pay what you want on the website and free in the apps. The dates are found
+   on the device by cycleWindows(), lifted out of the app here and run on the
+   vendored astronomy-engine, and the case it was asked for is the fixture:
+   Pluto on a Mars at 15 Aquarius, then on a Sun at 28 Aquarius. Pluto crosses
+   315 degrees five times from April 2032 to December 2033 and 328 degrees five
+   times from April 2041 to December 2042, measured with the same library. */
+(() => {
+  const AE = require(path.join(repo, 'app', 'astronomy-engine-2.1.19.min.js'));
+  const field = name => { const m = new RegExp('\\n  ' + name + ' = [^\\n]*').exec(appSrc); return m ? m[0] : ''; };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + '\n}';
+  /* Today is pinned to the day this was written, so the fixture stays inside
+     the scan however long after that the suite is run. */
+  class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
+  let Zc = null;
+  try { Zc = vm.runInNewContext('(' + src + ')', { Date: Today, Math: Math, String: String, Object: Object, Intl: Intl }); } catch (e) { Zc = null; }
+  tTrue('Z1', 'the Cycle Audit methods lift out of the app and compile', typeof Zc === 'function');
+  if (typeof Zc !== 'function') return;
+  const z = new Zc();
+  const BODY = { Saturn: AE.Body.Saturn, Uranus: AE.Body.Uranus, Neptune: AE.Body.Neptune, Pluto: AE.Body.Pluto };
+  const SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  Object.assign(z, {
+    PLNS: ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].map(n => [n]),
+    activeProfile: () => ({ id: 'p', birthStamp: 'z', name: 'Rowan Vale' }),
+    natalDate: () => new Date(Date.UTC(1990, 0, 1)),
+    chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
+    anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    norm360: x => ((x % 360) + 360) % 360,
+    addDays: (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; },
+    t2000: d => d.getTime() / 86400000 + 2440587.5 - 2451545.0,
+    lonOf: (name, t) => AE.Ecliptic(AE.GeoVector(BODY[name], new Date((t + 2451545.0 - 2440587.5) * 86400000), true)).elon,
+    _fmt: (k, o) => new Intl.DateTimeFormat('en', o),
+    signOf: lon => ({ sign: SIGNS[Math.floor(z.norm360(lon) / 30)], deg: z.norm360(lon) % 30 }),
+    aspName: a => a
+  });
+  const ws = z.cycleWindows();
+  const near = (d, iso) => Math.abs(d - Date.parse(iso + 'T12:00:00Z')) <= 3 * 864e5;
+  const mars = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Mars');
+  const sun = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Sun');
+  const MARS = ['2032-04-15', '2032-06-17', '2033-02-11', '2033-09-04', '2033-12-19'];
+  const SUN = ['2041-04-08', '2041-07-22', '2042-02-15', '2042-10-01', '2042-12-21'];
+  t('Z2', 'Pluto on a Mars at 15 Aquarius is one passage with its five exact dates, each within three days of the measured crossing', {
+    passages: 1, passes: 5, onDates: true, label: 'Pluto conjunct your Mars'
+  }, { passages: mars.length, passes: mars[0] && mars[0].passes.length,
+    onDates: !!mars[0] && mars[0].passes.length === 5 && mars[0].passes.every((d, i) => near(d, MARS[i])), label: mars[0] && mars[0].label });
+  t('Z3', 'Pluto on a Sun at 28 Aquarius is the later passage, nine years after, with its own five', {
+    passages: 1, passes: 5, onDates: true, after: true
+  }, { passages: sun.length, passes: sun[0] && sun[0].passes.length,
+    onDates: !!sun[0] && sun[0].passes.length === 5 && sun[0].passes.every((d, i) => near(d, SUN[i])),
+    after: !!(sun[0] && mars[0]) && ws.indexOf(sun[0]) > ws.indexOf(mars[0]) });
+  tTrue('Z4', 'only the four slow astral bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
+  const dos = z.cycleDossier();
+  const dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  t('Z5', 'the dossier names the first name, the touched points and the passages with their dates, and no birth date, no full name, no dash and no planet', {
+    name: true, points: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
+  }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos), passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
+    noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noPlanet: !/planet/i.test(dos) });
+  const k1 = z.cycleKey(); z._cy = null; z._cyKey = null;
+  const pending = z.cycleKey(); z.cycleWindows();
+  t('Z6', 'the scan is anchored to the calendar year, so the key and the dossier come out the same when asked again, and no key is named before the scan has run', { key: true, dossier: true, pending: 'cypending' },
+    { key: z.cycleKey() === k1 && /^cy[0-9a-z]+$/.test(k1), dossier: z.cycleDossier() === dos, pending });
+  tTrue('Z7', 'the audit reads at most eight passages, in the order they arrive', (() => {
+    const p = z.cyclePassages();
+    return p.length <= 8 && p.every((w, i) => i === 0 || p[i - 1].from <= w.from) && p.every(w => !w.past);
+  })());
+})();
+
+/* ------------------------------------------------ J: Omni lives on the server
+   Omni became a paid add-on on 18 October 2026, written by the Oracle function
+   so the lock holds. Its composer must not come back into the app, the
+   function's copy of the deck must be the app's byte for byte, and the moved
+   composer must write a whole, steady reading from that copy. */
+(() => {
+  const appDeck = fs.readFileSync(path.join(repo, 'app', 'tarot.js'), 'utf8');
+  const srvDeckPath = path.join(repo, 'server', 'oracle', 'tarot.js');
+  const srvDeck = fs.existsSync(srvDeckPath) ? fs.readFileSync(srvDeckPath, 'utf8') : '';
+  const TA = require(path.join(repo, 'app', 'tarot.js'));
+  const OMNI = require(path.join(repo, 'server', 'oracle', 'tarot-omni.js'));
+  tTrue('J1', 'the app\'s tarot.js carries no Omni composer, and asked for Omni without one it answers null', !/function omni\(/.test(appDeck) && TA.read({ count: 9, topic: 'general', depth: 'omni', seed: 3 }) === null);
+  tTrue('J2', 'the Oracle function\'s copy of tarot.js is the app\'s, byte for byte (tools/build-bundle.js writes it)', srvDeck === appDeck);
+  const a = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  const b = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  t('J3', 'the server composer writes seven passages in the tradition\'s order, the same every time for one shuffle', {
+    passages: 7, tags: 'CALCULATED,TRADITIONAL,TRADITIONAL,TRADITIONAL,TRADITIONAL,SYNTHESIS,POSSIBILITY', steady: true, cards: 11
+  }, { passages: a && a.passages.length, tags: a && a.passages.map(x => x.tag).join(','), steady: JSON.stringify(a) === JSON.stringify(b), cards: a && a.count });
+  tTrue('J4', 'the bundle does not carry the composer', (() => {
+    const m = fs.readFileSync(path.join(repo, 'tools', 'build-bundle.js'), 'utf8').match(/const BUNDLE = path\.join\(repo, 'deploy', '([^']+)'\)/);
+    const app = m ? path.join(repo, 'deploy', m[1], 'app.html') : '';
+    return !!app && fs.existsSync(app) && fs.readFileSync(app, 'utf8').indexOf('Woven together, the reading turns on three of its cards') === -1;
+  })());
+})();
+
 /* ------------------------------------------------ V: the profile menu
    The owner asked on 30 September 2026 for the profile icon to open a menu
    (Profile, Settings, Get Help, Log Out), for the profile card to carry a
@@ -2009,17 +2109,19 @@ async function runCloudTests() {
     fn: 'billing', action: 'status', sync1: true, sync2: false, premium: true, plan: 'annual'
   }, { fn: bIn.calls[0].name, action: bIn.calls[0].body.action, sync1: bIn.calls[0].body.sync, sync2: bIn.calls[1].body.sync,
     premium: st1.status && st1.status.isPremium, plan: st2.status && st2.status.plan });
-  var co1 = await CO.billingCheckout('monthly', 'https://app.k31.invalid/app.html#/oracle');
+  /* The subscription checkout was retired on 18 October 2026: the module no
+     longer offers one, and Luminary is the one time unlock (K34d). */
+  var co1 = await CO.billingUnlock('https://app.k31.invalid/app.html?lumfrom=deep#/oracle');
   var po1 = await CO.billingPortal('https://app.k31.invalid/app.html#/oracle');
-  t('K32', 'a checkout and the portal each come back as the address Stripe gave, and send the plan and the return address', {
-    checkout: 'https://stripe.k31.invalid/checkout', portal: 'https://stripe.k31.invalid/portal', plan: 'monthly', returnTo: 'https://app.k31.invalid/app.html#/oracle'
-  }, { checkout: co1.url, portal: po1.url, plan: bIn.calls[2].body.plan, returnTo: bIn.calls[3].body.returnTo });
+  t('K32', 'the unlock and the portal each come back as the address Stripe gave and send the return address, and there is no subscription checkout any more', {
+    unlock: 'https://stripe.k31.invalid/unlock', portal: 'https://stripe.k31.invalid/portal', returnTo: 'https://app.k31.invalid/app.html?lumfrom=deep#/oracle', noCheckout: true
+  }, { unlock: co1.url, portal: po1.url, returnTo: bIn.calls[2].body.returnTo, noCheckout: typeof CO.billingCheckout === 'undefined' });
   var bReasons = {};
   var bCases = [['404', httpErr(404)], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['already', httpErr(409, 'ALREADY')], ['noacct', httpErr(404, 'NO_ACCOUNT')], ['401', httpErr(401, 'SIGNED_OUT')], ['500', httpErr(502, 'STRIPE')]];
   for (var bi = 0; bi < bCases.length; bi++) {
     var be = bCases[bi][1];
     CO._setClientForTests(oracleClient(function () { return { data: null, error: be }; }).client, { user: { id: 'u1' } });
-    bReasons[bCases[bi][0]] = (await CO.billingCheckout('annual', 'https://x.invalid/')).reason;
+    bReasons[bCases[bi][0]] = (await CO.billingUnlock('https://x.invalid/')).reason;
   }
   t('K33', 'each way billing can fail is a reason, and a missing account is told apart from a missing function', {
     '404': 'notSetUp', nc: 'notConfigured', already: 'already', noacct: 'noAccount', '401': 'signedOut', '500': 'error'
@@ -2067,40 +2169,16 @@ async function runCloudTests() {
     localSignOut: adSignOut[0], reasons: adReasons
   });
 
-  /* K57: Luminary bought inside the apps (docs/REVENUECAT-SETUP.md). After a
-     store purchase or a restore the app asks the store function to read the
-     purchase from RevenueCat. The call is never made without a session and
-     carries nothing but the action, because the server reads the reader from
-     the token and the purchase from RevenueCat, never from the page. status()
-     names the user id, which the app hands RevenueCat as the app user id. And
-     an account deletion that could not reach RevenueCat is told apart. */
-  var stCalls = [];
-  var stClient = function (answer) {
-    return { functions: { invoke: function (name, opts) { stCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } } };
-  };
-  var ST = loadIsolatedCloud({ createClient: function () { return {}; } });
-  ST._setClientForTests(stClient({ data: { active: true }, error: null }), null);
-  var stNo = await ST.storeSync();
-  var stCallsSignedOut = stCalls.length;
-  ST._setClientForTests(stClient({ data: { active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z', extra: 'x' }, error: null }), { user: { id: 'u57' } });
-  var stOk = await ST.storeSync();
-  var stUid = ST.status().userId;
-  var stReasons = {};
-  var stCases = [['503', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['502', httpErr(502, 'UPSTREAM')]];
-  for (var si = 0; si < stCases.length; si++) {
-    ST._setClientForTests(stClient({ data: null, error: stCases[si][1] }), { user: { id: 'u57' } });
-    stReasons[stCases[si][0]] = (await ST.storeSync()).reason;
-  }
+  /* K57: an account deletion that could not reach RevenueCat is told apart.
+     The app no longer sells anything through the stores (18 October 2026:
+     every add-on is free in the apps), so the store sync went with it; the
+     account function still closes a RevenueCat record when that service is
+     set up, and its failure must still read as its own reason. */
   AD._setClientForTests(adClient({ data: null, error: httpErr(502, 'REVENUECAT') }), { user: { id: 'u1' } });
   var stDel = (await AD.accountDelete('delete')).reason;
-  t('K57', 'the store sync is not asked without a session, sends only its action to the store function, returns the four fields, names each failure, status() carries the user id, and a deletion that could not reach RevenueCat says so', {
-    signedOut: 'signedOut', callsSignedOut: 0, fn: 'store', body: '{"action":"sync"}',
-    ok: { ok: true, active: true, source: 'apple', plan: 'annual', currentPeriodEnd: '2027-10-12T00:00:00Z' },
-    userId: 'u57', reasons: { '503': 'notConfigured', '404': 'notSetUp', mfa: 'signedOut', '502': 'error' }, deleteReason: 'revenuecat'
-  }, {
-    signedOut: stNo.reason, callsSignedOut: stCallsSignedOut, fn: stCalls[0] && stCalls[0].name, body: stCalls[0] && JSON.stringify(stCalls[0].body),
-    ok: stOk, userId: stUid, reasons: stReasons, deleteReason: stDel
-  });
+  t('K57', 'a deletion that could not reach RevenueCat says so, and the module no longer carries a store sync', {
+    deleteReason: 'revenuecat', noStoreSync: true
+  }, { deleteReason: stDel, noStoreSync: typeof CO.storeSync === 'undefined' });
 
   /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
      travels with the status and the checkout as two capital letters or not at
@@ -2112,16 +2190,85 @@ async function runCloudTests() {
   CO._setClientForTests(bCo.client, { user: { id: 'u1' } });
   await CO.billingStatus({ country: 'FR' });
   await CO.billingStatus({ country: 'france' });
-  await CO.billingCheckout('annual', 'https://x.invalid/', 'GB');
-  await CO.billingCheckout('annual', 'https://x.invalid/');
+  await CO.billingUnlock('https://x.invalid/', 'GB');
+  await CO.billingUnlock('https://x.invalid/');
   CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'REGION') }; }).client, { user: { id: 'u1' } });
-  var bRegion = await CO.billingCheckout('annual', 'https://x.invalid/', 'DE');
-  t('K34b', 'the country guess is sent with the status and the checkout only as two capital letters, and a country not sold to yet comes back as region', {
+  var bRegion = await CO.billingUnlock('https://x.invalid/', 'DE');
+  t('K34b', 'the country guess is sent with the status and the unlock only as two capital letters, and a country not sold to yet comes back as region', {
     status: 'FR', badDropped: true, checkout: 'GB', noneDropped: true, region: 'region'
   }, {
     status: bCo.calls[0].body.country, badDropped: !('country' in bCo.calls[1].body) || bCo.calls[1].body.country === undefined,
     checkout: bCo.calls[2].body.country, noneDropped: bCo.calls[3].body.country === undefined, region: bRegion.reason
   });
+
+  /* K34c-K34e: the Cycle Audit, 18 October 2026. Its reading is asked of the
+     Oracle as one call, the period named and no part, and a website reader who
+     has not opened it is refused as premium, which the page reads as the gate.
+     Its unlock is a billing action of its own that carries no amount, because
+     the reader chooses the amount on Stripe's page. A gift needs no account,
+     so it is sent through the functions address with the public key and
+     carries only where to come back to. */
+  var cyOc = oracleClient(function () { return { data: { reading: { title: 'The Long Tide', passages: [] } }, error: null }; });
+  CO._setClientForTests(cyOc.client, { user: { id: 'u1' } });
+  var cyR = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var cyLocked = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  t('K34c', 'a Cycle Audit is one call to the Oracle naming the period and no part, and a reader who has not opened it is refused as premium', {
+    calls: 1, period: 'cycle', part: false, title: 'The Long Tide', locked: 'premium'
+  }, { calls: cyOc.calls.length, period: cyOc.calls[0] && cyOc.calls[0].body.period, part: !!(cyOc.calls[0] && 'part' in cyOc.calls[0].body),
+    title: cyR.reading && cyR.reading.title, locked: cyLocked.reason });
+  var ulOut = oracleClient(function () { return { data: { url: 'https://stripe.k34d.invalid/unlock' }, error: null }; });
+  CO._setClientForTests(ulOut.client, null);
+  var ulNo = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  CO._setClientForTests(ulOut.client, { user: { id: 'u1' } });
+  var ulOk = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  var ulBad = await CO.billingUnlock('https://app.k34d.invalid/', 'usa');
+  var ulReasons = {};
+  var ulCases = [['already', httpErr(409, 'ALREADY')], ['region', httpErr(403, 'REGION')], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)]];
+  for (var ui = 0; ui < ulCases.length; ui++) {
+    var ue = ulCases[ui][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: ue }; }).client, { user: { id: 'u1' } });
+    ulReasons[ulCases[ui][0]] = (await CO.billingUnlock('https://x.invalid/', 'FR')).reason;
+  }
+  t('K34d', 'the unlock is not asked without a session, sends the action, the return address and a two letter country and no amount, comes back as the Checkout address, and names already and region', {
+    signedOut: 'signedOut', calls: 2, url: 'https://stripe.k34d.invalid/unlock', keys: ['action', 'country', 'returnTo'], action: 'unlock', badCountryDropped: true,
+    reasons: { already: 'already', region: 'region', nc: 'notConfigured', '404': 'notSetUp' }
+  }, {
+    signedOut: ulNo.reason, calls: ulOut.calls.length, url: ulOk.url, keys: Object.keys(ulOut.calls[0].body).sort(), action: ulOut.calls[0].body.action,
+    badCountryDropped: ulOut.calls[1].body.country === undefined && !!ulBad.ok, reasons: ulReasons
+  });
+  var gSent = [];
+  var gFetch = function (status, b) { return function (url, init) { gSent.push({ url: url, init: init }); return Promise.resolve({ ok: status < 300, status: status, json: function () { return Promise.resolve(b); } }); }; };
+  CO._setClientForTests(null, null);
+  var gOk = await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(200, { url: 'https://stripe.k34e.invalid/gift' }) });
+  var gBody = gSent[0] ? JSON.parse(gSent[0].init.body) : {}, gHdr = gSent[0] ? gSent[0].init.headers : {};
+  var gReasons = {
+    nc: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(503, { code: 'NOT_CONFIGURED' }) })).reason,
+    '404': (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(404, null) })).reason,
+    older: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(401, { code: 'SIGNED_OUT' }) })).reason,
+    offline: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: function () { return Promise.reject(new Error('net')); } })).reason
+  };
+  t('K34e', 'a gift is asked of the billing function with nobody signed in, with the public key, carrying only the action and where to come back to, and each failure is a reason', {
+    ok: true, url: 'https://stripe.k34e.invalid/gift', endpoint: true, anon: true, body: { action: 'support', returnTo: 'https://incommonspace.com/thanks.html' },
+    reasons: { nc: 'notConfigured', '404': 'notSetUp', older: 'notSetUp', offline: 'offline' }
+  }, {
+    ok: !!gOk.ok, url: gOk.url, endpoint: !!gSent[0] && /\/functions\/v1\/billing$/.test(gSent[0].url),
+    anon: !!gHdr && gHdr.Authorization === 'Bearer ' + gHdr.apikey && /^eyJ/.test(gHdr.apikey || ''), body: gBody, reasons: gReasons
+  });
+
+  /* K34f: Omni is asked of the Oracle function with the shuffle, the count
+     and the topic and nothing else, and is refused as premium like every
+     add-on. */
+  var omOc = oracleClient(function () { return { data: { reading: { title: 'General \u00b7 Omni \u00b7 9 cards', passages: [{ tag: 'CALCULATED', text: 'x' }] } }, error: null }; });
+  CO._setClientForTests(omOc.client, null);
+  var omNo = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  CO._setClientForTests(omOc.client, { user: { id: 'u1' } });
+  var omOk = await CO.tarotRead({ seed: 7, count: 9, topic: 'general', extra: 'no' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var omLocked = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  t('K34f', 'Omni is not asked without a session, goes to the oracle function as kind tarot with the seed, count and topic only, and a reader without Luminary is refused as premium', {
+    signedOut: 'signedOut', fn: 'oracle', body: { kind: 'tarot', seed: 7, count: 9, topic: 'general' }, ok: true, locked: 'premium'
+  }, { signedOut: omNo.reason, fn: omOc.calls[0] && omOc.calls[0].name, body: omOc.calls[0] && omOc.calls[0].body, ok: !!omOk.ok, locked: omLocked.reason });
 
   /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
      October 2026. A password that passed on an account with an authenticator
@@ -2706,8 +2853,10 @@ async function runCloudTests() {
   var dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']|&[mn]dash;');
   var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
   var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
-  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings and at the Luminary purchase; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
-    cover: true, appLinks: 6, appOrderEachTime: true, operator: true, florida: true, age16: true,
+  /* Eight links in the app, in each shell: Settings twice, the Luminary gate
+     in the Oracle, and the same gate in the tarot room for Omni. */
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+    cover: true, appLinks: 8, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
@@ -2718,7 +2867,7 @@ async function runCloudTests() {
     oracleNotSent: /birth date, birth time and birth place are not sent/.test(privSrc),
     moonshot: /Moonshot AI/.test(termsSrc),
     supportRoute: /#\/support/.test(termsSrc) && /#\/support/.test(privSrc) && /seg\[0\] === 'support'/.test(appSrcK),
-    renewal: /renews automatically/i.test(termsSrc) && /Renews automatically each month or year/.test(appSrcK),
+    renewal: /one time payment/i.test(termsSrc) && /not a subscription/.test(termsSrc) && /One payment, not a subscription/.test(appSrcK) && !/Renews automatically each month or year/.test(appSrcK),
     noDash: !dashRe.test(termsSrc) && !dashRe.test(privSrc),
     mfaCovers: /'support_requests'/.test(mfaSrc),
     sqlInsertOnly: /for insert to anon, authenticated/.test(sqlSrc) && !/for select|for update|for delete|for all/.test(sqlSrc)
@@ -2751,7 +2900,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
