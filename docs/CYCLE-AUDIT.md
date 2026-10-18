@@ -34,7 +34,10 @@ run again.
 Keep each function's existing setting for JWT verification (billing stays
 **off**).
 
-- **oracle**: `server/oracle/index.ts` **and the two files beside it,
+- **oracle**: `server/oracle/index.ts` (the Cycle Audit's shape changed on 18
+  October 2026 for the ledger layout: the Tax and the Dividend are short lists
+  and each question names its system, so redeploy it even if you already did
+  once today) **and the two files beside it,
   `tarot.js` and `tarot-omni.js`**, which it imports. With the CLI, deploying
   the folder carries all three. In the dashboard editor, add the two files to
   the function beside `index.ts`. Without them Omni answers a store error.

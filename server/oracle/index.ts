@@ -175,7 +175,10 @@ const DEEP_SCHEMA = {
 };
 
 // The Cycle Audit's shape: one entry per passage the dossier names, each with
-// its Tax, its Dividend and three questions, and a long view across them.
+// its Tax and its Dividend as short lists (the page draws them as a ledger, one
+// line to a row), and three questions, each drawn from one of the three
+// systems, so the stars, the design and the numbers each ask one. A long view
+// runs across them.
 const CYCLE_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -190,7 +193,20 @@ const CYCLE_SCHEMA = {
         type: "object",
         additionalProperties: false,
         required: ["contact", "window", "tax", "dividend", "prompts"],
-        properties: { contact: str, window: str, tax: str, dividend: str, prompts: { type: "array", items: str } },
+        properties: {
+          contact: str, window: str,
+          tax: { type: "array", items: str },
+          dividend: { type: "array", items: str },
+          prompts: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["system", "question"],
+              properties: { system: { type: "string", enum: ["stars", "design", "numbers"] }, question: str },
+            },
+          },
+        },
       },
     },
     longView: str,
@@ -265,7 +281,7 @@ Field guidance:
 - title: a poetic 3-7 word title for the whole cycle.
 - epigraph: one lyrical sentence.
 - overview: 2 paragraphs (separate with a blank line) on the arc the passages make together, in the order they arrive.
-- passages: one item for each passage in the dossier, in the dossier's order. contact: the passage's name exactly as the dossier writes it. window: its dates in words, as the dossier gives them. tax: one paragraph, what it asks to be surrendered. dividend: one paragraph, what it builds. prompts: exactly 3 journal questions specific to this passage, each one a question only the reader can answer, none of them leading toward an answer.
+- passages: one item for each passage in the dossier, in the dossier's order. contact: the passage's name exactly as the dossier writes it. window: its dates in words, as the dossier gives them. tax: 3 to 5 short lines, each under 15 words and each one thing the passage asks to be set down, ledger entries rather than sentences of a paragraph. dividend: 3 to 5 short lines in the same form, each one thing it builds in that place. prompts: exactly 3 journal questions specific to this passage, one for each system: system "stars" asks through the passage itself, its astral body, aspect, natal point and house; system "design" asks through the reader's Human Design type, strategy and authority as the dossier gives them; system "numbers" asks through the reader's Life Path. Each is a question only the reader can answer, none of them leading toward an answer.
 - longView: one paragraph on how the earlier passages prepare the ground for the later ones, naming them and their years.
 - mantra: one short line.`;
 

@@ -4203,8 +4203,31 @@ Pluto stands near 10 Aquarius; the dates come from the library, never from a
 brief.
 
 **What leaves the device** (`cycleDossier()`): the first name, the touched
-natal points with sign, degree and house, and each passage with its dates. No
-birth date, and nothing that moves with today. Privacy Policy section 6 says so.
+natal points with sign, degree and house, each passage with its dates, and the
+Human Design type, strategy and authority and the Life Path, which the
+questions are asked through. No birth date, and nothing that moves with today.
+Privacy Policy section 6 says so.
+
+**Each passage is drawn as a ledger** (the owner's layout, 18 October 2026),
+`cyDash()`, in both shells: a header with the passage's state as a badge
+(Active Outer Transit, Outer Transit Ahead) and the natal coordinate it lands
+on; then two columns that stack on a phone, The Surrender Ledger (Deconstruct,
+the Tax, and Reconstruct, the Dividend, as short lists) and Timeline & Shadow
+Integration (the cycle stage, the years, a bar filled to today with a node at
+every exact date, and Cross-System Shadow Prompts, one question each from The
+Stars, The Design and The Numbers). **Everything but the lists and the
+questions is the device's arithmetic, never the model's prose**: a written
+passage is matched to its computed window by name, the dossier's order as the
+fallback, and the title, window, coordinate, stage and timeline come from the
+window. The schema asks for `tax` and `dividend` as lists and each prompt as
+`{system, question}`; a reading kept in the older shape (paragraphs, plain
+questions) is split into its sentences and drawn without the system labels, so
+it still reads. The layout brief labelled the coordinate "NASA Ephemeris
+Precision Coordinate"; it says "Natal Mars" and the like instead, because a
+line naming the method is what "No disclaimers" removed, and because the
+positions come from astronomy-engine, which is not NASA. Its year range used a
+dash, and reads with middle dots. Z8 holds the dashboard against the Pluto
+fixture and an older reading.
 
 **The server writes it with inCommon's own instructions** (`CYCLE_INSTRUCTIONS`
 and `CYCLE_SCHEMA` in `server/oracle/index.ts`), not the Codex's, and they carry
