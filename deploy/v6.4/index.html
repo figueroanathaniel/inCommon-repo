@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4 cover  |  built 2026-10-18 -->
+<!-- inCommon incommon-v6.4 cover  |  built 2026-10-19 -->
 <!DOCTYPE html>
 <!-- cover.html: the Event Horizon cover, the first screen a visitor meets.
 
@@ -912,7 +912,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.9.0'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.9.1'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);

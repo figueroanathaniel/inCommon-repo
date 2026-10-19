@@ -521,6 +521,96 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 26px/1.25 var(--fd)">{{ greetWord }}, {{ actName }}.</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">{{ todaySubtitle }}</div>
     </div>
+    <!-- THE LONG WEATHER (owner, 18 October 2026): the Cycle Audit on Today,
+         read like a weather widget. The conditions now, three readings, and the
+         three studies drawn as one chart over twelve years, every mark placed
+         as a share of that span (cycleWidgetVals). All of it is computed here
+         and free; the sheet it opens carries the full lists and the reading. -->
+    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+      <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:16px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
+        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <p role="status" style="margin:0;font:italic 400 16px/1.45 var(--fd);color:var(--mut)">Reading the long sky&#8230;</p>
+            <span aria-hidden="true" style="height:60px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+            <span aria-hidden="true" style="height:90px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:14px">
+            <span aria-hidden="true" style="flex:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 28px/1 var(--fd);color:var(--tx);background:radial-gradient(circle at 35% 30%,rgba(var(--atmc2),.5),rgba(var(--atmc),.5) 55%,rgba(var(--atmc),.12) 100%);border:1px solid var(--ac2);box-shadow:0 0 28px rgba(var(--atmc),.45)">{{ cwGlyph }}</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <h2 style="margin:0;font:400 20px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cwHead }}</h2>
+              <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+            <sc-for list="{{ cwStat }}" as="k" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0;padding:10px 11px;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.08)">
+                <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ k.k }}</span>
+                <span style="font:600 14px/1.2 var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ k.v }}</span>
+                <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ k.sub }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+              <div style="position:relative;height:{{ cwStarsH }}">
+                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                    </sc-for>
+                  </span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+              <div style="position:relative;height:{{ cwDesignH }}">
+                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                </sc-if>
+                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                  </sc-for>
+                </div>
+                <div style="position:relative;height:16px">
+                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                    </span>
+                  </sc-for>
+                </div>
+              </div>
+              <span></span>
+              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+            </div>
+          </div>
+          <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
+            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
+            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
+            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:var(--blue)"></span>On your gate</span>
+            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;box-sizing:border-box;border-radius:3px;border:1.5px solid var(--blue)"></span>Completes a channel</span>
+          </div>
+          <button onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.14);font:600 13px var(--fu);color:var(--tx)">Open the Cycle Audit <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#8594;</span></button>
+        </sc-if>
+      </section>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:13px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
       <button onClick="{{ dropToggle }}" aria-expanded="{{ dropOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px">
         <div style="display:flex;align-items:center;gap:9px">
@@ -3319,41 +3409,13 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
       </sc-if>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
         <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
         </sc-for>
       </div>
-      <!-- THE CYCLE AUDIT: the passages, free and computed here. The reading
-           waits behind the Luminary gate below on the website. -->
-      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
-          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
-          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
-          </sc-if>
-          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
-            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
-          </sc-if>
-          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
-            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
-                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
-                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
-                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
-                </span>
-                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
-              </li>
-            </sc-for>
-          </ol>
-          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
-          </sc-if>
-        </section>
-      </sc-if>
       <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
           <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
@@ -3364,7 +3426,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <!-- CODEX LUMINARY: one payment of the reader's choosing opens every
            add-on (18 October 2026). The same gate stands in place of an
-           in-depth reading and of the Cycle Audit, worded for each. -->
+           in-depth reading here, and in the Cycle Audit's sheet on Today. -->
       <sc-if value="{{ orGate }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
@@ -3549,116 +3611,6 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
-          </div>
-        </article>
-      </sc-if>
-      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
-        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
-          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
-            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
-            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
-            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
-            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
-          </header>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
-            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
-              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
-            </sc-for>
-          </div>
-          <!-- THE CYCLE AUDIT AS A LEDGER (owner, 18 October 2026): one dashboard
-               per passage, styled to the owner's sheet in tokens. The badge, the
-               coordinate and the timeline come from the device's own scan
-               (cyDash); the two lists and the questions are the Oracle's. The
-               Tax and the Dividend wear --ledger-tax and --ledger-div, fixed
-               amber and teal, because the sheet's crimson sits on the crisis hue
-               and its emerald on the action green. -->
-          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
-            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
-              <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
-                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
-                  <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
-                  <h3 style="margin:0;font:700 28px/1.2 var(--fu);color:var(--tx);text-wrap:balance">{{ cp.title }}</h3>
-                  <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
-                </div>
-                <sc-if value="{{ cp.coordOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:right">
-                    <span style="display:block;font:500 11.2px var(--fu);letter-spacing:.04em;text-transform:uppercase;color:var(--mut)">{{ cp.coordLabel }}</span>
-                    <span style="display:block;margin-top:2px;font:700 17.6px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ cp.coord }}</span>
-                  </div>
-                </sc-if>
-              </header>
-              <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:24px">
-                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">The Surrender Ledger</h4>
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
-                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Deconstruct (The Tax)</h5>
-                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-tax);box-shadow:0 0 8px var(--ledger-tax)"></span>
-                    </div>
-                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.tax }}" as="ct" hint-placeholder-count="3">
-                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:2px solid var(--ledger-tax)"></span>{{ ct.t }}</li>
-                      </sc-for>
-                    </ul>
-                  </div>
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
-                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Reconstruct (The Dividend)</h5>
-                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-div);box-shadow:0 0 8px var(--ledger-div)"></span>
-                    </div>
-                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.dividend }}" as="cd" hint-placeholder-count="3">
-                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;background:var(--ledger-div)"></span>{{ cd.t }}</li>
-                      </sc-for>
-                    </ul>
-                  </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">Timeline &amp; Shadow Integration</h4>
-                  <sc-if value="{{ cp.tlOn }}" hint-placeholder-val="{{ false }}">
-                    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:8px">
-                      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font:400 13.6px var(--fu);color:var(--mut)">
-                        <span>{{ cp.stage }}</span>
-                        <span style="font-variant-numeric:tabular-nums">{{ cp.years }}</span>
-                      </div>
-                      <div role="img" aria-label="{{ cp.tlAria }}" style="position:relative;height:6px;margin:24px 7px 16px;border-radius:3px;background:var(--bd)">
-                        <span style="position:absolute;left:0;top:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ledger-tax),var(--ac2));width:{{ cp.fill }}"></span>
-                        <sc-for list="{{ cp.nodes }}" as="cn" hint-placeholder-count="3">
-                          <span style="position:absolute;top:50%;left:{{ cn.at }};width:8px;height:8px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;border:2px solid var(--ac2-hi);background:var(--bg)"></span>
-                        </sc-for>
-                        <sc-if value="{{ cp.nowOn }}" hint-placeholder-val="{{ false }}">
-                          <span style="position:absolute;top:50%;left:{{ cp.nowAt }};width:14px;height:14px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;background:var(--tx);border:3px solid var(--ac2);box-shadow:0 0 10px var(--ac2)"></span>
-                        </sc-if>
-                      </div>
-                    </div>
-                  </sc-if>
-                  <div>
-                    <h5 style="margin:0 0 16px;font:600 16px/1.3 var(--fu);color:var(--mut)">Cross-System Shadow Prompts</h5>
-                    <div style="display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
-                        <div style="display:flex;flex-direction:column;gap:4px;background:rgba(var(--atmc),.08);border-left:3px solid var(--ac2);border-radius:0 8px 8px 0;padding:16px">
-                          <sc-if value="{{ cq.sysOn }}" hint-placeholder-val="{{ false }}">
-                            <span style="font:600 10.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ cq.sys }}</span>
-                          </sc-if>
-                          <p style="margin:0;font:italic 400 14.4px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ cq.t }}</p>
-                        </div>
-                      </sc-for>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </sc-for>
-          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
-              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
-            </div>
-          </sc-if>
-          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
-            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
-            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -4620,6 +4572,252 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 
+<!-- THE CYCLE AUDIT'S SHEET, opened from the widget on Today (owner, 18
+     October 2026): the passages, the design and the years ahead in full, then
+     the Oracle's reading of the passages, behind Codex Luminary on the website
+     and free in the apps (cycleSheetVals). -->
+<sc-if value="{{ cyOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ cyClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:84">
+    <div role="dialog" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;max-width:860px;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 32px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
+          <h2 style="margin:0;font:400 26px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
+        </div>
+        <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
+      </div>
+            <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
+          <button onClick="{{ cyUseMine }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Give my birth date</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyNeedSignIn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to read the audit</div>
+          <button onClick="{{ cySignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyConsentOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button onClick="{{ cyConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyGateOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cgHead }}</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cgBody }}</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+          <sc-if value="{{ cgBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cgBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ cgCta }}</button>
+          </sc-if>
+          <sc-if value="{{ cgNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ cgNote }}</p>
+          </sc-if>
+          <sc-if value="{{ cgRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cgRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <sc-if value="{{ cgTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cgTerms }}</p>
+          </sc-if>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, standard readings, and the dates of every passage</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyBusyOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:30px 20px">
+          <span aria-hidden="true" style="width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p role="status" style="margin:6px 0;max-width:44ch;font:italic 400 18px/1.45 var(--fd);color:var(--mut)">{{ cyLoadingText }}</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyErrOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ cyErrText }}</p>
+          <sc-if value="{{ cyErrRetry }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <!-- THE CYCLE AUDIT AS A LEDGER (owner, 18 October 2026): one dashboard
+               per passage, styled to the owner's sheet in tokens. The badge, the
+               coordinate and the timeline come from the device's own scan
+               (cyDash); the two lists and the questions are the Oracle's. The
+               Tax and the Dividend wear --ledger-tax and --ledger-div, fixed
+               amber and teal, because the sheet's crimson sits on the crisis hue
+               and its emerald on the action green. -->
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
+              <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
+                  <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
+                  <h3 style="margin:0;font:700 28px/1.2 var(--fu);color:var(--tx);text-wrap:balance">{{ cp.title }}</h3>
+                  <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+                </div>
+                <sc-if value="{{ cp.coordOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:right">
+                    <span style="display:block;font:500 11.2px var(--fu);letter-spacing:.04em;text-transform:uppercase;color:var(--mut)">{{ cp.coordLabel }}</span>
+                    <span style="display:block;margin-top:2px;font:700 17.6px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ cp.coord }}</span>
+                  </div>
+                </sc-if>
+              </header>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:24px">
+                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">The Surrender Ledger</h4>
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
+                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Deconstruct (The Tax)</h5>
+                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-tax);box-shadow:0 0 8px var(--ledger-tax)"></span>
+                    </div>
+                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.tax }}" as="ct" hint-placeholder-count="3">
+                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:2px solid var(--ledger-tax)"></span>{{ ct.t }}</li>
+                      </sc-for>
+                    </ul>
+                  </div>
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
+                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Reconstruct (The Dividend)</h5>
+                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-div);box-shadow:0 0 8px var(--ledger-div)"></span>
+                    </div>
+                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.dividend }}" as="cd" hint-placeholder-count="3">
+                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;background:var(--ledger-div)"></span>{{ cd.t }}</li>
+                      </sc-for>
+                    </ul>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">Timeline &amp; Shadow Integration</h4>
+                  <sc-if value="{{ cp.tlOn }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:8px">
+                      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font:400 13.6px var(--fu);color:var(--mut)">
+                        <span>{{ cp.stage }}</span>
+                        <span style="font-variant-numeric:tabular-nums">{{ cp.years }}</span>
+                      </div>
+                      <div role="img" aria-label="{{ cp.tlAria }}" style="position:relative;height:6px;margin:24px 7px 16px;border-radius:3px;background:var(--bd)">
+                        <span style="position:absolute;left:0;top:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ledger-tax),var(--ac2));width:{{ cp.fill }}"></span>
+                        <sc-for list="{{ cp.nodes }}" as="cn" hint-placeholder-count="3">
+                          <span style="position:absolute;top:50%;left:{{ cn.at }};width:8px;height:8px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;border:2px solid var(--ac2-hi);background:var(--bg)"></span>
+                        </sc-for>
+                        <sc-if value="{{ cp.nowOn }}" hint-placeholder-val="{{ false }}">
+                          <span style="position:absolute;top:50%;left:{{ cp.nowAt }};width:14px;height:14px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;background:var(--tx);border:3px solid var(--ac2);box-shadow:0 0 10px var(--ac2)"></span>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <div>
+                    <h5 style="margin:0 0 16px;font:600 16px/1.3 var(--fu);color:var(--mut)">Cross-System Shadow Prompts</h5>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px;background:rgba(var(--atmc),.08);border-left:3px solid var(--ac2);border-radius:0 8px 8px 0;padding:16px">
+                          <sc-if value="{{ cq.sysOn }}" hint-placeholder-val="{{ false }}">
+                            <span style="font:600 10.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ cq.sys }}</span>
+                          </sc-if>
+                          <p style="margin:0;font:italic 400 14.4px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ cq.t }}</p>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyDOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">&#9672; The Design</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your gates under the slow sky</h2>
+          <sc-if value="{{ cyDNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No slow body settles on your gates in the years ahead.</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyDRows }}" as="cd" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cd.label }}</span>
+                  <sc-if value="{{ cd.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--blue);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--blue)">Now</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cd.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyDMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyDMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyDMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyNOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your Personal Years" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#8734; The Numbers</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your Personal Years</h2>
+          <div role="list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px">
+            <sc-for list="{{ cyNYears }}" as="ny" hint-placeholder-count="10">
+              <div role="listitem" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid {{ ny.bd }};border-radius:12px">
+                <span style="font:500 11px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums">{{ ny.y }}</span>
+                <span style="font:400 22px/1.1 var(--fd);color:{{ ny.c }}">{{ ny.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <!-- GET HELP, FROM THE MENU: a prompt to call. The line is the one for where
      the reader is (callVals); with no line for their country it offers the way
      to find one rather than a number that would not connect. -->
@@ -5364,6 +5562,96 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
       <div style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:22px">
+        <!-- THE LONG WEATHER (owner, 18 October 2026): the Cycle Audit on Today,
+             read like a weather widget. The conditions now, three readings, and the
+             three studies drawn as one chart over twelve years, every mark placed
+             as a share of that span (cycleWidgetVals). All of it is computed here
+             and free; the sheet it opens carries the full lists and the reading. -->
+        <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+          <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
+            <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <p role="status" style="margin:0;font:italic 400 16px/1.45 var(--fd);color:var(--mut)">Reading the long sky&#8230;</p>
+                <span aria-hidden="true" style="height:60px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+                <span aria-hidden="true" style="height:90px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span aria-hidden="true" style="flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 32px/1 var(--fd);color:var(--tx);background:radial-gradient(circle at 35% 30%,rgba(var(--atmc2),.5),rgba(var(--atmc),.5) 55%,rgba(var(--atmc),.12) 100%);border:1px solid var(--ac2);box-shadow:0 0 28px rgba(var(--atmc),.45)">{{ cwGlyph }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                  <h2 style="margin:0;font:400 23px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cwHead }}</h2>
+                  <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ cwStat }}" as="k" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;padding:10px 11px;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.08)">
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ k.k }}</span>
+                    <span style="font:600 15.5px/1.2 var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ k.v }}</span>
+                    <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ k.sub }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+                <div aria-hidden="true" style="display:grid;grid-template-columns:64px minmax(0,1fr);row-gap:12px;align-items:center">
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+                  <div style="position:relative;height:{{ cwStarsH }}">
+                    <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                      <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                        <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                          <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                        </sc-for>
+                      </span>
+                    </sc-for>
+                  </div>
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+                  <div style="position:relative;height:{{ cwDesignH }}">
+                    <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                    </sc-if>
+                    <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                      <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                    </sc-for>
+                  </div>
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                      <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                        <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 12.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                      </sc-for>
+                    </div>
+                    <div style="position:relative;height:16px">
+                      <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                        <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                          <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                        </span>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <span></span>
+                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                      <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:64px;right:0;pointer-events:none">
+                  <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+                  <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                </div>
+              </div>
+              <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:var(--blue)"></span>On your gate</span>
+                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;box-sizing:border-box;border-radius:3px;border:1.5px solid var(--blue)"></span>Completes a channel</span>
+              </div>
+              <button onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.14);font:600 13px var(--fu);color:var(--tx)">Open the Cycle Audit <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#8594;</span></button>
+            </sc-if>
+          </section>
+        </sc-if>
         <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
           <div style="display:flex;align-items:center;gap:10px">
             <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Today’s Alignment</span>
@@ -8302,41 +8590,13 @@ input[type="date"]{color-scheme:dark}
         </sc-for>
       </div>
       </sc-if>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which period to read" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
         <sc-for list="{{ orPeriods }}" as="pr" hint-placeholder-count="4">
           <button onClick="{{ pr.go }}" role="radio" aria-checked="{{ pr.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border-radius:var(--rad);border:1px solid {{ pr.bd }};background:{{ pr.bg }};text-align:center">
             <span style="font:400 17px/1.2 var(--fd);color:{{ pr.c }}">{{ pr.label }}</span>
           </button>
         </sc-for>
       </div>
-      <!-- THE CYCLE AUDIT: the passages, free and computed here. The reading
-           waits behind the Luminary gate below on the website. -->
-      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
-          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
-          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
-            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
-          </sc-if>
-          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
-            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
-          </sc-if>
-          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
-            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
-                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
-                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
-                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
-                </span>
-                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
-              </li>
-            </sc-for>
-          </ol>
-          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
-          </sc-if>
-        </section>
-      </sc-if>
       <sc-if value="{{ orLumMember }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:0 4px">
           <span style="flex:1;min-width:0;font:400 12.5px/1.5 var(--fu);color:var(--mut)"><span style="font-weight:600;color:var(--ac2-hi)">&#10038; You are a Luminary</span> {{ orLumPlanLine }}</span>
@@ -8347,7 +8607,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <!-- CODEX LUMINARY: one payment of the reader's choosing opens every
            add-on (18 October 2026). The same gate stands in place of an
-           in-depth reading and of the Cycle Audit, worded for each. -->
+           in-depth reading here, and in the Cycle Audit's sheet on Today. -->
       <sc-if value="{{ orGate }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
           <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
@@ -8532,116 +8792,6 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
-          </div>
-        </article>
-      </sc-if>
-      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
-        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
-          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
-            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
-            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
-            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
-            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
-          </header>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
-            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
-              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
-            </sc-for>
-          </div>
-          <!-- THE CYCLE AUDIT AS A LEDGER (owner, 18 October 2026): one dashboard
-               per passage, styled to the owner's sheet in tokens. The badge, the
-               coordinate and the timeline come from the device's own scan
-               (cyDash); the two lists and the questions are the Oracle's. The
-               Tax and the Dividend wear --ledger-tax and --ledger-div, fixed
-               amber and teal, because the sheet's crimson sits on the crisis hue
-               and its emerald on the action green. -->
-          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
-            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
-              <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
-                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
-                  <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
-                  <h3 style="margin:0;font:700 28px/1.2 var(--fu);color:var(--tx);text-wrap:balance">{{ cp.title }}</h3>
-                  <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
-                </div>
-                <sc-if value="{{ cp.coordOn }}" hint-placeholder-val="{{ false }}">
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:right">
-                    <span style="display:block;font:500 11.2px var(--fu);letter-spacing:.04em;text-transform:uppercase;color:var(--mut)">{{ cp.coordLabel }}</span>
-                    <span style="display:block;margin-top:2px;font:700 17.6px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ cp.coord }}</span>
-                  </div>
-                </sc-if>
-              </header>
-              <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px">
-                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">The Surrender Ledger</h4>
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
-                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Deconstruct (The Tax)</h5>
-                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-tax);box-shadow:0 0 8px var(--ledger-tax)"></span>
-                    </div>
-                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.tax }}" as="ct" hint-placeholder-count="3">
-                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:2px solid var(--ledger-tax)"></span>{{ ct.t }}</li>
-                      </sc-for>
-                    </ul>
-                  </div>
-                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
-                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Reconstruct (The Dividend)</h5>
-                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-div);box-shadow:0 0 8px var(--ledger-div)"></span>
-                    </div>
-                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.dividend }}" as="cd" hint-placeholder-count="3">
-                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;background:var(--ledger-div)"></span>{{ cd.t }}</li>
-                      </sc-for>
-                    </ul>
-                  </div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">Timeline &amp; Shadow Integration</h4>
-                  <sc-if value="{{ cp.tlOn }}" hint-placeholder-val="{{ false }}">
-                    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:8px">
-                      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font:400 13.6px var(--fu);color:var(--mut)">
-                        <span>{{ cp.stage }}</span>
-                        <span style="font-variant-numeric:tabular-nums">{{ cp.years }}</span>
-                      </div>
-                      <div role="img" aria-label="{{ cp.tlAria }}" style="position:relative;height:6px;margin:24px 7px 16px;border-radius:3px;background:var(--bd)">
-                        <span style="position:absolute;left:0;top:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ledger-tax),var(--ac2));width:{{ cp.fill }}"></span>
-                        <sc-for list="{{ cp.nodes }}" as="cn" hint-placeholder-count="3">
-                          <span style="position:absolute;top:50%;left:{{ cn.at }};width:8px;height:8px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;border:2px solid var(--ac2-hi);background:var(--bg)"></span>
-                        </sc-for>
-                        <sc-if value="{{ cp.nowOn }}" hint-placeholder-val="{{ false }}">
-                          <span style="position:absolute;top:50%;left:{{ cp.nowAt }};width:14px;height:14px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;background:var(--tx);border:3px solid var(--ac2);box-shadow:0 0 10px var(--ac2)"></span>
-                        </sc-if>
-                      </div>
-                    </div>
-                  </sc-if>
-                  <div>
-                    <h5 style="margin:0 0 16px;font:600 16px/1.3 var(--fu);color:var(--mut)">Cross-System Shadow Prompts</h5>
-                    <div style="display:flex;flex-direction:column;gap:12px">
-                      <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
-                        <div style="display:flex;flex-direction:column;gap:4px;background:rgba(var(--atmc),.08);border-left:3px solid var(--ac2);border-radius:0 8px 8px 0;padding:16px">
-                          <sc-if value="{{ cq.sysOn }}" hint-placeholder-val="{{ false }}">
-                            <span style="font:600 10.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ cq.sys }}</span>
-                          </sc-if>
-                          <p style="margin:0;font:italic 400 14.4px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ cq.t }}</p>
-                        </div>
-                      </sc-for>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </sc-for>
-          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
-              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
-            </div>
-          </sc-if>
-          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
-            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
-            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
           </div>
         </article>
       </sc-if>
@@ -9273,6 +9423,252 @@ input[type="date"]{color-scheme:dark}
         <span style="flex:1;font:600 13px var(--fu);color:var(--tx);text-align:left">Log Out</span>
         <span style="flex:none;max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--fu);color:var(--dim)">{{ pmLogOutNote }}</span>
       </button>
+    </div>
+  </div>
+</sc-if>
+
+<!-- THE CYCLE AUDIT'S SHEET, opened from the widget on Today (owner, 18
+     October 2026): the passages, the design and the years ahead in full, then
+     the Oracle's reading of the passages, behind Codex Luminary on the website
+     and free in the apps (cycleSheetVals). -->
+<sc-if value="{{ cyOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ cyClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:13">
+    <div role="dialog" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;max-width:860px;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 32px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
+          <h2 style="margin:0;font:400 26px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
+        </div>
+        <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
+      </div>
+            <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
+          <button onClick="{{ cyUseMine }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Give my birth date</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyNeedSignIn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Sign in to read the audit</div>
+          <button onClick="{{ cySignInGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Sign in</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyConsentOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button onClick="{{ cyConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyGateOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:26px 18px;box-shadow:0 0 60px rgba(var(--atmc2),.12)">
+          <span aria-hidden="true" style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ac2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi);box-shadow:0 0 30px rgba(var(--atmc2),.3)">&#10022;</span>
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Codex Luminary</div>
+          <h2 style="margin:0;font:400 24px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cgHead }}</h2>
+          <p style="margin:0;max-width:52ch;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cgBody }}</p>
+          <p style="margin:0;max-width:52ch;font:italic 400 16px/1.55 var(--fd);color:var(--tx);text-wrap:pretty">This is an exchange rather than a wall. Pay what it is worth to you, once, and every add-on opens on this account: in-depth readings, Omni tarot, the Cycle Audit, and whatever comes after them.</p>
+          <sc-if value="{{ cgBuyOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cgBuy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ cgCta }}</button>
+          </sc-if>
+          <sc-if value="{{ cgNoteOn }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">{{ cgNote }}</p>
+          </sc-if>
+          <sc-if value="{{ cgRetryOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cgRetry }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Check again</button>
+          </sc-if>
+          <sc-if value="{{ cgTermsOn }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cgTerms }}</p>
+          </sc-if>
+          <p style="margin:0;display:flex;flex-direction:column;align-items:flex-start"><a href="./terms.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Terms &amp; Conditions</a><a href="./privacy.html" style="box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 12px var(--fu);color:var(--blue);text-underline-offset:3px">Privacy Policy</a></p>
+          <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">&#10003; Free forever: every chart, the wiring, the numbers, standard readings, and the dates of every passage</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyBusyOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;text-align:center;padding:30px 20px">
+          <span aria-hidden="true" style="width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--tx),rgb(var(--atmc2)) 35%,var(--ac2) 80%);box-shadow:0 0 50px rgba(var(--atmc2),.5);animation:pulseGentle 2.4s ease-in-out infinite"></span>
+          <p role="status" style="margin:6px 0;max-width:44ch;font:italic 400 18px/1.45 var(--fd);color:var(--mut)">{{ cyLoadingText }}</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyErrOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <p style="margin:0;font:400 18px/1.45 var(--fd);color:var(--mut)">{{ cyErrText }}</p>
+          <sc-if value="{{ cyErrRetry }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyShow }}" hint-placeholder-val="{{ false }}">
+        <article aria-label="{{ cyAria }}" style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .3s ease">
+          <header style="display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:12px 6px 2px">
+            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ cyLabel }}</div>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ cyTitle }}</h2>
+            <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ cyEpigraph }}</p>
+            <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cyOvFirst }}</p>
+            <sc-for list="{{ cyOvRest }}" as="cop" hint-placeholder-count="1">
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ cop.t }}</p>
+            </sc-for>
+          </div>
+          <!-- THE CYCLE AUDIT AS A LEDGER (owner, 18 October 2026): one dashboard
+               per passage, styled to the owner's sheet in tokens. The badge, the
+               coordinate and the timeline come from the device's own scan
+               (cyDash); the two lists and the questions are the Oracle's. The
+               Tax and the Dividend wear --ledger-tax and --ledger-div, fixed
+               amber and teal, because the sheet's crimson sits on the crisis hue
+               and its emerald on the action green. -->
+          <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
+            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
+              <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
+                  <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
+                  <h3 style="margin:0;font:700 28px/1.2 var(--fu);color:var(--tx);text-wrap:balance">{{ cp.title }}</h3>
+                  <span style="font:400 13px/1.45 var(--fu);color:var(--mut)">{{ cp.window }}</span>
+                </div>
+                <sc-if value="{{ cp.coordOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:right">
+                    <span style="display:block;font:500 11.2px var(--fu);letter-spacing:.04em;text-transform:uppercase;color:var(--mut)">{{ cp.coordLabel }}</span>
+                    <span style="display:block;margin-top:2px;font:700 17.6px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ cp.coord }}</span>
+                  </div>
+                </sc-if>
+              </header>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px">
+                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">The Surrender Ledger</h4>
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
+                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Deconstruct (The Tax)</h5>
+                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-tax);box-shadow:0 0 8px var(--ledger-tax)"></span>
+                    </div>
+                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.tax }}" as="ct" hint-placeholder-count="3">
+                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:2px solid var(--ledger-tax)"></span>{{ ct.t }}</li>
+                      </sc-for>
+                    </ul>
+                  </div>
+                  <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(var(--atmc),.16)">
+                      <h5 style="margin:0;font:600 17.6px/1.3 var(--fu);color:var(--tx)">Reconstruct (The Dividend)</h5>
+                      <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--ledger-div);box-shadow:0 0 8px var(--ledger-div)"></span>
+                    </div>
+                    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.dividend }}" as="cd" hint-placeholder-count="3">
+                        <li style="position:relative;padding-left:20px;font:400 15.2px/1.4 var(--fu);color:var(--tx)"><span aria-hidden="true" style="position:absolute;left:0;top:.42em;width:9px;height:9px;box-sizing:border-box;border-radius:50%;background:var(--ledger-div)"></span>{{ cd.t }}</li>
+                      </sc-for>
+                    </ul>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                  <h4 style="margin:0;font:600 17.6px/1.3 var(--fu);letter-spacing:.05em;text-transform:uppercase;color:var(--mut)">Timeline &amp; Shadow Integration</h4>
+                  <sc-if value="{{ cp.tlOn }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:8px">
+                      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font:400 13.6px var(--fu);color:var(--mut)">
+                        <span>{{ cp.stage }}</span>
+                        <span style="font-variant-numeric:tabular-nums">{{ cp.years }}</span>
+                      </div>
+                      <div role="img" aria-label="{{ cp.tlAria }}" style="position:relative;height:6px;margin:24px 7px 16px;border-radius:3px;background:var(--bd)">
+                        <span style="position:absolute;left:0;top:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ledger-tax),var(--ac2));width:{{ cp.fill }}"></span>
+                        <sc-for list="{{ cp.nodes }}" as="cn" hint-placeholder-count="3">
+                          <span style="position:absolute;top:50%;left:{{ cn.at }};width:8px;height:8px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;border:2px solid var(--ac2-hi);background:var(--bg)"></span>
+                        </sc-for>
+                        <sc-if value="{{ cp.nowOn }}" hint-placeholder-val="{{ false }}">
+                          <span style="position:absolute;top:50%;left:{{ cp.nowAt }};width:14px;height:14px;transform:translate(-50%,-50%);box-sizing:border-box;border-radius:50%;background:var(--tx);border:3px solid var(--ac2);box-shadow:0 0 10px var(--ac2)"></span>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <div>
+                    <h5 style="margin:0 0 16px;font:600 16px/1.3 var(--fu);color:var(--mut)">Cross-System Shadow Prompts</h5>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                      <sc-for list="{{ cp.prompts }}" as="cq" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px;background:rgba(var(--atmc),.08);border-left:3px solid var(--ac2);border-radius:0 8px 8px 0;padding:16px">
+                          <sc-if value="{{ cq.sysOn }}" hint-placeholder-val="{{ false }}">
+                            <span style="font:600 10.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ cq.sys }}</span>
+                          </sc-if>
+                          <p style="margin:0;font:italic 400 14.4px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ cq.t }}</p>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </sc-for>
+          <sc-if value="{{ cyHasLong }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Long View</div>
+              <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ cyLong }}</p>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+            <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ cyMantra }}&#8221;</p>
+          </div>
+        </article>
+      </sc-if>
+      <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
+          <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No long passage touches your chart in the years ahead.</p>
+          </sc-if>
+          <sc-if value="{{ cyFinding }}" hint-placeholder-val="{{ false }}">
+            <p role="status" style="margin:0;font:italic 400 15px/1.5 var(--fd);color:var(--mut)">Finding your passages&#8230;</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
+                  <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cw.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyDOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">&#9672; The Design</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your gates under the slow sky</h2>
+          <sc-if value="{{ cyDNone }}" hint-placeholder-val="{{ false }}">
+            <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--mut)">No slow body settles on your gates in the years ahead.</p>
+          </sc-if>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ cyDRows }}" as="cd" hint-placeholder-count="3">
+              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px">
+                <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+                  <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cd.label }}</span>
+                  <sc-if value="{{ cd.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--blue);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--blue)">Now</span></sc-if>
+                </span>
+                <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cd.detail }}</span>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{ cyDMoreOn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ cyDMoreGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">{{ cyDMoreLabel }}</button>
+          </sc-if>
+        </section>
+      </sc-if>
+      <sc-if value="{{ cyNOn }}" hint-placeholder-val="{{ false }}">
+        <section aria-label="Your Personal Years" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#8734; The Numbers</div>
+          <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your Personal Years</h2>
+          <div role="list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px">
+            <sc-for list="{{ cyNYears }}" as="ny" hint-placeholder-count="10">
+              <div role="listitem" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid {{ ny.bd }};border-radius:12px">
+                <span style="font:500 11px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums">{{ ny.y }}</span>
+                <span style="font:400 22px/1.1 var(--fd);color:{{ ny.c }}">{{ ny.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -10014,7 +10410,7 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false };
+    pmenuOpen: false, callOpen: false, cyOpen: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -10538,6 +10934,7 @@ class Component extends DCLogic {
     this.lumAuto();
     this.oracleAutoAsk();
     this.oraclePrepareAuto();
+    this.cycleSheetAutoAsk();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -19383,7 +19780,11 @@ class Component extends DCLogic {
      the device and presses Consult the Oracle. After that the screen behaves as
      the Codex's did. A reading is kept on the device and on the server for the
      period it covers, so opening the screen again costs nothing. */
-  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month'], ['cycle', 'Cycle Audit']];
+  /* The Cycle Audit was a fourth period here until the owner moved it to
+     Today as a widget (18 October 2026). It is still asked of the Oracle as
+     period 'cycle', from the widget's sheet, so the plumbing below keeps it. */
+  ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
+  orPeriodOf(v) { return ['daily', 'weekly', 'monthly'].indexOf(v) !== -1 ? v : 'daily'; }
   oracleLocalDate(d) {
     d = d || new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -19632,7 +20033,8 @@ class Component extends DCLogic {
         return;
       }
       const reason = (r && r.reason) || 'error';
-      const wait = this.ORACLE_WAIT[reason], n = this._orTry[slot] || 0, here = this._orQuiet[slot] || this.curTab() === 'oracle';
+      const wait = this.ORACLE_WAIT[reason], n = this._orTry[slot] || 0;
+      const here = this._orQuiet[slot] || (period === 'cycle' ? !!this.state.cyOpen : this.curTab() === 'oracle');
       if (wait && here && n < wait.tries) {
         this._orTry[slot] = n + 1;
         this._orRetryT[slot] = setTimeout(() => { delete this._orRetryT[slot]; this.oracleAsk(period, depth, true); },
@@ -19688,7 +20090,9 @@ class Component extends DCLogic {
       /* A wait between two asks stops with the screen. A request actually in
          flight is left to answer, and stops itself when it sees the screen
          has gone. */
-      const timers = this._orRetryT || {}, stopped = Object.keys(timers).filter(k => !(this._orQuiet && this._orQuiet[k]));
+      /* The Cycle Audit is asked from its sheet on Today, so its waits stop
+         with the sheet rather than with the Oracle. */
+      const timers = this._orRetryT || {}, stopped = Object.keys(timers).filter(k => !(this._orQuiet && this._orQuiet[k]) && !(this.state.cyOpen && k.indexOf('cycle|') === 0));
       if (stopped.length) {
         const waits = { ...(this.state.orWaitMap || {}) };
         stopped.forEach(k => { clearTimeout(timers[k]); delete timers[k]; delete this._orBusy[k]; delete this._orTry[k]; delete waits[k]; });
@@ -19697,7 +20101,7 @@ class Component extends DCLogic {
       return;
     }
     this._orSeen = true;
-    const period = this.state.orPeriod || 'daily', depth = period === 'cycle' ? 'standard' : this.state.orDepth || 'standard';
+    const period = this.orPeriodOf(this.state.orPeriod), depth = this.state.orDepth || 'standard';
     const want = period + '|' + depth;
     if (this._orAutoFor === want || !this.oracleWillAsk(period, depth)) return;
     this._orAutoFor = want;
@@ -19705,7 +20109,7 @@ class Component extends DCLogic {
     this._orAutoT = setTimeout(() => {
       this._orAutoT = null; this._orAutoFor = null;
       const st = this.state;
-      if (this.curTab() === 'oracle' && (st.orPeriod || 'daily') === period && (period === 'cycle' || (st.orDepth || 'standard') === depth) && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
+      if (this.curTab() === 'oracle' && this.orPeriodOf(st.orPeriod) === period && (st.orDepth || 'standard') === depth && this.oracleWillAsk(period, depth)) this.oracleAsk(period, depth);
     }, 600);
   }
   /* THE IN-DEPTH READING IS WRITTEN BEFORE IT IS ASKED FOR. A reading of that
@@ -19726,7 +20130,7 @@ class Component extends DCLogic {
     if (!this.addonsOpen()) return;
     /* The Cycle Audit has no in-depth form, so a reader looking at it has
        today's in-depth reading prepared. */
-    const deepOf = x => x && x !== 'cycle' ? x : 'daily';
+    const deepOf = x => this.orPeriodOf(x);
     const period = deepOf(st.orPeriod), slot = this.oracleSlot(period, 'deep');
     this._orPrepTried = this._orPrepTried || {};
     if (this._orPrepTried[slot] || this.oracleCached(period, 'deep')) return;
@@ -19800,7 +20204,7 @@ class Component extends DCLogic {
   cycleReady() { return this._cyKey === this.cycleScanKey() && !!this._cy; }
   cycleSoon() {
     if (this._cySoonT) return;
-    this._cySoonT = setTimeout(() => { this._cySoonT = null; this.cycleWindows(); this.setState({ orTick: (this.state.orTick || 0) + 1 }); }, 40);
+    this._cySoonT = setTimeout(() => { this._cySoonT = null; this.cycleWindows(); this.cycleDesign(); this.setState({ orTick: (this.state.orTick || 0) + 1 }); }, 40);
   }
   cycleWindows() {
     const key = this.cycleScanKey();
@@ -19989,6 +20393,274 @@ class Component extends DCLogic {
       tlAria: w.range + ', ' + (passes.length ? 'exact ' + w.passFull : 'close without reaching exact') + '. ' + stage + (w.now ? ', ' + done + ' percent of the way through.' : '.')
     });
   }
+  /* ---- The Cycle Audit on Today: the long weather -------------------------
+
+     THE OWNER MOVED IT HERE (18 October 2026): the audit is a widget on Today,
+     read the way a weather widget is read, with the three studies drawn as one
+     chart, and the written reading one press away in a sheet. The chart is
+     free and computed on the device; the sheet carries the passages, the
+     design and the numbers in full and, for a Luminary (or anybody in the
+     apps), the Oracle's reading of them.
+
+     THREE LANES, ONE CLOCK. Stars: the passages cycleWindows() finds. Design:
+     the same four slow bodies read as gates, kept where one sits on a gate the
+     chart holds or completes a channel with one (cycleDesign). Numbers: the
+     Personal Year of every year in view and the Pinnacle each falls in
+     (cycleNumbers). All three share the widget's span, the year before this
+     one to ten years ahead, so a column of the chart is one moment in all
+     three. */
+  CY_GLYPH = { Saturn: '♄', Uranus: '♅', Neptune: '♆', Pluto: '♇' };
+  CY_DSTEP = { Saturn: 6, Uranus: 10, Neptune: 14, Pluto: 14 };
+  CY_SPAN = 12;
+  /* The design lane: the slow bodies through the gates, kept where they touch
+     the chart. Sampled every one to two weeks (a gate is 5.6 degrees, and
+     Saturn, the fastest, moves about a fifth of a degree a week) and anchored
+     to the calendar year like the passages, so it is scanned once a year per
+     profile. A return of one body to one gate within CY_JOIN days, which is
+     what a retrograde does, is one stay, as it is for the passages. */
+  cycleDesign() {
+    const key = this.cycleScanKey();
+    if (this._cyDKey === key && this._cyD) return this._cyD;
+    const year = new Date().getFullYear(), today = new Date();
+    const t0 = this.t2000(new Date(year - 1, 0, 1, 12)), t1 = this.t2000(new Date(year + this.CY_AHEAD + 1, 0, 1, 12));
+    const toDate = t => new Date((t + 2451545.0 - 2440587.5) * 864e5);
+    let natal = new Set();
+    try { natal = new Set(this.hdChart().gates.map(g => g.gate)); } catch (e) { natal = new Set(); }
+    const partner = {};
+    (this.HD_CHANNELS || []).forEach(c => { (partner[c[0]] = partner[c[0]] || []).push(c[1]); (partner[c[1]] = partner[c[1]] || []).push(c[0]); });
+    const stays = [];
+    this.CY_MOVERS.forEach(mover => {
+      const h = this.CY_DSTEP[mover] || 10;
+      let cur = null;
+      for (let t = t0; t < t1 + h; t += h) {
+        const lon = this.cyLon(mover, Math.min(t, t1));
+        if (lon == null || !Number.isFinite(lon)) return;
+        const g = this.gateOf(lon).gate;
+        if (cur && cur.gate === g) { cur.to = t; continue; }
+        if (cur) stays.push(cur);
+        cur = { mover, gate: g, from: t, to: t };
+      }
+      if (cur) stays.push(cur);
+    });
+    const keep = [];
+    stays.forEach(r => {
+      const own = natal.has(r.gate), comp = own ? [] : (partner[r.gate] || []).filter(x => natal.has(x));
+      if (!own && !comp.length) return;
+      let last = null;
+      for (let i = keep.length - 1; i >= 0; i--) if (keep[i].mover === r.mover && keep[i].gate === r.gate) { last = keep[i]; break; }
+      if (last && r.from - last.to < this.CY_JOIN) { last.to = Math.max(last.to, r.to); return; }
+      keep.push({ mover: r.mover, gate: r.gate, from: r.from, to: r.to, own, with: comp });
+    });
+    const yr = this._fmt('cymonth', { month: 'short', year: 'numeric' }), mY = d => yr ? yr.format(d) : d.toDateString();
+    this._cyD = keep.map(r => {
+      const from = toDate(r.from), to = toDate(r.to), name = this.GATE_NAMES[r.gate] || '';
+      return { id: r.mover + '|' + r.gate + '|' + from.getFullYear(), mover: r.mover, gate: r.gate, own: r.own, with: r.with,
+        from, to, past: to < today, now: from <= today && to >= today,
+        label: r.own ? r.mover + ' on your gate ' + r.gate : r.mover + ' in gate ' + r.gate + ', completing ' + r.with.map(x => r.gate + '-' + x).join(' and '),
+        sub: (name ? 'Gate ' + r.gate + ', ' + name : 'Gate ' + r.gate) + (r.own ? '' : ' · with your gate ' + r.with.join(' and ')),
+        range: mY(from) === mY(to) ? mY(from) : mY(from) + ' to ' + mY(to) };
+    }).sort((a, b) => a.from - b.from);
+    this._cyDKey = key;
+    return this._cyD;
+  }
+  cycleDesignReady() { return this._cyDKey === this.cycleScanKey() && !!this._cyD; }
+  /* The numbers lane: the Personal Year of each year in view, and the
+     Pinnacle periods by the ages numerology() already gives them. */
+  cycleNumbers(fromYear, toYear) {
+    const core = window.InCommonCore, dob = this.dob(), years = [];
+    for (let y = fromYear; y <= toYear; y++) {
+      let v = null;
+      try { v = core ? core.personalYear(dob, y).value : null; } catch (e) { v = null; }
+      years.push({ y, v });
+    }
+    const n = this.numerology(), born = +((/(\d{4})/.exec(dob) || [0, 1992])[1]), e = n.end1;
+    const ages = [[0, e], [e + 1, e + 9], [e + 10, e + 18], [e + 19, 200]];
+    const pins = ages.map(([a, b], i) => ({ i, v: n.pinnacles[i][0], from: born + a, to: born + b }));
+    return { years, pins };
+  }
+  /* THE WIDGET. Everything here is arithmetic on the device; nothing is sent.
+     The headline is the heaviest passage under way (CY_WEIGHT), or the next
+     one to begin when none is, said as the field says it. The chart spans
+     CY_SPAN calendar years from the start of last year, and every mark on it
+     is placed as a percentage of that span, so it is the same picture at any
+     width and the type never scales with it. */
+  cycleWidgetVals() {
+    const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
+    const ready = this.cycleReady() && this.cycleDesignReady();
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    const now = new Date(), year = now.getFullYear();
+    const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
+    const pct = t => (Math.max(0, Math.min(1, (t - s0) / span)) * 100).toFixed(2) + '%';
+    const wid = (a, b) => (Math.max(1.6, (Math.min(b, s1) - Math.max(a, s0)) / span * 100)).toFixed(2) + '%';
+    const inView = (a, b) => b >= s0 && a < s1;
+    const yr = this._fmt('cymonth', { month: 'short', year: 'numeric' }), mY = d => yr ? yr.format(d) : d.toDateString();
+    /* Stacked into rows so overlapping passages never sit on each other; a
+       third row is the most the widget gives a lane before it shares one. */
+    const pack = (items, rowsMax) => {
+      const ends = [];
+      return items.map(it => {
+        let r = ends.findIndex(e => e < +it.from - 864e5 * 20);
+        if (r === -1) r = ends.length < rowsMax ? ends.length : rowsMax - 1;
+        ends[r] = Math.max(ends[r] || 0, +it.to);
+        return { it, row: r };
+      });
+    };
+    /* The chart draws what the audit reads (CY_MAX, the heaviest) and what is
+       under way, and in the design lane only the bodies whose stay in a gate
+       lasts a year or more. Every passage and every Saturn stay is listed in
+       the sheet; a chart that drew all of them could not be read at a glance. */
+    const reads = this.cyclePassages();
+    const ws = this.cycleWindows().filter(w => inView(+w.from, +w.to) && (w.now || reads.indexOf(w) !== -1));
+    const ds = this.cycleDesign().filter(d => inView(+d.from, +d.to) && d.mover !== 'Saturn');
+    const starRows = pack(ws, 3), designRows = pack(ds, 2);
+    const nRows = (pk) => Math.max(1, pk.reduce((m, x) => Math.max(m, x.row + 1), 0));
+    const sN = nRows(starRows), dN = nRows(designRows);
+    const hard = a => a !== 'trine';
+    const cwStars = starRows.map(({ it: w, row }) => ({
+      left: pct(+w.from), w: wid(+w.from, +w.to), top: (row * 13) + 'px',
+      bg: hard(w.asp) ? 'linear-gradient(90deg,var(--ac2),var(--ac2-hi))' : 'linear-gradient(90deg,rgba(var(--atmc),.95),var(--ac2))',
+      title: w.label + ', ' + w.range,
+      ticks: w.passes.filter(d => +d >= s0 && +d < s1).map(d => ({ at: ((+d - Math.max(+w.from, s0)) / Math.max(1, Math.min(+w.to, s1) - Math.max(+w.from, s0)) * 100).toFixed(1) + '%' }))
+    }));
+    const cwDesign = designRows.map(({ it: d, row }) => ({
+      left: pct(+d.from), w: wid(+d.from, +d.to), top: (row * 13) + 'px',
+      bg: d.own ? 'var(--blue)' : 'transparent', bd: 'var(--blue)', title: d.label + ', ' + d.range
+    }));
+    const nums = this.cycleNumbers(year - 1, year - 2 + this.CY_SPAN);
+    const master = v => v === 11 || v === 22 || v === 33;
+    const cwYears = nums.years.map(({ y, v }) => ({ y: String(y), short: String(y).slice(2), v: v == null ? '' : String(v),
+      on: y === year, c: master(v) ? 'var(--ac2-hi)' : 'var(--tx)', bd: y === year ? 'var(--ac2-hi)' : 'transparent',
+      bg: y === year ? 'rgba(var(--atmc),.28)' : 'transparent', label: y % 2 === year % 2 ? String(y) : '' }));
+    const pinNow = nums.pins.find(p => year >= p.from && year <= p.to);
+    const cwPins = nums.pins.filter(p => p.to >= year - 1 && p.from <= year - 2 + this.CY_SPAN).map(p => {
+      const a = new Date(Math.max(p.from, year - 1), 0, 1).getTime(), b = new Date(Math.min(p.to, year - 2 + this.CY_SPAN) + 1, 0, 1).getTime();
+      return { left: pct(a), w: wid(a, b), label: 'Pinnacle ' + p.v, show: (b - a) / span > 0.18,
+        bg: p.i % 2 ? 'rgba(var(--atmc),.32)' : 'rgba(var(--atmc),.18)', title: 'Pinnacle ' + p.v + ', ' + p.from + ' to ' + (p.to > 3000 ? 'onward' : p.to) };
+    });
+    /* The conditions now: what the widget leads with. */
+    const live = this.cycleWindows().filter(w => w.now).sort((a, b) => b.weight - a.weight);
+    const ahead = this.cycleWindows().filter(w => !w.past && !w.now).sort((a, b) => a.from - b.from);
+    const head = live[0] || null, next = ahead[0] || null;
+    const nextExact = head ? head.passes.find(d => d >= now) : null;
+    const lastExact = head && head.passes.length ? head.passes[head.passes.length - 1] : null;
+    const dNow = this.cycleDesign().filter(d => d.now), dNext = this.cycleDesign().find(d => !d.past && !d.now);
+    const py = nums.years.find(x => x.y === year);
+    const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
+    return {
+      cwOn: true, cwFinding: false, cwReady: true,
+      cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
+      cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
+      cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
+      cwLive: !!head,
+      cwStat: [
+        { k: 'Stars', v: live.length ? live.length + ' now' : 'Quiet', sub: next ? 'Next ' + mY(next.from) : 'Nothing ahead' },
+        { k: 'Design', v: dNow.length ? 'Gate ' + dNow[0].gate : 'Open', sub: dNow.length ? dNow[0].mover + (dNow[0].own ? ', your gate' : ', a channel') : dNext ? 'Next ' + mY(dNext.from) : 'Nothing ahead' },
+        { k: 'Numbers', v: py && py.v != null ? 'Year ' + py.v : 'Year', sub: pinNow ? 'Pinnacle ' + pinNow.v : '' }
+      ],
+      cwStars, cwStarsH: (sN * 13 - 5) + 'px',
+      cwDesign, cwDesignH: (dN * 13 - 5) + 'px', cwDesignNone: !cwDesign.length,
+      cwYears, cwPins,
+      cwNowAt: pct(now.getTime()),
+      cwChartAria: 'The long weather, ' + (year - 1) + ' to ' + (year - 2 + this.CY_SPAN) + '. Stars: ' + ws.length + ' passage' + (ws.length === 1 ? '' : 's') +
+        (live.length ? ', ' + live.length + ' under way now' : '') + '. Design: ' + ds.length + ' stay' + (ds.length === 1 ? '' : 's') + ' of a slow body on your gates or channels. Numbers: Personal Year ' + (py && py.v != null ? py.v : '') + ' this year' + (pinNow ? ', Pinnacle ' + pinNow.v : '') + '.',
+      cwOpenGo: () => this.setState({ cyOpen: true })
+    };
+  }
+  /* THE SHEET. Opened from the widget: every passage, every stay in the
+     design and the years ahead in full, then the Oracle's reading of the
+     passages. The reading is asked the way the Oracle asked it (one press of
+     Consult the Oracle the first time, then on open), as period 'cycle', and
+     on the website it waits behind Codex Luminary. */
+  cycleSheetVals() {
+    const st = this.state, open = !!st.cyOpen, str = v => typeof v === 'string' ? v : '';
+    const list = v => Array.isArray(v) ? v : [], pick = (on, a, b) => on ? a : b;
+    const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+    const closed = { cyOpen: false, cyListOn: false, cyNone: false, cyFinding: false, cyMoreOn: false, cyRows: [], cyShow: false,
+      cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
+      cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
+    const base = { cyClose: () => this.setState({ cyOpen: false }), cyMoreGo: () => this.setState({ cyAll: !st.cyAll }), cyDMoreGo: () => this.setState({ cyDAll: !st.cyDAll }),
+      cySignInGo: () => { location.href = this.coverHref() + '?signin=1'; }, cyUseMine: () => { this.setState({ cyOpen: false }); this.authGo('birth'); },
+      cyConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk('cycle', 'standard'); },
+      cyAskGo: () => this.oracleAsk('cycle', 'standard'), ...this.lumGateVals('cycle', 'cg') };
+    if (!open) return { ...closed, ...base };
+    const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud, native = this.nativeApp(), lum = st.lum;
+    const cyReady = this.cycleReady() && this.cycleDesignReady();
+    if (!cyReady) this.cycleSoon();
+    const slot = this.oracleSlot('cycle', 'standard'), cached = cyReady ? this.oracleCached('cycle', 'standard') : null;
+    const err = st.orErr && st.orErr.slot === slot ? st.orErr.reason : null;
+    const signedIn = !!(cs && cs.mode === 'cloud') && err !== 'signedOut';
+    const consented = !!this.readLS(this.oracleConsentKey(), false);
+    const busy = !!(st.orBusyMap && st.orBusyMap[slot]);
+    const waitWhy = busy && st.orWaitMap ? st.orWaitMap[slot] : null;
+    const otherBusy = !busy && this.orNonQuietBusy().some(k => k !== slot);
+    const cyRows = cyReady ? this.cycleWindows().filter(w => !w.past) : [];
+    const cyShown = cyReady && !st.cyAll ? this.cyclePassages() : cyRows;
+    const cyNone = cyReady && !cyRows.length, cyFinding = !cyReady;
+    const cyish = cyReady && !sample && signedIn && !off && !native && !cyNone;
+    const cyWait = cyish && !lum, cyLocked = cyish && !!lum && !lum.isPremium;
+    const cr = cached && !sample && !cyLocked && !cyWait && !cyNone ? cached.reading : null;
+    const blocked = sample || off || !!cr || cyLocked || cyWait || cyNone || cyFinding;
+    const waiting = !blocked && !err && signedIn && consented;
+    const cyPass = cr ? list(cr.passages).filter(x => x && str(x.contact)) : [];
+    /* Each passage the Oracle wrote is drawn against the passage the device
+       computed, matched by name (the dossier's order as the fallback), so the
+       badge, the coordinate and the timeline are arithmetic and never prose. */
+    const cyWs = cr ? this.cyclePassages() : [];
+    const cyNameOf = w => (w.mover + ' ' + w.asp + ' natal ' + w.natal).toLowerCase();
+    const cyNorm = v => str(v).toLowerCase().replace(/\byour\b/g, 'natal').replace(/\s+/g, ' ').trim();
+    const cyOv = cr ? paras(cr.overview) : [];
+    const year = new Date().getFullYear(), nums = cyReady ? this.cycleNumbers(year, year + 9) : { years: [], pins: [] };
+    const dsAll = cyReady ? this.cycleDesign().filter(d => !d.past) : [], ds = st.cyDAll ? dsAll : dsAll.slice(0, 6);
+    return {
+      ...base, cyOpen: true,
+      cyListOn: true, cyNone, cyFinding,
+      cyMoreOn: cyRows.length > this.CY_MAX,
+      cyMoreLabel: st.cyAll ? 'Show the passages the audit reads' : 'Show every passage (' + cyRows.length + ')',
+      cyRows: cyShown.map(w => ({ label: w.label, glyph: this.CY_GLYPH[w.mover] || '',
+        detail: [w.range, w.passLine].concat(w.house ? [w.house + (w.house === 1 ? 'st' : w.house === 2 ? 'nd' : w.house === 3 ? 'rd' : 'th') + ' house'] : []).join(' · '),
+        now: w.now, bd: pick(w.now, 'var(--ac2)', 'var(--bd)') })),
+      cyDOn: cyReady, cyDNone: cyReady && !dsAll.length,
+      cyDMoreOn: dsAll.length > 6,
+      cyDMoreLabel: st.cyDAll ? 'Show fewer' : 'Show every stay (' + dsAll.length + ')',
+      cyDRows: ds.map(d => ({ label: d.label, detail: d.range + ' · ' + d.sub, now: d.now, glyph: this.CY_GLYPH[d.mover] || '',
+        bd: pick(d.now, 'var(--blue)', 'var(--bd)') })),
+      cyNOn: cyReady && nums.years.some(x => x.v != null),
+      cyNYears: nums.years.map(({ y, v }) => ({ y: String(y), v: v == null ? '' : String(v), on: y === year,
+        bd: y === year ? 'var(--ac2-hi)' : 'var(--bd)', c: v === 11 || v === 22 || v === 33 ? 'var(--ac2-hi)' : 'var(--tx)' })),
+      cySample: sample,
+      cyNeedSignIn: !blocked && !busy && !signedIn,
+      cyConsentOn: !blocked && !busy && !err && signedIn && !consented,
+      cyGateOn: cyLocked,
+      cyBusyOn: !cr && !cyLocked && !sample && (busy || waiting || cyWait),
+      cyLoadingText: cyWait ? 'Checking your Codex Luminary…'
+        : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
+        : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
+        : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
+        : 'The Oracle is reading the long passages across your chart…',
+      cyErrOn: !blocked && !busy && !!err && err !== 'signedOut',
+      cyErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
+      cyErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
+      cyShow: !!cr,
+      cyAria: cr ? 'The Oracle, the Cycle Audit: ' + str(cr.title) : '',
+      cyLabel: cr ? str(cached.label) || 'The Cycle Audit' : '',
+      cyTitle: cr ? str(cr.title) : '', cyEpigraph: cr ? str(cr.epigraph) : '',
+      cyOvFirst: cyOv[0] || '', cyOvRest: cyOv.slice(1).map(t => ({ t })),
+      cyPassages: cyPass.map((x, i) => this.cyDash(x, cyWs.find(w => cyNameOf(w) === cyNorm(x.contact)) || cyWs[i] || null, i)),
+      cyHasLong: !!(cr && str(cr.longView)), cyLong: cr ? str(cr.longView) : '',
+      cyMantra: cr ? str(cr.mantra) : ''
+    };
+  }
+  /* Asked when the sheet is open, as the Oracle asked when its screen was:
+     the reader has agreed once, the audit is open to them, nothing is kept or
+     failed for it. A short wait, so a sheet opened and closed sends nothing. */
+  cycleSheetAutoAsk() {
+    if (!this.state.cyOpen || !this.state.ready) { clearTimeout(this._cyAskT); this._cyAskT = null; return; }
+    if (this._cyAskT || !this.oracleWillAsk('cycle', 'standard')) return;
+    this._cyAskT = setTimeout(() => {
+      this._cyAskT = null;
+      if (this.state.cyOpen && this.oracleWillAsk('cycle', 'standard')) this.oracleAsk('cycle', 'standard');
+    }, 400);
+  }
   /* Whether the add-ons (in-depth readings, Omni and the Cycle Audit) are open
      to this reader: free in the apps, and on the website once the account has
      Codex Luminary. The server decides in the end. */
@@ -20050,7 +20722,7 @@ class Component extends DCLogic {
       const rest = q.toString();
       history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
     } catch (e) { return; }
-    const where = from === 'cycle' ? { orPeriod: 'cycle' } : from === 'deep' ? { orDepth: 'deep' } : {};
+    const where = from === 'cycle' ? { tab: 'today', cyOpen: true } : from === 'deep' ? { orDepth: 'deep' } : {};
     if (v === 'success') this.setState({ lumReturn: 'success', ...where });
     else {
       this.setState(where);
@@ -20059,7 +20731,7 @@ class Component extends DCLogic {
   }
   /* Back to the screen the reader paid from, with which add-on it was. */
   lumReturnTo(from) {
-    const hash = from === 'omni' ? '#/library/readings/tarot' : '#/oracle';
+    const hash = from === 'omni' ? '#/library/readings/tarot' : from === 'cycle' ? '#/today' : '#/oracle';
     return location.origin + location.pathname + (from ? '?lumfrom=' + from : '') + hash;
   }
   /* WHERE THE READER IS, FOR LUMINARY ONLY: the two letter country the device's
@@ -20102,7 +20774,7 @@ class Component extends DCLogic {
       return;
     }
     if (this._lumFor === who) return;
-    const back = st.lumReturn === 'success', selling = this.curTab() === 'oracle' || st.libView === 'reading';
+    const back = st.lumReturn === 'success', selling = this.curTab() === 'oracle' || st.libView === 'reading' || !!st.cyOpen;
     if (!selling && !back && !this.readLS(this.oracleDeepKey(), false)) return;
     this._lumFor = who;
     this.lumFetch(back, 0);
@@ -20192,8 +20864,11 @@ class Component extends DCLogic {
       Retry: () => this.lumFetch(true, 0)
     };
     /* Two sets of names, because the Oracle's gate and the tarot room's are
-       both in the same values and must not overwrite each other. They are
+       both in the same values and must not overwrite each other (and the Cycle
+     Audit's sheet, cg, is a third). They are
        written out rather than built so check-dead-controls can find them. */
+    if (p === 'cg') return { cgHead: v.Head, cgBody: v.Body, cgBuyOn: v.BuyOn, cgCta: v.Cta, cgBuy: v.Buy, cgTermsOn: v.TermsOn, cgTerms: v.Terms,
+      cgNoteOn: v.NoteOn, cgNote: v.Note, cgRetryOn: v.RetryOn, cgRetry: v.Retry };
     return p === 'tg'
       ? { tgHead: v.Head, tgBody: v.Body, tgBuyOn: v.BuyOn, tgCta: v.Cta, tgBuy: v.Buy, tgTermsOn: v.TermsOn, tgTerms: v.Terms,
         tgNoteOn: v.NoteOn, tgNote: v.Note, tgRetryOn: v.RetryOn, tgRetry: v.Retry }
@@ -20201,9 +20876,8 @@ class Component extends DCLogic {
         gateNoteOn: v.NoteOn, gateNote: v.Note, gateRetryOn: v.RetryOn, gateRetry: v.Retry };
   }
   oracleVals() {
-    const st = this.state, period = st.orPeriod || 'daily', cycle = period === 'cycle';
-    /* The Cycle Audit has one depth, so the depth control steps aside for it. */
-    const depth = cycle ? 'standard' : st.orDepth || 'standard';
+    const st = this.state, period = this.orPeriodOf(st.orPeriod);
+    const depth = st.orDepth || 'standard';
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud;
     const slot = this.oracleSlot(period, depth), cached = this.oracleCached(period, depth);
     /* A reading being prepared ahead is not on the screen until the reader has
@@ -20231,21 +20905,7 @@ class Component extends DCLogic {
     /* In depth is shown only once the reader has pressed Consult the Oracle for
        it, whether it was written a minute ago or is still to be written. */
     const deepGate = depth === 'deep' && signedIn && !sample && !off && canDeep && consented && !busy && !err && !opened;
-    /* THE CYCLE AUDIT'S GATE. The dates are drawn for any chart of the
-       reader's own; the reading waits on Luminary on the website, and on
-       nothing in the apps, where it is free. With no passage ahead there is
-       nothing to write, and the list says so. */
-    const cyReady = cycle && !sample && this.cycleReady();
-    if (cycle && !sample && !cyReady) this.cycleSoon();
-    const cyRows = cyReady ? this.cycleWindows().filter(w => !w.past) : [];
-    /* The list opens on the passages the audit reads, so the gate is not
-       pushed out of sight by a long chart; every passage is one press away. */
-    const cyShown = cyReady && !st.cyAll ? this.cyclePassages() : cyRows;
-    const cyNone = cyReady && !cyRows.length, cyFinding = cycle && !sample && !cyReady;
-    const cyish = cyReady && signedIn && !off && !native && !cyNone;
-    const cyWait = cyish && !lum, cyLocked = cyish && !!lum && !lum.isPremium;
-    const r = !cycle && hit && !locked && !lumWait && !(depth === 'deep' && !opened) ? hit.reading : null;
-    const cr = cycle && hit && !cyLocked && !cyWait && !cyNone ? hit.reading : null;
+    const r = hit && !locked && !lumWait && !(depth === 'deep' && !opened) ? hit.reading : null;
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
@@ -20256,44 +20916,19 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
-    const blocked = sample || off || !!r || !!cr || locked || lumWait || deepGate || cyLocked || cyWait || cyNone || cyFinding;
+    const blocked = sample || off || !!r || locked || lumWait || deepGate;
     const waiting = !blocked && !err && signedIn && consented;
     /* A subscription from before the one time payment, still running: the
        member line says when it ends and Manage billing cancels it. */
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
     const subbed = !!lum && !!lum.plan && !!lum.status;
-    const cyPass = cr ? list(cr.passages).filter(x => x && str(x.contact)) : [];
-    /* Each passage the Oracle wrote is drawn against the passage the device
-       computed, matched by name (the dossier's order as the fallback), so the
-       badge, the coordinate and the timeline are arithmetic and never prose. */
-    const cyWs = cr && cyReady ? this.cyclePassages() : [];
-    const cyNameOf = w => (w.mover + ' ' + w.asp + ' natal ' + w.natal).toLowerCase();
-    const cyNorm = v => str(v).toLowerCase().replace(/\byour\b/g, 'natal').replace(/\s+/g, ' ').trim();
-    const cyOv = cr ? paras(cr.overview) : [];
     return {
       orIcon: this.uiIcon('oracle'),
-      orDepthsOn: !cycle,
-      /* The passages, free, for any chart of the reader's own. */
-      cyListOn: cycle && !sample,
-      cyNone, cyFinding,
-      cyMoreOn: cyRows.length > this.CY_MAX,
-      cyMoreLabel: st.cyAll ? 'Show the passages the audit reads' : 'Show every passage (' + cyRows.length + ')',
-      cyMoreGo: () => this.setState({ cyAll: !st.cyAll }),
-      cyRows: cyShown.map(w => ({ label: w.label,
-        detail: [w.range, w.passLine].concat(w.house ? [w.house + (w.house === 1 ? 'st' : w.house === 2 ? 'nd' : w.house === 3 ? 'rd' : 'th') + ' house'] : []).join(' \u00b7 '),
-        now: w.now, bd: pick(w.now, 'var(--ac2)', 'var(--bd)') })),
+      orDepthsOn: true,
       /* One gate for every add-on, worded for the one the reader reached for.
          In the apps it is never drawn: every add-on is free there. */
-      orGate: locked || cyLocked,
-      ...this.lumGateVals(cycle ? 'cycle' : 'deep'),
-      cyShow: !!cr,
-      cyAria: cr ? 'The Oracle, the Cycle Audit: ' + str(cr.title) : '',
-      cyLabel: cr ? str(hit.label) || 'The Cycle Audit' : '',
-      cyTitle: cr ? str(cr.title) : '', cyEpigraph: cr ? str(cr.epigraph) : '',
-      cyOvFirst: cyOv[0] || '', cyOvRest: cyOv.slice(1).map(t => ({ t })),
-      cyPassages: cyPass.map((x, i) => this.cyDash(x, cyWs.find(w => cyNameOf(w) === cyNorm(x.contact)) || cyWs[i] || null, i)),
-      cyHasLong: !!(cr && str(cr.longView)), cyLong: cr ? str(cr.longView) : '',
-      cyMantra: cr ? str(cr.mantra) : '',
+      orGate: locked,
+      ...this.lumGateVals('deep'),
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
         c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
@@ -20309,7 +20944,7 @@ class Component extends DCLogic {
       orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
-      orBusy: !r && !cr && !locked && !cyLocked && (busy || waiting || lumWait || cyWait),
+      orBusy: !r && !locked && (busy || waiting || lumWait),
       orErrOn: !blocked && !busy && !!err && err !== 'signedOut',
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
@@ -20317,18 +20952,17 @@ class Component extends DCLogic {
       orAskGo: () => { if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
-      orLoadingText: lumWait || cyWait ? 'Checking your Codex Luminary…'
+      orLoadingText: lumWait ? 'Checking your Codex Luminary…'
         : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
         : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
         : otherBusy ? 'The Oracle is finishing another reading first. This one follows…'
-        : cycle ? 'The Oracle is reading the long passages across your chart…'
         : depth === 'deep'
         ? 'The Oracle is reading every point of your chart. An in-depth reading takes up to a minute…'
         : 'The Oracle is reading the heavens for you…',
       /* Who has Luminary, said once above the reading: a subscription from
          before the one time payment says when it ends and keeps Manage
          billing to cancel it; a payment says every add-on is open. */
-      orLumMember: !native && signedIn && !sample && (depth === 'deep' || cycle) && !!lum && !!lum.isPremium,
+      orLumMember: !native && signedIn && !sample && depth === 'deep' && !!lum && !!lum.isPremium,
       orLumPlanLine: subbed ? (lum.plan === 'annual' ? 'Annual' : 'Monthly') + ' plan' + (end && !isNaN(end) ? ' \u00b7 ' + (lum.cancelAtPeriodEnd ? 'ends ' : 'renews ') + end.toLocaleDateString() : '')
         : 'Every add-on is open on this account.',
       orLumManageOn: !native && subbed && lum.source === 'stripe' && !!lum.hasAccount && !!lum.billingConfigured,
@@ -21195,7 +21829,7 @@ class Component extends DCLogic {
      that closes them all. */
   dialogEscape() {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
-      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false,
+      quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
       avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
@@ -21665,6 +22299,8 @@ class Component extends DCLogic {
           ...this.tarotVals(),
           ...this.dreamVals(),
           ...this.oracleVals(),
+          ...this.cycleWidgetVals(),
+          ...this.cycleSheetVals(),
           ...this.tarotLibVals(),
           ...this.dreamLibVals(),
           ...this.ichingVals(),

@@ -4171,10 +4171,41 @@ that one payment of the reader's choosing opens it for the account for good
 instead. Later the same day that payment became Codex Luminary and opens every
 add-on: see "Codex Luminary is one payment" below. `docs/CYCLE-AUDIT.md` is the owner's half.
 
-**It is the Oracle's fourth period, `cycle`**, beside Today, This Week and This
-Month, because the model, the consent press and the paywall already live there.
-It has one depth (`orDepthsOn` hides the control), and `oraclePrepareAuto`
-prepares today's in-depth reading while a reader sits on it.
+**It lives on Today now, as a widget and a sheet** (the owner, 19 October
+2026: "treat it like the weather channel widget"). It was the Oracle's fourth
+period for one day and read as awkward there, so `ORACLE_PERIODS` is three
+again and `orPeriodOf()` turns any stored `cycle` back into `daily`. The
+plumbing underneath still calls the period `cycle`: `oracleSlot`, `oracleAsk`,
+the kept reading and the server's period are unchanged, so nothing stored or
+deployed had to move. `oracleAsk` treats the sheet being open (`cyOpen`) as the
+reader being on the screen, and `oracleAutoAsk` leaves `cycle|` slots alone
+while it is.
+
+**The widget is free and draws three studies on one twelve year axis**
+(`cycleWidgetVals()`, `cw*`), placed on Today in both shells: on the phone
+after the greeting, on the desktop at the top of the right column. A hero line
+names the heaviest passage under way (or the next one), three tiles give each
+lane's state, and the chart has three lanes and a Now line through all of
+them. **Stars** is the passages from `cyclePassages()` plus any under way,
+packed into at most three rows, a tick at each exact date. **Design** is
+`cycleDesign()`: Uranus, Neptune and Pluto staying on a gate the reader holds
+(filled) or on a gate that completes a channel with one (outlined), sampled on
+the same `cyLon` walk and memoised by `cycleScanKey()`. Saturn is left out of
+the lane because it changes gate too often to read at this scale; the sheet
+lists it. **Numbers** is the Personal Year for each year with the Pinnacles as
+a band under it, from `numerology()` and the core's `personalYear()`, masters
+in `--ac2-hi`. Every mark has a minimum width so a short stay never paints as a
+sliver.
+
+**Tapping opens the sheet** (`cyOpen`, `cycleSheetVals()`, `cy*`), a dialog
+in both shells. The written reading comes first, because it is what the tap
+was for: the sample, sign in, consent and gate states, then the ledger
+(`cyDash()`, unchanged). Under it the passages list, the Design list (six,
+then all), and the Personal Years. The gate is `lumGateVals('cycle', 'cg')`,
+written as its own `cg*` keys so it cannot collide with the Oracle's; a return
+from Stripe for it lands on `#/today` with the sheet open. `cycleSheetAutoAsk()`
+asks for the reading 400ms after the sheet opens, the same rule the Oracle's
+standard reading follows.
 
 **The dates are free and computed on the device; only the reading is sold.**
 `cycleWindows()` finds every passage of Saturn, Uranus, Neptune and Pluto across
@@ -4336,7 +4367,7 @@ add-on the reader reached for (`LUM_GATE`: deep, cycle, omni) and returns
 check-dead-controls can see them. `lumBuy(from)` sends a return address with
 `?lumfrom=` naming that add-on, because the hash cannot say whether the reader
 was on In-Depth, the Cycle Audit or Omni, and `lumReturnRead()` puts them back
-there. In the Oracle the Cycle Audit's free list stays above the gate.
+there. In the Cycle Audit's sheet the reading's gate sits above the free lists.
 
 **Omni is written on the server, so the lock holds.** Its composer moved out of
 `app/tarot.js` into `server/oracle/tarot-omni.js`, and the app's `read()`
@@ -4501,7 +4532,12 @@ Today (`backIn()`), so Back from Today after signing in reads as Today
 refreshing rather than as being signed out. A marked tab is never sent in. And
 `signOut()` in `incommon-cloud.js` falls back to a local sign out when the
 server cannot be told, because supabase-js keeps the stored session on a
-network failure and the cover would then offer the reader straight back in. `accountLogOut()`
+network failure and the cover would then offer the reader straight back in.
+**It signs out this device and no other** (`scope: 'local'`, K70). supabase-js
+defaults to a global sign out, which revokes every refresh token the account
+holds, so logging out on one phone signed the reader out everywhere and their
+next visit on the laptop asked them to sign in while it still looked signed in
+(Refresh Token Not Found in the auth log, reported 18 October 2026). `accountLogOut()`
 calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
 is `./` in the bundle and `./cover.html` in the source shell, because the app
 is `app.html` in one and the long name in the other. The line beside it names

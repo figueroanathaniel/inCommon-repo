@@ -2,10 +2,13 @@
 
 Built 18 October 2026. Three decisions in one change:
 
-- **The Cycle Audit** is the Oracle's fourth period: the dates of a reader's long
-  passages (Saturn, Uranus, Neptune and Pluto across the chart, twenty years
-  ahead) are free and worked out on the device, and the Oracle writes a reading
-  from them.
+- **The Cycle Audit** is a widget on Today (it was the Oracle's fourth period
+  until 19 October 2026): a small free chart of the long weather in three
+  lanes, The Stars (Saturn, Uranus, Neptune and Pluto across the chart), The
+  Design (the slow astral bodies on the reader's gates) and The Numbers (the
+  Personal Years and the Pinnacles), with a Now line through all three. Tapping
+  it opens a sheet with the full lists and the written reading, which is the
+  part Luminary opens.
 - **Codex Luminary is now one payment, of an amount the reader chooses** (at
   least $3, with $12 filled in), and it opens every add-on for the account for
   good: in-depth readings, **Omni tarot** and the Cycle Audit's readings, and
@@ -30,6 +33,13 @@ run again.
    rule, like every other table.
 
 ## 2. Redeploy three functions
+
+**Done on 19 October 2026** from this repository: oracle (with `tarot.js` and
+`tarot-omni.js` beside it), billing and account. The functions that were live
+before that still answered the Cycle Audit and Omni with a refusal, which is
+why the Cycle Audit loaded nothing. The SQL in step 1 was checked on the live
+database the same day and is in place. Redeploy again only if one of these
+files changes.
 
 Keep each function's existing setting for JWT verification (billing stays
 **off**).
@@ -101,6 +111,23 @@ Apple and Google as sellers are gone); and `delete-account.html`. Worth a
 lawyer's eye before launch: pay what you want pricing with a floor, changing
 from a subscription to a one time payment while subscribers remain, and
 accepting gifts as an individual in Florida.
+
+## Why it moved to Today, and seeing the gate yourself
+
+Reported 19 October 2026: it asked to sign in while signed in, Luminary and a
+standard account looked the same, the Cycle Audit loaded nothing, and it looked
+awkward in the Oracle.
+
+- **Signing in again.** Log Out signed the account out on every device, so
+  logging out on one phone ended the session on the laptop too. It signs out
+  only the device it is pressed on now. This reaches readers once the site is
+  published.
+- **No difference between Luminary and standard.** An address in
+  `LUMINARY_ADMIN_EMAILS` passes every gate without paying, which includes
+  yours. To see what a standard reader sees, sign in with an account whose
+  address is not on that list.
+- **Nothing loading.** The live functions were older than the page (step 2).
+- **The layout.** It is a widget on Today now, and a tap opens the rest.
 
 ## What the brief asked for, and what changed
 

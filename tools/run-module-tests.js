@@ -2192,6 +2192,15 @@ async function runCloudTests() {
     localSignOut: adSignOut[0], reasons: adReasons
   });
 
+  /* K70: Log Out ends this device's session and no other. supabase-js signs
+     out globally unless told otherwise, which revoked the account's sessions
+     on every device, so a Log Out on a phone signed the laptop out too. */
+  adSignOut.length = 0;
+  AD._setClientForTests(adClient({ data: null, error: null }), { user: { id: 'u1' } });
+  var soR = await AD.signOut();
+  t('K70', 'Log Out signs out with the local scope, so the account stays signed in on its other devices', { ok: true, scopes: 'local' },
+    { ok: !!(soR && soR.ok), scopes: adSignOut.join(',') });
+
   /* K57: an account deletion that could not reach RevenueCat is told apart.
      The app no longer sells anything through the stores (18 October 2026:
      every add-on is free in the apps), so the store sync went with it; the
@@ -2878,8 +2887,8 @@ async function runCloudTests() {
   var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
   /* Eight links in the app, in each shell: Settings twice, the Luminary gate
      in the Oracle, and the same gate in the tarot room for Omni. */
-  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
-    cover: true, appLinks: 8, appOrderEachTime: true, operator: true, florida: true, age16: true,
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle, in the sheet of the Cycle Audit and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+    cover: true, appLinks: 10, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
