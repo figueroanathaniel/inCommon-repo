@@ -438,6 +438,40 @@ if (!hdLine) {
   tTrue('U6', 'the Personal Day reaches 11, 22 and 33 across a year and never another number over 9',
     seen.has(11) && seen.has(22) && seen.has(33) && [...seen].every(v => v <= 9 || v === 11 || v === 22 || v === 33));
   tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
+
+  /* The double digit decides (owner, 19 October 2026). A 6 reached from 33 is
+     Master Number 33: 1985-01-09 reduces by its parts to 1 + 9 + 5 = 15, and
+     every digit of it adds to 33, so its Life Path is 33 and not 6. */
+  const lp = CORE.lifePath('1985-01-09');
+  t('U8', 'a Life Path whose digits add to 33 is Master Number 33, though its parts give 15', [lp.sum, lp.all, lp.value, lp.root, lp.compound].join(','), '15,33,33,6,33');
+  let moved = 0, wrong = 0, total = 0;
+  for (let ms = Date.UTC(1940, 0, 1); ms < Date.UTC(2010, 0, 1); ms += 864e5) {
+    const iso = new Date(ms).toISOString().slice(0, 10), r = CORE.lifePath(iso), old = CORE.reduce(r.sum).value;
+    total++;
+    if (r.value !== old) { moved++; if (!r.master || CORE.reduce(r.value, { preserveMasters: false }).value !== CORE.reduce(old, { preserveMasters: false }).value) wrong++; }
+  }
+  tTrue('U9', 'a Life Path only ever moves to a master of its own root, and never without one (' + moved + ' of ' + total + ' moved)', moved > 0 && wrong === 0);
+  t('U10', 'compound() is the first double digit on the way down', [128, 199, 38, 7, 99].map(v => CORE.compound(v)).join(','), '11,19,38,,99');
+  global.window = { InCommonCore: CORE };
+  delete require.cache[require.resolve(path.join(repo, 'app', 'numerology-content.js'))];
+  require(path.join(repo, 'app', 'numerology-content.js'));
+  const nm = global.window.NumerologyContent.fromName('Ida Bell Wells');
+  delete global.window;
+  t('U11', 'a name number meets a master on the word by word route: IDA BELL WELLS has vowels 20, words 1 + 5 + 5 = 11', [nm.rawTotals.vowels, nm.soulUrge, nm.compounds.soulUrge].join(','), '20,11,11');
+  const MX = require(path.join(repo, 'app', 'number-matrix.js'));
+  const ks = Object.keys(MX.entries).map(Number);
+  tTrue('U12', 'the Book of Numbers holds every compound from 10 to 99 once, each on its own root',
+    ks.length === 90 && ks.every(k => k >= 10 && k <= 99 && MX.entries[k].root === CORE.reduce(k, { preserveMasters: false }).value));
+  t('U13', 'the matrix names the three masters and the four karmic debts', [ks.filter(k => MX.get(k).master).join(' '), ks.filter(k => MX.get(k).karmic).join(' ')].join(' | '), '11 22 33 | 13 14 16 19');
+  let Cm = null;
+  try { Cm = vm.runInNewContext('(class { ' + method('numCmp').replace(/^\n/, '') + ' })', { window: { NumberMatrix: MX }, String: String }); } catch (e) { Cm = null; }
+  const cm = Cm ? new Cm() : null;
+  t('U14', 'the label is 33/6 for a master, 24/6 or 38/11 otherwise, and a karmic debt wears --warn',
+    cm ? [cm.numCmp(33, 33).cmp, cm.numCmp(24, 6).cmp, cm.numCmp(38, 11).cmp, cm.numCmp(13, 4).cmpC, cm.numCmp(null, 4).cmpOn].join(',') : 'did not lift',
+    '33/6,24/6,38/11,var(--warn),false');
+  x.dob = () => '1985-01-09';
+  const xa = x.numerology();
+  t('U15', 'the Numbers page reads the Life Path and its compound from the core', [xa.lp, xa.lpC, xa.rdC, xa.cycles[2][3]].join(','), '33,33,,23');
 })();
 
 /* ------------------------------------------------ Z: the Cycle Audit
