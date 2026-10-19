@@ -51,10 +51,27 @@
       var v = reduce(rs[i]).value;
       if (MASTERS.indexOf(v) !== -1) master = v;
     }
-    var root = reduce(rs[0], { preserveMasters: false }).value;
-    if (master != null) return { value: master, root: root, compound: master, master: true, routes: rs };
+    var root = reduce(rs[0], { preserveMasters: false }).value, karmic = karmicOf(rs);
+    if (master != null) return { value: master, root: root, compound: master, master: true, karmic: karmic, routes: rs };
     for (i = 0, c = null; i < rs.length && c == null; i++) c = compound(rs[i]);
-    return { value: root, root: root, compound: c, master: false, routes: rs };
+    return { value: root, root: root, compound: c, master: false, karmic: karmic, routes: rs };
+  }
+  /* KARMIC DEBT IS FOUND ON ANY ROUTE, the way the modern school reads it: a
+     number carries the debt of 13, 14, 16 or 19 if any route to its root
+     passes through one, whether or not that is the compound shown (1940-01-04
+     is 10 by its parts and 19 by its digits, and owes 19). Returned in route
+     order, each once. The tradition reads it on the birth numbers only (Life
+     Path, Birthday, Expression, Soul Urge, Personality), so the screen marks
+     it there and nowhere else; the cycles still return it, unread. */
+  var KARMIC = [13, 14, 16, 19];
+  function karmicOf(routes) {
+    var out = [];
+    routes.forEach(function (r) {
+      reduce(r, { preserveMasters: false }).steps.forEach(function (v) {
+        if (KARMIC.indexOf(v) !== -1 && out.indexOf(v) === -1) out.push(v);
+      });
+    });
+    return out;
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   // every digit of the date, added: 1992-07-02 -> 1+9+9+2+0+7+0+2 = 30
@@ -99,7 +116,7 @@
     var total = pw.reduce(function (a, p) { return a + p.reduced; }, 0);
     var full = pw.reduce(function (a, p) { return a + p.raw; }, 0);
     var fin = settle([total, full]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, parts: pw, total: total, full: full,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, parts: pw, total: total, full: full,
       work: pw.map(function (p) { return p.word + ' ' + p.raw + '→' + p.reduced; }).join(' · ') + ' · ' + total + ' → ' + fin.value };
   }
   function expression(name, yPolicy) { return nameNumber(name, null, yPolicy); }
@@ -115,20 +132,20 @@
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), y = reduce(digitSum(p.y));
     var sum = mo.value + d.value + y.value, all = dateDigits(p.y, p.mo, p.d), fin = settle([sum, all]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, sum: sum, all: all,
       work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
   }
   function birthday(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var r = reduce(p.d), fin = settle([p.d]);
-    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, work: p.d + ' → ' + r.value };
+    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, karmic: fin.karmic, work: p.d + ' → ' + r.value };
   }
   // fixture N2: 7 + 2 + (2026→10→1) = 10 → 1
   function personalYear(iso, year) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), uy = reduce(digitSum(+year));
     var sum = mo.value + d.value + uy.value, all = dateDigits(+year, p.mo, p.d), fin = settle([sum, all]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, sum: sum, all: all,
       work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
   }
   // fixture N3: PY 1 + month 7 = 8
@@ -315,7 +332,7 @@
   }
 
   return { VERSION: VERSION, MASTERS: MASTERS, LETTER: LETTER,
-    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS,
+    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS, KARMIC: KARMIC, karmicOf: karmicOf,
     lifePath: lifePath, birthday: birthday, expression: expression, soulUrge: soulUrge,
     personality: personality, personalYear: personalYear, personalMonth: personalMonth, coreNumbers: coreNumbers,
     angelAnalyze: angelAnalyze, fmtToday: fmtToday, fmtShort: fmtShort,

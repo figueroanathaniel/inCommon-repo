@@ -4453,10 +4453,30 @@ are differences of single digits and have none.
 **`numCmp(c, v)` is the one place a compound becomes a label**: 33/6 for a
 master, 24/6 or 38/11 otherwise, with the matrix title beside it on the card
 and the category, title and description on the number's own page, in both
-shells. A Karmic Debt compound (13, 14, 16, 19) wears `--warn`, the colour the
-Challenges already wear; everything else wears `--ac2-hi`. The reduction math
-column is kept in the data and never drawn, by "No disclaimers". U10 to U15
-hold the rest.
+shells. Everything wears `--ac2-hi` except a karmic debt on a birth number. The
+reduction math column is kept in the data and never drawn, by "No disclaimers".
+U10 to U15 hold the rest.
+
+**Karmic debt is found on any route and read on the birth numbers only**
+(owner, 19 October 2026, after asking whether the first pass matched the
+tradition; it did not, on both counts). `karmicOf(routes)` in the core walks
+every route all the way to its root and returns each 13, 14, 16 or 19 it
+passes, so 1940-01-04, 10 by its parts and 19 by its digits, owes 19 though its
+compound is 10; 608 Life Paths from 1940 to 2010 had a debt the first pass did
+not show. The modern school reads it on the Life Path, Birthday, Expression,
+Soul Urge and Personality, so only those pass `debts` to `numCmp()`: a debt
+compound there wears `--warn`, and a debt the shown compound does not carry
+gets its own line on the card (`debtLine`) and its own block on the number's
+page (`numDebts`). The Personal Year, Month and Day, the Pinnacles and the
+cycles pass nothing: a compound of 13 to 19 there keeps its title and
+description in the ordinary colour, and its category label is dropped so it is
+never called a debt. A master still sets the number when a route also owes a
+debt; both are shown. **Two choices this does not make for the reader, recorded
+so they are not mistaken for oversights**: 19 is the modern school's debt where
+Cheiro, whose titles fill most of the matrix, reads it as the Prince of Heaven,
+and the owner kept the debt; and a compound's own description can sit beside a
+debt it does not mention (10, "a clean karmic slate", above a debt of 19).
+U16 to U18 hold it.
 
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
