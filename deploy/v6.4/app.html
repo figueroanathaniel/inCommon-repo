@@ -7431,13 +7431,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     10: {"root":1,"math":"1+0=1","title":"The Wheel of Fortune","category":"Elite Auspicious","desc":"A clean karmic slate offering absolute independence, fresh starts, and a flawless field for manifestation with zero residual baggage."},
     11: {"root":2,"math":"1+1=2","title":"The Master Messenger","category":"Master Number","desc":"Channel of pure psychic intuition, cosmic illumination, and artistic vision. Must ground nervous energy to avoid chronic anxiety."},
     12: {"root":3,"math":"1+2=3","title":"The Expressive Individual","category":"Standard Sub-Frequency","desc":"Blends independent drive (1) with cooperative diplomacy (2) to articulate highly creative, original concepts smoothly."},
-    13: {"root":4,"math":"1+3=4","title":"The Debt of Hard Work","category":"Karmic Debt","desc":"Requires overcoming past-life shortcuts or laziness by mastering strict discipline, structural organization, and relentless effort."},
-    14: {"root":5,"math":"1+4=5","title":"The Debt of Abuse of Freedom","category":"Karmic Debt","desc":"Demands temperance, commitment, and moderation to correct past misuses of physical freedom, indulgence, or escapism."},
+    13: {"root":4,"math":"1+3=4","title":"The Debt of Hard Work","category":"Karmic Debt","desc":"Requires overcoming past-life shortcuts or laziness by mastering strict discipline, structural organization, and relentless effort.","cycleTitle":"The Season of Steady Labor","cycleDesc":"A stretch that rewards discipline, structure and patient effort, where the work done carefully now is the work that holds later."},
+    14: {"root":5,"math":"1+4=5","title":"The Debt of Abuse of Freedom","category":"Karmic Debt","desc":"Demands temperance, commitment, and moderation to correct past misuses of physical freedom, indulgence, or escapism.","cycleTitle":"The Season of Temperance","cycleDesc":"A stretch of movement and appetite that asks for moderation and commitment, so that freedom is used well rather than spent."},
     15: {"root":6,"math":"1+5=6","title":"The Charismatic Magnet","category":"Standard Sub-Frequency","desc":"Combines pioneering spirit (1) with versatile adventure (5) to generate immense personal allure, wealth, and material luck."},
-    16: {"root":7,"math":"1+6=7","title":"The Debt of Intellectual Pride","category":"Karmic Debt","desc":"Shatters intellectual vanity and ego through sudden, disruptive life collapses ('Tower moments') to rebuild authentic spiritual faith."},
+    16: {"root":7,"math":"1+6=7","title":"The Debt of Intellectual Pride","category":"Karmic Debt","desc":"Shatters intellectual vanity and ego through sudden, disruptive life collapses ('Tower moments') to rebuild authentic spiritual faith.","cycleTitle":"The Tower Season","cycleDesc":"A stretch that tests what was built on certainty and pride, and clears ground for something more honest to be rebuilt on faith."},
     17: {"root":8,"math":"1+7=8","title":"The Star of the Magi","category":"Elite Auspicious","desc":"Supreme protection and immortality of name/work. Perfectly fuses spiritual wisdom (7) with material and financial mastery (8)."},
     18: {"root":9,"math":"1+8=9","title":"The Spiritual Warrior","category":"Standard Sub-Frequency","desc":"Fuses raw identity (1) with intense corporate/material power (8) to protect vulnerable communities and fight for systemic justice."},
-    19: {"root":1,"math":"1+9=10 -> 1+0=1","title":"The Debt of Selfishness","category":"Karmic Debt","desc":"Enforces isolation and forces the individual to stand completely alone until they pay off past-life narcissistic abuse of power."},
+    19: {"root":1,"math":"1+9=10 -> 1+0=1","title":"The Debt of Selfishness","category":"Karmic Debt","desc":"Enforces isolation and forces the individual to stand completely alone until they pay off past-life narcissistic abuse of power.","cycleTitle":"The Season of Self-Reliance","cycleDesc":"A stretch that asks for standing on one's own feet, and for turning that strength toward others rather than only toward the self."},
     20: {"root":2,"math":"2+0=2","title":"The Quiet Harmonizer","category":"Standard Sub-Frequency","desc":"Amplified cooperative and peacemaking energy operating entirely behind the scenes with deep, passive intuitive accuracy."},
     21: {"root":3,"math":"2+1=3","title":"The Crown of the Magi","category":"Elite Auspicious","desc":"A hallmark of eventual public elevation, high honor, and absolute victory after navigating grueling early-life tests."},
     22: {"root":4,"math":"2+2=4","title":"The Master Builder","category":"Master Number","desc":"Holds the structural capacity to anchor massive cosmic visions into functional, physical, global organizations and infrastructure."},
@@ -7525,11 +7525,17 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     CATEGORIES: CATEGORIES,
     entries: M,
     has: function (n) { return !!M[n]; },
-    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null */
-    get: function (n) {
+    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null.
+       get(16, { cycle: true }) is the compound as a Personal Year, Month or Day,
+       a Pinnacle or a period cycle reads it: a Karmic Debt row answers with its
+       Cycle Title and Cycle Description and no category, because the tradition
+       reads no debt there. Every other row answers exactly as get() does. */
+    get: function (n, opts) {
       var e = M[n];
       if (!e) return null;
-      return { n: +n, root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc,
+      var cyc = !!(opts && opts.cycle && e.cycleTitle);
+      return { n: +n, root: e.root, math: e.math, title: cyc ? e.cycleTitle : e.title,
+        category: cyc ? '' : e.category, desc: cyc ? e.cycleDesc : e.desc,
         master: e.category === 'Master Number', karmic: e.category === 'Karmic Debt',
         auspicious: e.category === 'Elite Auspicious' };
     }
@@ -22881,6 +22887,7 @@ input[type="date"]{color-scheme:dark}
 [data-vt-modals] [role="dialog"][data-immersive]{border-radius:0!important;padding-bottom:0!important}
 @keyframes vtSheet{from{transform:translateY(100%)}to{transform:none}}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
+@keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
    both skip buttons. That is not an HTML attribute and not a DC runtime
@@ -24135,6 +24142,59 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">My Numerology</div>
       <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
     </div>
+    <div role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
+      <div onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:128px;position:relative;height:370px;overflow:hidden;perspective:760px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
+        <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
+        <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
+        <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
+        <span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
+        <div data-ns-cam="1" style="position:absolute;inset:0;pointer-events:none;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.22,1,.36,1)">
+          <div style="position:absolute;left:50%;top:64%;width:416px;height:416px;margin:-208px 0 0 -208px;transform-style:preserve-3d;transform:rotateX(58deg)">
+            <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(var(--atmc),.3) 0 1px,transparent 1px 30px),repeating-linear-gradient(90deg,rgba(var(--atmc),.3) 0 1px,transparent 1px 30px);-webkit-mask-image:radial-gradient(circle,#000 28%,transparent 70%);mask-image:radial-gradient(circle,#000 28%,transparent 70%)"></div>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:142px;height:142px;margin:-71px 0 0 -71px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(var(--atmc2),.4),rgba(var(--atmc),.18) 45%,transparent 70%)"></div>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 2);height:calc(var(--R) * 2);margin:calc(var(--R) * -1) 0 0 calc(var(--R) * -1);border-radius:50%;pointer-events:none;border:1.5px solid var(--ac2);opacity:.8;box-shadow:0 0 24px rgba(var(--atmc),.6),inset 0 0 24px rgba(var(--atmc),.4)"></div>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 2 + 46px);height:calc(var(--R) * 2 + 46px);margin:calc(var(--R) * -1 - 23px) 0 0 calc(var(--R) * -1 - 23px);border-radius:50%;pointer-events:none;border:1px dashed rgba(var(--atmc2),.45);animation:nsOrbit 90s linear infinite"></div>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 1.1);height:calc(var(--R) * 1.1);margin:calc(var(--R) * -.55) 0 0 calc(var(--R) * -.55);border-radius:50%;pointer-events:none;border:1px dotted rgba(var(--atmc),.6);animation:nsOrbit 60s linear infinite reverse"></div>
+            <div style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transform:rotateZ({{ nsSpin }}deg);transition:transform .9s cubic-bezier(.22,1,.36,1)">
+              <sc-for list="{{ nsNodes }}" as="s" hint-placeholder-count="5">
+                <div style="position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;transform:rotateZ({{ s.a }}deg) translateX(var(--R)) rotateZ({{ s.na }}deg)">
+                  <button data-ns="{{ s.key }}" onClick="{{ s.pick }}" aria-label="{{ s.aria }}" aria-pressed="{{ s.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;pointer-events:none;position:absolute;left:-60px;top:-106px;width:120px;height:106px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;transform-origin:50% 100%;transform:rotateZ({{ nsNeg }}deg) rotateX(-58deg);transition:transform .9s cubic-bezier(.22,1,.36,1);animation:veilIn .7s ease both;animation-delay:{{ s.delay }}">
+                    <span style="pointer-events:auto;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ s.bg }};border:1.5px solid {{ s.bd }};box-shadow:{{ s.glow }};font:400 18px/1 var(--fd);color:{{ s.c }};transition:background .4s ease,border-color .4s ease,box-shadow .4s ease">{{ s.v }}</span>
+                    <span style="pointer-events:auto;font:600 8.5px/1.2 var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx);text-align:center;max-width:96px;text-shadow:0 1px 6px rgba(0,0,0,.85)">{{ s.k }}</span>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d">
+              <button data-ns="lifePath" onClick="{{ nsLpPick }}" aria-label="{{ nsLpAria }}" aria-pressed="{{ nsLpOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;pointer-events:none;position:absolute;left:-130px;top:-262px;width:260px;height:262px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transform-origin:50% 100%;transform:rotateX(-58deg)">
+                <span style="pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;animation:nsHover 6s ease-in-out infinite">
+                  <span style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.42),rgba(var(--atmc),.4) 55%,var(--sf2) 100%);border:1.5px solid {{ nsLpBd }};box-shadow:{{ nsLpGlow }};font:400 34px/1 var(--fd);color:{{ nsLpC }};transition:border-color .4s ease,box-shadow .4s ease">{{ nsLpV }}</span>
+                  <span style="font:600 9px/1.2 var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--tx);text-shadow:0 1px 6px rgba(0,0,0,.85)">Life Path</span>
+                </span>
+                <span aria-hidden="true" style="flex:none;width:2px;height:120px;margin-top:8px;border-radius:1px;background:linear-gradient(rgba(var(--atmc2),.5),rgba(var(--atmc),.06))"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
+        <button onClick="{{ nsPrev }}" aria-label="Previous number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ nsK }}</span>
+            <span style="font:600 9px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ nsIdx }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ nsV }}</span>
+            <sc-if value="{{ nsCmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ nsCmpC }}">{{ nsCmpLine }}</span></sc-if>
+          </div>
+          <sc-if value="{{ nsDebtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ nsDebtLine }}</div></sc-if>
+          <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim)">{{ nsMean }}</div>
+        </div>
+        <button onClick="{{ nsNext }}" aria-label="Next number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+      </div>
+      <button onClick="{{ nsGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ nsOpenLabel }} <span style="font:400 13px var(--fb)">→</span></button>
+    </div>
     <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ numerSummary.head }}</div>
       <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numerSummary.text }}</div>
@@ -24143,7 +24203,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
-          <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;text-align:left">
+          <button onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
             <div style="display:flex;align-items:baseline;gap:8px">
               <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
@@ -24163,7 +24223,7 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
             <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="3">
-              <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;text-align:left">
+              <button onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                 <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
@@ -24187,7 +24247,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Pinnacles</div>
       <sc-for list="{{ numerPinnacles }}" as="p" hint-placeholder-count="4">
-        <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:10px 13px">
+        <button onClick="{{ p.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
           <span style="flex:none;width:30px;font:400 22px var(--fd);color:{{ p.c }}">{{ p.v }}</span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
             <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
@@ -24201,7 +24261,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
       <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-        <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;text-align:left">
+        <button onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
           <div style="font:400 13.5px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
           <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
           <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</div>
@@ -24212,7 +24272,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Challenges</div>
       <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-        <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px">
+        <button onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
           <span style="flex:none;width:30px;font:400 22px var(--fd);color:var(--warn)">{{ c.v }}</span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
             <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
@@ -29325,6 +29385,59 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">My Numerology</div>
         <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
       </div>
+      <div role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
+        <div onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:225px;position:relative;height:500px;overflow:hidden;perspective:1100px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
+          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
+          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
+          <span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
+          <div data-ns-cam="1" style="position:absolute;inset:0;pointer-events:none;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.22,1,.36,1)">
+            <div style="position:absolute;left:50%;top:58%;width:610px;height:610px;margin:-305px 0 0 -305px;transform-style:preserve-3d;transform:rotateX(58deg)">
+              <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(var(--atmc),.3) 0 1px,transparent 1px 30px),repeating-linear-gradient(90deg,rgba(var(--atmc),.3) 0 1px,transparent 1px 30px);-webkit-mask-image:radial-gradient(circle,#000 28%,transparent 70%);mask-image:radial-gradient(circle,#000 28%,transparent 70%)"></div>
+              <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:162px;height:162px;margin:-81px 0 0 -81px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(var(--atmc2),.4),rgba(var(--atmc),.18) 45%,transparent 70%)"></div>
+              <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 2);height:calc(var(--R) * 2);margin:calc(var(--R) * -1) 0 0 calc(var(--R) * -1);border-radius:50%;pointer-events:none;border:1.5px solid var(--ac2);opacity:.8;box-shadow:0 0 24px rgba(var(--atmc),.6),inset 0 0 24px rgba(var(--atmc),.4)"></div>
+              <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 2 + 46px);height:calc(var(--R) * 2 + 46px);margin:calc(var(--R) * -1 - 23px) 0 0 calc(var(--R) * -1 - 23px);border-radius:50%;pointer-events:none;border:1px dashed rgba(var(--atmc2),.45);animation:nsOrbit 90s linear infinite"></div>
+              <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:calc(var(--R) * 1.1);height:calc(var(--R) * 1.1);margin:calc(var(--R) * -.55) 0 0 calc(var(--R) * -.55);border-radius:50%;pointer-events:none;border:1px dotted rgba(var(--atmc),.6);animation:nsOrbit 60s linear infinite reverse"></div>
+              <div style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transform:rotateZ({{ nsSpin }}deg);transition:transform .9s cubic-bezier(.22,1,.36,1)">
+                <sc-for list="{{ nsNodes }}" as="s" hint-placeholder-count="5">
+                  <div style="position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;transform:rotateZ({{ s.a }}deg) translateX(var(--R)) rotateZ({{ s.na }}deg)">
+                    <button data-ns="{{ s.key }}" onClick="{{ s.pick }}" aria-label="{{ s.aria }}" aria-pressed="{{ s.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;pointer-events:none;position:absolute;left:-60px;top:-120px;width:120px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;transform-origin:50% 100%;transform:rotateZ({{ nsNeg }}deg) rotateX(-58deg);transition:transform .9s cubic-bezier(.22,1,.36,1);animation:veilIn .7s ease both;animation-delay:{{ s.delay }}">
+                      <span style="pointer-events:auto;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ s.bg }};border:1.5px solid {{ s.bd }};box-shadow:{{ s.glow }};font:400 24px/1 var(--fd);color:{{ s.c }};transition:background .4s ease,border-color .4s ease,box-shadow .4s ease">{{ s.v }}</span>
+                      <span style="pointer-events:auto;font:600 8.5px/1.2 var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx);text-align:center;max-width:96px;text-shadow:0 1px 6px rgba(0,0,0,.85)">{{ s.k }}</span>
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d">
+                <button data-ns="lifePath" onClick="{{ nsLpPick }}" aria-label="{{ nsLpAria }}" aria-pressed="{{ nsLpOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;pointer-events:none;position:absolute;left:-130px;top:-312px;width:260px;height:312px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transform-origin:50% 100%;transform:rotateX(-58deg)">
+                  <span style="pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;animation:nsHover 6s ease-in-out infinite">
+                    <span style="width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.42),rgba(var(--atmc),.4) 55%,var(--sf2) 100%);border:1.5px solid {{ nsLpBd }};box-shadow:{{ nsLpGlow }};font:400 44px/1 var(--fd);color:{{ nsLpC }};transition:border-color .4s ease,box-shadow .4s ease">{{ nsLpV }}</span>
+                    <span style="font:600 9px/1.2 var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--tx);text-shadow:0 1px 6px rgba(0,0,0,.85)">Life Path</span>
+                  </span>
+                  <span aria-hidden="true" style="flex:none;width:2px;height:150px;margin-top:8px;border-radius:1px;background:linear-gradient(rgba(var(--atmc2),.5),rgba(var(--atmc),.06))"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
+          <button onClick="{{ nsPrev }}" aria-label="Previous number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ nsK }}</span>
+              <span style="font:600 9px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ nsIdx }}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ nsV }}</span>
+              <sc-if value="{{ nsCmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ nsCmpC }}">{{ nsCmpLine }}</span></sc-if>
+            </div>
+            <sc-if value="{{ nsDebtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ nsDebtLine }}</div></sc-if>
+            <div style="font:italic 400 11.5px/1.5 var(--fb);color:var(--dim)">{{ nsMean }}</div>
+          </div>
+          <button onClick="{{ nsNext }}" aria-label="Next number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+        </div>
+        <button onClick="{{ nsGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ nsOpenLabel }} <span style="font:400 13px var(--fb)">→</span></button>
+      </div>
       <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:16px 18px;max-width:100ch">
         <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ numerSummary.head }}</div>
         <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numerSummary.text }}</div>
@@ -29333,7 +29446,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px">
           <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
-            <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:15px;padding:18px;text-align:left;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease">
+            <button onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
               <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
@@ -29348,7 +29461,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Pinnacles</div>
           <sc-for list="{{ numerPinnacles }}" as="p" hint-placeholder-count="4">
-            <button onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:12px 15px">
+            <button onClick="{{ p.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
             <span style="flex:none;width:36px;font:400 26px var(--fd);color:{{ p.c }}">{{ p.v }}</span>
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
@@ -29362,7 +29475,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
           <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-            <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;text-align:left">
+            <button onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <div style="font:400 14px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
               <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</div>
@@ -29373,7 +29486,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Challenges</div>
           <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-            <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 15px">
+            <button onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <span style="flex:none;width:36px;font:400 26px var(--fd);color:var(--warn)">{{ c.v }}</span>
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
@@ -29390,7 +29503,7 @@ input[type="date"]{color-scheme:dark}
           <div style="display:flex;flex-direction:column;gap:11px">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px">
               <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="3">
-                <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:13px;padding:14px 16px;text-align:left">
+                <button onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:13px;padding:14px 16px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
                   <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                   <div style="font:600 8.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                   <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
@@ -33249,7 +33362,7 @@ class Component extends DCLogic {
     dreamView: 'write', dreamTitle: '', dreamText: '', dreamDate: '', dreamSleep: 0, dreamLucid: 0,
     dreamMoodB: '', dreamMoodA: '', dreamRecurring: false, dreamInterp: '',
     dreamRej: {}, dreamAssoc: {}, dreamSaved: false,
-    numSel: null, numListsOpen: false, nameDraft: '', nameTick: 0, clockTick: 0, dpSel: null, installGone: false,
+    numSel: null, numListsOpen: false, numFocus: 'lifePath', numSpin: null, nameDraft: '', nameTick: 0, clockTick: 0, dpSel: null, installGone: false,
     profileTick: 0, quickOpen: false, switchTo: null, pin: ['', '', '', ''], pinErr: '',
     formMode: null, form: null, formPin: '', delOpen: false, delName: '', sharePin: {},
     alignOpen: false, sabQuery: '', sabSign: null, ack: true, geoManual: false, geoLat: '', geoLon: '',
@@ -36036,10 +36149,12 @@ class Component extends DCLogic {
      debt the shown compound does not carry gets a line of its own (debtLine),
      because 1940-01-04 is 10 by its parts and still owes 19. Every other
      number (the Personal Year, Month and Day, the Pinnacles and the cycles)
-     passes nothing: its compound keeps its title in the ordinary colour and
-     is never labelled a debt, because the tradition does not read one there. */
+     passes nothing: its compound is read in the ordinary colour, and a debt
+     compound there answers with the matrix's Cycle Title and Cycle
+     Description (13 is The Season of Steady Labor, 16 The Tower Season), so
+     nothing on a cycle is named a debt, because the tradition reads none. */
   numCmp(c, v, debts) {
-    const M = window.NumberMatrix, e = M && c ? M.get(c) : null, natal = Array.isArray(debts);
+    const natal = Array.isArray(debts), M = window.NumberMatrix, e = M && c ? M.get(c, natal ? null : { cycle: true }) : null;
     const owed = natal ? debts.filter(k => k !== c && M && M.get(k)).map(k => M.get(k)) : [];
     const debtBits = { debtOn: owed.length > 0, debtLine: owed.map(d => 'Karmic Debt ' + d.n + ' \u00b7 ' + d.title).join(' \u00b7 '),
       debts: owed.map(d => ({ n: String(d.n), title: d.title, desc: d.desc })) };
@@ -36047,7 +36162,7 @@ class Component extends DCLogic {
     const label = e.master ? c + '/' + e.root : (+v === c ? String(c) : c + '/' + v);
     const owes = e.karmic && natal;
     return { cmpOn: true, cmp: label, cmpLine: label + ' \u00b7 ' + e.title, cmpTitle: e.title,
-      cmpCat: e.karmic && !natal ? '' : e.category, cmpDesc: e.desc,
+      cmpCat: e.category, cmpDesc: e.desc,
       cmpC: owes ? 'var(--warn)' : 'var(--ac2-hi)', cmpN: c, ...debtBits };
   }
   numerology() {
@@ -40288,17 +40403,17 @@ class Component extends DCLogic {
     const synthArgs = { lifePath: n.lp, personalYear: pyV, personalDay: pdV, challenge: n.challenge,
       pinnacle: n.curPin == null ? null : n.pinnacles[n.curPin][0],
       expression: nm ? nm.expression : null, soulUrge: nm ? nm.soulUrge : null };
-    return {
+    const out = {
       numerWho: (prof ? prof.name : 'This profile') + ' \u00b7 born ' + dob + ' \u00b7 calculated from that date',
       numerSummary: { head: 'What these numbers are drawn from',
         text: 'Life Path ' + n.lp + ', reduced from ' + dob + '. Personal Year ' + pyV + ', Personal Day ' + pdV + '. Every figure below is arithmetic performed on that one date: no interpretation has entered yet, and every step of it can be checked by hand. That is worth knowing before any of the meanings arrive: the numbers are certain, and what they are said to mean is the part that has been argued over for centuries.' },
       numerYearSpan: span,
       numerCore: [['Life Path', n.lp, 'lifePath', n.lpC, n.lpK], ['Birthday', n.rd, 'birthday', n.rdC, n.rdK], ['Personal Year', pyV, 'personalYear', pyC],
         ['Personal Month', pm, 'personalMonth', pmC], ['Personal Day', pdV, 'personalDay', pdC], ['Challenge', n.challenge, 'challenge', null]]
-        .map(([k, v, pos, c, kd]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v, { c: c, k: kd }), ...this.numCmp(c, v, kd) })),
+        .map(([k, v, pos, c, kd], i) => ({ k: k, v: v == null ? '0' : v, pos: pos, mean: mean(v), delay: (i * 70) + 'ms', go: open(pos, v == null ? 1 : v, { c: c, k: kd }), ...this.numCmp(c, v, kd) })),
       hasBirthName: !!nm, noBirthName: !nm,
       nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality']]
-        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v, { c: nmC[pos], k: nmK[pos] || [] }), ...this.numCmp(nmC[pos], v, nmK[pos] || []) })) : [],
+        .map(([k, v, pos], i) => ({ k: k, v: v, pos: pos, mean: mean(v), delay: (420 + i * 70) + 'ms', go: open(pos, v, { c: nmC[pos], k: nmK[pos] || [] }), ...this.numCmp(nmC[pos], v, nmK[pos] || []) })) : [],
       birthNameLine: nm ? 'From ' + nm.letters + ' letters of the birth name saved on this device. Pythagorean values.' : '',
       nameDraft: st.nameDraft,
       nameType: e => this.setState({ nameDraft: String(e.target.value || '').slice(0, 80) }),
@@ -40322,8 +40437,119 @@ class Component extends DCLogic {
         ['Second sub-challenge, the later half', n.subs[1]]]
         .map(([k, v]) => ({ k: k, v: v, mean: mean(v), go: open('challenge', v) })),
       numerSynthesis: NC ? [this.headLine('Read together', NC.synthesis(synthArgs)),
-        this.headLine('How to hold it', NC.synthesisPossibility(synthArgs))] : []
+        this.headLine('How to hold it', NC.synthesisPossibility(synthArgs))] : [],
+      numTilt: e => this.numTilt(e), numTiltOff: e => this.numTiltOff(e)
     };
+    return { ...out, ...this.numStage(out.numerCore, out.nameNumbers) };
+  }
+  /* THE NUMBERS STAGE (owner, 19 October 2026: "interactive, as if it were
+     made by Unreal Engine"). A real CSS 3D scene rather than a picture of one:
+     a floor tilted 58 degrees away under a perspective camera, the Life
+     Path floating over its centre on a beam, high enough that the number
+     behind it is never hidden, and every other number standing on one orbit
+     around it. Each number is a sprite: a button anchored by its foot and
+     turned back upright (rotateX(-58deg), the floor's own angle), so it faces the camera wherever
+     the orbit carries it, and depth, overlap and the shrink toward the back
+     are the browser's own perspective rather than arithmetic done here.
+
+     The orbit turns, it does not jump. The spinner is rotateZ(numSpin) and
+     every sprite carries rotateZ(-numSpin) under the same transition, so the
+     two cancel at every frame and the numbers ride the ellipse upright. The
+     spin is kept cumulative and always takes the short way round.
+
+     Choosing is two steps, the way a game menu is: the first press brings a
+     number to the front and into the panel under the stage, the second opens
+     its reading. Arrow keys turn the orbit and carry focus with it; a sideways
+     swipe on the stage turns it on a phone (the stage is data-noswipe, so the
+     swipe does not also move the screen chain); the mouse tilts the camera.
+     Nothing per frame goes through state: the camera and the card tilt write
+     the element's own style, the way live regions are written, because a
+     setState per pointer move re-renders the whole app. Reduced motion drops
+     the tilt, and the sheet's global rule stills every transition. */
+  numStage(core, names) {
+    const st = this.state, lp = core[0], ring = core.slice(1).concat(names);
+    const keys = ['lifePath'].concat(ring.map(r => r.pos));
+    const focus = keys.indexOf(st.numFocus) !== -1 ? st.numFocus : 'lifePath';
+    const fi = keys.indexOf(focus), fr = fi === 0 ? lp : ring[fi - 1], spin = this.numSpinNow();
+    const stepDeg = 360 / Math.max(1, ring.length);
+    const pick = r => () => (focus === r.pos ? r.go() : this.numFocusTo(r.pos, ring.map(x => x.pos)));
+    const look = (r, on) => ({ c: r.cmpOn ? r.cmpC : 'var(--ac2-hi)', bd: on ? 'var(--ac2-hi)' : 'var(--bd)',
+      bg: on ? 'rgba(var(--atmc),.42)' : 'var(--sf2)', glow: on ? '0 0 28px rgba(var(--atmc2),.45)' : '0 6px 18px rgba(0,0,0,.35)',
+      on: on ? 'true' : 'false', aria: r.k + ' ' + r.v + (r.cmpOn ? ', ' + r.cmpTitle : '') + (on ? ', selected, press again to open' : '') });
+    const pad = n => (n < 10 ? '0' : '') + n;
+    return {
+      nsSpin: spin, nsNeg: -spin,
+      nsNodes: ring.map((r, i) => {
+        const a = i * stepDeg - 90;
+        return { key: r.pos, v: r.v, k: r.k, a: a, na: -a, delay: (240 + i * 80) + 'ms', pick: pick(r), ...look(r, r.pos === focus) };
+      }),
+      nsLpV: lp.v, nsLpPick: pick(lp), ...(o => ({ nsLpC: o.c, nsLpOn: o.on, nsLpAria: o.aria, nsLpBd: o.bd, nsLpGlow: o.on === 'true' ? '0 0 46px rgba(var(--atmc2),.55)' : '0 0 30px rgba(var(--atmc),.5)' }))(look(lp, focus === 'lifePath')),
+      nsK: fr.k, nsV: fr.v, nsMean: fr.mean || '', nsIdx: pad(fi + 1) + ' / ' + pad(keys.length),
+      nsCmpOn: !!fr.cmpOn, nsCmpLine: fr.cmpLine || '', nsCmpC: fr.cmpC || 'var(--ac2-hi)',
+      nsDebtOn: !!fr.debtOn, nsDebtLine: fr.debtLine || '',
+      nsGo: fr.go, nsOpenLabel: 'Open ' + fr.k,
+      nsPrev: () => this.numStep(-1, keys, ring), nsNext: () => this.numStep(1, keys, ring),
+      nsKeys: e => {
+        const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (!d) return;
+        e.preventDefault();
+        const next = this.numStep(d, keys, ring);
+        setTimeout(() => { const b = document.querySelector('[data-ns="' + next + '"]'); if (b) b.focus({ preventScroll: true }); }, 40);
+      },
+      nsCam: e => this.numCam(e), nsCamOff: e => this.numCam(e, true),
+      nsTouchStart: e => { const t = e.touches && e.touches[0]; this._nsTouch = t ? { x: t.clientX, y: t.clientY } : null; },
+      nsTouchEnd: e => {
+        const s0 = this._nsTouch, t = e.changedTouches && e.changedTouches[0];
+        this._nsTouch = null;
+        if (!s0 || !t) return;
+        const dx = t.clientX - s0.x, dy = t.clientY - s0.y;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) this.numStep(dx < 0 ? 1 : -1, keys, ring);
+      }
+    };
+  }
+  /* Bring one number to the front. The Life Path stands at the centre, so
+     choosing it leaves the orbit where it is. */
+  numFocusTo(key, ringKeys) {
+    const i = ringKeys.indexOf(key), spin = this.numSpinNow();
+    if (i === -1) { this.setState({ numFocus: key }); return; }
+    const target = 90 - (i * 360 / ringKeys.length - 90);
+    const d = ((target - spin) % 360 + 540) % 360 - 180;
+    this.setState({ numFocus: key, numSpin: spin + d });
+  }
+  /* Until a number is chosen the orbit rests with its first number in front,
+     not hidden behind the Life Path: the ring starts at the top (-90 degrees)
+     and the front is +90. */
+  numSpinNow() { const v = this.state.numSpin; return v == null || isNaN(+v) ? 180 : +v; }
+  numStep(dir, keys, ring) {
+    const cur = keys.indexOf(this.state.numFocus), at = cur === -1 ? 0 : cur;
+    const next = keys[(at + dir + keys.length) % keys.length];
+    this.numFocusTo(next, ring.map(r => r.pos));
+    return next;
+  }
+  numCam(e, off) {
+    const stage = e.currentTarget, cam = stage && stage.querySelector('[data-ns-cam]');
+    if (!cam) return;
+    if (off || e.pointerType === 'touch' || this.motionOff()) { cam.style.transform = ''; return; }
+    const r = stage.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+    cam.style.transform = 'rotateY(' + (px * 9).toFixed(2) + 'deg) rotateX(' + (-py * 6).toFixed(2) + 'deg)';
+  }
+  /* A card leans toward the pointer and catches a highlight where it is. */
+  numTilt(e) {
+    const el = e.currentTarget;
+    if (!el || e.pointerType === 'touch' || this.motionOff()) return;
+    const r = el.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+    el.style.transform = 'perspective(800px) rotateX(' + ((.5 - py) * 7).toFixed(2) + 'deg) rotateY(' + ((px - .5) * 9).toFixed(2) + 'deg) translateZ(6px)';
+    el.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+    el.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+    const sh = el.querySelector('[data-sheen]');
+    if (sh) sh.style.opacity = '1';
+  }
+  numTiltOff(e) {
+    const el = e.currentTarget;
+    if (!el) return;
+    el.style.transform = '';
+    const sh = el.querySelector('[data-sheen]');
+    if (sh) sh.style.opacity = '0';
   }
   numberDetailVals() {
     const NC = window.NumerologyContent, sel = this.state.numSel;

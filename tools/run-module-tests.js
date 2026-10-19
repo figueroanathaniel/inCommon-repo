@@ -475,9 +475,30 @@ if (!hdLine) {
   t('U16', 'a karmic debt on the second route is found though the compound shown is the first route\'s', [kd.compound, kd.value, kd.karmic.join(' ')].join(','), '10,1,19');
   t('U17', 'karmicOf walks every route to its root: 49 passes 13, 28 passes nothing, 199 passes 19', CORE.karmicOf([49, 28, 199]).join(','), '13,19');
   const owe = cm ? cm.numCmp(10, 1, kd.karmic) : null, cyc = cm ? cm.numCmp(16, 7) : null;
-  t('U18', 'a Life Path owing 19 on its other route carries a debt line; a cycle on 16 keeps its title, the ordinary colour and no debt label',
+  t('U18', 'a Life Path owing 19 on its other route carries a debt line; a cycle on 16 reads as The Tower Season, the ordinary colour and no debt label',
     owe && cyc ? [owe.cmpC, owe.debtOn, owe.debtLine, cyc.cmpTitle, cyc.cmpC, cyc.cmpCat === '', cyc.debtOn].join('|') : 'did not lift',
-    'var(--ac2-hi)|true|Karmic Debt 19 \u00b7 The Debt of Selfishness|The Debt of Intellectual Pride|var(--ac2-hi)|true|false');
+    'var(--ac2-hi)|true|Karmic Debt 19 \u00b7 The Debt of Selfishness|The Tower Season|var(--ac2-hi)|true|false');
+  const cycDebt = ks.filter(k => MX.get(k).karmic).map(k => MX.get(k, { cycle: true }));
+  tTrue('U19', 'every karmic compound has a cycle title and description of its own, and none of them says debt',
+    cycDebt.length === 4 && cycDebt.every(e => e.title && e.desc && e.category === '' && !/debt/i.test(e.title + e.desc) && e.title !== MX.get(e.n).title)
+    && MX.get(24, { cycle: true }).title === MX.get(24).title);
+  /* The Numbers stage turns its orbit, it does not jump (owner, 19 October
+     2026). numFocusTo() must bring the chosen number to the front (+90
+     degrees, the near side of the floor) and always take the short way. */
+  let Ns = null;
+  try { Ns = vm.runInNewContext('(class { ' + method('numSpinNow').replace(/^\n/, '') + method('numFocusTo') + method('numStep') + ' })', { Math: Math, isNaN: isNaN }); } catch (e) { Ns = null; }
+  const ns = Ns ? new Ns() : null;
+  if (ns) { ns.state = { numSpin: null, numFocus: 'lifePath' }; ns.setState = o => Object.assign(ns.state, o); }
+  const ringKeys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const front = k => { const i = ringKeys.indexOf(k); return (((i * 45 - 90 + ns.state.numSpin) % 360) + 360) % 360; };
+  const walk = [];
+  if (ns) {
+    walk.push(ns.numSpinNow());
+    ['c', 'h', 'a', 'e'].forEach(k => { const before = ns.state.numSpin == null ? 180 : ns.state.numSpin; ns.numFocusTo(k, ringKeys); walk.push(front(k), Math.abs(ns.state.numSpin - before) <= 180); });
+    const still = ns.state.numSpin; ns.numFocusTo('lifePath', ringKeys); walk.push(ns.state.numFocus, ns.state.numSpin === still);
+  }
+  t('U20', 'the orbit rests with its first number in front, brings each chosen number to the front by the short way, and leaves the orbit still for the Life Path',
+    walk.join(','), '180,90,true,90,true,90,true,90,true,lifePath,true');
   x.dob = () => '1985-01-09';
   const xa = x.numerology();
   t('U15', 'the Numbers page reads the Life Path and its compound from the core', [xa.lp, xa.lpC, xa.rdC, xa.cycles[2][3]].join(','), '33,33,,23');

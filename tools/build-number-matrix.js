@@ -14,6 +14,12 @@
  * root that is not the compound's own digital root, a category it does not
  * know, a field left empty, or a dash.
  *
+ * Cycle Title and Cycle Description (owner, 19 October 2026) are what a
+ * compound is called when it lands on a Personal Year, Month or Day, a
+ * Pinnacle or a period cycle, where the tradition reads no karmic debt. Every
+ * Karmic Debt row must carry both, and neither may say debt; every other row
+ * leaves them empty and its own title serves.
+ *
  * Usage: node tools/build-number-matrix.js [--check]
  *   --check  write nothing, exit 1 if app/number-matrix.js is not what this
  *            would write.
@@ -57,13 +63,13 @@ function digitalRoot(n) { while (n > 9) n = String(n).split('').reduce((a, c) =>
 
 const rows = parse(fs.readFileSync(SRC, 'utf8'));
 const head = rows.shift().map(s => s.trim());
-const want = ['Number', 'Base Root', 'Reduction Math', 'Title', 'Category', 'Description'];
+const want = ['Number', 'Base Root', 'Reduction Math', 'Title', 'Category', 'Description', 'Cycle Title', 'Cycle Description'];
 if (head.join('|') !== want.join('|')) fail('header is "' + head.join(',') + '", expected "' + want.join(',') + '"');
 
 const seen = {};
 const entries = rows.map((r, i) => {
-  if (r.length !== 6) fail('row ' + (i + 2) + ' has ' + r.length + ' fields');
-  const [n, root, math, title, category, desc] = r.map(s => s.trim());
+  if (r.length !== want.length) fail('row ' + (i + 2) + ' has ' + r.length + ' fields');
+  const [n, root, math, title, category, desc, cycleTitle, cycleDesc] = r.map(s => s.trim());
   const num = +n, rt = +root;
   if (!/^\d{2}$/.test(n) || num < 10 || num > 99) fail('row ' + (i + 2) + ': number "' + n + '" is not 10 to 99');
   if (seen[num]) fail('compound ' + num + ' appears twice');
@@ -72,11 +78,17 @@ const entries = rows.map((r, i) => {
   if (CATEGORIES.indexOf(category) === -1) fail(num + ': unknown category "' + category + '"');
   [math, title, desc].forEach((s, k) => { if (!s) fail(num + ': ' + ['reduction', 'title', 'description'][k] + ' is empty'); });
   r.forEach(s => { if (DASH.test(s)) fail(num + ': carries a dash'); });
-  return { n: num, root: rt, math: math, title: title, category: category, desc: desc };
+  if (category === 'Karmic Debt' && (!cycleTitle || !cycleDesc)) fail(num + ': a Karmic Debt row needs a Cycle Title and a Cycle Description');
+  if (category !== 'Karmic Debt' && (cycleTitle || cycleDesc)) fail(num + ': only a Karmic Debt row carries a cycle reading');
+  if (/\bdebt/i.test(cycleTitle + ' ' + cycleDesc)) fail(num + ': a cycle reading may not say debt');
+  const e = { n: num, root: rt, math: math, title: title, category: category, desc: desc };
+  if (cycleTitle) { e.cycleTitle = cycleTitle; e.cycleDesc = cycleDesc; }
+  return e;
 });
 for (let n = 10; n <= 99; n++) if (!seen[n]) fail('compound ' + n + ' is missing');
 
-const lines = entries.map(e => '    ' + e.n + ': ' + JSON.stringify({ root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc }) + ',');
+const lines = entries.map(e => '    ' + e.n + ': ' + JSON.stringify(Object.assign({ root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc },
+  e.cycleTitle ? { cycleTitle: e.cycleTitle, cycleDesc: e.cycleDesc } : {})) + ',');
 lines[lines.length - 1] = lines[lines.length - 1].replace(/,$/, '');
 
 const out = `/* number-matrix.js. The Book of Numbers: every compound from 10 to 99. V1.0.0
@@ -111,11 +123,17 @@ ${lines.join('\n')}
     CATEGORIES: CATEGORIES,
     entries: M,
     has: function (n) { return !!M[n]; },
-    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null */
-    get: function (n) {
+    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null.
+       get(16, { cycle: true }) is the compound as a Personal Year, Month or Day,
+       a Pinnacle or a period cycle reads it: a Karmic Debt row answers with its
+       Cycle Title and Cycle Description and no category, because the tradition
+       reads no debt there. Every other row answers exactly as get() does. */
+    get: function (n, opts) {
       var e = M[n];
       if (!e) return null;
-      return { n: +n, root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc,
+      var cyc = !!(opts && opts.cycle && e.cycleTitle);
+      return { n: +n, root: e.root, math: e.math, title: cyc ? e.cycleTitle : e.title,
+        category: cyc ? '' : e.category, desc: cyc ? e.cycleDesc : e.desc,
         master: e.category === 'Master Number', karmic: e.category === 'Karmic Debt',
         auspicious: e.category === 'Elite Auspicious' };
     }
