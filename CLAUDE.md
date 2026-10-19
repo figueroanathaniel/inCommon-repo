@@ -4921,6 +4921,86 @@ desktop and the phone, the Cycle Audit widget on Today and its sheet opened
 before the scene was live. In every one the order was the veil alone, the
 canvas through the veil, then the units; with WebGL off the 2D wheel came up
 with its zoom cluster showing and no veil.
+## The full view is the Natal Observatory
+Asked for by the owner on 19 October 2026: "The full screen expansion needs to
+be the most ux/ui impressive feature in the astrology tab, maybe even the entire
+site and app ... Create a UI people can believe in. Make the UX borderline
+addictive." The ⛶ overlay is rebuilt as a full screen instrument in both
+shells: a top bar, the **Manifest** of every point on the left, the **stage** in
+the middle, and the **Inspector** (Point, Aspects, Houses) on the right. Below
+900px the stage sits under the top bar and the panels become four tabs (Point,
+Aspects, Houses, All).
+
+**The stage is the same scene, with its instruments on.** `chartSceneSync()`
+prefers `[data-cs-scene="full"]` while the overlay is open and attaches with
+mode `full`, so there is still one renderer and one WebGL context; closing the
+overlay hands it back to the inline card. In full mode the scene draws its own
+instruments into its own DOM, because they change every frame and a setState
+per frame would re-render the app: the telemetry panel, a **reticle** that
+locks onto the body in front with its position beside it, the **Live contacts**
+strip, and the **clock**. The view switch (3D, Orbital, 2D) and a **Core / All
+points** switch are in the top bar; 2D shows the SVG wheel, as it always did.
+
+**The clock is the part that keeps a reader in it.** It runs from the birth
+moment to twenty years ahead, plays at a day, a week, a month or a year a
+second, steps by one unit of that speed, and jumps to the birth moment or now.
+At each instant the ten bodies stand as ghosts (on a transit ring outside the
+rim in 3D, on their own orbits in the orrery) with the arc each has travelled
+since birth, and every contact they make with the chart's bodies and angles
+inside a transit orb (`CX_ORB`) is a ribbon that brightens as it closes and a
+row in the strip with a meter. A contact going exact flares the stage once,
+except the Moon's, and not while the clock is running faster than a week a
+second, or it would never stop flashing. **The scene asks; it does not compute.**
+`chartSkyAt(t)` is the app's: positions from `lonRaw()`, the same library the
+chart is drawn from, and the contacts from `ASPECTS`. Reduced motion holds the
+sky still: the opening, the camera flight and Play are all off, and the steps,
+Birth and Now still work.
+
+**It opens with a sequence and never forces it.** The disc is drawn outward
+from the centre by a scan front, the bodies rise onto their pillars one after
+another, and the camera comes in from far and high, about three seconds. Any
+press or key ends it. Choosing a point (the Manifest, the Inspector's ‹ ›, J and
+K, or a tap on the stage) brings it forward and **flies the camera to it**,
+circling slowly until the reader takes the controls; the second press on the
+same point opens its reading, the two press rule every stage in this app keeps.
+Reset (◎ or R) brings the whole chart back.
+
+**Keys**, shown by the ? button: 1 2 3 for the views, J K for points, Space to
+play, comma and full stop to step, the angle brackets for ten steps, S for the
+speed, B and N for the birth moment and now, L for Core or All points, R to
+reset, Esc to close. They are letters, digits and punctuation only, so the
+arrows stay with the radiogroups, tabs, stage and clock that own them, and they
+are skipped in a text field and on the clock's slider. **The focus trap lands on
+the first view radio**, which is why the handler must not skip radiogroups: the
+first version did, and every key was dead until the reader clicked elsewhere.
+
+**Capture** (◎ in the top bar, 3D and Orbital only) saves the stage as a PNG
+with the chart's name set in its corner. It is the reader's own download; it
+sends nothing anywhere.
+
+**Two older rules change here, and this section overrides them.** Opening the
+overlay no longer forces `chartMode: 'expanded'` ("The expanded wheel" and "The
+maximize button" say it does): it opens on whatever the reader last chose, and
+the Core / All points switch is in the top bar, because eighty points is the
+wrong first impression of a chart. And the aspects list no longer reads
+`natalAspects(true, { rich: true })` regardless of mode: it reads the stage's
+own call, `natalAspects(expanded, { rich: expanded, ... })`, so a row's id is
+still its index into exactly the array the stage and the 2D wheel draw, which is
+the rule "The Aspects grid filters" exists to keep.
+
+**What a phone gets.** On a stage under 560px the telemetry hides, the strip
+keeps the one closest contact, the clock keeps Birth, Play and Now with a short
+speed label, and the zoom buttons go (a pinch does it). The camera's frame is
+lowered under the clock's bar with `setViewOffset`, and the fit is taken over
+the space above the bar, so the chart is centred where it can be seen rather
+than behind the controls.
+
+**Held by.** N40 and N40b still pass unchanged: the dialog keeps its name and
+its close button, and every point in the Manifest is a `button[title]` carrying
+`pointTooltip()`. The template keeps no hex beyond the allowed ones, the
+purple text gate and the dead controls gate pass, and the overlay was measured
+with the harness's `contrastFails()` and `tapTargets()` over the dialog in
+3D, Orbital and 2D, four identities, hardened and not, at 1440 and 375.
 
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the

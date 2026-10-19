@@ -82,7 +82,7 @@ a{color:#2fff8f;text-decoration:none}a:hover{color:#7dffb9}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes veilIn{from{opacity:0}to{opacity:1}}
-@keyframes chartxScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+
 html{scroll-behavior:smooth}
 html,body{max-width:100%;overflow-x:hidden}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
@@ -90,18 +90,17 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}[data-dropcap]::first-letter{float:left;font-family:var(--fd);font-size:4.2rem;line-height:.85;padding:6px 10px 0 0;color:var(--ac2-hi);text-shadow:0 0 18px rgba(var(--atmc2),.5)}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
 .syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
-.chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr auto;grid-template-areas:"houses wheel points" "aspects aspects aspects";gap:0;width:92vw;height:90vh;max-width:1400px;animation:chartxScale .2s ease-out}
-.chartx-row:hover{background:rgba(47,255,143,.08)}
-.chartx-panel-left{grid-area:houses}
-.chartx-panel-center{grid-area:wheel;width:min(60vh,60vw);height:min(60vh,60vw);margin:auto;justify-self:center;align-self:center}
-.chartx-panel-right{grid-area:points}
-.chartx-panel-aspects{grid-area:aspects;overflow-x:auto;overflow-y:hidden}
-.chartx-tabbar{display:none}
+.cx-root{position:fixed;inset:0;z-index:400;display:grid;grid-template-columns:clamp(250px,21vw,320px) minmax(0,1fr) clamp(300px,24vw,380px);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"top top top" "left stage right";animation:cxIn .55s cubic-bezier(.22,1,.36,1)}
+.cx-top{grid-area:top}.cx-left{grid-area:left}.cx-stage{grid-area:stage}.cx-right{grid-area:right}.cx-tabs{display:none}
+.cx-row:hover{background:rgba(var(--atmc),.16)!important}
+.cx-segs{order:2;display:flex;gap:8px;align-items:center}.cx-btns{order:3;display:flex;gap:8px;align-items:center}
+@keyframes cxIn{from{opacity:0;transform:scale(1.025);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @media (max-width:900px){
-  .chartx-grid{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"wheel" "tabbar" "content";width:96vw;height:92vh}
-  .chartx-panel-center{width:min(60vh,60vw,90vw);height:min(60vh,60vw,90vw)}
-  .chartx-panel-left,.chartx-panel-right,.chartx-panel-aspects{grid-area:content;max-height:none;overflow-x:auto}
-  .chartx-tabbar{display:flex;grid-area:tabbar}
+  .cx-root{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(300px,54vh) auto minmax(0,1fr);grid-template-areas:"top" "stage" "tabs" "panel"}
+  .cx-left,.cx-right{grid-area:panel;border:none!important}
+  .cx-tabs{display:flex;grid-area:tabs}
+  .cx-segs{order:3;flex:1 1 100%;overflow-x:auto;scrollbar-width:none}.cx-btns{order:2}.cx-wide{display:none!important}
+  .cx-root{grid-template-rows:auto minmax(280px,50vh) auto minmax(0,1fr)}
 }
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
@@ -4446,21 +4445,123 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
-    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
-        <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
-        <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
-          <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
-            <span style="color:var(--dim)">{{ hc.h }}</span>
-            <span>{{ hc.sign }} {{ hc.deg }}°</span>
-          </div>
-        </sc-for>
+  <!-- THE NATAL OBSERVATORY (owner, 19 October 2026): the chart's full view. A
+       stage with the scene, the clock and the target lock in the middle, the
+       manifest of every point on the left, the inspector on the right. -->
+  <div role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="cx-root" onKeyDown="{{ cxKeys }}" style="background:var(--bg);color:var(--tx)">
+    <div class="cx-top" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);background:linear-gradient(180deg,rgba(var(--atmc),.2),rgba(var(--atmc),.04))">
+      <div style="flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:12px">
+        <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.8),inset 0 0 10px rgba(var(--atmc),.6);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac);box-shadow:0 0 10px #2fff8f;animation:pulseGentle 2.4s ease-in-out infinite"></span></span>
+        <div style="min-width:0;display:flex;flex-direction:column;gap:1px">
+          <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--ac2-hi)">Natal Observatory</span>
+          <span style="font:400 21px/1.15 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cxOwner }}</span>
+          <span class="cx-wide" style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cxSub }}</span>
+        </div>
       </div>
-      <div class="chartx-panel-center" style="background:var(--sf);border-right:1px solid var(--bd);overflow:hidden;display:flex;flex-direction:column;position:relative">
-        <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(139,92,246,.2);color:var(--ac2-hi);font:600 18px system-ui">×</button>
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div data-chart="expand-wheel" style="position:relative;width:100%;height:100%">
+      <div class="cx-segs">
+      <sc-if value="{{ cxViewsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:none;display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:999px;padding:3px">
+            <sc-for list="{{ cxViews }}" as="v" hint-placeholder-count="2">
+              <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+            </sc-for>
+          </div>
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Points shown" style="flex:none;display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:999px;padding:3px">
+            <sc-for list="{{ cxLayers }}" as="v" hint-placeholder-count="2">
+              <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+            </sc-for>
+          </div>
+      </div>
+      <div class="cx-btns">
+      <sc-if value="{{ cxCaptureOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cxCapture }}" aria-label="Save an image of the chart" title="Save an image of the chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx)">◎</button>
+      </sc-if>
+      <button onClick="{{ cxHelpGo }}" aria-label="Keyboard shortcuts" aria-expanded="{{ cxHelp }}" title="Keyboard shortcuts" class="cx-wide" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:700 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">?</button>
+      <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.18);font:400 22px var(--fu);color:var(--tx)">×</button>
+      </div>
+    </div>
+    <div class="cx-left" style="display:{{ cxLeftDisplay }};flex-direction:column;min-height:0;border-right:1px solid var(--bd);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)">
+      <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:12px 12px 8px;border-bottom:1px solid var(--bd)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+          <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi)">Manifest</span>
+          <span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--mut)">{{ chartExpandCount }}</span>
+        </div>
+        <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="box-sizing:border-box;width:100%;min-height:40px;padding:0 12px;border:1px solid var(--bd);border-radius:10px;background:rgba(0,0,0,.35);color:var(--tx);font:400 13px var(--fu)">
+        <div style="display:flex;flex-wrap:wrap;gap:2px 6px">
+          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--ac2-hi)">{{ chartExpandGroupMark }}</span>Group</button>
+          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>Comets</button>
+          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--ac2-hi)">{{ chartExpandMinorAspectsMark }}</span>Minor aspects</button>
+        </div>
+      </div>
+      <div style="flex:none;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;padding:0 12px 0 10px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.25)">
+        <span></span>
+        <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortName }}</button>
+        <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortLon }}</button>
+        <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:flex-end;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortHouse }}</button>
+        <span></span>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding-bottom:12px">
+        <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+            <div style="position:sticky;top:0;z-index:1;padding:7px 12px;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi);background:var(--bg);border-bottom:1px solid var(--bd)">{{ grp.label }}</div>
+            <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+              <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+            </sc-for>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+            <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+          </sc-for>
+        </sc-if>
+        <div style="margin-top:8px;border-top:1px solid var(--bd)">
+          <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
+            <div>
+              <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--bd)">
+                <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">{{ sub.mark }}</span>
+                <span style="flex:1;font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ sub.label }}</span>
+                <span style="flex:none;font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ sub.count }}</span>
+              </button>
+              <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
+                  <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+                </sc-for>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div class="cx-stage" style="position:relative;min-height:0;min-width:0;overflow:hidden;background:var(--bg)">
+      <sc-if value="{{ cxDeep }}" hint-placeholder-val="{{ true }}">
+        <div data-chart="sky" data-cs-scene="full" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:absolute;inset:0;outline:none"></div>
+        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px">
+          <button onClick="{{ cxZoomIn }}" aria-label="Zoom in" title="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">+</button>
+          <button onClick="{{ cxZoomOut }}" aria-label="Zoom out" title="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">−</button>
+          <button onClick="{{ cxZoomReset }}" aria-label="Reset the camera" title="Reset the camera" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55);color:var(--ac2-hi)">◎</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cxFlat }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box">
+          <div data-chart="expand-wheel" style="position:relative;height:100%;max-height:100%;max-width:100%;aspect-ratio:1/1">
             <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
               <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
               <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -4494,113 +4595,115 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </div>
         </div>
-      </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
-        <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
-            Group
-          </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
-            Comets on wheel
-          </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
-            Minor aspects
-          </button>
+      </sc-if>
+      <sc-if value="{{ cxHelp }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Keyboard shortcuts" style="position:absolute;left:50%;top:50%;z-index:4;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));display:grid;grid-template-columns:auto 1fr;gap:8px 16px;padding:20px 22px;border:1px solid var(--ac2);border-radius:18px;background:var(--bg);box-shadow:0 24px 80px rgba(0,0,0,.6);font:500 13px var(--fu);color:var(--tx);animation:fadeUp .25s ease">
+          <span style="grid-column:1 / span 2;font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi)">Keys</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">1 2 3</span><span>3D, Orbital, 2D</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">J K</span><span>Previous and next point</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">Space</span><span>Play or pause the sky</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">, .</span><span>Step back or forward in time</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">&lt; &gt;</span><span>Ten steps at a time</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">S</span><span>Change the speed</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">B N</span><span>The birth moment, or now</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">L</span><span>Core points or all points</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">R</span><span>Reset the camera</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">Esc</span><span>Close</span>
         </div>
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandCount }}</div>
-        <div style="flex:1;overflow-y:auto;font:400 10.5px var(--fu)">
-          <div style="position:sticky;top:0;z-index:1;background:var(--sf);border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px">
-            <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 6px;text-align:left;font-weight:600;color:var(--ac2-hi)">Point</button>
-            <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;text-align:right;font-weight:600;color:var(--ac2-hi)">Position</button>
-            <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 6px;text-align:center;font-weight:600;color:var(--ac2-hi)">House</button>
-            <span style="display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-weight:600;color:var(--ac2-hi)">Speed</span>
-            <span style="display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ac2-hi)">R</span>
-            <span style="display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:600;color:var(--ac2-hi)">Status</span>
-          </div>
-          <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
-            <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
-              <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
-              <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                  <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                  <span style="text-align:center">{{ r.house }}</span>
-                  <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                  <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                  <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
+      </sc-if>
+    </div>
+    <div class="cx-right" style="display:{{ cxRightDisplay }};flex-direction:column;min-height:0;border-left:1px solid var(--bd);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)">
+      <sc-if value="{{ cxSubTabsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Inspector" style="flex:none;display:flex;border-bottom:1px solid var(--bd)">
+          <sc-for list="{{ cxSubTabs }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-bottom:2px solid {{ t.bd }};font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-height:0;overflow-y:auto">
+        <sc-if value="{{ cxPBody }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;animation:fadeUp .3s ease">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onClick="{{ cxFPrev }}" aria-label="Previous point" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+              <div style="flex:1;display:flex;justify-content:center">
+                <span aria-hidden="true" style="width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.34),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:2px solid {{ cxFColor }};box-shadow:0 0 34px rgba(var(--atmc),.7),inset 0 0 18px rgba(var(--atmc),.5);font:400 40px/1 Georgia,serif;color:{{ cxFColor }}">{{ cxFGlyph }}</span>
+              </div>
+              <button onClick="{{ cxFNext }}" aria-label="Next point" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center">
+              <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)">{{ cxFCat }} · {{ cxFIdx }}</span>
+              <span style="font:400 28px/1.1 var(--fd);color:var(--tx)">{{ cxFName }}</span>
+              <span style="font:600 14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em;color:var(--ac2-hi)">{{ cxFPos }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">House</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--tx)">{{ cxFHouse }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Speed</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--tx)">{{ cxFSpeed }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Motion</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:{{ cxFMotionC }}">{{ cxFMotion }}</span></div>
+            </div>
+            <div style="font:italic 400 14px/1.6 var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ cxFMean }}</div>
+            <sc-if value="{{ cxFRefOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 12px/1.55 var(--fu);color:var(--dim);text-align:center">{{ cxFRef }}</div>
+            </sc-if>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ cxFOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);font:700 12px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--onac)">Open the reading <span style="font:400 14px var(--fb)">→</span></button>
+              <sc-if value="{{ cxFlyOn }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cxFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:48px;padding:0 16px;display:flex;align-items:center;border:1px solid var(--ac2);border-radius:999px;font:700 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">Fly to</button>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding-top:6px;border-top:1px solid var(--bd)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Contacts</span><span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ cxFAspCount }}</span></div>
+              <sc-if value="{{ cxFAspNone }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px var(--fu);color:var(--dim)">Nothing in orb with this point.</div></sc-if>
+              <sc-for list="{{ cxFAspects }}" as="a" hint-placeholder-count="4">
+                <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 10px;border:1px solid var(--bd);border-left:3px solid {{ a.color }};border-radius:10px;background:{{ a.bg }}">
+                  <span aria-hidden="true" style="font:400 15px Georgia,serif;color:var(--tx);text-align:center">{{ a.otherGlyph }}</span>
+                  <span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:600 12px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.aspLabel }} {{ a.otherName }}</span><span aria-hidden="true" style="height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:{{ a.meter }};background:{{ a.color }}"></span></span></span>
+                  <span style="font:600 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ a.orb }}</span>
                 </button>
               </sc-for>
-            </sc-for>
-          </sc-if>
-          <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
-            <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                <span style="text-align:center">{{ r.house }}</span>
-                <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cxPAspects }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Aspects</span><span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ chartExpandAspectCount }}</span></div>
+            <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
+              <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--bd);border-left:3px solid {{ a.color }};border-radius:10px;background:{{ a.bg }}">
+                <span style="min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="display:flex;align-items:center;gap:6px;min-width:0;font:600 12px var(--fu);color:var(--tx)"><span aria-hidden="true" style="font:400 14px Georgia,serif">{{ a.glyphA }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span><span style="font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">{{ a.aspLabel }}</span><span aria-hidden="true" style="font:400 14px Georgia,serif">{{ a.glyphB }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span></span>
+                  <span aria-hidden="true" style="height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:{{ a.meter }};background:{{ a.color }}"></span></span>
+                </span>
+                <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font:600 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ a.orb }}</span><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;color:var(--ac)">{{ a.exactMark }}</span></span>
               </button>
             </sc-for>
-          </sc-if>
-          <div style="border-top:1px solid var(--bd);margin-top:6px">
-            <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
-              <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
-                  <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
-                  <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
-                  <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
-                </button>
-                <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
-                  <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                      <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                      <span style="text-align:center">{{ r.house }}</span>
-                    </button>
-                  </sc-for>
-                </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cxPHouses }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;padding:8px 14px 14px">
+            <sc-for list="{{ cxHouses }}" as="hc" hint-placeholder-count="12">
+              <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)">
+                <span style="font:700 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ac2-hi)">{{ hc.ord }}</span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }} {{ hc.deg }}</span><span style="font:400 11.5px/1.45 var(--fu);color:var(--dim)">{{ hc.theme }}</span></span>
+                <span aria-hidden="true" style="font:400 15px Georgia,serif;color:var(--tx);letter-spacing:.12em">{{ hc.glyphs }}</span>
               </div>
             </sc-for>
           </div>
-        </div>
+        </sc-if>
       </div>
-      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
-        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
-          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
-          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
-          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
-          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
-              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
-              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
-              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
-            </button>
-          </sc-for>
-        </div>
-      </div>
+    </div>
+    <div class="cx-tabs" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:rgba(0,0,0,.35)">
+      <sc-for list="{{ cxTabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-bottom:2px solid {{ t.bd }};font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+      </sc-for>
     </div>
   </div>
 </sc-if>
@@ -9537,21 +9640,123 @@ input[type="date"]{color-scheme:dark}
   </div>
 </main>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
-    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
-        <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
-        <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
-          <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
-            <span style="color:var(--dim)">{{ hc.h }}</span>
-            <span>{{ hc.sign }} {{ hc.deg }}°</span>
-          </div>
-        </sc-for>
+  <!-- THE NATAL OBSERVATORY (owner, 19 October 2026): the chart's full view. A
+       stage with the scene, the clock and the target lock in the middle, the
+       manifest of every point on the left, the inspector on the right. -->
+  <div role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="cx-root" onKeyDown="{{ cxKeys }}" style="background:var(--bg);color:var(--tx)">
+    <div class="cx-top" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);background:linear-gradient(180deg,rgba(var(--atmc),.2),rgba(var(--atmc),.04))">
+      <div style="flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:12px">
+        <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.8),inset 0 0 10px rgba(var(--atmc),.6);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac);box-shadow:0 0 10px #2fff8f;animation:pulseGentle 2.4s ease-in-out infinite"></span></span>
+        <div style="min-width:0;display:flex;flex-direction:column;gap:1px">
+          <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--ac2-hi)">Natal Observatory</span>
+          <span style="font:400 21px/1.15 var(--fd);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cxOwner }}</span>
+          <span class="cx-wide" style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cxSub }}</span>
+        </div>
       </div>
-      <div class="chartx-panel-center" style="background:var(--sf);border-right:1px solid var(--bd);overflow:hidden;display:flex;flex-direction:column;position:relative">
-        <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(139,92,246,.2);color:var(--ac2-hi);font:600 18px system-ui">×</button>
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div data-chart="expand-wheel" style="position:relative;width:100%;height:100%">
+      <div class="cx-segs">
+      <sc-if value="{{ cxViewsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:none;display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:999px;padding:3px">
+            <sc-for list="{{ cxViews }}" as="v" hint-placeholder-count="2">
+              <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+            </sc-for>
+          </div>
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Points shown" style="flex:none;display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:999px;padding:3px">
+            <sc-for list="{{ cxLayers }}" as="v" hint-placeholder-count="2">
+              <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+            </sc-for>
+          </div>
+      </div>
+      <div class="cx-btns">
+      <sc-if value="{{ cxCaptureOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cxCapture }}" aria-label="Save an image of the chart" title="Save an image of the chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx)">◎</button>
+      </sc-if>
+      <button onClick="{{ cxHelpGo }}" aria-label="Keyboard shortcuts" aria-expanded="{{ cxHelp }}" title="Keyboard shortcuts" class="cx-wide" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:700 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">?</button>
+      <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.18);font:400 22px var(--fu);color:var(--tx)">×</button>
+      </div>
+    </div>
+    <div class="cx-left" style="display:{{ cxLeftDisplay }};flex-direction:column;min-height:0;border-right:1px solid var(--bd);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)">
+      <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:12px 12px 8px;border-bottom:1px solid var(--bd)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+          <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi)">Manifest</span>
+          <span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--mut)">{{ chartExpandCount }}</span>
+        </div>
+        <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="box-sizing:border-box;width:100%;min-height:40px;padding:0 12px;border:1px solid var(--bd);border-radius:10px;background:rgba(0,0,0,.35);color:var(--tx);font:400 13px var(--fu)">
+        <div style="display:flex;flex-wrap:wrap;gap:2px 6px">
+          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--ac2-hi)">{{ chartExpandGroupMark }}</span>Group</button>
+          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>Comets</button>
+          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 6px;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)"><span aria-hidden="true" style="width:15px;height:15px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--ac2-hi)">{{ chartExpandMinorAspectsMark }}</span>Minor aspects</button>
+        </div>
+      </div>
+      <div style="flex:none;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;padding:0 12px 0 10px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.25)">
+        <span></span>
+        <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortName }}</button>
+        <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortLon }}</button>
+        <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:flex-end;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ cxSortHouse }}</button>
+        <span></span>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding-bottom:12px">
+        <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+            <div style="position:sticky;top:0;z-index:1;padding:7px 12px;font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi);background:var(--bg);border-bottom:1px solid var(--bd)">{{ grp.label }}</div>
+            <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+              <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+            </sc-for>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+            <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+          </sc-for>
+        </sc-if>
+        <div style="margin-top:8px;border-top:1px solid var(--bd)">
+          <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
+            <div>
+              <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--bd)">
+                <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">{{ sub.mark }}</span>
+                <span style="flex:1;font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ sub.label }}</span>
+                <span style="flex:none;font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ sub.count }}</span>
+              </button>
+              <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
+                  <button onClick="{{ r.go }}" title="{{ r.tip }}" aria-pressed="{{ r.on }}" class="cx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 26px 12px;gap:7px;align-items:center;padding:4px 12px 4px 10px;border-left:2px solid {{ r.edge }};background:{{ r.bg }};opacity:{{ r.dim }};color:var(--tx);text-align:left">
+                <span aria-hidden="true" style="text-align:center;font:400 16px Georgia,serif;color:{{ r.catColor }};opacity:{{ r.inScene }}">{{ r.glyph }}</span>
+                <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px var(--fu)">{{ r.name }}</span>
+                <span style="font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">{{ r.pos }}</span>
+                <span style="text-align:right;font:500 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ r.house }}</span>
+                <span style="font:700 9px var(--fu);color:var(--warn)">{{ r.retro }}</span>
+              </button>
+                </sc-for>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div class="cx-stage" style="position:relative;min-height:0;min-width:0;overflow:hidden;background:var(--bg)">
+      <sc-if value="{{ cxDeep }}" hint-placeholder-val="{{ true }}">
+        <div data-chart="sky" data-cs-scene="full" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:absolute;inset:0;outline:none"></div>
+        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px">
+          <button onClick="{{ cxZoomIn }}" aria-label="Zoom in" title="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">+</button>
+          <button onClick="{{ cxZoomOut }}" aria-label="Zoom out" title="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">−</button>
+          <button onClick="{{ cxZoomReset }}" aria-label="Reset the camera" title="Reset the camera" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55);color:var(--ac2-hi)">◎</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cxFlat }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box">
+          <div data-chart="expand-wheel" style="position:relative;height:100%;max-height:100%;max-width:100%;aspect-ratio:1/1">
             <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
               <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
               <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -9585,113 +9790,115 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
           </div>
         </div>
-      </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
-        <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
-            Group
-          </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
-            Comets on wheel
-          </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
-            Minor aspects
-          </button>
+      </sc-if>
+      <sc-if value="{{ cxHelp }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Keyboard shortcuts" style="position:absolute;left:50%;top:50%;z-index:4;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));display:grid;grid-template-columns:auto 1fr;gap:8px 16px;padding:20px 22px;border:1px solid var(--ac2);border-radius:18px;background:var(--bg);box-shadow:0 24px 80px rgba(0,0,0,.6);font:500 13px var(--fu);color:var(--tx);animation:fadeUp .25s ease">
+          <span style="grid-column:1 / span 2;font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi)">Keys</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">1 2 3</span><span>3D, Orbital, 2D</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">J K</span><span>Previous and next point</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">Space</span><span>Play or pause the sky</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">, .</span><span>Step back or forward in time</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">&lt; &gt;</span><span>Ten steps at a time</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">S</span><span>Change the speed</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">B N</span><span>The birth moment, or now</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">L</span><span>Core points or all points</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">R</span><span>Reset the camera</span>
+          <span style="font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ac2-hi)">Esc</span><span>Close</span>
         </div>
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandCount }}</div>
-        <div style="flex:1;overflow-y:auto;font:400 10.5px var(--fu)">
-          <div style="position:sticky;top:0;z-index:1;background:var(--sf);border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px">
-            <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 6px;text-align:left;font-weight:600;color:var(--ac2-hi)">Point</button>
-            <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;text-align:right;font-weight:600;color:var(--ac2-hi)">Position</button>
-            <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 6px;text-align:center;font-weight:600;color:var(--ac2-hi)">House</button>
-            <span style="display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-weight:600;color:var(--ac2-hi)">Speed</span>
-            <span style="display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ac2-hi)">R</span>
-            <span style="display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:600;color:var(--ac2-hi)">Status</span>
-          </div>
-          <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
-            <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
-              <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
-              <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                  <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                  <span style="text-align:center">{{ r.house }}</span>
-                  <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                  <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                  <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
+      </sc-if>
+    </div>
+    <div class="cx-right" style="display:{{ cxRightDisplay }};flex-direction:column;min-height:0;border-left:1px solid var(--bd);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)">
+      <sc-if value="{{ cxSubTabsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Inspector" style="flex:none;display:flex;border-bottom:1px solid var(--bd)">
+          <sc-for list="{{ cxSubTabs }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-bottom:2px solid {{ t.bd }};font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-height:0;overflow-y:auto">
+        <sc-if value="{{ cxPBody }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;padding:16px;animation:fadeUp .3s ease">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onClick="{{ cxFPrev }}" aria-label="Previous point" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+              <div style="flex:1;display:flex;justify-content:center">
+                <span aria-hidden="true" style="width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.34),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:2px solid {{ cxFColor }};box-shadow:0 0 34px rgba(var(--atmc),.7),inset 0 0 18px rgba(var(--atmc),.5);font:400 40px/1 Georgia,serif;color:{{ cxFColor }}">{{ cxFGlyph }}</span>
+              </div>
+              <button onClick="{{ cxFNext }}" aria-label="Next point" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center">
+              <span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)">{{ cxFCat }} · {{ cxFIdx }}</span>
+              <span style="font:400 28px/1.1 var(--fd);color:var(--tx)">{{ cxFName }}</span>
+              <span style="font:600 14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em;color:var(--ac2-hi)">{{ cxFPos }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">House</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--tx)">{{ cxFHouse }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Speed</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--tx)">{{ cxFSpeed }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px;padding:9px 10px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.25)"><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">Motion</span><span style="font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:{{ cxFMotionC }}">{{ cxFMotion }}</span></div>
+            </div>
+            <div style="font:italic 400 14px/1.6 var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ cxFMean }}</div>
+            <sc-if value="{{ cxFRefOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 12px/1.55 var(--fu);color:var(--dim);text-align:center">{{ cxFRef }}</div>
+            </sc-if>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{ cxFOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);font:700 12px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--onac)">Open the reading <span style="font:400 14px var(--fb)">→</span></button>
+              <sc-if value="{{ cxFlyOn }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cxFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:48px;padding:0 16px;display:flex;align-items:center;border:1px solid var(--ac2);border-radius:999px;font:700 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">Fly to</button>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;padding-top:6px;border-top:1px solid var(--bd)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Contacts</span><span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ cxFAspCount }}</span></div>
+              <sc-if value="{{ cxFAspNone }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px var(--fu);color:var(--dim)">Nothing in orb with this point.</div></sc-if>
+              <sc-for list="{{ cxFAspects }}" as="a" hint-placeholder-count="4">
+                <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 10px;border:1px solid var(--bd);border-left:3px solid {{ a.color }};border-radius:10px;background:{{ a.bg }}">
+                  <span aria-hidden="true" style="font:400 15px Georgia,serif;color:var(--tx);text-align:center">{{ a.otherGlyph }}</span>
+                  <span style="min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:600 12px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.aspLabel }} {{ a.otherName }}</span><span aria-hidden="true" style="height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:{{ a.meter }};background:{{ a.color }}"></span></span></span>
+                  <span style="font:600 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ a.orb }}</span>
                 </button>
               </sc-for>
-            </sc-for>
-          </sc-if>
-          <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
-            <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                <span style="text-align:center">{{ r.house }}</span>
-                <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cxPAspects }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 9.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Aspects</span><span style="font:500 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ chartExpandAspectCount }}</span></div>
+            <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
+              <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--bd);border-left:3px solid {{ a.color }};border-radius:10px;background:{{ a.bg }}">
+                <span style="min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="display:flex;align-items:center;gap:6px;min-width:0;font:600 12px var(--fu);color:var(--tx)"><span aria-hidden="true" style="font:400 14px Georgia,serif">{{ a.glyphA }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span><span style="font:700 9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">{{ a.aspLabel }}</span><span aria-hidden="true" style="font:400 14px Georgia,serif">{{ a.glyphB }}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span></span>
+                  <span aria-hidden="true" style="height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:{{ a.meter }};background:{{ a.color }}"></span></span>
+                </span>
+                <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="font:600 10.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ a.orb }}</span><span style="font:700 8.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;color:var(--ac)">{{ a.exactMark }}</span></span>
               </button>
             </sc-for>
-          </sc-if>
-          <div style="border-top:1px solid var(--bd);margin-top:6px">
-            <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
-              <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
-                  <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
-                  <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
-                  <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
-                </button>
-                <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
-                  <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                      <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                      <span style="text-align:center">{{ r.house }}</span>
-                    </button>
-                  </sc-for>
-                </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cxPHouses }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;padding:8px 14px 14px">
+            <sc-for list="{{ cxHouses }}" as="hc" hint-placeholder-count="12">
+              <div style="display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)">
+                <span style="font:700 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ac2-hi)">{{ hc.ord }}</span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }} {{ hc.deg }}</span><span style="font:400 11.5px/1.45 var(--fu);color:var(--dim)">{{ hc.theme }}</span></span>
+                <span aria-hidden="true" style="font:400 15px Georgia,serif;color:var(--tx);letter-spacing:.12em">{{ hc.glyphs }}</span>
               </div>
             </sc-for>
           </div>
-        </div>
+        </sc-if>
       </div>
-      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
-        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
-          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
-          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
-          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
-        </div>
-        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
-          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
-              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
-              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
-              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
-            </button>
-          </sc-for>
-        </div>
-      </div>
+    </div>
+    <div class="cx-tabs" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);background:rgba(0,0,0,.35)">
+      <sc-for list="{{ cxTabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-bottom:2px solid {{ t.bd }};font:700 10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+      </sc-for>
     </div>
   </div>
 </sc-if>
@@ -10900,7 +11107,8 @@ class Component extends DCLogic {
     pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
     chartView: '3d', csFail: false, csFocus: null, csToday: false,
     hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
-    csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0 };
+    csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
+    cxPanel: 'body', cxHelp: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11286,13 +11494,12 @@ class Component extends DCLogic {
   componentDidMount() {
     this.pruneDefaultProfile();
     window.__incommonApp = this;
-    // Restore the expanded chart overlay across a reload. chartExpandGo
-    // always sets chartMode alongside chartExpandOpen, so the restore does
-    // too, or a reload would reopen the overlay over the basic wheel
-    // instead of the one it was actually showing.
+    // Restore the full view across a reload. It opens on whichever points
+    // the reader last chose (Core or All points), the same as opening it by
+    // hand does, so the restore does not touch chartMode.
     try {
       if (localStorage.getItem('incommon.chart.expanded') === '1') {
-        this.setState({ chartExpandOpen: true, chartMode: 'expanded' });
+        this.setState({ chartExpandOpen: true });
       }
       /* The chart view (3D, Orbital or 2D) is a device preference, kept the
          way the expanded overlay is. */
@@ -13932,8 +14139,8 @@ class Component extends DCLogic {
     const st = this.state;
     const base = {
       chartExpandOpen: !!st.chartExpandOpen,
-      chartExpandGo: () => this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null }),
-      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null }),
+      chartExpandGo: () => this.setState({ chartExpandOpen: true, openBody: null, aspSel: null, chartExpandAspSel: null, cxHelp: false }),
+      chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, cxHelp: false }),
       chartExpandSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
     };
     if (!st.chartExpandOpen) return base;
@@ -13946,17 +14153,29 @@ class Component extends DCLogic {
     const natalSun = rows[0];
     const zero = this.wheelZero();
     const houseOf = r => (r.lon == null || r.group === 'angle') ? null : this.houseOf(r.lon, natalSun, asc);
-
-    const houses = Array.from({ length: 12 }, (_, i) => {
-      const lon = this.norm360(zero + i * 30), s = this.signOf(lon);
-      return { h: i + 1, sign: s.sign, deg: Math.floor(s.deg) };
-    });
+    const expanded = st.chartMode === 'expanded';
+    const S = this._csS, deep = this.chartViewNow() !== '2d';
+    const sceneKeys = this._csModel ? this._csModel.bodies.map(b => b.key) : [];
+    const firstKey = sceneKeys[0] || (rows[0] ? (rows[0].id || rows[0].name) : null);
+    const focusKey = st.csFocus || firstKey;
+    const narrow = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 900;
+    const openReading = key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null });
+    /* The first press on a point brings it forward, in the scene and in the
+       inspector; a second press on the one already in front opens its reading,
+       the same two presses the stage and the Numbers stage take. */
+    const pointGo = key => () => {
+      if (key === focusKey && st.csFocus) { openReading(key); return; }
+      if (S && sceneKeys.indexOf(key) !== -1) S.setFocus(key, true);
+      this.setState({ csFocus: key, cxPanel: 'body', chartExpandTab: narrow ? 'body' : st.chartExpandTab });
+      const r = rows.find(x => (x.id || x.name) === key);
+      if (r) this.speak(this.pointLabel(r) + (r.lon != null ? ', ' + Math.floor(r.deg) + ' degrees ' + r.sign : '') + '.', 'polite');
+    };
 
     const allRows = rows.map(r => {
       const known = r.lon != null;
-      const h = houseOf(r);
+      const h = houseOf(r), key = r.id || r.name;
       return {
-        id: r.id || r.name, name: r.name, glyph: r.glyph || '',
+        id: key, name: r.name, glyph: r.glyph || '',
         lon: known ? r.lon : null,
         pos: known ? (this.dmsOf(r.deg) + ' ' + r.sign) : 'n/a: no ephemeris',
         house: h ? String(h) : 'n/a',
@@ -13964,18 +14183,20 @@ class Component extends DCLogic {
         speed: r.speed != null ? (r.speed >= 0 ? '+' : '') + r.speed.toFixed(2) + '°/d' : 'n/a',
         retro: r.retro ? 'R' : '',
         status: r.status || 'unavailable',
-        statusLabel: known ? (r.status === 'fixed' ? 'formula' : 'ok') : 'n/a: no ephemeris',
         category: r.category || r.group, categoryLabel: this.CAT_LABEL[r.category || r.group] || r.category || r.group,
         catColor: this.CAT_COLOR[r.category] || 'var(--ac)',
         tip: this.pointTooltip(r, h ? 'House ' + h : ''),
         known: known, dim: known ? '1' : '.55',
-        go: () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: r.id || r.name, aspSel: null })
+        on: key === focusKey ? 'true' : 'false',
+        bg: key === focusKey ? 'linear-gradient(90deg,rgba(47,255,143,.16),transparent)' : 'transparent',
+        edge: key === focusKey ? 'var(--ac)' : 'transparent',
+        inScene: sceneKeys.indexOf(key) !== -1 ? '1' : '.62',
+        go: pointGo(key)
       };
     });
 
     const term = (st.chartExpandSearch || '').toLowerCase();
     const filtered = term ? allRows.filter(r => r.name.toLowerCase().indexOf(term) !== -1) : allRows;
-
     const sortBy = st.chartExpandSortBy || 'lon', dir = st.chartExpandSortDir === 'desc' ? -1 : 1;
     const sorted = filtered.slice().sort((a, b) => {
       let c;
@@ -13984,22 +14205,15 @@ class Component extends DCLogic {
       else c = (a.lon == null ? 999 : a.lon) - (b.lon == null ? 999 : b.lon);
       return c * dir;
     });
-
     const sortGo = field => () => this.setState({
       chartExpandSortBy: field,
       chartExpandSortDir: st.chartExpandSortBy === field && st.chartExpandSortDir === 'asc' ? 'desc' : 'asc'
     });
-
+    const sortMark = field => sortBy === field ? (dir > 0 ? ' ↑' : ' ↓') : '';
     const catOrder = ['body', 'angle'].concat(this.SUBTABLE_CATS);
     const grouped = !st.chartExpandGroup ? [] : catOrder.map(cat => ({
       category: cat, label: this.CAT_LABEL[cat], rows: sorted.filter(r => r.category === cat)
     })).filter(g => g.rows.length);
-
-    // The seven collapsible sub-tables: independent of search/sort/group on
-    // the main table above, a plain browsable reference the way the
-    // Library's rooms are (see CLAUDE.md's "browsable now" precedent for
-    // the dream registry). Closed by default so the panel opens tidy at 80+
-    // points; chartExpandSubOpen is a plain {category: bool} map on state.
     const subOpen = st.chartExpandSubOpen || {};
     const subTables = this.SUBTABLE_CATS.map(cat => {
       const catRows = allRows.filter(r => r.category === cat);
@@ -14011,54 +14225,37 @@ class Component extends DCLogic {
       };
     }).filter(s => s.count);
 
-    // The aspects grid: the SAME rich aspect pass the wheel's own lines use
-    // (identical options), so the grid and the wheel can never disagree
-    // about which contacts exist. "Horizontally scrollable" per the brief -
-    // a row of small cards, not a tall table, since a vertical list here
-    // would just be a second points table with different columns.
-    const asps = this.natalAspects(true, { rich: true, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true });
-    // EXACT_ORB: the conventional astrological sense of "exact" - a contact
-    // tight enough to read as live rather than merely in range. One degree
-    // is the common floor across the tradition's own orb tables
-    // (EXPANDED_ORBS run 2 to 10 depending on the aspect), not a figure
-    // invented for this grid.
+    /* The aspects: the SAME pass the stage and the 2D wheel draw, with the
+       same arguments, so a row's id is its index into what is on screen and a
+       highlight can never land on a different pair than the one pressed. */
+    const asps = this.natalAspects(expanded, { rich: expanded, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true });
     const EXACT_ORB = 1;
-    // id is the row's own index into `asps`, fixed regardless of any filter
-    // applied below: chartExpandAspSel stores this id, never a post-filter
-    // position, so toggling a filter chip can never silently point the
-    // wheel highlight at a different pair than the one that was clicked.
+    const keyOf = p => p.id || p.name;
     const aspectRowsAll = asps.map((x, i) => {
-      const exact = x.orb <= EXACT_ORB, aspLabel = this.aspName(x.asp);
+      const exact = x.orb <= EXACT_ORB, aspLabel = this.aspName(x.asp), sel = st.chartExpandAspSel === i;
       return {
-        id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name,
+        id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name, keyA: keyOf(x.a), keyB: keyOf(x.b),
         asp: x.asp, aspLabel: aspLabel, orb: x.orb.toFixed(1) + '°',
-        exact: exact, exactMark: exact ? '●' : '',
+        exact: exact, exactMark: exact ? 'EXACT' : '',
         tip: x.a.name + ' ' + aspLabel + ' ' + x.b.name + ', orb ' + x.orb.toFixed(1) + '°' + (exact ? ', exact' : ''),
         catA: x.a.category, catB: x.b.category,
         color: (this.ASP_COLOR[x.asp] || ['var(--dim)'])[0],
-        on: st.chartExpandAspSel === i ? 'true' : 'false',
-        ring: st.chartExpandAspSel === i ? '0 0 0 2px var(--ac) inset' : 'none',
-        // Highlights the pair on the wheel; a second click on the same row
-        // clears it rather than toggling something else, per the brief.
-        go: () => this.setState({ chartExpandAspSel: st.chartExpandAspSel === i ? null : i })
+        meter: Math.round(Math.max(6, 100 - x.orb / ((this.EXPANDED_ORBS || {})[x.asp] || 8) * 100)) + '%',
+        on: sel ? 'true' : 'false',
+        bg: sel ? 'rgba(var(--atmc),.24)' : 'transparent',
+        go: () => this.setState({ chartExpandAspSel: sel ? null : i })
       };
     });
-    // Filter chips: aspect type and category involvement, both multi-select
-    // and OR'd within their own group (an empty selection filters nothing,
-    // so the grid opens showing everything). "Category involvement" means
-    // EITHER end of the pair carries that category, since an aspect belongs
-    // to both bodies it connects, not to one of them.
     const aspTypeSel = st.chartExpandAspTypeSel || [];
     const aspCatSel = st.chartExpandAspCatSel || [];
-    const typesPresent = [];
+    const typesPresent = [], catsPresent = [];
     asps.forEach(x => { if (typesPresent.indexOf(x.asp) === -1) typesPresent.push(x.asp); });
-    const catsPresent = [];
     asps.forEach(x => [x.a.category, x.b.category].forEach(c => { if (c && catsPresent.indexOf(c) === -1) catsPresent.push(c); }));
     const aspectRows = aspectRowsAll.filter(r =>
       (aspTypeSel.length === 0 || aspTypeSel.indexOf(r.asp) !== -1) &&
       (aspCatSel.length === 0 || aspCatSel.indexOf(r.catA) !== -1 || aspCatSel.indexOf(r.catB) !== -1));
     const chipStyle = on => on
-      ? { c: 'var(--ac)', bg: 'rgba(47,255,143,.16)', bd: 'var(--ac)' }
+      ? { c: 'var(--tx)', bg: 'rgba(var(--atmc),.34)', bd: 'var(--ac2-hi)' }
       : { c: 'var(--dim)', bg: 'transparent', bd: 'var(--bd)' };
     const aspTypeChips = typesPresent.map(nm => {
       const sel = aspTypeSel.indexOf(nm) !== -1, style = chipStyle(sel);
@@ -14071,20 +14268,45 @@ class Component extends DCLogic {
         go: () => this.setState({ chartExpandAspCatSel: sel ? aspCatSel.filter(x => x !== cat) : aspCatSel.concat(cat) }) };
     });
 
-    // Below 900px (this.chartx-grid's own breakpoint), Houses/Points/Aspects
-    // become tabs instead of a stack: three panels shown at once is how a
-    // table with a Speed and a Status column stopped being readable on a
-    // phone. dtW is the same tracked width syncSectionToTab and friends
-    // already read; window.innerWidth is the fallback for the first render
-    // before it is set.
-    const narrow = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 900;
-    const tab = st.chartExpandTab || 'points';
-    const tabGo = t => () => this.setState({ chartExpandTab: t });
-    const panelDisplay = key => (!narrow || tab === key) ? 'flex' : 'none';
+    /* The inspector: the point in front, from the same row the manifest draws. */
+    const fr = rows.find(r => (r.id || r.name) === focusKey) || rows[0];
+    const fRow = allRows.find(r => r.id === focusKey) || allRows[0];
+    const fAsps = aspectRowsAll.filter(r => r.keyA === focusKey || r.keyB === focusKey).map(r => {
+      const other = r.keyA === focusKey ? { g: r.glyphB, n: r.nameB } : { g: r.glyphA, n: r.nameA };
+      return { ...r, otherGlyph: other.g, otherName: other.n };
+    });
+    const order = sceneKeys.length ? sceneKeys : allRows.map(r => r.id);
+    const at = Math.max(0, order.indexOf(focusKey));
+    const stepGo = d => () => {
+      const k = order[(at + d + order.length) % order.length];
+      if (S && sceneKeys.indexOf(k) !== -1) S.setFocus(k, true);
+      this.setState({ csFocus: k });
+      const r = rows.find(x => (x.id || x.name) === k);
+      if (r) this.speak(this.pointLabel(r) + (r.lon != null ? ', ' + Math.floor(r.deg) + ' degrees ' + r.sign : '') + '.', 'polite');
+    };
+
+    /* The houses: the cusp, and what stands in each. */
+    const houses = Array.from({ length: 12 }, (_, i) => {
+      const lon = this.norm360(zero + i * 30), s = this.signOf(lon);
+      const inside = allRows.filter(r => r.houseN === i + 1 && (r.category === 'body' || r.category === 'node'));
+      return { h: i + 1, ord: (i + 1) + (i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'), sign: s.sign, deg: Math.floor(s.deg) + '°',
+        glyphs: inside.map(r => r.glyph).join(' '), theme: String(this.HOUSE_LONG[i] || '').split(/\.\s+/)[0].replace(/\.$/, '') };
+    });
+
+    const panel = st.cxPanel || 'body';
+    const tab = narrow ? (st.chartExpandTab && ['body', 'aspects', 'houses', 'points'].indexOf(st.chartExpandTab) !== -1 ? st.chartExpandTab : 'body') : null;
+    const rightPanel = narrow ? (tab === 'points' ? null : tab) : panel;
+    const subTab = (id, label) => ({ id, label, on: rightPanel === id ? 'true' : 'false', c: rightPanel === id ? 'var(--tx)' : 'var(--mut)',
+      bd: rightPanel === id ? 'var(--ac)' : 'transparent', go: () => this.setState({ cxPanel: id }) });
+    const viewsOn = this.chartSceneOn();
+    const cv = this.chartViewNow();
+    const layer = (id, label) => ({ label, on: (expanded ? 'expanded' : 'basic') === id,
+      bg: (expanded ? 'expanded' : 'basic') === id ? 'rgba(var(--atmc),.34)' : 'transparent', bd: (expanded ? 'expanded' : 'basic') === id ? 'var(--ac2-hi)' : 'transparent',
+      c: (expanded ? 'expanded' : 'basic') === id ? 'var(--tx)' : 'var(--dim)', go: () => this.setState({ chartMode: id, chartExpandAspSel: null }) });
+    const viewGo = id => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); };
 
     return {
       ...base,
-      chartExpandHouses: houses,
       chartExpandRows: sorted,
       chartExpandGrouped: grouped,
       chartExpandGroup: !!st.chartExpandGroup,
@@ -14096,6 +14318,7 @@ class Component extends DCLogic {
       chartExpandSortNameGo: sortGo('name'),
       chartExpandSortLonGo: sortGo('lon'),
       chartExpandSortHouseGo: sortGo('house'),
+      cxSortName: 'Point' + sortMark('name'), cxSortLon: 'Position' + sortMark('lon'), cxSortHouse: 'H' + sortMark('house'),
       chartExpandCount: sorted.length + (sorted.length === 1 ? ' point' : ' points'),
       chartExpandSubTables: subTables,
       chartExpandShowComets: !!st.chartExpandShowComets,
@@ -14109,16 +14332,86 @@ class Component extends DCLogic {
         (aspectRows.length !== aspectRowsAll.length ? ' of ' + aspectRowsAll.length : ''),
       chartExpandAspTypeChips: aspTypeChips,
       chartExpandAspCatChips: aspCatChips,
-      chartExpandTabs: [
-        { id: 'points', label: 'Points', on: tab === 'points' ? 'true' : 'false', c: tab === 'points' ? 'var(--ac)' : 'var(--dim)', go: tabGo('points') },
-        { id: 'aspects', label: 'Aspects', on: tab === 'aspects' ? 'true' : 'false', c: tab === 'aspects' ? 'var(--ac)' : 'var(--dim)', go: tabGo('aspects') },
-        { id: 'houses', label: 'Houses', on: tab === 'houses' ? 'true' : 'false', c: tab === 'houses' ? 'var(--ac)' : 'var(--dim)', go: tabGo('houses') }
-      ],
-      chartExpandTabBarDisplay: narrow ? 'flex' : 'none',
-      chartExpandHousesDisplay: panelDisplay('houses'),
-      chartExpandPointsDisplay: panelDisplay('points'),
-      chartExpandAspectsDisplay: panelDisplay('aspects')
+      /* the top bar */
+      cxOwner: (this.activeProfile() || {}).name || 'Your chart',
+      cxSub: (asc ? asc.sign + ' rising' : 'No birth time') + ' · ' + natalSun.sign + ' Sun · ' + allRows.filter(r => r.known).length + ' points',
+      cxViewsOn: viewsOn,
+      cxViews: viewsOn ? [['3d', '3D'], ['orbit', 'Orbital'], ['2d', '2D']].map(([id, label]) => ({ label, on: cv === id,
+        bg: cv === id ? 'rgba(var(--atmc),.34)' : 'transparent', bd: cv === id ? 'var(--ac2-hi)' : 'transparent', c: cv === id ? 'var(--tx)' : 'var(--dim)',
+        go: () => viewGo(id) })) : [],
+      cxLayers: [layer('basic', 'Core'), layer('expanded', 'All points')],
+      cxCaptureOn: deep && viewsOn,
+      cxCapture: () => {
+        const url = this._csS && this._csS.capture();
+        if (!url) return;
+        const a = document.createElement('a');
+        a.href = url; a.download = 'inCommon-chart.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        this.speak('Chart image saved.', 'polite');
+      },
+      cxHelp: !!st.cxHelp,
+      cxHelpGo: () => this.setState({ cxHelp: !st.cxHelp }),
+      cxKeys: e => this.cxKeys(e),
+      cxFlat: !deep, cxDeep: deep,
+      cxZoomIn: () => { if (this._csS) this._csS.zoom(-1); },
+      cxZoomOut: () => { if (this._csS) this._csS.zoom(1); },
+      cxZoomReset: () => { if (this._csS) this._csS.zoom(0); },
+      /* the inspector */
+      cxSubTabs: [subTab('body', 'Point'), subTab('aspects', 'Aspects'), subTab('houses', 'Houses')],
+      cxSubTabsOn: !narrow,
+      cxPBody: rightPanel === 'body', cxPAspects: rightPanel === 'aspects', cxPHouses: rightPanel === 'houses',
+      cxFGlyph: fRow ? fRow.glyph : '', cxFColor: fRow ? fRow.catColor : 'var(--ac)',
+      cxFName: fr ? this.pointLabel(fr) : '', cxFCat: fRow ? fRow.categoryLabel : '',
+      cxFPos: fRow ? fRow.pos : '', cxFHouse: fRow && fRow.house !== 'n/a' ? 'House ' + fRow.house : 'No house',
+      cxFSpeed: fRow ? fRow.speed : '', cxFMotion: fr && fr.lon != null ? (fr.retro ? 'Retrograde' : 'Direct') : 'Not computed',
+      cxFMotionC: fr && fr.retro ? 'var(--warn)' : 'var(--ac2-hi)',
+      cxFMean: fr && (this.PL_MEAN[fr.name] || fr.mean) ? String(this.PL_MEAN[fr.name] || fr.mean) : '',
+      cxFRef: fr && fr.reference ? 'Used in reference to: ' + fr.reference : '',
+      cxFRefOn: !!(fr && fr.reference),
+      cxFAspects: fAsps.slice(0, 12), cxFAspCount: fAsps.length + (fAsps.length === 1 ? ' aspect' : ' aspects'),
+      cxFAspNone: !fAsps.length,
+      cxFIdx: (at + 1) + ' / ' + order.length,
+      cxFPrev: stepGo(-1), cxFNext: stepGo(1),
+      cxFOpen: () => openReading(focusKey),
+      cxFlyOn: deep && sceneKeys.indexOf(focusKey) !== -1,
+      cxFly: () => { if (this._csS) { this._csS.setFocus(focusKey, true); this._csS.setFly(true); } },
+      cxHouses: houses,
+      /* the narrow layout's tabs */
+      cxTabs: narrow ? [['body', 'Point'], ['aspects', 'Aspects'], ['houses', 'Houses'], ['points', 'All']].map(([id, label]) => ({ label,
+        on: tab === id ? 'true' : 'false', c: tab === id ? 'var(--tx)' : 'var(--mut)', bd: tab === id ? 'var(--ac)' : 'transparent',
+        go: () => this.setState({ chartExpandTab: id }) })) : [],
+      cxLeftDisplay: !narrow || tab === 'points' ? 'flex' : 'none',
+      cxRightDisplay: !narrow || tab !== 'points' ? 'flex' : 'none'
     };
+  }
+  /* The full view's keys, for the reader who would rather not reach for the
+     mouse. Letters, digits and punctuation only, so the arrows stay with the
+     radiogroups, the tabs, the stage and the clock; skipped inside a field and
+     on the clock's own slider, and Space is left to a button that has focus. */
+  cxKeys(e) {
+    const t = e.target, k = e.key;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || (t.closest && t.closest('[role="slider"]')))) return;
+    const S = this._csS, onButton = t && t.tagName === 'BUTTON', inStage = t && t.closest && t.closest('[data-cs-scene]');
+    const act = {
+      '1': () => this.chartSceneOn() && this.setState({ chartView: '3d' }),
+      '2': () => this.chartSceneOn() && this.setState({ chartView: 'orbit' }),
+      '3': () => this.setState({ chartView: '2d' }),
+      ' ': () => { if (onButton) return false; if (S) S.play(); },
+      ',': () => S && S.timeStep(-1), '.': () => S && S.timeStep(1),
+      '<': () => S && S.timeStep(-10), '>': () => S && S.timeStep(10),
+      'n': () => S && S.timeTo(Date.now()),
+      'b': () => S && this._csModel && S.timeTo(this._csModel.natalT),
+      'r': () => S && S.zoom(0),
+      's': () => S && S.cycleSpeed(),
+      'l': () => this.setState({ chartMode: this.state.chartMode === 'expanded' ? 'basic' : 'expanded', chartExpandAspSel: null }),
+      'j': () => !inStage && this.chartExpandVals().cxFPrev(),
+      'k': () => !inStage && this.chartExpandVals().cxFNext(),
+      '?': () => this.setState({ cxHelp: !this.state.cxHelp })
+    }[k.length === 1 ? k.toLowerCase() === k ? k : k.toLowerCase() : k];
+    if (!act) return;
+    if (act() === false) return;
+    e.preventDefault();
   }
   // 360° -> screen. The Ascendant sits at the left edge (9 o'clock) and
   // longitude increases counterclockwise, which is the standard wheel. Without a
@@ -21474,16 +21767,18 @@ class Component extends DCLogic {
   }
   chartSceneSync(retry) {
     if (!this.chartSceneOn()) return;
-    const st = this.state, view = this.chartViewNow(), host = view === '2d' ? null : document.querySelector('[data-cs-scene]');
+    const st = this.state, view = this.chartViewNow();
+    const fullHost = st.chartExpandOpen ? document.querySelector('[data-cs-scene="full"]') : null;
+    const host = view === '2d' ? null : (fullHost || (st.chartExpandOpen ? null : document.querySelector('[data-cs-scene="1"]')));
     const vertical = (st.dtW || 1440) < this.BP.md;
     clearTimeout(this._csSyncT);
     if (!host) {
       if (this._csS) this._csS.detach();
-      const want = st.ready && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology');
+      const want = st.ready && view !== '2d' && (st.chartExpandOpen || (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology'));
       if (want && (retry || 0) < 8) this._csSyncT = setTimeout(() => this.chartSceneSync((retry || 0) + 1), 60);
       return;
     }
-    if (!this._csS && vertical && this.curTab() !== 'spirit') return;
+    if (!this._csS && vertical && this.curTab() !== 'spirit' && !st.chartExpandOpen) return;
     if (!this._csS) {
       this._csS = window.ChartScene.create({
         onFail: () => { this._csS = null; this.setState({ csFail: true }); },
@@ -21494,8 +21789,9 @@ class Component extends DCLogic {
           const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
           if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
         },
-        onOpen: key => this.setState({ spiritView: 'placement', placeSel: key, aspSel: null }),
-        onAspect: i => this.setState({ aspSel: i }),
+        onOpen: key => this.setState({ spiritView: 'placement', placeSel: key, aspSel: null, chartExpandOpen: false, chartExpandAspSel: null }),
+        onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, cxPanel: 'aspects' } : { aspSel: i }),
+        skyAt: t => this.chartSkyAt(t),
         onHouse: n => this.setState({ dpSel: { kind: 'house', h: n } }),
         lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t)))
       });
@@ -21504,10 +21800,10 @@ class Component extends DCLogic {
     if (m) S.setModel(m);
     S.setView(view);
     S.setFocus(st.csFocus || (m && m.bodies[0] ? m.bodies[0].key : null), false);
-    S.setSelection({ aspect: st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
+    S.setSelection({ aspect: st.chartExpandOpen ? st.chartExpandAspSel : st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
+    S.attach(host, host === fullHost ? 'full' : 'inline');
     S.setToday(view === 'orbit' && !!st.csToday);
     S.setExplore(!!st.csFree);
-    S.attach(host);
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
     if (this._csTheme !== tk) { if (this._csTheme != null) S.setTheme(); this._csTheme = tk; }
   }
@@ -21638,6 +21934,36 @@ class Component extends DCLogic {
         c: a.kind === 'personality' ? 'var(--tx)' : 'var(--hd-des)' };
     }
     return null;
+  }
+  /* What the full view's clock asks for: the ten bodies at an instant, from
+     the same library the chart is drawn from, and every contact they make
+     with the chart's own bodies and angles inside a transit orb, closest
+     first. The scene draws this; it computes none of it. The orbs are a
+     transit's, tighter than the wheel's natal ones, because a contact on the
+     clock is a moment rather than a standing feature. */
+  CX_ORB = { conjunct: 2, opposite: 2, square: 1.5, trine: 1.5, sextile: 1 };
+  chartSkyAt(t) {
+    const m = this._csModel, tt = this.t2000(new Date(t));
+    if (!m || !Number.isFinite(tt)) return null;
+    const bodies = this.PLNS.slice(0, 10).map(([n, g]) => ({ name: n, glyph: g, lon: this.lonRaw(n, tt) }));
+    const natal = m.bodies.filter(b => b.core).map(b => ({ key: b.key, label: b.label, glyph: b.glyph, lon: b.lon }))
+      .concat((m.angles || []).map(a => ({ key: a.name, label: a.name, glyph: a.label, lon: a.lon })));
+    const out = [];
+    bodies.forEach(tb => {
+      if (tb.lon == null || !Number.isFinite(tb.lon)) return;
+      natal.forEach(nb => {
+        let d = Math.abs(this.norm360(tb.lon - nb.lon)); if (d > 180) d = 360 - d;
+        this.ASPECTS.forEach(([ang, nm]) => {
+          const off = Math.abs(d - ang), max = this.CX_ORB[nm];
+          if (off > max) return;
+          const asp = this.aspName(nm);
+          out.push({ mover: tb.name, moverGlyph: tb.glyph, key: nb.key, natalGlyph: nb.glyph, asp: nm, orb: off, max, fast: tb.name === 'Moon',
+            c: (this.ASP_COLOR[nm] || ['var(--dim)'])[0], label: tb.name + ' ' + asp + ' natal ' + nb.label, short: tb.name + ' ' + asp + ' ' + nb.label });
+        });
+      });
+    });
+    out.sort((a, b) => a.orb / a.max - b.orb / b.max);
+    return { bodies, contacts: out.slice(0, 12) };
   }
   /* THE SHEET. Opened from the widget: every passage, every stay in the
      design and the years ahead in full, then the Oracle's reading of the
@@ -23491,7 +23817,7 @@ class Component extends DCLogic {
             const csKey = [prof ? prof.birthStamp : 'legacy', expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
-              this._csModel = { key: csKey, zero, timed: !!asc, owner: prof ? prof.name : '',
+              this._csModel = { key: csKey, zero, timed: !!asc, owner: prof ? prof.name : '', natalT: this.natalDate().getTime(),
                 sub: asc ? 'equal house · ' + asc.sign + ' rising' : 'whole-sign · no birth time',
                 signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
                 bodies: placedRows.map(r => {
@@ -23499,6 +23825,7 @@ class Component extends DCLogic {
                   return { key, name: r.name, label: this.pointLabel(r), glyph: r.glyph, lon: r.lon, deg: Math.floor(r.deg), sign: r.sign,
                     ring, rad, lvl: ring === 1 ? Math.round((234 - rad) / 40) : Math.round((136 - rad) / 20), cat: r.category,
                     c: this.CAT_COLOR[r.category] || 'var(--ac)', retro: !!r.retro, core: r.group === 'astral body',
+                    pos: this.dmsOf(r.deg) + ' ' + r.sign, house: houseOf(r),
                     tip: this.pointTooltip(r, 'House ' + houseOf(r)) };
                 }),
                 angles: asc ? [['ASC', 'Ascendant', asc.asc], ['DC', 'Descendant', asc.asc + 180], ['MC', 'Midheaven', asc.mc], ['IC', 'IC', asc.mc + 180]]
