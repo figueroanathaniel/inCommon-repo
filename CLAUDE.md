@@ -4197,8 +4197,8 @@ a band under it, from `numerology()` and the core's `personalYear()`, masters
 in `--ac2-hi`. Every mark has a minimum width so a short stay never paints as a
 sliver.
 
-**Tapping opens the sheet** (`cyOpen`, `cycleSheetVals()`, `cy*`), a dialog
-in both shells. The written reading comes first, because it is what the tap
+**Tapping opens the sheet** (`cyOpen`, `cycleSheetVals()`, `cy*`), a full
+screen dialog in both shells with the scene's stage beside or above it. The written reading comes first, because it is what the tap
 was for: the sample, sign in, consent and gate states, then the ledger
 (`cyDash()`, unchanged). Under it the passages list, the Design list (six,
 then all), and the Personal Years. The gate is `lumGateVals('cycle', 'cg')`,
@@ -4206,6 +4206,77 @@ written as its own `cg*` keys so it cannot collide with the Oracle's; a return
 from Stripe for it lands on `#/today` with the sheet open. `cycleSheetAutoAsk()`
 asks for the reading 400ms after the sheet opens, the same rule the Oracle's
 standard reading follows.
+
+**It is drawn in depth, and the flat chart is its fallback** (the owner, 19
+October 2026: "make the audit cycle completely interactive like it was made on
+Unreal Engines. It should breathe with the reader's curiosity"). `app/cycle-scene.js`
+(shell layer, global `CycleScene`) draws the widget's chart and the sheet's
+stage as one three.js landscape: the Stars lane is an arch of light per passage,
+as tall as its `weight`, with a pillar at each exact date; the Design lane is lit
+slabs (own gate) and outlines (a channel); the Numbers lane is a tile per year as
+tall as its Personal Year with the Pinnacles as a band; Now is a column of light.
+In the full view a wheel of the sky hangs in the corner and turns with the
+instant the reader is looking at, a line from each slow body to the natal point
+it touches. The reader drags (or uses the arrow keys) through the years, hovers
+a passage to name it, taps one for a card that scrolls to its ledger, zooms with
+the wheel, a pinch or the + and minus buttons, and Now brings the probe back.
+Several things are easy to undo:
+
+- **It computes nothing.** Every passage, stay, year and pinnacle arrives in
+  `cycleSceneModel()`, built from the same scan the lists read, and the four
+  positions on the wheel come through `opts.lonAt`, the app's `cyLon`. Nothing
+  new leaves the device and no outside origin was added: three.js is the copy
+  the cover vendors, imported with `import('./three.module.js')` on first use,
+  which resolves beside the page in the source shell, the bundle and the store
+  apps alike.
+- **One renderer, two hosts.** `[data-cy-scene="mini"]` in the widget and
+  `[data-cy-scene="full"]` on the sheet's stage. `cycleSceneSync()`, from the
+  one `componentDidUpdate`, moves the one canvas to whichever is in the
+  document (the sheet's first) and retries a few times 60ms apart, because the
+  runtime commits an `sc-if` a tick after the hook.
+- **It reads its palette off the page, and only once it is in the page.** The
+  first pass read the tokens while its root was out of the document, got empty
+  computed styles, and drew the whole scene in fallback grey. `readTokens()`
+  returns null until the root is connected, the scene keeps Deep Field numbers
+  for that frame, and `attach()` reads again. A theme change reaches it through
+  the same identity key `skySync` uses.
+- **It falls back rather than failing.** WebGL 2 missing (`CycleScene.supported()`),
+  three.js not loading, or a lost context sets `cwSceneFail`, and the flat chart
+  and the sheet's plain header come back (`cwChartOn`, `cySceneOff`).
+- **The sheet is full screen, and the shell's dialog rules had to be told.**
+  `[data-dt-modals] [role=dialog]` caps every desktop dialog at 620px and
+  `[data-vt-modals]` makes every phone dialog a rounded bottom sheet, so the
+  stage came out 180px wide. The overlay and the dialog carry `data-immersive`,
+  which the head stylesheet exempts. Desktop: the stage beside a 340 to 440px
+  panel. Phone: the stage over the panel, at 52vh.
+- **The timeline is a slider.** `role="slider"`, `aria-valuetext` naming the
+  date, the passages under way, the gate and the Personal Year, written directly
+  by the scene (never through state). Keyboard focus holds the probe where the
+  reader left it; a click focuses the slider too, and that must NOT hold it, or
+  a mouse reader's probe never goes back to now. The focus ring is keyboard only
+  for the same reason. The host is `data-noswipe`, and the widget's canvas is
+  `touch-action: pan-y`, so a sideways drag scrubs and a vertical one scrolls.
+- **Breathing is one number.** Curiosity rises with pointer movement, hovering,
+  dragging and keys and decays over eight seconds; it raises the glow, the
+  bloom, the dust's pull toward the pointer and leans the camera in. Under
+  reduced motion nothing animates: frames are drawn on change and the camera
+  cuts.
+- **It runs only where it is seen.** An IntersectionObserver and the page's
+  visibility gate the loop (the phone draws every section at once), it drops to
+  30 frames a second at rest, and a quality ladder lowers the pixel ratio and
+  then the bloom when frames run long.
+- **The passages the audit reads are the lit ones.** The full view draws all
+  twenty years of passages, and drawn alike they summed to white; the rest stand
+  behind at 0.4.
+
+Driven in Chromium on SwiftShader (`sdrive.js`, 42 rows over both shells): it
+paints (pixels read back), hover names a passage, a drag and the keys move the
+probe and its readout, a sideways drag does not turn the page, the probe returns
+to now, Enter and a tap open the full view with the same canvas, the wheel
+shows four bodies, a tap opens the card and its button reaches the passage,
+zoom and Now, all eight theme cases at 1440 and 390 with the scene repainting
+from each palette, the fallback without WebGL and with three.js blocked, and
+reduced motion drawn and still. The flat chart's own drive runs without WebGL.
 
 **The dates are free and computed on the device; only the reading is sold.**
 `cycleWindows()` finds every passage of Saturn, Uranus, Neptune and Pluto across

@@ -51,7 +51,7 @@ var PRECACHE = [
   './profile-manager.js', './placement-content.js', './numerology-content.js', './number-matrix.js', './timing-lexicon.js', './angel-numbers.js', './animal-symbolism.js',
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js', './minor-body-elements.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
-  './birth-time.js', './astronomy-engine-2.1.19.min.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',
+  './birth-time.js', './astronomy-engine-2.1.19.min.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js', './cycle-scene.js',
   './people-library.js', './pair-cache.js', './analytics.js',
   './forecast/newsEngine.js', './forecast/news/synastryTemplates.js', './forecast/news/multiChart.js',
   './forecast/news/skyWire.js', './forecast/news/lint.js', './forecast/feedBuilder.js',

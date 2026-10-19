@@ -102,6 +102,9 @@ const LAYERS = {
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
     'oki-api.js', 'oki-post-processor.js', 'oki-prompt-builder.js', 'oki-voice-v144.js',
     'sw.js',
+    /* The Cycle Audit's scene. It draws what the app hands it and computes
+       nothing: no ephemeris, no chart, no writing beyond its labels. */
+    'cycle-scene.js',
 
     /* THE DUAL-BACKEND EPHEMERIS SYSTEM (V1.0.0), unwired like the Oki
        modules above rather than mechanics like ephemeris-cache.js just
