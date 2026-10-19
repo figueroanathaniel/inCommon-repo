@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.0';
+  var VERSION = '2.9.1';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1776,9 +1776,15 @@
        request fails for any reason but a 401, 403 or 404 (no signal, a
        timeout), so a Log Out on a weak connection left the reader signed in
        and the cover offered them straight back in. The local sign out needs
-       no network. */
+       no network.
+       LOG OUT ENDS THIS DEVICE'S SESSION AND NO OTHER. supabase-js signs out
+       globally by default, which revoked every session the account held, so
+       Logging Out on a phone signed the laptop out too and its next request
+       failed with "Refresh Token Not Found" (owner, 18 October 2026). The
+       scope is 'local': this session is revoked on the server, the others
+       carry on. */
     signOut: function () {
-      return normalize(client.auth.signOut()).then(function (r) {
+      return normalize(client.auth.signOut({ scope: 'local' })).then(function (r) {
         if (r.ok) return r;
         return normalize(client.auth.signOut({ scope: 'local' })).then(function () { return r; });
       });
