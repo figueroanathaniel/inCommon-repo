@@ -1230,6 +1230,12 @@
       await sleep(2100);
 
       /* ---- G11: the charts describe themselves ---- */
+      /* The wheel opens in 3D now, so the SVG these rows read is the 2D view:
+         choose it, as a reader would, and measure it. G11c then holds the 3D
+         stage to the same description, and the view goes back to the default. */
+      var view0 = wp.__incommonApp.state.chartView;
+      wp.__incommonApp.setState({ chartView: '2d' });
+      await sleep(700);
       var wheel = dp.querySelector('svg[aria-roledescription="astrological chart"]');
       var sumId = wheel && wheel.getAttribute('aria-describedby');
       var sumEl = sumId ? dp.getElementById(sumId) : null;
@@ -1244,6 +1250,21 @@
       t('G11b', 'The summary leaves the accessibility tree while a detail sheet is open',
         'true', sumEl2 ? sumEl2.getAttribute('aria-hidden') : 'summary gone');
       wp.__incommonApp.setState({ dpSel: null });
+      await sleep(400);
+      /* The 3D and Orbital stage carries the same role description and points
+         at the same summary. Without WebGL 2 there is no stage and no switch,
+         and the 2D wheel above is all there is, which is the row passing. */
+      wp.__incommonApp.setState({ chartView: '3d' });
+      await sleep(900);
+      var deepOn = !!(wp.ChartScene && wp.ChartScene.supported() && !wp.__incommonApp.state.csFail);
+      var stage = dp.querySelector('[data-cs-scene]');
+      t('G11c', 'The chart in depth describes itself as the wheel does',
+        { roledesc: 'astrological chart', summary: 'incommon-wheel-summary', focusable: '0', named: true },
+        deepOn
+          ? { roledesc: stage && stage.getAttribute('aria-roledescription'), summary: stage && stage.getAttribute('aria-describedby'),
+              focusable: stage && stage.getAttribute('tabindex'), named: !!(stage && /arrow keys/i.test(stage.getAttribute('aria-label') || '')) }
+          : { roledesc: 'astrological chart', summary: 'incommon-wheel-summary', focusable: '0', named: !!wheel });
+      wp.__incommonApp.setState({ chartView: view0 });
       await sleep(400);
 
       /* ---- G14: icon only controls ---- */
