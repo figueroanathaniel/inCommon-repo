@@ -363,7 +363,7 @@
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.22,.61,.36,1)';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');

@@ -243,7 +243,7 @@
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.22,.61,.36,1)';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -956,7 +956,9 @@
   P.showRead = function (on) {
     if (on && this.probeT == null && this.model) this.setProbe(this.model.now);
     if (on && this.card && (this.W || 0) < 560) on = false;
-    this.el.read.style.opacity = on ? '1' : '0';
+    /* a readout is a unit of the scene: it waits for the reveal (render) */
+    this._readOn = on;
+    this.el.read.style.opacity = on && this.shown ? '1' : '0';
     this.el.read.style.bottom = this.card ? (this.el.card.offsetHeight + 22) + 'px' : '12px';
   };
 
@@ -1338,6 +1340,8 @@
     if (!this.shown && this.fontsOk) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
+      var me = this;
+      setTimeout(function () { if (me._readOn && !me.failed) me.el.read.style.opacity = '1'; }, 600);
       if (this.o.onReady) this.o.onReady();
     }
   };

@@ -4883,6 +4883,45 @@ desktop has none. Filmed on a throttled connection: the stage holds its place
 with Loading for about three seconds, then the finished scene, and the flat
 wiring is never visible.
 
+## The 3D scenes fade in from behind Loading, and nothing else on the stage arrives first
+Asked for by the owner on 19 October 2026: "The 3D objects should stay behind a
+loading screen until they fade in for effect. Never show the units before
+they're a utility." Loading was already in place, but it was an `sc-if` that
+vanished the frame the scene reported ready, and every control on the stage
+popped in with it at full strength while the canvas was still dark.
+
+**Loading is a veil now, not a removal.** Each stage's `role="status"` stays in
+the markup while the deep view is drawn and dissolves over 0.8s
+(`csVeilO`/`csVeilV`, and `hs`, `cw`, `cy` the same), ending at
+`visibility: hidden` so it leaves the accessibility tree and stops taking the
+pointer. Under it the canvas fades up over 1.2s (all three scene modules), so
+the scene comes through the veil rather than appearing after it.
+
+**The units wait for the scene** (`csUiO`/`csUiV`, `hsUiO`/`hsUiV`,
+`cyUiO`/`cyUiV`). On the astrology stage: the corner brackets, the stage
+outline, Free look, Today's sky, the zoom cluster, the body panel under the
+stage and the Chart view switch. On the wiring: the same, plus The sky now,
+the Personality and Design key, the panel and the Wiring layer control. On the
+Cycle Audit's sheet: zoom and Now (Close is never held back, because closing
+works from the first frame). While the scene loads they are `opacity: 0;
+visibility: hidden`, so they hold their place in the layout, take no focus and
+no press, and are not read out; once it is live they fade in over 0.6s after a
+0.6s delay, which lands them as the canvas finishes. In the 2D view they are a
+utility at once (`!deep || live`), so the flat wheel and wiring are unchanged,
+and without WebGL the switch is not drawn at all, as before. The cycle scene's
+own readout waits for the reveal too (`_readOn` in `showRead()`).
+
+**Hide by visibility, never by `sc-if`.** Removing a control while the scene
+loads would move the stage when it came back, and a view switch that appears
+above a stage pushes the stage down under the reader. Under reduced motion the
+global rule makes every one of these fades instant.
+
+Driven on SwiftShader, both shells: astrology on the desktop, the wiring on the
+desktop and the phone, the Cycle Audit widget on Today and its sheet opened
+before the scene was live. In every one the order was the veil alone, the
+canvas through the veil, then the units; with WebGL off the 2D wheel came up
+with its zoom cluster showing and no veil.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
