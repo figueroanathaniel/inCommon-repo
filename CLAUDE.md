@@ -4783,6 +4783,47 @@ step and Enter opens, the layer and the sky now reach the scene, the morph runs,
 press and wakes from its Sacral, a theme change repaints, and with WebGL off or
 three.js blocked the SVG comes back with no switch.
 
+## The Human Design readings are a deck, and the full text stays
+Asked for by the owner on 19 October 2026: "For the drop down menu with lots of
+text, make it scrollable, ux centered, fit it into the concept of the new page.
+Keep the long text option open as well. Make it fit and make it engaging,
+dynamic, fun." The reading under the choice of one (My Type, Chart, Mood and the
+rest, `hdTab`) is six paragraphs of fifty to a hundred and fifty words and four
+lists, which on a phone was most of a metre of scrolling.
+
+**The choice of one is still a dropdown**, by "A row of pills becomes a dropdown
+when it is a choice of one". Its menu contains its own scroll
+(`overscroll-behavior: contain`) and ticks the current choice; the Throughline
+filter shares that markup and got the tick with it. The reading's title and
+kicker moved out of the card to sit beside it.
+
+**Cards are the default; Full text is the old layout, one press away**, kept
+per device (`hdRead`, `incommon.hd.read`). `hdDeckCards()` makes a card of each
+paragraph with its first sentence set as the lead, splits a paragraph past
+ninety words at the sentence nearest its middle so the cards are of a size, and
+makes a card of each of the four lists. **The cards are the same sentences in
+the same order**: nothing is dropped or rewritten, and the drive asserts every
+sentence of the reading is on a card. The deck is a native sideways scroll
+with snap, the next card showing at the edge (which is the whole invitation to
+swipe, by "Discovery belongs to the reader"), a progress bar, a counter, the
+arrows either side, and the arrow keys, Home and End on the focused deck.
+A card is capped in height and scrolls inside itself past the cap.
+
+**The card in front is state (`hdCard`), written from the deck's scroll only
+when the index changes**, never per frame. A new reading starts at its first
+card. A card behind the one in front is set back by scale and a quieter border,
+never by opacity, because `contrastFails()` reads an element's own opacity and
+not its ancestors', so a dimmed card would fail its readers while passing the
+gate. The deck is `data-noswipe` and scrolls sideways, so the phone's section
+chain never takes a swipe that starts on it.
+
+Measured over the Human Design screen with the harness's own `contrastFails()`
+and `tapTargets()`, deck on screen: four identities, hardened and not, 1440 and
+375, all 32 cases clean, 103 to 104 elements each. Driven in both shells:
+next, a hand scroll and the keys each move the card in front, every sentence is
+on a card, the menu scrolls and ticks, a new reading starts at card one, and
+Full text is the long layout and is kept.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five

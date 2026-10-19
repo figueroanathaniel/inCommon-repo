@@ -139,6 +139,8 @@ input[type="date"]{color-scheme:dark}
 @keyframes vtSheet{from{transform:translateY(100%)}to{transform:none}}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
 [data-cs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
+[data-hd-deck]::-webkit-scrollbar{display:none}
+[data-hd-deck]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:2px;border-radius:var(--rad)}
 [data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
@@ -1093,45 +1095,99 @@ input[type="date"]{color-scheme:dark}
       </div>
     </div>
     <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex;flex-direction:column;gap:13px">
-        <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
-          <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
-          <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
-            <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
-            <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
-              <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
-                <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
-          <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
             <div style="font:400 22px/1.2 var(--fd);color:var(--tx)">{{ hdTeachTitle }}</div>
             <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ hdTeachKicker }}</div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:14px">
-            <sc-for list="{{ hdParas }}" as="p" hint-placeholder-count="6">
-              <div style="max-width:58ch;font:400 14px/1.8 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div>
-            </sc-for>
+          <div style="position:relative;flex:none;display:flex;justify-content:flex-end">
+            <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+            <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+              <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+                <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
+                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}"><span style="flex:1">{{ o.label }}</span><span aria-hidden="true" style="flex:none;font:700 12px var(--fu);color:var(--ac)">{{ o.tick }}</span></button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
-            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
-            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-              <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
-                <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
-                  <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ q.accent }}">{{ q.label }}</div>
-                  <sc-for list="{{ q.items }}" as="it" hint-placeholder-count="4">
-                    <div style="display:flex;gap:8px">
-                      <span style="flex:none;color:var(--ac2-hi);font:400 12px var(--fb)">•</span>
-                      <span style="flex:1;font:400 12px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+        </div>
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Reading layout" style="align-self:flex-start;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <sc-for list="{{ hdReadModes }}" as="m" hint-placeholder-count="2">
+            <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;padding:0 18px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11.5px var(--fu);letter-spacing:.06em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hdReadCards }}" hint-placeholder-val="{{ true }}">
+          <!-- THE READINGS AS A DECK (owner, 19 October 2026): the same sentences as the
+               full text, a paragraph to a card, the next card showing at the edge. -->
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div data-hd-deck="1" data-noswipe="1" tabindex="0" role="region" aria-roledescription="carousel" aria-label="{{ hdDeckAria }}" onScroll="{{ hdDeckScroll }}" onKeyDown="{{ hdDeckKeys }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 4px;padding:8px 4px 16px;margin:0 -4px;scrollbar-width:none;outline:none;overscroll-behavior-x:contain">
+              <sc-for list="{{ hdDeck }}" as="c" hint-placeholder-count="3">
+                <div role="group" aria-roledescription="slide" aria-label="{{ c.aria }}" onClick="{{ c.go }}" style="flex:0 0 min(86%,420px);min-height:220px;max-height:62vh;scroll-snap-align:start;box-sizing:border-box;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:18px 18px 4px;border:1px solid {{ c.bd }};border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:{{ c.glow }};transform:{{ c.lift }};transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s ease,border-color .3s ease;animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ c.delay }}">
+                  <span aria-hidden="true" style="position:absolute;right:10px;top:-6px;font:400 84px/1 var(--fd);color:transparent;-webkit-text-stroke:1px rgba(var(--atmc),.32);pointer-events:none;user-select:none">{{ c.num }}</span>
+                  <sc-if value="{{ c.para }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:relative;display:flex;align-items:baseline;gap:8px">
+                      <span style="font:700 10.5px var(--fu);letter-spacing:.16em;color:var(--ac2-hi)">{{ c.num }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ c.numOf }}</span>
                     </div>
-                  </sc-for>
+                    <sc-if value="{{ c.leadOn }}" hint-placeholder-val="{{ true }}">
+                      <div style="position:relative;font:400 19px/1.38 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.lead }}</div>
+                    </sc-if>
+                    <div style="position:relative;flex:1;min-height:0;overflow-y:auto;padding-bottom:18px;font:400 14px/1.75 var(--fb);color:var(--tx);text-wrap:pretty;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)">{{ c.body }}</div>
+                  </sc-if>
+                  <sc-if value="{{ c.quad }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:relative;display:flex;flex-direction:column;gap:3px">
+                      <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working With This</span>
+                      <span style="font:400 24px/1.2 var(--fd);color:{{ c.accent }}">{{ c.label }}</span>
+                    </div>
+                    <div style="position:relative;flex:1;min-height:0;overflow-y:auto;padding-bottom:18px;display:flex;flex-direction:column;gap:11px">
+                      <sc-for list="{{ c.items }}" as="it" hint-placeholder-count="3">
+                        <div style="display:flex;gap:10px">
+                          <span aria-hidden="true" style="flex:none;margin-top:7px;width:7px;height:7px;border-radius:50%;background:{{ c.accent }};box-shadow:0 0 10px {{ c.accent }}"></span>
+                          <span style="flex:1;font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-for>
             </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onClick="{{ hdDeckPrev }}" aria-label="Previous card" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--sf2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:{{ hdDeckPrevC }}">&#8249;</button>
+              <div aria-hidden="true" style="flex:1;height:4px;border-radius:4px;background:var(--sf2);overflow:hidden">
+                <div style="height:100%;width:{{ hdDeckPct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi));box-shadow:0 0 12px rgba(var(--atmc),.9);transition:width .5s cubic-bezier(.22,1,.36,1)"></div>
+              </div>
+              <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;font-variant-numeric:tabular-nums;color:var(--mut)">{{ hdDeckCount }}</span>
+              <button onClick="{{ hdDeckNext }}" aria-label="Next card" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--sf2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:{{ hdDeckNextC }}">&#8250;</button>
+            </div>
           </div>
-        </div>
+        </sc-if>
+        <sc-if value="{{ hdReadFull }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ hdParas }}" as="p" hint-placeholder-count="6">
+                <div style="max-width:58ch;font:400 14px/1.8 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+                <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
+                  <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
+                    <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ q.accent }}">{{ q.label }}</div>
+                    <sc-for list="{{ q.items }}" as="it" hint-placeholder-count="4">
+                      <div style="display:flex;gap:8px">
+                        <span style="flex:none;color:var(--ac2-hi);font:400 12px var(--fb)">•</span>
+                        <span style="flex:1;font:400 12px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
       </div>
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -1691,7 +1747,7 @@ input[type="date"]{color-scheme:dark}
               <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
               <div role="menu" aria-label="Filter timeline" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
                 <sc-for list="{{ tlFilters }}" as="o" hint-placeholder-count="6">
-                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}"><span style="flex:1">{{ o.label }}</span><span aria-hidden="true" style="flex:none;font:700 12px var(--fu);color:var(--ac)">{{ o.tick }}</span></button>
                 </sc-for>
               </div>
             </sc-if>
@@ -6747,45 +6803,99 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
         <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;flex-direction:column;gap:13px">
-            <div style="position:relative;align-self:flex-end;display:flex;justify-content:flex-end">
-              <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
-              <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
-                <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
-                <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
-                  <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
-                    <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
-                  </sc-for>
-                </div>
-              </sc-if>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
-              <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
                 <div style="font:400 22px/1.2 var(--fd);color:var(--tx)">{{ hdTeachTitle }}</div>
                 <div style="font:italic 400 12px/1.5 var(--fb);color:var(--dim)">{{ hdTeachKicker }}</div>
               </div>
-              <div style="display:flex;flex-direction:column;gap:14px">
-                <sc-for list="{{ hdParas }}" as="p" hint-placeholder-count="6">
-                  <div style="max-width:58ch;font:400 14px/1.8 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div>
-                </sc-for>
+              <div style="position:relative;flex:none;display:flex;justify-content:flex-end">
+                <button data-dd-trigger="1" onClick="{{ hdDdGo }}" aria-haspopup="menu" aria-expanded="{{ hdDdExpanded }}" aria-label="Human Design readings, {{ hdDdLabel }} selected" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 14px 0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11.5px var(--fu);color:var(--tx)">{{ hdDdLabel }}<span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac2-hi)">&#9662;</span></button>
+                <sc-if value="{{ hdDdOpen }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
+                  <div role="menu" aria-label="Human Design readings" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
+                    <sc-for list="{{ hdTabs }}" as="o" hint-placeholder-count="6">
+                      <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}"><span style="flex:1">{{ o.label }}</span><span aria-hidden="true" style="flex:none;font:700 12px var(--fu);color:var(--ac)">{{ o.tick }}</span></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
               </div>
-              <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
-                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
-                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-                  <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
-                    <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
-                      <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ q.accent }}">{{ q.label }}</div>
-                      <sc-for list="{{ q.items }}" as="it" hint-placeholder-count="4">
-                        <div style="display:flex;gap:8px">
-                          <span style="flex:none;color:var(--ac2-hi);font:400 12px var(--fb)">•</span>
-                          <span style="flex:1;font:400 12px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+            </div>
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Reading layout" style="align-self:flex-start;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+              <sc-for list="{{ hdReadModes }}" as="m" hint-placeholder-count="2">
+                <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;padding:0 18px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11.5px var(--fu);letter-spacing:.06em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hdReadCards }}" hint-placeholder-val="{{ true }}">
+              <!-- THE READINGS AS A DECK (owner, 19 October 2026): the same sentences as the
+                   full text, a paragraph to a card, the next card showing at the edge. -->
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div data-hd-deck="1" data-noswipe="1" tabindex="0" role="region" aria-roledescription="carousel" aria-label="{{ hdDeckAria }}" onScroll="{{ hdDeckScroll }}" onKeyDown="{{ hdDeckKeys }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 4px;padding:8px 4px 16px;margin:0 -4px;scrollbar-width:none;outline:none;overscroll-behavior-x:contain">
+                  <sc-for list="{{ hdDeck }}" as="c" hint-placeholder-count="3">
+                    <div role="group" aria-roledescription="slide" aria-label="{{ c.aria }}" onClick="{{ c.go }}" style="flex:0 0 clamp(300px,31%,440px);min-height:240px;max-height:440px;scroll-snap-align:start;box-sizing:border-box;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:18px 18px 4px;border:1px solid {{ c.bd }};border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:{{ c.glow }};transform:{{ c.lift }};transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s ease,border-color .3s ease;animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ c.delay }}">
+                      <span aria-hidden="true" style="position:absolute;right:10px;top:-6px;font:400 84px/1 var(--fd);color:transparent;-webkit-text-stroke:1px rgba(var(--atmc),.32);pointer-events:none;user-select:none">{{ c.num }}</span>
+                      <sc-if value="{{ c.para }}" hint-placeholder-val="{{ true }}">
+                        <div style="position:relative;display:flex;align-items:baseline;gap:8px">
+                          <span style="font:700 10.5px var(--fu);letter-spacing:.16em;color:var(--ac2-hi)">{{ c.num }}</span>
+                          <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ c.numOf }}</span>
                         </div>
-                      </sc-for>
+                        <sc-if value="{{ c.leadOn }}" hint-placeholder-val="{{ true }}">
+                          <div style="position:relative;font:400 19px/1.38 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.lead }}</div>
+                        </sc-if>
+                        <div style="position:relative;flex:1;min-height:0;overflow-y:auto;padding-bottom:18px;font:400 14px/1.75 var(--fb);color:var(--tx);text-wrap:pretty;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent)">{{ c.body }}</div>
+                      </sc-if>
+                      <sc-if value="{{ c.quad }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:relative;display:flex;flex-direction:column;gap:3px">
+                          <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working With This</span>
+                          <span style="font:400 24px/1.2 var(--fd);color:{{ c.accent }}">{{ c.label }}</span>
+                        </div>
+                        <div style="position:relative;flex:1;min-height:0;overflow-y:auto;padding-bottom:18px;display:flex;flex-direction:column;gap:11px">
+                          <sc-for list="{{ c.items }}" as="it" hint-placeholder-count="3">
+                            <div style="display:flex;gap:10px">
+                              <span aria-hidden="true" style="flex:none;margin-top:7px;width:7px;height:7px;border-radius:50%;background:{{ c.accent }};box-shadow:0 0 10px {{ c.accent }}"></span>
+                              <span style="flex:1;font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
                     </div>
                   </sc-for>
                 </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <button onClick="{{ hdDeckPrev }}" aria-label="Previous card" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--sf2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:{{ hdDeckPrevC }}">&#8249;</button>
+                  <div aria-hidden="true" style="flex:1;height:4px;border-radius:4px;background:var(--sf2);overflow:hidden">
+                    <div style="height:100%;width:{{ hdDeckPct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi));box-shadow:0 0 12px rgba(var(--atmc),.9);transition:width .5s cubic-bezier(.22,1,.36,1)"></div>
+                  </div>
+                  <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;font-variant-numeric:tabular-nums;color:var(--mut)">{{ hdDeckCount }}</span>
+                  <button onClick="{{ hdDeckNext }}" aria-label="Next card" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--sf2);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:{{ hdDeckNextC }}">&#8250;</button>
+                </div>
               </div>
-            </div>
+            </sc-if>
+            <sc-if value="{{ hdReadFull }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px 17px">
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <sc-for list="{{ hdParas }}" as="p" hint-placeholder-count="6">
+                    <div style="max-width:58ch;font:400 14px/1.8 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:14px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac)">Working With This</div>
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+                    <sc-for list="{{ hdQuads }}" as="q" hint-placeholder-count="4">
+                      <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 14px">
+                        <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ q.accent }}">{{ q.label }}</div>
+                        <sc-for list="{{ q.items }}" as="it" hint-placeholder-count="4">
+                          <div style="display:flex;gap:8px">
+                            <span style="flex:none;color:var(--ac2-hi);font:400 12px var(--fb)">•</span>
+                            <span style="flex:1;font:400 12px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ it.t }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
           </div>
         </sc-if>
     </div>
@@ -7073,7 +7183,7 @@ input[type="date"]{color-scheme:dark}
               <div onClick="{{ ddClose }}" aria-hidden="true" style="position:fixed;inset:0;z-index:60"></div>
               <div role="menu" aria-label="Filter timeline" ref="{{ ddMenuRef }}" onKeyDown="{{ ddKeys }}" style="position:absolute;right:0;top:calc(100% + 6px);z-index:61;box-sizing:border-box;min-width:210px;max-width:calc(100vw - 36px);max-height:min(40vh,300px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--bd);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));box-shadow:0 14px 34px rgba(0,0,0,.5)">
                 <sc-for list="{{ tlFilters }}" as="o" hint-placeholder-count="6">
-                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}">{{ o.label }}</button>
+                  <button role="menuitemradio" aria-checked="{{ o.on }}" onClick="{{ o.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:8px;background:{{ o.mbg }};font:600 12px var(--fu);color:{{ o.mc }}"><span style="flex:1">{{ o.label }}</span><span aria-hidden="true" style="flex:none;font:700 12px var(--fu);color:var(--ac)">{{ o.tick }}</span></button>
                 </sc-for>
               </div>
             </sc-if>
@@ -10797,7 +10907,7 @@ class Component extends DCLogic {
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
     chartView: '3d', csFail: false, csFocus: null, csToday: false,
-    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates' };
+    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0 };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11197,6 +11307,8 @@ class Component extends DCLogic {
       if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
       const hv = localStorage.getItem('incommon.hd.view');
       if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
+      const hr = localStorage.getItem('incommon.hd.read');
+      if (hr === 'cards' || hr === 'full') this.setState({ hdRead: hr });
     } catch (e) {}
     /* Initialize ephemeris router (V1.0.0): dual-backend system (Swiss WASM + fallback).
        Loads in background; app is interactive before WASM initializes. */
@@ -16615,7 +16727,9 @@ class Component extends DCLogic {
   }
   hdTeachVals() {
     const tabs = this.hdTeachings();
-    if (!tabs.length) return { hdTeachOn: false, hdTabs: [], hdParas: [], hdQuads: [], hdDdLabel: '', hdDdOpen: false, hdDdExpanded: 'false', hdDdGo: () => {} };
+    if (!tabs.length) return { hdTeachOn: false, hdTabs: [], hdParas: [], hdQuads: [], hdDdLabel: '', hdDdOpen: false, hdDdExpanded: 'false', hdDdGo: () => {},
+      hdReadModes: [], hdReadCards: false, hdReadFull: false, hdDeck: [], hdDeckCount: '', hdDeckPct: '0%', hdDeckPrev: () => {}, hdDeckNext: () => {},
+      hdDeckPrevC: 'var(--dim)', hdDeckNextC: 'var(--dim)', hdDeckAria: '', hdDeckScroll: () => {}, hdDeckKeys: () => {} };
     const cur = tabs.find(t => t.key === this.state.hdTab) || tabs[0];
     return {
       hdTeachOn: true,
@@ -16623,8 +16737,8 @@ class Component extends DCLogic {
         const on = t.key === cur.key;
         return { label: t.label, on,
           mbg: on ? 'rgba(47,255,143,.12)' : 'transparent',
-          mc: on ? 'var(--ac)' : 'var(--tx)',
-          go: () => this.setState({ hdTab: t.key, ddOpen: null }) };
+          mc: on ? 'var(--ac)' : 'var(--tx)', tick: on ? '\u2713' : '',
+          go: () => { this.setState({ hdTab: t.key, ddOpen: null, hdCard: 0 }); this.hdDeckTo(0, true); } };
       }),
       hdDdLabel: cur.label,
       hdDdOpen: this.state.ddOpen === 'hd',
@@ -16632,7 +16746,110 @@ class Component extends DCLogic {
       hdDdGo: () => this.setState({ ddOpen: this.state.ddOpen === 'hd' ? null : 'hd' }),
       hdTeachTitle: cur.title, hdTeachKicker: cur.kicker,
       hdParas: cur.paragraphs.map(t => ({ t })),
-      hdQuads: cur.quads.map(q => ({ label: q.label, accent: q.accent, items: q.items.map(t => ({ t })) }))
+      hdQuads: cur.quads.map(q => ({ label: q.label, accent: q.accent, items: q.items.map(t => ({ t })) })),
+      ...this.hdDeckVals(cur)
+    };
+  }
+  /* ---- The readings as a deck (owner, 19 October 2026) ----------------------
+
+     "For the drop down menu with lots of text, make it scrollable, ux
+     centered, fit it into the concept of the new page. Keep the long text
+     option open as well. Make it fit and make it engaging, dynamic, fun." The
+     reading under the choice of one is six paragraphs of fifty to a hundred
+     and fifty words and four lists, which on a phone was most of a metre of
+     scrolling. So it is a deck now: each paragraph a card, its first sentence
+     set as the lead, a paragraph past ninety words split at the sentence
+     nearest its middle so every card fits one height, and the four lists as
+     cards of their own. The next card shows at the edge, which is the whole of
+     the invitation to swipe. Full text is the old layout, one press away and
+     kept per device (incommon.hd.read). Nothing in the writing changes: the
+     cards are the same sentences in the same order.
+
+     The card in front is state (hdCard), written from the deck's own scroll
+     only when the index changes, never per frame. */
+  hdDeckCards(cur) {
+    const key = cur.key + '|' + cur.paragraphs.length + '|' + (cur.paragraphs[0] || '').length;
+    if (this._deckKey === key) return this._deck;
+    const sentences = t => String(t).match(/[^.!?]+[.!?]+["')\u2019\u201d]*\s*|[^.!?]+$/g) || [String(t)];
+    const words = t => t.trim().split(/\s+/).length;
+    const cards = [];
+    cur.paragraphs.forEach((p, pi) => {
+      const ss = sentences(p).map(x => x.trim()).filter(Boolean);
+      let parts = [ss];
+      if (words(p) > 90 && ss.length > 2) {
+        let best = 1, bd = 1e9, acc = 0;
+        const total = words(p);
+        ss.forEach((x, i) => { acc += words(x); if (i < ss.length - 1 && Math.abs(acc - total / 2) < bd) { bd = Math.abs(acc - total / 2); best = i + 1; } });
+        parts = [ss.slice(0, best), ss.slice(best)];
+      }
+      parts.forEach((part, k) => cards.push({ kind: 'para', ch: pi + 1, cont: k > 0,
+        lead: k === 0 ? part[0] : '', body: (k === 0 ? part.slice(1) : part).join(' ') }));
+    });
+    cur.quads.forEach(q => cards.push({ kind: 'quad', label: q.label, accent: q.accent, items: q.items }));
+    this._deckKey = key; this._deck = cards;
+    return cards;
+  }
+  hdDeckEl() { return document.querySelector('[data-hd-deck]'); }
+  hdDeckTo(i, instant) {
+    const go = () => {
+      const el = this.hdDeckEl(), card = el && el.children[i];
+      if (!el || !card) return;
+      const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollTo({ left: card.offsetLeft - el.firstElementChild.offsetLeft, behavior: instant || rm ? 'auto' : 'smooth' });
+    };
+    if (instant) setTimeout(go, 60); else go();
+  }
+  hdDeckVals(cur) {
+    const st = this.state, cards = this.hdDeckCards(cur), n = cards.length;
+    const at = Math.max(0, Math.min(n - 1, st.hdCard || 0)), pad = x => (x < 10 ? '0' : '') + x;
+    const paras = cur.paragraphs.length;
+    const step = d => () => { const i = Math.max(0, Math.min(n - 1, at + d)); this.hdDeckTo(i); if (i !== at) this.setState({ hdCard: i }); };
+    const mode = st.hdRead === 'full' ? 'full' : 'cards';
+    return {
+      hdReadModes: [['cards', 'Cards'], ['full', 'Full text']].map(([id, label]) => ({
+        label, on: mode === id,
+        bg: mode === id ? 'rgba(var(--atmc),.34)' : 'transparent', bd: mode === id ? 'var(--ac2)' : 'transparent',
+        c: mode === id ? 'var(--tx)' : 'var(--dim)',
+        go: () => { try { localStorage.setItem('incommon.hd.read', id); } catch (e) {} this.setState({ hdRead: id, hdCard: 0 }); } })),
+      hdReadCards: mode === 'cards', hdReadFull: mode === 'full',
+      hdDeck: cards.map((c, i) => {
+        const on = i === at;
+        return { para: c.kind === 'para', quad: c.kind === 'quad',
+          num: c.kind === 'para' ? pad(c.ch) : '', numOf: c.kind === 'para' ? (c.cont ? 'continued' : 'of ' + pad(paras)) : '',
+          lead: c.lead || '', leadOn: !!c.lead, body: c.body || '',
+          label: c.label || '', accent: c.accent || 'var(--ac2-hi)', items: (c.items || []).map(t => ({ t })),
+          aria: (i + 1) + ' of ' + n,
+          bd: on ? 'var(--ac2)' : 'var(--bd)',
+          glow: on ? '0 18px 44px rgba(0,0,0,.35), 0 0 0 1px rgba(var(--atmc),.35), 0 0 34px rgba(var(--atmc),.28)' : '0 8px 22px rgba(0,0,0,.22)',
+          lift: on ? 'translateY(-3px)' : 'scale(.975)',
+          delay: Math.min(i, 6) * 70 + 'ms',
+          go: () => { if (i !== at) { this.hdDeckTo(i); this.setState({ hdCard: i }); } } };
+      }),
+      hdDeckCount: pad(at + 1) + ' / ' + pad(n), hdDeckPct: ((at + 1) / n * 100).toFixed(1) + '%',
+      hdDeckPrev: step(-1), hdDeckNext: step(1),
+      hdDeckPrevC: at > 0 ? 'var(--ac2-hi)' : 'var(--dim)', hdDeckNextC: at < n - 1 ? 'var(--ac2-hi)' : 'var(--dim)',
+      hdDeckAria: cur.title + ', ' + n + ' cards. Arrow keys move between them.',
+      hdDeckScroll: e => {
+        const el = e.currentTarget, kids = el.children;
+        if (!kids.length) return;
+        const x0 = kids[0].offsetLeft, max = el.scrollWidth - el.clientWidth;
+        let i = 0, bd = 1e9;
+        for (let k = 0; k < kids.length; k++) { const d = Math.abs(kids[k].offsetLeft - x0 - el.scrollLeft); if (d < bd) { bd = d; i = k; } }
+        if (max > 0 && el.scrollLeft >= max - 2 && kids.length) {
+          /* at the end of the deck the last card is the one being read, even
+             when it cannot snap to the start */
+          const visible = Math.round(el.clientWidth / Math.max(1, kids[0].offsetWidth));
+          if (visible > 1) i = kids.length - 1;
+        }
+        if (i !== (this.state.hdCard || 0)) this.setState({ hdCard: i });
+      },
+      hdDeckKeys: e => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') return;
+        e.preventDefault();
+        const i = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : Math.max(0, Math.min(n - 1, at + (e.key === 'ArrowRight' ? 1 : -1)));
+        this.hdDeckTo(i);
+        if (i !== at) { this.setState({ hdCard: i }); this.speak('Card ' + (i + 1) + ' of ' + n + '.', 'polite'); }
+      }
     };
   }
   /* ---- The theme boundary -------------------------------------------------
@@ -23913,7 +24130,7 @@ class Component extends DCLogic {
       /* The Throughline is the record and nothing else, now that the reading
          has moved to Spirit, so the timeline is always what this tab shows. */
       tlTimeline: true,
-      tlFilters: [['all', 'Everything'], ['event', 'Life events'], ['practice', 'Practices'], ['mood', 'Moods'], ['reading', 'Readings'], ['dream', 'Dreams'], ['transit', 'Sky']].map(([v, t]) => ({ t, on: st.tlFilter === v, c: st.tlFilter === v ? '#05060a' : 'var(--dim)', bg: st.tlFilter === v ? 'var(--ac)' : 'transparent', bd: st.tlFilter === v ? 'var(--ac)' : 'var(--bd)', label: t, mbg: st.tlFilter === v ? 'rgba(47,255,143,.12)' : 'transparent', mc: st.tlFilter === v ? 'var(--ac)' : 'var(--tx)', go: () => this.setState({ tlFilter: v, ddOpen: null }) })),
+      tlFilters: [['all', 'Everything'], ['event', 'Life events'], ['practice', 'Practices'], ['mood', 'Moods'], ['reading', 'Readings'], ['dream', 'Dreams'], ['transit', 'Sky']].map(([v, t]) => ({ t, on: st.tlFilter === v, c: st.tlFilter === v ? '#05060a' : 'var(--dim)', bg: st.tlFilter === v ? 'var(--ac)' : 'transparent', bd: st.tlFilter === v ? 'var(--ac)' : 'var(--bd)', label: t, mbg: st.tlFilter === v ? 'rgba(47,255,143,.12)' : 'transparent', mc: st.tlFilter === v ? 'var(--ac)' : 'var(--tx)', tick: st.tlFilter === v ? '\u2713' : '', go: () => this.setState({ tlFilter: v, ddOpen: null }) })),
       tlDdLabel: ({ event: 'Life events', practice: 'Practices', mood: 'Moods', reading: 'Readings', dream: 'Dreams', transit: 'Sky' })[st.tlFilter] || 'Everything',
       tlDdOpen: st.ddOpen === 'tl',
       tlDdExpanded: st.ddOpen === 'tl' ? 'true' : 'false',
