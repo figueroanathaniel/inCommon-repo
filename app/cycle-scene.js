@@ -235,7 +235,7 @@
   P.dom = function () {
     var self = this, r = document.createElement('div');
     r.setAttribute('data-cy-scene-root', '1');
-    r.style.cssText = 'position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.22),transparent 70%)';
+    r.style.cssText = 'position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:var(--bg)';
     var s = document.createElement('div');
     s.setAttribute('role', 'slider');
     s.setAttribute('tabindex', '0');
@@ -243,7 +243,7 @@
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .9s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -353,6 +353,9 @@
         self.updateRun();
         self.kick();
       }
+      /* Shown only once the faces are in, so its labels never jump. */
+      var faces = function () { if (self.fontsOk || self.failed) return; self.fontsOk = true; if (self.ready) { self.buildContent(); self.kick(); } };
+      if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') { document.fonts.ready.then(faces); setTimeout(faces, 3000); } else self.fontsOk = true;
     }, function () { self.building = false; self.fail('load'); });
   };
 
@@ -836,7 +839,8 @@
     this.goals();
     if (!this.rig || moved) {
       var g = this.goal;
-      this.rig = { x: g.x, dist: g.dist * (this.reduced ? 1 : full ? 1.9 : 1.55), elev: g.elev + (this.reduced ? 0 : full ? 0.32 : 0.55), yaw: g.yaw + (this.reduced ? 0 : full ? -0.25 : 0) };
+      /* it opens where it rests: no fly-in (owner, 19 October 2026) */
+      this.rig = { x: g.x, dist: g.dist, elev: g.elev, yaw: g.yaw };
     }
     this.lift(0.35);
     if (this.focusId && full) this.focus(this.focusId);
@@ -1331,7 +1335,7 @@
       cu.tScene.value = p.scene.texture; cu.tB1.value = p.a.texture; cu.tB2.value = p.d.texture; cu.uStr.value = 0.55 + 0.45 * this.cur;
       this.pass(this.mComp, null);
     }
-    if (!this.shown) {
+    if (!this.shown && this.fontsOk) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
       if (this.o.onReady) this.o.onReady();

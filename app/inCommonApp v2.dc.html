@@ -542,11 +542,7 @@ input[type="date"]{color-scheme:dark}
       <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:16px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
         <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
         <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <p role="status" style="margin:0;font:italic 400 16px/1.45 var(--fd);color:var(--mut)">Reading the long sky&#8230;</p>
-            <span aria-hidden="true" style="height:60px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
-            <span aria-hidden="true" style="height:90px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
-          </div>
+          <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
         </sc-if>
         <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;align-items:center;gap:14px">
@@ -568,8 +564,8 @@ input[type="date"]{color-scheme:dark}
           <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
                the chart below as a lit landscape the reader can move through, and
                this flat chart stays as its fallback (cycleSceneOn). -->
-          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
-            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"></div>
+          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
+            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><sc-if value="{{ cwLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
           </sc-if>
           <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
             <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
@@ -1012,7 +1008,7 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ false }}">
           <div style="padding:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%">
         <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
@@ -1032,12 +1028,13 @@ input[type="date"]{color-scheme:dark}
             </div>
           </div>
         </sc-if>
-        <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
           <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
                Wheel views into this host; the 2D wiring above is the third view and the
                fallback (hdViewNow). -->
           <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:3/4;max-height:68vh;min-height:380px;outline:none;background:var(--bg)"></div>
-          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none"></span>
+          <sc-if value="{{ hsLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
           <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
           <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
@@ -1052,7 +1049,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </sc-if>
       </div>
-      <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
         <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
           <div style="display:flex;align-items:center;gap:10px;padding:12px">
             <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
@@ -1078,10 +1075,8 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
-      <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;min-height:44px">
+      <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
         <span style="flex:none;font:700 11px var(--fu);letter-spacing:.18em;text-transform:uppercase;padding:7px 13px;border-radius:8px;color:var(--ac);background:rgba(var(--atmc),.3);border:1px solid rgba(47,255,143,.32)">{{ hdType }}</span>
-        <span style="flex:1"></span>
-        <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE &#8594;</span>
       </button>
       <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdDesc }}</div>
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
@@ -1343,7 +1338,7 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
-        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ false }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
@@ -1382,13 +1377,14 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
         </sc-if>
-        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ true }}">
           <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:4/5;max-height:72vh;outline:none;background:var(--bg)"></div>
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none"></span>
+          <sc-if value="{{ csLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
@@ -4816,7 +4812,7 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
       <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;flex:none;height:52vh;min-height:300px;border-bottom:1px solid var(--bd);background:var(--bg)">
-          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"></div>
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><sc-if value="{{ cyLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
           <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
             <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
             <h2 style="margin:0;font:400 24px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
@@ -5825,11 +5821,7 @@ input[type="date"]{color-scheme:dark}
           <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
             <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
             <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:10px">
-                <p role="status" style="margin:0;font:italic 400 16px/1.45 var(--fd);color:var(--mut)">Reading the long sky&#8230;</p>
-                <span aria-hidden="true" style="height:60px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
-                <span aria-hidden="true" style="height:90px;border-radius:12px;background:var(--sf2);animation:pulseGentle 1.6s ease-in-out infinite"></span>
-              </div>
+              <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
             </sc-if>
             <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;align-items:center;gap:14px">
@@ -5851,8 +5843,8 @@ input[type="date"]{color-scheme:dark}
               <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
                    the chart below as a lit landscape the reader can move through, and
                    this flat chart stays as its fallback (cycleSceneOn). -->
-              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
-                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"></div>
+              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
+                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><sc-if value="{{ cwLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
               </sc-if>
               <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
                 <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
@@ -6300,7 +6292,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
-        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ false }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
@@ -6339,13 +6331,14 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
         </sc-if>
-        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ true }}">
           <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:1/1;max-height:78vh;min-height:420px;outline:none;background:var(--bg)"></div>
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none"></span>
+          <sc-if value="{{ csLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
@@ -6643,7 +6636,7 @@ input[type="date"]{color-scheme:dark}
             </div>
             <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
               <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ false }}">
                 <div style="padding:12px">
                   <div data-chart="bodygraph" style="position:relative;width:100%">
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
@@ -6663,12 +6656,13 @@ input[type="date"]{color-scheme:dark}
                   </div>
                 </div>
               </sc-if>
-              <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
                 <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
                      Wheel views into this host; the 2D wiring above is the third view and the
                      fallback (hdViewNow). -->
                 <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:6/5;max-height:78vh;min-height:460px;outline:none;background:var(--bg)"></div>
-                <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+                <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none"></span>
+                <sc-if value="{{ hsLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
                 <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
                 <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
                 <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
@@ -6683,7 +6677,7 @@ input[type="date"]{color-scheme:dark}
                 </div>
               </sc-if>
             </div>
-            <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
               <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
                 <div style="display:flex;align-items:center;gap:10px;padding:12px">
                   <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
@@ -6711,10 +6705,8 @@ input[type="date"]{color-scheme:dark}
         </div>
         <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
           <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
-            <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;min-height:44px">
+            <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
               <span style="flex:none;font:700 clamp(18px,1.6vw,26px) var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac);text-align:left">{{ hdType }}</span>
-              <span style="flex:1"></span>
-              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE &#8594;</span>
             </button>
             <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdDesc }}</div>
             <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
@@ -9912,7 +9904,7 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:grid;grid-template-columns:{{ cyGridCols }};justify-content:center;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
       <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;min-width:0;height:100%;background:var(--bg)">
-          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"></div>
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><sc-if value="{{ cyLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
           <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
             <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
@@ -10907,7 +10899,8 @@ class Component extends DCLogic {
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
     chartView: '3d', csFail: false, csFocus: null, csToday: false,
-    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0 };
+    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
+    csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0 };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11306,6 +11299,18 @@ class Component extends DCLogic {
       const cv = localStorage.getItem('incommon.chart.view');
       if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
       const hv = localStorage.getItem('incommon.hd.view');
+      /* The scenes' scripts load async with the rest of the helmet. Until they
+         have arrived the deep views hold their place with Loading rather than
+         drawing the flat fallback and swapping it out, which is the layout
+         jumping the owner asked to be rid of (19 October 2026). Eight seconds
+         is the ceiling: past it the fallback is the honest answer. */
+      this._sceneT0 = Date.now();
+      const sceneWait = () => {
+        const all = ['ChartScene', 'HDScene', 'CycleScene'].every(n => window[n]);
+        if (all || Date.now() - this._sceneT0 > 8000) { this._scenesSettled = true; this.setState({ sceneTick: (this.state.sceneTick || 0) + 1 }); return; }
+        this._sceneWaitT = setTimeout(sceneWait, 120);
+      };
+      sceneWait();
       if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
       const hr = localStorage.getItem('incommon.hd.read');
       if (hr === 'cards' || hr === 'full') this.setState({ hdRead: hr });
@@ -11460,7 +11465,7 @@ class Component extends DCLogic {
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
     if (this._csS) { this._csS.destroy(); this._csS = null; }
     if (this._hsS) { this._hsS.destroy(); this._hsS = null; }
-    clearTimeout(this._hsSyncT);
+    clearTimeout(this._hsSyncT); clearTimeout(this._sceneWaitT);
     clearTimeout(this._cySyncT);
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
@@ -21258,8 +21263,8 @@ class Component extends DCLogic {
   cycleWidgetVals() {
     const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
     const ready = this.cycleReady() && this.cycleDesignReady();
-    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
-    const scene = this.cycleSceneOn();
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwLoading: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    const scene = this.cycleSceneOn() || this.scenePending('CycleScene');
     const now = new Date(), year = now.getFullYear();
     const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
     const pct = t => (Math.max(0, Math.min(1, (t - s0) / span)) * 100).toFixed(2) + '%';
@@ -21320,7 +21325,7 @@ class Component extends DCLogic {
     const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
     return {
       cwOn: true, cwFinding: false, cwReady: true,
-      cwSceneOn: scene, cwChartOn: !scene,
+      cwSceneOn: scene, cwChartOn: !scene, cwLoading: scene && !this.state.cwSceneLive,
       cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
       cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
       cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
@@ -21453,13 +21458,19 @@ class Component extends DCLogic {
      is expected and not there yet is looked for again, a few times, 60ms apart.
      On the phone the astrology page is mounted with the shell, so three.js is
      not fetched until the reader is on My Charts. */
+  /* A scene whose script has not arrived yet, and may still. */
+  scenePending(name) { return typeof window !== 'undefined' && !window[name] && !this._scenesSettled; }
+  /* Free look is offered where a finger drives the stage. */
+  touchUi() {
+    try { return (this.state.dtW || 1440) < this.BP.md || !!(window.matchMedia && window.matchMedia('(any-pointer: coarse)').matches); } catch (e) { return false; }
+  }
   chartSceneOn() {
     const CS = typeof window !== 'undefined' && window.ChartScene;
     return !!(CS && CS.supported() && !this.state.csFail);
   }
   chartViewNow() {
     const v = this.state.chartView;
-    return (v === '3d' || v === 'orbit') && this.chartSceneOn() ? v : '2d';
+    return (v === '3d' || v === 'orbit') && (this.chartSceneOn() || this.scenePending('ChartScene')) ? v : '2d';
   }
   chartSceneSync(retry) {
     if (!this.chartSceneOn()) return;
@@ -21476,6 +21487,8 @@ class Component extends DCLogic {
     if (!this._csS) {
       this._csS = window.ChartScene.create({
         onFail: () => { this._csS = null; this.setState({ csFail: true }); },
+        onReady: () => { if (!this.state.csLive) this.setState({ csLive: true }); },
+        onExploreEnd: () => { if (this.state.csFree) this.setState({ csFree: false }); },
         onFocus: (key, how) => {
           this.setState({ csFocus: key });
           const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
@@ -21493,6 +21506,7 @@ class Component extends DCLogic {
     S.setFocus(st.csFocus || (m && m.bodies[0] ? m.bodies[0].key : null), false);
     S.setSelection({ aspect: st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
     S.setToday(view === 'orbit' && !!st.csToday);
+    S.setExplore(!!st.csFree);
     S.attach(host);
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
     if (this._csTheme !== tk) { if (this._csTheme != null) S.setTheme(); this._csTheme = tk; }
@@ -21518,7 +21532,7 @@ class Component extends DCLogic {
   }
   hdViewNow() {
     const v = this.state.hdView;
-    return (v === '3d' || v === 'wheel') && this.hdSceneOn() ? v : '2d';
+    return (v === '3d' || v === 'wheel') && (this.hdSceneOn() || this.scenePending('HDScene')) ? v : '2d';
   }
   /* The sky now, for the scene: the same minute's hd-transit reading the gates
      card on Today reads, with the place on the wheel each body stands at. A
@@ -21557,6 +21571,8 @@ class Component extends DCLogic {
     if (!this._hsS) {
       this._hsS = window.HDScene.create({
         onFail: () => { this._hsS = null; this.setState({ hsFail: true }); },
+        onReady: () => { if (!this.state.hsLive) this.setState({ hsLive: true }); },
+        onExploreEnd: () => { if (this.state.hsFree) this.setState({ hsFree: false }); },
         onFocus: (key, how) => {
           this.setState({ hsFocus: key });
           if (how === 'key') { const h = this.hdHudOf(key); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite'); }
@@ -21569,6 +21585,7 @@ class Component extends DCLogic {
     S.setView(view);
     S.setLayer(st.bgMode || 'both');
     S.setSky(this.hdSkyOn() ? this.hdSkyList() : null);
+    S.setExplore(!!st.hsFree);
     S.setFocus(st.hsFocus || null, false);
     S.attach(host);
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
@@ -21634,8 +21651,8 @@ class Component extends DCLogic {
     const closed = { cyOpen: false, cyListOn: false, cyNone: false, cyFinding: false, cyMoreOn: false, cyRows: [], cyShow: false,
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
       cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
-    const sceneOn = open && this.cycleSceneOn() && this.cycleReady() && this.cycleDesignReady();
-    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn,
+    const sceneOn = open && (this.cycleSceneOn() || this.scenePending('CycleScene')) && this.cycleReady() && this.cycleDesignReady();
+    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn, cyLoading: sceneOn && !st.cwSceneLive,
       cyGridCols: sceneOn ? 'minmax(0,1fr) minmax(340px,440px)' : 'minmax(0,860px)',
       cyNowGo: () => { if (this._cyS) this._cyS.toNow(); },
       cyZoomIn: () => { if (this._cyS) this._cyS.zoom(-1); },
@@ -23469,7 +23486,7 @@ class Component extends DCLogic {
                from the rows, stagger radii and aspects the 2D wheel above was
                just drawn from, so the three views cannot disagree. Rebuilt only
                when the chart itself changes; selection travels separately. */
-            const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn();
+            const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn() || this.scenePending('ChartScene');
             const csKey = [prof ? prof.birthStamp : 'legacy', expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
@@ -23512,6 +23529,11 @@ class Component extends DCLogic {
                 go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); }
               })) : [],
               cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
+              csLoading: deep && !st.csLive,
+              csFreeOn: deep && this.touchUi(), csFreeOff: !(deep && this.touchUi()), csFree: !!st.csFree,
+              csFreeGo: () => this.setState({ csFree: !st.csFree }),
+              csFreeBg: st.csFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', csFreeBd: st.csFree ? 'var(--ac2-hi)' : 'var(--bd)',
+              csStageBd: st.csFree ? 'var(--ac2)' : 'transparent',
               csAria: view === 'orbit' ? 'Natal chart as an orrery. Arrow keys move between the bodies, Enter opens one.' : 'Natal chart in three dimensions. Arrow keys move between the bodies, Enter opens one.',
               csToday: !!st.csToday, csTodayGo: () => this.setState({ csToday: !st.csToday }),
               csTodayDot: st.csToday ? 'var(--ac2-hi)' : 'transparent', csTodayGlow: st.csToday ? '0 0 10px rgba(var(--atmc),.8)' : 'none',
@@ -23975,7 +23997,7 @@ class Component extends DCLogic {
              the focus and the sky travel separately. */
           ...(() => {
             const A = this.A(), W = this.HW(), gl = this.hdGlyphs(), prof = this.activeProfile(), pr = this.hdProfile();
-            const view = this.hdViewNow(), deep = view !== '2d', deepOn = this.hdSceneOn();
+            const view = this.hdViewNow(), deep = view !== '2d', deepOn = this.hdSceneOn() || this.scenePending('HDScene');
             const gset = new Set(hd.gates.map(g => g.gate));
             const hsKey = [prof ? prof.birthStamp : 'legacy', prof ? prof.name : '', A ? 'a' : '', W ? 'w' : ''].join('|');
             if (this._hsModelKey !== hsKey) {
@@ -24029,6 +24051,11 @@ class Component extends DCLogic {
                 go: () => { try { localStorage.setItem('incommon.hd.view', id); } catch (e) {} this.setState({ hdView: id }); }
               })) : [],
               hvFlat: !deep, hvDeep: deep,
+              hsLoading: deep && !st.hsLive,
+              hsFreeOn: deep && this.touchUi(), hsFreeOff: !(deep && this.touchUi()), hsFree: !!st.hsFree,
+              hsFreeGo: () => this.setState({ hsFree: !st.hsFree }),
+              hsFreeBg: st.hsFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', hsFreeBd: st.hsFree ? 'var(--ac2-hi)' : 'var(--bd)',
+              hsStageBd: st.hsFree ? 'var(--ac2)' : 'transparent',
               hsAria: view === 'wheel' ? 'The wiring inside the wheel of sixty four gates. Arrow keys move between the centres and channels, Enter opens one.'
                 : 'The wiring in three dimensions. Arrow keys move between the centres and channels, Enter opens one.',
               hsSkyOn: sky, hsSkyGo: () => this.setState({ hsSky: !sky }),

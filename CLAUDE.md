@@ -4824,6 +4824,65 @@ next, a hand scroll and the keys each move the card in front, every sentence is
 on a card, the menu scrolls and ticks, a new reading starts at card one, and
 Full text is the long layout and is kept.
 
+## The scenes say Loading, open at rest, and give a finger Free look
+Asked for by the owner on 19 October 2026: on a phone, scrolling fought the
+3D charts for vertical drags; every chart (the astrology wheel, the wiring and
+the Cycle Audit) showed abstractions and moving blocks until it loaded, and
+"Loading..." was to stand in their place; and the Human Design type lost its
+"Full Type" label, left aligned in its box.
+
+**Free look is the reader handing the stage the vertical drag.** On a touch
+screen a vertical drag is the page scrolling, so by default only a sideways
+drag turns the astrology and Human Design scenes. A `role="switch"` on the
+stage, "Free look" (`csFree`, `hsFree`, top right where the bracket was),
+makes one finger orbit both ways and holds the page still (`setExplore()` sets
+the pad's `touch-action` to `none`); a pinch still zooms. It is offered only
+where a finger drives the stage (`touchUi()`: the phone shell or any coarse
+pointer), so a mouse desktop keeps its bracket. It turns itself off when the
+stage leaves the screen (`onExploreEnd`, from the scene's IntersectionObserver),
+so the page never comes back to a stage still holding the reader's finger, and
+the stage wears a violet outline while it is on. The Cycle Audit's full stage
+already took every drag (`touch-action: none` in full mode) and its widget
+only scrubs sideways, so it needed no switch. Two finger gestures were the
+alternative and were not chosen: they need a sentence to be found, and
+"Discovery belongs to the reader" bars the sentence.
+
+**Loading holds the place; nothing is drawn and then swapped.** Three causes,
+three fixes:
+- The scene scripts load async, and until they arrived the views fell back to
+  the flat chart and then swapped it out. `scenePending(name)` keeps a deep
+  view while its script may still come (`componentDidMount` waits up to eight
+  seconds, then `_scenesSettled` lets the fallback be the answer), so the
+  stage is the stage from the first paint. The streaming hints were flipped
+  with it (`cvDeep`, `hvDeep`, `cwSceneOn` hint true; the flat ones false).
+- Each stage, the cycle widget's band and the cycle sheet's stage carry a
+  `role="status"` "Loading..." over a plain `--bg` until the scene reports it
+  has drawn (`csLive`, `hsLive`, `cwSceneLive`, from `onReady`). The scenes'
+  own backdrop is plain `--bg` now, not a gradient, and **a scene reports
+  ready only once the faces have loaded** (`fontsOk`, with a three second
+  ceiling), because labels drawn in the fallback face and redrawn a moment
+  later were the blocks jumping.
+- The cycle widget's finding state was two pulsing grey blocks; it is
+  "Loading..." in a 520px slot, about the height of the finished widget, so
+  the page does not grow under the reader when the scan lands.
+
+**The scenes open where they rest.** All three used to fly in from a wider,
+turned camera. They now start at their resting framing and the only arrival is
+the canvas fading up. The wiring's wake (the body lighting by type) starts at
+that reveal rather than at build time, so it is not spent behind Loading; a
+Generator's seven second wait for a response is counted from the reveal too.
+
+**The Human Design type is the type alone**, left aligned in its button, which
+still opens the type's reading.
+
+Driven on a phone with real touch through the DevTools protocol: a vertical
+drag on the stage scrolls the page and leaves the tilt alone; with Free look on
+the same drag tilts the wiring and the page holds still; off gives the scroll
+back; scrolling the stage away ends it; the astrology stage carries it; a mouse
+desktop has none. Filmed on a throttled connection: the stage holds its place
+with Loading for about three seconds, then the finished scene, and the flat
+wiring is never visible.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
