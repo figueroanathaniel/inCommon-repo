@@ -138,6 +138,7 @@ input[type="date"]{color-scheme:dark}
 [data-vt-modals] [role="dialog"][data-immersive]{border-radius:0!important;padding-bottom:0!important}
 @keyframes vtSheet{from{transform:translateY(100%)}to{transform:none}}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
+[data-cs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -238,6 +239,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-composite.js"></script>
 <script src="./hd-circle.js"></script>
 <script src="./cycle-scene.js"></script>
+<script src="./chart-scene.js"></script>
 <script src="./analytics.js"></script>
 <script src="./incommon-cloud.js"></script>
 <!-- Extension modules: synastry news, Sky Wire, localization (Prompts A, B, C) -->
@@ -1225,6 +1227,13 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Birth Chart</div>
+      <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
       <div style="display:flex;gap:7px;align-items:center">
         <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart detail" style="flex:1;display:flex;gap:7px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
           <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="2">
@@ -1234,8 +1243,9 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="Expand chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)">⛶</button>
       </div>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+        <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
             <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -1272,13 +1282,44 @@ input[type="date"]{color-scheme:dark}
             <button onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
           </sc-for>
         </div>
-        <div style="position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px">
+        </sc-if>
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
+          <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
+               Orbital views into this host; the 2D wheel above is the third view and the
+               fallback (chartViewNow). -->
+          <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:4/5;max-height:72vh;outline:none;background:var(--bg)"></div>
+          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+        </sc-if>
+        <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
+        </sc-if>
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
           <button onClick="{{ zoomReset }}" aria-label="Reset view" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 13px var(--fb);color:var(--dim)">◎</button>
         </div>
       </div>
+      <sc-if value="{{ csHudOn }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px">
+            <button onClick="{{ csPrev }}" aria-label="Previous body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+            <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ csHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:400 24px/1 Georgia,serif;color:{{ csHudC }}">{{ csHudGlyph }}</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <span style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ csHudName }}</span>
+                <span style="font:600 9px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ csHudIdx }}</span>
+              </div>
+              <div style="font:600 11.5px/1.4 var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ csHudPos }} · <span style="color:var(--dim)">{{ csHudSub }}</span></div>
+              <div style="font:italic 400 11.5px/1.45 var(--fb);color:var(--dim)">{{ csHudMean }}</div>
+            </div>
+            <button onClick="{{ csNext }}" aria-label="Next body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+          </div>
+          <button onClick="{{ csOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Open the reading <span style="font:400 13px var(--fb)">→</span></button>
+        </div>
+      </sc-if>
       <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:9px">
@@ -6112,6 +6153,13 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ spiritBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back</button>
           <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">My Chart</div>
         </div>
+        <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
+          <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+            <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
+              <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;padding:0 18px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
         <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart detail" style="flex:none;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
           <sc-for list="{{ chartModes }}" as="m" hint-placeholder-count="2">
             <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
@@ -6152,8 +6200,9 @@ input[type="date"]{color-scheme:dark}
         </div>
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+        <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-          <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
             <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
@@ -6190,13 +6239,44 @@ input[type="date"]{color-scheme:dark}
             <button onClick="{{ w.go }}" aria-label="{{ w.aria }}" style="all:unset;cursor:{{ w.cur }};box-sizing:border-box;position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);min-width:{{ w.hit }};min-height:{{ w.hit }};display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</button>
           </sc-for>
         </div>
-        <div style="position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px">
+        </sc-if>
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
+          <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
+               Orbital views into this host; the 2D wheel above is the third view and the
+               fallback (chartViewNow). -->
+          <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:1/1;max-height:78vh;min-height:420px;outline:none;background:var(--bg)"></div>
+          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+        </sc-if>
+        <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
+        </sc-if>
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
           <button onClick="{{ zoomReset }}" aria-label="Reset view" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 13px var(--fb);color:var(--dim)">◎</button>
         </div>
       </div>
+      <sc-if value="{{ csHudOn }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px">
+            <button onClick="{{ csPrev }}" aria-label="Previous body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
+            <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ csHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:400 24px/1 Georgia,serif;color:{{ csHudC }}">{{ csHudGlyph }}</span>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <span style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ csHudName }}</span>
+                <span style="font:600 9px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ csHudIdx }}</span>
+              </div>
+              <div style="font:600 11.5px/1.4 var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ csHudPos }} · <span style="color:var(--dim)">{{ csHudSub }}</span></div>
+              <div style="font:italic 400 11.5px/1.45 var(--fb);color:var(--dim)">{{ csHudMean }}</div>
+            </div>
+            <button onClick="{{ csNext }}" aria-label="Next body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">›</button>
+          </div>
+          <button onClick="{{ csOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Open the reading <span style="font:400 13px var(--fb)">→</span></button>
+        </div>
+      </sc-if>
 
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           <div style="display:flex;flex-direction:column;gap:9px">
@@ -10632,7 +10712,8 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false };
+    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
+    chartView: '3d', csFail: false, csFocus: null, csToday: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11026,6 +11107,10 @@ class Component extends DCLogic {
       if (localStorage.getItem('incommon.chart.expanded') === '1') {
         this.setState({ chartExpandOpen: true, chartMode: 'expanded' });
       }
+      /* The chart view (3D, Orbital or 2D) is a device preference, kept the
+         way the expanded overlay is. */
+      const cv = localStorage.getItem('incommon.chart.view');
+      if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
     } catch (e) {}
     /* Initialize ephemeris router (V1.0.0): dual-backend system (Swiss WASM + fallback).
        Loads in background; app is interactive before WASM initializes. */
@@ -11158,6 +11243,7 @@ class Component extends DCLogic {
     this.oraclePrepareAuto();
     this.cycleSheetAutoAsk();
     this.cycleSceneSync();
+    this.chartSceneSync();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -11173,6 +11259,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
+    if (this._csS) { this._csS.destroy(); this._csS = null; }
     clearTimeout(this._cySyncT);
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
@@ -12370,6 +12457,9 @@ class Component extends DCLogic {
   // reuse --dim (already the app's own neutral), so only asteroid/centaur/
   // comet needed new tokens (--cat-ast/--cat-cen/--cat-com, declared beside
   // --crisis-lo in all three token roots).
+  /* The four elements as the wheel colours them, fire, earth, air, water, in
+     sign order. One table, read by the 2D wheel and handed to the 3D one. */
+  SIGN_EL_C = ['#e08d7d', '#2fff8f', '#7eb8da', '#59b37d'];
   CAT_COLOR = { body: 'var(--ac)', angle: '#2fff8f', asteroid: 'var(--cat-ast)', centaur: 'var(--cat-cen)', tno: 'var(--ac2)', comet: 'var(--cat-com)', node: 'var(--dim)', hypothetical: 'var(--dim)', derived: 'var(--ac2-hi)' };
 
   ASTEROIDS = ['Ceres', 'Pallas', 'Juno', 'Vesta'];
@@ -21043,6 +21133,64 @@ class Component extends DCLogic {
     const isD = this.cycleDesign().some(d => d.id === id);
     this.setState(isD ? { cyDAll: true } : { cyAll: true }, () => setTimeout(go, 80));
   }
+  /* ---- The natal chart in depth (owner, 19 October 2026) -------------------
+
+     "Make it as if it was built by Unreal Engine. Make a 3D natal chart, an
+     orbital option, and a standard 2D chart." The 2D chart is the SVG wheel,
+     unchanged. 3D and Orbital are one chart-scene.js scene, drawn from the
+     model the chart vals build (this._csModel) and moved between its two
+     layouts by a morph. Without WebGL 2, or when three.js does not arrive, the
+     scene says so (csFail) and the page shows the 2D wheel with no switch.
+
+     ONE SCENE, ONE HOST. [data-cs-scene] is in whichever shell is drawn. The
+     runtime commits an sc-if body a tick after the update hook, so a host that
+     is expected and not there yet is looked for again, a few times, 60ms apart.
+     On the phone the astrology page is mounted with the shell, so three.js is
+     not fetched until the reader is on My Charts. */
+  chartSceneOn() {
+    const CS = typeof window !== 'undefined' && window.ChartScene;
+    return !!(CS && CS.supported() && !this.state.csFail);
+  }
+  chartViewNow() {
+    const v = this.state.chartView;
+    return (v === '3d' || v === 'orbit') && this.chartSceneOn() ? v : '2d';
+  }
+  chartSceneSync(retry) {
+    if (!this.chartSceneOn()) return;
+    const st = this.state, view = this.chartViewNow(), host = view === '2d' ? null : document.querySelector('[data-cs-scene]');
+    const vertical = (st.dtW || 1440) < this.BP.md;
+    clearTimeout(this._csSyncT);
+    if (!host) {
+      if (this._csS) this._csS.detach();
+      const want = st.ready && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology');
+      if (want && (retry || 0) < 8) this._csSyncT = setTimeout(() => this.chartSceneSync((retry || 0) + 1), 60);
+      return;
+    }
+    if (!this._csS && vertical && this.curTab() !== 'spirit') return;
+    if (!this._csS) {
+      this._csS = window.ChartScene.create({
+        onFail: () => { this._csS = null; this.setState({ csFail: true }); },
+        onFocus: (key, how) => {
+          this.setState({ csFocus: key });
+          const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
+          if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
+        },
+        onOpen: key => this.setState({ spiritView: 'placement', placeSel: key, aspSel: null }),
+        onAspect: i => this.setState({ aspSel: i }),
+        onHouse: n => this.setState({ dpSel: { kind: 'house', h: n } }),
+        lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t)))
+      });
+    }
+    const m = this._csModel, S = this._csS;
+    if (m) S.setModel(m);
+    S.setView(view);
+    S.setFocus(st.csFocus || (m && m.bodies[0] ? m.bodies[0].key : null), false);
+    S.setSelection({ aspect: st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
+    S.setToday(view === 'orbit' && !!st.csToday);
+    S.attach(host);
+    const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
+    if (this._csTheme !== tk) { if (this._csTheme != null) S.setTheme(); this._csTheme = tk; }
+  }
   /* THE SHEET. Opened from the widget: every passage, every stay in the
      design and the years ahead in full, then the Oracle's reading of the
      passages. The reading is asked the way the Oracle asked it (one press of
@@ -22885,7 +23033,65 @@ class Component extends DCLogic {
               return d + '\u00b0 ' + r.sign + ' sits in ' + band + ', the ' + (dec + 1) + (dec === 0 ? 'st' : dec === 1 ? 'nd' : 'rd') + ' decan of ' + modality + ' ' + element + '.';
             };
             const sabianOf = r => (S ? S.at(r.lon) : null);
+            /* THE CHART IN DEPTH (owner, 19 October 2026). The 3D and Orbital
+               views are drawn by chart-scene.js from this model, which is built
+               from the rows, stagger radii and aspects the 2D wheel above was
+               just drawn from, so the three views cannot disagree. Rebuilt only
+               when the chart itself changes; selection travels separately. */
+            const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn();
+            const csKey = [prof ? prof.birthStamp : 'legacy', expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
+            if (this._csModelKey !== csKey) {
+              this._csModelKey = csKey;
+              this._csModel = { key: csKey, zero, timed: !!asc, owner: prof ? prof.name : '',
+                sub: asc ? 'equal house · ' + asc.sign + ' rising' : 'whole-sign · no birth time',
+                signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
+                bodies: placedRows.map(r => {
+                  const key = this.pointKey(r), rad = radiusFor[key], ring = r.ring === 2 ? 2 : 1;
+                  return { key, name: r.name, label: this.pointLabel(r), glyph: r.glyph, lon: r.lon, deg: Math.floor(r.deg), sign: r.sign,
+                    ring, rad, lvl: ring === 1 ? Math.round((234 - rad) / 40) : Math.round((136 - rad) / 20), cat: r.category,
+                    c: this.CAT_COLOR[r.category] || 'var(--ac)', retro: !!r.retro, core: r.group === 'astral body',
+                    tip: this.pointTooltip(r, 'House ' + houseOf(r)) };
+                }),
+                angles: asc ? [['ASC', 'Ascendant', asc.asc], ['DC', 'Descendant', asc.asc + 180], ['MC', 'Midheaven', asc.mc], ['IC', 'IC', asc.mc + 180]]
+                  .map(([label, name, lon]) => ({ label, name, lon: this.norm360(lon) })) : [],
+                aspects: asps.slice(0, 40).map((x, i) => {
+                  const col = this.ASP_COLOR[x.asp] || ['var(--dim)', '', 1];
+                  return { i, a: this.pointKey(x.a), b: this.pointKey(x.b), aLon: x.a.lon, bLon: x.b.lon, c: col[0], dash: !!col[1], w: col[2],
+                    label: x.a.name + ' ' + this.aspName(x.asp) + ' ' + x.b.name + ' · ' + x.orb.toFixed(1) + '° orb' };
+                }) };
+            }
+            const csList = this._csModel.bodies;
+            const csAt = csList.findIndex(b => b.key === st.csFocus), csI = csAt < 0 ? 0 : csAt, csB = csList[csI] || null;
+            const csRow = csB ? placedRows.find(r => this.pointKey(r) === csB.key) : null;
+            const csMove = d => () => {
+              if (!csList.length) return;
+              const b = csList[(csI + d + csList.length) % csList.length];
+              if (this._csS) this._csS.setFocus(b.key, true);
+              this.setState({ csFocus: b.key });
+              this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
+            };
+            const deepZoom = d => () => { if (this._csS) this._csS.zoom(d); };
             return {
+              chartViewsOn: deepOn,
+              chartViews: deepOn ? [['3d', '3D'], ['orbit', 'Orbital'], ['2d', '2D']].map(([id, label]) => ({
+                label, on: view === id,
+                bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
+                bd: view === id ? 'var(--ac2)' : 'transparent',
+                c: view === id ? 'var(--tx)' : 'var(--dim)',
+                go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); }
+              })) : [],
+              cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
+              csAria: view === 'orbit' ? 'Natal chart as an orrery. Arrow keys move between the bodies, Enter opens one.' : 'Natal chart in three dimensions. Arrow keys move between the bodies, Enter opens one.',
+              csToday: !!st.csToday, csTodayGo: () => this.setState({ csToday: !st.csToday }),
+              csTodayDot: st.csToday ? 'var(--ac2-hi)' : 'transparent', csTodayGlow: st.csToday ? '0 0 10px rgba(var(--atmc),.8)' : 'none',
+              csHudOn: deep && !!csB,
+              csHudGlyph: csB ? csB.glyph : '', csHudC: csB ? csB.c : 'var(--ac)',
+              csHudName: csB ? csB.label : '', csHudIdx: csB ? (csI + 1) + ' of ' + csList.length : '',
+              csHudPos: csRow ? this.dmsOf(csRow.deg) + ' ' + csRow.sign : '',
+              csHudSub: csRow ? ordinal(houseOf(csRow)) + ' house' + (csRow.retro ? ' · retrograde' : '') : '',
+              csHudMean: csRow ? (this.PL_MEAN[csRow.name] || csRow.mean || '') : '',
+              csPrev: csMove(-1), csNext: csMove(1),
+              csOpen: () => { if (csB) openBody(csB.key); },
               chartModes: [['basic', 'Basic Chart'], ['expanded', 'Expanded Chart']].map(([id, label]) => ({
                 label, on: st.chartMode === id,
                 bg: st.chartMode === id ? 'var(--ac)' : 'transparent',
@@ -22896,9 +23102,9 @@ class Component extends DCLogic {
               wheelCursor: st.zoom > 1 ? 'grab' : 'default',
               wheelSub: asc ? 'equal house \u00b7 ' + asc.sign + ' rising' : 'whole-sign \u00b7 no birth time',
               wheelHint: 'Tap a glyph, or ASC / DC / MC / IC on the rim, for its full reading, or an aspect line for what it joins. Scroll or use + to zoom; drag to pan when zoomed.',
-              zoomIn: () => this.setState({ zoom: Math.min(3, +(st.zoom + .35).toFixed(2)) }),
-              zoomOut: () => this.setState({ zoom: Math.max(.5, +(st.zoom - .35).toFixed(2)), panX: st.zoom <= 1.2 ? 0 : st.panX, panY: st.zoom <= 1.2 ? 0 : st.panY }),
-              zoomReset: () => this.setState({ zoom: 1, panX: 0, panY: 0 }),
+              zoomIn: deep ? deepZoom(-1) : () => this.setState({ zoom: Math.min(3, +(st.zoom + .35).toFixed(2)) }),
+              zoomOut: deep ? deepZoom(1) : () => this.setState({ zoom: Math.max(.5, +(st.zoom - .35).toFixed(2)), panX: st.zoom <= 1.2 ? 0 : st.panX, panY: st.zoom <= 1.2 ? 0 : st.panY }),
+              zoomReset: deep ? deepZoom(0) : () => this.setState({ zoom: 1, panX: 0, panY: 0 }),
               wheelZoomEv: e => { e.preventDefault(); const z = Math.min(3, Math.max(.5, +(this.state.zoom - e.deltaY * .0015).toFixed(3))); this.setState({ zoom: z, panX: z <= 1 ? 0 : this.state.panX, panY: z <= 1 ? 0 : this.state.panY }); },
               wheelDown: e => { if (this.state.zoom <= 1) return; this._drag = { x: e.clientX, y: e.clientY, px: this.state.panX, py: this.state.panY }; },
               wheelMove: e => {
@@ -22914,7 +23120,7 @@ class Component extends DCLogic {
                 SG.forEach((glyph, i) => {
                   const m = P(i * 30 + 15, 294);
                   out.push({ hit: '26px', l: pc(m.x), t: pc(m.y), text: glyph, aria: 'Sign ' + (i + 1), cur: 'default', ls: 'normal',
-                    c: (i % 4 === 0) ? '#e08d7d' : (i % 4 === 1) ? '#2fff8f' : (i % 4 === 2) ? '#7eb8da' : '#59b37d',
+                    c: this.SIGN_EL_C[i % 4],
                     f: '400 22px Georgia,serif', go: noop });
                 });
                 for (let i = 0; i < 12; i++) {
@@ -22947,7 +23153,7 @@ class Component extends DCLogic {
                 const mid = P(i * 30 + 15, 294);
                 return { glyph, path: arc(i * 30, i * 30 + 30, 322, 266),
                   fill: i % 2 ? 'rgba(255,255,255,.022)' : 'transparent',
-                  c: (i % 4 === 0) ? '#e08d7d' : (i % 4 === 1) ? '#2fff8f' : (i % 4 === 2) ? '#7eb8da' : '#59b37d',
+                  c: this.SIGN_EL_C[i % 4],
                   gx: mid.x.toFixed(1), gy: mid.y.toFixed(1) };
               }),
               // The house band is a clickable wedge, not just a cusp line: a 1px line

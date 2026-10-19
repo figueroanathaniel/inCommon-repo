@@ -1962,7 +1962,7 @@ they actually are, and renaming any of them to v5.9 would make them lie.
 `Verification v6.0.dc.html` runs `handoff/tests-v6.0.js`: Checks A to E plus S
 (short desktop), the functional sweep, the theme phase, the removal phase
 (group R, V1.6.0), the ADA phase (group G, V1.7.0) and the new surfaces phase
-(group N). 276 assertions (group N is 58 rows since 2 October 2026: the Month
+(group N). 277 assertions (G11c joined group G on 19 October 2026; group N is 58 rows since 2 October 2026: the Month
 Ahead rows left and seven Library rows, N41 to N47, arrived). A full run takes 25+ minutes.
 
 The theme phase runs four identities now rather than three, which is what took
@@ -2024,7 +2024,7 @@ failure looks like a build defect: G1c reports the skip link as
 test on a throwaway button first, and prints a red banner naming
 `document.activeElement`, `matches(':focus')` and `document.hasFocus()` when
 they disagree. An automated browser pane typically cannot hold that focus even
-after a real click, so **31 of 33 is the expected clean result there, not a
+after a real click, so **32 of 34 is the expected clean result there, not a
 regression**. To separate blocked from broken without focus, check that
 `[data-skip]:focus` still resolves: it carries `min-height:44px !important`,
 `width:auto !important` and `clip:auto !important`, which is exactly what G1c
@@ -4606,6 +4606,86 @@ Measured with the harness's own `contrastFails()` and `tapTargets()` over the
 Numbers screen, since the theme phase sees Today only: four identities, each
 hardened and not, at 1440 and 375, about 80 elements each, no pair under 4.5:1
 and no control under 44px.
+
+## The natal chart is drawn three ways: 3D, Orbital and 2D
+Asked for by the owner on 19 October 2026: "Update the astrology page to make it
+as if it was built by unreal engine. Make a 3D natal chart, an orbital option,
+and a standard 2D chart. Make the logos fit elegantly." The Birth Chart has a
+**Chart view** radiogroup in both shells, 3D, Orbital and 2D in that order,
+state `chartView`, kept per device as `incommon.chart.view` the way the
+expanded overlay is. **3D is the default.**
+
+**2D is the SVG wheel, untouched**, and it is also the fallback. 3D and Orbital
+are one scene, `app/chart-scene.js` (shell layer, global `ChartScene`), drawn
+the way `cycle-scene.js` draws the Cycle Audit: three.js imported from the
+cover's vendored copy on first use, the palette read off the page, bloom, a
+quality ladder, the loop only while the host is on screen, and nothing animated
+under reduced motion. Without WebGL 2, or when three.js does not load, or when
+the context is lost, the scene says so (`csFail`), `chartViewNow()` answers
+`2d`, and the switch is not drawn: a reader never sees a choice that cannot be
+made.
+
+**It draws the model, never its own chart.** `this._csModel` is built inside
+the same vals block that draws the 2D wheel, from the same `placedRows`, the
+same stagger radii (`radiusFor`, so a body stands at the radius the 2D wheel
+puts it, on a pillar whose height is its stagger level), the same
+`natalAspects()` and the same `CAT_COLOR`, so the three views cannot disagree.
+It is rebuilt only when the chart changes (birth stamp, mode, comets, minor
+aspects, name); focus, the selected aspect, the open house and the chosen
+placement travel separately (`setFocus`, `setSelection`). The one position the
+scene asks for itself is today's, for the Orbital view's Today's sky, and it
+comes through `opts.lonAt`, which is the app's `lonOf()`. `SIGN_EL_C` is the one
+table of element colours, read by the 2D labels and handed to the scene.
+
+**3D is the wheel as an astrolabe; Orbital is the same sky as an orrery.** In 3D
+every ring, division and degree tick is drawn in the disc's shader, the rims
+stand up out of it, bodies stand on pillars over their longitude, the aspects
+are ribbons bowed over the inner field and the angles are beams at the rim. In
+Orbital each body sits on its own orbit in the order the bodies stand from the
+Earth, the nodes on the Moon's, the minor points on belts (asteroids between
+Mars and Jupiter, centaurs between Saturn and Uranus, TNOs beyond Pluto), and
+the zodiac slides outward into a belt round all of it. **The angle from the
+centre is still the longitude**, so it is the same chart; only distance has
+been given a meaning. The two are one morph, not a cut: the radii are shader
+uniforms and the ribbon ends are uniforms, so nothing is rebuilt on the way.
+Today's sky (a `role="switch"`, Orbital only) lays a ghost on each orbit where
+the body stands now, with the arc it has travelled since birth.
+
+**"Logos" was read as the glyphs**, the sign and body symbols, and that is the
+choice to revisit if the owner meant the inCommon mark. Each glyph is set on
+its optical centre: astrological symbols sit at different heights in every font
+that carries them, so `medallion()` measures `actualBoundingBox` and places
+the ink, not the text box, in the middle of a roundel ringed in the 2D wheel's
+colour for it. Glyphs are drawn at a pixel size that follows the stage
+(`ui`, from its shorter side), so a phone's chart is not wearing a desktop's
+roundels, and the minor points of the Expanded Chart get a plain small roundel
+with their degree left to the tooltip and the panel, or eighty of them bury the
+ten that matter.
+
+**Choosing is two presses, as on the Numbers stage.** A tap or a click on a body
+brings it forward (the camera turns it to the front) and names it in the panel
+under the stage; a second press on it, or Open the reading, opens its placement
+page. The panel's ‹ and › and the arrow keys on the focused stage step through
+the bodies, and the keyboard step is spoken (`speak()`, never through state).
+A ribbon selects its aspect (`aspSel`), the house band opens a house (`dpSel`),
+and the zoom cluster drives whichever view is showing (`zoomDir` lays it as a
+row in the deep views, where a column would sit on the chart). Picking is done
+on the screen, by projecting each body and sampling each ribbon, which is why
+a ribbon a few pixels wide can still be hit.
+
+**The stage is `[data-chart]`**, so its canvas is judged as chart; the switch,
+the Today's sky control, the zoom cluster and the panel are outside it and were
+measured with the harness's own `contrastFails()` and `tapTargets()` over the
+astrology screen, since the theme phase sees Today only: 3D and Orbital, four
+identities, hardened and not, at 1440 and 375. All 32 cases clean, 179 to 183
+elements each. **G11 now chooses 2D before it reads the SVG**, because that is
+the view it describes; G11c holds the stage to the same role description and
+summary, and passes on a build without WebGL 2 because the 2D wheel is then all
+there is. Driven in Chromium on SwiftShader: the stage paints, hover names a
+body, the two presses focus and open it, Next and the arrow keys step, a ribbon
+selects its aspect, the morph runs both ways, Today's sky lays ten ghosts, a
+theme change re-reads the palette, and with WebGL off or three.js blocked the 2D
+wheel comes back with no switch.
 
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the

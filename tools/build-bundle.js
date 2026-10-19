@@ -176,6 +176,8 @@ const MODULES = [
   /* The Cycle Audit drawn in depth. Reads nothing above it and imports
      three.module.js, which sits beside the bundle for the cover, on first use. */
   'cycle-scene.js',
+  /* The natal chart drawn in depth, the same way and on the same three.js. */
+  'chart-scene.js',
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',
   'pair-cache.js',
