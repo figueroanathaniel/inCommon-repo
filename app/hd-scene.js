@@ -358,12 +358,12 @@
   P.dom = function () {
     var self = this, r = document.createElement('div');
     r.setAttribute('data-hs-root', '1');
-    r.style.cssText = 'position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:radial-gradient(110% 80% at 50% 10%,rgba(var(--atmc),.24),transparent 70%)';
+    r.style.cssText = 'position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:var(--bg)';
     var s = document.createElement('div');
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .9s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -401,7 +401,13 @@
     this.host = host;
     if (!this.io && window.IntersectionObserver) {
       var me = this;
-      this.io = new IntersectionObserver(function (es) { me.visible = es.some(function (x) { return x.isIntersecting; }); me.updateRun(); });
+      this.io = new IntersectionObserver(function (es) {
+        me.visible = es.some(function (x) { return x.isIntersecting; });
+        /* Free look ends when the stage leaves the screen, so the page never
+           comes back to a stage still holding the reader's finger. */
+        if (!me.visible && me.explore) { me.setExplore(false); if (me.o.onExploreEnd) me.o.onExploreEnd(); }
+        me.updateRun();
+      });
     }
     if (moved && this.io) { this.io.disconnect(); this.io.observe(this.el.root); }
     if (!this.ro && window.ResizeObserver) { var m2 = this; this.ro = new ResizeObserver(function () { m2.resize(); }); }
@@ -455,6 +461,18 @@
     this.lift(0.25);
     this.kick();
   };
+  /* FREE LOOK. On a touch screen a vertical drag is the page scrolling, so by
+     default only a sideways one turns the scene. Free look is the reader saying
+     the stage is theirs: one finger orbits both ways, the page holds still,
+     and a pinch still zooms. The app shows the switch on touch screens only. */
+  P.setExplore = function (on) {
+    on = !!on;
+    if (this.explore === on) return;
+    this.explore = on;
+    this.el.pad.style.touchAction = on ? 'none' : 'pan-y';
+    this.lift(0.2);
+    this.kick();
+  };
   P.setFocus = function (key, turn) {
     if (this.focusKey === key) return;
     this.focusKey = key || null;
@@ -491,7 +509,11 @@
         self.updateRun();
         self.kick();
       }
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!self.failed && self.ready) { self.buildContent(); self.kick(); } });
+      /* The display face may land after the first labels were drawn with the
+         fallback, so the scene is not shown until it has: the reader sees
+         Loading, then the finished picture, and never the labels jumping. */
+      var faces = function () { if (self.fontsOk || self.failed) return; self.fontsOk = true; if (self.ready) { self.buildContent(); self.kick(); } };
+      if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') { document.fonts.ready.then(faces); setTimeout(faces, 3000); } else self.fontsOk = true;
     }, function () { self.building = false; self.fail('load'); });
   };
 
@@ -966,7 +988,8 @@
     this.wakeWait = wait && !this.reduced;
     this.wakeOrigin = origin;
     this.wakeSpan = this.centres.reduce(function (a, o) { return Math.max(a, o.delay); }, 0) + 0.9;
-    if (!this.wakeWait && this.wakeAt == null) this.wakeAt = now();
+    /* the wake begins when the reader can see it, at the reveal in render() */
+    if (!this.wakeWait && this.wakeAt == null && this.shown) this.wakeAt = now();
     if (this.reduced) this.wakeAt = -1e6;
   };
   /* Anything the reader does counts as the response a Generator waits for. */
@@ -1047,7 +1070,9 @@
   };
   P.placeCamera = function (k) {
     var g = this.goals();
-    if (!this.rig) this.rig = this.reduced ? { yaw: g.yaw, pitch: g.pitch, dist: g.dist, ty: g.ty, tx: g.tx } : { yaw: g.yaw - 0.5, pitch: g.pitch + 0.25, dist: g.dist * 1.5, ty: g.ty, tx: g.tx };
+    /* The scene opens where it rests: no fly-in, so nothing moves on arrival but
+       the fade and the body's own wake (owner, 19 October 2026). */
+    if (!this.rig) this.rig = { yaw: g.yaw, pitch: g.pitch, dist: g.dist, ty: g.ty, tx: g.tx };
     var r = this.rig;
     r.yaw = damp(r.yaw, g.yaw, k); r.pitch = damp(r.pitch, g.pitch, k); r.dist = damp(r.dist, g.dist, k); r.ty = damp(r.ty, g.ty, k); r.tx = damp(r.tx, g.tx, k);
     var cp = Math.cos(r.pitch);
@@ -1158,7 +1183,7 @@
       if (!dn.axis && Math.hypot(dx, dy) > 7) {
         /* On a touch screen a vertical drag is the page scrolling, so only a
            sideways one turns the wiring; a mouse may tilt it too. */
-        dn.axis = dn.type === 'mouse' ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+        dn.axis = dn.type === 'mouse' || this.explore ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
         if (dn.axis !== 'y') { try { this.el.pad.setPointerCapture(e.pointerId); } catch (er) { /* not capturable */ } this.el.pad.style.cursor = 'grabbing'; this.hideTip(); this.respond(); }
       }
       if (dn.axis === 'x' || dn.axis === 'free') {
@@ -1524,8 +1549,10 @@
       cu.tScene.value = p.scene.texture; cu.tB1.value = p.a.texture; cu.tB2.value = p.d.texture; cu.uStr.value = 0.5 + 0.4 * this.cur;
       this.pass(this.mComp, null);
     }
-    if (!this.shown) {
+    if (!this.shown && this.fontsOk) {
       this.shown = true;
+      if (this.wakeAt == null && !this.wakeWait) this.wakeAt = now();
+      this.wakeT0 = now();
       this.el.canvas.style.opacity = '1';
       if (this.o.onReady) this.o.onReady();
     }
