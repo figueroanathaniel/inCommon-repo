@@ -17412,7 +17412,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.22,.61,.36,1)';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -18125,7 +18125,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   P.showRead = function (on) {
     if (on && this.probeT == null && this.model) this.setProbe(this.model.now);
     if (on && this.card && (this.W || 0) < 560) on = false;
-    this.el.read.style.opacity = on ? '1' : '0';
+    /* a readout is a unit of the scene: it waits for the reveal (render) */
+    this._readOn = on;
+    this.el.read.style.opacity = on && this.shown ? '1' : '0';
     this.el.read.style.bottom = this.card ? (this.el.card.offsetHeight + 22) + 'px' : '12px';
   };
 
@@ -18507,6 +18509,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (!this.shown && this.fontsOk) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
+      var me = this;
+      setTimeout(function () { if (me._readOn && !me.failed) me.el.read.style.opacity = '1'; }, 600);
       if (this.o.onReady) this.o.onReady();
     }
   };
@@ -18832,7 +18836,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.22,.61,.36,1)';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -20214,7 +20218,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     s.style.cssText = 'position:absolute;inset:0;outline:none;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent';
     var cv = document.createElement('canvas');
     cv.setAttribute('aria-hidden', 'true');
-    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease';
+    cv.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s cubic-bezier(.22,.61,.36,1)';
     s.appendChild(cv);
     r.appendChild(s);
     var tip = document.createElement('div');
@@ -26220,7 +26224,7 @@ input[type="date"]{color-scheme:dark}
                the chart below as a lit landscape the reader can move through, and
                this flat chart stays as its fallback (cycleSceneOn). -->
           <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
-            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><sc-if value="{{ cwLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
+            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
           </sc-if>
           <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
             <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
@@ -26650,13 +26654,13 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
       <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
             <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
           </sc-for>
         </div>
       </sc-if>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
         <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
           <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
         </sc-for>
@@ -26688,15 +26692,15 @@ input[type="date"]{color-scheme:dark}
                Wheel views into this host; the 2D wiring above is the third view and the
                fallback (hdViewNow). -->
           <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:3/4;max-height:68vh;min-height:380px;outline:none;background:var(--bg)"></div>
-          <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none"></span>
-          <sc-if value="{{ hsLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
-          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-          <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
-          <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
+          <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
+          <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
             <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
           </div>
-          <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px">
+          <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <span id="incommon-hs-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the wiring. Use plus and minus to adjust, or the centre button to reset.</span>
             <button onClick="{{ hsZoomIn }}" aria-label="Zoom in" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">+</button>
             <button onClick="{{ hsZoomOut }}" aria-label="Zoom out" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
@@ -26705,7 +26709,7 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
       </div>
       <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
-        <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+        <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <div style="display:flex;align-items:center;gap:10px;padding:12px">
             <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
             <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ hsHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:700 {{ hsHudGlyphPx }}/1 var(--fu);color:var(--tx)">{{ hsHudGlyph }}</span>
@@ -26977,7 +26981,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Birth Chart</div>
       <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
             <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
           </sc-for>
@@ -27037,15 +27041,15 @@ input[type="date"]{color-scheme:dark}
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:4/5;max-height:72vh;outline:none;background:var(--bg)"></div>
-          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none"></span>
-          <sc-if value="{{ csLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
-          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
+          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
         </sc-if>
-        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px">
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
@@ -27053,7 +27057,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
       <sc-if value="{{ csHudOn }}" hint-placeholder-val="{{ false }}">
-        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <div style="display:flex;align-items:center;gap:10px;padding:12px">
             <button onClick="{{ csPrev }}" aria-label="Previous body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
             <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ csHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:400 24px/1 Georgia,serif;color:{{ csHudC }}">{{ csHudGlyph }}</span>
@@ -30467,13 +30471,13 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
       <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;flex:none;height:52vh;min-height:300px;border-bottom:1px solid var(--bd);background:var(--bg)">
-          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><sc-if value="{{ cyLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cyVeilO }};visibility:{{ cyVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
           <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
             <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
             <h2 style="margin:0;font:400 24px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
           </div>
           <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);position:absolute;top:12px;right:12px;font:400 20px/1 var(--fu)">&#215;</button>
-          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;opacity:{{ cyUiO }};visibility:{{ cyUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <button onClick="{{ cyZoomIn }}" aria-label="Closer" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">+</button>
             <button onClick="{{ cyZoomOut }}" aria-label="Further" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">&#8722;</button>
             <button onClick="{{ cyNowGo }}" aria-label="Back to now" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);border:1px solid var(--ac2);font:700 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</button>
@@ -31499,7 +31503,7 @@ input[type="date"]{color-scheme:dark}
                    the chart below as a lit landscape the reader can move through, and
                    this flat chart stays as its fallback (cycleSceneOn). -->
               <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
-                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><sc-if value="{{ cwLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
+                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
               </sc-if>
               <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
                 <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
@@ -31900,7 +31904,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">My Chart</div>
         </div>
         <sc-if value="{{ chartViewsOn }}" hint-placeholder-val="{{ true }}">
-          <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Chart view" style="flex:none;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <sc-for list="{{ chartViews }}" as="v" hint-placeholder-count="3">
               <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;padding:0 18px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
             </sc-for>
@@ -31991,15 +31995,15 @@ input[type="date"]{color-scheme:dark}
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
           <div data-chart="sky" data-cs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:relative;width:100%;aspect-ratio:1/1;max-height:78vh;min-height:420px;outline:none;background:var(--bg)"></div>
-          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none"></span>
-          <sc-if value="{{ csLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
-          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <sc-if value="{{ csFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ csFreeGo }}" role="switch" aria-checked="{{ csFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ csFreeBd }};border-radius:999px;background:{{ csFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ csFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ csStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+          <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ csVeilO }};visibility:{{ csVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
         </sc-if>
         <sc-if value="{{ cvOrbit }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
+          <button onClick="{{ csTodayGo }}" role="switch" aria-checked="{{ csToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--ac2-hi);background:{{ csTodayDot }};box-shadow:{{ csTodayGlow }}"></span>Today’s sky</button>
         </sc-if>
-        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px">
+        <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;flex-direction:{{ zoomDir }};gap:6px;opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <span id="incommon-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the chart wheel. Use plus and minus to adjust, or the centre button to reset.</span>
           <button onClick="{{ zoomIn }}" aria-label="Zoom in" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">+</button>
           <button onClick="{{ zoomOut }}" aria-label="Zoom out" aria-describedby="incommon-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:rgba(13,12,17,.85);font:400 17px var(--fb);color:var(--tx)">−</button>
@@ -32007,7 +32011,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
       <sc-if value="{{ csHudOn }}" hint-placeholder-val="{{ false }}">
-        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+        <div role="group" aria-label="The body in front" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ csUiO }};visibility:{{ csUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <div style="display:flex;align-items:center;gap:10px;padding:12px">
             <button onClick="{{ csPrev }}" aria-label="Previous body" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
             <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ csHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:400 24px/1 Georgia,serif;color:{{ csHudC }}">{{ csHudGlyph }}</span>
@@ -32277,13 +32281,13 @@ input[type="date"]{color-scheme:dark}
             <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
               <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
-                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="flex:1 1 240px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="flex:1 1 240px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                   <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
                     <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
                   </sc-for>
                 </div>
               </sc-if>
-              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="flex:1 1 240px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="flex:1 1 240px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                 <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
                   <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
                 </sc-for>
@@ -32316,15 +32320,15 @@ input[type="date"]{color-scheme:dark}
                      Wheel views into this host; the 2D wiring above is the third view and the
                      fallback (hdViewNow). -->
                 <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:6/5;max-height:78vh;min-height:460px;outline:none;background:var(--bg)"></div>
-                <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none"></span>
-                <sc-if value="{{ hsLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if>
-                <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
-                <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
-                <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
+                <sc-if value="{{ hsFreeOn }}" hint-placeholder-val="{{ false }}"><button onClick="{{ hsFreeGo }}" role="switch" aria-checked="{{ hsFree }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;right:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px 0 11px;border:1px solid {{ hsFreeBd }};border-radius:999px;background:{{ hsFreeBg }};font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;font:400 15px/1 var(--fu);color:var(--ac2-hi)">&#10021;</span>Free look</button></sc-if><sc-if value="{{ hsFreeOff }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;z-index:2;border:1.5px solid {{ hsStageBd }};border-radius:inherit;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+                <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ hsVeilO }};visibility:{{ hsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+                <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></span>
+                <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
+                <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                   <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
                   <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
                 </div>
-                <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px">
+                <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px;opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                   <span id="incommon-hs-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the wiring. Use plus and minus to adjust, or the centre button to reset.</span>
                   <button onClick="{{ hsZoomIn }}" aria-label="Zoom in" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">+</button>
                   <button onClick="{{ hsZoomOut }}" aria-label="Zoom out" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
@@ -32333,7 +32337,7 @@ input[type="date"]{color-scheme:dark}
               </sc-if>
             </div>
             <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
-              <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+              <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                 <div style="display:flex;align-items:center;gap:10px;padding:12px">
                   <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
                   <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ hsHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:700 {{ hsHudGlyphPx }}/1 var(--fu);color:var(--tx)">{{ hsHudGlyph }}</span>
@@ -35559,13 +35563,13 @@ input[type="date"]{color-scheme:dark}
     <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:grid;grid-template-columns:{{ cyGridCols }};justify-content:center;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
       <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;min-width:0;height:100%;background:var(--bg)">
-          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><sc-if value="{{ cyLoading }}" hint-placeholder-val="{{ true }}"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div></sc-if></div>
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cyVeilO }};visibility:{{ cyVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
           <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
             <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
           </div>
           <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);position:absolute;top:12px;right:12px;font:400 20px/1 var(--fu)">&#215;</button>
-          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;opacity:{{ cyUiO }};visibility:{{ cyUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
             <button onClick="{{ cyZoomIn }}" aria-label="Closer" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">+</button>
             <button onClick="{{ cyZoomOut }}" aria-label="Further" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">&#8722;</button>
             <button onClick="{{ cyNowGo }}" aria-label="Back to now" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);border:1px solid var(--ac2);font:700 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</button>
@@ -46918,7 +46922,7 @@ class Component extends DCLogic {
   cycleWidgetVals() {
     const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
     const ready = this.cycleReady() && this.cycleDesignReady();
-    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwLoading: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
     const scene = this.cycleSceneOn() || this.scenePending('CycleScene');
     const now = new Date(), year = now.getFullYear();
     const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
@@ -46980,7 +46984,7 @@ class Component extends DCLogic {
     const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
     return {
       cwOn: true, cwFinding: false, cwReady: true,
-      cwSceneOn: scene, cwChartOn: !scene, cwLoading: scene && !this.state.cwSceneLive,
+      cwSceneOn: scene, cwChartOn: !scene, cwVeilO: this.state.cwSceneLive ? '0' : '1', cwVeilV: this.state.cwSceneLive ? 'hidden' : 'visible',
       cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
       cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
       cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
@@ -47307,7 +47311,8 @@ class Component extends DCLogic {
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
       cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
     const sceneOn = open && (this.cycleSceneOn() || this.scenePending('CycleScene')) && this.cycleReady() && this.cycleDesignReady();
-    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn, cyLoading: sceneOn && !st.cwSceneLive,
+    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn,
+      cyVeilO: st.cwSceneLive ? '0' : '1', cyVeilV: st.cwSceneLive ? 'hidden' : 'visible', cyUiO: st.cwSceneLive ? '1' : '0', cyUiV: st.cwSceneLive ? 'visible' : 'hidden',
       cyGridCols: sceneOn ? 'minmax(0,1fr) minmax(340px,440px)' : 'minmax(0,860px)',
       cyNowGo: () => { if (this._cyS) this._cyS.toNow(); },
       cyZoomIn: () => { if (this._cyS) this._cyS.zoom(-1); },
@@ -49184,7 +49189,8 @@ class Component extends DCLogic {
                 go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); }
               })) : [],
               cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
-              csLoading: deep && !st.csLive,
+              /* the stage's units wait for the scene: nothing on or under it is shown until it is a utility */
+              csVeilO: st.csLive ? '0' : '1', csVeilV: st.csLive ? 'hidden' : 'visible', csUiO: (!deep || st.csLive) ? '1' : '0', csUiV: (!deep || st.csLive) ? 'visible' : 'hidden',
               csFreeOn: deep && this.touchUi(), csFreeOff: !(deep && this.touchUi()), csFree: !!st.csFree,
               csFreeGo: () => this.setState({ csFree: !st.csFree }),
               csFreeBg: st.csFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', csFreeBd: st.csFree ? 'var(--ac2-hi)' : 'var(--bd)',
@@ -49706,7 +49712,7 @@ class Component extends DCLogic {
                 go: () => { try { localStorage.setItem('incommon.hd.view', id); } catch (e) {} this.setState({ hdView: id }); }
               })) : [],
               hvFlat: !deep, hvDeep: deep,
-              hsLoading: deep && !st.hsLive,
+              hsVeilO: st.hsLive ? '0' : '1', hsVeilV: st.hsLive ? 'hidden' : 'visible', hsUiO: (!deep || st.hsLive) ? '1' : '0', hsUiV: (!deep || st.hsLive) ? 'visible' : 'hidden',
               hsFreeOn: deep && this.touchUi(), hsFreeOff: !(deep && this.touchUi()), hsFree: !!st.hsFree,
               hsFreeGo: () => this.setState({ hsFree: !st.hsFree }),
               hsFreeBg: st.hsFree ? 'rgba(var(--atmc),.4)' : 'var(--bg)', hsFreeBd: st.hsFree ? 'var(--ac2-hi)' : 'var(--bd)',
