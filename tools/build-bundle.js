@@ -178,6 +178,8 @@ const MODULES = [
   'cycle-scene.js',
   /* The natal chart drawn in depth, the same way and on the same three.js. */
   'chart-scene.js',
+  /* The wiring drawn in depth, the same way and on the same three.js. */
+  'hd-scene.js',
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',
   'pair-cache.js',

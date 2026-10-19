@@ -108,6 +108,9 @@ const LAYERS = {
     /* The natal chart's 3D and orbital views. Draws the model the app hands
        it; the one position it asks for, today's, comes through the app. */
     'chart-scene.js',
+    /* The wiring's 3D and Wheel views. Draws the model the app hands it;
+       the sky now arrives from the app's own hd-transit reading. */
+    'hd-scene.js',
 
     /* THE DUAL-BACKEND EPHEMERIS SYSTEM (V1.0.0), unwired like the Oki
        modules above rather than mechanics like ephemeris-cache.js just

@@ -1962,7 +1962,7 @@ they actually are, and renaming any of them to v5.9 would make them lie.
 `Verification v6.0.dc.html` runs `handoff/tests-v6.0.js`: Checks A to E plus S
 (short desktop), the functional sweep, the theme phase, the removal phase
 (group R, V1.6.0), the ADA phase (group G, V1.7.0) and the new surfaces phase
-(group N). 277 assertions (G11c joined group G on 19 October 2026; group N is 58 rows since 2 October 2026: the Month
+(group N). 278 assertions (G11c and G11d joined group G on 19 October 2026; group N is 58 rows since 2 October 2026: the Month
 Ahead rows left and seven Library rows, N41 to N47, arrived). A full run takes 25+ minutes.
 
 The theme phase runs four identities now rather than three, which is what took
@@ -4686,6 +4686,102 @@ body, the two presses focus and open it, Next and the arrow keys step, a ribbon
 selects its aspect, the morph runs both ways, Today's sky lays ten ghosts, a
 theme change re-reads the palette, and with WebGL off or three.js blocked the 2D
 wheel comes back with no switch.
+
+## The wiring is drawn three ways: 3D, Wheel and 2D
+Asked for by the owner on 19 October 2026: "Redesign the human design page to
+make the ux like it was made by unreal engine. Completely interactive, high
+quality visuals, 3D options with 2D available. Compact, highly engaging, drive
+the experience to reflect the human design philosophy." The Wiring has a
+**Wiring view** radiogroup in both shells, 3D, Wheel and 2D, state `hdView`,
+kept per device as `incommon.hd.view`. **3D is the default.** The layer control
+(Personality, Design, Both, `bgMode`) drives every view.
+
+**2D is the SVG wiring, untouched**, and the fallback. 3D and Wheel are one
+scene, `app/hd-scene.js` (shell layer, global `HDScene`), built the way
+`chart-scene.js` is: the cover's vendored three.js on first use, the palette
+read off the page, bloom, a quality ladder (which here also drops a rung at once
+after three frames over 120ms), the loop only while the host is on screen, and
+nothing animated under reduced motion. Without WebGL 2, without three.js or on a
+lost context it says so (`hsFail`), `hdViewNow()` answers `2d`, and the switch is
+not drawn. `hdSceneSync()` runs from the one `componentDidUpdate`.
+
+**It draws the model, never its own chart.** `this._hsModel` is built in the
+wiring vals from the same `hdChart()` the SVG reads: the nine centres at the
+SVG's own `BG_POS` boxes, in the shapes the field draws them, coloured from the
+atlas as the SVG colours them; all thirty six channels; every activation with
+its gate and line. Centres keep the chart's own definition in every layer, as
+the SVG does; gates and channel halves follow the layer. The one thing the scene
+is handed besides the model is the sky now (`setSky`), the same minute's
+hd-transit reading the gates card on Today reads.
+
+**A channel is two halves and a half lights from its own gate**: Personality in
+`--tx`, Design in `--hd-des`, a gate held by both as a braid of the two, and the
+sky now in `--blue`, dashed. That is how a hanging gate reads, as half a channel
+reaching for somebody else, and it is why the scene draws all thirty six rather
+than only the defined ones. `--hd-des` (`#df9a5f`) is a fixed hue declared in all
+three roots beside the ledger hues: the tradition's design red sits on
+`--crisis`, which nothing but safety may go near. It is a fill and a stroke,
+never text. Gates sit on the edge of their centre facing the centre their first
+channel runs to, with the channels between one pair of centres kept parallel
+(`layoutGates`), and a channel whose straight path would cross a third centre
+bows toward the reader to pass in front of it.
+
+**Wheel is the same chart with the sky put back round it**: the sixty four gates
+as a ring at the body's waist in `HDWheel`'s order from gate 41, and each
+activation leaves its column for the place on the ring its astral body stood,
+with a thread down to the gate it lights. The activations peel away one at a
+time rather than as a block. It is one morph, not a cut. "Wheel" was chosen over
+the field's own name for this figure because that name belongs to somebody.
+
+**The philosophy is in the behaviour and never in a sentence**, by "Discovery
+belongs to the reader" and "No disclaimers". Defined centres hold their light;
+open centres are glass that takes on the colours of the defined centres their
+channels reach and never settles, and fill with them when named. Defined
+channels carry a flow that rises from the lower centre to the higher. A defined
+Solar Plexus breathes on a nine second wave, a defined Sacral hums, a defined
+Root builds. And the body wakes the way its type meets the world (`planWake`):
+a Manifestor's lights from the motor that reaches its Throat on its own; a
+Generator's waits, its Sacral asking, until the reader does anything at all,
+and that press is the response, so it wakes the body and names what was pressed
+in one; a Manifesting Generator's answers at twice the speed; a Projector's open
+centres see first and the defined follow from the G; a Reflector's comes up all
+at once, and for a Reflector the sky now is on until the reader turns it off
+(`hdSkyOn`), because that chart takes its shape from the sky. A waiting body
+wakes on its own after seven seconds, so nobody is left in front of a dark
+chart. The wake runs on the wall clock rather than scene time, so a slow machine
+shows fewer frames of it rather than a longer one.
+
+**Choosing is two presses, as on the chart and the Numbers stage.** A press
+names a centre, gate, channel or activation (`hsFocus`), dims what it does not
+touch and threads the activations it involves; a second press, Enter, or Open
+the reading opens the detail sheet the SVG already opens (`hdSelOf`). Picking is
+done on the screen, activation before gate before channel before centre. The
+arrow keys and the panel's arrows step through the nine centres and then the
+defined channels (`model.steps`), and a keyboard step is spoken. With nothing
+named the panel under the stage is the type, and Open your type opens it; Whole
+chart clears a focus.
+
+**The page was made compact around the stage.** Both shells open on the stage
+and its panel; the type card keeps its description and puts Strategy,
+Authority, Profile and Definition in a grid of four (`hdTiles`), which is where
+the Your Lines card went (the profile sheet carries both lines); and Activated
+Gates, Defined Channels and the centres share one control (`hdList`) instead of
+four stacked lists. The readings are unchanged.
+
+**The stage is `[data-chart]`** and carries `aria-roledescription="human design
+wiring"` and the same summary as the SVG, which moved up to the stage card so
+both views point at it. G11d holds both views to it. G14b checks every zoom
+cluster now, because on the phone every chart page is mounted at once and the
+first Zoom in on the page may be the wiring's. Measured with the harness's own
+`contrastFails()` and `tapTargets()` over the Human Design screen, since the
+theme phase sees Today only: 3D and Wheel, four identities, hardened and not, at
+1440 and 375, all 32 cases clean, 75 to 76 elements each. Driven in Chromium on
+SwiftShader: the stage paints, hover names a centre, the two presses focus and
+open it, a gate and an activation are picked over their centre, the arrow keys
+step and Enter opens, the layer and the sky now reach the scene, the morph runs,
+2D is the SVG with no stage, the view is kept, a Generator body waits for the
+press and wakes from its Sacral, a theme change repaints, and with WebGL off or
+three.js blocked the SVG comes back with no switch.
 
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the

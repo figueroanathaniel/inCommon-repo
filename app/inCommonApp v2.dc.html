@@ -139,6 +139,7 @@ input[type="date"]{color-scheme:dark}
 @keyframes vtSheet{from{transform:translateY(100%)}to{transform:none}}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
 [data-cs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
+[data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -240,6 +241,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-circle.js"></script>
 <script src="./cycle-scene.js"></script>
 <script src="./chart-scene.js"></script>
+<script src="./hd-scene.js"></script>
 <script src="./analytics.js"></script>
 <script src="./incommon-cloud.js"></script>
 <!-- Extension modules: synastry news, Sky Wire, localization (Prompts A, B, C) -->
@@ -253,7 +255,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./i18n/es.js"></script>
 <script src="./i18n/index.js"></script>
 </helmet>
-<div data-app-root="1" style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:18px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));color:var(--tx);font-family:var(--fu);position:relative;width:100%;height:100dvh;overflow:hidden;background:var(--bg);{{ themeAppVars }}">
+<div data-app-root="1" style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:18px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));color:var(--tx);font-family:var(--fu);position:relative;width:100%;height:100dvh;overflow:hidden;background:var(--bg);{{ themeAppVars }}">
 <!-- TWO LOBES, TWO CLOCKS. As one element the whole sky slid together and
      read as a single blob moving behind the app. Split, the cold lobe overhead
      and the warm horizon below drift on different periods and in opposite
@@ -461,7 +463,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <sc-if value="{{ shellVertical }}" hint-placeholder-val="{{ false }}">
 
-<div data-vt="1" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
+<div data-vt="1" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
 <sc-if value="{{ booting }}" hint-placeholder-val="{{ true }}">
   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:0 34px;text-align:center">
     <!-- The primary mark, drawn rather than loaded. Two wholes and the lens
@@ -992,45 +994,103 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ goDaily }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid rgba(47,255,143,.36);border-radius:12px;font:600 11px var(--fu);color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back to Today’s Alignment</button>
       </div>
     </sc-if>
-    <div style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:17px 16px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
+      <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+        <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
+          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
+        </sc-for>
+      </div>
+      <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+        <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
+        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:12px">
+            <div data-chart="bodygraph" style="position:relative;width:100%">
+        <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
+                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
+                </sc-for>
+                <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                  <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
+                  <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
+                  <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+          <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
+               Wheel views into this host; the 2D wiring above is the third view and the
+               fallback (hdViewNow). -->
+          <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:3/4;max-height:68vh;min-height:380px;outline:none;background:var(--bg)"></div>
+          <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+          <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
+          <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
+            <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
+            <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
+          </div>
+          <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px">
+            <span id="incommon-hs-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the wiring. Use plus and minus to adjust, or the centre button to reset.</span>
+            <button onClick="{{ hsZoomIn }}" aria-label="Zoom in" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">+</button>
+            <button onClick="{{ hsZoomOut }}" aria-label="Zoom out" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+            <button onClick="{{ hsZoomReset }}" aria-label="Reset view" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 13px var(--fb);color:var(--dim)">&#9678;</button>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px">
+            <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
+            <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ hsHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:700 {{ hsHudGlyphPx }}/1 var(--fu);color:var(--tx)">{{ hsHudGlyph }}</span>
+            <div aria-live="off" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ hsHudKind }}</span>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ hsHudIdx }}</span>
+              </div>
+              <span style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ hsHudName }}</span>
+              <div style="font:600 11px/1.45 var(--fu);color:var(--dim)">{{ hsHudSub }}</div>
+              <div style="font:italic 400 12.5px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ hsHudMean }}</div>
+            </div>
+            <button onClick="{{ hsNext }}" aria-label="Next in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8250;</button>
+          </div>
+          <div style="display:flex;border-top:1px solid var(--bd)">
+            <sc-if value="{{ hsClearOn }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ hsClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 16px;border-right:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Whole chart</button>
+            </sc-if>
+            <button onClick="{{ hsOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ hsOpenLabel }} <span style="font:400 13px var(--fb)">&#8594;</span></button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
       <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;min-height:44px">
         <span style="flex:none;font:700 11px var(--fu);letter-spacing:.18em;text-transform:uppercase;padding:7px 13px;border-radius:8px;color:var(--ac);background:rgba(var(--atmc),.3);border:1px solid rgba(47,255,143,.32)">{{ hdType }}</span>
         <span style="flex:1"></span>
-        <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE →</span>
+        <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE &#8594;</span>
       </button>
-      <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx)">{{ hdDesc }}</div>
-      <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
-        <button onClick="{{ hdStrategyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:baseline;gap:9px;width:100%;min-height:44px">
-          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Strategy</span>
-          <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx);text-align:left">{{ hdStrategy }}</span>
-          <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
-        </button>
-        <button onClick="{{ hdAuthorityGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:baseline;gap:9px;width:100%;min-height:44px">
-          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Authority</span>
-          <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
-          <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
-        </button>
-        <div style="display:flex;align-items:baseline;gap:9px;width:100%;box-sizing:border-box;padding:12px 0">
-          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
-          <span style="flex:1;font:400 12.5px/1.55 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your Lines</div>
-      <button onClick="{{ hdProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac2);border-radius:var(--rad);padding:14px 15px;width:100%">
-        <div style="display:flex;align-items:center;gap:10px;width:100%">
-          <span style="flex:none;font:400 28px/1 var(--fd);color:var(--tx)">{{ hdProfileKey }}</span>
-          <span style="flex:1;min-width:0;font:600 12.5px var(--fu);color:var(--ac2-hi);text-align:left">{{ hdProfileName }}</span>
-          <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-        </div>
-        <sc-for list="{{ hdProfileLines }}" as="l" hint-placeholder-count="2">
-          <div style="display:flex;flex-direction:column;gap:2px;text-align:left">
-            <span style="font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ l.kind }}</span>
-            <span style="font:400 12.5px/1.55 var(--fb);color:var(--tx)">{{ l.text }}</span>
-          </div>
+      <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdDesc }}</div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+        <sc-for list="{{ hdTiles }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;flex-direction:column;gap:3px;padding:11px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2);text-align:left">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ t.label }}</span>
+            <span style="font:600 13px/1.35 var(--fu);color:var(--tx)">{{ t.head }}</span>
+            <span style="font:400 11.5px/1.45 var(--fb);color:var(--mut)">{{ t.rest }}</span>
+          </button>
         </sc-for>
-      </button>
+      </div>
     </div>
     <sc-if value="{{ hdTeachOn }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;flex-direction:column;gap:13px">
@@ -1075,94 +1135,77 @@ input[type="date"]{color-scheme:dark}
       </div>
     </sc-if>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
-      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-        <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
-          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
+      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Show gates, channels or centres" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+        <sc-for list="{{ hdListTabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 11.5px var(--fu);color:{{ t.c }}">{{ t.label }}<span style="font:600 10px var(--fu);color:var(--ac2-hi)">{{ t.n }}</span></button>
         </sc-for>
       </div>
-      <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:12px">
-        <div data-chart="bodygraph" style="position:relative;width:100%">
-          <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-<svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
-            <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
-              <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
-            </sc-for>
-            <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-              <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
-            </sc-for>
-          </svg>
-          <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-            <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
-              <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
-              <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
+      <sc-if value="{{ hdListGates }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
+            <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:12px;padding:11px 13px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="flex:1;font:600 12px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
+                <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px">
+                <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
+                  <button onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
+                    <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
+                    <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hdListChannels }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
+            <button onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:12px 14px;width:100%">
+              <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
+                <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
+              </span>
+              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">&#8594;</span>
             </button>
           </sc-for>
         </div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Activated Gates · {{ hdGateCount }}</div>
-      <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
-        <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:12px;padding:11px 13px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="flex:1;font:600 12px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
-            <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:7px">
-            <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
-              <button onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
-                <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
-                <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
-              </button>
-            </sc-for>
-          </div>
+        <sc-if value="{{ hdNoChannels }}" hint-placeholder-val="{{ false }}">
+          <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">No defined channels in this chart.</div>
+        </sc-if>
+      </sc-if>
+      <sc-if value="{{ hdListCentres }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:10px;padding:12px 14px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px;width:100%">
+                <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
+                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
+              </div>
+              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+              <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
+            </button>
+          </sc-for>
+          <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
+            <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px;width:100%">
+                <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
+                <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
+              </div>
+              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+            </button>
+          </sc-for>
         </div>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your Defined Channels · {{ hdChanCount }}</div>
-      <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
-        <button onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:12px 14px;width:100%">
-          <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
-          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-            <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
-            <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
-          </span>
-          <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your Defined Centers</div>
-      <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
-        <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:10px;padding:12px 14px;width:100%">
-          <div style="display:flex;align-items:center;gap:8px;width:100%">
-            <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
-            <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
-          </div>
-          <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-          <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Undefined Centers</div>
-      <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
-        <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;width:100%">
-          <div style="display:flex;align-items:center;gap:8px;width:100%">
-            <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
-            <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
-          </div>
-          <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-        </button>
-      </sc-for>
+      </sc-if>
     </div>
     <button onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
       <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
         <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
       </span>
-      <span style="flex:none;font:400 13px var(--fb);color:var(--ac2-hi)">→</span>
+      <span style="flex:none;font:400 13px var(--fb);color:var(--ac2-hi)">&#8594;</span>
     </button>
   </div>
 </sc-if>
@@ -5560,7 +5603,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <sc-if value="{{ shellDesktop }}" hint-placeholder-val="{{ true }}">
 
-<div style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:15.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:16px;height:100%;width:100%;box-sizing:border-box;overflow:hidden;position:relative;display:flex;background:transparent;color:var(--tx);font-family:var(--fu);{{ themeDtVars }}">
+<div style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:15.5px;--rddlh:1.75;--motion:.2s ease-out;--rad:16px;height:100%;width:100%;box-sizing:border-box;overflow:hidden;position:relative;display:flex;background:transparent;color:var(--tx);font-family:var(--fu);{{ themeDtVars }}">
 <sc-if value="{{ booting }}" hint-placeholder-val="{{ true }}">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:dtIn .3s ease">
     <svg viewBox="0 0 100 100" width="92" height="92" role="img" aria-label="inCommon" style="display:block;animation:markIn .8s cubic-bezier(.2,.8,.2,1) both">
@@ -6525,141 +6568,181 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Human Design</div>
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
-        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <div style="display:flex;flex-direction:column;gap:13px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
-            <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%">
-              <span style="flex:1;font:700 clamp(20px,1.9vw,30px) var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac);text-align:left">{{ hdType }}</span>
-              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE →</span>
-            </button>
-            <div style="font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdDesc }}</div>
-            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
-              <button onClick="{{ hdStrategyGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:baseline;gap:10px;width:100%;min-height:44px">
-                <span style="flex:none;width:74px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Strategy</span>
-                <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left">{{ hdStrategy }}</span>
-                <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
-              </button>
-              <button onClick="{{ hdAuthorityGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:baseline;gap:10px;width:100%;min-height:44px">
-                <span style="flex:none;width:74px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Authority</span>
-                <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left">{{ hdAuthority }}</span>
-                <span style="flex:none;font:400 12px var(--fb);color:var(--ac)">›</span>
-              </button>
-              <div style="display:flex;align-items:baseline;gap:10px;width:100%;box-sizing:border-box;padding:12px 0">
-                <span style="flex:none;width:74px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Definition</span>
-                <span style="flex:1;font:400 13px/1.6 var(--fb);color:var(--tx)">{{ hdDefinition }}</span>
-              </div>
-            </div>
-          </div>
-          <button onClick="{{ hdProfileGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac2);border-radius:var(--rad);padding:16px 18px;width:100%">
-            <div style="display:flex;align-items:center;gap:11px;width:100%">
-              <span style="flex:none;font:400 30px/1 var(--fd);color:var(--tx)">{{ hdProfileKey }}</span>
-              <span style="flex:1;min-width:0;font:600 13px var(--fu);color:var(--ac2-hi);text-align:left">{{ hdProfileName }}</span>
-              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-            </div>
-            <sc-for list="{{ hdProfileLines }}" as="l" hint-placeholder-count="2">
-              <div style="display:flex;flex-direction:column;gap:2px;text-align:left">
-                <span style="font:600 9.5px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ l.kind }}</span>
-                <span style="font:400 12.5px/1.6 var(--fb);color:var(--tx)">{{ l.text }}</span>
-              </div>
-            </sc-for>
-          </button>
+        <div style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
-            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-              <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
-                <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
-              </sc-for>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-if value="{{ hdViewsOn }}" hint-placeholder-val="{{ true }}">
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring view" style="flex:1 1 240px;display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                  <sc-for list="{{ hdViews }}" as="v" hint-placeholder-count="3">
+                    <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 16px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Wiring layer" style="flex:1 1 240px;display:flex;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                <sc-for list="{{ bgModes }}" as="m" hint-placeholder-count="3">
+                  <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
+                </sc-for>
+              </div>
             </div>
-      <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:12px">
-        <div data-chart="bodygraph" style="position:relative;width:100%">
-          <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-<svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
-            <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
-              <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
-            </sc-for>
-            <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-              <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
-            </sc-for>
-          </svg>
-          <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-            <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
-              <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
-              <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
-            </button>
-          </sc-for>
-        </div>
-      </div>
-      
-          </div>
-        </div>
-        <div style="flex:2 1 470px;min-width:0;display:flex;flex-direction:column;gap:18px">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Activated gates · {{ hdGateCount }}</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
-              <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
-                <div style="display:flex;flex-direction:column;gap:9px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:13px;padding:14px 15px">
-                  <div style="display:flex;align-items:center;gap:8px">
-                    <span style="flex:1;font:600 12.5px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
-                    <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
-                  </div>
-                  <div style="display:flex;flex-wrap:wrap;gap:7px">
-                    <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
-                      <button onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
-                        <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
-                        <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
+            <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+              <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
+              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
+                <div style="padding:12px">
+                  <div data-chart="bodygraph" style="position:relative;width:100%">
+              <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
+                      <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
+                        <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
+                      </sc-for>
+                      <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                        <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
+                      </sc-for>
+                    </svg>
+                    <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                      <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
+                        <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
+                        <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                       </button>
                     </sc-for>
                   </div>
                 </div>
+              </sc-if>
+              <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+                <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
+                     Wheel views into this host; the 2D wiring above is the third view and the
+                     fallback (hdViewNow). -->
+                <div data-chart="wiring" data-hs-scene="1" data-noswipe="1" tabindex="0" role="group" aria-roledescription="human design wiring" aria-label="{{ hsAria }}" aria-describedby="incommon-bg-summary" style="position:relative;width:100%;aspect-ratio:6/5;max-height:78vh;min-height:460px;outline:none;background:var(--bg)"></div>
+                <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+                <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none;z-index:2"></span>
+                <button onClick="{{ hsSkyGo }}" role="switch" aria-checked="{{ hsSkyOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:10px;top:10px;z-index:3;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px 0 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);font:600 11px var(--fu);letter-spacing:.06em;color:var(--tx)"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--blue);background:{{ hsSkyDot }};box-shadow:{{ hsSkyGlow }}"></span>The sky now</button>
+                <div role="list" aria-label="What the two colours are" style="position:absolute;left:14px;bottom:38px;z-index:3;display:flex;flex-direction:column;gap:5px;pointer-events:none">
+                  <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--tx)"></span>Personality</span>
+                  <span role="listitem" style="display:flex;align-items:center;gap:7px;font:600 10px var(--fu);letter-spacing:.08em;color:var(--mut);background:var(--bg);padding:2px 6px;border-radius:6px"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:var(--hd-des)"></span>Design</span>
+                </div>
+                <div style="position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:6px">
+                  <span id="incommon-hs-zoom-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Zooms the wiring. Use plus and minus to adjust, or the centre button to reset.</span>
+                  <button onClick="{{ hsZoomIn }}" aria-label="Zoom in" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">+</button>
+                  <button onClick="{{ hsZoomOut }}" aria-label="Zoom out" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 17px var(--fb);color:var(--tx)">&#8722;</button>
+                  <button onClick="{{ hsZoomReset }}" aria-label="Reset view" aria-describedby="incommon-hs-zoom-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--bg);font:400 13px var(--fb);color:var(--dim)">&#9678;</button>
+                </div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2)">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px">
+                  <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
+                  <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.3),rgba(var(--atmc),.3) 55%,var(--bg) 100%);border:1.5px solid {{ hsHudC }};box-shadow:0 0 18px rgba(var(--atmc),.5);font:700 {{ hsHudGlyphPx }}/1 var(--fu);color:var(--tx)">{{ hsHudGlyph }}</span>
+                  <div aria-live="off" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                      <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ hsHudKind }}</span>
+                      <span style="font:600 9.5px var(--fu);letter-spacing:.12em;color:var(--dim)">{{ hsHudIdx }}</span>
+                    </div>
+                    <span style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ hsHudName }}</span>
+                    <div style="font:600 11px/1.45 var(--fu);color:var(--dim)">{{ hsHudSub }}</div>
+                    <div style="font:italic 400 12.5px/1.5 var(--fb);color:var(--tx);text-wrap:pretty">{{ hsHudMean }}</div>
+                  </div>
+                  <button onClick="{{ hsNext }}" aria-label="Next in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8250;</button>
+                </div>
+                <div style="display:flex;border-top:1px solid var(--bd)">
+                  <sc-if value="{{ hsClearOn }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ hsClear }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 16px;border-right:1px solid var(--bd);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Whole chart</button>
+                  </sc-if>
+                  <button onClick="{{ hsOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ hsOpenLabel }} <span style="font:400 13px var(--fb)">&#8594;</span></button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
+            <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;min-height:44px">
+              <span style="flex:none;font:700 clamp(18px,1.6vw,26px) var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac);text-align:left">{{ hdType }}</span>
+              <span style="flex:1"></span>
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">FULL TYPE &#8594;</span>
+            </button>
+            <div style="font:400 13.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdDesc }}</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ hdTiles }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;flex-direction:column;gap:3px;padding:11px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2);text-align:left">
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ t.label }}</span>
+                  <span style="font:600 13px/1.35 var(--fu);color:var(--tx)">{{ t.head }}</span>
+                  <span style="font:400 11.5px/1.45 var(--fb);color:var(--mut)">{{ t.rest }}</span>
+                </button>
               </sc-for>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Defined channels · {{ hdChanCount }}</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">
-              <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
-                <button onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:13px 15px">
-                  <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
-                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                    <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
-                    <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
-                  </span>
-                  <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-                </button>
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Show gates, channels or centres" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+              <sc-for list="{{ hdListTabs }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.go }}" role="radio" aria-checked="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 11.5px var(--fu);color:{{ t.c }}">{{ t.label }}<span style="font:600 10px var(--fu);color:var(--ac2-hi)">{{ t.n }}</span></button>
               </sc-for>
             </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start">
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--ok)">Defined centers</div>
-              <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
-                <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:11px;padding:13px 15px;width:100%">
-                  <div style="display:flex;align-items:center;gap:8px;width:100%">
-                    <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
-                    <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
+            <sc-if value="{{ hdListGates }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+                <sc-for list="{{ hdCenterGates }}" as="cg" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid {{ cg.bd }};border-radius:12px;padding:11px 13px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="flex:1;font:600 12px var(--fu);color:{{ cg.nameC }}">{{ cg.name }}</span>
+                      <span style="flex:none;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ cg.tagC }};background:{{ cg.tagBg }}">{{ cg.tag }}</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px">
+                      <sc-for list="{{ cg.gates }}" as="g" hint-placeholder-count="4">
+                        <button onClick="{{ g.go }}" aria-label="Gate {{ g.n }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid {{ g.bd }};border-radius:10px;background:{{ g.bg }};padding:0 7px">
+                          <span style="font:600 13px var(--fu);color:{{ g.c }}">{{ g.n }}</span>
+                          <span style="font:400 10px var(--fu);color:var(--dim)">{{ g.line }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
                   </div>
-                  <div style="font:400 11.5px/1.6 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-                  <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
-                </button>
-              </sc-for>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Undefined centers</div>
-              <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
-                <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:11px;padding:13px 15px;width:100%">
-                  <div style="display:flex;align-items:center;gap:8px;width:100%">
-                    <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
-                    <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
-                  </div>
-                  <div style="font:400 11.5px/1.6 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
-                </button>
-              </sc-for>
-            </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdListChannels }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+                <sc-for list="{{ hdChannels }}" as="ch" hint-placeholder-count="4">
+                  <button onClick="{{ ch.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid rgba(139,92,246,.28);border-radius:12px;padding:12px 14px;width:100%">
+                    <span style="flex:none;font:600 12px var(--fu);color:var(--ac2-hi)">{{ ch.pair }}</span>
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                      <span style="font:400 15px var(--fd);color:var(--tx)">{{ ch.name }}</span>
+                      <span style="font:400 10.5px/1.45 var(--fu);color:var(--dim)">{{ ch.route }}</span>
+                    </span>
+                    <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">&#8594;</span>
+                  </button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ hdNoChannels }}" hint-placeholder-val="{{ false }}">
+                <div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">No defined channels in this chart.</div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ hdListCentres }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+                <sc-for list="{{ hdDefined }}" as="c" hint-placeholder-count="4">
+                  <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid rgba(89,179,125,.28);border-radius:10px;padding:12px 14px;width:100%">
+                    <div style="display:flex;align-items:center;gap:8px;width:100%">
+                      <span style="flex:1;font:400 15px var(--fd);text-align:left">{{ c.name }}</span>
+                      <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ok);background:rgba(89,179,125,.16)">DEFINED</span>
+                    </div>
+                    <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+                    <div style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi);text-align:left">{{ c.gates }}</div>
+                  </button>
+                </sc-for>
+                <sc-for list="{{ hdUndefined }}" as="c" hint-placeholder-count="5">
+                  <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:5px;background:rgba(23,21,30,.5);border:1px dashed var(--bd);border-radius:10px;padding:12px 14px;width:100%">
+                    <div style="display:flex;align-items:center;gap:8px;width:100%">
+                      <span style="flex:1;font:400 15px var(--fd);color:var(--dim);text-align:left">{{ c.name }}</span>
+                      <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--dim);background:rgba(238,240,248,.08)">UNDEFINED</span>
+                    </div>
+                    <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim);text-align:left">{{ c.desc }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
-          <button onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:12px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:14px 16px">
+          <button onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
             <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
               <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
             </span>
-            <span style="flex:none;font:400 13px var(--fb);color:var(--ac2-hi)">→</span>
+            <span style="flex:none;font:400 13px var(--fb);color:var(--ac2-hi)">&#8594;</span>
           </button>
         </div>
       </div>
@@ -10713,7 +10796,8 @@ class Component extends DCLogic {
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
-    chartView: '3d', csFail: false, csFocus: null, csToday: false };
+    chartView: '3d', csFail: false, csFocus: null, csToday: false,
+    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates' };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11111,6 +11195,8 @@ class Component extends DCLogic {
          way the expanded overlay is. */
       const cv = localStorage.getItem('incommon.chart.view');
       if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
+      const hv = localStorage.getItem('incommon.hd.view');
+      if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
     } catch (e) {}
     /* Initialize ephemeris router (V1.0.0): dual-backend system (Swiss WASM + fallback).
        Loads in background; app is interactive before WASM initializes. */
@@ -11244,6 +11330,7 @@ class Component extends DCLogic {
     this.cycleSheetAutoAsk();
     this.cycleSceneSync();
     this.chartSceneSync();
+    this.hdSceneSync();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -11260,6 +11347,8 @@ class Component extends DCLogic {
   componentWillUnmount() {
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
     if (this._csS) { this._csS.destroy(); this._csS = null; }
+    if (this._hsS) { this._hsS.destroy(); this._hsS = null; }
+    clearTimeout(this._hsSyncT);
     clearTimeout(this._cySyncT);
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
@@ -21191,6 +21280,131 @@ class Component extends DCLogic {
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
     if (this._csTheme !== tk) { if (this._csTheme != null) S.setTheme(); this._csTheme = tk; }
   }
+  /* ---- The wiring in depth (owner, 19 October 2026) -------------------------
+
+     "Redesign the human design page to make the ux like it was made by unreal
+     engine. Completely interactive, high quality visuals, 3D options with 2D
+     available. Compact, highly engaging, drive the experience to reflect the
+     human design philosophy." The 2D wiring is the SVG, unchanged. 3D and Wheel
+     are one hd-scene.js scene, drawn from the model the wiring vals build
+     (this._hsModel) and moved between its two layouts by a morph. Without
+     WebGL 2, or when three.js does not arrive, the scene says so (hsFail) and
+     the page shows the 2D wiring with no switch.
+
+     The same one-host rule as the chart: [data-hs-scene] is in whichever shell
+     is drawn, looked for again a few times because an sc-if body commits a tick
+     after the update hook, and on the phone three.js is not fetched until the
+     reader is on My Charts. */
+  hdSceneOn() {
+    const HS = typeof window !== 'undefined' && window.HDScene;
+    return !!(HS && HS.supported() && !this.state.hsFail);
+  }
+  hdViewNow() {
+    const v = this.state.hdView;
+    return (v === '3d' || v === 'wheel') && this.hdSceneOn() ? v : '2d';
+  }
+  /* The sky now, for the scene: the same minute's hd-transit reading the gates
+     card on Today reads, with the place on the wheel each body stands at. A
+     Reflector's chart takes its shape from the sky, so for one it is on until
+     the reader turns it off. */
+  hdSkyOn() {
+    const v = this.state.hsSky;
+    return v == null ? this.hdChart().type === 'Reflector' : !!v;
+  }
+  hdSkyList() {
+    const HT = window.HDTransit, W = this.HW();
+    if (!HT || !W || !this.state.ready) return null;
+    const ms = HT.minuteStart(Date.now());
+    if (!this._gnow || this._gnow.ms !== ms) this._gnow = { ms: ms, r: HT.reading((n, t) => this.lonOf(n, t), ms, { wheel: W }) };
+    const r = this._gnow.r, gl = this.hdGlyphs();
+    if (!r) return null;
+    return r.activations.filter(a => a.gate != null).map(a => ({ body: a.body, gate: a.gate, line: a.line, glyph: gl[a.body] || '',
+      lon: W.norm360(W.gateStart(a.gate) + (a.line - 0.5) * W.LINE_DEG) }));
+  }
+  hdGlyphs() {
+    if (!this._hdGl) { this._hdGl = {}; this.PLNS.forEach(([n, g]) => { this._hdGl[n] = g; }); this._hdGl.Earth = '\u2295'; }
+    return this._hdGl;
+  }
+  hdSceneSync(retry) {
+    if (!this.hdSceneOn()) return;
+    const st = this.state, view = this.hdViewNow(), host = view === '2d' ? null : document.querySelector('[data-hs-scene]');
+    const vertical = (st.dtW || 1440) < this.BP.md;
+    clearTimeout(this._hsSyncT);
+    if (!host) {
+      if (this._hsS) this._hsS.detach();
+      const want = st.ready && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'humanDesign');
+      if (want && (retry || 0) < 8) this._hsSyncT = setTimeout(() => this.hdSceneSync((retry || 0) + 1), 60);
+      return;
+    }
+    if (!this._hsS && vertical && this.curTab() !== 'spirit') return;
+    if (!this._hsS) {
+      this._hsS = window.HDScene.create({
+        onFail: () => { this._hsS = null; this.setState({ hsFail: true }); },
+        onFocus: (key, how) => {
+          this.setState({ hsFocus: key });
+          if (how === 'key') { const h = this.hdHudOf(key); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite'); }
+        },
+        onOpen: key => { const sel = this.hdSelOf(key); if (sel) this.setState({ hdSel: sel }); }
+      });
+    }
+    const m = this._hsModel, S = this._hsS;
+    if (m) S.setModel(m);
+    S.setView(view);
+    S.setLayer(st.bgMode || 'both');
+    S.setSky(this.hdSkyOn() ? this.hdSkyList() : null);
+    S.setFocus(st.hsFocus || null, false);
+    S.attach(host);
+    const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
+    if (this._hsTheme !== tk) { if (this._hsTheme != null) S.setTheme(); this._hsTheme = tk; }
+  }
+  /* What a focus key opens, in the detail sheet the 2D wiring already opens. */
+  hdSelOf(key) {
+    if (!key) return { kind: 'type' };
+    const p = key.split(':');
+    if (p[0] === 'c') return { kind: 'center', name: p[1] };
+    if (p[0] === 'ch') { const ab = p[1].split('-'); return { kind: 'channel', a: +ab[0], b: +ab[1] }; }
+    if (p[0] === 'g') { const n = +p[1], a = this.hdChart().acts.find(x => x.gate === n); return { kind: 'gate', gate: n, line: a ? a.line : 1 }; }
+    if (p[0] === 'a') { const a = this._hsModel && this._hsModel.acts.find(x => x.key === key.slice(2)); return a ? { kind: 'gate', gate: a.gate, line: a.line } : null; }
+    return null;
+  }
+  /* The panel under the stage, for whatever is named. Nothing named is the
+     chart as a whole, which is the type. */
+  hdHudOf(key) {
+    const hd = this.hdChart(), A = this.A(), pr = this.hdProfile();
+    const actsOf = n => hd.acts.filter(a => a.gate === n);
+    const actLine = a => (a.kind === 'personality' ? 'Personality ' : 'Design ') + a.body + ', line ' + a.line;
+    const SHAPE = { Head: '\u25B2', Ajna: '\u25BC', Throat: '\u25A0', G: '\u25C6', Heart: '\u25B2', Spleen: '\u25B6', Sacral: '\u25A0', 'Solar Plexus': '\u25C0', Root: '\u25A0' };
+    if (!key) return { glyph: '\u25C7', kind: 'Your type', name: hd.type, sub: pr.key + ' ' + (pr.name || '') + ' \u00b7 ' + hd.definition.split(':')[0],
+      mean: hd.strategy, c: 'var(--ac2-hi)' };
+    const p = key.split(':');
+    if (p[0] === 'c') {
+      const name = p[1], def = hd.defined.has(name), info = A && A.CENTERS[name];
+      const n = hd.gates.filter(g => this.hdCenterOf(g.gate) === name).length;
+      return { glyph: SHAPE[name] || '\u25A0', kind: def ? 'Defined centre' : 'Open centre', name: name,
+        sub: (n ? n + (n === 1 ? ' gate' : ' gates') : 'No gates') + ' \u00b7 ' + (info ? info.fn.split('.')[0] : ''),
+        mean: info ? (def ? info.defined : info.open) : '', c: info ? info.color : 'var(--ac2-hi)' };
+    }
+    if (p[0] === 'g') {
+      const n = +p[1], g = A && A.GATES[n], acts = actsOf(n);
+      return { glyph: String(n), kind: acts.length ? 'Gate' : 'Gate, not activated', name: 'Gate ' + n + ' \u00b7 ' + (this.GATE_NAMES[n] || ''),
+        sub: this.hdCenterOf(n) + (acts.length ? ' \u00b7 ' + acts.map(actLine).join(' \u00b7 ') : ''), mean: g ? g[2] : '', c: acts.length ? 'var(--tx)' : 'var(--dim)' };
+    }
+    if (p[0] === 'ch') {
+      const ab = p[1].split('-').map(Number), info = A ? A.channel(ab[0], ab[1]) : null, hdc = this.HD_CHANNELS.find(c => c[0] === ab[0] && c[1] === ab[1]);
+      const set = new Set(hd.gates.map(g => g.gate)), def = set.has(ab[0]) && set.has(ab[1]), half = !def && (set.has(ab[0]) || set.has(ab[1]));
+      return { glyph: ab[0] + '-' + ab[1], kind: def ? 'Defined channel' : half ? 'Hanging gate' : 'Channel', name: info ? info.name : 'Channel ' + p[1],
+        sub: (hdc ? hdc[2] + ' to ' + hdc[3] : '') + (info && info.theme ? ' \u00b7 ' + info.theme : ''), mean: info ? info.meaning : '', c: def ? 'var(--ac2-hi)' : 'var(--dim)' };
+    }
+    if (p[0] === 'a') {
+      const a = this._hsModel && this._hsModel.acts.find(x => x.key === key.slice(2));
+      if (!a) return null;
+      const g = A && A.GATES[a.gate];
+      return { glyph: a.glyph, kind: a.kind === 'personality' ? 'Personality' : 'Design', name: (a.kind === 'personality' ? 'Personality ' : 'Design ') + a.body,
+        sub: 'Gate ' + a.gate + '.' + a.line + ' \u00b7 ' + (this.GATE_NAMES[a.gate] || '') + ' \u00b7 ' + this.hdCenterOf(a.gate), mean: g ? g[2] : '',
+        c: a.kind === 'personality' ? 'var(--tx)' : 'var(--hd-des)' };
+    }
+    return null;
+  }
   /* THE SHEET. Opened from the widget: every passage, every stay in the
      design and the years ahead in full, then the Oracle's reading of the
      passages. The reading is asked the way the Oracle asked it (one press of
@@ -23536,6 +23750,91 @@ class Component extends DCLogic {
               bgNote: 'The wiring, which the field calls a bodygraph. ' + (mode === 'personality' ? 'Personality: the birth moment. Traditionally the part you think of as yourself, and the part you can talk about.'
                 : mode === 'design' ? 'Design: the moment the Sun stood exactly 88 degrees earlier, which falls between 86.6 and 92 days before birth depending on where the Earth was in its orbit. Solved rather than assumed. Read as the body you were given rather than the self you narrate.'
                 : 'Personality and design together. The birth moment, plus the moment the Sun stood 88 degrees of arc earlier. Together they are the whole of it.') };
+          })(),
+          /* THE WIRING IN DEPTH (owner, 19 October 2026). The 3D and Wheel views
+             are drawn by hd-scene.js from this model, built from the same
+             hdChart() the 2D wiring above reads, so the three views cannot
+             disagree. Rebuilt only when the chart itself changes; the layer,
+             the focus and the sky travel separately. */
+          ...(() => {
+            const A = this.A(), W = this.HW(), gl = this.hdGlyphs(), prof = this.activeProfile(), pr = this.hdProfile();
+            const view = this.hdViewNow(), deep = view !== '2d', deepOn = this.hdSceneOn();
+            const gset = new Set(hd.gates.map(g => g.gate));
+            const hsKey = [prof ? prof.birthStamp : 'legacy', prof ? prof.name : '', A ? 'a' : '', W ? 'w' : ''].join('|');
+            if (this._hsModelKey !== hsKey) {
+              this._hsModelKey = hsKey;
+              const actName = a => (a.kind === 'personality' ? 'Personality ' : 'Design ') + a.body;
+              const gateTips = {};
+              for (let n = 1; n <= 64; n++) {
+                const acts = hd.acts.filter(a => a.gate === n);
+                gateTips[n] = 'Gate ' + n + ' \u00b7 ' + (this.GATE_NAMES[n] || '') + '\n' + this.hdCenterOf(n) +
+                  (acts.length ? '\n' + acts.map(a => actName(a) + ', line ' + a.line).join('\n') : '');
+              }
+              const order = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Solar Plexus', 'Sacral', 'Root'];
+              this._hsModel = { key: hsKey, type: hd.type, owner: prof ? prof.name : '', sub: hd.type + ' \u00b7 ' + pr.key,
+                wheel: W ? W.WHEEL.slice() : [],
+                centres: order.map(name => {
+                  const def = hd.defined.has(name), info = A && A.CENTERS[name];
+                  return { name, short: this.BG_SHORT[name], defined: def, c: info ? info.color : '#2fff8f', box: this.BG_POS[name],
+                    tip: name + ' \u00b7 ' + (def ? 'defined' : 'open') + (info ? '\n' + info.fn.split('.')[0] : '') };
+                }),
+                channels: this.HD_CHANNELS.map(c => {
+                  const info = A ? A.channel(c[0], c[1]) : null;
+                  return { key: c[0] + '-' + c[1], a: c[0], b: c[1], ca: c[2], cb: c[3], defined: gset.has(c[0]) && gset.has(c[1]),
+                    tip: (info ? info.name + ' \u00b7 ' : 'Channel ') + c[0] + '-' + c[1] + '\n' + c[2] + ' to ' + c[3] };
+                }),
+                acts: hd.acts.map(a => ({ key: a.kind.charAt(0) + ':' + a.body, kind: a.kind, body: a.body, glyph: gl[a.body] || '', gate: a.gate, line: a.line,
+                  lon: W ? W.norm360(W.gateStart(a.gate) + (a.line - 0.5) * W.LINE_DEG) : 0,
+                  tip: actName(a) + '\nGate ' + a.gate + '.' + a.line + ' \u00b7 ' + (this.GATE_NAMES[a.gate] || '') })),
+                gateTips,
+                steps: order.map(n => 'c:' + n).concat(hd.activeChannels.map(c => 'ch:' + c[0] + '-' + c[1])) };
+            }
+            const steps = this._hsModel.steps, fk = st.hsFocus, at = steps.indexOf(fk);
+            const hud = this.hdHudOf(fk) || this.hdHudOf(null);
+            const move = d => () => {
+              const i = at < 0 ? (d > 0 ? 0 : steps.length - 1) : (at + d + steps.length) % steps.length, k = steps[i];
+              if (this._hsS) this._hsS.setFocus(k, true);
+              this.setState({ hsFocus: k });
+              const h = this.hdHudOf(k); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite');
+            };
+            const z = d => () => { if (this._hsS) this._hsS.zoom(d); };
+            const sky = this.hdSkyOn();
+            const head = (txt, sep) => { const i = txt.indexOf(sep); return i < 0 ? [txt, ''] : [txt.slice(0, i + (sep === '.' ? 1 : 0)), txt.slice(i + 1).trim()]; };
+            const sa = head(hd.strategy || '', '.'), au = head(hd.authority || '', ':'), df = head(hd.definition || '', ':');
+            const listTab = st.hdList || 'gates';
+            return {
+              hdViewsOn: deepOn,
+              hdViews: deepOn ? [['3d', '3D'], ['wheel', 'Wheel'], ['2d', '2D']].map(([id, label]) => ({
+                label, on: view === id,
+                bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
+                bd: view === id ? 'var(--ac2)' : 'transparent',
+                c: view === id ? 'var(--tx)' : 'var(--dim)',
+                go: () => { try { localStorage.setItem('incommon.hd.view', id); } catch (e) {} this.setState({ hdView: id }); }
+              })) : [],
+              hvFlat: !deep, hvDeep: deep,
+              hsAria: view === 'wheel' ? 'The wiring inside the wheel of sixty four gates. Arrow keys move between the centres and channels, Enter opens one.'
+                : 'The wiring in three dimensions. Arrow keys move between the centres and channels, Enter opens one.',
+              hsSkyOn: sky, hsSkyGo: () => this.setState({ hsSky: !sky }),
+              hsSkyDot: sky ? 'var(--blue)' : 'transparent', hsSkyGlow: sky ? '0 0 10px rgba(var(--atmc),.8)' : 'none',
+              hsHudGlyph: hud.glyph, hsHudKind: hud.kind, hsHudName: hud.name, hsHudSub: hud.sub, hsHudMean: hud.mean, hsHudC: hud.c,
+              hsHudIdx: at < 0 ? '' : (at + 1) + ' of ' + steps.length, hsHudGlyphPx: hud.glyph.length > 2 ? '12px' : hud.glyph.length > 1 ? '15px' : '19px',
+              hsPrev: move(-1), hsNext: move(1),
+              hsOpen: () => { const sel = this.hdSelOf(fk); if (sel) this.setState({ hdSel: sel }); },
+              hsOpenLabel: fk ? 'Open the reading' : 'Open your type',
+              hsClear: () => { if (this._hsS) this._hsS.setFocus(null); this.setState({ hsFocus: null }); }, hsClearOn: !!fk,
+              hsZoomIn: z(-1), hsZoomOut: z(1), hsZoomReset: z(0),
+              hdTiles: [
+                { label: 'Strategy', head: sa[0], rest: sa[1], go: this.hdOpen({ kind: 'strategy' }) },
+                { label: 'Authority', head: au[0], rest: au[1], go: this.hdOpen({ kind: 'authority' }) },
+                { label: 'Profile', head: pr.key, rest: pr.name || '', go: this.hdOpen({ kind: 'profile' }) },
+                { label: 'Definition', head: df[0], rest: df[1], go: () => { this.setState({ hdList: 'centres' }); } }
+              ],
+              hdListTabs: [['gates', 'Gates', hd.gates.length], ['channels', 'Channels', hd.activeChannels.length], ['centres', 'Centres', hd.defined.size + '/9']].map(([id, label, n]) => ({
+                label, n: String(n), on: listTab === id,
+                bg: listTab === id ? 'rgba(var(--atmc),.34)' : 'transparent', bd: listTab === id ? 'var(--ac2)' : 'transparent',
+                c: listTab === id ? 'var(--tx)' : 'var(--dim)', go: () => this.setState({ hdList: id }) })),
+              hdListGates: listTab === 'gates', hdListChannels: listTab === 'channels', hdListCentres: listTab === 'centres'
+            };
           })(),
           hdChannels: hd.activeChannels.map(ch => {
             const A = this.A(), info = A ? A.channel(ch[0], ch[1]) : null;

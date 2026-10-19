@@ -1266,6 +1266,31 @@
           : { roledesc: 'astrological chart', summary: 'incommon-wheel-summary', focusable: '0', named: !!wheel });
       wp.__incommonApp.setState({ chartView: view0 });
       await sleep(400);
+      /* G11d: the wiring holds itself to the same rule. Its 2D view is the SVG
+         with the role description and the summary; the 3D and Wheel stage
+         carries both, and without WebGL 2 the SVG is all there is. Back to the
+         astrology page afterwards, as the phase was before this row. */
+      await goP('#/spirit/human-design', 900);
+      var hv0 = wp.__incommonApp.state.hdView;
+      wp.__incommonApp.setState({ hdView: '2d' });
+      await sleep(700);
+      var bg = dp.querySelector('svg[aria-roledescription="human design wiring"]');
+      var bgSum = bg && dp.getElementById(bg.getAttribute('aria-describedby') || '');
+      wp.__incommonApp.setState({ hdView: '3d' });
+      await sleep(900);
+      var hsOn = !!(wp.HDScene && wp.HDScene.supported() && !wp.__incommonApp.state.hsFail);
+      var hsStage = dp.querySelector('[data-hs-scene]');
+      t('G11d', 'The wiring describes itself, flat and in depth',
+        { roledesc: 'human design wiring', summary: true, stage: true },
+        { roledesc: bg && bg.getAttribute('aria-roledescription'), summary: !!(bgSum && txt(bgSum).length > 20),
+          stage: hsOn ? !!(hsStage && hsStage.getAttribute('aria-roledescription') === 'human design wiring' &&
+            hsStage.getAttribute('aria-describedby') === 'incommon-bg-summary' && hsStage.getAttribute('tabindex') === '0' &&
+            /arrow keys/i.test(hsStage.getAttribute('aria-label') || '')) : !hsStage });
+      wp.__incommonApp.setState({ hdView: hv0 });
+      /* the view change commits and writes its address first, or the address
+         sync can put the wiring's route back over the hash set below */
+      await sleep(500);
+      for (var hdBack = 0; hdBack < 3 && wp.__incommonApp.state.spiritView !== 'astrology'; hdBack++) await goP('#/spirit/astrology', 900);
 
       /* ---- G14: icon only controls ---- */
       var described = [].slice.call(dp.querySelectorAll('[aria-describedby]'));
@@ -1276,10 +1301,21 @@
       }).map(function (el) { return el.getAttribute('aria-label') || el.tagName; });
       t('G14', 'Every aria-describedby points at real, non-empty text', [], dangling);
       var zoomBtn = dp.querySelector('button[aria-label="Zoom in"]');
-      t('G14b', 'The zoom cluster is described, not just labelled',
-        { described: 'incommon-zoom-help', mentionsReset: true },
+      /* The wiring has a zoom cluster of its own now, and on the phone every
+         chart page is mounted at once, so the first Zoom in on the page may be
+         the wiring's. The chart's cluster is still held to its own help text,
+         and every other cluster has to carry one that mentions the reset. */
+      var zoomAll = [].slice.call(dp.querySelectorAll('button[aria-label="Zoom in"]'));
+      zoomBtn = zoomAll.filter(function (b) { return b.getAttribute('aria-describedby') === 'incommon-zoom-help'; })[0] || zoomBtn;
+      var zoomBare = zoomAll.filter(function (b) {
+        if (b === zoomBtn) return false;
+        var d = dp.getElementById(b.getAttribute('aria-describedby') || '');
+        return !(d && /reset/i.test(txt(d)));
+      }).length;
+      t('G14b', 'Every zoom cluster is described, not just labelled',
+        { described: 'incommon-zoom-help', mentionsReset: true, othersDescribed: true },
         { described: zoomBtn && zoomBtn.getAttribute('aria-describedby'),
-          mentionsReset: /reset/i.test(txt(dp.getElementById('incommon-zoom-help'))) });
+          mentionsReset: /reset/i.test(txt(dp.getElementById('incommon-zoom-help'))), othersDescribed: zoomBare === 0 });
 
       /* ---- G9: colour is never the only carrier ---- */
       var legend = dp.querySelector('[aria-label="What the aspect line colours mean"]');
