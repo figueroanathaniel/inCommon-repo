@@ -340,6 +340,7 @@
       var e = NC.settle([all, wAll]), su = NC.settle([vow, wVow]), pe = NC.settle([con, wCon]);
       return { letters: s.length, expression: e.value, soulUrge: su.value, personality: pe.value,
         compounds: { expression: e.compound, soulUrge: su.compound, personality: pe.compound },
+        karmic: { expression: e.karmic || [], soulUrge: su.karmic || [], personality: pe.karmic || [] },
         rawTotals: { all: all, vowels: vow, consonants: con } };
     },
     keep: function (t) { t = Math.abs(+t || 0); while (t > 9 && t !== 11 && t !== 22 && t !== 33) t = String(t).split('').reduce(function (x, c) { return x + +c; }, 0); return t; },

@@ -466,9 +466,18 @@ if (!hdLine) {
   let Cm = null;
   try { Cm = vm.runInNewContext('(class { ' + method('numCmp').replace(/^\n/, '') + ' })', { window: { NumberMatrix: MX }, String: String }); } catch (e) { Cm = null; }
   const cm = Cm ? new Cm() : null;
-  t('U14', 'the label is 33/6 for a master, 24/6 or 38/11 otherwise, and a karmic debt wears --warn',
-    cm ? [cm.numCmp(33, 33).cmp, cm.numCmp(24, 6).cmp, cm.numCmp(38, 11).cmp, cm.numCmp(13, 4).cmpC, cm.numCmp(null, 4).cmpOn].join(',') : 'did not lift',
+  t('U14', 'the label is 33/6 for a master, 24/6 or 38/11 otherwise, and a birth number owing 13 wears --warn',
+    cm ? [cm.numCmp(33, 33, []).cmp, cm.numCmp(24, 6).cmp, cm.numCmp(38, 11).cmp, cm.numCmp(13, 4, [13]).cmpC, cm.numCmp(null, 4).cmpOn].join(',') : 'did not lift',
     '33/6,24/6,38/11,var(--warn),false');
+  /* Karmic debt on any route, read on the birth numbers only (owner, 19
+     October 2026). 1940-01-04 is 10 by its parts and 19 by its digits. */
+  const kd = CORE.lifePath('1940-01-04');
+  t('U16', 'a karmic debt on the second route is found though the compound shown is the first route\'s', [kd.compound, kd.value, kd.karmic.join(' ')].join(','), '10,1,19');
+  t('U17', 'karmicOf walks every route to its root: 49 passes 13, 28 passes nothing, 199 passes 19', CORE.karmicOf([49, 28, 199]).join(','), '13,19');
+  const owe = cm ? cm.numCmp(10, 1, kd.karmic) : null, cyc = cm ? cm.numCmp(16, 7) : null;
+  t('U18', 'a Life Path owing 19 on its other route carries a debt line; a cycle on 16 keeps its title, the ordinary colour and no debt label',
+    owe && cyc ? [owe.cmpC, owe.debtOn, owe.debtLine, cyc.cmpTitle, cyc.cmpC, cyc.cmpCat === '', cyc.debtOn].join('|') : 'did not lift',
+    'var(--ac2-hi)|true|Karmic Debt 19 \u00b7 The Debt of Selfishness|The Debt of Intellectual Pride|var(--ac2-hi)|true|false');
   x.dob = () => '1985-01-09';
   const xa = x.numerology();
   t('U15', 'the Numbers page reads the Life Path and its compound from the core', [xa.lp, xa.lpC, xa.rdC, xa.cycles[2][3]].join(','), '33,33,,23');

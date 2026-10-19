@@ -3519,10 +3519,27 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       var v = reduce(rs[i]).value;
       if (MASTERS.indexOf(v) !== -1) master = v;
     }
-    var root = reduce(rs[0], { preserveMasters: false }).value;
-    if (master != null) return { value: master, root: root, compound: master, master: true, routes: rs };
+    var root = reduce(rs[0], { preserveMasters: false }).value, karmic = karmicOf(rs);
+    if (master != null) return { value: master, root: root, compound: master, master: true, karmic: karmic, routes: rs };
     for (i = 0, c = null; i < rs.length && c == null; i++) c = compound(rs[i]);
-    return { value: root, root: root, compound: c, master: false, routes: rs };
+    return { value: root, root: root, compound: c, master: false, karmic: karmic, routes: rs };
+  }
+  /* KARMIC DEBT IS FOUND ON ANY ROUTE, the way the modern school reads it: a
+     number carries the debt of 13, 14, 16 or 19 if any route to its root
+     passes through one, whether or not that is the compound shown (1940-01-04
+     is 10 by its parts and 19 by its digits, and owes 19). Returned in route
+     order, each once. The tradition reads it on the birth numbers only (Life
+     Path, Birthday, Expression, Soul Urge, Personality), so the screen marks
+     it there and nowhere else; the cycles still return it, unread. */
+  var KARMIC = [13, 14, 16, 19];
+  function karmicOf(routes) {
+    var out = [];
+    routes.forEach(function (r) {
+      reduce(r, { preserveMasters: false }).steps.forEach(function (v) {
+        if (KARMIC.indexOf(v) !== -1 && out.indexOf(v) === -1) out.push(v);
+      });
+    });
+    return out;
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   // every digit of the date, added: 1992-07-02 -> 1+9+9+2+0+7+0+2 = 30
@@ -3567,7 +3584,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     var total = pw.reduce(function (a, p) { return a + p.reduced; }, 0);
     var full = pw.reduce(function (a, p) { return a + p.raw; }, 0);
     var fin = settle([total, full]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, parts: pw, total: total, full: full,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, parts: pw, total: total, full: full,
       work: pw.map(function (p) { return p.word + ' ' + p.raw + '→' + p.reduced; }).join(' · ') + ' · ' + total + ' → ' + fin.value };
   }
   function expression(name, yPolicy) { return nameNumber(name, null, yPolicy); }
@@ -3583,20 +3600,20 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), y = reduce(digitSum(p.y));
     var sum = mo.value + d.value + y.value, all = dateDigits(p.y, p.mo, p.d), fin = settle([sum, all]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, sum: sum, all: all,
       work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
   }
   function birthday(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var r = reduce(p.d), fin = settle([p.d]);
-    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, work: p.d + ' → ' + r.value };
+    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, karmic: fin.karmic, work: p.d + ' → ' + r.value };
   }
   // fixture N2: 7 + 2 + (2026→10→1) = 10 → 1
   function personalYear(iso, year) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), uy = reduce(digitSum(+year));
     var sum = mo.value + d.value + uy.value, all = dateDigits(+year, p.mo, p.d), fin = settle([sum, all]);
-    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, karmic: fin.karmic, sum: sum, all: all,
       work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
   }
   // fixture N3: PY 1 + month 7 = 8
@@ -3783,7 +3800,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   return { VERSION: VERSION, MASTERS: MASTERS, LETTER: LETTER,
-    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS,
+    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS, KARMIC: KARMIC, karmicOf: karmicOf,
     lifePath: lifePath, birthday: birthday, expression: expression, soulUrge: soulUrge,
     personality: personality, personalYear: personalYear, personalMonth: personalMonth, coreNumbers: coreNumbers,
     angelAnalyze: angelAnalyze, fmtToday: fmtToday, fmtShort: fmtShort,
@@ -7352,6 +7369,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       var e = NC.settle([all, wAll]), su = NC.settle([vow, wVow]), pe = NC.settle([con, wCon]);
       return { letters: s.length, expression: e.value, soulUrge: su.value, personality: pe.value,
         compounds: { expression: e.compound, soulUrge: su.compound, personality: pe.compound },
+        karmic: { expression: e.karmic || [], soulUrge: su.karmic || [], personality: pe.karmic || [] },
         rawTotals: { all: all, vowels: vow, consonants: con } };
     },
     keep: function (t) { t = Math.abs(+t || 0); while (t > 9 && t !== 11 && t !== 22 && t !== 33) t = String(t).split('').reduce(function (x, c) { return x + +c; }, 0); return t; },
@@ -22761,6 +22779,7 @@ input[type="date"]{color-scheme:dark}
             </div>
             <div style="font:italic 400 11px/1.5 var(--fb);color:var(--dim)">{{ n.mean }}</div>
             <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+            <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
           </button>
         </sc-for>
       </div>
@@ -22776,6 +22795,7 @@ input[type="date"]{color-scheme:dark}
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                 <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+                <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
               </button>
             </sc-for>
           </div>
@@ -25492,6 +25512,18 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
         </div>
       </sc-if>
+      <sc-if value="{{ numDebtOn }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ numDebts }}" as="dk" hint-placeholder-count="1">
+          <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--warn);border-radius:12px;padding:13px 15px">
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span style="font:400 22px/1 var(--fd);color:var(--warn)">{{ dk.n }}</span>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">Karmic Debt</span>
+            </div>
+            <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ dk.title }}</div>
+            <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ dk.desc }}</div>
+          </div>
+        </sc-for>
+      </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <sc-for list="{{ numLines }}" as="l" hint-placeholder-count="3">
@@ -27907,6 +27939,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
               <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
               <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+              <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
             </button>
           </sc-for>
         </div>
@@ -27962,6 +27995,7 @@ input[type="date"]{color-scheme:dark}
                   <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                   <div style="font:600 8.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                   <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+                  <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
                 </button>
               </sc-for>
             </div>
@@ -28016,6 +28050,18 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ numCmpTitle }}</div>
           <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
         </div>
+      </sc-if>
+      <sc-if value="{{ numDebtOn }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ numDebts }}" as="dk" hint-placeholder-count="1">
+          <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--warn);border-radius:12px;padding:13px 15px">
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span style="font:400 22px/1 var(--fd);color:var(--warn)">{{ dk.n }}</span>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">Karmic Debt</span>
+            </div>
+            <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ dk.title }}</div>
+            <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ dk.desc }}</div>
+          </div>
+        </sc-for>
       </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -34560,15 +34606,28 @@ class Component extends DCLogic {
      the double digit a number passed through is its own frequency, and the
      Book of Numbers (number-matrix.js) holds a title for every one from 10 to
      99. c is that compound, v the number as shown. The label is the notation
-     the tradition writes, 33/6 for a master and 24/6 or 38/11 otherwise, and a
-     Karmic Debt compound wears --warn, the colour the Challenges already wear,
-     because the matrix reads it as a debt to be met. */
-  numCmp(c, v) {
-    const M = window.NumberMatrix, e = M && c ? M.get(c) : null;
-    if (!e) return { cmpOn: false, cmp: '', cmpLine: '', cmpTitle: '', cmpCat: '', cmpDesc: '', cmpC: 'var(--ac2-hi)', cmpN: null };
+     the tradition writes, 33/6 for a master and 24/6 or 38/11 otherwise.
+
+     KARMIC DEBT IS READ ON THE BIRTH NUMBERS ONLY (owner, 19 October 2026):
+     Life Path, Birthday, Expression, Soul Urge and Personality pass `debts`,
+     the core's karmicOf() list, which is every 13, 14, 16 or 19 any route
+     passed through. Those wear --warn, the colour the Challenges wear, and a
+     debt the shown compound does not carry gets a line of its own (debtLine),
+     because 1940-01-04 is 10 by its parts and still owes 19. Every other
+     number (the Personal Year, Month and Day, the Pinnacles and the cycles)
+     passes nothing: its compound keeps its title in the ordinary colour and
+     is never labelled a debt, because the tradition does not read one there. */
+  numCmp(c, v, debts) {
+    const M = window.NumberMatrix, e = M && c ? M.get(c) : null, natal = Array.isArray(debts);
+    const owed = natal ? debts.filter(k => k !== c && M && M.get(k)).map(k => M.get(k)) : [];
+    const debtBits = { debtOn: owed.length > 0, debtLine: owed.map(d => 'Karmic Debt ' + d.n + ' \u00b7 ' + d.title).join(' \u00b7 '),
+      debts: owed.map(d => ({ n: String(d.n), title: d.title, desc: d.desc })) };
+    if (!e) return { cmpOn: false, cmp: '', cmpLine: '', cmpTitle: '', cmpCat: '', cmpDesc: '', cmpC: 'var(--ac2-hi)', cmpN: null, ...debtBits };
     const label = e.master ? c + '/' + e.root : (+v === c ? String(c) : c + '/' + v);
-    return { cmpOn: true, cmp: label, cmpLine: label + ' \u00b7 ' + e.title, cmpTitle: e.title, cmpCat: e.category, cmpDesc: e.desc,
-      cmpC: e.karmic ? 'var(--warn)' : 'var(--ac2-hi)', cmpN: c };
+    const owes = e.karmic && natal;
+    return { cmpOn: true, cmp: label, cmpLine: label + ' \u00b7 ' + e.title, cmpTitle: e.title,
+      cmpCat: e.karmic && !natal ? '' : e.category, cmpDesc: e.desc,
+      cmpC: owes ? 'var(--warn)' : 'var(--ac2-hi)', cmpN: c, ...debtBits };
   }
   numerology() {
     const core = window.InCommonCore, dob = this.dob();
@@ -34585,6 +34644,7 @@ class Component extends DCLogic {
     const age = Math.floor((Date.now() - Date.parse(dob + 'T12:00:00')) / 31557600000);
     return { lp: lp, rm: rm, rd: rd, ry: ry, age: isNaN(age) ? null : age,
       lpC: lpR ? lpR.compound : null, rdC: cmp(d),
+      lpK: lpR && lpR.karmic ? lpR.karmic : [], rdK: core && core.karmicOf ? core.karmicOf([d]) : [],
       pinnacles: [[p1, '0 to ' + end1, cmp(rm + rd)], [p2, (end1 + 1) + ' to ' + (end1 + 9), cmp(rd + ry)], [p3, (end1 + 10) + ' to ' + (end1 + 18), cmp(p1 + p2)], [p4, (end1 + 19) + ' onward', cmp(rm + ry)]],
       cycles: [['Formative', rm, 'birth to ' + end1, cmp(mo)], ['Productive', rd, (end1 + 1) + ' to ' + (end1 + 27), cmp(d)], ['Harvest', ry, (end1 + 28) + ' onward', cmp(y)]],
       challenge: this.numReduce(Math.abs(c1 - c2)), subs: [this.numReduce(c1), this.numReduce(c2)], end1: end1,
@@ -38792,7 +38852,7 @@ class Component extends DCLogic {
     const pyR = core ? core.personalYear(dob, now.getFullYear()) : null;
     const pyC = pyR && pyR.value === pyV ? pyR.compound : null, pmC = pmR ? pmR.compound : null;
     const pdC = core && core.compound && pm != null ? core.compound(pm + now.getDate()) : null;
-    const nm = NC ? NC.fromName(this.birthName()) : null, nmC = (nm && nm.compounds) || {};
+    const nm = NC ? NC.fromName(this.birthName()) : null, nmC = (nm && nm.compounds) || {}, nmK = (nm && nm.karmic) || {};
     const open = (pos, v, extra) => () => this.setState({ spiritView: 'numberDetail', numSel: { pos: pos, v: v, ...(extra || {}) }, numListsOpen: false });
     let span = '';
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob);
@@ -38812,12 +38872,12 @@ class Component extends DCLogic {
       numerSummary: { head: 'What these numbers are drawn from',
         text: 'Life Path ' + n.lp + ', reduced from ' + dob + '. Personal Year ' + pyV + ', Personal Day ' + pdV + '. Every figure below is arithmetic performed on that one date: no interpretation has entered yet, and every step of it can be checked by hand. That is worth knowing before any of the meanings arrive: the numbers are certain, and what they are said to mean is the part that has been argued over for centuries.' },
       numerYearSpan: span,
-      numerCore: [['Life Path', n.lp, 'lifePath', n.lpC], ['Birthday', n.rd, 'birthday', n.rdC], ['Personal Year', pyV, 'personalYear', pyC],
+      numerCore: [['Life Path', n.lp, 'lifePath', n.lpC, n.lpK], ['Birthday', n.rd, 'birthday', n.rdC, n.rdK], ['Personal Year', pyV, 'personalYear', pyC],
         ['Personal Month', pm, 'personalMonth', pmC], ['Personal Day', pdV, 'personalDay', pdC], ['Challenge', n.challenge, 'challenge', null]]
-        .map(([k, v, pos, c]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v, { c: c }), ...this.numCmp(c, v) })),
+        .map(([k, v, pos, c, kd]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v, { c: c, k: kd }), ...this.numCmp(c, v, kd) })),
       hasBirthName: !!nm, noBirthName: !nm,
       nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality']]
-        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v, { c: nmC[pos] }), ...this.numCmp(nmC[pos], v) })) : [],
+        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v, { c: nmC[pos], k: nmK[pos] || [] }), ...this.numCmp(nmC[pos], v, nmK[pos] || []) })) : [],
       birthNameLine: nm ? 'From ' + nm.letters + ' letters of the birth name saved on this device. Pythagorean values.' : '',
       nameDraft: st.nameDraft,
       nameType: e => this.setState({ nameDraft: String(e.target.value || '').slice(0, 80) }),
@@ -38861,7 +38921,8 @@ class Component extends DCLogic {
       ['Opportunities', c.lists.opportunities, 'var(--ac)'], ['Obstacles', c.lists.obstacles, 'var(--ac2-hi)']];
     return {
       spiritNumDetail: true, numValue: c.value, numCategory: c.category, numTitle: c.title,
-      ...(cm => ({ numCmpOn: cm.cmpOn, numCmp: cm.cmp, numCmpTitle: cm.cmpTitle, numCmpCat: cm.cmpCat, numCmpDesc: cm.cmpDesc, numCmpC: cm.cmpC }))(this.numCmp(sel.c, sel.v)),
+      ...(cm => ({ numCmpOn: cm.cmpOn, numCmp: cm.cmp, numCmpTitle: cm.cmpTitle, numCmpCat: cm.cmpCat, numCmpDesc: cm.cmpDesc, numCmpC: cm.cmpC,
+        numDebtOn: cm.debtOn, numDebts: cm.debts }))(this.numCmp(sel.c, sel.v, sel.k)),
       numFrom: /birth month, day, and year in turn/.test(c.from) ? '' : 'Calculated from ' + c.from + '.', numHasFrom: !/birth month, day, and year in turn/.test(c.from), numIsPinnacle: c.isPinnacle,
       numRange: sel.range ? 'Peak period, ages ' + sel.range : '',
       numBg: c.isPinnacle ? 'rgba(47,255,143,.08)' : 'var(--sf)',
