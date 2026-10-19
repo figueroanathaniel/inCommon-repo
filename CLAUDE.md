@@ -4478,6 +4478,64 @@ and the owner kept the debt; and a compound's own description can sit beside a
 debt it does not mention (10, "a clean karmic slate", above a debt of 19).
 U16 to U18 hold it.
 
+## A debt compound on a cycle has a name of its own
+Asked for by the owner on 19 October 2026: the Personal Year, Month and Day,
+the Pinnacles and the period cycles read no karmic debt, so their titles should
+not say debt either. The matrix CSV carries two more columns, **Cycle Title**
+and **Cycle Description**, filled on the four Karmic Debt rows and empty on
+every other: 13 The Season of Steady Labor, 14 The Season of Temperance, 16 The
+Tower Season, 19 The Season of Self-Reliance. These four titles and
+descriptions were drafted in this pass, in the matrix's own register, and are
+the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answers with them and no category;
+`numCmp()` asks for it whenever no `debts` list is passed, which is exactly the
+cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
+other row with either, and a cycle reading that says debt. U19 holds it.
+
+## The Numbers stage
+Asked for by the owner on 19 October 2026: the Numbers page "interactive, as if
+it were made by Unreal Engine". It opens with a real CSS 3D scene, in both
+shells, above the summary: a grid floor tilted 58 degrees under a perspective
+camera, an orbit ring, the Life Path floating over the centre on a beam, and
+every other number standing on the orbit as an upright sprite. Under it, a HUD
+panel names the number in front, its compound and any debt, with previous,
+next and Open. Depth, overlap and the shrink toward the back are the browser's
+perspective, not arithmetic. `numStage()` builds it from the same rows the cards
+use, so the stage and the cards cannot disagree.
+
+**Six things are easy to undo.**
+- **The orbit turns rather than jumping.** The spinner is `rotateZ(numSpin)` and
+  every sprite carries `rotateZ(-numSpin)` under the same transition, so the
+  two cancel at every frame and the numbers ride the ellipse upright.
+  `numFocusTo()` keeps the spin cumulative and always takes the short way, and
+  `numSpinNow()` rests it at 180 so the first number starts in front rather than
+  behind the Life Path. U20 holds that.
+- **Choosing is two presses**, as in a game menu: the first brings a number to
+  the front, the second opens its reading. Arrow keys turn the orbit and carry
+  focus with it; a sideways swipe turns it on a phone (the stage is
+  `data-noswipe`, so the screen chain does not also move).
+- **Nothing per frame goes through state.** The camera tilt (`numCam()`) and
+  the card tilt and highlight (`numTilt()`, `[data-sheen]`) write the element's
+  own style, the way live regions are written, because a setState per pointer
+  move re-renders the whole app. Touch and reduced motion skip both, and the
+  sheet's global rule stills every transition and the two ambient animations
+  (`nsOrbit`, `nsHover`).
+- **The camera layer takes no pointer** (`pointer-events: none` on
+  `[data-ns-cam]`). It sits at screen depth, and the numbers on the far half of
+  the floor are behind it, so without this only the near half could be clicked.
+  The same goes for the sprite buttons: each box ignores the pointer and its
+  visible orb and label take it, because the boxes overlap their neighbours.
+- **The sprite boxes are wider than what they draw**, because Chromium clips a
+  3D layer's shadow to its own box: at the orb's width the Life Path's glow was
+  cut into a lit column.
+- **The Life Path floats high enough that the back of the orbit is never
+  hidden** (a 150px beam on the desktop, 120px on the phone). On the floor it
+  covered whichever number stood behind it.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+Numbers screen, since the theme phase sees Today only: four identities, each
+hardened and not, at 1440 and 375, about 80 elements each, no pair under 4.5:1
+and no control under 44px.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five

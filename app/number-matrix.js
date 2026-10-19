@@ -25,13 +25,13 @@
     10: {"root":1,"math":"1+0=1","title":"The Wheel of Fortune","category":"Elite Auspicious","desc":"A clean karmic slate offering absolute independence, fresh starts, and a flawless field for manifestation with zero residual baggage."},
     11: {"root":2,"math":"1+1=2","title":"The Master Messenger","category":"Master Number","desc":"Channel of pure psychic intuition, cosmic illumination, and artistic vision. Must ground nervous energy to avoid chronic anxiety."},
     12: {"root":3,"math":"1+2=3","title":"The Expressive Individual","category":"Standard Sub-Frequency","desc":"Blends independent drive (1) with cooperative diplomacy (2) to articulate highly creative, original concepts smoothly."},
-    13: {"root":4,"math":"1+3=4","title":"The Debt of Hard Work","category":"Karmic Debt","desc":"Requires overcoming past-life shortcuts or laziness by mastering strict discipline, structural organization, and relentless effort."},
-    14: {"root":5,"math":"1+4=5","title":"The Debt of Abuse of Freedom","category":"Karmic Debt","desc":"Demands temperance, commitment, and moderation to correct past misuses of physical freedom, indulgence, or escapism."},
+    13: {"root":4,"math":"1+3=4","title":"The Debt of Hard Work","category":"Karmic Debt","desc":"Requires overcoming past-life shortcuts or laziness by mastering strict discipline, structural organization, and relentless effort.","cycleTitle":"The Season of Steady Labor","cycleDesc":"A stretch that rewards discipline, structure and patient effort, where the work done carefully now is the work that holds later."},
+    14: {"root":5,"math":"1+4=5","title":"The Debt of Abuse of Freedom","category":"Karmic Debt","desc":"Demands temperance, commitment, and moderation to correct past misuses of physical freedom, indulgence, or escapism.","cycleTitle":"The Season of Temperance","cycleDesc":"A stretch of movement and appetite that asks for moderation and commitment, so that freedom is used well rather than spent."},
     15: {"root":6,"math":"1+5=6","title":"The Charismatic Magnet","category":"Standard Sub-Frequency","desc":"Combines pioneering spirit (1) with versatile adventure (5) to generate immense personal allure, wealth, and material luck."},
-    16: {"root":7,"math":"1+6=7","title":"The Debt of Intellectual Pride","category":"Karmic Debt","desc":"Shatters intellectual vanity and ego through sudden, disruptive life collapses ('Tower moments') to rebuild authentic spiritual faith."},
+    16: {"root":7,"math":"1+6=7","title":"The Debt of Intellectual Pride","category":"Karmic Debt","desc":"Shatters intellectual vanity and ego through sudden, disruptive life collapses ('Tower moments') to rebuild authentic spiritual faith.","cycleTitle":"The Tower Season","cycleDesc":"A stretch that tests what was built on certainty and pride, and clears ground for something more honest to be rebuilt on faith."},
     17: {"root":8,"math":"1+7=8","title":"The Star of the Magi","category":"Elite Auspicious","desc":"Supreme protection and immortality of name/work. Perfectly fuses spiritual wisdom (7) with material and financial mastery (8)."},
     18: {"root":9,"math":"1+8=9","title":"The Spiritual Warrior","category":"Standard Sub-Frequency","desc":"Fuses raw identity (1) with intense corporate/material power (8) to protect vulnerable communities and fight for systemic justice."},
-    19: {"root":1,"math":"1+9=10 -> 1+0=1","title":"The Debt of Selfishness","category":"Karmic Debt","desc":"Enforces isolation and forces the individual to stand completely alone until they pay off past-life narcissistic abuse of power."},
+    19: {"root":1,"math":"1+9=10 -> 1+0=1","title":"The Debt of Selfishness","category":"Karmic Debt","desc":"Enforces isolation and forces the individual to stand completely alone until they pay off past-life narcissistic abuse of power.","cycleTitle":"The Season of Self-Reliance","cycleDesc":"A stretch that asks for standing on one's own feet, and for turning that strength toward others rather than only toward the self."},
     20: {"root":2,"math":"2+0=2","title":"The Quiet Harmonizer","category":"Standard Sub-Frequency","desc":"Amplified cooperative and peacemaking energy operating entirely behind the scenes with deep, passive intuitive accuracy."},
     21: {"root":3,"math":"2+1=3","title":"The Crown of the Magi","category":"Elite Auspicious","desc":"A hallmark of eventual public elevation, high honor, and absolute victory after navigating grueling early-life tests."},
     22: {"root":4,"math":"2+2=4","title":"The Master Builder","category":"Master Number","desc":"Holds the structural capacity to anchor massive cosmic visions into functional, physical, global organizations and infrastructure."},
@@ -119,11 +119,17 @@
     CATEGORIES: CATEGORIES,
     entries: M,
     has: function (n) { return !!M[n]; },
-    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null */
-    get: function (n) {
+    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null.
+       get(16, { cycle: true }) is the compound as a Personal Year, Month or Day,
+       a Pinnacle or a period cycle reads it: a Karmic Debt row answers with its
+       Cycle Title and Cycle Description and no category, because the tradition
+       reads no debt there. Every other row answers exactly as get() does. */
+    get: function (n, opts) {
       var e = M[n];
       if (!e) return null;
-      return { n: +n, root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc,
+      var cyc = !!(opts && opts.cycle && e.cycleTitle);
+      return { n: +n, root: e.root, math: e.math, title: cyc ? e.cycleTitle : e.title,
+        category: cyc ? '' : e.category, desc: cyc ? e.cycleDesc : e.desc,
         master: e.category === 'Master Number', karmic: e.category === 'Karmic Debt',
         auspicious: e.category === 'Elite Auspicious' };
     }
