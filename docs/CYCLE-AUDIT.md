@@ -129,6 +129,21 @@ awkward in the Oracle.
 - **Nothing loading.** The live functions were older than the page (step 2).
 - **The layout.** It is a widget on Today now, and a tap opens the rest.
 
+## The Cycle Audit in depth
+
+Added 19 October 2026 at your request ("make the audit cycle completely
+interactive like it was made on Unreal Engines"). The chart on Today is now a
+small lit landscape you can drag through: the passages are arches of light,
+your gates are glowing slabs, your Personal Years are tiles, and Now is a
+column of light through all three. Tapping it opens the full screen view, with
+a wheel of the sky that turns as you move through the years, a card for any
+passage you tap, and the reading and the lists beside it.
+
+Nothing for you to set up: it uses the copy of three.js the cover already
+carries, it sends nothing anywhere, and on a device that cannot draw it the
+flat chart from before is shown instead. It only appears once the site is
+published.
+
 ## What the brief asked for, and what changed
 
 The brief asked for a `pwyw_unlocked` flag on `profiles`, row level security

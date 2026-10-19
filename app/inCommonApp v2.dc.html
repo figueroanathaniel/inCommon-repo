@@ -114,6 +114,8 @@ input[type="date"]{color-scheme:dark}
 [data-app-nav="desktop"]::-webkit-scrollbar-thumb{background:rgba(47,255,143,.3)}
 [data-dt-modals] > div{align-items:center!important;padding:28px!important}
 [data-dt-modals] [role="dialog"]{max-width:620px!important;margin:0 auto!important;border-radius:20px!important;border-top-left-radius:20px!important;border-top-right-radius:20px!important}
+[data-dt-modals] > div[data-immersive]{align-items:stretch!important;padding:0!important}
+[data-dt-modals] [role="dialog"][data-immersive]{max-width:none!important;margin:0!important;border-radius:0!important}
 @keyframes dtIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 [data-dt-pass] > [data-screen-label]{width:100%;max-width:1120px;margin-left:auto;margin-right:auto;box-sizing:border-box}
 [data-dt-pass] > [data-screen-label="Spirit / Number"]{max-width:980px}
@@ -133,6 +135,7 @@ input[type="date"]{color-scheme:dark}
 [data-vt-sheet] > [data-screen-label]{flex:none!important;min-height:0!important;overflow:visible!important;position:static!important;padding:0 20px!important;background:transparent!important;animation:none!important}
 [data-vt-modals] > div{align-items:flex-end!important;padding:0!important}
 [data-vt-modals] [role="dialog"]{max-width:none!important;width:100%!important;border-radius:26px 26px 0 0!important;padding-bottom:calc(20px + env(safe-area-inset-bottom))!important}
+[data-vt-modals] [role="dialog"][data-immersive]{border-radius:0!important;padding-bottom:0!important}
 @keyframes vtSheet{from{transform:translateY(100%)}to{transform:none}}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
@@ -233,6 +236,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./pair-cache.js"></script>
 <script src="./hd-composite.js"></script>
 <script src="./hd-circle.js"></script>
+<script src="./cycle-scene.js"></script>
 <script src="./analytics.js"></script>
 <script src="./incommon-cloud.js"></script>
 <!-- Extension modules: synastry news, Sky Wire, localization (Prompts A, B, C) -->
@@ -554,54 +558,62 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-for>
           </div>
-          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-              <div style="position:relative;height:{{ cwStarsH }}">
-                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                    </sc-for>
-                  </span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-              <div style="position:relative;height:{{ cwDesignH }}">
-                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                </sc-if>
-                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-              <div style="display:flex;flex-direction:column;gap:5px">
-                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                  </sc-for>
-                </div>
-                <div style="position:relative;height:16px">
-                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+          <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
+               the chart below as a lit landscape the reader can move through, and
+               this flat chart stays as its fallback (cycleSceneOn). -->
+          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
+            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"></div>
+          </sc-if>
+          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+              <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+                <div style="position:relative;height:{{ cwStarsH }}">
+                  <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                      <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                        <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                      </sc-for>
                     </span>
                   </sc-for>
                 </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+                <div style="position:relative;height:{{ cwDesignH }}">
+                  <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                  </sc-if>
+                  <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                  </sc-for>
+                </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                      <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="position:relative;height:16px">
+                    <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                      <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                        <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <span></span>
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                  </sc-for>
+                </div>
               </div>
-              <span></span>
-              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
-                </sc-for>
+              <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+                <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+                <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
               </div>
             </div>
-            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
-              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-            </div>
-          </div>
+          </sc-if>
           <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
             <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
             <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
@@ -4606,8 +4618,25 @@ input[type="date"]{color-scheme:dark}
      the Oracle's reading of the passages, behind Codex Luminary on the website
      and free in the apps (cycleSheetVals). -->
 <sc-if value="{{ cyOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ cyClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:84">
-    <div role="dialog" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;max-width:860px;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 32px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+  <div data-immersive="1" onClick="{{ cyClose }}" style="position:fixed;inset:0;background:var(--bg);display:flex;z-index:84">
+    <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
+      <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;flex:none;height:52vh;min-height:300px;border-bottom:1px solid var(--bd);background:var(--bg)">
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"></div>
+          <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
+            <h2 style="margin:0;font:400 24px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
+          </div>
+          <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);position:absolute;top:12px;right:12px;font:400 20px/1 var(--fu)">&#215;</button>
+          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px">
+            <button onClick="{{ cyZoomIn }}" aria-label="Closer" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">+</button>
+            <button onClick="{{ cyZoomOut }}" aria-label="Further" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">&#8722;</button>
+            <button onClick="{{ cyNowGo }}" aria-label="Back to now" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);border:1px solid var(--ac2);font:700 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</button>
+          </div>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-height:0;overflow-y:auto;box-sizing:border-box;padding:16px 16px calc(32px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ cySceneOff }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="flex:1;display:flex;flex-direction:column;gap:2px">
           <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
@@ -4615,6 +4644,7 @@ input[type="date"]{color-scheme:dark}
         </div>
         <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
       </div>
+      </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
@@ -4692,7 +4722,7 @@ input[type="date"]{color-scheme:dark}
                amber and teal, because the sheet's crimson sits on the crisis hue
                and its emerald on the action green. -->
           <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
-            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
+            <section data-cy-pass="{{ cp.pid }}" tabindex="-1" aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
               <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
                 <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
                   <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
@@ -4792,7 +4822,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+              <li data-cy-row="{{ cw.id }}" tabindex="-1" style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px;scroll-margin-top:12px">
                 <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
                   <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
                   <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
@@ -4815,7 +4845,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ cyDRows }}" as="cd" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px">
+              <li data-cy-drow="{{ cd.id }}" tabindex="-1" style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px;scroll-margin-top:12px">
                 <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
                   <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cd.label }}</span>
                   <sc-if value="{{ cd.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--blue);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--blue)">Now</span></sc-if>
@@ -4843,6 +4873,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </section>
       </sc-if>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -5623,54 +5654,62 @@ input[type="date"]{color-scheme:dark}
                   </div>
                 </sc-for>
               </div>
-              <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-                <div aria-hidden="true" style="display:grid;grid-template-columns:64px minmax(0,1fr);row-gap:12px;align-items:center">
-                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-                  <div style="position:relative;height:{{ cwStarsH }}">
-                    <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                      <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                        <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                          <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                        </sc-for>
-                      </span>
-                    </sc-for>
-                  </div>
-                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-                  <div style="position:relative;height:{{ cwDesignH }}">
-                    <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                      <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                    </sc-if>
-                    <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                      <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                    </sc-for>
-                  </div>
-                  <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-                  <div style="display:flex;flex-direction:column;gap:5px">
-                    <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                      <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                        <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 12.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                      </sc-for>
-                    </div>
-                    <div style="position:relative;height:16px">
-                      <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                        <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                          <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+              <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
+                   the chart below as a lit landscape the reader can move through, and
+                   this flat chart stays as its fallback (cycleSceneOn). -->
+              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
+                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"></div>
+              </sc-if>
+              <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
+                <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+                  <div aria-hidden="true" style="display:grid;grid-template-columns:64px minmax(0,1fr);row-gap:12px;align-items:center">
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+                    <div style="position:relative;height:{{ cwStarsH }}">
+                      <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                        <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                          <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                            <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                          </sc-for>
                         </span>
                       </sc-for>
                     </div>
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+                    <div style="position:relative;height:{{ cwDesignH }}">
+                      <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                        <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                      </sc-if>
+                      <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                        <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                      </sc-for>
+                    </div>
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                        <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                          <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 12.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                        </sc-for>
+                      </div>
+                      <div style="position:relative;height:16px">
+                        <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                          <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                            <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                          </span>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <span></span>
+                    <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                      <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                        <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                      </sc-for>
+                    </div>
                   </div>
-                  <span></span>
-                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                      <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
-                    </sc-for>
+                  <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:64px;right:0;pointer-events:none">
+                    <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+                    <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
                   </div>
                 </div>
-                <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:64px;right:0;pointer-events:none">
-                  <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-                  <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-                </div>
-              </div>
+              </sc-if>
               <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
                 <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
                 <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
@@ -9489,8 +9528,25 @@ input[type="date"]{color-scheme:dark}
      the Oracle's reading of the passages, behind Codex Luminary on the website
      and free in the apps (cycleSheetVals). -->
 <sc-if value="{{ cyOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ cyClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:13">
-    <div role="dialog" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;max-width:860px;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 32px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .25s ease">
+  <div data-immersive="1" onClick="{{ cyClose }}" style="position:absolute;inset:0;background:var(--bg);display:flex;z-index:13">
+    <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:grid;grid-template-columns:{{ cyGridCols }};justify-content:center;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
+      <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;min-width:0;height:100%;background:var(--bg)">
+          <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"></div>
+          <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
+            <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx)">The Cycle Audit</h2>
+          </div>
+          <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);position:absolute;top:12px;right:12px;font:400 20px/1 var(--fu)">&#215;</button>
+          <div style="position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px">
+            <button onClick="{{ cyZoomIn }}" aria-label="Closer" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">+</button>
+            <button onClick="{{ cyZoomOut }}" aria-label="Further" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);font:400 20px/1 var(--fu)">&#8722;</button>
+            <button onClick="{{ cyNowGo }}" aria-label="Back to now" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--bg);color:var(--tx);border:1px solid var(--ac2);font:700 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</button>
+          </div>
+        </div>
+      </sc-if>
+      <div style="min-width:0;height:100%;overflow-y:auto;box-sizing:border-box;padding:20px 20px 32px;display:flex;flex-direction:column;gap:14px;border-left:1px solid var(--bd);background:var(--sf)">
+      <sc-if value="{{ cySceneOff }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="flex:1;display:flex;flex-direction:column;gap:2px">
           <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
@@ -9498,6 +9554,7 @@ input[type="date"]{color-scheme:dark}
         </div>
         <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
       </div>
+      </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
@@ -9575,7 +9632,7 @@ input[type="date"]{color-scheme:dark}
                amber and teal, because the sheet's crimson sits on the crisis hue
                and its emerald on the action green. -->
           <sc-for list="{{ cyPassages }}" as="cp" hint-placeholder-count="2">
-            <section aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
+            <section data-cy-pass="{{ cp.pid }}" tabindex="-1" aria-label="{{ cp.title }}" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:32px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeUp .4s ease-out both">
               <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--bd);padding-bottom:24px;margin-bottom:32px">
                 <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;flex:1 1 220px">
                   <span style="font:600 12px var(--fu);letter-spacing:.05em;text-transform:uppercase;color:{{ cp.badgeC }};background:{{ cp.badgeBg }};border-radius:9999px;padding:4px 12px">{{ cp.badge }}</span>
@@ -9675,7 +9732,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ cyRows }}" as="cw" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px">
+              <li data-cy-row="{{ cw.id }}" tabindex="-1" style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cw.bd }};padding-left:11px;scroll-margin-top:12px">
                 <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
                   <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cw.label }}</span>
                   <sc-if value="{{ cw.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--ac2);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Under way</span></sc-if>
@@ -9698,7 +9755,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ cyDRows }}" as="cd" hint-placeholder-count="3">
-              <li style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px">
+              <li data-cy-drow="{{ cd.id }}" tabindex="-1" style="display:flex;flex-direction:column;gap:3px;border-left:2px solid {{ cd.bd }};padding-left:11px;scroll-margin-top:12px">
                 <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
                   <span style="font:600 14px/1.35 var(--fu);color:var(--tx)">{{ cd.label }}</span>
                   <sc-if value="{{ cd.now }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border:1px solid var(--blue);border-radius:999px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--blue)">Now</span></sc-if>
@@ -9726,6 +9783,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </section>
       </sc-if>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -10467,7 +10525,7 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false, cyOpen: false };
+    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -10992,6 +11050,7 @@ class Component extends DCLogic {
     this.oracleAutoAsk();
     this.oraclePrepareAuto();
     this.cycleSheetAutoAsk();
+    this.cycleSceneSync();
     const el = this._scroll;
     if (!this.state.ready || this._startPath) return;
     const p = this.currentPath();
@@ -11006,6 +11065,8 @@ class Component extends DCLogic {
     }
   }
   componentWillUnmount() {
+    if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
+    clearTimeout(this._cySyncT);
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
     clearTimeout(this._lumT);
@@ -20461,7 +20522,7 @@ class Component extends DCLogic {
     const SYS = { stars: 'The Stars', design: 'The Design', numbers: 'The Numbers' };
     const prompts = (Array.isArray(x.prompts) ? x.prompts : []).map(q => typeof q === 'string' ? { sys: '', t: q.trim() }
       : q && typeof q === 'object' ? { sys: SYS[q.system] || '', t: str(q.question) } : null).filter(q => q && q.t);
-    const out = { title: str(x.contact), window: str(x.window),
+    const out = { pid: w ? w.id : '', title: str(x.contact), window: str(x.window),
       tax: lines(x.tax).map(t => ({ t })), dividend: lines(x.dividend).map(t => ({ t })),
       prompts: prompts.map(q => ({ t: q.t, sys: q.sys, sysOn: !!q.sys })),
       badge: 'Outer Transit', badgeBg: 'rgba(var(--atmc),.15)', badgeC: 'var(--mut)', coordOn: false, coord: '', tlOn: false };
@@ -20581,7 +20642,8 @@ class Component extends DCLogic {
   cycleWidgetVals() {
     const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
     const ready = this.cycleReady() && this.cycleDesignReady();
-    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    const scene = this.cycleSceneOn();
     const now = new Date(), year = now.getFullYear();
     const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
     const pct = t => (Math.max(0, Math.min(1, (t - s0) / span)) * 100).toFixed(2) + '%';
@@ -20642,6 +20704,7 @@ class Component extends DCLogic {
     const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
     return {
       cwOn: true, cwFinding: false, cwReady: true,
+      cwSceneOn: scene, cwChartOn: !scene,
       cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
       cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
       cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
@@ -20660,6 +20723,106 @@ class Component extends DCLogic {
       cwOpenGo: () => this.setState({ cyOpen: true })
     };
   }
+  /* ---- The Cycle Audit in depth (owner, 19 October 2026) ---------------------
+
+     "Make the audit cycle completely interactive like it was made on Unreal
+     Engines. It should breathe with the reader's curiosity." The widget's chart
+     and the sheet's stage are drawn by cycle-scene.js, a three.js scene that
+     takes its whole picture from cycleSceneModel(): the same passages, stays,
+     years and pinnacles the lists read, so the scene and the lists cannot
+     disagree. The flat chart stays in the markup as the fallback, and comes
+     back the moment the scene says it cannot draw (cwSceneFail).
+
+     ONE SCENE, TWO HOSTS. [data-cy-scene="mini"] in the widget and
+     [data-cy-scene="full"] on the sheet's stage. There is one renderer and one
+     WebGL context, and cycleSceneSync() moves it to whichever host is in the
+     document, the sheet's first, from the one componentDidUpdate. The runtime
+     commits an sc-if body a tick after the update hook, so a host that is
+     expected and not there yet is looked for again, a few times, 60ms apart.
+
+     NOTHING NEW LEAVES THE DEVICE. The scene is drawn here; the two positions
+     it asks for at the instant the reader is looking at come from cyLon. */
+  cycleSceneOn() {
+    const CS = typeof window !== 'undefined' && window.CycleScene;
+    return !!(CS && CS.supported() && !this.state.cwSceneFail);
+  }
+  cycleSceneModel() {
+    if (!(this.cycleReady() && this.cycleDesignReady())) return null;
+    const today = new Date(), year = today.getFullYear(), jan = y => new Date(y, 0, 1).getTime();
+    const key = this.cycleScanKey() + '|' + today.toDateString();
+    if (this._cySMKey === key && this._cySM) return this._cySM;
+    const reads = new Set(this.cyclePassages().map(w => w.id));
+    const s0 = jan(year - 1), s1 = jan(year - 1 + this.CY_SPAN), end = jan(year + this.CY_AHEAD + 1);
+    const sfx = h => h + (h === 1 ? 'st' : h === 2 ? 'nd' : h === 3 ? 'rd' : 'th') + ' house';
+    const stars = this.cycleWindows().map(w => ({ id: w.id, mover: w.mover, glyph: this.CY_GLYPH[w.mover] || '', natal: w.natal,
+      hard: w.asp !== 'trine', label: w.label, range: w.range, pass: w.passLine, house: w.house ? sfx(w.house) : '',
+      from: +w.from, to: +w.to, passes: w.passes.map(d => +d), now: w.now, past: w.past, weight: w.weight,
+      mini: (w.now || reads.has(w.id)) && +w.to >= s0 && +w.from < s1 }));
+    const design = this.cycleDesign().map(d => ({ id: d.id, mover: d.mover, glyph: this.CY_GLYPH[d.mover] || '', gate: d.gate, own: d.own,
+      label: d.label, sub: d.sub, range: d.range, from: +d.from, to: +d.to, now: d.now, past: d.past, mini: d.mover !== 'Saturn' }));
+    const nums = this.cycleNumbers(year - 1, year + this.CY_AHEAD);
+    const years = nums.years.map(({ y, v }) => ({ y, v, master: v === 11 || v === 22 || v === 33 }));
+    const pins = nums.pins.map(p => ({ v: p.v, from: jan(p.from), to: jan(Math.min(p.to, 3000) + 1) }));
+    let natal = [], asc = null;
+    try {
+      const names = this.PLNS.slice(0, 10).map(x => x[0]), glyph = {};
+      this.PLNS.forEach(x => { glyph[x[0]] = x[1]; });
+      natal = this.chartAt(this.natalDate()).filter(x => names.indexOf(x.name) !== -1).map(x => ({ name: x.name, glyph: glyph[x.name] + '︎', lon: x.lon }));
+      this.anglePoints().filter(a => a.name === 'Ascendant' || a.name === 'Midheaven')
+        .forEach(a => natal.push({ name: a.name, glyph: a.name === 'Ascendant' ? 'AC' : 'MC', lon: a.lon }));
+      const a = natal.find(x => x.name === 'Ascendant');
+      asc = a ? a.lon : null;
+    } catch (e) { natal = []; }
+    this._cySMKey = key;
+    this._cySM = { key, now: Date.now(), span: { from: s0, to: end }, mini: { from: s0, to: s1 }, miniNarrow: { from: s0, to: jan(year + 6) },
+      stars, design, years, pins, natal, asc, aria: 'The long weather, ' + (year - 1) + ' to ' + (year + this.CY_AHEAD) };
+    return this._cySM;
+  }
+  cycleSceneSync(retry) {
+    if (!this.cycleSceneOn()) return;
+    const full = document.querySelector('[data-cy-scene="full"]'), mini = document.querySelector('[data-cy-scene="mini"]'), host = full || mini;
+    clearTimeout(this._cySyncT);
+    if (!host || (this.state.cyOpen && !full && this.cycleReady())) {
+      if (!host && this._cyS) this._cyS.detach();
+      const want = this.state.cyOpen || (this.state.ready && this.cycleReady() && (this.curTab() === 'today' || (this.state.dtW || 1440) < this.BP.md));
+      if (want && (retry || 0) < 8) this._cySyncT = setTimeout(() => this.cycleSceneSync((retry || 0) + 1), 60);
+      if (!host) return;
+    }
+    if (!this._cyS) {
+      const fmtM = this._fmt('cymonth', { month: 'short', year: 'numeric' }), fmtD = this._fmt('cyday', { day: 'numeric', month: 'long', year: 'numeric' });
+      this._cyS = window.CycleScene.create({
+        onReady: () => { if (!this.state.cwSceneLive) this.setState({ cwSceneLive: true }); },
+        onFail: () => { this._cyS = null; this.setState({ cwSceneFail: true, cwSceneLive: false }); },
+        onOpen: o => { this._cyFocus = (o && o.focus) || null; this.setState({ cyOpen: true }); },
+        onRead: id => this.cycleSceneRead(id),
+        readLabel: id => document.querySelector('[data-cy-pass="' + id + '"]') ? 'Read the ledger' : 'See it in the list',
+        fmt: (t, kind) => { const d = new Date(t), f = kind === 'day' ? fmtD : fmtM; return f ? f.format(d) : d.toDateString(); },
+        lonAt: (name, t) => this.cyLon(name, this.t2000(new Date(t)))
+      });
+    }
+    const m = this.cycleSceneModel();
+    if (m) this._cyS.setModel(m);
+    this._cyS.attach(host, full ? 'full' : 'mini');
+    if (full && this._cyFocus) { this._cyS.focus(this._cyFocus); this._cyFocus = null; }
+    const tk = (this.state.themeKey || '') + (this.state.themeHC ? '/hc' : '');
+    if (this._cySTheme !== tk) { if (this._cySTheme != null) this._cyS.setTheme(); this._cySTheme = tk; }
+  }
+  /* "Read the ledger" on a passage's card: the sheet's own section for it, or
+     its row in the list, opened out first when the list is showing only the
+     passages the audit reads. */
+  cycleSceneRead(id) {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const go = () => {
+      const el = document.querySelector('[data-cy-pass="' + id + '"]') || document.querySelector('[data-cy-row="' + id + '"]') || document.querySelector('[data-cy-drow="' + id + '"]');
+      if (!el) return false;
+      el.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+      try { el.focus({ preventScroll: true }); } catch (e) { /* not focusable */ }
+      return true;
+    };
+    if (go()) return;
+    const isD = this.cycleDesign().some(d => d.id === id);
+    this.setState(isD ? { cyDAll: true } : { cyAll: true }, () => setTimeout(go, 80));
+  }
   /* THE SHEET. Opened from the widget: every passage, every stay in the
      design and the years ahead in full, then the Oracle's reading of the
      passages. The reading is asked the way the Oracle asked it (one press of
@@ -20672,7 +20835,13 @@ class Component extends DCLogic {
     const closed = { cyOpen: false, cyListOn: false, cyNone: false, cyFinding: false, cyMoreOn: false, cyRows: [], cyShow: false,
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
       cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
-    const base = { cyClose: () => this.setState({ cyOpen: false }), cyMoreGo: () => this.setState({ cyAll: !st.cyAll }), cyDMoreGo: () => this.setState({ cyDAll: !st.cyDAll }),
+    const sceneOn = open && this.cycleSceneOn() && this.cycleReady() && this.cycleDesignReady();
+    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn,
+      cyGridCols: sceneOn ? 'minmax(0,1fr) minmax(340px,440px)' : 'minmax(0,860px)',
+      cyNowGo: () => { if (this._cyS) this._cyS.toNow(); },
+      cyZoomIn: () => { if (this._cyS) this._cyS.zoom(-1); },
+      cyZoomOut: () => { if (this._cyS) this._cyS.zoom(1); },
+      cyClose: () => this.setState({ cyOpen: false }), cyMoreGo: () => this.setState({ cyAll: !st.cyAll }), cyDMoreGo: () => this.setState({ cyDAll: !st.cyDAll }),
       cySignInGo: () => { location.href = this.coverHref() + '?signin=1'; }, cyUseMine: () => { this.setState({ cyOpen: false }); this.authGo('birth'); },
       cyConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk('cycle', 'standard'); },
       cyAskGo: () => this.oracleAsk('cycle', 'standard'), ...this.lumGateVals('cycle', 'cg') };
@@ -20710,13 +20879,13 @@ class Component extends DCLogic {
       cyListOn: true, cyNone, cyFinding,
       cyMoreOn: cyRows.length > this.CY_MAX,
       cyMoreLabel: st.cyAll ? 'Show the passages the audit reads' : 'Show every passage (' + cyRows.length + ')',
-      cyRows: cyShown.map(w => ({ label: w.label, glyph: this.CY_GLYPH[w.mover] || '',
+      cyRows: cyShown.map(w => ({ id: w.id, label: w.label, glyph: this.CY_GLYPH[w.mover] || '',
         detail: [w.range, w.passLine].concat(w.house ? [w.house + (w.house === 1 ? 'st' : w.house === 2 ? 'nd' : w.house === 3 ? 'rd' : 'th') + ' house'] : []).join(' · '),
         now: w.now, bd: pick(w.now, 'var(--ac2)', 'var(--bd)') })),
       cyDOn: cyReady, cyDNone: cyReady && !dsAll.length,
       cyDMoreOn: dsAll.length > 6,
       cyDMoreLabel: st.cyDAll ? 'Show fewer' : 'Show every stay (' + dsAll.length + ')',
-      cyDRows: ds.map(d => ({ label: d.label, detail: d.range + ' · ' + d.sub, now: d.now, glyph: this.CY_GLYPH[d.mover] || '',
+      cyDRows: ds.map(d => ({ id: d.id, label: d.label, detail: d.range + ' · ' + d.sub, now: d.now, glyph: this.CY_GLYPH[d.mover] || '',
         bd: pick(d.now, 'var(--blue)', 'var(--bd)') })),
       cyNOn: cyReady && nums.years.some(x => x.v != null),
       cyNYears: nums.years.map(({ y, v }) => ({ y: String(y), v: v == null ? '' : String(v), on: y === year,
