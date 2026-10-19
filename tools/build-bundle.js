@@ -135,6 +135,8 @@ const MODULES = [
   'minor-body-elements.js',
   'placement-content.js',
   'numerology-content.js',
+  /* The Book of Numbers: the compounds 10 to 99. Generated, reads nothing. */
+  'number-matrix.js',
   /* The Timing Lexicon: transit, gate and number readings. Reads nothing. */
   'timing-lexicon.js',
   'today-integration.js',

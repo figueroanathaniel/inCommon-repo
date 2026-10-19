@@ -3489,6 +3489,45 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return { value: v, steps: steps };
   }
 
+  /* ---------- the compound, and the rule that settles a number ----------
+     The owner's principle (19 October 2026): a single digit is where a number
+     ends, not what it is. The double digit a reduction passes through on its
+     way down is the number's own frequency, and a master number met on any
+     standard route to the root is the number. A 6 reached from 33 is Master
+     Number 33.
+
+     compound(raw) is the first value from 10 to 99 on the way down: 128 gives
+     11, 199 gives 19, 38 gives 38, and anything under 10 has none.
+
+     settle(routes) takes the raw totals the standard methods reach for one
+     number (each a different route to the same root, because a digit sum
+     keeps the value mod 9) and returns { value, root, compound, master }.
+     value is the master when any route meets 11, 22 or 33, else the root.
+     compound is the master when one was met, else the first route's own
+     double digit, else the next route's: the first route is the method the
+     app has always used, so where no master is found nothing it showed moves. */
+  function compound(raw) {
+    var v = Math.abs(Math.floor(+raw || 0));
+    while (v > 99) v = digitSum(v);
+    return v >= 10 ? v : null;
+  }
+  function settle(routes) {
+    var rs = (routes || []).map(function (r) { return Math.abs(Math.floor(+r || 0)); }).filter(function (r) { return r > 0; });
+    if (!rs.length) return { value: 0, root: 0, compound: null, master: false, routes: [] };
+    var master = null, i, c;
+    for (i = 0; i < rs.length && master == null; i++) {
+      var v = reduce(rs[i]).value;
+      if (MASTERS.indexOf(v) !== -1) master = v;
+    }
+    var root = reduce(rs[0], { preserveMasters: false }).value;
+    if (master != null) return { value: master, root: root, compound: master, master: true, routes: rs };
+    for (i = 0, c = null; i < rs.length && c == null; i++) c = compound(rs[i]);
+    return { value: root, root: root, compound: c, master: false, routes: rs };
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  // every digit of the date, added: 1992-07-02 -> 1+9+9+2+0+7+0+2 = 30
+  function dateDigits(y, mo, d) { return digitSum(String(y) + pad2(mo) + pad2(d)); }
+
   /* ---------- numerology engine (audit item 5: live functions, not fixture arithmetic) ---------- */
   var LETTER = {};
   'AJS BKT CLU DMV ENW FOX GPY HQZ IR'.split(' ').forEach(function (g, i) {
@@ -3526,8 +3565,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       return { word: w, raw: raw, reduced: r.value };
     });
     var total = pw.reduce(function (a, p) { return a + p.reduced; }, 0);
-    var fin = reduce(total);
-    return { value: fin.value, parts: pw, total: total,
+    var full = pw.reduce(function (a, p) { return a + p.raw; }, 0);
+    var fin = settle([total, full]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, parts: pw, total: total, full: full,
       work: pw.map(function (p) { return p.word + ' ' + p.raw + '→' + p.reduced; }).join(' · ') + ' · ' + total + ' → ' + fin.value };
   }
   function expression(name, yPolicy) { return nameNumber(name, null, yPolicy); }
@@ -3542,25 +3582,27 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   function lifePath(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), y = reduce(digitSum(p.y));
-    var sum = mo.value + d.value + y.value, fin = reduce(sum);
-    return { value: fin.value, work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
+    var sum = mo.value + d.value + y.value, all = dateDigits(p.y, p.mo, p.d), fin = settle([sum, all]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+      work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
   }
   function birthday(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
-    var r = reduce(p.d);
-    return { value: r.value, work: p.d + ' → ' + r.value };
+    var r = reduce(p.d), fin = settle([p.d]);
+    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, work: p.d + ' → ' + r.value };
   }
   // fixture N2: 7 + 2 + (2026→10→1) = 10 → 1
   function personalYear(iso, year) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), uy = reduce(digitSum(+year));
-    var sum = mo.value + d.value + uy.value, fin = reduce(sum);
-    return { value: fin.value, work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
+    var sum = mo.value + d.value + uy.value, all = dateDigits(+year, p.mo, p.d), fin = settle([sum, all]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+      work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
   }
   // fixture N3: PY 1 + month 7 = 8
   function personalMonth(py, month) {
     var sum = (+py || 0) + (+month || 0), fin = reduce(sum);
-    return { value: fin.value, work: py + ' + ' + month + ' = ' + sum + (fin.value !== sum ? ' → ' + fin.value : '') };
+    return { value: fin.value, compound: compound(sum), master: MASTERS.indexOf(fin.value) !== -1, work: py + ' + ' + month + ' = ' + sum + (fin.value !== sum ? ' → ' + fin.value : '') };
   }
   function coreNumbers(profile, onDate) {
     var d = onDate instanceof Date ? onDate : new Date();
@@ -3741,7 +3783,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   return { VERSION: VERSION, MASTERS: MASTERS, LETTER: LETTER,
-    digitSum: digitSum, reduce: reduce,
+    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS,
     lifePath: lifePath, birthday: birthday, expression: expression, soulUrge: soulUrge,
     personality: personality, personalYear: personalYear, personalMonth: personalMonth, coreNumbers: coreNumbers,
     angelAnalyze: angelAnalyze, fmtToday: fmtToday, fmtShort: fmtShort,
@@ -7286,18 +7328,40 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     /* Expression / Soul Urge / Personality from a full birth name. Pythagorean. */
     LETTERS: { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9, J: 1, K: 2, L: 3, M: 4, N: 5, O: 6, P: 7, Q: 8, R: 9, S: 1, T: 2, U: 3, V: 4, W: 5, X: 6, Y: 7, Z: 8 },
     VOWELS: 'AEIOU',
+    /* Two routes reach each name number, and the owner's rule of 19 October
+       2026 is that a master met on either is the number: the whole name added
+       letter by letter (the route this page has always shown), and each word
+       reduced on its own and then added (the route InCommonCore takes).
+       settle() in incommon-core.js decides, and `compounds` carries the double
+       digit each number passed through, which number-matrix.js reads. */
     fromName: function (raw) {
-      var s = String(raw || '').toUpperCase().replace(/[^A-Z]/g, '');
+      var words = String(raw || '').toUpperCase().replace(/[^A-Z\s\-']/g, ' ').split(/[\s\-']+/).filter(Boolean);
+      var s = words.join('');
       if (!s) return null;
-      var all = 0, vow = 0, con = 0;
-      for (var i = 0; i < s.length; i++) {
-        var c = s.charAt(i), v = NC.LETTERS[c] || 0;
-        all += v;
-        if (NC.VOWELS.indexOf(c) !== -1) vow += v; else con += v;
-      }
-      var keep = function (t) { return (t === 11 || t === 22 || t === 33) ? t : NC.reduce(t); };
-      return { letters: s.length, expression: keep(all), soulUrge: keep(vow), personality: keep(con),
+      var all = 0, vow = 0, con = 0, wAll = 0, wVow = 0, wCon = 0;
+      words.forEach(function (w) {
+        var a = 0, vo = 0, co = 0;
+        for (var i = 0; i < w.length; i++) {
+          var c = w.charAt(i), v = NC.LETTERS[c] || 0;
+          a += v;
+          if (NC.VOWELS.indexOf(c) !== -1) vo += v; else co += v;
+        }
+        all += a; vow += vo; con += co;
+        wAll += NC.keep(a); wVow += NC.keep(vo); wCon += NC.keep(co);
+      });
+      var e = NC.settle([all, wAll]), su = NC.settle([vow, wVow]), pe = NC.settle([con, wCon]);
+      return { letters: s.length, expression: e.value, soulUrge: su.value, personality: pe.value,
+        compounds: { expression: e.compound, soulUrge: su.compound, personality: pe.compound },
         rawTotals: { all: all, vowels: vow, consonants: con } };
+    },
+    keep: function (t) { t = Math.abs(+t || 0); while (t > 9 && t !== 11 && t !== 22 && t !== 33) t = String(t).split('').reduce(function (x, c) { return x + +c; }, 0); return t; },
+    /* settle() is the core's; this is only what the page falls back to when
+       incommon-core.js is missing, and it keeps the masters the old way. */
+    settle: function (routes) {
+      var core = typeof window !== 'undefined' && window.InCommonCore;
+      if (core && core.settle) return core.settle(routes);
+      var t = routes[0] || 0;
+      return { value: NC.keep(t), root: NC.reduce(t), compound: null, master: false };
     },
 
     /* [SYNTHESIS] paragraph. Assembled here from the numbers above, and tagged. */
@@ -7319,6 +7383,140 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
   window.NumerologyContent = NC;
 })();
+
+</script>
+<script>
+/* number-matrix.js. The Book of Numbers: every compound from 10 to 99. V1.0.0
+
+   GENERATED by tools/build-number-matrix.js from
+   docs/source/book-of-numbers-matrix.csv, the owner's matrix of 19 October
+   2026. Do not edit by hand: change the CSV and run the tool.
+
+   THE PRINCIPLE THE OWNER SET. A single digit is where a number ends, not what
+   it is. The double digit a reduction passes through on its way down is the
+   number's own frequency, and it is read before the root: a 6 reached from 33
+   is Master Number 33, and a 4 reached from 13 carries the debt of 13. The
+   arithmetic that finds the compound lives in incommon-core.js (settle()) and
+   numerology-content.js (fromName()); this file holds the writing, keyed by the
+   compound, and reads nothing.
+
+   Interpretation layer. No dashes. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.NumberMatrix = factory(); }
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var CATEGORIES = ["Master Number","Karmic Debt","Elite Auspicious","Standard Sub-Frequency"];
+
+  var M = {
+    10: {"root":1,"math":"1+0=1","title":"The Wheel of Fortune","category":"Elite Auspicious","desc":"A clean karmic slate offering absolute independence, fresh starts, and a flawless field for manifestation with zero residual baggage."},
+    11: {"root":2,"math":"1+1=2","title":"The Master Messenger","category":"Master Number","desc":"Channel of pure psychic intuition, cosmic illumination, and artistic vision. Must ground nervous energy to avoid chronic anxiety."},
+    12: {"root":3,"math":"1+2=3","title":"The Expressive Individual","category":"Standard Sub-Frequency","desc":"Blends independent drive (1) with cooperative diplomacy (2) to articulate highly creative, original concepts smoothly."},
+    13: {"root":4,"math":"1+3=4","title":"The Debt of Hard Work","category":"Karmic Debt","desc":"Requires overcoming past-life shortcuts or laziness by mastering strict discipline, structural organization, and relentless effort."},
+    14: {"root":5,"math":"1+4=5","title":"The Debt of Abuse of Freedom","category":"Karmic Debt","desc":"Demands temperance, commitment, and moderation to correct past misuses of physical freedom, indulgence, or escapism."},
+    15: {"root":6,"math":"1+5=6","title":"The Charismatic Magnet","category":"Standard Sub-Frequency","desc":"Combines pioneering spirit (1) with versatile adventure (5) to generate immense personal allure, wealth, and material luck."},
+    16: {"root":7,"math":"1+6=7","title":"The Debt of Intellectual Pride","category":"Karmic Debt","desc":"Shatters intellectual vanity and ego through sudden, disruptive life collapses ('Tower moments') to rebuild authentic spiritual faith."},
+    17: {"root":8,"math":"1+7=8","title":"The Star of the Magi","category":"Elite Auspicious","desc":"Supreme protection and immortality of name/work. Perfectly fuses spiritual wisdom (7) with material and financial mastery (8)."},
+    18: {"root":9,"math":"1+8=9","title":"The Spiritual Warrior","category":"Standard Sub-Frequency","desc":"Fuses raw identity (1) with intense corporate/material power (8) to protect vulnerable communities and fight for systemic justice."},
+    19: {"root":1,"math":"1+9=10 -> 1+0=1","title":"The Debt of Selfishness","category":"Karmic Debt","desc":"Enforces isolation and forces the individual to stand completely alone until they pay off past-life narcissistic abuse of power."},
+    20: {"root":2,"math":"2+0=2","title":"The Quiet Harmonizer","category":"Standard Sub-Frequency","desc":"Amplified cooperative and peacemaking energy operating entirely behind the scenes with deep, passive intuitive accuracy."},
+    21: {"root":3,"math":"2+1=3","title":"The Crown of the Magi","category":"Elite Auspicious","desc":"A hallmark of eventual public elevation, high honor, and absolute victory after navigating grueling early-life tests."},
+    22: {"root":4,"math":"2+2=4","title":"The Master Builder","category":"Master Number","desc":"Holds the structural capacity to anchor massive cosmic visions into functional, physical, global organizations and infrastructure."},
+    23: {"root":5,"math":"2+3=5","title":"The Royal Star of the Lion","category":"Elite Auspicious","desc":"The luckiest compound number in numerology. Grants total karmic protection from malice and immense natural social favor."},
+    24: {"root":6,"math":"2+4=6","title":"The Fortunate Love","category":"Elite Auspicious","desc":"Guarantees financial support from high-status allies and absolute protective harmony within domestic and romantic spheres."},
+    25: {"root":7,"math":"2+5=7","title":"The Intuitive Seeker","category":"Standard Sub-Frequency","desc":"Pairs emotional intelligence (2) with analytical freedom (5) to meticulously study, dissect, and understand human behavior."},
+    26: {"root":8,"math":"2+6=8","title":"The Compassionate Boss","category":"Standard Sub-Frequency","desc":"Balances sensitive teamwork (2) and protective parenting (6) to successfully direct ethical, people-first corporate bodies."},
+    27: {"root":9,"math":"2+7=9","title":"The Compassionate Teacher","category":"Standard Sub-Frequency","desc":"Combines psychic diplomacy (2) with clinical, spiritual logic (7) to selflessly heal, counsel, and tutor on a global scale."},
+    28: {"root":1,"math":"2+8=10 -> 1+0=1","title":"The Collaborative Executive","category":"Standard Sub-Frequency","desc":"Blends gentle diplomacy (2) with high-level financial authority (8) to lead massive corporate agendas without creating enemies."},
+    29: {"root":2,"math":"2+9=11 -> 1+1=2","title":"The Spiritual Catalyst","category":"Standard Sub-Frequency","desc":"Carries intense, Master-level pressure (reduces to 11/2). Experiences extreme emotional trials that force radical spiritual awakening."},
+    30: {"root":3,"math":"3+0=3","title":"The Pure Communicator","category":"Standard Sub-Frequency","desc":"Channels highly concentrated artistic genius, joyful self-expression, and effortless social magnetism without mental blocks."},
+    31: {"root":4,"math":"3+1=4","title":"The Practical Visionary","category":"Standard Sub-Frequency","desc":"Channels raw creative ideas (3) and fierce independence (1) into designing physically sound, long-lasting architectural projects."},
+    32: {"root":5,"math":"3+2=5","title":"The Magnetic Communicator","category":"Standard Sub-Frequency","desc":"Applies deep expressive charm (3) and psychic intuition (2) to fluidly influence, persuade, or sell concepts to vast audiences."},
+    33: {"root":6,"math":"3+3=6","title":"The Master Teacher","category":"Master Number","desc":"The ultimate frequency of unconditional cosmic love, protective healing, and absolute self-sacrifice for human evolution."},
+    34: {"root":7,"math":"3+4=7","title":"The Creative Scientist","category":"Standard Sub-Frequency","desc":"Directs active, fluid imagination (3) through rigid physical structures (4) to systematically engineer or invent technical devices."},
+    35: {"root":8,"math":"3+5=8","title":"The Creative Executive","category":"Standard Sub-Frequency","desc":"Combines rapid social expression (3) with volatile freedom (5) to pioneer fast-moving, innovative financial business empires."},
+    36: {"root":9,"math":"3+6=9","title":"The Creative Philanthropist","category":"Standard Sub-Frequency","desc":"Merges joyful artistic presentation (3) with community care (6) to structurally enrich and improve society through art and design."},
+    37: {"root":1,"math":"3+7=10 -> 1+0=1","title":"The Inspired Maverick","category":"Standard Sub-Frequency","desc":"Blends social articulation (3) with deep spiritual research (7) into an unassailable, highly unique independent identity."},
+    38: {"root":2,"math":"3+8=11 -> 1+1=2","title":"The Artistic Peacekeeper","category":"Standard Sub-Frequency","desc":"Deploys creative expression (3) and material force (8) to gracefully negotiate and resolve high-stakes tribal or systemic conflicts."},
+    39: {"root":3,"math":"3+9=12 -> 1+2=3","title":"The Creative Humanitarian","category":"Standard Sub-Frequency","desc":"Channels artistic expression (3) through global compassion (9) to bring major cycles of human suffering to an inspired close."},
+    40: {"root":4,"math":"4+0=4","title":"The Secure Foundation","category":"Standard Sub-Frequency","desc":"Deeply grounded, ultra-stable, and defensive. Prioritizes flawless safety, systemic order, and continuous physical labor."},
+    41: {"root":5,"math":"4+1=5","title":"The Grounded Explorer","category":"Standard Sub-Frequency","desc":"Combines solid structural planning (4) with independent drive (1) to orchestrate highly controlled, purposeful worldly travels."},
+    42: {"root":6,"math":"4+2=6","title":"The Practical Caretaker","category":"Standard Sub-Frequency","desc":"Uses structural order (4) and sensitive diplomacy (2) to manage, counsel, or clinically treat injured community members."},
+    43: {"root":7,"math":"4+3=7","title":"The Structured Mystic","category":"Standard Sub-Frequency","desc":"Combines methodical labor (4) with creative imagination (3) to systematically map ancient histories or esoteric data systems."},
+    44: {"root":8,"math":"4+4=8","title":"The Master Manifestor","category":"Standard Sub-Frequency","desc":"Double-4 structural energy demanding absolute discipline to manage colossal financial infrastructure and lasting earthly legacies."},
+    45: {"root":9,"math":"4+5=9","title":"The Universal Traveler","category":"Standard Sub-Frequency","desc":"Fuses structural discipline (4) with rapid adaptability (5) to investigate, analyze, and learn from diverse global cultures."},
+    46: {"root":1,"math":"4+6=10 -> 1+0=1","title":"The Authoritative Guardian","category":"Standard Sub-Frequency","desc":"Applies organizational precision (4) and domestic stewardship (6) to take absolute control of large commercial properties or clans."},
+    47: {"root":2,"math":"4+7=11 -> 1+1=2","title":"The Analytical Mystic","category":"Standard Sub-Frequency","desc":"Fuses practical logic (4) with deep spiritual research (7) to seamlessly diagnose psychological patterns within human nature."},
+    48: {"root":3,"math":"4+8=12 -> 1+2=3","title":"The Structured Creator","category":"Standard Sub-Frequency","desc":"Applies steady execution (4) and financial power (8) to commercialize and monetize innovative artistic endeavors successfully."},
+    49: {"root":4,"math":"4+9=13 -> 1+3=4","title":"The Structured Humanitarian","category":"Standard Sub-Frequency","desc":"Uses structural logic (4) to organize global charitable frameworks (9), building functional foundations for human relief."},
+    50: {"root":5,"math":"5+0=5","title":"The Ultimate Rebel","category":"Standard Sub-Frequency","desc":"Entirely unfettered, volatile, and highly adaptable. Lives strictly for radical change, sensory expansion, and raw experience."},
+    51: {"root":6,"math":"5+1=6","title":"The Unconventional Nurturer","category":"Standard Sub-Frequency","desc":"Blends an aggressive need for freedom (5) with individual leadership (1) to build highly atypical, modernized home lives."},
+    52: {"root":7,"math":"5+2=7","title":"The Discerning Observer","category":"Standard Sub-Frequency","desc":"Melds variable personal freedom (5) with psychic diplomacy (2) to instantly dissect and read the covert intentions of others."},
+    53: {"root":8,"math":"5+3=8","title":"The Dynamic Entrepreneur","category":"Standard Sub-Frequency","desc":"Deploys versatile adaptability (5) and rapid expression (3) to seamlessly market ideas, flip assets, and generate fast cash."},
+    54: {"root":9,"math":"5+4=9","title":"The Changing Humanitarian","category":"Standard Sub-Frequency","desc":"Fuses versatile adventure (5) with practical structural tools (4) to systematically reform or dismantle broken civic programs."},
+    55: {"root":1,"math":"5+5=10 -> 1+0=1","title":"The Radical Catalyst","category":"Standard Sub-Frequency","desc":"Explosive double-5 energy that continuously sparks disruptive global breakthroughs and chaotic personal independence."},
+    56: {"root":2,"math":"5+6=11 -> 1+1=2","title":"The Restless Nurturer","category":"Standard Sub-Frequency","desc":"Blends high-speed personal change (5) with domestic duties (6), working hard to secure inner harmony through physical transitions."},
+    57: {"root":3,"math":"5+7=12 -> 1+2=3","title":"The Eccentric Performer","category":"Standard Sub-Frequency","desc":"Blends erratic personal choices (5) with reclusive academic research (7) to create highly unusual, mesmerizing public works."},
+    58: {"root":4,"math":"5+8=13 -> 1+3=4","title":"The Wealth Builder","category":"Standard Sub-Frequency","desc":"Pairs quick resourcefulness (5) with corporate executive drive (8) to successfully extract material assets out of economic chaos."},
+    59: {"root":5,"math":"5+9=14 -> 1+4=5","title":"The Wandering Prophet","category":"Standard Sub-Frequency","desc":"Fuses variable personal exploration (5) with global completion (9) to preach, educate, and guide large demographics through change."},
+    60: {"root":6,"math":"6+0=6","title":"The Pure Cosmic Parent","category":"Standard Sub-Frequency","desc":"Radiates absolute unconditional love, community duty, artistic grace, and systemic responsibility to protect close circles."},
+    61: {"root":7,"math":"6+1=7","title":"The Private Leader","category":"Standard Sub-Frequency","desc":"Uses protective family values (6) and fierce independence (1) to command organizations quietly from behind closed doors."},
+    62: {"root":8,"math":"6+2=8","title":"The Family Benefactor","category":"Standard Sub-Frequency","desc":"Combines protective stewardship (6) with diplomatic teamwork (2) to smoothly regulate, protect, and multiply multi-generational family assets."},
+    63: {"root":9,"math":"6+3=9","title":"The Artistic Counselor","category":"Standard Sub-Frequency","desc":"Links domestic therapeutic care (6) with joyful expression (3) to systematically guide close clients through deep emotional processing."},
+    64: {"root":1,"math":"6+4=10 -> 1+0=1","title":"The Grounded Leader","category":"Standard Sub-Frequency","desc":"Fuses protective home values (6) with rigid manual labor (4) to build an unassailable framework of personal autonomy."},
+    65: {"root":2,"math":"6+5=11 -> 1+1=2","title":"The Domestic Freedom Seeker","category":"Standard Sub-Frequency","desc":"Employs reliable family models (6) to methodically generate financial and personal liberty (5) for the immediate household."},
+    66: {"root":3,"math":"6+6=12 -> 1+2=3","title":"The Generous Artist","category":"Standard Sub-Frequency","desc":"Overloaded domestic frequency bursting with aesthetic grace and therapeutic care, but perpetually prone to extreme personal burnout."},
+    67: {"root":4,"math":"6+7=13 -> 1+3=4","title":"The Analytical Protector","category":"Standard Sub-Frequency","desc":"Fuses structural family duty (6) with deep internal skepticism (7) to build a highly guarded, intellectually sound family unit."},
+    68: {"root":5,"math":"6+8=14 -> 1+4=5","title":"The Luxuriant Entrepreneur","category":"Standard Sub-Frequency","desc":"Merges a love for high-end comforts (6) with intense financial drive (8) to construct lucrative cash engines and physical assets."},
+    69: {"root":6,"math":"6+9=15 -> 1+5=6","title":"The Universal Soul Cleaner","category":"Standard Sub-Frequency","desc":"Fuses domestic protection (6) with global completion (9) to absorb, clean, and resolve generational family burdens and attachments."},
+    70: {"root":7,"math":"7+0=7","title":"The Ultimate Mystic","category":"Standard Sub-Frequency","desc":"Highly reclusive, analytical, and spiritually detached. Seeks absolute cosmic truth exclusively through isolated contemplation."},
+    71: {"root":8,"math":"7+1=8","title":"The Inspired Mogul","category":"Standard Sub-Frequency","desc":"Fuses internal academic research (7) with aggressive autonomy (1) to independently dominate specialized commercial niches."},
+    72: {"root":9,"math":"7+2=9","title":"The Intuitive Scholar","category":"Standard Sub-Frequency","desc":"Fuses specialized academic research (7) with diplomatic teamwork (2) to structurally audit global issues and supply remedies."},
+    73: {"root":1,"math":"7+3=10 -> 1+0=1","title":"The Mystic Pioneer","category":"Standard Sub-Frequency","desc":"Combines reclusive genius (7) and creative communication (3) to independently lead people toward esoteric truths."},
+    74: {"root":2,"math":"7+4=11 -> 1+1=2","title":"The Logical Intuitive","category":"Standard Sub-Frequency","desc":"Uses extreme critical reasoning (7) alongside physical organization (4) to mechanically sort and resolve complex emotional crises."},
+    75: {"root":3,"math":"7+5=12 -> 1+2=3","title":"The Intellectual Storyteller","category":"Standard Sub-Frequency","desc":"Combines deep introverted research (7) with worldly travel (5) to write, speak, or lecture on complex human philosophies."},
+    76: {"root":4,"math":"7+6=13 -> 1+3=4","title":"The Spiritual Architect","category":"Standard Sub-Frequency","desc":"Uses inward research (7) and community morals (6) to design highly practical, ethically clean, and orderly work settings."},
+    77: {"root":5,"math":"7+7=14 -> 1+4=5","title":"The Spiritual Nomad","category":"Standard Sub-Frequency","desc":"Double-7 energy focusing intense investigative intelligence on analyzing different global cultures, psychic matrices, and mindsets."},
+    78: {"root":6,"math":"7+8=15 -> 1+5=6","title":"The Wise Executive","category":"Standard Sub-Frequency","desc":"Pairs deep spiritual logic (7) with executive corporate dominance (8) to easily fund and protect close family lines."},
+    79: {"root":7,"math":"7+9=16 -> 1+6=7","title":"The Spiritual Humanitarian","category":"Standard Sub-Frequency","desc":"Fuses intense individual research (7) with global humanitarian completion (9) to selflessly teach advanced energetic concepts."},
+    80: {"root":8,"math":"8+0=8","title":"The Concentrated Executive","category":"Standard Sub-Frequency","desc":"Amplified financial authority and commercial drive paired with an explicit cosmic demand to govern material power ethically."},
+    81: {"root":9,"math":"8+1=9","title":"The Powerful Visionary","category":"Standard Sub-Frequency","desc":"Combines structural market mastery (8) with bold autonomy (1) to privately dictate and fund large-scale global modifications."},
+    82: {"root":1,"math":"8+2=10 -> 1+0=1","title":"The Diplomatic Powerhouse","category":"Standard Sub-Frequency","desc":"Balances sweeping corporate force (8) with sensitive teamwork (2) to govern influential public positions smoothly."},
+    83: {"root":2,"math":"8+3=11 -> 1+1=2","title":"The Powerful Creator","category":"Standard Sub-Frequency","desc":"Harnesses raw financial drive (8) alongside expressive charisma (3) to bring key stakeholders together in wealthy alliances."},
+    84: {"root":3,"math":"8+4=12 -> 1+2=3","title":"The Business Artist","category":"Standard Sub-Frequency","desc":"Deploys executive corporate efficiency (8) and manual execution (4) to manufacture, distribute, and monetize creative items."},
+    85: {"root":4,"math":"8+5=13 -> 1+3=4","title":"The Financial Strategist","category":"Standard Sub-Frequency","desc":"Combines corporate force (8) with high-stakes adaptability (5) to systematically predict, arbitrage, and beat economic trends."},
+    86: {"root":5,"math":"8+6=14 -> 1+4=5","title":"The Material Visionary","category":"Standard Sub-Frequency","desc":"Fuses executive authority (8) with domestic values (6) to invent creative, non-traditional strategies to exit corporate life safely."},
+    87: {"root":6,"math":"8+7=15 -> 1+5=6","title":"The Material Mystic","category":"Standard Sub-Frequency","desc":"Combines commercial drive (8) with reclusive psychological research (7) to successfully own or scale wellness networks."},
+    88: {"root":7,"math":"8+8=16 -> 1+6=7","title":"The Master of Karma","category":"Standard Sub-Frequency","desc":"Double-8 energy representing absolute material judgment, immense financial liability, and radical manifestation loops."},
+    89: {"root":8,"math":"8+9=17 -> 1+7=8","title":"The Spiritual Leader","category":"Standard Sub-Frequency","desc":"Combines extreme corporate force (8) with ultimate planetary closure (9) to teach challenging, hard-won energetic truths."},
+    90: {"root":9,"math":"9+0=9","title":"The Ultimate Soul","category":"Standard Sub-Frequency","desc":"Highly evolved, completely empathetic, and entirely selfless. Focuses on bringing major cosmic cycles to a harmonious finish."},
+    91: {"root":1,"math":"9+1=10 -> 1+0=1","title":"The Humanitarian Leader","category":"Standard Sub-Frequency","desc":"Merges planetary service (9) with independent drive (1) to execute and stand behind monumental socio-political shifts."},
+    92: {"root":2,"math":"9+2=11 -> 1+1=2","title":"The Empathetic Healer","category":"Standard Sub-Frequency","desc":"Absorbs world suffering (9) and applies extreme psychological intuition (2) to guide and treat massive patient bases."},
+    93: {"root":3,"math":"9+3=12 -> 1+2=3","title":"The Universal Entertainer","category":"Standard Sub-Frequency","desc":"Uses cosmic perspective (9) to distribute deep joy, expressive arts, and intellectual inspiration across immense audiences."},
+    94: {"root":4,"math":"9+4=13 -> 1+3=4","title":"The Global Builder","category":"Standard Sub-Frequency","desc":"Channels systematic global care (9) into engineering physical foundations, charities, or non-profit systems."},
+    95: {"root":5,"math":"9+5=14 -> 1+4=5","title":"The Global Philanthropist","category":"Standard Sub-Frequency","desc":"Applies planetary vision (9) to traverse the world, champion human liberties, and aggressively reform outdated systems."},
+    96: {"root":6,"math":"9+6=15 -> 1+5=6","title":"The Global Protector","category":"Standard Sub-Frequency","desc":"Expands close-knit parental love (6) to a planetary scale (9) to aggressively shield children, ecosystems, or wildlife."},
+    97: {"root":7,"math":"9+7=16 -> 1+6=7","title":"The Wise Philanthropist","category":"Standard Sub-Frequency","desc":"Applies planetary observation (9) and investigative research (7) to channel massive funding blocks to critical environmental fixes."},
+    98: {"root":8,"math":"9+8=17 -> 1+7=8","title":"The Philanthropic Scholar","category":"Standard Sub-Frequency","desc":"Deploys global awareness (9) alongside heavy financial capital (8) to privately support academic or metaphysical science labs."},
+    99: {"root":9,"math":"9+9=18 -> 1+8=9","title":"The Cosmic Avatar","category":"Standard Sub-Frequency","desc":"Double-9 energy of total energetic completion. Carries unparalleled psychic burdens to cleanse and close global eras."}
+  };
+
+  return {
+    VERSION: '1.0.0',
+    CATEGORIES: CATEGORIES,
+    entries: M,
+    has: function (n) { return !!M[n]; },
+    /* get(33) -> { n, root, math, title, category, desc, master, karmic } or null */
+    get: function (n) {
+      var e = M[n];
+      if (!e) return null;
+      return { n: +n, root: e.root, math: e.math, title: e.title, category: e.category, desc: e.desc,
+        master: e.category === 'Master Number', karmic: e.category === 'Karmic Debt',
+        auspicious: e.category === 'Elite Auspicious' };
+    }
+  };
+}));
 
 </script>
 <script>
@@ -21373,6 +21571,7 @@ input[type="date"]{color-scheme:dark}
 
 
 
+
 <!-- The connection pass. birth-time.js owns every decision about what a chart is drawn
      from, hd-composite.js overlays two bodygraphs, and analytics.js counts
      names and days and nothing else. All three are UMD, so the file the app
@@ -22561,6 +22760,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 12px var(--fb);color:var(--ac)">→</div>
             </div>
             <div style="font:italic 400 11px/1.5 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+            <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
           </button>
         </sc-for>
       </div>
@@ -22575,6 +22775,7 @@ input[type="date"]{color-scheme:dark}
               <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;text-align:left">
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+                <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
               </button>
             </sc-for>
           </div>
@@ -22599,6 +22800,7 @@ input[type="date"]{color-scheme:dark}
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
             <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
             <span style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ p.mean }}</span>
+            <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
           </span>
           <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
         </button>
@@ -22611,6 +22813,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 13.5px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
           <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
           <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</div>
+          <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
         </button>
       </sc-for>
     </div>
@@ -25279,6 +25482,16 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
         <div style="font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ numRange }}</div>
       </sc-if>
+      <sc-if value="{{ numCmpOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ numCmpC }};border-radius:12px;padding:13px 15px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:400 22px/1 var(--fd);color:{{ numCmpC }}">{{ numCmp }}</span>
+            <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCmpCat }}</span>
+          </div>
+          <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ numCmpTitle }}</div>
+          <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
+        </div>
+      </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <sc-for list="{{ numLines }}" as="l" hint-placeholder-count="3">
@@ -27693,6 +27906,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
               <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+              <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
             </button>
           </sc-for>
         </div>
@@ -27707,6 +27921,7 @@ input[type="date"]{color-scheme:dark}
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
                 <span style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ p.mean }}</span>
+                <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
               </span>
               <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
             </button>
@@ -27719,6 +27934,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 14px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
               <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</div>
+              <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
             </button>
           </sc-for>
         </div>
@@ -27745,6 +27961,7 @@ input[type="date"]{color-scheme:dark}
                 <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:13px;padding:14px 16px;text-align:left">
                   <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                   <div style="font:600 8.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+                  <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
                 </button>
               </sc-for>
             </div>
@@ -27789,6 +28006,16 @@ input[type="date"]{color-scheme:dark}
       </div>
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
         <div style="font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ numRange }}</div>
+      </sc-if>
+      <sc-if value="{{ numCmpOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ numCmpC }};border-radius:12px;padding:13px 15px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:400 22px/1 var(--fd);color:{{ numCmpC }}">{{ numCmp }}</span>
+            <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCmpCat }}</span>
+          </div>
+          <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ numCmpTitle }}</div>
+          <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
+        </div>
       </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -34329,19 +34556,37 @@ class Component extends DCLogic {
      and the first pinnacle ends at 36 less the Life Path's root. */
   NUM_MASTERS = [11, 22, 33];
   numKeep(n) { n = Math.abs(+n || 0); while (n > 9 && this.NUM_MASTERS.indexOf(n) === -1) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
+  /* THE COMPOUND IS READ BEFORE THE ROOT, the owner's rule of 19 October 2026:
+     the double digit a number passed through is its own frequency, and the
+     Book of Numbers (number-matrix.js) holds a title for every one from 10 to
+     99. c is that compound, v the number as shown. The label is the notation
+     the tradition writes, 33/6 for a master and 24/6 or 38/11 otherwise, and a
+     Karmic Debt compound wears --warn, the colour the Challenges already wear,
+     because the matrix reads it as a debt to be met. */
+  numCmp(c, v) {
+    const M = window.NumberMatrix, e = M && c ? M.get(c) : null;
+    if (!e) return { cmpOn: false, cmp: '', cmpLine: '', cmpTitle: '', cmpCat: '', cmpDesc: '', cmpC: 'var(--ac2-hi)', cmpN: null };
+    const label = e.master ? c + '/' + e.root : (+v === c ? String(c) : c + '/' + v);
+    return { cmpOn: true, cmp: label, cmpLine: label + ' \u00b7 ' + e.title, cmpTitle: e.title, cmpCat: e.category, cmpDesc: e.desc,
+      cmpC: e.karmic ? 'var(--warn)' : 'var(--ac2-hi)', cmpN: c };
+  }
   numerology() {
     const core = window.InCommonCore, dob = this.dob();
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const y = +m[1], mo = +m[2], d = +m[3];
-    const lp = core ? core.lifePath(dob).value : this.numReduce(mo + d + y);
+    const lpR = core ? core.lifePath(dob) : null;
+    const lp = lpR ? lpR.value : this.numReduce(mo + d + y);
     const rm = this.numKeep(mo), rd = this.numKeep(d), ry = this.numKeep(y);
     const p1 = this.numKeep(rm + rd), p2 = this.numKeep(rd + ry), p3 = this.numKeep(p1 + p2), p4 = this.numKeep(rm + ry);
+    // The double digit each number passed through, which the Book of Numbers reads (numCmp).
+    const cmp = x => core && core.compound ? core.compound(x) : null;
     const end1 = 36 - this.numReduce(lp);
     const c1 = Math.abs(this.numReduce(mo) - this.numReduce(d)), c2 = Math.abs(this.numReduce(d) - this.numReduce(y));
     const age = Math.floor((Date.now() - Date.parse(dob + 'T12:00:00')) / 31557600000);
     return { lp: lp, rm: rm, rd: rd, ry: ry, age: isNaN(age) ? null : age,
-      pinnacles: [[p1, '0 to ' + end1], [p2, (end1 + 1) + ' to ' + (end1 + 9)], [p3, (end1 + 10) + ' to ' + (end1 + 18)], [p4, (end1 + 19) + ' onward']],
-      cycles: [['Formative', rm, 'birth to ' + end1], ['Productive', rd, (end1 + 1) + ' to ' + (end1 + 27)], ['Harvest', ry, (end1 + 28) + ' onward']],
+      lpC: lpR ? lpR.compound : null, rdC: cmp(d),
+      pinnacles: [[p1, '0 to ' + end1, cmp(rm + rd)], [p2, (end1 + 1) + ' to ' + (end1 + 9), cmp(rd + ry)], [p3, (end1 + 10) + ' to ' + (end1 + 18), cmp(p1 + p2)], [p4, (end1 + 19) + ' onward', cmp(rm + ry)]],
+      cycles: [['Formative', rm, 'birth to ' + end1, cmp(mo)], ['Productive', rd, (end1 + 1) + ' to ' + (end1 + 27), cmp(d)], ['Harvest', ry, (end1 + 28) + ' onward', cmp(y)]],
       challenge: this.numReduce(Math.abs(c1 - c2)), subs: [this.numReduce(c1), this.numReduce(c2)], end1: end1,
       curPin: age == null || isNaN(age) ? null : (age <= end1 ? 0 : age <= end1 + 9 ? 1 : age <= end1 + 18 ? 2 : 3),
       curCycle: age == null || isNaN(age) ? null : (age <= end1 ? 0 : age <= end1 + 27 ? 1 : 2) };
@@ -38543,8 +38788,11 @@ class Component extends DCLogic {
     const NC = window.NumerologyContent, core = window.InCommonCore, st = this.state;
     const n = this.numerology(), prof = this.activeProfile(), dob = this.dob();
     const mean = v => this.NUM_MEANING[v] || (NC ? NC.essence(v) : '');
-    const pm = core ? core.personalMonth(pyV, now.getMonth() + 1).value : null;
-    const nm = NC ? NC.fromName(this.birthName()) : null;
+    const pmR = core ? core.personalMonth(pyV, now.getMonth() + 1) : null, pm = pmR ? pmR.value : null;
+    const pyR = core ? core.personalYear(dob, now.getFullYear()) : null;
+    const pyC = pyR && pyR.value === pyV ? pyR.compound : null, pmC = pmR ? pmR.compound : null;
+    const pdC = core && core.compound && pm != null ? core.compound(pm + now.getDate()) : null;
+    const nm = NC ? NC.fromName(this.birthName()) : null, nmC = (nm && nm.compounds) || {};
     const open = (pos, v, extra) => () => this.setState({ spiritView: 'numberDetail', numSel: { pos: pos, v: v, ...(extra || {}) }, numListsOpen: false });
     let span = '';
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob);
@@ -38564,12 +38812,12 @@ class Component extends DCLogic {
       numerSummary: { head: 'What these numbers are drawn from',
         text: 'Life Path ' + n.lp + ', reduced from ' + dob + '. Personal Year ' + pyV + ', Personal Day ' + pdV + '. Every figure below is arithmetic performed on that one date: no interpretation has entered yet, and every step of it can be checked by hand. That is worth knowing before any of the meanings arrive: the numbers are certain, and what they are said to mean is the part that has been argued over for centuries.' },
       numerYearSpan: span,
-      numerCore: [['Life Path', n.lp, 'lifePath'], ['Birthday', n.rd, 'birthday'], ['Personal Year', pyV, 'personalYear'],
-        ['Personal Month', pm, 'personalMonth'], ['Personal Day', pdV, 'personalDay'], ['Challenge', n.challenge, 'challenge']]
-        .map(([k, v, pos]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v) })),
+      numerCore: [['Life Path', n.lp, 'lifePath', n.lpC], ['Birthday', n.rd, 'birthday', n.rdC], ['Personal Year', pyV, 'personalYear', pyC],
+        ['Personal Month', pm, 'personalMonth', pmC], ['Personal Day', pdV, 'personalDay', pdC], ['Challenge', n.challenge, 'challenge', null]]
+        .map(([k, v, pos, c]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v, { c: c }), ...this.numCmp(c, v) })),
       hasBirthName: !!nm, noBirthName: !nm,
       nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality']]
-        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v) })) : [],
+        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v, { c: nmC[pos] }), ...this.numCmp(nmC[pos], v) })) : [],
       birthNameLine: nm ? 'From ' + nm.letters + ' letters of the birth name saved on this device. Pythagorean values.' : '',
       nameDraft: st.nameDraft,
       nameType: e => this.setState({ nameDraft: String(e.target.value || '').slice(0, 80) }),
@@ -38581,14 +38829,14 @@ class Component extends DCLogic {
         this.toastMsg('Saved.');
       },
       nameClear: () => { this.writeLS(this.nkey(), ''); this.setState({ nameDraft: '', nameTick: (st.nameTick || 0) + 1 }); },
-      numerPinnacles: n.pinnacles.map(([v, years], i) => {
+      numerPinnacles: n.pinnacles.map(([v, years, cc], i) => {
         const cur = n.curPin === i;
         return { v: v, years: 'Ages ' + years, nowLabel: cur ? ' \u00b7 you are here' : '', mean: mean(v),
           c: cur ? 'var(--ac)' : 'var(--ac2-hi)', bg: cur ? 'rgba(47,255,143,.08)' : 'var(--sf)',
-          bd: cur ? 'rgba(47,255,143,.56)' : 'var(--bd)', go: open('pinnacle', v, { range: years }) };
+          bd: cur ? 'rgba(47,255,143,.56)' : 'var(--bd)', go: open('pinnacle', v, { range: years, c: cc }), ...this.numCmp(cc, v) };
       }),
-      numerCycles: n.cycles.map(([k, v, years], i) => ({ k: k + ' cycle', v: v, years: 'Ages ' + years + (n.curCycle === i ? ' \u00b7 current' : ''),
-        mean: mean(v), go: open('cycle', v, { range: years }) })),
+      numerCycles: n.cycles.map(([k, v, years, cc], i) => ({ k: k + ' cycle', v: v, years: 'Ages ' + years + (n.curCycle === i ? ' \u00b7 current' : ''),
+        mean: mean(v), go: open('cycle', v, { range: years, c: cc }), ...this.numCmp(cc, v) })),
       numerChallenges: [['Main challenge, running the whole life', n.challenge], ['First sub-challenge, the earlier half', n.subs[0]],
         ['Second sub-challenge, the later half', n.subs[1]]]
         .map(([k, v]) => ({ k: k, v: v, mean: mean(v), go: open('challenge', v) })),
@@ -38613,6 +38861,7 @@ class Component extends DCLogic {
       ['Opportunities', c.lists.opportunities, 'var(--ac)'], ['Obstacles', c.lists.obstacles, 'var(--ac2-hi)']];
     return {
       spiritNumDetail: true, numValue: c.value, numCategory: c.category, numTitle: c.title,
+      ...(cm => ({ numCmpOn: cm.cmpOn, numCmp: cm.cmp, numCmpTitle: cm.cmpTitle, numCmpCat: cm.cmpCat, numCmpDesc: cm.cmpDesc, numCmpC: cm.cmpC }))(this.numCmp(sel.c, sel.v)),
       numFrom: /birth month, day, and year in turn/.test(c.from) ? '' : 'Calculated from ' + c.from + '.', numHasFrom: !/birth month, day, and year in turn/.test(c.from), numIsPinnacle: c.isPinnacle,
       numRange: sel.range ? 'Peak period, ages ' + sel.range : '',
       numBg: c.isPinnacle ? 'rgba(47,255,143,.08)' : 'var(--sf)',

@@ -21,6 +21,45 @@
     return { value: v, steps: steps };
   }
 
+  /* ---------- the compound, and the rule that settles a number ----------
+     The owner's principle (19 October 2026): a single digit is where a number
+     ends, not what it is. The double digit a reduction passes through on its
+     way down is the number's own frequency, and a master number met on any
+     standard route to the root is the number. A 6 reached from 33 is Master
+     Number 33.
+
+     compound(raw) is the first value from 10 to 99 on the way down: 128 gives
+     11, 199 gives 19, 38 gives 38, and anything under 10 has none.
+
+     settle(routes) takes the raw totals the standard methods reach for one
+     number (each a different route to the same root, because a digit sum
+     keeps the value mod 9) and returns { value, root, compound, master }.
+     value is the master when any route meets 11, 22 or 33, else the root.
+     compound is the master when one was met, else the first route's own
+     double digit, else the next route's: the first route is the method the
+     app has always used, so where no master is found nothing it showed moves. */
+  function compound(raw) {
+    var v = Math.abs(Math.floor(+raw || 0));
+    while (v > 99) v = digitSum(v);
+    return v >= 10 ? v : null;
+  }
+  function settle(routes) {
+    var rs = (routes || []).map(function (r) { return Math.abs(Math.floor(+r || 0)); }).filter(function (r) { return r > 0; });
+    if (!rs.length) return { value: 0, root: 0, compound: null, master: false, routes: [] };
+    var master = null, i, c;
+    for (i = 0; i < rs.length && master == null; i++) {
+      var v = reduce(rs[i]).value;
+      if (MASTERS.indexOf(v) !== -1) master = v;
+    }
+    var root = reduce(rs[0], { preserveMasters: false }).value;
+    if (master != null) return { value: master, root: root, compound: master, master: true, routes: rs };
+    for (i = 0, c = null; i < rs.length && c == null; i++) c = compound(rs[i]);
+    return { value: root, root: root, compound: c, master: false, routes: rs };
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  // every digit of the date, added: 1992-07-02 -> 1+9+9+2+0+7+0+2 = 30
+  function dateDigits(y, mo, d) { return digitSum(String(y) + pad2(mo) + pad2(d)); }
+
   /* ---------- numerology engine (audit item 5: live functions, not fixture arithmetic) ---------- */
   var LETTER = {};
   'AJS BKT CLU DMV ENW FOX GPY HQZ IR'.split(' ').forEach(function (g, i) {
@@ -58,8 +97,9 @@
       return { word: w, raw: raw, reduced: r.value };
     });
     var total = pw.reduce(function (a, p) { return a + p.reduced; }, 0);
-    var fin = reduce(total);
-    return { value: fin.value, parts: pw, total: total,
+    var full = pw.reduce(function (a, p) { return a + p.raw; }, 0);
+    var fin = settle([total, full]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, parts: pw, total: total, full: full,
       work: pw.map(function (p) { return p.word + ' ' + p.raw + '→' + p.reduced; }).join(' · ') + ' · ' + total + ' → ' + fin.value };
   }
   function expression(name, yPolicy) { return nameNumber(name, null, yPolicy); }
@@ -74,25 +114,27 @@
   function lifePath(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), y = reduce(digitSum(p.y));
-    var sum = mo.value + d.value + y.value, fin = reduce(sum);
-    return { value: fin.value, work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
+    var sum = mo.value + d.value + y.value, all = dateDigits(p.y, p.mo, p.d), fin = settle([sum, all]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+      work: mo.value + ' + ' + d.value + ' + (' + p.y + '→' + y.value + ') = ' + sum + ' → ' + fin.value };
   }
   function birthday(iso) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
-    var r = reduce(p.d);
-    return { value: r.value, work: p.d + ' → ' + r.value };
+    var r = reduce(p.d), fin = settle([p.d]);
+    return { value: r.value, root: fin.root, compound: compound(p.d), master: fin.master, work: p.d + ' → ' + r.value };
   }
   // fixture N2: 7 + 2 + (2026→10→1) = 10 → 1
   function personalYear(iso, year) {
     var p = parseDOB(iso); if (!p) return { value: null, work: 'invalid date' };
     var mo = reduce(p.mo), d = reduce(p.d), uy = reduce(digitSum(+year));
-    var sum = mo.value + d.value + uy.value, fin = reduce(sum);
-    return { value: fin.value, work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
+    var sum = mo.value + d.value + uy.value, all = dateDigits(+year, p.mo, p.d), fin = settle([sum, all]);
+    return { value: fin.value, root: fin.root, compound: fin.compound, master: fin.master, sum: sum, all: all,
+      work: mo.value + ' + ' + d.value + ' + (' + year + '→' + uy.value + ') = ' + sum + ' → ' + fin.value };
   }
   // fixture N3: PY 1 + month 7 = 8
   function personalMonth(py, month) {
     var sum = (+py || 0) + (+month || 0), fin = reduce(sum);
-    return { value: fin.value, work: py + ' + ' + month + ' = ' + sum + (fin.value !== sum ? ' → ' + fin.value : '') };
+    return { value: fin.value, compound: compound(sum), master: MASTERS.indexOf(fin.value) !== -1, work: py + ' + ' + month + ' = ' + sum + (fin.value !== sum ? ' → ' + fin.value : '') };
   }
   function coreNumbers(profile, onDate) {
     var d = onDate instanceof Date ? onDate : new Date();
@@ -273,7 +315,7 @@
   }
 
   return { VERSION: VERSION, MASTERS: MASTERS, LETTER: LETTER,
-    digitSum: digitSum, reduce: reduce,
+    digitSum: digitSum, reduce: reduce, compound: compound, settle: settle, MASTERS: MASTERS,
     lifePath: lifePath, birthday: birthday, expression: expression, soulUrge: soulUrge,
     personality: personality, personalYear: personalYear, personalMonth: personalMonth, coreNumbers: coreNumbers,
     angelAnalyze: angelAnalyze, fmtToday: fmtToday, fmtShort: fmtShort,

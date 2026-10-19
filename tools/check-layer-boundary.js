@@ -83,6 +83,7 @@ const LAYERS = {
     'hd-teachings.js',
     'placement-content.js',
     'numerology-content.js',
+    'number-matrix.js',            /* the Book of Numbers, generated from the owner's matrix */
     'timing-lexicon.js',           /* transit, gate and number readings, keyed by what mechanics returns */
     'angel-numbers.js',
     'animal-symbolism.js',

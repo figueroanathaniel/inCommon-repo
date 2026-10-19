@@ -4405,6 +4405,59 @@ other doubled numbers are not masters in the tradition these tables come from
 (nor in the Codex), so they reduce. U1 to U7 lift the methods out of the app
 and hold all of it.
 
+## The double digit is read before the root: the Book of Numbers
+Decided by the owner on 19 October 2026: "My 6 for example would be a 33 before
+reduced to a 6, so my life path is actually Master Number 33. This is the
+fundamental principle of organizing this information." A single digit is where
+a number ends, not what it is. The double digit a reduction passes through is
+the number's own frequency, and it is read first.
+
+**The matrix is the owner's, and it is generated, never typed.**
+`docs/source/book-of-numbers-matrix.csv` holds every compound from 10 to 99:
+its root, the reduction, a title, a category (Master Number, Karmic Debt, Elite
+Auspicious, Standard Sub-Frequency) and a description.
+`tools/build-number-matrix.js` writes `app/number-matrix.js` (global
+`NumberMatrix`, interpretation layer) from it and refuses a matrix with a
+compound missing or doubled, a root that is not the compound's digital root, an
+unknown category or a dash; `--check` says whether the module still matches.
+Change the CSV, then run the tool. The descriptions are the owner's words and
+are drawn as written.
+
+**A master met on any standard route is the number.** `settle(routes)` in
+`incommon-core.js` takes the raw totals the standard methods reach for one
+number and returns `{ value, root, compound, master }`. The Life Path and the
+Personal Year are settled over two routes: each part reduced and added (the
+route the app always took, fixture N1) and every digit of the date added. The
+name numbers are settled over the whole name added letter by letter and each
+word reduced and added (`NumerologyContent.fromName()`, which now returns
+`compounds`). Because a digit sum keeps the value mod 9, every route ends on
+the same root, so the only thing the rule can change is whether that root is
+read as its master: 1985-01-09 is 1 + 9 + 5 = 15 by its parts and 33 by its
+digits, and its Life Path is 33. U8 holds that case, U9 holds over every day
+from 1940 to 2010 that a number only ever moves to a master of its own root.
+
+**This changes existing readers' numbers**, about one Life Path in ten (2,698
+of 25,568 days from 1940 to 2010 moved to 11, 22 or 33), and the Oracle's
+dossier, the profile card's motto and Today read the same value. It is the
+owner's principle rather than a correction of arithmetic, and it is worth saying
+out loud.
+
+**`compound(raw)` is the first value from 10 to 99 on the way down** (128 gives
+11, 199 gives 19). Where a master was met the compound is the master; otherwise
+it is the first route's own double digit, so nothing the page showed moves
+where no master is found. The Numbers page carries it on every number that has
+one: Life Path, Birthday (the day itself), Personal Year, Month and Day, the
+three name numbers, the four Pinnacles and the three period cycles. Challenges
+are differences of single digits and have none.
+
+**`numCmp(c, v)` is the one place a compound becomes a label**: 33/6 for a
+master, 24/6 or 38/11 otherwise, with the matrix title beside it on the card
+and the category, title and description on the number's own page, in both
+shells. A Karmic Debt compound (13, 14, 16, 19) wears `--warn`, the colour the
+Challenges already wear; everything else wears `--ac2-hi`. The reduction math
+column is kept in the data and never drawn, by "No disclaimers". U10 to U15
+hold the rest.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
@@ -4715,7 +4768,7 @@ Until 15 October 2026 they shipped unrewritten, and from a site root that
 address is answered by the catch all with the app, so a home screen icon was
 an HTML page.
 
-`tools/` holds thirty three scripts. Twenty one are gates and are worth running
+`tools/` holds thirty four scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
@@ -4724,8 +4777,8 @@ before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
 `check-registry-integration.js`, `check-minor-body-elements.js`,
 `check-astral-bodies.js`, `check-timing-lexicon.js`.
-Nine generate:
-`build-bundle.js`, `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
+Ten generate:
+`build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
 and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the

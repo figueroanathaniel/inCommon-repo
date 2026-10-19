@@ -190,6 +190,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./minor-body-elements.js"></script>
 <script src="./placement-content.js"></script>
 <script src="./numerology-content.js"></script>
+<script src="./number-matrix.js"></script>
 <script src="./timing-lexicon.js"></script>
 <script src="./today-integration.js"></script>
 <script src="./angel-numbers.js"></script>
@@ -1394,6 +1395,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 12px var(--fb);color:var(--ac)">→</div>
             </div>
             <div style="font:italic 400 11px/1.5 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+            <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
           </button>
         </sc-for>
       </div>
@@ -1408,6 +1410,7 @@ input[type="date"]{color-scheme:dark}
               <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;text-align:left">
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+                <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
               </button>
             </sc-for>
           </div>
@@ -1432,6 +1435,7 @@ input[type="date"]{color-scheme:dark}
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
             <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
             <span style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ p.mean }}</span>
+            <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
           </span>
           <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
         </button>
@@ -1444,6 +1448,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 13.5px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
           <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
           <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</div>
+          <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
         </button>
       </sc-for>
     </div>
@@ -4112,6 +4117,16 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
         <div style="font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ numRange }}</div>
       </sc-if>
+      <sc-if value="{{ numCmpOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ numCmpC }};border-radius:12px;padding:13px 15px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:400 22px/1 var(--fd);color:{{ numCmpC }}">{{ numCmp }}</span>
+            <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCmpCat }}</span>
+          </div>
+          <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ numCmpTitle }}</div>
+          <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
+        </div>
+      </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
       <sc-for list="{{ numLines }}" as="l" hint-placeholder-count="3">
@@ -6526,6 +6541,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
               <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+              <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
             </button>
           </sc-for>
         </div>
@@ -6540,6 +6556,7 @@ input[type="date"]{color-scheme:dark}
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
                 <span style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ p.mean }}</span>
+                <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
               </span>
               <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
             </button>
@@ -6552,6 +6569,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 14px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
               <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</div>
+              <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
             </button>
           </sc-for>
         </div>
@@ -6578,6 +6596,7 @@ input[type="date"]{color-scheme:dark}
                 <button onClick="{{ n.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:13px;padding:14px 16px;text-align:left">
                   <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                   <div style="font:600 8.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+                  <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
                 </button>
               </sc-for>
             </div>
@@ -6622,6 +6641,16 @@ input[type="date"]{color-scheme:dark}
       </div>
       <sc-if value="{{ numIsPinnacle }}" hint-placeholder-val="{{ false }}">
         <div style="font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ numRange }}</div>
+      </sc-if>
+      <sc-if value="{{ numCmpOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ numCmpC }};border-radius:12px;padding:13px 15px">
+          <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <span style="font:400 22px/1 var(--fd);color:{{ numCmpC }}">{{ numCmp }}</span>
+            <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ numCmpCat }}</span>
+          </div>
+          <div style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ numCmpTitle }}</div>
+          <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numCmpDesc }}</div>
+        </div>
       </sc-if>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -13162,19 +13191,37 @@ class Component extends DCLogic {
      and the first pinnacle ends at 36 less the Life Path's root. */
   NUM_MASTERS = [11, 22, 33];
   numKeep(n) { n = Math.abs(+n || 0); while (n > 9 && this.NUM_MASTERS.indexOf(n) === -1) n = String(n).split('').reduce((s, c) => s + +c, 0); return n; }
+  /* THE COMPOUND IS READ BEFORE THE ROOT, the owner's rule of 19 October 2026:
+     the double digit a number passed through is its own frequency, and the
+     Book of Numbers (number-matrix.js) holds a title for every one from 10 to
+     99. c is that compound, v the number as shown. The label is the notation
+     the tradition writes, 33/6 for a master and 24/6 or 38/11 otherwise, and a
+     Karmic Debt compound wears --warn, the colour the Challenges already wear,
+     because the matrix reads it as a debt to be met. */
+  numCmp(c, v) {
+    const M = window.NumberMatrix, e = M && c ? M.get(c) : null;
+    if (!e) return { cmpOn: false, cmp: '', cmpLine: '', cmpTitle: '', cmpCat: '', cmpDesc: '', cmpC: 'var(--ac2-hi)', cmpN: null };
+    const label = e.master ? c + '/' + e.root : (+v === c ? String(c) : c + '/' + v);
+    return { cmpOn: true, cmp: label, cmpLine: label + ' \u00b7 ' + e.title, cmpTitle: e.title, cmpCat: e.category, cmpDesc: e.desc,
+      cmpC: e.karmic ? 'var(--warn)' : 'var(--ac2-hi)', cmpN: c };
+  }
   numerology() {
     const core = window.InCommonCore, dob = this.dob();
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob) || [0, '1992', '07', '02'];
     const y = +m[1], mo = +m[2], d = +m[3];
-    const lp = core ? core.lifePath(dob).value : this.numReduce(mo + d + y);
+    const lpR = core ? core.lifePath(dob) : null;
+    const lp = lpR ? lpR.value : this.numReduce(mo + d + y);
     const rm = this.numKeep(mo), rd = this.numKeep(d), ry = this.numKeep(y);
     const p1 = this.numKeep(rm + rd), p2 = this.numKeep(rd + ry), p3 = this.numKeep(p1 + p2), p4 = this.numKeep(rm + ry);
+    // The double digit each number passed through, which the Book of Numbers reads (numCmp).
+    const cmp = x => core && core.compound ? core.compound(x) : null;
     const end1 = 36 - this.numReduce(lp);
     const c1 = Math.abs(this.numReduce(mo) - this.numReduce(d)), c2 = Math.abs(this.numReduce(d) - this.numReduce(y));
     const age = Math.floor((Date.now() - Date.parse(dob + 'T12:00:00')) / 31557600000);
     return { lp: lp, rm: rm, rd: rd, ry: ry, age: isNaN(age) ? null : age,
-      pinnacles: [[p1, '0 to ' + end1], [p2, (end1 + 1) + ' to ' + (end1 + 9)], [p3, (end1 + 10) + ' to ' + (end1 + 18)], [p4, (end1 + 19) + ' onward']],
-      cycles: [['Formative', rm, 'birth to ' + end1], ['Productive', rd, (end1 + 1) + ' to ' + (end1 + 27)], ['Harvest', ry, (end1 + 28) + ' onward']],
+      lpC: lpR ? lpR.compound : null, rdC: cmp(d),
+      pinnacles: [[p1, '0 to ' + end1, cmp(rm + rd)], [p2, (end1 + 1) + ' to ' + (end1 + 9), cmp(rd + ry)], [p3, (end1 + 10) + ' to ' + (end1 + 18), cmp(p1 + p2)], [p4, (end1 + 19) + ' onward', cmp(rm + ry)]],
+      cycles: [['Formative', rm, 'birth to ' + end1, cmp(mo)], ['Productive', rd, (end1 + 1) + ' to ' + (end1 + 27), cmp(d)], ['Harvest', ry, (end1 + 28) + ' onward', cmp(y)]],
       challenge: this.numReduce(Math.abs(c1 - c2)), subs: [this.numReduce(c1), this.numReduce(c2)], end1: end1,
       curPin: age == null || isNaN(age) ? null : (age <= end1 ? 0 : age <= end1 + 9 ? 1 : age <= end1 + 18 ? 2 : 3),
       curCycle: age == null || isNaN(age) ? null : (age <= end1 ? 0 : age <= end1 + 27 ? 1 : 2) };
@@ -17376,8 +17423,11 @@ class Component extends DCLogic {
     const NC = window.NumerologyContent, core = window.InCommonCore, st = this.state;
     const n = this.numerology(), prof = this.activeProfile(), dob = this.dob();
     const mean = v => this.NUM_MEANING[v] || (NC ? NC.essence(v) : '');
-    const pm = core ? core.personalMonth(pyV, now.getMonth() + 1).value : null;
-    const nm = NC ? NC.fromName(this.birthName()) : null;
+    const pmR = core ? core.personalMonth(pyV, now.getMonth() + 1) : null, pm = pmR ? pmR.value : null;
+    const pyR = core ? core.personalYear(dob, now.getFullYear()) : null;
+    const pyC = pyR && pyR.value === pyV ? pyR.compound : null, pmC = pmR ? pmR.compound : null;
+    const pdC = core && core.compound && pm != null ? core.compound(pm + now.getDate()) : null;
+    const nm = NC ? NC.fromName(this.birthName()) : null, nmC = (nm && nm.compounds) || {};
     const open = (pos, v, extra) => () => this.setState({ spiritView: 'numberDetail', numSel: { pos: pos, v: v, ...(extra || {}) }, numListsOpen: false });
     let span = '';
     const m = /(\d{4})-(\d{2})-(\d{2})/.exec(dob);
@@ -17397,12 +17447,12 @@ class Component extends DCLogic {
       numerSummary: { head: 'What these numbers are drawn from',
         text: 'Life Path ' + n.lp + ', reduced from ' + dob + '. Personal Year ' + pyV + ', Personal Day ' + pdV + '. Every figure below is arithmetic performed on that one date: no interpretation has entered yet, and every step of it can be checked by hand. That is worth knowing before any of the meanings arrive: the numbers are certain, and what they are said to mean is the part that has been argued over for centuries.' },
       numerYearSpan: span,
-      numerCore: [['Life Path', n.lp, 'lifePath'], ['Birthday', n.rd, 'birthday'], ['Personal Year', pyV, 'personalYear'],
-        ['Personal Month', pm, 'personalMonth'], ['Personal Day', pdV, 'personalDay'], ['Challenge', n.challenge, 'challenge']]
-        .map(([k, v, pos]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v) })),
+      numerCore: [['Life Path', n.lp, 'lifePath', n.lpC], ['Birthday', n.rd, 'birthday', n.rdC], ['Personal Year', pyV, 'personalYear', pyC],
+        ['Personal Month', pm, 'personalMonth', pmC], ['Personal Day', pdV, 'personalDay', pdC], ['Challenge', n.challenge, 'challenge', null]]
+        .map(([k, v, pos, c]) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), go: open(pos, v == null ? 1 : v, { c: c }), ...this.numCmp(c, v) })),
       hasBirthName: !!nm, noBirthName: !nm,
       nameNumbers: nm ? [['Expression', nm.expression, 'expression'], ['Soul Urge', nm.soulUrge, 'soulUrge'], ['Personality', nm.personality, 'personality']]
-        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v) })) : [],
+        .map(([k, v, pos]) => ({ k: k, v: v, go: open(pos, v, { c: nmC[pos] }), ...this.numCmp(nmC[pos], v) })) : [],
       birthNameLine: nm ? 'From ' + nm.letters + ' letters of the birth name saved on this device. Pythagorean values.' : '',
       nameDraft: st.nameDraft,
       nameType: e => this.setState({ nameDraft: String(e.target.value || '').slice(0, 80) }),
@@ -17414,14 +17464,14 @@ class Component extends DCLogic {
         this.toastMsg('Saved.');
       },
       nameClear: () => { this.writeLS(this.nkey(), ''); this.setState({ nameDraft: '', nameTick: (st.nameTick || 0) + 1 }); },
-      numerPinnacles: n.pinnacles.map(([v, years], i) => {
+      numerPinnacles: n.pinnacles.map(([v, years, cc], i) => {
         const cur = n.curPin === i;
         return { v: v, years: 'Ages ' + years, nowLabel: cur ? ' \u00b7 you are here' : '', mean: mean(v),
           c: cur ? 'var(--ac)' : 'var(--ac2-hi)', bg: cur ? 'rgba(47,255,143,.08)' : 'var(--sf)',
-          bd: cur ? 'rgba(47,255,143,.56)' : 'var(--bd)', go: open('pinnacle', v, { range: years }) };
+          bd: cur ? 'rgba(47,255,143,.56)' : 'var(--bd)', go: open('pinnacle', v, { range: years, c: cc }), ...this.numCmp(cc, v) };
       }),
-      numerCycles: n.cycles.map(([k, v, years], i) => ({ k: k + ' cycle', v: v, years: 'Ages ' + years + (n.curCycle === i ? ' \u00b7 current' : ''),
-        mean: mean(v), go: open('cycle', v, { range: years }) })),
+      numerCycles: n.cycles.map(([k, v, years, cc], i) => ({ k: k + ' cycle', v: v, years: 'Ages ' + years + (n.curCycle === i ? ' \u00b7 current' : ''),
+        mean: mean(v), go: open('cycle', v, { range: years, c: cc }), ...this.numCmp(cc, v) })),
       numerChallenges: [['Main challenge, running the whole life', n.challenge], ['First sub-challenge, the earlier half', n.subs[0]],
         ['Second sub-challenge, the later half', n.subs[1]]]
         .map(([k, v]) => ({ k: k, v: v, mean: mean(v), go: open('challenge', v) })),
@@ -17446,6 +17496,7 @@ class Component extends DCLogic {
       ['Opportunities', c.lists.opportunities, 'var(--ac)'], ['Obstacles', c.lists.obstacles, 'var(--ac2-hi)']];
     return {
       spiritNumDetail: true, numValue: c.value, numCategory: c.category, numTitle: c.title,
+      ...(cm => ({ numCmpOn: cm.cmpOn, numCmp: cm.cmp, numCmpTitle: cm.cmpTitle, numCmpCat: cm.cmpCat, numCmpDesc: cm.cmpDesc, numCmpC: cm.cmpC }))(this.numCmp(sel.c, sel.v)),
       numFrom: /birth month, day, and year in turn/.test(c.from) ? '' : 'Calculated from ' + c.from + '.', numHasFrom: !/birth month, day, and year in turn/.test(c.from), numIsPinnacle: c.isPinnacle,
       numRange: sel.range ? 'Peak period, ages ' + sel.range : '',
       numBg: c.isPinnacle ? 'rgba(47,255,143,.08)' : 'var(--sf)',
