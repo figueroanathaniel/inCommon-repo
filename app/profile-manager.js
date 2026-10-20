@@ -674,10 +674,19 @@
     },
 
     /* Repairs profiles whose location text never resolved against an older,
-       smaller gazetteer. Returns the ids whose charts must be recomputed. */
+       smaller gazetteer, or that were placed in Puerto Rico with the wrong
+       zone. Returns the ids whose charts must be recomputed. */
     reresolveLocations: function () {
       var s = this._store(), fixed = [], self = this;
       s.profiles.forEach(function (p) {
+        /* A Puerto Rico place saved while the list filed the island under New
+           York's zone carries New_York: an hour out every winter. Its
+           coordinates are right, so only the zone is put back. */
+        if (p.timezone === 'America/New_York' && p.birth_lat >= 17.8 && p.birth_lat <= 18.6 && p.birth_lon >= -67.3 && p.birth_lon <= -65.2) {
+          p.timezone = 'America/Puerto_Rico'; p.tz_offset = -4;
+          fixed.push(p.id);
+          return;
+        }
         if (!p.birth_location || p.birth_lat != null) return;
         var geo = self.geocode(p.birth_location);
         if (!geo.resolved) return;
