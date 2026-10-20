@@ -4730,6 +4730,20 @@ folio** (`spTutStepOn`), because a step scrolls to the folio and a Next button
 left in the card above was scrolled off the screen. Progress, a finished
 tutorial and a hidden one are kept per room per path.
 
+**Show me shows; it does not navigate** (the owner, 20 October 2026, after
+finding it did nothing: it re-opened the entry Next had just opened).
+`studyTarget()` resolves where a step points without going there, `studyGo()`
+goes, and `studyHere()` asks whether the reader is already on it. On the step,
+Show me (`studyShow()`) pulses the step's own part of the wheel, the wiring or
+the mandala: every element the open entry lights carries `data-lit="1"`, the
+rest `data-lit="0"`, and `data-sp-show` on the figure, written to the DOM and
+taken off again rather than through state, makes the lit parts glow three
+times while the rest dims. An entry that lights nothing (an essay, a profile)
+pulses the whole figure. On the phone the figure sits above the folio, so the
+page rises to it and comes back. Once the reader has opened something else,
+the button becomes "Back to step N" and goes back. A new lit element in any of
+the three figures takes `data-lit` too, or Show me cannot see it.
+
 **This is an exception to "Discovery belongs to the reader" and to "No
 disclaimers", and the owner made it.** The tutorials explain the rooms, which
 those rules otherwise bar. They do so only on a path the reader chose, only
