@@ -4702,6 +4702,60 @@ selects its aspect, the morph runs both ways, Today's sky lays ten ghosts, a
 theme change re-reads the palette, and with WebGL off or three.js blocked the 2D
 wheel comes back with no switch.
 
+## The chart's lists are dropdowns, and its points and houses are flash cards
+Asked for by the owner on 20 October 2026: "Compact the lists of planets comets
+asteroids centaurs houses etc into dropdown menus. Create flash cards for them
+as well, centered around the impact they are having on the reader. This will be
+mutable, consistently updating as time goes on and the effects evolve over time
+for the reader." Every list under the Birth Chart, in both shells, is one
+dropdown (`chartGroupVals()`, `chgPhone` on the phone, `chgL`, `chgM` and `chgR`
+in the desktop's three columns): the points one per category (Astral Bodies,
+Nodes & Lunar Points, Angles, and in the Expanded Chart the asteroids, centaurs,
+TNOs, comets, hypotheticals and derived points), then the houses, the aspects
+and the two transit lists. They open closed (`chgOpen`), and a header carries
+the count, a peek of the glyphs and how many of its points are lit now.
+
+**The point and house groups have a List and Flash cards switch** (`chgMode`).
+A card's front is the point, where it sits, a five bar meter of how hard the
+sky is pressing on it and one line saying by what; turned (`fcFlip`, `fcFlip()`)
+it is the impact: each contact the sky is making to it now, building, exact or
+easing, with the window it runs in (opened, exact, closes) as a bar, the Timing
+Lexicon's reading of the heaviest contact, where the same body stands in its own
+round since birth, what came before and what is next, and the question. A house
+card is the bodies crossing it, how far through it each has come, who left last
+and who arrives next. Cards are sorted by impact, so the most active is first.
+
+**It is mutable because nothing is stored.** `impactSky()` reads the sky at the
+minute (the clock tick re-renders), and `impactDays()` holds the sky at local
+noon 120 days either side of today, rebuilt once a day, which is what gives a
+contact its window and the card its before and after. A card read next week has
+moved on by itself, and a contact that closes leaves the card. `impactWindows()`
+memoises per longitude per day: 88 points cost about 20ms the first time a
+cards view opens, and nothing while every group is a list.
+
+**Three things are easy to undo.** The South Node is not a mover: it is always
+opposite the North Node, so its contacts would be a second card for every fact.
+The lexicon is used only where it has the natal point (the ten bodies, both
+nodes, the four angles); every other point is read through what the mover does
+at that angle (`TimingLexicon.MOVE`), what the point carries, and a question per
+category (`IMPACT_ASK`), and the twelve house questions are `HOUSE_ASK`. Nothing
+on a card explains how it was worked out, by "No disclaimers". And the hidden
+face is `visibility: hidden` on a delay that lands mid turn, so it takes no focus
+and is not read out; `fcFlip()` moves focus to the face now showing, retrying
+until its visibility lands, or a keyboard turn drops focus to the page.
+
+**The violet borders and fills here are `--ac2-hi`, not `--ac2`.**
+`check-purple-text` resolves a value to the loop that renders it only for a top
+level list, and these sit in `g.cards` and `c.bars`, so `--ac2` reads as
+unresolved there. Measured with the harness's own `contrastFails()` and
+`tapTargets()`, one group or one card at a time because the gate stops at 420
+elements: every group open in the Expanded Chart, points and houses on cards and
+a card turned, four identities, hardened and not, at 1440 and 390, 695 elements
+a case, no pair under 4.5:1 and no control under 44px. Driven in Chromium, both
+shells: the dropdowns open and close, the switch, a keyboard turn and its focus,
+a touch swipe that moves the deck and leaves the screen where it is, a tap that
+turns a card, and an orb that moves when the clock does.
+
 ## The wiring is drawn three ways: 3D, Wheel and 2D
 Asked for by the owner on 19 October 2026: "Redesign the human design page to
 make the ux like it was made by unreal engine. Completely interactive, high

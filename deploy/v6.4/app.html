@@ -29128,60 +29128,136 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-for>
     </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Placements &amp; Angles</div>
-      <sc-for list="{{ placements }}" as="p" hint-placeholder-count="11">
-        <button id="{{ p.anchor }}" onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;min-height:46px">
-          <span style="flex:none;width:26px;text-align:center;font:400 18px var(--fb);color:var(--ac)">{{ p.glyph }}</span>
-          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
-            <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ p.name }} · <span style="color:var(--ac2-hi)">{{ p.pos }}</span></span>
-            <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ p.sub }}</span>
-          </span>
-          <span style="flex:none;font:400 11px var(--fu);color:var(--dim)">▶</span>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Major Aspects · {{ aspectCount }}</div>
-      <sc-for list="{{ natalAspectRows }}" as="a" hint-placeholder-count="6">
-        <button onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ a.c }};border-radius:10px;padding:11px 14px">
-          <div style="font:400 13.5px var(--fd);color:var(--tx);text-align:left">{{ a.label }}</div>
-          <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ a.orb }}</div>
-          <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim);text-align:left">{{ a.mean }}</div>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Houses</div>
-      <sc-for list="{{ houses }}" as="h" hint-placeholder-count="12">
-        <button onClick="{{ h.go }}" aria-label="{{ h.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd);padding:8px 2px">
-          <span style="flex:none;width:62px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--dim);text-align:left">{{ h.n }}</span>
-          <span style="flex:none;width:88px;font:400 13.5px var(--fd);color:var(--ac);text-align:left">{{ h.sign }}</span>
-          <span style="flex:1;min-width:0;font:400 11.5px/1.5 var(--fb);color:var(--dim);text-align:left">{{ h.theme }}</span>
-          <span style="flex:none;font:400 11px var(--fu);color:var(--ac)">›</span>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Current Transits · sky only</div>
-      <sc-for list="{{ globalTransits }}" as="t" hint-placeholder-count="4">
-        <div style="display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:11px 14px">
-          <div style="font:400 13.5px var(--fd)">{{ t.label }}</div>
-          <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ t.orb }}</div>
-          <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ t.mean }}</div>
+    <sc-for list="{{ chgPhone }}" as="g" hint-placeholder-count="6">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
+          <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
+          <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
+            <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+              <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
+              <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
+            </span>
+            <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
+            <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
+          </button>
+          <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+            <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
+              <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                  <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
+                    <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <div>
+                    <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
+                      <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                        <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                          <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
+                          <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                          <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                        </span>
+                        <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
+                        <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
+                      </button>
+                    </sc-if>
+                    <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
+                      <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                        <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
+                        <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                        <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                      </div>
+                    </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
+                <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
+                  <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
+                    <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
+                      <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
+                        <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
+                          <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
+                            <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
+                          </span>
+                          <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                          <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
+                          <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
+                          <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
+                            <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
+                          </span>
+                          <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
+                          <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
+                        </button>
+                        <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
+                          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
+                            <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                              <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
+                              <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
+                            </span>
+                          </div>
+                          <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
+                            <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
+                            <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
+                              <div style="display:flex;flex-direction:column;gap:5px">
+                                <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                                  <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
+                                  <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
+                                  <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
+                                </div>
+                                <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
+                                  <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                  <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
+                                </sc-if>
+                                <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
+                                <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
+                              </div>
+                            </sc-for>
+                            <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
+                              <div style="display:flex;flex-direction:column;gap:5px">
+                                <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
+                                <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
+                              </div>
+                            </sc-for>
+                            <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
+                            <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
+                              <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
+                                <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
+                                <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
+                              </div>
+                            </sc-if>
+                            <div style="display:flex;flex-direction:column;gap:3px">
+                              <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
+                              <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
+                              <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
+                            </div>
+                            <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
+                          </div>
+                          <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
+                            <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
+                            <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
         </div>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Personal Transits · to your chart</div>
-      <sc-for list="{{ personalTransits }}" as="t" hint-placeholder-count="4">
-        <div style="display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:10px;padding:11px 14px">
-          <div style="font:400 13.5px var(--fd)">{{ t.label }}</div>
-          <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ t.orb }}</div>
-          <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ t.mean }}</div>
-        </div>
-      </sc-for>
-    </div>
+      </div>
+    </sc-for>
   </div>
 </sc-if>
 
@@ -34337,34 +34413,136 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
         <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Placements</div>
-            <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden">
-              <sc-for list="{{ placements }}" as="p" hint-placeholder-count="11">
-                <button id="{{ p.anchor }}" onClick="{{ p.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:11px;min-height:44px;padding:9px 15px;border-bottom:1px solid var(--bd)">
-                  <span style="text-align:center;font:400 17px var(--fb);color:var(--ac)">{{ p.glyph }}</span>
-                  <span style="min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
-                    <span style="font:400 14px var(--fd);color:var(--tx)">{{ p.name }} · <span style="color:var(--ac2-hi)">{{ p.pos }}</span></span>
-                    <span style="font:400 10.5px/1.45 var(--fb);color:var(--dim)">{{ p.sub }}</span>
+          <sc-for list="{{ chgL }}" as="g" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
+                <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
+                  <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                    <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
+                    <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
                   </span>
-                  <span style="font:400 10px var(--fu);color:var(--dim)">▶</span>
+                  <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
+                  <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
                 </button>
-              </sc-for>
+                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                  <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
+                    <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
+                      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                        <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
+                          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column">
+                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                          <div>
+                          <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
+                            <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                                <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
+                                <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                                <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                              </span>
+                              <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
+                              <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
+                            </button>
+                          </sc-if>
+                          <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
+                            <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
+                              <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                              <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                            </div>
+                          </sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
+                      <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
+                        <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
+                          <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
+                            <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
+                              <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
+                                <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
+                                  <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
+                                </span>
+                                <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
+                                <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
+                                <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
+                                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
+                                </span>
+                                <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
+                                <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
+                              </button>
+                              <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
+                                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
+                                  <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                                    <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
+                                    <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
+                                  </span>
+                                </div>
+                                <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
+                                  <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
+                                  <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                                        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
+                                        <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
+                                        <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
+                                      </div>
+                                      <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
+                                        <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
+                                      </sc-if>
+                                      <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
+                                      <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
+                                    </div>
+                                  </sc-for>
+                                  <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                      <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
+                                    </div>
+                                  </sc-for>
+                                  <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
+                                  <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
+                                    <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
+                                      <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
+                                    </div>
+                                  </sc-if>
+                                  <div style="display:flex;flex-direction:column;gap:3px">
+                                    <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
+                                    <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
+                                    <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
+                                  </div>
+                                  <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
+                                </div>
+                                <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
+                                  <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
+                                  <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
             </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Houses</div>
-            <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:6px 15px">
-              <sc-for list="{{ houses }}" as="h" hint-placeholder-count="12">
-                <button onClick="{{ h.go }}" aria-label="{{ h.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:64px 92px 1fr 12px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)">
-                  <span style="font:600 9.5px var(--fu);letter-spacing:.06em;color:var(--dim);text-align:left">{{ h.n }}</span>
-                  <span style="font:400 13px var(--fd);color:var(--ac);text-align:left">{{ h.sign }}</span>
-                  <span style="font:400 11px/1.5 var(--fb);color:var(--dim);text-align:left">{{ h.theme }}</span>
-                  <span style="font:400 11px var(--fu);color:var(--ac)">›</span>
-                </button>
-              </sc-for>
-            </div>
-          </div>
+          </sc-for>
         </div>
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
@@ -34448,18 +34626,136 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
-          <div style="display:flex;flex-direction:column;gap:9px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Major aspects · {{ aspectCount }}</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
-              <sc-for list="{{ natalAspectRows }}" as="a" hint-placeholder-count="6">
-                <button onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid {{ a.c }};border-radius:11px;padding:12px 15px;text-align:left">
-                  <div style="font:400 14px var(--fd);color:var(--tx)">{{ a.label }}</div>
-                  <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ a.orb }}</div>
-                  <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ a.mean }}</div>
+          <sc-for list="{{ chgM }}" as="g" hint-placeholder-count="1">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
+                <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
+                  <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                    <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
+                    <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
+                  </span>
+                  <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
+                  <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
                 </button>
-              </sc-for>
+                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                  <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
+                    <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
+                      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                        <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
+                          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column">
+                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                          <div>
+                          <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
+                            <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                                <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
+                                <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                                <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                              </span>
+                              <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
+                              <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
+                            </button>
+                          </sc-if>
+                          <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
+                            <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
+                              <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                              <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                            </div>
+                          </sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
+                      <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
+                        <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
+                          <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
+                            <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
+                              <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
+                                <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
+                                  <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
+                                </span>
+                                <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
+                                <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
+                                <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
+                                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
+                                </span>
+                                <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
+                                <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
+                              </button>
+                              <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
+                                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
+                                  <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                                    <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
+                                    <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
+                                  </span>
+                                </div>
+                                <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
+                                  <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
+                                  <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                                        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
+                                        <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
+                                        <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
+                                      </div>
+                                      <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
+                                        <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
+                                      </sc-if>
+                                      <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
+                                      <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
+                                    </div>
+                                  </sc-for>
+                                  <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                      <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
+                                    </div>
+                                  </sc-for>
+                                  <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
+                                  <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
+                                    <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
+                                      <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
+                                    </div>
+                                  </sc-if>
+                                  <div style="display:flex;flex-direction:column;gap:3px">
+                                    <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
+                                    <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
+                                    <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
+                                  </div>
+                                  <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
+                                </div>
+                                <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
+                                  <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
+                                  <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
             </div>
-          </div>
+          </sc-for>
         </div>
         <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
           <sc-for list="{{ chartFeatures }}" as="f" hint-placeholder-count="2">
@@ -34505,26 +34801,136 @@ input[type="date"]{color-scheme:dark}
               </sc-if>
             </div>
           </sc-for>
-          <div style="display:flex;flex-direction:column;gap:9px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Personal transits · to your chart</div>
-            <sc-for list="{{ personalTransits }}" as="t" hint-placeholder-count="4">
-              <div style="display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:11px;padding:12px 15px">
-                <div style="font:400 13.5px var(--fd)">{{ t.label }}</div>
-                <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ t.orb }}</div>
-                <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ t.mean }}</div>
+          <sc-for list="{{ chgR }}" as="g" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
+                <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
+                  <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                    <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
+                    <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
+                  </span>
+                  <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
+                  <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
+                </button>
+                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                  <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
+                    <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
+                      <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                        <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
+                          <button onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column">
+                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                          <div>
+                          <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
+                            <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                                <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
+                                <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                                <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                              </span>
+                              <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
+                              <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
+                            </button>
+                          </sc-if>
+                          <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
+                            <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
+                              <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                              <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                            </div>
+                          </sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
+                      <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
+                        <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
+                          <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
+                            <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
+                              <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
+                                <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
+                                  <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
+                                </span>
+                                <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
+                                <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
+                                <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
+                                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
+                                </span>
+                                <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
+                                <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
+                              </button>
+                              <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
+                                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
+                                  <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                                    <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
+                                    <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
+                                  </span>
+                                </div>
+                                <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
+                                  <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
+                                  <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                                        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
+                                        <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
+                                        <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
+                                      </div>
+                                      <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
+                                        <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
+                                      </sc-if>
+                                      <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
+                                      <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
+                                    </div>
+                                  </sc-for>
+                                  <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                      <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
+                                    </div>
+                                  </sc-for>
+                                  <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
+                                  <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
+                                    <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
+                                      <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
+                                    </div>
+                                  </sc-if>
+                                  <div style="display:flex;flex-direction:column;gap:3px">
+                                    <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
+                                    <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
+                                    <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
+                                  </div>
+                                  <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
+                                </div>
+                                <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
+                                  <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
+                                  <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
               </div>
-            </sc-for>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:9px">
-            <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Current transits · sky only</div>
-            <sc-for list="{{ globalTransits }}" as="t" hint-placeholder-count="4">
-              <div style="display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:12px 15px">
-                <div style="font:400 13.5px var(--fd)">{{ t.label }}</div>
-                <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ t.orb }}</div>
-                <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ t.mean }}</div>
-              </div>
-            </sc-for>
-          </div>
+            </div>
+          </sc-for>
         </div>
       </div>
     </div>
@@ -39338,7 +39744,8 @@ class Component extends DCLogic {
     chartView: '2d', csFail: false, csFocus: null, csToday: false,
     hdView: '2d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
-    csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null };
+    csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null,
+    chgOpen: {}, chgMode: {}, fcFlip: {} };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -44689,6 +45096,341 @@ class Component extends DCLogic {
     return this.transitWindows()
       .filter(w => t >= w.from.getTime() - half && t <= w.to.getTime() + half)
       .sort((a, b) => b.weight - a.weight)[0] || null;
+  }
+  /* THE CHART'S LISTS ARE DROPDOWNS, AND ITS POINTS AND HOUSES ARE FLASH CARDS
+     (owner, 20 October 2026: "Compact the lists of planets comets asteroids
+     centaurs houses etc into dropdown menus. Create flash cards for them as
+     well, centered around the impact they are having on the reader. This will
+     be mutable, consistently updating as time goes on and the effects evolve
+     over time for the reader.")
+
+     A card is the natal point and what the sky is doing to it NOW. Nothing on
+     it is stored: it is computed from the minute (impactSky, which the clock
+     tick replaces) and from a day by day table of the sky 120 days either side
+     of today (impactDays, once a day), so a card read next week has moved on
+     by itself. The table is what lets a card say how a contact is evolving:
+     when it opened, when it is exact, when it closes, what it followed and what
+     comes next. The writing is the Timing Lexicon's where the lexicon has the
+     point, and the point's own meaning with a question per category where it
+     does not. The South Node is not a mover here: it is always opposite the
+     North Node, so every contact it made would be a second card for one fact. */
+  IMPACT_MOVERS = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'North Node'];
+  IMPACT_W = { Sun: .9, Moon: .5, Mercury: .7, Venus: .8, Mars: 1.2, Jupiter: 2, Saturn: 3, Uranus: 3.5, Neptune: 3.5, Pluto: 4, 'North Node': 1.6 };
+  IMPACT_SPAN = 120;
+  IMPACT_PHASE = [['new', 'a fresh round beginning'], ['crescent', 'the new round pushing past old habit'],
+    ['first quarter', 'the round asking for action'], ['gibbous', 'refining before the peak'],
+    ['full', 'the round at its fullest, seen clearly'], ['disseminating', 'sharing what the round has shown'],
+    ['last quarter', 'turning away from what no longer fits'], ['balsamic', 'clearing ground before the next return']];
+  IMPACT_PHASE_WORD = { building: 'building', exact: 'exact', easing: 'easing' };
+  IMPACT_ASK = {
+    asteroid: 'Which small, particular part of life has been asking for care lately, and what would tending it look like?',
+    centaur: 'Where does an old hurt meet a new skill right now, and what would it take to let the two speak?',
+    tno: 'What slow change has been gathering under the everyday, and when did it first show itself?',
+    comet: 'What arrived from outside the usual orbit, and what did it disturb or wake?',
+    node: 'What part of the story keeps returning to this point, and what would change if it were met directly?',
+    hypothetical: 'What is moving at the edge of attention that has no name yet?',
+    derived: 'Which two parts of life is this contact asking to be held together?',
+    other: 'What has this stretch brought into view that was not visible a month ago?'
+  };
+  HOUSE_ASK = [
+    'How do you want to arrive when you walk into a room this week?',
+    'What is worth spending on right now, and what is worth keeping?',
+    'Which everyday conversation deserves more attention than it gets?',
+    'What would make the ground at home feel steadier?',
+    'What would you make this week purely for the pleasure of making it?',
+    'Which part of the ordinary day is asking to be done differently?',
+    'Which partnership is asking to be met more honestly?',
+    'What is ready to be shared, and what is ready to end?',
+    'Which question has grown too big for the frame it has been kept in?',
+    'What would you want to be seen doing a year from now?',
+    'Which friendship or shared hope is asking for your part in it?',
+    'What needs quiet time before it can be said out loud?'
+  ];
+  impactSky() {
+    const ms = Math.floor(Date.now() / 60000) * 60000;
+    if (this._isky && this._isky.ms === ms) return this._isky;
+    const t = this.t2000(new Date(ms)), lon = {}, soon = {};
+    this.IMPACT_MOVERS.forEach(n => {
+      lon[n] = this.lonOf(n, t);
+      soon[n] = this.lonOf(n, t + (n === 'Moon' ? 1 / 24 : .5));
+    });
+    this._isky = { ms: ms, lon: lon, soon: soon };
+    return this._isky;
+  }
+  impactSep(a, b) { let d = Math.abs((a - b) % 360); return d > 180 ? 360 - d : d; }
+  /* Every contact the sky is making to one longitude this minute, heaviest
+     first. Building means the mover is closing on exact, easing that it has
+     passed it; the phase is read from where the mover will be shortly. */
+  impactContacts(lon) {
+    const S = this.impactSky(), out = [];
+    if (lon == null) return out;
+    this.IMPACT_MOVERS.forEach(m => {
+      const a = S.lon[m], b = S.soon[m];
+      if (a == null) return;
+      const d = this.impactSep(a, lon), d2 = b == null ? d : this.impactSep(b, lon);
+      let mv = b == null ? 0 : b - a; if (mv > 180) mv -= 360; if (mv < -180) mv += 360;
+      this.ASPECTS.forEach(([ang, asp]) => {
+        const orb = this.TR_ORBS[asp], off = Math.abs(d - ang);
+        if (off > orb) return;
+        const phase = off < (m === 'Moon' ? .5 : .25) ? 'exact' : Math.abs(d2 - ang) < off ? 'building' : 'easing';
+        out.push({ mover: m, asp: asp, off: off, orb: orb, phase: phase, retro: m !== 'North Node' && mv < 0,
+          w: this.IMPACT_W[m] * (.5 + .5 * (1 - off / orb)) });
+      });
+    });
+    return out.sort((x, y) => y.w - x.w);
+  }
+  /* The sky at local noon, every day from IMPACT_SPAN days back to as many
+     ahead. The Moon is left out: it crosses everything monthly and clears it
+     inside a day, so its contacts are read from the minute alone. Sky only, so
+     it is keyed by the day and shared by every profile. */
+  impactDays() {
+    const key = Component.localDay();
+    if (this._idays && this._idays.key === key) return this._idays;
+    const N = this.IMPACT_SPAN, base = new Date(); base.setHours(12, 0, 0, 0);
+    const movers = this.IMPACT_MOVERS.filter(m => m !== 'Moon'), lons = movers.map(() => new Float64Array(2 * N + 1));
+    for (let i = -N; i <= N; i++) {
+      const t = this.t2000(this.addDays(base, i));
+      movers.forEach((m, k) => { const v = this.lonOf(m, t); lons[k][i + N] = v == null ? NaN : v; });
+    }
+    this._idays = { key: key, base: base, N: N, movers: movers, lons: lons, win: {} };
+    return this._idays;
+  }
+  impactDay(i) { return this.addDays(this.impactDays().base, i); }
+  /* Every window in the table for one longitude: a run of days a mover holds
+     an aspect to it inside the transit orb, with the day it came closest.
+     Day 0 is today; open ends touch the edge of the table. */
+  impactWindows(lon) {
+    const D = this.impactDays(), mk = lon.toFixed(4);
+    if (D.win[mk]) return D.win[mk];
+    const N = D.N, runs = [];
+    D.movers.forEach((m, k) => {
+      const L = D.lons[k];
+      this.ASPECTS.forEach(([ang, asp]) => {
+        const orb = this.TR_ORBS[asp];
+        let run = null;
+        for (let i = 0; i < L.length; i++) {
+          const off = L[i] !== L[i] ? 99 : Math.abs(this.impactSep(L[i], lon) - ang);
+          if (off <= orb) {
+            if (!run) run = { mover: m, asp: asp, from: i - N, to: i - N, exact: i - N, orb: off };
+            else { run.to = i - N; if (off < run.orb) { run.orb = off; run.exact = i - N; } }
+          } else if (run) { runs.push(run); run = null; }
+        }
+        if (run) runs.push(run);
+      });
+    });
+    runs.forEach(r => { r.openStart = r.from <= -N; r.openEnd = r.to >= N; });
+    D.win[mk] = runs;
+    return runs;
+  }
+  /* Same words transitWindows() uses for a range, so a window reads alike on
+     the Throughline and on a card. */
+  impactRange(r) {
+    const f = this.fmtDay(this.impactDay(r.from)), t = this.fmtDay(this.impactDay(r.to));
+    return r.openStart && r.openEnd ? 'since before ' + f + ', and still running past ' + t
+      : r.openStart ? 'since before ' + f + ', through ' + t
+      : r.openEnd ? 'from ' + f + ', still running past ' + t
+      : f + ' to ' + t;
+  }
+  impactGlyph(n) { const p = this.PLNS.find(x => x[0] === n); return p ? p[1] : ''; }
+  /* The reading for one contact. The lexicon has the ten bodies, both nodes
+     and the four angles as natal points; every other point is read through
+     what the mover does at that angle and what the point itself carries. */
+  impactText(c, r) {
+    const TL = window.TimingLexicon, name = this.pointLabel(r);
+    const L = TL ? TL.transit(c.mover, c.asp, r.name) : null;
+    if (L) return { paras: [L.move, L.meet], ask: L.ask };
+    const move = TL && TL.MOVE[c.mover] ? TL.MOVE[c.mover][c.asp] : '';
+    const carries = r.mean ? name + ' carries ' + r.mean + '.' : '';
+    return { paras: [move, carries].filter(Boolean),
+      ask: this.IMPACT_ASK[r.category] || this.IMPACT_ASK.other };
+  }
+  impactLevel(w) { return Math.max(0, Math.min(5, Math.ceil(w / .9))); }
+  impactBars(level) { return [1, 2, 3, 4, 5].map(k => ({ bg: k <= level ? 'var(--ac2-hi)' : 'var(--sf2)', h: (6 + k * 3) + 'px' })); }
+  /* What the windows say about how this point's season is moving: the window
+     a contact is in now, the last one that closed, the next to open, and the
+     next heavy one (Mars or slower) when that is a different window. */
+  impactArc(lon) {
+    const runs = this.impactWindows(lon);
+    const past = runs.filter(r => r.to < 0).sort((a, b) => b.to - a.to)[0] || null;
+    const ahead = runs.filter(r => r.from > 0).sort((a, b) => a.from - b.from);
+    const next = ahead[0] || null;
+    const heavy = ahead.filter(r => (this.IMPACT_W[r.mover] || 0) >= 1.2)[0] || null;
+    return { runs: runs, past: past, next: next, heavy: heavy && heavy !== next ? heavy : null };
+  }
+  impactNameOf(r) { return r.mover + ' ' + r.asp; }
+  /* One card for one natal point. Built from the minute, so it is a fresh
+     object every render; the template reads it and nothing keeps it. */
+  impactPointCard(r, ctx) {
+    const cs = this.impactContacts(r.lon), name = this.pointLabel(r), lead = cs[0];
+    const w = cs.reduce((s, c) => s + c.w, 0), level = this.impactLevel(w);
+    const arc = this.impactArc(r.lon);
+    const contacts = cs.slice(0, 3).map((c, i) => {
+      const win = arc ? arc.runs.find(x => x.mover === c.mover && x.asp === c.asp && x.from <= 0 && x.to >= 0) : null;
+      const span = win && win.to > win.from ? Math.max(0, Math.min(100, (0 - win.from) / (win.to - win.from) * 100)) : 50;
+      const tx = i === 0 ? this.impactText(c, r) : null;
+      const exactOn = win ? (win.orb < .25 ? 'exact ' : 'closest ') + (win.exact === 0 ? 'today' : 'on ' + this.fmtDay(this.impactDay(win.exact))) : '';
+      return { glyph: this.impactGlyph(c.mover), title: c.mover + ' ' + this.aspName(c.asp), phase: this.IMPACT_PHASE_WORD[c.phase] + (c.retro ? ' · turning back' : ''),
+        orb: c.off.toFixed(1) + '° from exact', winOn: !!win, range: win ? this.impactRange(win) : '', exactOn: exactOn,
+        pct: span.toFixed(0) + '%', paceOn: !win, pace: !win && window.TimingLexicon ? 'Lasts ' + window.TimingLexicon.PACE[c.mover] + '.' : '',
+        paras: tx ? tx.paras.map(t => ({ t })) : [], parasOn: !!tx };
+    });
+    const ask = lead ? this.impactText(lead, r).ask : '';
+    /* Its own round: where the same body stands in the sky now, measured from
+       where it stood at birth. Only the bodies the sky carries have one. */
+    const S = this.impactSky();
+    const skyName = r.name === 'South Node' ? 'North Node' : r.name, skyLon = S.lon[skyName] != null && !r.id
+      ? (r.name === 'South Node' ? this.norm360(S.lon[skyName] + 180) : S.lon[skyName]) : null;
+    let round = '', roundPct = '0%';
+    if (skyLon != null) {
+      const ang = this.norm360(skyLon - r.lon), ph = this.IMPACT_PHASE[Math.floor(ang / 45) % 8], s = this.signOf(skyLon);
+      round = r.name + ' now stands at ' + Math.floor(s.deg) + '° ' + s.sign + ', in the ' + ctx.ordinal(ctx.houseOfLon(skyLon)) + ' house, ' +
+        Math.round(ang) + '° on from its place at birth: the ' + ph[0] + ' phase, ' + ph[1] + '.';
+      roundPct = (ang / 360 * 100).toFixed(1) + '%';
+    }
+    const line = x => this.impactNameOf(x) + ', ' + this.impactRange(x);
+    const status = lead ? this.impactNameOf(lead) + ', ' + this.IMPACT_PHASE_WORD[lead.phase]
+      : arc && arc.next ? 'Next: ' + this.impactNameOf(arc.next) + ' from ' + this.fmtDay(this.impactDay(arc.next.from)) : 'Quiet today';
+    return { key: this.pointKey(r), w: w, lit: cs.length > 0, name: name, glyph: r.glyph || '', ring: this.CAT_COLOR[r.category] || 'var(--ac2-hi)',
+      pos: Math.floor(r.deg) + '° ' + r.sign + (r.category === 'angle' ? '' : ' · House ' + ctx.houseOf(r)),
+      chip: cs.length ? (cs.length === 1 ? 'Lit now' : 'Lit by ' + cs.length) : 'Quiet',
+      status: status, bars: this.impactBars(level), contacts: contacts, contactsOn: contacts.length > 0,
+      quietOn: !contacts.length, quiet: 'No astral body is touching ' + name + ' today.',
+      ask: ask, askOn: !!ask, round: round, roundOn: !!round, roundPct: roundPct,
+      pastOn: !!(arc && arc.past), past: arc && arc.past ? 'Earlier: ' + line(arc.past) + '.' : '',
+      nextOn: !!(arc && arc.next), next: arc && arc.next ? 'Next: ' + line(arc.next) + '.' : '',
+      heavyOn: !!(arc && arc.heavy), heavy: arc && arc.heavy ? 'Ahead: ' + line(arc.heavy) + '.' : '',
+      open: () => ctx.openBody(this.pointKey(r)), openLabel: 'Open', openAria: 'Open the reading of ' + name,
+      aria: name + ', ' + (cs.length ? 'lit by ' + cs.map(c => c.mover + ' ' + this.aspName(c.asp)).join(', ') : 'quiet today') };
+  }
+  /* One card for one house: the bodies crossing it now, how far through it each
+     has come, who left it last and who arrives next. */
+  impactHouseCard(h, ctx) {
+    const S = this.impactSky(), D = this.impactDays();
+    const inside = this.IMPACT_MOVERS.filter(m => S.lon[m] != null && ctx.houseOfLon(S.lon[m]) === h).map(m => {
+      const lon = S.lon[m], s = this.signOf(lon), start = ctx.cuspOf(h);
+      let mv = S.soon[m] - lon; if (mv > 180) mv -= 360; if (mv < -180) mv += 360;
+      const retro = m !== 'North Node' && mv < 0, through = this.norm360(lon - start) / 30 * 100;
+      return { m: m, glyph: this.impactGlyph(m), w: this.IMPACT_W[m], title: m + ' · ' + Math.floor(s.deg) + '° ' + s.sign,
+        pct: Math.max(0, Math.min(100, through)).toFixed(0) + '%',
+        t: m + ' is crossing it' + (retro ? ', turning back on itself' : '') + ', bringing ' + this.PL_MEAN[m] + ' into ' + this.HOUSE_THEMES[h - 1] + '.' };
+    }).sort((a, b) => b.w - a.w);
+    let left = null, arrives = null;
+    if (D) {
+      const N = D.N;
+      D.movers.forEach((m, k) => {
+        const L = D.lons[k], inNow = ctx.houseOfLon(L[N]) === h;
+        if (inNow) return;
+        for (let i = N + 1; i < L.length; i++) if (ctx.houseOfLon(L[i]) === h) { if (!arrives || i - N < arrives.i) arrives = { m: m, i: i - N }; break; }
+        for (let i = N - 1; i >= 0; i--) if (ctx.houseOfLon(L[i]) === h) { if (!left || i - N > left.i) left = { m: m, i: i - N }; break; }
+      });
+    }
+    const w = inside.reduce((s, x) => s + x.w, 0);
+    return { key: 'h' + h, w: w, lit: inside.length > 0, name: 'House ' + h, glyph: String(h), ring: 'var(--ac2-hi)',
+      pos: ctx.cuspSign(h),
+      chip: inside.length ? inside.length + ' crossing' : 'Empty', bars: this.impactBars(this.impactLevel(w)),
+      status: inside.length ? inside.map(x => x.m).join(', ') : arrives ? 'Next: ' + arrives.m + ' from ' + this.fmtDay(this.impactDay(arrives.i)) : 'Empty today',
+      inside: inside, insideOn: inside.length > 0, quietOn: !inside.length, quiet: 'No astral body is crossing the ' + ctx.ordinal(h) + ' house today.',
+      pastOn: !!left, past: left ? 'Last to leave: ' + left.m + ', on ' + this.fmtDay(this.impactDay(left.i)) + '.' : '',
+      nextOn: !!arrives, next: arrives ? 'Next to arrive: ' + arrives.m + ', on ' + this.fmtDay(this.impactDay(arrives.i)) + '.' : '',
+      ask: this.HOUSE_ASK[h - 1], askOn: true, house: this.HOUSE_LONG[h - 1],
+      open: () => this.setState({ dpSel: { kind: 'house', h: h } }), openLabel: 'Open', openAria: 'Open the ' + ctx.ordinal(h) + ' house',
+      aria: 'House ' + h + ', ' + (inside.length ? inside.map(x => x.m).join(', ') + ' crossing' : 'empty today') };
+  }
+  fcFlip(id) {
+    const cur = this.state.fcFlip || {}, on = !cur[id], a = document.activeElement;
+    const mine = !!(a && a.closest && a.closest('[data-fc-card]') && a.closest('[data-fc-card]').getAttribute('data-fc-card') === id);
+    this.setState({ fcFlip: { ...cur, [id]: on } });
+    /* The face that held focus turns away and goes hidden, so focus follows
+       the card to the face now showing, or it would fall to the page. The
+       face only becomes focusable once its visibility lands, which is a
+       commit and a .3s turn after this press, so it is tried until it takes. */
+    if (!mine) return;
+    let tries = 0;
+    const go = () => {
+      const card = Array.prototype.find.call(document.querySelectorAll('[data-fc-card]'), el => el.getAttribute('data-fc-card') === id);
+      const el = card && card.querySelector(on ? '[data-fc-back]' : '[data-fc-front]');
+      if (el) el.focus();
+      if ((!el || document.activeElement !== el) && ++tries < 20) setTimeout(go, 60);
+    };
+    setTimeout(go, this.motionOff() ? 40 : 300);
+  }
+  /* The groups the Birth Chart is listed in, for both shells. Each is a
+     dropdown, closed until opened (chgOpen), and the point and house groups
+     carry a List and Flash cards switch (chgMode). A card's turn is fcFlip.
+     Cards are built only for a group that is open on its cards, so a closed
+     page pays for the lit counts and nothing more. */
+  chartGroupVals(o) {
+    const st = this.state, open = st.chgOpen || {}, mode = st.chgMode || {}, flip = st.fcFlip || {}, rm = this.motionOff();
+    const ctx = { ordinal: o.ordinal, houseOf: o.houseOf, openBody: o.openBody,
+      houseOfLon: lon => this.houseOf(lon, o.natalSun, o.asc),
+      cuspOf: h => o.asc ? this.norm360(o.asc.asc + (h - 1) * 30) : ((o.natalSun.idx + h - 1) % 12) * 30,
+      cuspSign: h => this.SIGNS12[((o.asc ? o.asc.idx : o.natalSun.idx) + h - 1) % 12] };
+    const flipped = id => !!flip[id];
+    const dress = (gk, cards) => cards.map(c => {
+      const id = gk + '|' + c.key, on = flipped(id);
+      return { ...c, id: id, rot: on ? '180deg' : '0deg', frontV: on ? 'hidden' : 'visible', backV: on ? 'visible' : 'hidden',
+        vDelay: rm ? '0s' : '.3s', flip: () => this.fcFlip(id), frontAria: c.aria + '. Turn the card.',
+        insideOn: !!c.insideOn, inside: c.inside || [], contactsOn: !!c.contactsOn, contacts: c.contacts || [],
+        houseOn: !!c.house, house: c.house || '', roundOn: !!c.roundOn, round: c.round || '', roundPct: c.roundPct || '0%' };
+    });
+    const group = (k, label, rows, opt) => {
+      opt = opt || {};
+      const isOpen = !!open[k], able = !!opt.cards, m = able && mode[k] === 'cards' ? 'cards' : 'list';
+      const cards = isOpen && m === 'cards' ? dress(k, opt.cards().sort((a, b) => b.w - a.w)) : [];
+      const lit = opt.lit || 0;
+      rows = rows.map((r, i) => r.anchor ? r : { ...r, anchor: 'incommon-chg-' + k + '-' + i });
+      return { key: k, label: label, count: String(rows.length), pid: 'incommon-chg-' + k,
+        peek: opt.peek || '', peekOn: !!opt.peek, litOn: lit > 0, lit: lit + ' lit now',
+        open: isOpen, rot: isOpen ? '90deg' : '0deg', bd: isOpen ? 'var(--ac2-hi)' : 'var(--bd)',
+        toggle: () => this.setState({ chgOpen: { ...(this.state.chgOpen || {}), [k]: !(this.state.chgOpen || {})[k] } }),
+        modesOn: able, modes: !able ? [] : [['list', 'List'], ['cards', 'Flash cards']].map(([id, lb]) => ({ label: lb, on: m === id,
+          bg: m === id ? 'rgba(var(--atmc),.34)' : 'transparent', bd: m === id ? 'var(--ac2-hi)' : 'transparent', c: m === id ? 'var(--tx)' : 'var(--dim)',
+          go: () => this.setState({ chgMode: { ...(this.state.chgMode || {}), [k]: id } }) })),
+        listOn: m === 'list', cardsOn: m === 'cards', rows: isOpen && m === 'list' ? rows : [], cards: cards,
+        deckAria: label + ', ' + cards.length + (cards.length === 1 ? ' card' : ' cards') + ', the most active first', headOn: false, head: '' };
+    };
+    const row = x => ({ anchor: x.anchor || '', glyph: x.glyph || '', glyphOn: !!x.glyph, title: x.title, hi: x.hi || '', hiOn: !!x.hi,
+      meta: x.meta || '', metaOn: !!x.meta, sub: x.sub || '', edge: x.edge || 'transparent', go: x.go || null, btn: !!x.go, plain: !x.go,
+      aria: x.aria || [x.title, x.hi, x.lit ? 'lit now' : '', x.sub].filter(Boolean).join(', '), litOn: !!x.lit, arrow: x.go ? '›' : '' });
+    const CATS = ['body', 'node', 'angle', 'asteroid', 'centaur', 'tno', 'comet', 'hypothetical', 'derived'];
+    const LABEL = { ...this.CAT_LABEL, body: 'Astral Bodies' };
+    const pts = CATS.map(cat => {
+      const rs = o.rows.filter(r => r.category === cat);
+      if (!rs.length) return null;
+      const litMap = {};
+      rs.forEach(r => { if (r.lon != null && !r.uncomputed) litMap[this.pointKey(r)] = this.impactContacts(r.lon).length > 0; });
+      const rows = rs.map(r => {
+        const meanOf = r.mean || this.PL_MEAN[r.name] || (window.PlacementContent && window.PlacementContent.bodies[r.name] ? window.PlacementContent.bodies[r.name].energy : '');
+        const off = r.uncomputed || r.lon == null;
+        return row({ anchor: 'pl-' + this.pointKey(r).replace(/\s+/g, '-'), glyph: r.glyph, title: this.pointLabel(r),
+          hi: off ? 'not drawn' : o.fmtDeg(r), lit: litMap[this.pointKey(r)],
+          sub: (off || cat === 'angle' ? (off ? 'no house' : '') : 'House ' + o.houseOf(r)) + (meanOf ? (off || cat !== 'angle' ? ' · ' : '') + meanOf : ''),
+          go: () => o.openBody(this.pointKey(r)) });
+      });
+      const live = rs.filter(r => r.lon != null && !r.uncomputed);
+      return group('pt-' + cat, LABEL[cat] || cat, rows, { peek: rs.slice(0, 9).map(r => r.glyph).filter(Boolean).join(' ') + (rs.length > 9 ? ' …' : ''),
+        lit: Object.keys(litMap).filter(k => litMap[k]).length, cards: () => live.map(r => this.impactPointCard(r, ctx)) });
+    }).filter(Boolean);
+    const houses = group('houses', 'Houses', this.HOUSE_THEMES.map((th, i) => row({ glyph: String(i + 1), title: 'House ' + (i + 1), hi: ctx.cuspSign(i + 1), sub: th,
+      aria: 'House ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
+      { cards: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => this.impactHouseCard(h, ctx)) });
+    const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.slice(0, 40).map((x, i) => row({
+      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
+      edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
+    const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map(x => row({
+      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
+      sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => o.openBody(x.b.name) })));
+    const trS = group('tr-sky', 'Current Transits', o.tr.global.map(x => row({
+      title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
+      sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })));
+    const headed = (list, heads) => list.map(g => heads[g.key] ? { ...g, headOn: true, head: heads[g.key] } : g);
+    const first = pts.length ? pts[0].key : 'houses';
+    return {
+      chgPhone: headed(pts.concat([aspects, houses, trP, trS]), { [first]: 'Placements & Angles', aspects: 'Aspects', houses: 'Houses', 'tr-personal': 'Transits' }),
+      chgL: headed(pts.concat([houses]), { [first]: 'Placements', houses: 'Houses' }),
+      chgM: headed([aspects], { aspects: 'Aspects' }),
+      chgR: headed([trP, trS], { 'tr-personal': 'Transits' })
+    };
   }
   lunationsAhead(from, days) {
     const out = []; let prev = null;
@@ -52654,12 +53396,6 @@ class Component extends DCLogic {
                   toggle: () => this.setState({ featOpen: st.featOpen === r.key ? null : r.key })
                 }));
               })(),
-              aspectCount: asps.length + (asps.length === 1 ? ' aspect' : ' aspects') + (expanded ? ' \u00b7 including extra bodies' : ''),
-              natalAspectRows: asps.slice(0, 14).map((x, i) => ({
-                label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name,
-                orb: x.orb.toFixed(1) + '\u00b0 orb', c: this.ASP_COLOR[x.asp][0],
-                mean: this.ASP_SHORT[x.asp], go: () => this.setState({ aspSel: i })
-              })),
               aspOpen: st.aspSel != null && !!asps[st.aspSel],
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
@@ -52676,21 +53412,9 @@ class Component extends DCLogic {
                   goA: () => { this.setState({ aspSel: null }); openBody(x.a.name); },
                   goB: () => { this.setState({ aspSel: null }); openBody(x.b.name); } };
               })(),
-              placements: rows.map(r => {
-                const meanOf = () => r.mean || this.PL_MEAN[r.name] ||
-                  (window.PlacementContent && window.PlacementContent.bodies[r.name] ? window.PlacementContent.bodies[r.name].energy : '');
-                const sub = (head, m) => head + (m ? ' \u00b7 ' + m : '');
-                const base = { glyph: r.glyph, name: r.name, anchor: 'pl-' + r.name.replace(/\s+/g, '-'),
-                  go: () => openBody(r.name), uncomputed: !!r.uncomputed };
-                if (r.uncomputed) return { ...base, pos: 'not drawn', sub: sub('no house', meanOf()) };
-                return { ...base, pos: fmtDeg(r), sub: sub('House ' + houseOf(r), meanOf()) };
-              }),
+              ...this.chartGroupVals({ rows, asps, houseOf, fmtDeg, openBody, tr, natalSun, asc, ordinal, expanded }),
             };
           })(),
-          houses: this.HOUSE_THEMES.map((th, i) => ({ n: 'House ' + (i + 1), sign: this.SIGNS12[((asc ? asc.idx : natalSun.idx) + i) % 12], theme: th,
-            aria: 'House ' + (i + 1) + ', open its details', go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) })),
-          globalTransits: tr.global.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
-          personalTransits: tr.personal.map(x => ({ label: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, orb: x.orb.toFixed(1) + '\u00b0 orb', mean: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })),
           hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority, hdDefinition: hd.definition,
           hdTypeGo: this.hdOpen({ kind: 'type' }), hdStrategyGo: this.hdOpen({ kind: 'strategy' }), hdAuthorityGo: this.hdOpen({ kind: 'authority' }),
           hdProfileGo: this.hdOpen({ kind: 'profile' }),
