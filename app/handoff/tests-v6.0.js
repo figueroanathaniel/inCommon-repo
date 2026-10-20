@@ -2103,12 +2103,22 @@
       await goD('#/library/study', 800);
       var libScreen = function () { return [].slice.call(dd.querySelectorAll('[data-screen-label="Library"]'))[0]; };
       var studyTxt = txt(libScreen());
-      var studyOrder = ['Human Design Atlas', 'Astropedia', 'The Numbers', 'My Tarot', 'Dream Symbols', 'Sabian Lexicon'];
-      var numbersBtn = find(dd, /The Numbers/);
-      t('N41', 'The Library is six tabs, and Study lists its six in the order given, The Numbers as coming soon and not a control',
-        { tabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'], ordered: true, comingSoon: true, numbersIsControl: false, journalItemsAbsent: true },
-        { tabs: visTabs(dd), ordered: inOrder(pos(studyTxt, studyOrder)), comingSoon: /COMING SOON/i.test(studyTxt),
-          numbersIsControl: !!numbersBtn,
+      var studyOrder = ['Human Design Atlas', 'Astropedia', 'The Book of Numbers', 'My Tarot', 'Dream Symbols', 'Sabian Lexicon'];
+      /* The Numbers was a dashed coming soon card until 20 October 2026; it is
+         the Book of Numbers now, a room like the two beside it, so the row
+         presses it and asks for the room and its ninety compounds. */
+      var numbersBtn = [].slice.call(libScreen().querySelectorAll('button')).filter(function (b) { return /The Book of Numbers/.test(txt(b)); })[0];
+      var studyComing = /COMING SOON/i.test(studyTxt);
+      var studyTabs = visTabs(dd);
+      if (numbersBtn) numbersBtn.click();
+      await sleep(900);
+      var bnRoom = dd.querySelector('[data-screen-label="Library / The Book of Numbers"]');
+      var bnDots = dd.querySelectorAll('[data-bn-room] [data-bn-dot]').length;
+      var bnAddr = wd.location.hash;
+      t('N41', 'The Library is six tabs, and Study lists its six in the order given, The Book of Numbers a control that opens its room of ninety',
+        { tabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'], ordered: true, comingSoon: false, numbersIsControl: true, room: true, dots: 90, address: '#/library/book-of-numbers', journalItemsAbsent: true },
+        { tabs: studyTabs, ordered: inOrder(pos(studyTxt, studyOrder)), comingSoon: studyComing,
+          numbersIsControl: !!numbersBtn, room: !!bnRoom, dots: bnDots, address: bnAddr,
           journalItemsAbsent: !/Synchronicities|Dream Journal|Book of Changes/.test(studyTxt) });
 
       await goD('#/library/journal', 800);
@@ -2460,7 +2470,7 @@
       t('N37b', 'The index reaches every shelf, not only the placements and the degrees',
         { screens: true, placements: true, numbers: true, practices: true, tarot: true,
           iching: true, dreams: true, animals: true, repeating: true, humanDesign: true,
-          astrology: true, sabian: true, help: true },
+          astrology: true, sabian: true, help: true, bookOfNumbers: true },
         { screens: reach('settings', 'Screens and rooms'),
           placements: reach('sun', 'Your placements'),
           numbers: reach('life path', 'Your numbers'),
@@ -2473,7 +2483,8 @@
           humanDesign: reach('gate 34', 'Human Design'),
           astrology: reach('scorpio', 'Astrology reference'),
           sabian: reach('Leo 15', 'Sabian degrees'),
-          help: reach('suicide', 'Lines that answer') });
+          help: reach('suicide', 'Lines that answer'),
+          bookOfNumbers: reach('master teacher', 'The Book of Numbers') });
 
       /* The routing rule, on the shell that breaks it. A row has to name a room
          the shell standing there draws: one that wrote a libView the vertical
