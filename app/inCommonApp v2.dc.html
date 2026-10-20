@@ -231,7 +231,6 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-life.js"></script>
 <script src="./hd-teachings.js"></script>
 <script src="./gazetteer-us.js"></script>
-<script src="./gazetteer-world.js"></script>
 <script src="./geocode-online.js"></script>
 <!-- The connection pass. birth-time.js owns every decision about what a chart is drawn
      from, hd-composite.js overlays two bodygraphs, and analytics.js counts
@@ -11425,7 +11424,7 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
+    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false, gazTick: 0,
     chartView: '3d', csFail: false, csFocus: null, csToday: false,
     hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
@@ -11578,6 +11577,46 @@ class Component extends DCLogic {
   track(name) { const A = this.AN(); if (A) { try { A.emit(name); } catch (e) {} } }
   // One-time profile bootstrap: register the chart engine as the single calculator,
   // then migrate any pre-multi-profile data into a Default Profile.
+  /* THE WORLD PLACE LIST IS FETCHED WHEN A PLACE IS ASKED FOR (20 October
+     2026). gazetteer-world.js is 7.7 MB of the page, and only a birth place
+     reads it: the first run's place search, the profile form, the synastry
+     form, and the repair of a profile saved with a place and no coordinates.
+     Inlined, every visit paid for it before the first paint. Now the page
+     carries gazetteer-us.js alone, and gazWant() fetches the world list the
+     first time one of those surfaces is drawn, which is what Gazetteer.WORLD
+     marks once it has appended its rows. Everything that ran without it is
+     run again when it lands (gazArrived): the place memos are dropped, an
+     unplaced profile is resolved, and a submit that was waiting on it goes
+     through. Read at the call site and never assumed present, like every
+     other module here. */
+  gazReady() { return !!(typeof window !== 'undefined' && window.Gazetteer && window.Gazetteer.WORLD); }
+  gazWant(then) {
+    if (this.gazReady()) return true;
+    if (this._gazFailed) { if (!then) return false; this._gazFailed = false; return true; }
+    if (then) this._gazThen = then;
+    if (this._gazLoading || typeof document === 'undefined') return false;
+    this._gazLoading = true;
+    const el = document.createElement('script');
+    el.src = './gazetteer-world.js';
+    el.async = true;
+    el.onload = () => this.gazArrived();
+    /* No signal: whatever was waiting goes on with the US list and the
+       online lookup, and says what it says without the world list. */
+    el.onerror = () => { this._gazLoading = false; this._gazFailed = true; const then = this._gazThen; this._gazThen = null; if (then) then(); };
+    document.head.appendChild(el);
+    return false;
+  }
+  gazArrived() {
+    this._gazLoading = false;
+    this._placeHitsQ = null; this._placeGeoQ = null;
+    const PM = this.PM();
+    if (PM && PM.reresolveLocations) {
+      const repaired = PM.reresolveLocations();
+      if (repaired.length) { this._hd = null; this._hdStamp = null; }
+    }
+    const then = this._gazThen; this._gazThen = null;
+    this.setState({ gazTick: (this.state.gazTick || 0) + 1 }, () => { if (then) then(); });
+  }
   ensureProfiles() {
     const PM = this.PM(); if (!PM) return;
     window.__incommonCalcFor = p => this.calcFor(p);
@@ -11589,6 +11628,9 @@ class Component extends DCLogic {
     // with null coordinates. Resolve them now so timed charts come back.
     const repaired = PM.reresolveLocations();
     if (repaired.length) { this._hd = null; this._hdStamp = null; }
+    try {
+      if (PM._store && PM._store().profiles.some(p => p.birth_location && p.birth_lat == null)) this.gazWant();
+    } catch (e) { /* a store that cannot be read has nothing to repair */ }
     if (!PM.count()) {
       const r = PM.migrateLegacyProfile({ name: 'Default Profile', birthDate: this.DOB, birthTime: '', birthLocation: '' });
       if (r.migrated && r.moved && r.moved.length) this._migrated = true;
@@ -19404,6 +19446,7 @@ class Component extends DCLogic {
     const date = String(f.birthDate || '').trim();
     if (!date) { this.toastMsg('A birth date is the one thing a chart cannot be drawn without.'); return; }
     const PM = this.PM(), BT = this.BT();
+    if (f.birthLocation && !this.gazWant(() => this.synFormSave())) return;
     const geo = (PM && f.birthLocation) ? PM.geocode(f.birthLocation) : null;
     /* Their time is read the same way the reader's own is. It used to go
        through normTime, which only understands a 24 hour clock, so "2:05" for
@@ -19509,7 +19552,7 @@ class Component extends DCLogic {
     };
 
     const formVals = {
-      synFormOpen: !!f,
+      synFormOpen: !!f && (this.gazWant(), true),
       synFName: f ? (f.name || '') : '',
       synFDate: f ? (f.birthDate || '') : '',
       synFTime: f ? (f.birthTime || '') : '',
@@ -20664,6 +20707,7 @@ class Component extends DCLogic {
      away once a candidate is picked, and comes back the moment the text moves
      off it, which is exactly the Codex's rule. */
   birthPlaceInfo() {
+    const world = this.gazWant();
     const PM = this.PM(), G = window.Gazetteer, BT = this.BT();
     const place = this.af('bplace').trim(), pick = this.af('bplacePick');
     const q = String(this.state.afPlaceQ || '').trim();
@@ -20701,6 +20745,8 @@ class Component extends DCLogic {
       } else if (geo.timezone === 'manual') {
         notes.push({ t: 'Coordinates entered by hand, so the offset is the one your longitude implies rather than a zone with a history.', c: 'var(--mut)' });
       }
+    } else if (place.length >= 2 && q === place && !hits.length && !world && this._gazLoading) {
+      notes.push({ t: 'Loading places\u2026', c: 'var(--mut)' });
     } else if (place.length >= 2 && q === place && !hits.length) {
       notes.push({ t: 'Nothing by that name in the place list. Try the fuller name with its region, or type the coordinates as latitude, longitude.', c: 'var(--warn)' });
     }
@@ -20738,6 +20784,7 @@ class Component extends DCLogic {
     if (codex && !date) errs.bdate = 'Choose your date of birth.';
     if (codex && this.af('bplace').trim()) {
       const g = PM ? PM.geocode(this.af('bplace').trim()) : null;
+      if ((!g || !g.resolved) && !this.gazWant(() => this.birthSubmit())) return;
       if (!g || !g.resolved) errs.bplace = 'Search for and select your place of birth, or type its coordinates as latitude, longitude.';
     }
     if (date) {
@@ -24918,6 +24965,7 @@ class Component extends DCLogic {
         const tgt = st.switchTo ? PM.getProfile(st.switchTo) : null;
         const fm = st.form || {}, formIsEdit = st.formMode === 'edit';
         const nameOk = String(fm.name || '').trim().length > 0;
+        if (st.form) this.gazWant();
         const geo = fm.birthLocation ? PM.geocode(fm.birthLocation) : null;
         const pinDigits = st.pin.join('');
         const openForm = (mode, p) => this.setState({ formMode: mode, formPin: '', delOpen: false, delName: '', quickOpen: false,

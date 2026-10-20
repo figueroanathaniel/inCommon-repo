@@ -5101,11 +5101,44 @@ before, 6.4s after, and the main thread's compile stall from 5.9s to 2.4s. What
 is left of that stall is the software rasterizer building its pipelines at the
 first draw, which a real GPU does not do once the programs are linked.
 
-**The next load cost is the page itself.** `app.html` is 12 MB, 4 MB over the
-wire with brotli, and 7.7 MB of it is `gazetteer-world.js` inlined, which only
-the birth place search reads. `ensureProfiles()` re-resolves old profiles
-against it at boot and first run searches it, so moving it out of the page has
-to keep both working when it arrives late. Not done here.
+## The world place list is fetched when a birth place is asked for
+Asked for by the owner on 20 October 2026, as the next load cost after the 3D
+stages above. `app.html` was 12.3 MB, 4.1 MB over the wire with brotli,
+and 7.7 MB of it was `gazetteer-world.js` inlined, which only a birth place
+reads. Every visit downloaded it before the first paint. The page is 4.8 MB
+now, about 1.3 MB gzipped, and the list sits beside it as a file.
+
+**`gazWant()` fetches it the first time a place surface is drawn**: the first
+run's place search (`birthPlaceInfo()`), the profile form, the synastry form,
+and at boot when a profile holds a place and no coordinates. The page keeps
+`gazetteer-us.js` inline, and the world file appends its rows into the same
+array, setting `Gazetteer.WORLD` when it has (`gazReady()`). `gazArrived()`
+runs everything that ran without it again: the place memos are dropped
+(`_placeHitsQ`, `_placeGeoQ`), `reresolveLocations()` places any profile saved
+while it was still on its way, and the page re-renders.
+
+**A submit that needs it waits for it rather than failing.** `birthSubmit()`
+and `synFormSave()` hand themselves to `gazWant(then)` when a typed place does
+not resolve on the US list alone, and run again when the list lands. While it
+is loading the place slot says "Loading places..." instead of nothing found. A
+fetch that fails lets the waiting submit go on with the US list and the online
+lookup, saying what it would have said, and the next press asks again; a
+render never retries on its own, so a dead connection is not a request per
+keystroke.
+
+**The bundle copies it rather than inlining it** (`PLACE_FILES` in
+`tools/build-bundle.js`), and refuses a bundle where the file is missing, the
+app no longer names `./gazetteer-world.js`, or the helmet loads it again. It is
+not precached, because a worker that installed it would charge every visit for
+it again; the bundle worker's runtime cache keeps it after the first use, and
+`build-native.js` carries it into the store apps with the rest of the folder.
+
+Driven in Chromium against the bundle: a returning reader on Today never
+requests it; the first run fetches it, finds Zürich, picks it and casts with
+47.37 N and Europe/Zurich at 1440 and 390; a cast pressed with the file held
+back four seconds waits and lands Kyoto; and a stored profile in Coimbra with
+no coordinates asks for the list at boot and is placed. Lisbon would not have
+tested it: the US list's fallback already knows the large world cities.
 
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the

@@ -11,6 +11,7 @@
 /app.html                          /deploy/v6.4/app.html   200
 /delete-account.html               /deploy/v6.4/delete-account.html   200
 /favicon.svg                       /deploy/v6.4/favicon.svg   200
+/gazetteer-world.js                /deploy/v6.4/gazetteer-world.js   200
 /icon-192.png                      /deploy/v6.4/icon-192.png   200
 /icon-512.png                      /deploy/v6.4/icon-512.png   200
 /incommon-cloud.js                 /deploy/v6.4/incommon-cloud.js   200
