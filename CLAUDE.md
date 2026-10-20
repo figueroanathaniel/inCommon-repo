@@ -4861,7 +4861,19 @@ three fixes:
   own backdrop is plain `--bg` now, not a gradient, and **a scene reports
   ready only once the faces have loaded** (`fontsOk`, with a three second
   ceiling), because labels drawn in the fallback face and redrawn a moment
-  later were the blocks jumping.
+  later were the blocks jumping. **It waits for its own faces, never for
+  `document.fonts.ready`** (owner, 20 October 2026: the 3D views came up
+  almost at once when chosen from 2D and slowly when opened directly). That
+  promise waits for every face the page is still fetching, which on a first
+  visit is most of them, so the scene sat on Loading up to the ceiling, drew
+  with the fallback, then rebuilt its labels and compiled a second time.
+  `faces()` asks `document.fonts.load()` for `--fu` at 400, 600 and 700 and
+  `--fd` at 400, beside the three.js import, and the scene is built once,
+  after both. The programs are then compiled with `compileAsync` before the
+  first frame (`compiling` holds the loop and `kick()` off until it lands).
+  Measured on SwiftShader, opening the astrology view directly: 7.4s from
+  create to live before, 4.6s after, against 2.9s chosen from 2D; the gap
+  left is the boot's own work on the main thread.
 - The cycle widget's finding state was two pulsing grey blocks; it is
   "Loading..." in a 520px slot, about the height of the finished widget, so
   the page does not grow under the reader when the scan lands.

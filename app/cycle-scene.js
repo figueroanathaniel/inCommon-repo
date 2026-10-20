@@ -62,6 +62,23 @@
     if (!loading) loading = import('./three.module.js').then(function (m) { T = m; return m; }, function (e) { loading = null; throw e; });
     return loading;
   }
+  /* The faces the labels are drawn in, and only those. Waiting on
+     document.fonts.ready waited for every face the page was still fetching,
+     so a first visit sat on Loading for up to three seconds and then built
+     its labels a second time; asked for beside three.js, these are usually in
+     before it is. A view chosen later found them loaded, which is why it came
+     up at once. */
+  function faces(el) {
+    var fs = document.fonts;
+    if (!fs || !fs.load || !el || !el.isConnected) return Promise.resolve();
+    var cs = getComputedStyle(el), fu = cs.getPropertyValue('--fu').trim(), fd = cs.getPropertyValue('--fd').trim(), want = [];
+    if (fu) want.push('400 16px ' + fu, '600 16px ' + fu, '700 16px ' + fu);
+    if (fd) want.push('400 16px ' + fd);
+    var all = Promise.all(want.map(function (f) {
+      try { return fs.check(f) ? null : fs.load(f).catch(function () {}); } catch (e) { return null; }
+    }));
+    return Promise.race([all, new Promise(function (ok) { setTimeout(ok, 3000); })]);
+  }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function damp(cur, goal, k) { return cur + (goal - cur) * k; }
 
@@ -344,20 +361,25 @@
     if (this.building) return;
     this.building = true;
     var self = this;
-    load().then(function () {
+    Promise.all([load(), faces(this.el.root)]).then(function () {
       self.building = false;
       if (self.failed) return;
+      self.fontsOk = true;
       try { self.init(); } catch (e) { self.fail('init'); return; }
-      if (self.host) {
+      /* The programs are compiled before the first frame asks for them,
+         off the main thread where the driver can, so the first draw is
+         not a long stall with the page frozen behind Loading. */
+      self.compiling = true;
+      var go = function () {
+        self.compiling = false;
+        if (self.failed || !self.host) return;
         if (!self.tokOk) self.setTheme();
         self.resize();
         self.enterMode(true);
         self.updateRun();
         self.kick();
-      }
-      /* Shown only once the faces are in, so its labels never jump. */
-      var faces = function () { if (self.fontsOk || self.failed) return; self.fontsOk = true; if (self.ready) { self.buildContent(); self.kick(); } };
-      if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') { document.fonts.ready.then(faces); setTimeout(faces, 3000); } else self.fontsOk = true;
+      };
+      try { if (self.r.compileAsync) self.r.compileAsync(self.scene, self.cam).then(go, go); else go(); } catch (e) { go(); }
     }, function () { self.building = false; self.fail('load'); });
   };
 
@@ -1194,14 +1216,14 @@
 
   /* ---- The loop --------------------------------------------------------------- */
   P.updateRun = function () {
-    var want = this.ready && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
+    var want = this.ready && !this.compiling && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
     if (want && this.reduced && !this.isFlying()) { this.stop(); this.kick(); return; }
     if (want && !this.running) { this.running = true; this.last = 0; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
   };
   P.stop = function () { this.running = false; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; };
   P.kick = function () {
-    if (!this.ready || this.failed) return;
+    if (!this.ready || this.compiling || this.failed) return;
     if (this.running) return;
     if (this._kick) return;
     var self = this;
