@@ -188,7 +188,7 @@ input[type="date"]{color-scheme:dark}
 [data-hd-deck]::-webkit-scrollbar{display:none}
 [data-hd-deck]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:2px;border-radius:var(--rad)}
 [data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
-@keyframes bnDotIn{from{transform:scale(0)}to{transform:scale(1)}}@keyframes bnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}@keyframes bnFolioA{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@keyframes bnFolioB{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@media (hover:hover){[data-bn-dot]:hover > span{transform:scale(1.7)!important;opacity:1!important}[data-bn-dot]:hover{z-index:6!important}}[data-bn-folio]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}
+@keyframes bnDotIn{from{transform:scale(0)}to{transform:scale(1)}}@keyframes bnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}@keyframes bnFolioA{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@keyframes bnFolioB{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@media (hover:hover){[data-bn-dot]:hover > span{transform:scale(1.7)!important;opacity:1!important}[data-bn-dot]:hover{z-index:6!important}}[data-bn-folio]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -2724,17 +2724,17 @@ input[type="date"]{color-scheme:dark}
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
-                <polygon points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
+                <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
               </sc-for>
             </svg>
             <sc-for list="{{ hdwCentres }}" as="cl" hint-placeholder-count="9">
-              <span onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
+              <span data-lit="{{ cl.lit }}" onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
             </sc-for>
             <sc-for list="{{ hdwGates }}" as="gd" hint-placeholder-count="64">
-              <span data-hd-gate onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
+              <span data-hd-gate data-lit="{{ gd.lit }}" onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
             </sc-for>
             <sc-if value="{{ hdwPeekOn }}" hint-placeholder-val="{{ false }}">
               <span onClick="{{ hdwPeekGo }}" style="position:absolute;left:{{ hdwPeekL }};top:{{ hdwPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ hdwPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
@@ -2768,7 +2768,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -2989,36 +2994,36 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
             <svg viewBox="0 0 360 360" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ apSegs }}" as="sg" hint-placeholder-count="12">
-                <path d="{{ sg.path }}" style="fill:{{ sg.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
+                <path data-lit="{{ sg.lit }}" d="{{ sg.path }}" style="fill:{{ sg.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
               </sc-for>
               <sc-for list="{{ apHouseSegs }}" as="hs" hint-placeholder-count="12">
-                <path d="{{ hs.path }}" style="fill:{{ hs.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
+                <path data-lit="{{ hs.lit }}" d="{{ hs.path }}" style="fill:{{ hs.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
               </sc-for>
               <sc-for list="{{ apSpokes }}" as="sp" hint-placeholder-count="12">
                 <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:var(--chl2);stroke-width:1"></line>
               </sc-for>
               <sc-for list="{{ apTicks }}" as="tk" hint-placeholder-count="0">
-                <line x1="{{ tk.x1 }}" y1="{{ tk.y1 }}" x2="{{ tk.x2 }}" y2="{{ tk.y2 }}" style="stroke:var(--ac2-hi);stroke-opacity:.7;stroke-width:1"></line>
+                <line data-lit="1" x1="{{ tk.x1 }}" y1="{{ tk.y1 }}" x2="{{ tk.x2 }}" y2="{{ tk.y2 }}" style="stroke:var(--ac2-hi);stroke-opacity:.7;stroke-width:1"></line>
               </sc-for>
               <circle cx="180" cy="180" r="92" fill="none" style="stroke:rgba(var(--atmc),.45);stroke-width:1;stroke-dasharray:1 5"></circle>
               <sc-if value="{{ apHorizon }}" hint-placeholder-val="{{ false }}">
-                <path d="{{ apHorizonPath }}" style="stroke:var(--el-earth);stroke-opacity:.8;stroke-width:1.4;fill:none"></path>
+                <path data-lit="1" d="{{ apHorizonPath }}" style="stroke:var(--el-earth);stroke-opacity:.8;stroke-width:1.4;fill:none"></path>
               </sc-if>
               <sc-for list="{{ apShapes }}" as="shp" hint-placeholder-count="0">
-                <polyline points="{{ shp.pts }}" style="fill:none;stroke:{{ shp.c }};stroke-opacity:{{ shp.o }};stroke-width:{{ shp.w }};stroke-linejoin:round;stroke-dasharray:{{ shp.dash }}"></polyline>
+                <polyline data-lit="1" points="{{ shp.pts }}" style="fill:none;stroke:{{ shp.c }};stroke-opacity:{{ shp.o }};stroke-width:{{ shp.w }};stroke-linejoin:round;stroke-dasharray:{{ shp.dash }}"></polyline>
               </sc-for>
             </svg>
             <sc-for list="{{ apSignLabels }}" as="sl" hint-placeholder-count="12">
-              <span onClick="{{ sl.go }}" title="{{ sl.tip }}" style="position:absolute;left:{{ sl.l }};top:{{ sl.t }};transform:translate(-50%,-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sl.fs }}/1 var(--fb);color:{{ sl.c }};transition:color .4s ease,font-size .3s ease">{{ sl.g }}</span>
+              <span data-lit="{{ sl.lit }}" onClick="{{ sl.go }}" title="{{ sl.tip }}" style="position:absolute;left:{{ sl.l }};top:{{ sl.t }};transform:translate(-50%,-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sl.fs }}/1 var(--fb);color:{{ sl.c }};transition:color .4s ease,font-size .3s ease">{{ sl.g }}</span>
             </sc-for>
             <sc-for list="{{ apHouseNums }}" as="hn" hint-placeholder-count="12">
-              <span onClick="{{ hn.go }}" title="{{ hn.tip }}" style="position:absolute;left:{{ hn.l }};top:{{ hn.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 10.5px var(--fu);color:{{ hn.c }}">{{ hn.n }}</span>
+              <span data-lit="{{ hn.lit }}" onClick="{{ hn.go }}" title="{{ hn.tip }}" style="position:absolute;left:{{ hn.l }};top:{{ hn.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 10.5px var(--fu);color:{{ hn.c }}">{{ hn.n }}</span>
             </sc-for>
             <sc-for list="{{ apNatal }}" as="na" hint-placeholder-count="10">
               <span onClick="{{ na.go }}" title="{{ na.tip }}" style="position:absolute;left:{{ na.l }};top:{{ na.t }};transform:translate(-50%,-50%);width:16px;height:16px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc2),.6)"></span></span>
             </sc-for>
             <sc-for list="{{ apSkyGlyphs }}" as="sk" hint-placeholder-count="10">
-              <span data-ap-body onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
+              <span data-ap-body data-lit="{{ sk.lit }}" onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
             </sc-for>
             <sc-if value="{{ apPeekOn }}" hint-placeholder-val="{{ false }}">
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
@@ -3057,7 +3062,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -3267,18 +3277,18 @@ input[type="date"]{color-scheme:dark}
               <circle cx="180" cy="180" r="44" fill="none" style="stroke:rgba(var(--atmc),.55);stroke-width:1"></circle>
               <circle cx="180" cy="180" r="70" fill="none" style="stroke:var(--chl);stroke-width:1"></circle>
               <sc-for list="{{ bnSpokes }}" as="sp" hint-placeholder-count="9">
-                <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
+                <line data-lit="{{ sp.lit }}" x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
               </sc-for>
               <sc-if value="{{ bnConsteOn }}" hint-placeholder-val="{{ false }}">
                 <polyline points="{{ bnConste }}" fill="none" style="stroke:var(--tx);stroke-opacity:.32;stroke-width:1;stroke-dasharray:2 4"></polyline>
               </sc-if>
-              <line x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
+              <line data-lit="1" x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
             </svg>
             <sc-for list="{{ bnRoots }}" as="ro" hint-placeholder-count="9">
-              <span onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
+              <span data-lit="{{ ro.lit }}" onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
             </sc-for>
             <sc-for list="{{ bnDots }}" as="d" hint-placeholder-count="90">
-              <span data-bn-dot onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <span data-bn-dot data-lit="{{ d.lit }}" onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
                 <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
               </span>
             </sc-for>
@@ -3318,7 +3328,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -9625,17 +9640,17 @@ input[type="date"]{color-scheme:dark}
             <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
             <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
-                <line x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+                <line data-lit="{{ ch.lit }}" x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
               </sc-for>
               <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
-                <polygon points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
+                <polygon data-lit="{{ ce.lit }}" points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
               </sc-for>
             </svg>
             <sc-for list="{{ hdwCentres }}" as="cl" hint-placeholder-count="9">
-              <span onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
+              <span data-lit="{{ cl.lit }}" onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
             </sc-for>
             <sc-for list="{{ hdwGates }}" as="gd" hint-placeholder-count="64">
-              <span data-hd-gate onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
+              <span data-hd-gate data-lit="{{ gd.lit }}" onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
             </sc-for>
             <sc-if value="{{ hdwPeekOn }}" hint-placeholder-val="{{ false }}">
               <span onClick="{{ hdwPeekGo }}" style="position:absolute;left:{{ hdwPeekL }};top:{{ hdwPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ hdwPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
@@ -9669,7 +9684,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -9890,36 +9910,36 @@ input[type="date"]{color-scheme:dark}
             </sc-for>
             <svg viewBox="0 0 360 360" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
               <sc-for list="{{ apSegs }}" as="sg" hint-placeholder-count="12">
-                <path d="{{ sg.path }}" style="fill:{{ sg.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
+                <path data-lit="{{ sg.lit }}" d="{{ sg.path }}" style="fill:{{ sg.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
               </sc-for>
               <sc-for list="{{ apHouseSegs }}" as="hs" hint-placeholder-count="12">
-                <path d="{{ hs.path }}" style="fill:{{ hs.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
+                <path data-lit="{{ hs.lit }}" d="{{ hs.path }}" style="fill:{{ hs.fill }};stroke:var(--chl);stroke-width:1;transition:fill .5s ease"></path>
               </sc-for>
               <sc-for list="{{ apSpokes }}" as="sp" hint-placeholder-count="12">
                 <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:var(--chl2);stroke-width:1"></line>
               </sc-for>
               <sc-for list="{{ apTicks }}" as="tk" hint-placeholder-count="0">
-                <line x1="{{ tk.x1 }}" y1="{{ tk.y1 }}" x2="{{ tk.x2 }}" y2="{{ tk.y2 }}" style="stroke:var(--ac2-hi);stroke-opacity:.7;stroke-width:1"></line>
+                <line data-lit="1" x1="{{ tk.x1 }}" y1="{{ tk.y1 }}" x2="{{ tk.x2 }}" y2="{{ tk.y2 }}" style="stroke:var(--ac2-hi);stroke-opacity:.7;stroke-width:1"></line>
               </sc-for>
               <circle cx="180" cy="180" r="92" fill="none" style="stroke:rgba(var(--atmc),.45);stroke-width:1;stroke-dasharray:1 5"></circle>
               <sc-if value="{{ apHorizon }}" hint-placeholder-val="{{ false }}">
-                <path d="{{ apHorizonPath }}" style="stroke:var(--el-earth);stroke-opacity:.8;stroke-width:1.4;fill:none"></path>
+                <path data-lit="1" d="{{ apHorizonPath }}" style="stroke:var(--el-earth);stroke-opacity:.8;stroke-width:1.4;fill:none"></path>
               </sc-if>
               <sc-for list="{{ apShapes }}" as="shp" hint-placeholder-count="0">
-                <polyline points="{{ shp.pts }}" style="fill:none;stroke:{{ shp.c }};stroke-opacity:{{ shp.o }};stroke-width:{{ shp.w }};stroke-linejoin:round;stroke-dasharray:{{ shp.dash }}"></polyline>
+                <polyline data-lit="1" points="{{ shp.pts }}" style="fill:none;stroke:{{ shp.c }};stroke-opacity:{{ shp.o }};stroke-width:{{ shp.w }};stroke-linejoin:round;stroke-dasharray:{{ shp.dash }}"></polyline>
               </sc-for>
             </svg>
             <sc-for list="{{ apSignLabels }}" as="sl" hint-placeholder-count="12">
-              <span onClick="{{ sl.go }}" title="{{ sl.tip }}" style="position:absolute;left:{{ sl.l }};top:{{ sl.t }};transform:translate(-50%,-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sl.fs }}/1 var(--fb);color:{{ sl.c }};transition:color .4s ease,font-size .3s ease">{{ sl.g }}</span>
+              <span data-lit="{{ sl.lit }}" onClick="{{ sl.go }}" title="{{ sl.tip }}" style="position:absolute;left:{{ sl.l }};top:{{ sl.t }};transform:translate(-50%,-50%);width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sl.fs }}/1 var(--fb);color:{{ sl.c }};transition:color .4s ease,font-size .3s ease">{{ sl.g }}</span>
             </sc-for>
             <sc-for list="{{ apHouseNums }}" as="hn" hint-placeholder-count="12">
-              <span onClick="{{ hn.go }}" title="{{ hn.tip }}" style="position:absolute;left:{{ hn.l }};top:{{ hn.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 10.5px var(--fu);color:{{ hn.c }}">{{ hn.n }}</span>
+              <span data-lit="{{ hn.lit }}" onClick="{{ hn.go }}" title="{{ hn.tip }}" style="position:absolute;left:{{ hn.l }};top:{{ hn.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 10.5px var(--fu);color:{{ hn.c }}">{{ hn.n }}</span>
             </sc-for>
             <sc-for list="{{ apNatal }}" as="na" hint-placeholder-count="10">
               <span onClick="{{ na.go }}" title="{{ na.tip }}" style="position:absolute;left:{{ na.l }};top:{{ na.t }};transform:translate(-50%,-50%);width:16px;height:16px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc2),.6)"></span></span>
             </sc-for>
             <sc-for list="{{ apSkyGlyphs }}" as="sk" hint-placeholder-count="10">
-              <span data-ap-body onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
+              <span data-ap-body data-lit="{{ sk.lit }}" onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
             </sc-for>
             <sc-if value="{{ apPeekOn }}" hint-placeholder-val="{{ false }}">
               <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
@@ -9958,7 +9978,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -10168,18 +10193,18 @@ input[type="date"]{color-scheme:dark}
               <circle cx="180" cy="180" r="44" fill="none" style="stroke:rgba(var(--atmc),.55);stroke-width:1"></circle>
               <circle cx="180" cy="180" r="70" fill="none" style="stroke:var(--chl);stroke-width:1"></circle>
               <sc-for list="{{ bnSpokes }}" as="sp" hint-placeholder-count="9">
-                <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
+                <line data-lit="{{ sp.lit }}" x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
               </sc-for>
               <sc-if value="{{ bnConsteOn }}" hint-placeholder-val="{{ false }}">
                 <polyline points="{{ bnConste }}" fill="none" style="stroke:var(--tx);stroke-opacity:.32;stroke-width:1;stroke-dasharray:2 4"></polyline>
               </sc-if>
-              <line x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
+              <line data-lit="1" x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
             </svg>
             <sc-for list="{{ bnRoots }}" as="ro" hint-placeholder-count="9">
-              <span onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
+              <span data-lit="{{ ro.lit }}" onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
             </sc-for>
             <sc-for list="{{ bnDots }}" as="d" hint-placeholder-count="90">
-              <span data-bn-dot onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <span data-bn-dot data-lit="{{ d.lit }}" onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
                 <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
               </span>
             </sc-for>
@@ -10219,7 +10244,12 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
                     <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
                   </sc-if>
-                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <sc-if value="{{ spTutShowOn }}" hint-placeholder-val="{{ true }}">
+                    <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  </sc-if>
+                  <sc-if value="{{ spTutReturnOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutReturn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">{{ spTutReturnLabel }}</button>
+                  </sc-if>
                   <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
                 </div>
               </div>
@@ -20647,8 +20677,36 @@ class Component extends DCLogic {
     this.writeLS(this.studyKey(), { ...this.studyState(), ...patch });
     this.setState({ studyTick: (this.state.studyTick || 0) + 1 });
   }
-  studyGo(room, a) {
-    if (!a) return;
+  apOpenKey() {
+    const all = this.apEntries(), st = this.state;
+    if (!all.length) return null;
+    const find = k => all.find(x => x.key === k), S = this.apSky();
+    const natalSun = S.natal.find(r => r.name === 'Sun'), skySun = S.sky.find(r => r.name === 'Sun');
+    const homeKey = 'sign:' + (natalSun ? natalSun.sign : skySun ? skySun.sign : 'Aries');
+    const chap = all.some(x => x.ch === st.apSec) ? st.apSec : 'signs';
+    const e = find(st.apOpen) || (chap !== 'signs' ? all.find(x => x.ch === chap) : null) || find(homeKey);
+    return e ? e.key : null;
+  }
+  atlasOpenKey() {
+    const all = this.atlasEntries(), st = this.state;
+    if (!all.length) return null;
+    const chap = all.some(x => x.ch === st.atlasSec) ? st.atlasSec : 'intro';
+    const e = (st.atlasItem && all.find(x => x.key === chap + ':' + st.atlasItem)) || all.find(x => x.ch === chap) || all[0];
+    return e.key;
+  }
+  bnOpenN() {
+    const M = window.NumberMatrix, st = this.state;
+    if (!M) return null;
+    if (M.has(st.bnSel)) return st.bnSel;
+    const marks = this.bnMine().marks, lp = marks.find(m => m.label === 'Life Path'), today = marks.find(m => m.label === 'Today');
+    return lp ? lp.c : (today ? today.c : 33);
+  }
+  /* Where a tutorial step points, without going there: an entry key in the
+     Astropedia and the Atlas, a compound or a filter in the Book. studyGo()
+     goes there; studyHere() asks whether the reader is already standing on
+     it, which is what decides between Show me and Back to step. */
+  studyTarget(room, a) {
+    if (!a) return null;
     const k = a.slice(0, a.indexOf(':')), v = a.slice(a.indexOf(':') + 1);
     if (room === 'astropedia') {
       let key = v;
@@ -20657,9 +20715,7 @@ class Component extends DCLogic {
         const r = S.natal.find(x => x.name === nm) || S.sky.find(x => x.name === nm);
         key = 'sign:' + (r ? r.sign : 'Aries');
       }
-      this.setState({ apQuery: '' });
-      this.apPick(key, true);
-      return;
+      return { key: key };
     }
     if (room === 'hdatlas') {
       const A = this.A(), sample = this.usingSampleBirth(), hd = this.hdChart(), sl = x => this.atlasSlug(x);
@@ -20678,16 +20734,72 @@ class Component extends DCLogic {
         channel: 'channels:' + sl(!sample && hd.activeChannels.length ? hd.activeChannels[0][0] + '-' + hd.activeChannels[0][1] : Object.keys(A.CHANNELS)[0])
       };
       const key = map[v] || v;
-      this.setState({ atlasQuery: '' });
-      this.atlasPick(this.atlasEntries().some(x => x.key === key) ? key : 'intro:0', true);
-      return;
+      return { key: this.atlasEntries().some(x => x.key === key) ? key : 'intro:0' };
     }
-    if (k === 'bnCat') { this.setState({ bnCat: v, bnQuery: '' }); return; }
+    if (k === 'bnCat') return { cat: v };
+    if (v === 'draw') return { draw: true };
+    if (v === 'current') return { stay: true };
     const marks = this.bnMine().marks, m = l => (marks.find(x => x.label === l) || {}).c;
-    const n = v === 'lp' ? (m('Life Path') || m('Today')) : v === 'today' ? m('Today') : v === 'py' ? (m('Personal Year') || m('Today'))
-      : v === 'draw' ? 10 + Math.floor(Math.random() * 90) : v === 'current' ? null : +v;
+    return { n: v === 'lp' ? (m('Life Path') || m('Today')) : v === 'today' ? m('Today') : v === 'py' ? (m('Personal Year') || m('Today')) : +v };
+  }
+  studyGo(room, a) {
+    const t = this.studyTarget(room, a);
+    if (!t) return;
+    if (room === 'astropedia') { this.setState({ apQuery: '' }); this.apPick(t.key, true); return; }
+    if (room === 'hdatlas') { this.setState({ atlasQuery: '' }); this.atlasPick(t.key, true); return; }
+    if (t.cat) { this.setState({ bnCat: t.cat, bnQuery: '' }); return; }
     this.setState({ bnCat: 'all', bnQuery: '' });
+    const n = t.draw ? 10 + Math.floor(Math.random() * 90) : t.n;
     if (n) this.bnPick(n, true);
+  }
+  studyHere(room, a) {
+    const t = this.studyTarget(room, a), st = this.state;
+    if (!t || t.draw || t.stay) return true;
+    if (room === 'astropedia') return this.apOpenKey() === t.key;
+    if (room === 'hdatlas') return this.atlasOpenKey() === t.key;
+    if (t.cat) return st.bnCat === t.cat;
+    return !t.n || this.bnOpenN() === t.n;
+  }
+  /* Show me: the step's own part of the wheel, the wiring or the mandala,
+     pulsed in place. The parts the open entry lights carry data-lit, so the
+     pulse is the room's own highlight made to move; a step whose entry
+     lights nothing (an essay) pulses the whole figure. Written to the DOM
+     directly and taken off again, never through state, because it is a
+     moment rather than a place the reader is in. On the phone the figure
+     sits above the folio, so the page goes up to it and comes back. */
+  studyShow(room) {
+    const roomSel = { astropedia: '[data-ap-room]', hdatlas: '[data-hd-room]', numbers: '[data-bn-room]' }[room];
+    const fig = [...document.querySelectorAll(roomSel + ' [data-chart]')].find(el => el.getClientRects().length);
+    if (!fig) return;
+    clearTimeout(this._spShowT);
+    if (this._spShowEl && this._spShowEl !== fig) this._spShowEl.removeAttribute('data-sp-show');
+    let box = fig.parentElement;
+    while (box && !box.matches('[data-vt-scroll],[data-vt-pager]')) {
+      const oy = getComputedStyle(box).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight + 1) break;
+      box = box.parentElement;
+    }
+    const still = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let back = null;
+    if (box && !box.matches('[data-vt-scroll],[data-vt-pager]')) {
+      const fr = fig.getBoundingClientRect(), br = box.getBoundingClientRect();
+      if (fr.top < br.top || fr.bottom > br.bottom) {
+        back = box.scrollTop;
+        box.scrollTo({ top: Math.max(0, box.scrollTop + fr.top - br.top - 12), behavior: still ? 'auto' : 'smooth' });
+      }
+    }
+    fig.removeAttribute('data-sp-show');
+    this._spShowEl = fig;
+    /* Wait for the page to arrive before pulsing, or the first beat is
+       spent in flight. */
+    this._spShowT = setTimeout(() => {
+      fig.setAttribute('data-sp-show', fig.querySelector('[data-lit="1"]') ? 'part' : 'all');
+      this._spShowT = setTimeout(() => {
+        fig.removeAttribute('data-sp-show');
+        this._spShowEl = null;
+        if (back !== null && box.isConnected) box.scrollTo({ top: back, behavior: still ? 'auto' : 'smooth' });
+      }, 2700);
+    }, back !== null && !still ? 420 : 0);
   }
   studyVals() {
     const st = this.state, vertical = (st.dtW || window.innerWidth || 1440) < this.BP.md;
@@ -20730,7 +20842,10 @@ class Component extends DCLogic {
       spTutBackOn: at > 1, spTutBack: () => { if (at > 1) goStep(at - 1); },
       spTutNextLabel: at >= n ? 'Finish' : 'Next \u203a',
       spTutNext: () => { if (at >= n) { saveTut({ done: true, step: 0 }); this.speak('Tutorial finished.', 'polite'); } else goStep(at + 1); },
-      spTutShowMe: () => { if (cur) this.studyGo(room, cur[1]); },
+      spTutShowOn: !cur || this.studyHere(room, cur[1]), spTutReturnOn: !!cur && !this.studyHere(room, cur[1]),
+      spTutShowMe: () => this.studyShow(room),
+      spTutReturn: () => { if (cur) { this.studyGo(room, cur[1]); this.speak('Back to step ' + at + ', ' + cur[0] + '.', 'polite'); } },
+      spTutReturnLabel: 'Back to step ' + at,
       spTutAgain: () => goStep(1),
       spLevel: lv
     };
@@ -20964,18 +21079,18 @@ class Component extends DCLogic {
       /* The wheel. */
       apWheelLabel: 'The zodiac with the sky as it stands now' + (S.natal.length ? ', and your placements' : '') + ', ' + e.name + ' open',
       apSegs: A.SIGNS.map((s, i) => { const lit = litSigns[i];
-        return { path: arc(i * 30, i * 30 + 30, 176, 148), fill: 'rgba(' + this.AP_EL_RGB[s.element] + ',' + (lit === 'on' ? '.46' : lit === 'soft' ? '.24' : '.09') + ')' }; }),
-      apHouseSegs: Array.from({ length: 12 }, (_, i) => ({ path: arc(i * 30, i * 30 + 30, 146, 118),
+        return { path: arc(i * 30, i * 30 + 30, 176, 148), lit: lit ? '1' : '0', fill: 'rgba(' + this.AP_EL_RGB[s.element] + ',' + (lit === 'on' ? '.46' : lit === 'soft' ? '.24' : '.09') + ')' }; }),
+      apHouseSegs: Array.from({ length: 12 }, (_, i) => ({ path: arc(i * 30, i * 30 + 30, 146, 118), lit: litHouses[i] === 'on' ? '1' : '0',
         fill: litHouses[i] === 'on' ? 'rgba(var(--atmc),.5)' : i % 2 ? 'rgba(var(--atmc),.07)' : 'rgba(var(--atmc),.03)' })),
       apSpokes: Array.from({ length: 12 }, (_, i) => { const a = P(i * 30, 176), b = P(i * 30, 118); return { x1: f1(a.x), y1: f1(a.y), x2: f1(b.x), y2: f1(b.y) }; }),
       apTicks: ticks, apShapes: shapes, apHorizon: horizon,
       apSignLabels: A.SIGNS.map((s, i) => { const q2 = P(i * 30 + 15, 162), lit = litSigns[i] === 'on';
-        return { g: s.glyph + '︎', l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--tx)' : this.AP_EL[s.element], fs: lit ? '19px' : '15px',
+        return { g: s.glyph + '︎', l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--tx)' : this.AP_EL[s.element], fs: lit ? '19px' : '15px',
           tip: s.name, go: peek('sign:' + s.name, { l: pct(q2.x), t: pct(q2.y) }, s.glyph + '\uFE0E ' + s.name, 'sign:' + s.name) }; }),
       apHouseNums: Array.from({ length: 12 }, (_, i) => { const q2 = P(i * 30 + 15, 132), lit = litHouses[i] === 'on';
-        return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: peek('house:' + (i + 1), { l: pct(q2.x), t: pct(q2.y) }, 'The ' + this.apOrd(i + 1) + ' house', 'house:' + (i + 1)) }; }),
+        return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: peek('house:' + (i + 1), { l: pct(q2.x), t: pct(q2.y) }, 'The ' + this.apOrd(i + 1) + ' house', 'house:' + (i + 1)) }; }),
       apSkyGlyphs: S.sky.map(r => { const q2 = P(r.lon, 101), lit = r.name === litBody;
-        return { g: r.glyph + '︎', l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--ac2-hi)' : 'var(--tx)', fs: lit ? '17px' : '13px',
+        return { g: r.glyph + '︎', l: pct(q2.x), t: pct(q2.y), lit: lit ? '1' : '0', c: lit ? 'var(--ac2-hi)' : 'var(--tx)', fs: lit ? '17px' : '13px',
           glow: lit ? '0 0 14px rgba(var(--atmc2),.9)' : '0 0 6px rgba(var(--atmc),.8)', tip: r.name + ' now, ' + fmtDeg(r), go: peek('sky:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, r.glyph + '\uFE0E ' + r.name + ' now, ' + fmtDeg(r), 'body:' + r.name) }; }),
       apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(r.lon, 84);
         return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
@@ -21176,7 +21291,7 @@ class Component extends DCLogic {
       bnDots: all.map((x, i) => {
         const s = this.bnSpot(x.n), isSel = x.n === sel, dim = !hit(x), own = yours.has(x.n);
         const size = isSel ? 22 : x.cat === 'master' ? 15 : x.cat === 'standard' ? 9 : 12;
-        return { l: pct(s.x), t: pct(s.y), size: size + 'px', fill: this.BN_FILL[x.cat],
+        return { l: pct(s.x), t: pct(s.y), lit: isSel || (cat !== 'all' && !dim) ? '1' : '0', size: size + 'px', fill: this.BN_FILL[x.cat],
           op: dim ? '.16' : '1', z: isSel ? '4' : own ? '3' : '1',
           ring: isSel ? '0 0 0 3px var(--bg),0 0 0 5px var(--ac2-hi),0 0 26px 6px rgba(var(--atmc2),.55)'
             : own ? '0 0 0 2px var(--bg),0 0 0 3.5px var(--tx)'
@@ -21187,13 +21302,13 @@ class Component extends DCLogic {
       }),
       bnSpokes: Array.from({ length: 9 }, (_, i) => {
         const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
-        return { x1: (180 + 70 * Math.cos(th)).toFixed(1), y1: (180 + 70 * Math.sin(th)).toFixed(1),
+        return { lit: lit ? '1' : '0', x1: (180 + 70 * Math.cos(th)).toFixed(1), y1: (180 + 70 * Math.sin(th)).toFixed(1),
           x2: (180 + 176 * Math.cos(th)).toFixed(1), y2: (180 + 176 * Math.sin(th)).toFixed(1),
           c: lit ? 'var(--ac2-hi)' : 'var(--chl)', o: lit ? '.6' : '.9', w: lit ? '1.4' : '1' };
       }),
       bnRoots: Array.from({ length: 9 }, (_, i) => {
         const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
-        return { d: String(i + 1), l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)),
+        return { d: String(i + 1), lit: lit ? '1' : '0', l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)),
           c: lit ? 'var(--ac2-hi)' : 'var(--mut)',
           go: peek('r:' + (i + 1), { l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)) }, 'Root ' + (i + 1) + ' \u00b7 ' + nameOf(i + 1),
             () => { const r = i + 1, seq = all.filter(x => x.root === r).map(x => x.n), at = seq.indexOf(sel);
@@ -21435,13 +21550,13 @@ class Component extends DCLogic {
     const spots = this.hdGateSpots();
     const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
       const lit = litK.has(k), own = myChan.has(k);
-      return a && b ? { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
+      return a && b ? { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1), lit: lit ? '1' : '0',
         c: lit ? 'var(--ac2-hi)' : own ? 'rgba(var(--atmc2),.75)' : 'var(--chl)', w: lit ? '3' : own ? '2.4' : '1.3', o: lit || own ? '1' : '.9' } : null; }).filter(Boolean);
     const centres = Object.keys(this.BG_POS).map(name => {
       const P = this.hdShape(name), defined = mine && hd.defined.has(name), lit = litC.has(name);
       const col = A.CENTERS[name] ? A.CENTERS[name].color : '';
       const q = this.BG_POS[name];
-      return { pts: P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '),
+      return { pts: P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), lit: lit ? '1' : '0',
         fill: defined ? col : 'rgba(var(--atmc),.07)', fo: defined ? '.82' : '1',
         stroke: lit ? 'var(--ac2-hi)' : defined ? col : 'var(--chl)', sw: lit ? '3' : '1.5',
         glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc2),.75))' : 'none',
@@ -21450,7 +21565,7 @@ class Component extends DCLogic {
         go: peek('c:' + name, { l: pct(q[0] + q[2] / 2, 300), t: pct(q[1], 520) }, A.CENTERS[name] ? A.CENTERS[name].label : name, 'centers:' + this.atlasSlug(name)) };
     });
     const gates = Object.keys(spots).map(Number).map(n => { const s = spots[n], lit = litG.has(n), own = myGates.has(n), now = skyGates.has(n);
-      return { l: pct(s.x, 300), t: pct(s.y, 520), size: lit ? '9px' : own ? '7px' : '5px',
+      return { l: pct(s.x, 300), t: pct(s.y, 520), lit: lit ? '1' : '0', size: lit ? '9px' : own ? '7px' : '5px',
         fill: lit ? 'var(--ac2-hi)' : own ? 'var(--tx)' : 'rgba(var(--atmc),.75)',
         ring: now ? '0 0 0 2px var(--blue),0 0 10px var(--blue)' : lit ? '0 0 10px rgba(var(--atmc2),.9)' : 'none',
         anim: now ? 'pulseGentle 2.4s ease-in-out infinite' : 'none',
