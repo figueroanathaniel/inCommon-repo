@@ -102,6 +102,11 @@ const LAYERS = {
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
     'oki-api.js', 'oki-post-processor.js', 'oki-prompt-builder.js', 'oki-voice-v144.js',
     'sw.js',
+    /* Flight for every scene: input in, a camera pose out. Knows no chart. */
+    'flight.js',
+    /* The worlds a body becomes up close, generated on the GPU from noise.
+       Computes no position: the scene places each one on its orb. */
+    'body-globes.js',
     /* The Cycle Audit's scene. It draws what the app hands it and computes
        nothing: no ephemeris, no chart, no writing beyond its labels. */
     'cycle-scene.js',

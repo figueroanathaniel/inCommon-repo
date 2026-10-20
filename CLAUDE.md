@@ -4922,6 +4922,145 @@ before the scene was live. In every one the order was the veil alone, the
 canvas through the veil, then the units; with WebGL off the 2D wheel came up
 with its zoom cluster showing and no veil.
 
+## The Observatory: the full screen chart, flown
+Asked for by the owner on 19 October 2026: "Make the full screen expansion an
+Observatory. People should feel like they're going in a certified space
+expedition facility. ... Free motion in every direction: up, down, left, right,
+diagonal, ascend, descend, strafe left, strafe right, dash up, and dash back,
+dash left, and dash right. Omni directional motion: on every chart, but
+especially in the full screen observatory in the astrology tab. Generate
+appropriate images for each astral body as they are encroached upon." The
+maximize button (the expand chart button) opens it; `chartExpandOpen` is still
+its state, so everything that already opened, closed, persisted or escaped the
+old overlay does the same to the Observatory.
+
+**It is the card's own scene, moved.** `chartSceneSync()` puts the one
+`chart-scene.js` scene into `[data-cs-scene="obs"]` while the Observatory is
+open and calls `setMode('obs')`, and back into the card's
+`[data-cs-scene="1"]` (and `setMode('stage')`) when it closes. While it is open
+the card's host behind it is never taken in its place, and the Observatory is
+deep even when the card shows 2D. Without WebGL 2 it shows the 2D wheel in the
+middle and the manifest round it, exactly as the overlay did.
+
+**Flight is one module for every chart.** `app/flight.js` (shell layer, global
+`Flight`) is a camera with a position, a yaw and a pitch, and no roll. W S
+forward and back, A D strafe, E or Space ascend, Q or C descend (the world's
+up, as an editor viewport flies), the arrows look, Shift boosts, a double tap
+of any move key or X dashes that way, and two keys at once is a diagonal,
+normalised. Keys are read by `code`, so the hand position is the same on every
+layout. Cruising speed is the distance to the nearest surface, so the open
+field crosses quickly and a body slows the reader as they close on it; a dash
+is a separate impulse that decays on its own. `travel()` is the autopilot
+along a curve, and any input takes the controls back. A standard gamepad flies
+too, and `mountPad()` builds the touch stick (flick it to dash) and the Ascend,
+Descend and Dash buttons, which are real named buttons a press can operate.
+`Flight.claimedElsewhere()` is what keeps flight off a field being typed into,
+off the arrows of a radio group, tab list or slider, and off Space and Enter on
+a button.
+
+**On the cards it is the same flight, taken off and landed.** On the astrology
+stage, the wiring and the Cycle Audit the move keys take off from wherever the
+camera is (Space only once flying, because Space opens on a card), a drag looks
+while flying, two fingers move in Free look (the pair sliding strafes and
+climbs, spreading goes forward), the wheel pushes along the view, and Escape, 0,
+Home or the reset control lands: the camera eases back onto the scene's own
+resting rig rather than jumping. hd-scene and cycle-scene take this glue from
+`Flight.mixin()`, installed on first use because flight.js may load after them;
+chart-scene carries its own, because the Observatory needs more of it. Under
+reduced motion a frame is drawn on change except while flying, the autopilot
+cuts instead of travelling, and a dash is a short step with no lens kick.
+
+**The bodies become worlds as the reader closes on them.** `app/body-globes.js`
+(shell layer, global `BodyGlobes`) generates each surface on the graphics card
+from noise, so it holds its detail however near the reader comes and downloads
+nothing. A globe is made when the camera is inside thirty of the body's radii,
+crossfades in over the orb from thirty to fourteen while the glyph gives way,
+and is disposed beyond forty six; at most sixteen exist at once. Each is drawn
+from what is known of it: the Sun's granulation, spots and corona; the Moon's
+maria and craters; Venus's cloud; Mars's rust and caps; Jupiter's belts and
+Great Red Spot; Saturn's rings with the Cassini Division and the planet's
+shadow on them; Uranus tipped on its side and ringed; Neptune's dark spot;
+Pluto's heart; Ceres's bright spot; Haumea stretched and ringed; Chariklo and
+Chiron ringed; Arrokoth as two lobes; the comets as a nucleus, a coma and two
+tails pointing from the Sun. Every globe is lit from where the chart's own Sun
+stands. **The colours are the bodies' own, not tokens**: a theme does not
+repaint a planet, which is the same reasoning the fixed category hues rest on,
+and none of these colours is text.
+
+**The points that are not bodies are not drawn as worlds.** The nodes, Lilith,
+Selena, the Vertex, the Parts, the Aries Point, the midpoint and the Hamburg
+hypotheticals are lattices of light, a node as two planes crossing and a
+hypothetical dashed, because their pages already say they are not bodies and
+the image has to agree. Lilith is a dark one, a rim round nothing. **None of
+them is solid**: the first build gave Lilith an opaque black core, and in a
+chart where she stands beside Saturn she hid the planet.
+
+**What moves every frame is the scene's; the station is the app's.** The scene
+draws the reticle, the target's bracket and the arrow to it when it is off
+screen, the telemetry strip (heading as a zodiac degree, altitude, speed, range
+to the target, the time in UTC), the approach banner, the motion streaks, the
+launch from further out down onto the station, the boot lines once per page,
+and the close-up: the target's world rendered into the same canvas under the
+target panel's transparent window (`[data-obs-pip]`), through a second camera
+that sees only layer 1 (the worlds, the stars and the sky). The app draws the
+header, the manifest (Bodies, Aspects, Houses), the target panel, the controls
+card and the touch pad's container, and writes the live range into
+`[data-obs-range]` by direct DOM write, never through state. The HUD is
+`aria-hidden`; the stage carries a role description and a described-by naming
+the keys, and `onArrive` speaks the arrival.
+
+**The lens is centred on the open sky, not the screen.** On a wide screen the
+rails cover the sides, so `--obs-l` and `--obs-r` on the dialog name their
+widths, the scene reads them (`readInset()`), shifts the camera's principal
+point with `setViewOffset` and frames the station on the free width. The
+telemetry, the banner and the boot lines centre on the same region, the
+off-screen arrow rides its edge, and the HUD is clipped to it, so nothing of it
+shows under a panel or through the close-up window.
+
+**One target, shared with the card**: `csFocus`. A first press on a body (in
+the scene, a manifest row or the target panel's arrows) targets it and flies
+there; a second press on the target opens its reading, the same two press rule
+as every stage, and the reading closes the Observatory. In the scene a second
+tap on the target flies instead, and the reading is the panel's button. Brackets
+step the target, Enter or T flies to it, O opens it, H or Home returns to the
+station, V switches 3D and Orbital, P shows or hides the panels. A contact
+(an aspect row, a contact chip, a ribbon in the scene) frames both its ends; a
+house looks down onto its sector. Hovering a row with a mouse lights the body.
+
+**Below 1100 wide the panels are a drawer.** A target pill under the
+telemetry opens it on the Target tab; the Manifest button opens it on the
+others. Closing the drawer, the controls card, or flying from the drawer hands
+focus back inside the dialog (`obsRefocus()`): the control that had it is gone,
+and focus left on the page is outside the trap, where neither Escape nor the
+flight keys reach. The drive that found this pressed Escape after closing the
+drawer and nothing happened.
+
+**The controls card opens on the first visit**, once per device
+(`incommon.obs.keys`), and is a button in the header after that. It names
+controls; it explains nothing about a reading, so "No disclaimers" is not
+touched by it.
+
+**Measured, not assumed.** With the harness's own `contrastFails()` and
+`tapTargets()` over the dialog: four identities, hardened and not, at 1440 (the
+plain station, the Aspects tab, the controls card) and 390 (the plain station,
+the drawer on Target, the drawer on Bodies, the controls card), 56 cases, no
+pair under 4.5:1 and no control under 44px. Driven in Chromium on SwiftShader,
+source and bundle: the launch, flying to Saturn and Jupiter with the globe
+filling the view and the close-up drawn, W held and a double tapped D, the
+drawer on a 390 touch screen with the stick, a manifest row targeting and
+flying, the houses tab, hover from a row, Escape from every state, and the 2D
+fallback with WebGL off. Flight was driven on the wiring and the Cycle Audit
+too: take off, dash, land. N40 and N40b find the dialog by its new name, The
+Observatory, and its close control, Close the Observatory.
+
+**What it replaced.** The overlay's grid (`.chartx-grid`, its named areas, the
+narrow tab bar) and the seven sub-tables below the points table are gone; every
+point is in the manifest once, grouped by category as the sub-tables were. The
+rules the overlay sections above record for its data still hold: the aspect id
+is an index into the one rich pass the wheel draws, the filter chips are built
+from what is present, and comets are off the wheel until the Comets box is
+ticked.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five

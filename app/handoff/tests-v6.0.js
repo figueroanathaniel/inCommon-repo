@@ -2534,13 +2534,13 @@
       var expandBtn = dd.querySelector('[aria-label="Expand chart"]');
       if (expandBtn) expandBtn.click();
       await sleep(500);
-      var dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      var dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var dlgOpen = !!dlg;
-      var closeBtn = dlg ? dlg.querySelector('[aria-label="Close expanded chart"]') : null;
+      var closeBtn = dlg ? dlg.querySelector('[aria-label="Close the Observatory"]') : null;
       if (closeBtn) closeBtn.click();
       await sleep(350);
-      var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
-      t('N40', 'The maximize control opens the expanded chart overlay and the close control dismisses it',
+      var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
+      t('N40', 'The maximize control opens the Observatory and its close control dismisses it',
         { opened: true, closed: true },
         { opened: dlgOpen, closed: dlgClosedNow });
 
@@ -2550,7 +2550,7 @@
          Reopened for this row since N40 just closed it. */
       if (expandBtn) expandBtn.click();
       await sleep(500);
-      dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var sample = app.EXPANDED_REGISTRY.filter(function (_, i) { return i % 8 === 0; }).slice(0, 10);
       var rowsNow = app.fullChart(true);
       var titleButtons = dlg ? [].slice.call(dlg.querySelectorAll('button[title]')) : [];

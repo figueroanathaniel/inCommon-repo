@@ -173,6 +173,11 @@ const MODULES = [
      name, so it has to follow it. */
   'hd-transit.js',
   'hd-circle.js',
+  /* Flight in every direction, shared by every scene below, and the worlds a
+     body becomes when the reader closes on it. Both read three.js from the
+     scene that calls them, so they need nothing above them. */
+  'flight.js',
+  'body-globes.js',
   /* The Cycle Audit drawn in depth. Reads nothing above it and imports
      three.module.js, which sits beside the bundle for the cover, on first use. */
   'cycle-scene.js',

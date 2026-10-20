@@ -282,6 +282,8 @@
     s.addEventListener('pointerleave', this._on.leave);
     s.addEventListener('wheel', this._on.wheel, { passive: false });
     s.addEventListener('keydown', this._on.key);
+    s.addEventListener('keyup', function (e) { if (self.flyOk()) self.flyKeyUp(e); });
+    window.addEventListener('blur', function () { if (self.fly) self.fly.blur(); });
     s.addEventListener('focus', this._on.focus);
     s.addEventListener('blur', this._on.blur);
     document.addEventListener('visibilitychange', this._on.vis);
@@ -862,13 +864,27 @@
     g.yaw = drift + (this.ptr.on ? this.ptr.x * (full ? 0.08 : 0.05) : 0);
     return g;
   };
+  /* FLIGHT (flight.js, owner 19 October 2026: "omni directional motion, on
+     every chart"). The move keys on the timeline take off, a drag looks while
+     flying, and Escape or 0 lands back on the timeline's rig. Installed on
+     first use, because flight.js may arrive after this file. */
+  P.flyOk = function () { if (!P.flyer && root.Flight && root.Flight.mixin) root.Flight.mixin(P); return !!P.flyer; };
+  P.isFlying = function () { return this.flyOk() && this.flying(); };
   P.placeCamera = function (k) {
+    if (this.isFlying() && this.flyPose(this._dt)) {
+      this.U.uCam.value.copy(this.cam.position);
+      this.U.uFog.value = 1 / (Math.abs(this.cam.position.z - TARGET_Z) * 2.6 + 30);
+      this.sky.position.copy(this.cam.position);
+      this.stars.position.copy(this.cam.position);
+      return;
+    }
     var r = this.rig, g = this.goal;
     r.x = damp(r.x, g.x, k); r.dist = damp(r.dist, g.dist, k); r.elev = damp(r.elev, g.elev, k); r.yaw = damp(r.yaw, g.yaw, k);
     var ce = Math.cos(r.elev);
     this.cam.position.set(r.x + Math.sin(r.yaw) * ce * r.dist, TARGET_Y + Math.sin(r.elev) * r.dist, TARGET_Z + Math.cos(r.yaw) * ce * r.dist);
     this.cam.lookAt(r.x, TARGET_Y, TARGET_Z);
     this.cam.updateMatrixWorld();
+    if (this.flyOk()) this.flyBlend(this._dt);
     this.U.uCam.value.copy(this.cam.position);
     this.U.uFog.value = 1 / (r.dist * 2.6 + 18);
     this.sky.position.copy(this.cam.position);
@@ -895,6 +911,7 @@
     this.kick();
   };
   P.toNow = function () {
+    if (this.isFlying()) this.flyRelease();
     if (!this.model) return;
     this.setProbe(this.model.now);
     if (this.mode === 'full') { this.user.center = this.x(this.model.now) + U * 2.5; }
@@ -903,6 +920,7 @@
     this.kick();
   };
   P.zoom = function (dir) {
+    if (this.isFlying()) { if (dir === 0) this.flyRelease(); else this.flyNudge([0, 0, dir < 0 ? 1.2 : -1.2]); this.kick(); return; }
     if (this.mode !== 'full' || !this.user.dist) return;
     this.user.dist = clamp(this.user.dist * (dir < 0 ? 0.8 : 1.25), 7, 90);
     this.lift(0.15);
@@ -1044,7 +1062,7 @@
     }
     this.keyed = false;
     this.el.slider.style.boxShadow = 'none';
-    this.down = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, elev: this.user.elev, center: this.user.center };
+    this.down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, elev: this.user.elev, center: this.user.center };
     this.lift(0.08);
   };
   P.onMove = function (e) {
@@ -1057,7 +1075,11 @@
     if (this.pts && this.pts[e.pointerId]) this.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
     if (this.pinch && this.pts) {
       var ids = Object.keys(this.pts);
-      if (ids.length === 2) { var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y); this.user.dist = clamp(this.pinch.dist * this.pinch.d / Math.max(20, d), 7, 90); }
+      if (ids.length === 2) {
+        var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (this.isFlying()) { this.flyNudge([0, 0, (d - (this.pinch.ld || this.pinch.d)) / (this.H || 300) * 3.2], 0.9); this.pinch.ld = d; }
+        else this.user.dist = clamp(this.pinch.dist * this.pinch.d / Math.max(20, d), 7, 90);
+      }
       this.kick();
       return;
     }
@@ -1065,11 +1087,12 @@
     if (dn && dn.id === e.pointerId) {
       var dx = e.clientX - dn.x, dy = e.clientY - dn.y;
       if (!dn.axis && Math.hypot(dx, dy) > 7) {
-        dn.axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+        dn.axis = this.isFlying() && (dn.type === 'mouse' || this.mode === 'full') ? 'look' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
         if (dn.axis === 'x' || this.mode === 'full') { try { this.el.slider.setPointerCapture(e.pointerId); } catch (er) { /* not capturable */ } }
         if (dn.axis === 'x') this.el.slider.style.cursor = 'grabbing';
       }
-      if (dn.axis === 'x') {
+      if (dn.axis === 'look') { this.flyLook(e.clientX - dn.lx, e.clientY - dn.ly); dn.lx = e.clientX; dn.ly = e.clientY; }
+      else if (dn.axis === 'x') {
         var f = this.floorAt(n);
         if (f) { this.setProbe(this.t(f.x)); this.probeShow = 1; this.showRead(true); this.hideTip(); }
         this.lift(0.02);
@@ -1109,6 +1132,7 @@
     this.pinch = null; this.down = null;
   };
   P.onWheel = function (e) {
+    if (this.isFlying()) { e.preventDefault(); this.flyNudge([0, 0, clamp(-e.deltaY * 0.004, -1.5, 1.5)], 0.8); this.lift(0.03); this.kick(); return; }
     if (this.mode !== 'full' || !this.ready) return;
     e.preventDefault();
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -1121,6 +1145,7 @@
   };
   P.onKey = function (e) {
     if (!this.ready || !this.model) return;
+    if (this.flyOk() && this.flyKey(e)) return;
     if (!this.keyed) { this.keyed = true; this.el.slider.style.boxShadow = 'inset 0 0 0 2px var(--ac2-hi)'; }
     var t = this.probeT == null ? this.model.now : this.probeT, k = e.key, step = e.shiftKey ? YEAR : 30.4375 * DAY, done = true;
     if (k === 'ArrowRight' || k === 'ArrowUp') this.setProbe(t + step);
@@ -1170,7 +1195,7 @@
   /* ---- The loop --------------------------------------------------------------- */
   P.updateRun = function () {
     var want = this.ready && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
-    if (want && this.reduced) { this.stop(); this.kick(); return; }
+    if (want && this.reduced && !this.isFlying()) { this.stop(); this.kick(); return; }
     if (want && !this.running) { this.running = true; this.last = 0; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
   };
@@ -1191,8 +1216,8 @@
     if (!this.running) return;
     this.raf = requestAnimationFrame(this._tick);
     if (!this.host || !this.el.root.isConnected) { this.stop(); return; }
-    var dt = this.last ? Math.min(0.1, (ts - this.last) / 1000) : 0.016;
-    var busy = this.c > 0.04 || this.down || this.pinch || !this.settled();
+    var dt = this.last ? Math.min(this.isFlying() ? 0.25 : 0.1, (ts - this.last) / 1000) : 0.016;
+    var busy = this.c > 0.04 || this.down || this.pinch || !this.settled() || (this.flyOk() && this.flyBusy());
     if (!busy && ts - this.lastDraw < 31) return;
     this.last = ts;
     if (this.lastDraw) this.measure(ts - this.lastDraw, busy);
@@ -1268,6 +1293,7 @@
     });
 
     this.goals();
+    this._dt = dt;
     this.placeCamera(rm ? 1 : 1 - Math.exp(-dt * 2.6));
     this.placeOrrery();
     /* Billboards: the exact date pillars and the two columns of light turn to

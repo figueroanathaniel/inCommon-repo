@@ -392,11 +392,14 @@
     if (this.failed || !host) return;
     var moved = this.host !== host || this.el.root.parentNode !== host;
     if (moved) {
-      if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
+      if (this.host && this._onKey) { this.host.removeEventListener('keydown', this._onKey); this.host.removeEventListener('keyup', this._onKeyUp); }
       host.appendChild(this.el.root);
       var self = this;
       this._onKey = this._onKey || function (e) { self.onKey(e); };
+      this._onKeyUp = this._onKeyUp || function (e) { if (self.flyOk()) self.flyKeyUp(e); };
       host.addEventListener('keydown', this._onKey);
+      host.addEventListener('keyup', this._onKeyUp);
+      if (!this._onBlur) { this._onBlur = function () { if (self.fly) self.fly.blur(); }; window.addEventListener('blur', this._onBlur); }
     }
     this.host = host;
     if (!this.io && window.IntersectionObserver) {
@@ -419,8 +422,23 @@
     this.updateRun();
     this.kick();
   };
+  /* FLIGHT (flight.js, owner 19 October 2026: "omni directional motion, on
+     every chart"). The move keys take off from wherever the camera is, a drag
+     looks while flying, two fingers in Free look move, and Escape, 0 or Home
+     land back on the rig. flight.js may arrive after this file, so its glue
+     is installed on first use. */
+  P.flyOk = function () { if (!P.flyer && root.Flight && root.Flight.mixin) root.Flight.mixin(P); return !!P.flyer; };
+  P.isFlying = function () { return this.flyOk() && this.flying(); };
+  P.nearest = function (p) {
+    var best = null;
+    (this.centres || []).forEach(function (C) {
+      var d = Math.sqrt((p[0] - C.cx) * (p[0] - C.cx) + (p[1] - C.cy) * (p[1] - C.cy) + p[2] * p[2]) - 0.55;
+      if (!best || d < best.d) best = { d: d, c: [C.cx, C.cy, 0], r: 0.55 };
+    });
+    return best;
+  };
   P.detach = function () {
-    if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
+    if (this.host && this._onKey) { this.host.removeEventListener('keydown', this._onKey); this.host.removeEventListener('keyup', this._onKeyUp); }
     this.host = null;
     this.stop();
   };
@@ -1069,6 +1087,14 @@
     };
   };
   P.placeCamera = function (k) {
+    if (this.isFlying() && this.flyPose(this._dt)) {
+      this.U.uCam.value.copy(this.cam.position);
+      this.U.uFog.value = 1 / (this.cam.position.length() * 3.2 + 30);
+      this.skyDome.position.copy(this.cam.position);
+      this.stars.position.copy(this.cam.position);
+      this._settled = true;
+      return;
+    }
     var g = this.goals();
     /* The scene opens where it rests: no fly-in, so nothing moves on arrival but
        the fade and the body's own wake (owner, 19 October 2026). */
@@ -1079,6 +1105,7 @@
     this.cam.position.set(r.tx + Math.sin(r.yaw) * cp * r.dist, r.ty + Math.sin(r.pitch) * r.dist, Math.cos(r.yaw) * cp * r.dist);
     this.cam.lookAt(r.tx, r.ty, 0);
     this.cam.updateMatrixWorld();
+    if (this.flyOk() && this.flyBlend(this._dt)) this._blending = !!this.ret;
     this.U.uCam.value.copy(this.cam.position);
     this.U.uFog.value = 1 / (r.dist * 3.2 + 30);
     this.skyDome.position.copy(this.cam.position);
@@ -1088,6 +1115,7 @@
 
   /* ---- Public moves --------------------------------------------------------- */
   P.zoom = function (dir) {
+    if (dir === 0 && this.isFlying()) this.flyRelease();
     if (dir === 0) { this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null; }
     else this.user.zoom = clamp(this.user.zoom * (dir < 0 ? 1.25 : 0.8), 0.6, 3.4);
     this.respond();
@@ -1156,11 +1184,11 @@
     var ids = Object.keys(this.pts);
     if (ids.length === 2) {
       var a = this.pts[ids[0]], b = this.pts[ids[1]];
-      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), zoom: this.user.zoom };
+      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), zoom: this.user.zoom, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
       this.down = null;
       return;
     }
-    this.down = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, yaw: this.user.yaw, pitch: this.user.pitch != null ? this.user.pitch : this.defaultPitch() };
+    this.down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, yaw: this.user.yaw, pitch: this.user.pitch != null ? this.user.pitch : this.defaultPitch() };
     this.lift(0.06);
   };
   P.onMove = function (e) {
@@ -1172,7 +1200,14 @@
     if (this.pts && this.pts[e.pointerId]) this.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
     if (this.pinch && this.pts) {
       var ids = Object.keys(this.pts);
-      if (ids.length === 2) { var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y); this.user.zoom = clamp(this.pinch.zoom * d / Math.max(20, this.pinch.d), 0.6, 3.4); }
+      if (ids.length === 2) {
+        var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if ((this.explore || this.isFlying()) && this.flyOk()) {
+          var cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2, Hd = this.H || 300;
+          this.flyNudge([-(cx - this.pinch.cx) / Hd * 2.2, (cy - this.pinch.cy) / Hd * 2.2, (d - this.pinch.d) / Hd * 3.2], 0.9);
+          this.pinch.cx = cx; this.pinch.cy = cy; this.pinch.d = d;
+        } else this.user.zoom = clamp(this.pinch.zoom * d / Math.max(20, this.pinch.d), 0.6, 3.4);
+      }
       this.respond();
       this.kick();
       return;
@@ -1183,10 +1218,11 @@
       if (!dn.axis && Math.hypot(dx, dy) > 7) {
         /* On a touch screen a vertical drag is the page scrolling, so only a
            sideways one turns the wiring; a mouse may tilt it too. */
-        dn.axis = dn.type === 'mouse' || this.explore ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+        dn.axis = this.isFlying() && (dn.type === 'mouse' || this.explore) ? 'look' : dn.type === 'mouse' || this.explore ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
         if (dn.axis !== 'y') { try { this.el.pad.setPointerCapture(e.pointerId); } catch (er) { /* not capturable */ } this.el.pad.style.cursor = 'grabbing'; this.hideTip(); this.respond(); }
       }
-      if (dn.axis === 'x' || dn.axis === 'free') {
+      if (dn.axis === 'look') { this.flyLook(e.clientX - dn.lx, e.clientY - dn.ly); dn.lx = e.clientX; dn.ly = e.clientY; }
+      else if (dn.axis === 'x' || dn.axis === 'free') {
         var Wd = this.W || 300;
         this.user.yaw = dn.yaw - dx / Wd * Math.PI * 1.1;
         if (dn.axis === 'free') this.user.pitch = clamp(dn.pitch + dy * 0.005, -0.25, 1.35);
@@ -1218,6 +1254,7 @@
   P.onWheel = function (e) {
     if (!this.ready) return;
     e.preventDefault();
+    if (this.isFlying()) { this.flyNudge([0, 0, clamp(-e.deltaY * 0.004, -1.5, 1.5)], 0.8); this.lift(0.03); this.kick(); return; }
     this.user.zoom = clamp(this.user.zoom * Math.exp(-e.deltaY * 0.0012), 0.6, 3.4);
     this.respond();
     this.lift(0.04);
@@ -1225,6 +1262,7 @@
   };
   P.onKey = function (e) {
     if (!this.ready || !this.model || e.target !== this.host) return;
+    if (this.flyOk() && this.flyKey(e)) { this.respond(); return; }
     var k = e.key, done = true;
     if (k === 'ArrowRight' || k === 'ArrowLeft') {
       var nk = this.step(k === 'ArrowRight' ? 1 : -1);
@@ -1287,7 +1325,7 @@
   /* ---- The loop --------------------------------------------------------------- */
   P.updateRun = function () {
     var want = this.ready && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
-    if (want && this.reduced) { this.stop(); this.kick(); return; }
+    if (want && this.reduced && !this.isFlying()) { this.stop(); this.kick(); return; }
     if (want && !this.running) { this.running = true; this.last = 0; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
   };
@@ -1306,9 +1344,10 @@
     if (!this.running) return;
     this.raf = requestAnimationFrame(this._tick);
     if (!this.host || !this.el.root.isConnected) { this.stop(); return; }
-    var dt = this.last ? Math.min(0.1, (ts - this.last) / 1000) : 0.016;
+    var dt = this.last ? Math.min(this.isFlying() ? 0.25 : 0.1, (ts - this.last) / 1000) : 0.016;
     var waking = this.wakeAt == null || now() - this.wakeAt < this.wakeSpan + 0.5;
-    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001;
+    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001 ||
+      (this.flyOk() && this.flyBusy());
     /* the flow and the breathing never stop, so the rest rate is only a rate */
     if (!busy && ts - this.lastDraw < 31) return;
     this.last = ts;
@@ -1451,6 +1490,7 @@
       l.material.opacity = ease(clamp(self.k, 0, 1)) * (on ? 1 : G.sky ? 0.8 * self.skyK + 0.4 : 0.42);
     });
 
+    this._dt = dt;
     this.placeCamera(rm ? 1 : 1 - Math.exp(-dt * 3));
   };
   /* What a named thing touches: a centre its gates, channels and the
