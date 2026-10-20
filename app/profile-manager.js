@@ -463,7 +463,8 @@
     _dropProfileKeys: function (id) {
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
-        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep'
+        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
+        'incommon.p.' + id + '.study'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
     },

@@ -1920,9 +1920,10 @@ once per new item. `hdAtlasTo` marks the item it scrolls to itself in
 and leaving the atlas clear `atlasItem`, and every clean bag that clears
 `atlasSec` clears it too.
 
-The anchors are on the HD atlas markup only. Astropedia shares the block and
-row markup byte for byte, so an edit to it has to be anchored on `atlasSecs`, or
-a replace across the file lands on four sites instead of two.
+Since 20 October 2026 the accordion is gone and the anchor is the folio's own
+id (`atlasFolioId`), with the chapter's on a hidden span: see "The Human Design
+Atlas is the wiring, a folio and fifteen chapters". The idents above are
+unchanged, because they are the slugs `atlasItem` stores.
 
 ## Anything that can be pressed is lifted; only ornament is flat
 Decided by the owner on 20 October 2026: "All flat items in the app that have
@@ -4631,6 +4632,170 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 `numCmp()` asks for it whenever no `debts` list is passed, which is exactly the
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
+
+## The Human Design Atlas is the wiring, a folio and fifteen chapters
+Asked for by the owner on 20 October 2026 ("Doing the same thing for human
+design"), after the Astropedia and the study paths. The room is the
+Astropedia's shape with the wiring in place of the wheel.
+
+**`atlasSec` and `atlasItem` mean exactly what they meant.** `atlasSec` is the
+chapter (`HDAtlas.SECTIONS`) and `atlasItem` the slugged entry inside it, with
+the same slugs the accordion's anchors used: a Type by name, a profile by key
+(`1-3`), a centre by its key, a gate as `g<n>`, a channel by its pair, the rest
+by name. So `hdAtlasTo()`, Learn from Atlas, the chart popup, the search rows
+and the Learn pages' `/library/human-design-atlas/gate/<n>` all land on the
+entry they name with no change. The folio carries the anchor
+`scrollAtlasIntoView()` looks for (`atlasFolioId`), and a hidden span carries
+the chapter's, so that scroll still lands. `atlasPick()` marks
+`_atlasScrolled` itself, so a pick from the wiring does not also trigger the
+scroll `syncAtlasItem()` runs for an address.
+
+**Every word is `hd-atlas.js`**, and `atlasBlocks()` stays for the two essays
+(What Human Design is, An example wiring). `atlasEntries()` is the one list,
+with `atlasHay()` giving the room's search the writing and not only the names.
+
+**The wiring is drawn from the app's own geometry**: `BG_POS` boxes in the
+shapes the field draws (`hdShape()`), the sixty four gates spaced round each
+centre's outline (`hdGateSpots()`, memoised), and the thirty six channels drawn
+gate to gate. The reader's defined centres wear the atlas's own colours, their
+gates are white and their channels warm, and the gates the sky holds this
+minute are ringed in `--blue` and breathe (`hdSkyNow()`, the same hd-transit
+reading the gates card on Today uses). The open entry is drawn on top: a
+centre, a gate with its channels and partner gates, a channel, a type's
+centres (`HD_TYPE_LIGHT`), an authority's centre (`HD_AUTH_CENTRE`), a
+strategy's types, the reader's four Cross gates, the example wiring. It is
+pointer ornament inside `[data-chart]`, as the other two centrepieces are.
+
+**The folio links the system together**: a gate to its centre, its channels and
+**hexagram N in the Book of Changes**, because gate N is hexagram N; a channel
+to its gates; a profile to its two lines; a type to its strategy; an authority
+to its centre. "In your chart" is the reader's own activations, centres,
+channels and Cross, and opens the wiring on My Charts.
+
+**The folio carries an epigraph and the sky now, as the Astropedia's does.**
+The epigraph is the type's signature, the gate's hexagram name from
+`iching.js` (gate N is hexagram N), or a channel's two hexagram names; the
+"In the sky now" line names the bodies on a gate, a channel's gates or a
+centre's gates this minute, from the same `hdSkyNow()` reading the wiring rings.
+It replaced the "Sun now" rows that sat under In your chart, because the sky is
+not the reader's own.
+
+**The study paths reach it.** `studyVals()` serves all three rooms, the five
+guides apply as they do in the other two (the first-path lead is the reader's
+own entry, "Your type"), and `STUDY_TUT.hdatlas` holds three tutorials: First
+steps (the wiring, type, strategy, authority, the centres, the profile, gates
+and channels), Finding my way (definition, circuits, open and defined, lines,
+the Cross, the example) and Deep study (gate and hexagram, the reader's
+channels, the sky now, hanging gates, strategy beside authority). Steps that
+name the reader's own fall back to a sensible entry under the sample.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room with the tutorial card, a step, the bubble, a gate with its terms and
+links, and the sixty four gate tiles on screen: four identities, hardened and
+not, at 1440 and 375, 48 cases, 85 to 203 elements each, no pair under 4.5:1
+and no control under 44px.
+
+## Study paths, the five guides, and the tutorials
+Asked for by the owner on 20 October 2026, after asking how the Astropedia and
+the Book of Numbers would read to somebody brand new: "Add paths the reader can
+select, and show the five guides based on the reader's preference/level.
+Incorporate tutorials based on the path as well."
+
+**A path is the reader's level**, First steps, Finding my way or Deep study
+(`STUDY_PATHS`), chosen in a radiogroup at the top of each study room and kept per
+profile in `incommon.p.<id>.study` (`studyState()`, `studyPath()`), one choice
+shared by every study room (the Human Design Atlas joined them the same day). First steps is the path until one is chosen.
+`deleteProfile()` drops the key with the profile's others.
+
+**The five guides, by path** (all in `apVals()` and `numBookVals()`):
+
+| Guide | First steps | Finding my way | Deep study |
+|---|---|---|---|
+| A name on the first press of anything on a wheel (`apPeek`, `bnPeek`), opened by the second press or the bubble | yes | no | no |
+| Words here: the terms on a page linked to the entries that explain them (`apTerms`, `bnTerms`) | yes | yes | no |
+| A key under each wheel (`apKey`, `bnKey`) | yes | yes | no |
+| The reader's own number leads the Book's folio (`bnLeadText`) | yes | no | no |
+| A tutorial | yes | yes | yes |
+
+Deep study is the rooms as they were, the tutorial aside.
+
+**Six tutorials** (`STUDY_TUT`), one per path per room, four to seven steps
+each, written for this pass in the app's voice: no dash, no "you are", astral
+body rather than planet, and a question rather than a verdict where one is
+asked. **Every step opens the entry it talks about** (`studyGo()`: an entry,
+the reader's own Sun or Moon sign, their Life Path, today's number, a filter),
+so the reading happens in the room. The card at the top of the room holds the
+path's header and progress; **the step itself is drawn at the top of the
+folio** (`spTutStepOn`), because a step scrolls to the folio and a Next button
+left in the card above was scrolled off the screen. Progress, a finished
+tutorial and a hidden one are kept per room per path.
+
+**This is an exception to "Discovery belongs to the reader" and to "No
+disclaimers", and the owner made it.** The tutorials explain the rooms, which
+those rules otherwise bar. They do so only on a path the reader chose, only
+while the reader keeps the tutorial open (it hides to a pill), and they
+explain the tradition and the room, never how the app computes anything. Do
+not take this as licence for an explanatory line anywhere else.
+
+Driven in Chromium, both shells, with a chart of the reader's own: a first
+press names and a second opens; a tutorial walked from Begin to Finish in each
+room, every step landing on its entry; a term opening its concept; Deep study
+with no key, no terms and a one press wheel; the path shared between the rooms;
+hiding and showing the tutorial. Measured with the harness's own
+`contrastFails()` and `tapTargets()` over both rooms with the tutorial card, a
+step, the bubble, the terms and the key on screen: four identities, hardened
+and not, at 1440 and 375, 64 cases, 70 to 108 elements each, no pair under
+4.5:1 and no control under 44px.
+
+## The Astropedia is a sky, a folio and thirteen chapters
+Asked for by the owner on 20 October 2026, after the Book of Numbers: "Give
+it the same glamour and enchantment." The room keeps its address
+(`/library/astropedia`), its gate (`libAstropedia`) and `apSec`, which is the
+chapter now; `apOpen` is the entry on the folio and `apQuery` its search. One
+entry is `/library/astropedia/<kind>/<slug>`: `sign/scorpio`, `house/10`,
+`body/saturn`, `point/chiron`, `aspect/trine`, `concept/<slug>`,
+`technique/<slug>`. Search rows open the entry itself, not only its chapter.
+
+**Nothing in it is new writing about astrology.** Every entry is
+`astropedia.js`; the essay chapters (The Birth Chart, Sabian Symbols,
+Stellium, Transits, Synastry, An Example Chart, and Orbs inside Aspects) are
+drawn from `apBlocks()`, which stays for exactly that; and an aspect adds the
+app's own `ASP_SHORT` and `ASP_NATURE`, the same lines the chart reads.
+`apEntries()` is the one list (key, chapter, glyph, line, search text) and is
+built once.
+
+**The wheel is the sky this minute** (`apSky()`, once a minute per chart): the
+natural zodiac in its four element hues, the twelve houses inside it, the ten
+bodies where they stand now, and the reader's own placements as small violet
+stars, which the sample chart does not have. The open entry is drawn on top
+of it: a sign lit, a house lit, a body's homes lit and its exaltation softer,
+an aspect's figure (the trine is a triangle, the square a square) anchored on
+the Sun now, the four triangles of Elements, the three crosses of Modalities,
+the angular houses, the thirty six decans, the horizon for Sect, and the signs
+holding a gathering today for Stellium. Like the Book's mandala it is pointer
+ornament inside `[data-chart]`; the chapters, the grid and the folio's arrow
+keys are the keyboard's way to every entry.
+
+**The element hues are tokens of their own**, `--el-fire`, `--el-earth`,
+`--el-air` and `--el-water`, fixed and declared in all three roots, because the
+wheel's own `SIGN_EL_C` paints earth in `--ac` and a category is not a semantic
+colour. The values are hues the build already carries (the coral of `--warn`,
+the amber of `--cat-ast`, the blue of `--blue`, the teal of `--cat-cen`).
+
+**The folio is what the entry has, never a fixed form**: a kicker, a sign's
+keyword as an epigraph, the lead (with a drop cap for the long single texts),
+what is in that sign now, facets as tiles, "In your chart" (your bodies in a
+sign or a house, your own body, your aspects of that kind, each opening its
+placement page), and links across the book (a sign's ruler and natural house,
+the sign across the wheel, a body's homes and falls, the Lexicon from the
+Sabian essay). Wander opens any entry at random. The folio re-animates through
+`bnFolioA`/`bnFolioB` like the Book's, and a pick from the grid scrolls back to
+it through the same nearest-scroller rule.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room: four identities, hardened and not, at 1440 and 375, with a sign, a body,
+an aspect and an essay open, 64 cases, 54 to 77 elements each, no pair under
+4.5:1 and no control under 44px.
 
 ## The Book of Numbers is a Study room
 Asked for by the owner on 20 October 2026: the matrix that updated the Numbers
