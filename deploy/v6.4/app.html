@@ -4509,7 +4509,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     _dropProfileKeys: function (id) {
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
-        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep'
+        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
+        'incommon.p.' + id + '.study'
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
     },
@@ -30270,6 +30271,52 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ apBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">Astropedia</div>
       </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
         <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
@@ -30313,11 +30360,21 @@ input[type="date"]{color-scheme:dark}
             <sc-for list="{{ apSkyGlyphs }}" as="sk" hint-placeholder-count="10">
               <span data-ap-body onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
             </sc-for>
+            <sc-if value="{{ apPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
               <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
               <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
+          <sc-if value="{{ apKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ apKey }}" as="ky" hint-placeholder-count="5">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
@@ -30331,6 +30388,20 @@ input[type="date"]{color-scheme:dark}
 
         <div data-ap-folio data-lift="card" tabindex="0" role="region" aria-label="{{ apFolioLabel }}" onKeyDown="{{ apKeys }}" style="flex:1 1 380px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
           <div style="display:flex;flex-direction:column;gap:15px;animation:{{ apAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
             <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
@@ -30378,6 +30449,14 @@ input[type="date"]{color-scheme:dark}
                     <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
               </div>
             </sc-if>
@@ -30471,6 +30550,52 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ bnBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">The Book of Numbers</div>
       </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
         <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
@@ -30497,11 +30622,21 @@ input[type="date"]{color-scheme:dark}
                 <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
               </span>
             </sc-for>
+            <sc-if value="{{ bnPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ bnPeekGo }}" style="position:absolute;left:{{ bnPeekL }};top:{{ bnPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ bnPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none">
               <span style="font:400 clamp(28px,8vw,38px)/1 var(--fd);color:{{ bnCenterC }};text-shadow:0 0 18px rgba(var(--atmc2),.5)">{{ bnCenter }}</span>
               <span style="font:600 10.5px var(--fu);letter-spacing:.12em;color:var(--mut)">{{ bnCenterRoot }}</span>
             </div>
           </div>
+          <sc-if value="{{ bnKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ bnKey }}" as="ky" hint-placeholder-count="5">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
@@ -30514,18 +30649,43 @@ input[type="date"]{color-scheme:dark}
 
         <div data-bn-folio data-lift="card" tabindex="0" role="region" aria-label="{{ bnFolioLabel }}" onKeyDown="{{ bnKeys }}" style="flex:1 1 360px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
           <div style="display:flex;flex-direction:column;gap:15px;animation:{{ bnAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
             <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
               <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:{{ bnCatC }};background:{{ bnCatBg }}">{{ bnCat }}</span>
               <sc-if value="{{ bnWhereOn }}" hint-placeholder-val="{{ false }}">
                 <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;color:var(--ac2-hi);border:1px solid var(--ac2)">{{ bnWhere }}</span>
               </sc-if>
             </div>
+            <sc-if value="{{ bnLeadOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 20px/1.2 var(--fd);color:var(--ac2-hi)">{{ bnLeadText }}</div>
+            </sc-if>
             <div style="display:flex;align-items:baseline;gap:8px">
               <span style="font:400 clamp(64px,16vw,92px)/.92 var(--fd);color:{{ bnInk }};letter-spacing:-.02em;text-shadow:0 0 30px rgba(var(--atmc2),.42)">{{ bnN }}</span>
               <span style="font:400 26px var(--fd);color:var(--mut)">{{ bnRootDigit }}</span>
             </div>
             <div style="font:400 clamp(22px,4.6vw,28px)/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ bnTitle }}</div>
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
+            <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
             <sc-if value="{{ bnSeasonOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--warn);padding-left:12px">
                 <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)">{{ bnSeasonHead }}</div>
@@ -36790,6 +36950,52 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ apBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">Astropedia</div>
       </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
         <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
@@ -36833,11 +37039,21 @@ input[type="date"]{color-scheme:dark}
             <sc-for list="{{ apSkyGlyphs }}" as="sk" hint-placeholder-count="10">
               <span data-ap-body onClick="{{ sk.go }}" title="{{ sk.tip }}" style="position:absolute;left:{{ sk.l }};top:{{ sk.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:400 {{ sk.fs }}/1 var(--fb);color:{{ sk.c }};text-shadow:{{ sk.glow }};transition:color .4s ease,font-size .3s ease">{{ sk.g }}</span>
             </sc-for>
+            <sc-if value="{{ apPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ apPeekGo }}" style="position:absolute;left:{{ apPeekL }};top:{{ apPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ apPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;text-align:center">
               <span style="font:400 clamp(26px,7.5vw,36px)/1 var(--fb);color:{{ apCenterC }};text-shadow:0 0 20px rgba(var(--atmc2),.55)">{{ apCenter }}</span>
               <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apCenterName }}</span>
             </div>
           </div>
+          <sc-if value="{{ apKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ apKey }}" as="ky" hint-placeholder-count="5">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
           <div role="group" aria-label="Your sky, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ apMarks }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
@@ -36851,6 +37067,20 @@ input[type="date"]{color-scheme:dark}
 
         <div data-ap-folio data-lift="card" tabindex="0" role="region" aria-label="{{ apFolioLabel }}" onKeyDown="{{ apKeys }}" style="flex:1 1 380px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
           <div style="display:flex;flex-direction:column;gap:15px;animation:{{ apAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
             <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ apChapterName }}</div>
             <div style="display:flex;align-items:center;gap:16px">
               <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 36px/1 var(--fb);color:{{ apIconC }};text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ apIcon }}</span>
@@ -36898,6 +37128,14 @@ input[type="date"]{color-scheme:dark}
                     <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
                     <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
                   </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ apTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
               </div>
             </sc-if>
@@ -36991,6 +37229,52 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ bnBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">The Book of Numbers</div>
       </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
         <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
@@ -37017,11 +37301,21 @@ input[type="date"]{color-scheme:dark}
                 <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
               </span>
             </sc-for>
+            <sc-if value="{{ bnPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ bnPeekGo }}" style="position:absolute;left:{{ bnPeekL }};top:{{ bnPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 14px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ bnPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
             <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none">
               <span style="font:400 clamp(28px,8vw,38px)/1 var(--fd);color:{{ bnCenterC }};text-shadow:0 0 18px rgba(var(--atmc2),.5)">{{ bnCenter }}</span>
               <span style="font:600 10.5px var(--fu);letter-spacing:.12em;color:var(--mut)">{{ bnCenterRoot }}</span>
             </div>
           </div>
+          <sc-if value="{{ bnKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ bnKey }}" as="ky" hint-placeholder-count="5">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
           <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
             <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
               <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
@@ -37034,18 +37328,43 @@ input[type="date"]{color-scheme:dark}
 
         <div data-bn-folio data-lift="card" tabindex="0" role="region" aria-label="{{ bnFolioLabel }}" onKeyDown="{{ bnKeys }}" style="flex:1 1 360px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
           <div style="display:flex;flex-direction:column;gap:15px;animation:{{ bnAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
             <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
               <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:{{ bnCatC }};background:{{ bnCatBg }}">{{ bnCat }}</span>
               <sc-if value="{{ bnWhereOn }}" hint-placeholder-val="{{ false }}">
                 <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;color:var(--ac2-hi);border:1px solid var(--ac2)">{{ bnWhere }}</span>
               </sc-if>
             </div>
+            <sc-if value="{{ bnLeadOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 20px/1.2 var(--fd);color:var(--ac2-hi)">{{ bnLeadText }}</div>
+            </sc-if>
             <div style="display:flex;align-items:baseline;gap:8px">
               <span style="font:400 clamp(64px,16vw,92px)/.92 var(--fd);color:{{ bnInk }};letter-spacing:-.02em;text-shadow:0 0 30px rgba(var(--atmc2),.42)">{{ bnN }}</span>
               <span style="font:400 26px var(--fd);color:var(--mut)">{{ bnRootDigit }}</span>
             </div>
             <div style="font:400 clamp(22px,4.6vw,28px)/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ bnTitle }}</div>
             <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
+            <sc-if value="{{ bnTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ bnTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
             <sc-if value="{{ bnSeasonOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--warn);padding-left:12px">
                 <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)">{{ bnSeasonHead }}</div>
@@ -47342,6 +47661,147 @@ class Component extends DCLogic {
       .concat(A.EXAMPLE.steps.map((s, i) => ({ head: (i + 1) + '. ' + s[0], hasSub: false, sub: '', rows: [plain(s[1])] })));
     return [];
   }
+  /* STUDY PATHS AND TUTORIALS (owner, 20 October 2026: "Add paths the reader
+     can select, and show the five guides based on the reader's preference or
+     level. Incorporate tutorials based on the path as well.")
+
+     A path is the reader's own level, kept per profile under
+     incommon.p.<id>.study and shared by the Astropedia and the Book of
+     Numbers. First steps is the path until one is chosen. The five guides:
+     a name on the first press of anything on a wheel (First steps), the words
+     on a page linked to the entries that explain them (First steps and
+     Finding my way), a key under each wheel (the same two), the reader's own
+     number leading the Book's folio (First steps), and a tutorial on every
+     path. Deep study keeps the rooms as they were, tutorial aside.
+
+     A tutorial is the one place these rooms explain themselves, and it does
+     so only on a path the reader chose and only while they keep it open: the
+     owner's request, and the exception it makes to "Discovery belongs to the
+     reader" is recorded in CLAUDE.md. Every step opens the entry it talks
+     about, so the reading happens in the room rather than in the card. */
+  STUDY_PATHS = [['first', 'First steps'], ['way', 'Finding my way'], ['deep', 'Deep study']];
+  STUDY_TUT = {
+    astropedia: {
+      first: [
+        ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the astral bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
+        ['The Sun sign', 'ap:sun', 'The sign the Sun stood in at birth is the one most people call their sign. The tradition reads it as the manner a person shines in. Of the tiles on this page, As the Sun is the one that belongs to this step.'],
+        ['The Moon sign', 'ap:moon', 'The Moon crosses a sign in about two and a half days, so its sign is more personal than the Sun’s. It is read as what soothes, what is needed, and how feeling arrives. Read As the Moon on this page.'],
+        ['The houses', 'ap:house:1', 'Where the signs are atmospheres, the houses are rooms: twelve areas of life, from the self in the first to the hidden things in the twelfth. The first house begins at the Rising sign, which is why a birth time matters. The arrows at the foot of the page step through all twelve.'],
+        ['The astral bodies', 'ap:body:Sun', 'The bodies are the actors in a chart, each with its own rhythm and its own concerns. Each is at home in some signs and uneasy in others, and those signs light up on the wheel while the body is open.'],
+        ['Aspects', 'ap:aspect:Trine', 'An aspect is the angle between two bodies, read as the tone of their conversation. The triangle on the wheel is a trine, drawn from where the Sun stands today. When a chart of your own is on this device, its trines are listed on this page.'],
+        ['Reading a whole chart', 'ap:essay:chart', 'This chapter puts the pieces together in seven steps. When it starts to feel familiar, An Example Chart is a chart that belongs to nobody, kept for practice. Wander is there whenever curiosity would rather lead.']
+      ],
+      way: [
+        ['The four elements', 'ap:concept:Elements', 'Fire, earth, air and water sort the signs into four temperaments. Each triangle on the wheel joins the three signs of one element, and signs that share one tend to understand each other.'],
+        ['The three modalities', 'ap:concept:Modalities', 'Cardinal, fixed and mutable are three postures toward change. The crosses on the wheel join the four signs of each, which is why a square so often runs between two signs that want the same kind of movement for different ends.'],
+        ['Dignity', 'ap:concept:Essential Dignity', 'A body is at home in some signs, exalted in one, and uneasy or fallen in their opposites. Open any astral body afterwards and its homes light up on the wheel.'],
+        ['Houses by kind', 'ap:concept:Angular, Succedent, and Cadent Houses', 'Angular houses act, succedent houses hold, and cadent houses think and adjust. The four angular houses are lit on the wheel.'],
+        ['Orbs', 'ap:essay:orbs', 'An aspect is rarely exact. The orb is how far from exact it can stand and still be heard, and the closer it stands, the louder it reads.'],
+        ['Practice', 'ap:essay:example', 'An Example Chart walks a whole reading on a chart that belongs to nobody. Try reading it before the steps do, then compare the two.']
+      ],
+      deep: [
+        ['Sect', 'ap:concept:Sect', 'Day charts and night charts favour different bodies. The line across the wheel is the horizon, and a Sun above it makes a chart of the day.'],
+        ['Decans', 'ap:concept:Decans', 'Each sign divides into three decans of ten degrees, each with a ruler of its own. The ticks on the wheel mark all thirty six.'],
+        ['Mutual reception', 'ap:concept:Mutual Reception', 'Two bodies each standing in the sign the other rules are read as guests in each other’s house. Look for it in a chart by opening each body and following its homes.'],
+        ['Profection', 'ap:technique:Profection', 'An old timing method that moves one house a year. Count a year of age for each house from the first, and the house it lands on is the year’s.'],
+        ['The solar return', 'ap:technique:Solar Return', 'A chart for the moment the Sun comes back to its birth degree, read as the climate of the year it opens.'],
+        ['Synastry', 'ap:essay:synastry', 'Two charts read together. The Commons tab of the Library is where it is drawn for two people.']
+      ]
+    },
+    numbers: {
+      first: [
+        ['A number before it ends', 'bn:lp', 'Most numerology reduces a number to one digit. The Book reads the double digit on the way down first: 33 before 6, 23 before 5. That double digit is the number’s own voice, and the digit after the slash is where it comes to rest.'],
+        ['Your Life Path', 'bn:lp', 'The Life Path comes from the whole birth date and is where most people begin. A ring around a dot on the wheel marks a number that is yours, and the chips under the wheel open each of them.'],
+        ['The four kinds', 'bnCat:master', 'Every compound belongs to one of four kinds, and the colours on the wheel show which. The Master Numbers, 11, 22 and 33, are read as carrying the most charge. The filter under the wheel shows one kind at a time.'],
+        ['A debt, and its season', 'bn:13', 'Four compounds, 13, 14, 16 and 19, are read as a lesson owed when they fall on a birth number. On a year, a month or a day the same number is read as a season instead, and its page carries both readings.'],
+        ['Today’s number', 'bn:today', 'Today has a number of its own, the same for everybody, and it turns at midnight. Its chip under the wheel opens it on any day.'],
+        ['A family of ten', 'bn:current', 'Every compound rests on one of nine roots, and the ten that share a root are a family. They are listed under On the same root, and they are the petal the open number sits on.']
+      ],
+      way: [
+        ['The Masters', 'bn:11', '11, 22 and 33 keep their own reading rather than resting on 2, 4 and 6. Open 22 and 33 from the same root and notice how the charge changes.'],
+        ['Elite Auspicious', 'bnCat:auspicious', 'Five compounds are read as especially fortunate, and the filter shows them together.'],
+        ['Debt or season', 'bn:16', '16 is a debt on a birth number and a season on a cycle. Read both halves of its page, and notice how the same number changes with where it falls.'],
+        ['Your numbers together', 'bn:lp', 'The rings on the wheel are your numbers, and the dotted line joins your birth numbers in turn. Open each chip under the wheel.'],
+        ['The year and the day', 'bn:py', 'A Personal Year sets the climate of twelve months, and the day’s number turns every midnight. Read the year’s compound, then today’s, and ask where they meet.']
+      ],
+      deep: [
+        ['Mirrors', 'bn:19', 'Reverse the digits and a compound often answers itself: 19 and 91, 37 and 73. Open one, then its mirror, and read them side by side.'],
+        ['A root’s ten', 'bn:16', 'Read the ten compounds on one root in order, lowest to highest, and watch the root’s theme change its clothing.'],
+        ['Draw before reading', 'bn:draw', 'Draw a number and sit with it before reading its page. What did you expect it to say, and where did the page differ?'],
+        ['Across the systems', 'bn:lp', 'Open your Life Path compound here, then your Sun sign in the Astropedia, and ask what the two have in common.']
+      ]
+    }
+  };
+  studyKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.study'; }
+  studyState() { const s = this.readLS(this.studyKey(), null); return s && typeof s === 'object' ? s : {}; }
+  studyPath() { const p = this.studyState().path; return this.STUDY_PATHS.some(x => x[0] === p) ? p : 'first'; }
+  studySave(patch) {
+    this.writeLS(this.studyKey(), { ...this.studyState(), ...patch });
+    this.setState({ studyTick: (this.state.studyTick || 0) + 1 });
+  }
+  studyGo(room, a) {
+    if (!a) return;
+    const k = a.slice(0, a.indexOf(':')), v = a.slice(a.indexOf(':') + 1);
+    if (room === 'astropedia') {
+      let key = v;
+      if (v === 'sun' || v === 'moon') {
+        const S = this.apSky(), nm = v === 'sun' ? 'Sun' : 'Moon';
+        const r = S.natal.find(x => x.name === nm) || S.sky.find(x => x.name === nm);
+        key = 'sign:' + (r ? r.sign : 'Aries');
+      }
+      this.setState({ apQuery: '' });
+      this.apPick(key, true);
+      return;
+    }
+    if (k === 'bnCat') { this.setState({ bnCat: v, bnQuery: '' }); return; }
+    const marks = this.bnMine().marks, m = l => (marks.find(x => x.label === l) || {}).c;
+    const n = v === 'lp' ? (m('Life Path') || m('Today')) : v === 'today' ? m('Today') : v === 'py' ? (m('Personal Year') || m('Today'))
+      : v === 'draw' ? 10 + Math.floor(Math.random() * 90) : v === 'current' ? null : +v;
+    this.setState({ bnCat: 'all', bnQuery: '' });
+    if (n) this.bnPick(n, true);
+  }
+  studyVals() {
+    const st = this.state, vertical = (st.dtW || window.innerWidth || 1440) < this.BP.md;
+    const room = st.libView === 'astropedia' || st.libView === 'numbers' ? (st.libView === 'numbers' ? 'numbers' : 'astropedia') : null;
+    if (!room || !(vertical || this.curTab() === 'library')) return { spOn: false };
+    const s = this.studyState(), lv = this.studyPath(), tutKey = room + '.' + lv;
+    const tut = (s.tut || {})[tutKey] || {}, steps = this.STUDY_TUT[room][lv], n = steps.length;
+    const at = Math.max(0, Math.min(n, tut.step || 0));
+    const saveTut = patch => this.studySave({ tut: { ...(s.tut || {}), [tutKey]: { ...tut, ...patch } } });
+    const goStep = i => {
+      saveTut({ step: i, done: false, hidden: false });
+      this.studyGo(room, steps[i - 1][1]);
+      setTimeout(() => this.speak('Step ' + i + ' of ' + n + ', ' + steps[i - 1][0] + '.', 'polite'), 500);
+    };
+    const cur = at > 0 ? steps[at - 1] : null, pathName = this.STUDY_PATHS.find(x => x[0] === lv)[1];
+    return { spOn: true,
+      spPaths: this.STUDY_PATHS.map(([k, label]) => { const on = k === lv;
+        return { label: label, on: on, bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.24)' : 'var(--sf)', c: on ? 'var(--tx)' : 'var(--mut)',
+          go: () => { this.studySave({ path: k }); this.speak('Path: ' + label + '.', 'polite'); } }; }),
+      spTutOn: !tut.hidden, spTutPill: !!tut.hidden,
+      spTutShow: () => saveTut({ hidden: false }),
+      spTutHide: () => saveTut({ hidden: true }),
+      spTutHead: 'Tutorial · ' + pathName,
+      spTutCount: tut.done ? 'Finished' : at ? at + ' of ' + n : n + ' steps',
+      spTutIntro: !at && !tut.done, spTutStepOn: at > 0 && !tut.done, spTutDone: !!tut.done,
+      spTutIntroText: (room === 'astropedia'
+        ? { first: 'A first walk through the sky: the wheel, the Sun and Moon signs, the houses, the bodies and the aspects.',
+            way: 'The structure under the signs: elements, modalities, dignity, the kinds of house, orbs, and a chart to practise on.',
+            deep: 'The older and finer tools: sect, decans, reception, profection, the solar return and synastry.' }
+        : { first: 'A first walk through the Book: what a compound is, your own numbers, the four kinds, and today’s number.',
+            way: 'The Masters, the auspicious five, debt against season, and your numbers read together.',
+            deep: 'Mirrors, a root read whole, drawing before reading, and the Book beside the stars.' })[lv],
+      spTutBegin: () => goStep(1),
+      spTutTitle: cur ? cur[0] : '', spTutText: cur ? cur[2] : '',
+      spTutBar: steps.map((_, i) => ({ bg: i < at ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.3)' })),
+      spTutBackOn: at > 1, spTutBack: () => { if (at > 1) goStep(at - 1); },
+      spTutNextLabel: at >= n ? 'Finish' : 'Next \u203a',
+      spTutNext: () => { if (at >= n) { saveTut({ done: true, step: 0 }); this.speak('Tutorial finished.', 'polite'); } else goStep(at + 1); },
+      spTutShowMe: () => { if (cur) this.studyGo(room, cur[1]); },
+      spTutAgain: () => goStep(1),
+      spLevel: lv
+    };
+  }
   /* THE ASTROPEDIA, given the same room as the Book of Numbers (owner, 20
      October 2026). Every word is astropedia.js, apBlocks() for the essays and
      the app's own ASP_NATURE and ASP_SHORT for the aspects, so nothing here is
@@ -47415,7 +47875,7 @@ class Component extends DCLogic {
   apPick(key, scroll) {
     const e = this.apEntries().find(x => x.key === key);
     if (!e) return;
-    this.setState({ apOpen: key, apSec: e.ch, apFlip: (this.state.apFlip || 0) + 1 });
+    this.setState({ apOpen: key, apSec: e.ch, apPeek: null, apFlip: (this.state.apFlip || 0) + 1 });
     this.speak(e.name + (e.sub ? ', ' + e.sub : '') + '.', 'polite');
     if (scroll) setTimeout(() => {
       const f = document.querySelector('[data-ap-folio]');
@@ -47435,7 +47895,13 @@ class Component extends DCLogic {
     if (!(this.curTab() === 'library' && st.libView === 'astropedia')) return { libAstropedia: false };
     const A = this.AP(), all = this.apEntries();
     if (!A || !all.length) return { libAstropedia: false };
-    const S = this.apSky(), find = k => all.find(x => x.key === k);
+    const S = this.apSky(), find = k => all.find(x => x.key === k), lv = this.studyPath();
+    /* First steps names a thing on its first press and opens it on the
+       second; the other paths open on the first, as the room always did. */
+    const peek = (id, q, text, key) => () => {
+      if (lv === 'first' && st.apPeek !== id) this.setState({ apPeek: id, apPeekAt: { l: q.l, t: q.t, text: text, key: key } });
+      else this.apPick(key, false);
+    };
     const signE = n => find('sign:' + n), bodyE = n => find('body:' + n);
     const natalSun = S.natal.find(r => r.name === 'Sun'), skySun = S.sky.find(r => r.name === 'Sun');
     const homeKey = 'sign:' + (natalSun ? natalSun.sign : skySun ? skySun.sign : 'Aries');
@@ -47541,6 +48007,18 @@ class Component extends DCLogic {
       if (e.ess === 'synastry') links.push({ label: 'Go to The Commons', glyph: '⚭', c: 'var(--ac2-hi)', aria: 'Go to The Commons', go: () => this.setState({ libSub: 'commons', libView: null, selId: null }) });
       if (e.ess === 'orbs') ['Conjunction', 'Square', 'Trine'].forEach(n => link(n, '', 'aspect:' + n));
     }
+    const terms = [];
+    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key) terms.push({ label: label, g: '?', go: () => this.apPick(key, false) }); };
+    if (e.kind === 'sign') { const s = A.sign(e.name);
+      term(s.modality.charAt(0).toUpperCase() + s.modality.slice(1), 'concept:Modalities');
+      term(s.element.charAt(0).toUpperCase() + s.element.slice(1), 'concept:Elements');
+      term('Ruler', 'concept:Chart Ruler'); term('Decans', 'concept:Decans'); }
+    if (e.kind === 'house') { term(['Angular', 'Succedent', 'Cadent'][e.idx % 3], 'concept:Angular, Succedent, and Cadent Houses'); term('Intercepted signs', 'concept:Intercepted Signs'); }
+    if (e.kind === 'body') { term('At home, exalted, in fall', 'concept:Essential Dignity'); term('Retrograde', 'concept:Retrograde Motion');
+      if (e.name === 'Moon') term('Void of course', 'concept:Void of Course Moon');
+      if (e.name === 'Sun') { term('Combust and cazimi', 'concept:Combust and Cazimi'); term('Sect', 'concept:Sect'); } }
+    if (e.kind === 'point' && /Node/.test(e.name)) term('Eclipses', 'concept:Eclipses');
+    if (e.kind === 'aspect') { term('Orb', 'essay:orbs'); term('Aspect patterns', 'concept:Aspect Patterns'); }
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = d => sib[(at + d + sib.length) % sib.length];
     const q = String(st.apQuery || '').trim().toLowerCase();
@@ -47560,17 +48038,27 @@ class Component extends DCLogic {
       apTicks: ticks, apShapes: shapes, apHorizon: horizon,
       apSignLabels: A.SIGNS.map((s, i) => { const q2 = P(i * 30 + 15, 162), lit = litSigns[i] === 'on';
         return { g: s.glyph + '︎', l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--tx)' : this.AP_EL[s.element], fs: lit ? '19px' : '15px',
-          tip: s.name, go: () => this.apPick('sign:' + s.name, false) }; }),
+          tip: s.name, go: peek('sign:' + s.name, { l: pct(q2.x), t: pct(q2.y) }, s.glyph + '\uFE0E ' + s.name, 'sign:' + s.name) }; }),
       apHouseNums: Array.from({ length: 12 }, (_, i) => { const q2 = P(i * 30 + 15, 132), lit = litHouses[i] === 'on';
-        return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: () => this.apPick('house:' + (i + 1), false) }; }),
+        return { n: String(i + 1), l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--tx)' : 'var(--mut)', tip: this.apOrd(i + 1) + ' house', go: peek('house:' + (i + 1), { l: pct(q2.x), t: pct(q2.y) }, 'The ' + this.apOrd(i + 1) + ' house', 'house:' + (i + 1)) }; }),
       apSkyGlyphs: S.sky.map(r => { const q2 = P(r.lon, 101), lit = r.name === litBody;
         return { g: r.glyph + '︎', l: pct(q2.x), t: pct(q2.y), c: lit ? 'var(--ac2-hi)' : 'var(--tx)', fs: lit ? '17px' : '13px',
-          glow: lit ? '0 0 14px rgba(var(--atmc2),.9)' : '0 0 6px rgba(var(--atmc),.8)', tip: r.name + ' now, ' + fmtDeg(r), go: () => this.apPick('body:' + r.name, false) }; }),
+          glow: lit ? '0 0 14px rgba(var(--atmc2),.9)' : '0 0 6px rgba(var(--atmc),.8)', tip: r.name + ' now, ' + fmtDeg(r), go: peek('sky:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, r.glyph + '\uFE0E ' + r.name + ' now, ' + fmtDeg(r), 'body:' + r.name) }; }),
       apNatal: S.natal.filter(r => this.PLNS.slice(0, 10).some(x => x[0] === r.name)).map(r => { const q2 = P(r.lon, 84);
-        return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: () => this.apPick('body:' + r.name, false) }; }),
+        return { l: pct(q2.x), t: pct(q2.y), tip: 'Your ' + r.name + ', ' + fmtDeg(r), go: peek('natal:' + r.name, { l: pct(q2.x), t: pct(q2.y) }, 'Your ' + r.name + ', ' + fmtDeg(r), 'body:' + r.name) }; }),
       apStars: stars,
       apHorizonPath: (() => { const a = P(0, 176), b = P(180, 176); return 'M' + f1(a.x) + ' ' + f1(a.y) + 'L' + f1(b.x) + ' ' + f1(b.y); })(),
       apCenter: e.glyph, apCenterC: e.c, apCenterName: e.name,
+      apPeekOn: lv === 'first' && !!st.apPeek && !!st.apPeekAt,
+      apPeekL: st.apPeekAt ? st.apPeekAt.l : '0%', apPeekT: st.apPeekAt ? st.apPeekAt.t : '0%', apPeekText: st.apPeekAt ? st.apPeekAt.text : '',
+      apPeekGo: () => { if (st.apPeekAt) this.apPick(st.apPeekAt.key, false); },
+      /* The key under the wheel, on the first two paths. */
+      apKeyOn: lv !== 'deep',
+      apKey: [{ label: 'Now', sw: 'var(--tx)', ring: '0 0 6px rgba(var(--atmc),.9)' }]
+        .concat(S.natal.length ? [{ label: 'Yours', sw: 'var(--ac2-hi)', ring: '0 0 6px rgba(var(--atmc2),.6)' }] : [])
+        .concat(['fire', 'earth', 'air', 'water'].map(el => ({ label: el.charAt(0).toUpperCase() + el.slice(1), sw: this.AP_EL[el], ring: 'none' }))),
+      /* The words on the page, each linked to the entry that explains it. */
+      apTermsOn: lv !== 'deep' && terms.length > 0, apTerms: terms,
       /* The reader's sky, and the sky now, as ways into the signs. */
       apMarks: [].concat(
         S.natal.filter(r => r.name === 'Sun' || r.name === 'Moon').map(r => ({ label: 'Your ' + r.name, r: r })),
@@ -47686,7 +48174,7 @@ class Component extends DCLogic {
   bnPick(n, scroll) {
     const M = window.NumberMatrix, e = M ? M.get(n) : null;
     if (!e) return;
-    this.setState({ bnSel: n, bnFlip: (this.state.bnFlip || 0) + 1 });
+    this.setState({ bnSel: n, bnPeek: null, bnFlip: (this.state.bnFlip || 0) + 1 });
     const ms = this.bnMine().marks.filter(m => m.c === n), cyc = e.karmic && ms.length && ms.every(m => !m.natal) ? M.get(n, { cycle: true }) : null;
     this.speak(n + ', ' + (cyc ? cyc.title : e.title + '. ' + e.category) + '.', 'polite');
     /* The folio is brought back into view by its nearest scroller, which is
@@ -47712,7 +48200,11 @@ class Component extends DCLogic {
     if (!on || !M) return { libNumBook: false };
     const all = [];
     for (let n = 10; n <= 99; n++) { const e = M.get(n); if (e) all.push({ ...e, cat: this.BN_CAT[e.category] || 'standard' }); }
-    const mine = this.bnMine(), marksOf = n => mine.marks.filter(m => m.c === n);
+    const mine = this.bnMine(), marksOf = n => mine.marks.filter(m => m.c === n), lv = this.studyPath();
+    const peek = (id, at, text, open) => () => {
+      if (lv === 'first' && st.bnPeek !== id) this.setState({ bnPeek: id, bnPeekAt: { l: at.l, t: at.t, text: text } });
+      else open();
+    };
     const yours = new Set(mine.marks.filter(m => m.label !== 'Today').map(m => m.c));
     const lp = mine.marks.find(m => m.label === 'Life Path'), today = mine.marks.find(m => m.label === 'Today');
     const sel = M.has(st.bnSel) ? st.bnSel : (lp ? lp.c : (today ? today.c : 33));
@@ -47758,7 +48250,7 @@ class Component extends DCLogic {
             : x.cat === 'master' ? '0 0 12px 2px rgba(var(--atmc),.7)' : 'none',
           anim: isSel ? 'bnPulse 2.8s ease-in-out infinite' : 'bnDotIn .7s cubic-bezier(.2,.7,.2,1) both',
           delay: isSel ? '0ms' : (i * 11) + 'ms',
-          tip: x.n + ' · ' + x.title, go: () => this.bnPick(x.n, false) };
+          tip: x.n + ' · ' + x.title, go: peek('n:' + x.n, { l: pct(s.x), t: pct(s.y) }, x.n + ' · ' + x.title, () => this.bnPick(x.n, false)) };
       }),
       bnSpokes: Array.from({ length: 9 }, (_, i) => {
         const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
@@ -47770,11 +48262,26 @@ class Component extends DCLogic {
         const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
         return { d: String(i + 1), l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)),
           c: lit ? 'var(--ac2-hi)' : 'var(--mut)',
-          go: () => { const r = i + 1, seq = all.filter(x => x.root === r).map(x => x.n), at = seq.indexOf(sel);
-            this.setState({ bnRoot: r }); this.bnPick(seq[(at + 1) % seq.length], false); } };
+          go: peek('r:' + (i + 1), { l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)) }, 'Root ' + (i + 1) + ' \u00b7 ' + nameOf(i + 1),
+            () => { const r = i + 1, seq = all.filter(x => x.root === r).map(x => x.n), at = seq.indexOf(sel);
+              this.setState({ bnRoot: r }); this.bnPick(seq[(at + 1) % seq.length], false); }) };
       }),
       bnTx: spot.x.toFixed(1), bnTy: spot.y.toFixed(1),
       bnConste: conste, bnConsteOn: !!conste,
+      bnPeekOn: lv === 'first' && !!st.bnPeek && !!st.bnPeekAt,
+      bnPeekL: st.bnPeekAt ? st.bnPeekAt.l : '0%', bnPeekT: st.bnPeekAt ? st.bnPeekAt.t : '0%', bnPeekText: st.bnPeekAt ? st.bnPeekAt.text : '',
+      bnPeekGo: () => { const id = st.bnPeek || ''; if (/^n:/.test(id)) this.bnPick(+id.slice(2), false); else this.setState({ bnPeek: null }); },
+      bnKeyOn: lv !== 'deep',
+      bnKey: [{ label: 'Yours', sw: 'var(--mut)', ring: '0 0 0 2px var(--bg),0 0 0 3.5px var(--tx)' }]
+        .concat([['master', 'Master'], ['auspicious', 'Elite Auspicious'], ['karmic', 'Karmic Debt'], ['standard', 'Sub-Frequency']]
+          .map(([k, l]) => ({ label: l, sw: this.BN_FILL[k], ring: 'none' }))),
+      bnTermsOn: lv !== 'deep', bnTerms: [
+        { label: 'Every ' + ({ master: 'Master Number', auspicious: 'Elite Auspicious number', karmic: 'Karmic Debt', standard: 'Sub-Frequency' })[e.cat],
+          g: '?', go: () => this.setState({ bnCat: e.cat, bnQuery: '' }) },
+        { label: 'Root ' + e.root + ', ' + nameOf(e.root), g: '?', go: () => this.setState({ bnRoot: e.root, bnCat: 'all', bnQuery: '' }) }
+      ].concat(marksOf(sel).some(m => m.natal) || lp ? [{ label: 'My numerology', g: '\u2192', go: this.searchGo(this.searchSpirit('numerology', 2)) }] : []),
+      bnLeadOn: lv === 'first' && where.length > 0,
+      bnLeadText: where.map(l => l === 'Today' ? 'Today\u2019s number' : 'Your ' + l).join(' \u00b7 '),
       bnCenter: String(sel), bnCenterC: this.BN_INK[e.cat], bnCenterRoot: '/' + e.root,
       bnMandalaLabel: 'The ninety compounds on their nine roots, ' + sel + ' open',
       /* Today and the reader's own, as chips into the folio. */
@@ -47792,7 +48299,7 @@ class Component extends DCLogic {
       bnCatBg: e.cat === 'karmic' && !asCycle ? 'rgba(var(--atmc2),.14)' : 'rgba(var(--atmc),.2)',
       bnSeasonOn: !!(cyc && cyc.title !== e.title), bnSeasonHead: asCycle ? 'In the book' : 'As a season',
       bnSeasonTitle: cyc ? (asCycle ? e.title : cyc.title) : '', bnSeasonDesc: cyc ? (asCycle ? e.desc : cyc.desc) : '',
-      bnWhereOn: where.length > 0, bnWhere: where.join(' · '),
+      bnWhereOn: where.length > 0 && lv !== 'first', bnWhere: where.join(' · '),
       bnRootHead: e.master ? sel + ' · ' + nameOf(sel) : 'Root ' + e.root + ' · ' + nameOf(e.root),
       bnRootText: rc ? rc.universal : '', bnRootOn: !!rc,
       bnOpp: opp, bnOppOn: !!opp,
@@ -54066,6 +54573,7 @@ class Component extends DCLogic {
           ...this.atlasVals(),
           ...this.apVals(),
           ...this.numBookVals(),
+          ...this.studyVals(),
           ...this.tarotVals(),
           ...this.dreamVals(),
           ...this.oracleVals(),

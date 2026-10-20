@@ -4632,6 +4632,58 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
 
+## Study paths, the five guides, and the tutorials
+Asked for by the owner on 20 October 2026, after asking how the Astropedia and
+the Book of Numbers would read to somebody brand new: "Add paths the reader can
+select, and show the five guides based on the reader's preference/level.
+Incorporate tutorials based on the path as well."
+
+**A path is the reader's level**, First steps, Finding my way or Deep study
+(`STUDY_PATHS`), chosen in a radiogroup at the top of both rooms and kept per
+profile in `incommon.p.<id>.study` (`studyState()`, `studyPath()`), one choice
+shared by the two rooms. First steps is the path until one is chosen.
+`deleteProfile()` drops the key with the profile's others.
+
+**The five guides, by path** (all in `apVals()` and `numBookVals()`):
+
+| Guide | First steps | Finding my way | Deep study |
+|---|---|---|---|
+| A name on the first press of anything on a wheel (`apPeek`, `bnPeek`), opened by the second press or the bubble | yes | no | no |
+| Words here: the terms on a page linked to the entries that explain them (`apTerms`, `bnTerms`) | yes | yes | no |
+| A key under each wheel (`apKey`, `bnKey`) | yes | yes | no |
+| The reader's own number leads the Book's folio (`bnLeadText`) | yes | no | no |
+| A tutorial | yes | yes | yes |
+
+Deep study is the rooms as they were, the tutorial aside.
+
+**Six tutorials** (`STUDY_TUT`), one per path per room, four to seven steps
+each, written for this pass in the app's voice: no dash, no "you are", astral
+body rather than planet, and a question rather than a verdict where one is
+asked. **Every step opens the entry it talks about** (`studyGo()`: an entry,
+the reader's own Sun or Moon sign, their Life Path, today's number, a filter),
+so the reading happens in the room. The card at the top of the room holds the
+path's header and progress; **the step itself is drawn at the top of the
+folio** (`spTutStepOn`), because a step scrolls to the folio and a Next button
+left in the card above was scrolled off the screen. Progress, a finished
+tutorial and a hidden one are kept per room per path.
+
+**This is an exception to "Discovery belongs to the reader" and to "No
+disclaimers", and the owner made it.** The tutorials explain the rooms, which
+those rules otherwise bar. They do so only on a path the reader chose, only
+while the reader keeps the tutorial open (it hides to a pill), and they
+explain the tradition and the room, never how the app computes anything. Do
+not take this as licence for an explanatory line anywhere else.
+
+Driven in Chromium, both shells, with a chart of the reader's own: a first
+press names and a second opens; a tutorial walked from Begin to Finish in each
+room, every step landing on its entry; a term opening its concept; Deep study
+with no key, no terms and a one press wheel; the path shared between the rooms;
+hiding and showing the tutorial. Measured with the harness's own
+`contrastFails()` and `tapTargets()` over both rooms with the tutorial card, a
+step, the bubble, the terms and the key on screen: four identities, hardened
+and not, at 1440 and 375, 64 cases, 70 to 108 elements each, no pair under
+4.5:1 and no control under 44px.
+
 ## The Astropedia is a sky, a folio and thirteen chapters
 Asked for by the owner on 20 October 2026, after the Book of Numbers: "Give
 it the same glamour and enchantment." The room keeps its address
