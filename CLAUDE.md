@@ -5155,6 +5155,18 @@ back four seconds waits and lands Kyoto; and a stored profile in Coimbra with
 no coordinates asks for the list at boot and is placed. Lisbon would not have
 tested it: the US list's fallback already knows the large world cities.
 
+**Puerto Rico is Atlantic time, and the US list had it as New York's** (found
+20 October 2026, adding Rio Piedras at the owner's request). `STATE_TZ` filed
+`PR` under `E`, so every Puerto Rico place in `gazetteer-us.js` carried
+`America/New_York` and a winter birth was drawn an hour late: 06:30 on 9
+January 1985 in San Juan came out at 11:30 UTC instead of 10:30. The world
+list's own Puerto Rico rows were right all along, but the US rows rank first.
+`PR` is code `R` now, `America/Puerto_Rico`, minus four, no daylight saving,
+and `reresolveLocations()` gives a stored profile whose coordinates sit on the
+island and whose zone is New York's the right zone once at boot. Rio Piedras
+is in the US list rather than left to the world list, which never carried it:
+a search for it found Rio Piedras in Salta, Argentina.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
