@@ -1920,9 +1920,10 @@ once per new item. `hdAtlasTo` marks the item it scrolls to itself in
 and leaving the atlas clear `atlasItem`, and every clean bag that clears
 `atlasSec` clears it too.
 
-The anchors are on the HD atlas markup only. Astropedia shares the block and
-row markup byte for byte, so an edit to it has to be anchored on `atlasSecs`, or
-a replace across the file lands on four sites instead of two.
+Since 20 October 2026 the accordion is gone and the anchor is the folio's own
+id (`atlasFolioId`), with the chapter's on a hidden span: see "The Human Design
+Atlas is the wiring, a folio and fifteen chapters". The idents above are
+unchanged, because they are the slugs `atlasItem` stores.
 
 ## Anything that can be pressed is lifted; only ornament is flat
 Decided by the owner on 20 October 2026: "All flat items in the app that have
@@ -4632,6 +4633,60 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
 
+## The Human Design Atlas is the wiring, a folio and fifteen chapters
+Asked for by the owner on 20 October 2026 ("Doing the same thing for human
+design"), after the Astropedia and the study paths. The room is the
+Astropedia's shape with the wiring in place of the wheel.
+
+**`atlasSec` and `atlasItem` mean exactly what they meant.** `atlasSec` is the
+chapter (`HDAtlas.SECTIONS`) and `atlasItem` the slugged entry inside it, with
+the same slugs the accordion's anchors used: a Type by name, a profile by key
+(`1-3`), a centre by its key, a gate as `g<n>`, a channel by its pair, the rest
+by name. So `hdAtlasTo()`, Learn from Atlas, the chart popup, the search rows
+and the Learn pages' `/library/human-design-atlas/gate/<n>` all land on the
+entry they name with no change. The folio carries the anchor
+`scrollAtlasIntoView()` looks for (`atlasFolioId`), and a hidden span carries
+the chapter's, so that scroll still lands. `atlasPick()` marks
+`_atlasScrolled` itself, so a pick from the wiring does not also trigger the
+scroll `syncAtlasItem()` runs for an address.
+
+**Every word is `hd-atlas.js`**, and `atlasBlocks()` stays for the two essays
+(What Human Design is, An example wiring). `atlasEntries()` is the one list,
+with `atlasHay()` giving the room's search the writing and not only the names.
+
+**The wiring is drawn from the app's own geometry**: `BG_POS` boxes in the
+shapes the field draws (`hdShape()`), the sixty four gates spaced round each
+centre's outline (`hdGateSpots()`, memoised), and the thirty six channels drawn
+gate to gate. The reader's defined centres wear the atlas's own colours, their
+gates are white and their channels warm, and the gates the sky holds this
+minute are ringed in `--blue` and breathe (`hdSkyNow()`, the same hd-transit
+reading the gates card on Today uses). The open entry is drawn on top: a
+centre, a gate with its channels and partner gates, a channel, a type's
+centres (`HD_TYPE_LIGHT`), an authority's centre (`HD_AUTH_CENTRE`), a
+strategy's types, the reader's four Cross gates, the example wiring. It is
+pointer ornament inside `[data-chart]`, as the other two centrepieces are.
+
+**The folio links the system together**: a gate to its centre, its channels and
+**hexagram N in the Book of Changes**, because gate N is hexagram N; a channel
+to its gates; a profile to its two lines; a type to its strategy; an authority
+to its centre. "In your chart" is the reader's own activations, centres,
+channels and Cross, and opens the wiring on My Charts.
+
+**The study paths reach it.** `studyVals()` serves all three rooms, the five
+guides apply as they do in the other two (the first-path lead is the reader's
+own entry, "Your type"), and `STUDY_TUT.hdatlas` holds three tutorials: First
+steps (the wiring, type, strategy, authority, the centres, the profile, gates
+and channels), Finding my way (definition, circuits, open and defined, lines,
+the Cross, the example) and Deep study (gate and hexagram, the reader's
+channels, the sky now, hanging gates, strategy beside authority). Steps that
+name the reader's own fall back to a sensible entry under the sample.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room with the tutorial card, a step, the bubble, a gate with its terms and
+links, and the sixty four gate tiles on screen: four identities, hardened and
+not, at 1440 and 375, 48 cases, 85 to 203 elements each, no pair under 4.5:1
+and no control under 44px.
+
 ## Study paths, the five guides, and the tutorials
 Asked for by the owner on 20 October 2026, after asking how the Astropedia and
 the Book of Numbers would read to somebody brand new: "Add paths the reader can
@@ -4639,9 +4694,9 @@ select, and show the five guides based on the reader's preference/level.
 Incorporate tutorials based on the path as well."
 
 **A path is the reader's level**, First steps, Finding my way or Deep study
-(`STUDY_PATHS`), chosen in a radiogroup at the top of both rooms and kept per
+(`STUDY_PATHS`), chosen in a radiogroup at the top of each study room and kept per
 profile in `incommon.p.<id>.study` (`studyState()`, `studyPath()`), one choice
-shared by the two rooms. First steps is the path until one is chosen.
+shared by every study room (the Human Design Atlas joined them the same day). First steps is the path until one is chosen.
 `deleteProfile()` drops the key with the profile's others.
 
 **The five guides, by path** (all in `apVals()` and `numBookVals()`):

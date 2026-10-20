@@ -2660,40 +2660,252 @@ input[type="date"]{color-scheme:dark}
 
 
 <sc-if value="{{ libAtlas }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Library / Human Design Atlas" style="flex:1;overflow-y:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button onClick="{{ atlasBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac)"><span style="font:400 14px var(--fb)">←</span> Library</button>
-      <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
-    </div>
-    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="15">
-      <div data-lift="card" id="{{ sec.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px">
-        <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
-          <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
-          <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ sec.count }}</span>
-          <span style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ sec.icon }}</span>
-        </button>
-        <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .2s ease">
-            <sc-for list="{{ sec.blocks }}" as="b" hint-placeholder-count="5">
-              <div id="{{ b.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px;border-left:{{ b.bl }};padding-left:{{ b.pl }}">
-                <div style="font:600 12.5px var(--fu);color:var(--ac)">{{ b.head }}</div>
-                <sc-if value="{{ b.hasSub }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ b.sub }}</div>
+  <!-- THE HUMAN DESIGN ATLAS. The wiring, live, a folio for the open entry and
+       the fifteen chapters under them. The wiring is pointer ornament inside
+       [data-chart]; the folio and the chapters are the keyboard's way through
+       every entry. Written once, placed in both shells. -->
+  <div data-screen-label="Library / Human Design Atlas" data-hd-room style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 18px 32px;display:flex;flex-direction:column;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+      <span id="{{ atlasSecAnchor }}" aria-hidden="true" style="display:block;height:0;scroll-margin-top:calc(var(--hdr) + 12px)"></span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ atlasBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
+        <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
+      </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:14px;align-items:center">
+          <div data-chart="hd-atlas" role="img" aria-label="{{ hdwLabel }}" style="position:relative;width:100%;max-width:300px;aspect-ratio:300/520">
+            <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
+            <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+              <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
+                <line x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+              </sc-for>
+              <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
+                <polygon points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
+              </sc-for>
+            </svg>
+            <sc-for list="{{ hdwCentres }}" as="cl" hint-placeholder-count="9">
+              <span onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
+            </sc-for>
+            <sc-for list="{{ hdwGates }}" as="gd" hint-placeholder-count="64">
+              <span data-hd-gate onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
+            </sc-for>
+            <sc-if value="{{ hdwPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ hdwPeekGo }}" style="position:absolute;left:{{ hdwPeekL }};top:{{ hdwPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ hdwPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
+          </div>
+          <sc-if value="{{ hdwKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ hdwKey }}" as="ky" hint-placeholder-count="4">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+            <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
+              <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
+                <span style="font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-hd-folio id="{{ atlasFolioId }}" data-lift="card" tabindex="0" role="region" aria-label="{{ hdFolioLabel }}" onKeyDown="{{ hdKeys }}" style="flex:1 1 380px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
+          <div style="display:flex;flex-direction:column;gap:15px;animation:{{ hdAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
+            <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
+            <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 {{ hdIconFs }}/1 var(--fd);color:var(--ac2-hi);text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ hdIcon }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
+                <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
                 </sc-if>
-                <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
-                  <div id="{{ r.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:2px;border-left:{{ r.bl }};padding-left:{{ r.pl }}">
-                    <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}">
-                      <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ r.tc }};background:{{ r.tb }}">{{ r.tag }}</span>
+              </div>
+            </div>
+            <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
+              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdEssayOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ hdEssay }}" as="es" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid rgba(var(--atmc),.6);padding-left:12px">
+                    <sc-if value="{{ es.hasHead }}" hint-placeholder-val="{{ true }}">
+                      <div style="font:400 16px/1.3 var(--fd);color:var(--tx)">{{ es.head }}</div>
                     </sc-if>
-                    <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx)">{{ r.text }}</div>
+                    <sc-for list="{{ es.rows }}" as="er" hint-placeholder-count="2">
+                      <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ er.t }}</div>
+                    </sc-for>
                   </div>
                 </sc-for>
               </div>
+            </sc-if>
+            <sc-if value="{{ hdFacetsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
+                <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
+                  <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
+                    <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
+                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
+                    <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
+                      <span style="font:600 12px var(--fu);color:var(--tx)">{{ yo.label }}</span>
+                      <span style="font:400 12px var(--fu);color:var(--mut)">{{ yo.text }}</span>
+                      <span aria-hidden="true" style="font:400 13px var(--fb);color:var(--ac2-hi)">&#8594;</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdLinksOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                <sc-for list="{{ hdLinks }}" as="lk" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
+              <button data-lift onClick="{{ hdWander }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">&#10022; Wander</button>
+              <sc-if value="{{ hdStepOn }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:8px">
+                  <button data-lift onClick="{{ hdPrev }}" aria-label="{{ hdPrevAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1 1 0;min-width:0;min-height:46px;padding:0 14px;display:flex;align-items:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx);justify-content:flex-start"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ hdPrevLabel }}</span></button>
+                  <button data-lift onClick="{{ hdNext }}" aria-label="{{ hdNextAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1 1 0;min-width:0;min-height:46px;padding:0 14px;display:flex;align-items:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx);justify-content:flex-end"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ hdNextLabel }}</span></button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div role="radiogroup" aria-label="Atlas chapters" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ hdChapters }}" as="c" hint-placeholder-count="13">
+            <button data-lift role="radio" aria-checked="{{ c.on }}" onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 11.5px var(--fu);color:{{ c.c }}">
+              <span>{{ c.label }}</span>
+              <span style="font:600 10px var(--fu);color:var(--mut)">{{ c.count }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <input data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <sc-if value="{{ hdSearching }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ hdHitLine }}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
+            <sc-for list="{{ hdHits }}" as="h" hint-placeholder-count="6">
+              <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                <span aria-hidden="true" style="flex:none;width:44px;font:400 {{ h.gfs }}/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                  <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
+                  <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
+                </span>
+                <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hdGridOn }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
+            <sc-for list="{{ hdGrid }}" as="h" hint-placeholder-count="12">
+              <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                <span aria-hidden="true" style="flex:none;width:44px;font:400 {{ h.gfs }}/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                  <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
+                  <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
+                </span>
+                <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                </sc-if>
+              </button>
             </sc-for>
           </div>
         </sc-if>
       </div>
-    </sc-for>
+    </div>
   </div>
 </sc-if>
 
@@ -9339,40 +9551,252 @@ input[type="date"]{color-scheme:dark}
 
 
 <sc-if value="{{ libAtlas }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Library / Human Design Atlas" style="flex:1;overflow-y:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .25s ease">
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button onClick="{{ atlasBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac)"><span style="font:400 14px var(--fb)">←</span> Library</button>
-      <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
-    </div>
-    <sc-for list="{{ atlasSecs }}" as="sec" hint-placeholder-count="15">
-      <div data-lift="card" id="{{ sec.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid {{ sec.bd }};border-radius:var(--rad);padding:14px 15px">
-        <button onClick="{{ sec.toggle }}" aria-expanded="{{ sec.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
-          <span style="flex:1;min-width:0;font:400 18px var(--fd);color:var(--tx);text-align:left">{{ sec.title }}</span>
-          <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.06em;color:var(--dim)">{{ sec.count }}</span>
-          <span style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ sec.icon }}</span>
-        </button>
-        <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:14px;animation:fadeUp .2s ease">
-            <sc-for list="{{ sec.blocks }}" as="b" hint-placeholder-count="5">
-              <div id="{{ b.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:11px;border-left:{{ b.bl }};padding-left:{{ b.pl }}">
-                <div style="font:600 12.5px var(--fu);color:var(--ac)">{{ b.head }}</div>
-                <sc-if value="{{ b.hasSub }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:600 10px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">{{ b.sub }}</div>
+  <!-- THE HUMAN DESIGN ATLAS. The wiring, live, a folio for the open entry and
+       the fifteen chapters under them. The wiring is pointer ornament inside
+       [data-chart]; the folio and the chapters are the keyboard's way through
+       every entry. Written once, placed in both shells. -->
+  <div data-screen-label="Library / Human Design Atlas" data-hd-room style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 18px 32px;display:flex;flex-direction:column;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+      <span id="{{ atlasSecAnchor }}" aria-hidden="true" style="display:block;height:0;scroll-margin-top:calc(var(--hdr) + 12px)"></span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ atlasBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
+        <div style="font:400 24px/1.25 var(--fd)">Human Design Atlas</div>
+      </div>
+      <!-- The reader's path and its tutorial: one block, shared by the
+           Astropedia and the Book of Numbers (studyVals). -->
+      <sc-if value="{{ spOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px">
+            <span style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-right:4px">Your path</span>
+            <div role="radiogroup" aria-label="Your path" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ spPaths }}" as="pa" hint-placeholder-count="3">
+                <button data-lift role="radio" aria-checked="{{ pa.on }}" onClick="{{ pa.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid {{ pa.bd }};border-radius:999px;background:{{ pa.bg }};font:600 11.5px var(--fu);color:{{ pa.c }}">{{ pa.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ spTutPill }}" hint-placeholder-val="{{ false }}">
+              <button data-lift onClick="{{ spTutShow }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px dashed var(--ac2-hi);border-radius:999px;background:var(--sf);font:600 11.5px var(--fu);color:var(--ac2-hi)">&#10022; Show the tutorial</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ spTutOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="card" role="region" aria-label="Tutorial" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(120deg,rgba(var(--atmc),.2),var(--sf) 55%);border:1px solid rgba(var(--atmc),.5);border-left:3px solid var(--ac2-hi);border-radius:var(--rad);padding:12px 12px 14px 16px;animation:fadeUp .3s ease">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;min-width:0;font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--mut)">{{ spTutCount }}</span>
+                <button onClick="{{ spTutHide }}" aria-label="Hide the tutorial" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;font:400 18px var(--fu);color:var(--mut)">&#215;</button>
+              </div>
+              <sc-if value="{{ spTutIntro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 240px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">{{ spTutIntroText }}</div>
+                  <button data-lift onClick="{{ spTutBegin }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Begin</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+                <div aria-hidden="true" style="display:flex;gap:4px">
+                  <sc-for list="{{ spTutBar }}" as="tb" hint-placeholder-count="6">
+                    <span style="flex:1;height:3px;border-radius:2px;background:{{ tb.bg }};transition:background-color .4s ease"></span>
+                  </sc-for>
+                </div>
+                <div style="font:400 15px/1.3 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+              </sc-if>
+              <sc-if value="{{ spTutDone }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                  <div style="flex:1 1 200px;font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">The path is walked. Another path, or this one again, whenever you like.</div>
+                  <button data-lift onClick="{{ spTutAgain }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Walk it again</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:14px;align-items:center">
+          <div data-chart="hd-atlas" role="img" aria-label="{{ hdwLabel }}" style="position:relative;width:100%;max-width:300px;aspect-ratio:300/520">
+            <div aria-hidden="true" style="position:absolute;inset:-6% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 55%,rgba(var(--atmc2),.13),rgba(var(--atmc),.12) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
+            <svg viewBox="0 0 300 520" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+              <sc-for list="{{ hdwChans }}" as="ch" hint-placeholder-count="36">
+                <line x1="{{ ch.x1 }}" y1="{{ ch.y1 }}" x2="{{ ch.x2 }}" y2="{{ ch.y2 }}" style="stroke:{{ ch.c }};stroke-opacity:{{ ch.o }};stroke-width:{{ ch.w }};stroke-linecap:round;transition:stroke .4s ease"></line>
+              </sc-for>
+              <sc-for list="{{ hdwCentres }}" as="ce" hint-placeholder-count="9">
+                <polygon points="{{ ce.pts }}" style="fill:{{ ce.fill }};fill-opacity:{{ ce.fo }};stroke:{{ ce.stroke }};stroke-width:{{ ce.sw }};stroke-linejoin:round;filter:{{ ce.glow }};transition:fill .4s ease,stroke .4s ease"></polygon>
+              </sc-for>
+            </svg>
+            <sc-for list="{{ hdwCentres }}" as="cl" hint-placeholder-count="9">
+              <span onClick="{{ cl.go }}" style="position:absolute;left:{{ cl.l }};top:{{ cl.t }};transform:translate(-50%,-50%);min-width:44px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 8.5px var(--fu);letter-spacing:.12em;color:{{ cl.lc }}">{{ cl.label }}</span>
+            </sc-for>
+            <sc-for list="{{ hdwGates }}" as="gd" hint-placeholder-count="64">
+              <span data-hd-gate onClick="{{ gd.go }}" title="{{ gd.tip }}" style="position:absolute;left:{{ gd.l }};top:{{ gd.t }};transform:translate(-50%,-50%);width:14px;height:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2"><span style="flex:none;width:{{ gd.size }};height:{{ gd.size }};border-radius:50%;background:{{ gd.fill }};box-shadow:{{ gd.ring }};animation:{{ gd.anim }};transition:width .3s ease,height .3s ease"></span></span>
+            </sc-for>
+            <sc-if value="{{ hdwPeekOn }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ hdwPeekGo }}" style="position:absolute;left:{{ hdwPeekL }};top:{{ hdwPeekT }};z-index:8;transform:translate(-50%,calc(-100% - 12px));white-space:nowrap;cursor:pointer;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2-hi);box-shadow:0 6px 18px rgba(0,0,0,.45);font:600 11.5px var(--fu);color:var(--tx);animation:fadeUp .2s ease">{{ hdwPeekText }} <span style="color:var(--ac2-hi)">&#8250;</span></span>
+            </sc-if>
+          </div>
+          <sc-if value="{{ hdwKeyOn }}" hint-placeholder-val="{{ false }}">
+            <div aria-label="Key" role="group" style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center">
+              <sc-for list="{{ hdwKey }}" as="ky" hint-placeholder-count="4">
+                <span style="display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);color:var(--mut)"><span aria-hidden="true" style="flex:none;width:9px;height:9px;border-radius:50%;background:{{ ky.sw }};box-shadow:{{ ky.ring }}"></span>{{ ky.label }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div role="group" aria-label="Your wiring, and the sky now" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+            <sc-for list="{{ hdwMarks }}" as="m" hint-placeholder-count="3">
+              <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
+                <span style="font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:400 14px var(--fd);color:var(--tx)">{{ m.val }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-hd-folio id="{{ atlasFolioId }}" data-lift="card" tabindex="0" role="region" aria-label="{{ hdFolioLabel }}" onKeyDown="{{ hdKeys }}" style="flex:1 1 380px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
+          <div style="display:flex;flex-direction:column;gap:15px;animation:{{ hdAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <sc-if value="{{ spTutStepOn }}" hint-placeholder-val="{{ false }}">
+              <div role="group" aria-label="Tutorial step" style="display:flex;flex-direction:column;gap:9px;border:1px solid rgba(var(--atmc),.55);border-left:3px solid var(--ac2-hi);border-radius:14px;background:rgba(var(--atmc),.14);padding:12px 12px 12px 14px">
+                <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ spTutHead }} · {{ spTutCount }}</div>
+                <div style="font:400 17px/1.25 var(--fd);color:var(--tx)">{{ spTutTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ spTutText }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-if value="{{ spTutBackOn }}" hint-placeholder-val="{{ false }}">
+                    <button data-lift onClick="{{ spTutBack }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx)">&#8249; Back</button>
+                  </sc-if>
+                  <button data-lift onClick="{{ spTutShowMe }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--ac2-hi)">Show me</button>
+                  <button data-lift onClick="{{ spTutNext }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">{{ spTutNextLabel }}</button>
+                </div>
+              </div>
+            </sc-if>
+            <div style="font:700 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hdChapterName }}</div>
+            <sc-if value="{{ hdFamOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 19px/1.2 var(--fd);color:var(--ac2-hi)">{{ hdFam }}</div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span aria-hidden="true" style="flex:none;min-width:66px;height:66px;padding:0 6px;box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.5);background:radial-gradient(circle,rgba(var(--atmc2),.12),transparent 70%);font:400 {{ hdIconFs }}/1 var(--fd);color:var(--ac2-hi);text-shadow:0 0 22px rgba(var(--atmc2),.45)">{{ hdIcon }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                <div style="font:400 clamp(24px,5vw,32px)/1.12 var(--fd);color:var(--tx);text-wrap:balance">{{ hdName }}</div>
+                <sc-if value="{{ hdKickerOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdKicker }}</div>
                 </sc-if>
-                <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
-                  <div id="{{ r.anchor }}" style="scroll-margin-top:calc(var(--hdr) + 12px);display:flex;flex-direction:column;gap:2px;border-left:{{ r.bl }};padding-left:{{ r.pl }}">
-                    <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}">
-                      <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ r.tc }};background:{{ r.tb }}">{{ r.tag }}</span>
+              </div>
+            </div>
+            <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
+              <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdEssayOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ hdEssay }}" as="es" hint-placeholder-count="3">
+                  <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid rgba(var(--atmc),.6);padding-left:12px">
+                    <sc-if value="{{ es.hasHead }}" hint-placeholder-val="{{ true }}">
+                      <div style="font:400 16px/1.3 var(--fd);color:var(--tx)">{{ es.head }}</div>
                     </sc-if>
-                    <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx)">{{ r.text }}</div>
+                    <sc-for list="{{ es.rows }}" as="er" hint-placeholder-count="2">
+                      <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ er.t }}</div>
+                    </sc-for>
                   </div>
                 </sc-for>
               </div>
+            </sc-if>
+            <sc-if value="{{ hdFacetsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px">
+                <sc-for list="{{ hdFacets }}" as="fc" hint-placeholder-count="4">
+                  <div style="display:flex;flex-direction:column;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:11px 13px">
+                    <div style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ fc.label }}</div>
+                    <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ fc.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
+                <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ hdYours }}" as="yo" hint-placeholder-count="2">
+                    <button data-lift onClick="{{ yo.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.16)">
+                      <span style="font:600 12px var(--fu);color:var(--tx)">{{ yo.label }}</span>
+                      <span style="font:400 12px var(--fu);color:var(--mut)">{{ yo.text }}</span>
+                      <span aria-hidden="true" style="font:400 13px var(--fb);color:var(--ac2-hi)">&#8594;</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hdLinksOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                <sc-for list="{{ hdLinks }}" as="lk" hint-placeholder-count="3">
+                  <button data-lift onClick="{{ lk.go }}" aria-label="{{ lk.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2)">
+                    <span aria-hidden="true" style="font:400 15px/1 var(--fb);color:{{ lk.c }}">{{ lk.glyph }}</span>
+                    <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ lk.label }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
+              <button data-lift onClick="{{ hdWander }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">&#10022; Wander</button>
+              <sc-if value="{{ hdStepOn }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:8px">
+                  <button data-lift onClick="{{ hdPrev }}" aria-label="{{ hdPrevAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1 1 0;min-width:0;min-height:46px;padding:0 14px;display:flex;align-items:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx);justify-content:flex-start"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ hdPrevLabel }}</span></button>
+                  <button data-lift onClick="{{ hdNext }}" aria-label="{{ hdNextAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1 1 0;min-width:0;min-height:46px;padding:0 14px;display:flex;align-items:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 12px var(--fu);color:var(--tx);justify-content:flex-end"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ hdNextLabel }}</span></button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div role="radiogroup" aria-label="Atlas chapters" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ hdChapters }}" as="c" hint-placeholder-count="13">
+            <button data-lift role="radio" aria-checked="{{ c.on }}" onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 14px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 11.5px var(--fu);color:{{ c.c }}">
+              <span>{{ c.label }}</span>
+              <span style="font:600 10px var(--fu);color:var(--mut)">{{ c.count }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <input data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <sc-if value="{{ hdSearching }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ hdHitLine }}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
+            <sc-for list="{{ hdHits }}" as="h" hint-placeholder-count="6">
+              <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                <span aria-hidden="true" style="flex:none;width:44px;font:400 {{ h.gfs }}/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                  <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
+                  <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
+                </span>
+                <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hdGridOn }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;animation:fadeUp .22s ease-out">
+            <sc-for list="{{ hdGrid }}" as="h" hint-placeholder-count="12">
+              <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                <span aria-hidden="true" style="flex:none;width:44px;font:400 {{ h.gfs }}/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.glyph }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                  <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.name }}</span>
+                  <span style="font:400 11px/1.4 var(--fu);color:var(--mut)">{{ h.sub }}</span>
+                </span>
+                <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                </sc-if>
+              </button>
             </sc-for>
           </div>
         </sc-if>
       </div>
-    </sc-for>
+    </div>
   </div>
 </sc-if>
 
@@ -20119,6 +20543,32 @@ class Component extends DCLogic {
      about, so the reading happens in the room rather than in the card. */
   STUDY_PATHS = [['first', 'First steps'], ['way', 'Finding my way'], ['deep', 'Deep study']];
   STUDY_TUT = {
+    hdatlas: {
+      first: [
+        ['The wiring', 'hd:intro:0', 'The diagram is the wiring, which the field calls a bodygraph: nine centres joined by thirty six channels, with sixty four gates set round them. When a chart of your own is on this device, its defined centres are filled with colour and the open ones are outlines. Tap a centre or a gate once to see its name, and again to open it.'],
+        ['Your type', 'hd:type', 'Type is the broadest thing the system says: how a person\u2019s energy tends to meet the world. There are five. The Strategy and Signature tiles are the parts the tradition treats as most practical.'],
+        ['Strategy', 'hd:strategy', 'Strategy is the type\u2019s way of engaging, the advice the system is best known for. It is offered as an experiment to try in ordinary life rather than a rule.'],
+        ['Authority', 'hd:authority', 'Authority is how a decision is best made in this wiring. The centre it comes from lights up on the diagram.'],
+        ['The centres', 'hd:centre', 'Nine centres, each with a function. A defined centre is read as consistent; an open one as the place the world is taken in and amplified, which the tradition treats as where wisdom can grow.'],
+        ['Your profile', 'hd:profile', 'The profile is two lines, one from the Sun in each of the two charts, read as the role a person tends to play. Each line has its own page under The six lines.'],
+        ['Gates and channels', 'hd:sungate', 'A gate is one of sixty four points on the wiring, and a channel joins two of them. When both gates of a channel are held, the channel and its two centres are defined. This is the gate your Sun holds, or the Sun\u2019s gate today.']
+      ],
+      way: [
+        ['Definition', 'hd:definition', 'Definition is how the defined centres connect: in one piece, or in groups with gaps between them. The gaps are read as the places other people tend to complete.'],
+        ['The three circuits', 'hd:circuitry:individual-circuitry', 'Channels belong to circuits: Individual for mutation, Tribal for support, Collective for sharing. Step through all three with the arrows.'],
+        ['Open and defined', 'hd:open:head', 'The nine centres again, read by what changes when a centre is open. Notice the wisdom each open centre is said to hold.'],
+        ['The six lines', 'hd:lines:1', 'Every gate has six lines, and the six carry the same themes everywhere, from the foundation of the first to the long view of the sixth.'],
+        ['The Incarnation Cross', 'hd:cross:what', 'The four gates of the Sun and the Earth in both charts. With a chart of your own on this device, they are listed on this page and lit on the wiring.'],
+        ['Practice', 'hd:example:0', 'An example wiring that belongs to nobody, read in eight steps. Read it before the steps do, then compare the two.']
+      ],
+      deep: [
+        ['Gate and hexagram', 'hd:sungate', 'Gate N is hexagram N of the Book of Changes. Open the hexagram from this page and read the two side by side.'],
+        ['Your channels', 'hd:channel', 'Read each defined channel in your chart in turn, and ask where its theme has shown itself.'],
+        ['The sky now', 'hd:skysun', 'The Sun crosses a gate in about six days. The blue rings on the wiring are the gates the sky holds this minute.'],
+        ['Hanging gates', 'hd:terms:hanging-gate', 'A gate held without its partner is read as reaching for someone else. Find the ones in your chart by opening each of your gates and following its channel.'],
+        ['Strategy and authority', 'hd:authority', 'Strategy says when to engage and authority says how to decide. Read both pages for your chart together.']
+      ]
+    },
     astropedia: {
       first: [
         ['The wheel', 'ap:sun', 'The circle is the sky seen from Earth, cut into twelve signs. The outer ring holds the signs, each tinted by its element, and the ring inside it holds the twelve houses. The symbols in the middle are the astral bodies, placed where they stand this minute. Tap any of them once to see its name, and again to open it.'],
@@ -20191,6 +20641,27 @@ class Component extends DCLogic {
       this.apPick(key, true);
       return;
     }
+    if (room === 'hdatlas') {
+      const A = this.A(), sample = this.usingSampleBirth(), hd = this.hdChart(), sl = x => this.atlasSlug(x);
+      const sky = this.hdSkyNow(), skySun = sky.find(a => a.body === 'Sun');
+      const sunG = !sample ? (hd.acts.find(a => a.body === 'Sun' && a.kind === 'personality') || {}).gate : null;
+      const fa = String(hd.authority || '').split(':')[0].trim().split(/\s+/)[0].toLowerCase();
+      const map = {
+        type: 'types:' + sl(sample ? 'Generator' : hd.type),
+        strategy: 'strategies:' + sl(((A.STRATEGIES.find(x => x.who.indexOf(sample ? 'Generator' : hd.type) !== -1)) || A.STRATEGIES[0]).name),
+        authority: 'authorities:' + sl(((!sample && A.AUTHORITIES.find(x => x.name.toLowerCase().indexOf(fa) === 0)) || A.AUTHORITIES[0]).name),
+        centre: 'centers:' + sl((!sample && [...hd.defined][0]) || 'Sacral'),
+        profile: 'profiles:' + sl(sample ? Object.keys(A.PROFILES)[0] : this.hdProfile().key),
+        definition: 'definition:' + sl(sample ? A.DEFINITION[0].name : String(hd.definition).split(':')[0].trim()),
+        sungate: 'gates:g' + (sunG || (skySun ? skySun.gate : 1)),
+        skysun: 'gates:g' + (skySun ? skySun.gate : 1),
+        channel: 'channels:' + sl(!sample && hd.activeChannels.length ? hd.activeChannels[0][0] + '-' + hd.activeChannels[0][1] : Object.keys(A.CHANNELS)[0])
+      };
+      const key = map[v] || v;
+      this.setState({ atlasQuery: '' });
+      this.atlasPick(this.atlasEntries().some(x => x.key === key) ? key : 'intro:0', true);
+      return;
+    }
     if (k === 'bnCat') { this.setState({ bnCat: v, bnQuery: '' }); return; }
     const marks = this.bnMine().marks, m = l => (marks.find(x => x.label === l) || {}).c;
     const n = v === 'lp' ? (m('Life Path') || m('Today')) : v === 'today' ? m('Today') : v === 'py' ? (m('Personal Year') || m('Today'))
@@ -20200,7 +20671,7 @@ class Component extends DCLogic {
   }
   studyVals() {
     const st = this.state, vertical = (st.dtW || window.innerWidth || 1440) < this.BP.md;
-    const room = st.libView === 'astropedia' || st.libView === 'numbers' ? (st.libView === 'numbers' ? 'numbers' : 'astropedia') : null;
+    const room = ['astropedia', 'numbers', 'hdatlas'].indexOf(st.libView) !== -1 ? st.libView : null;
     if (!room || !(vertical || this.curTab() === 'library')) return { spOn: false };
     const s = this.studyState(), lv = this.studyPath(), tutKey = room + '.' + lv;
     const tut = (s.tut || {})[tutKey] || {}, steps = this.STUDY_TUT[room][lv], n = steps.length;
@@ -20222,7 +20693,11 @@ class Component extends DCLogic {
       spTutHead: 'Tutorial · ' + pathName,
       spTutCount: tut.done ? 'Finished' : at ? at + ' of ' + n : n + ' steps',
       spTutIntro: !at && !tut.done, spTutStepOn: at > 0 && !tut.done, spTutDone: !!tut.done,
-      spTutIntroText: (room === 'astropedia'
+      spTutIntroText: (room === 'hdatlas'
+        ? { first: 'A first walk through the wiring: your type, strategy and authority, the centres, your profile, and the gates and channels.',
+            way: 'The structure under the type: definition, the circuits, open and defined centres, the lines, the Cross, and a wiring to practise on.',
+            deep: 'Gate and hexagram, your channels, the gates in the sky now, hanging gates, and strategy beside authority.' }
+        : room === 'astropedia'
         ? { first: 'A first walk through the sky: the wheel, the Sun and Moon signs, the houses, the bodies and the aspects.',
             way: 'The structure under the signs: elements, modalities, dignity, the kinds of house, orbs, and a chart to practise on.',
             deep: 'The older and finer tools: sect, decans, reception, profection, the solar return and synastry.' }
@@ -20778,37 +21253,321 @@ class Component extends DCLogic {
       })
     };
   }
+  /* THE HUMAN DESIGN ATLAS, given the room the Astropedia and the Book have
+     (owner, 20 October 2026: "Doing the same thing for human design").
+
+     atlasSec is the chapter and atlasItem the entry inside it, slugged, with
+     exactly the meaning they always had: hdAtlasTo(), Learn from Atlas, the
+     chart popup, the search rows and the Learn pages' /gate/<n> addresses all
+     keep landing on the entry they name. The folio carries the anchor
+     scrollAtlasIntoView() looks for, so that machinery lands on it too.
+
+     Every word is hd-atlas.js. The centrepiece is the wiring itself, drawn
+     from the app's own BG_POS boxes and HD_CHANNELS in the shapes the field
+     draws them: the reader's defined centres filled, their gates and channels
+     lit, the gates the sky holds this minute ringed, and the open entry drawn
+     on top. Like the other two rooms it is pointer ornament inside
+     [data-chart], and the chapters, the grid and the folio's arrow keys are
+     the keyboard's way to every entry. */
+  HD_SEC_GLYPH = { intro: '✧', types: '◉', lines: '☰', profiles: '⁄', centers: '◆', gates: '●',
+    channels: '⟷', circuitry: '◎', definition: '◫', cross: '✚', strategies: '⤳', authorities: '⚖',
+    open: '◌', terms: '◇', example: '✎' };
+  HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
+    Projector: ['G', 'Ajna'], Reflector: [] };
+  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', self: 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
+  hdShape(name) {
+    const q = this.BG_POS[name], x = q[0], y = q[1], w = q[2], h = q[3], cx = x + w / 2, cy = y + h / 2;
+    if (name === 'Head' || name === 'Heart') return [[cx, y], [x + w, y + h], [x, y + h]];
+    if (name === 'Ajna') return [[x, y], [x + w, y], [cx, y + h]];
+    if (name === 'G') return [[cx, y - 4], [x + w + 4, cy], [cx, y + h + 4], [x - 4, cy]];
+    if (name === 'Spleen') return [[x, y], [x + w, cy], [x, y + h]];
+    if (name === 'Solar Plexus') return [[x + w, y], [x, cy], [x + w, y + h]];
+    return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
+  }
+  /* Each gate's place on the wiring: spread evenly round its centre's own
+     outline, drawn a little inside it. Memoised, because it never changes. */
+  hdGateSpots() {
+    if (this._hdSpots) return this._hdSpots;
+    const by = {}, out = {};
+    for (let n = 1; n <= 64; n++) { const c = this.hdCenterOf(n); if (this.BG_POS[c]) (by[c] = by[c] || []).push(n); }
+    Object.keys(by).forEach(c => {
+      const P = this.hdShape(c), cx = P.reduce((a, p) => a + p[0], 0) / P.length, cy = P.reduce((a, p) => a + p[1], 0) / P.length;
+      const seg = P.map((p, i) => { const q = P[(i + 1) % P.length]; return { p: p, q: q, len: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
+      const per = seg.reduce((a, s) => a + s.len, 0), list = by[c].sort((a, b) => a - b);
+      list.forEach((n, i) => {
+        let d = (i + .5) / list.length * per, k = 0;
+        while (k < seg.length - 1 && d > seg[k].len) { d -= seg[k].len; k++; }
+        const s = seg[k], f = d / s.len, px = s.p[0] + (s.q[0] - s.p[0]) * f, py = s.p[1] + (s.q[1] - s.p[1]) * f;
+        out[n] = { x: px + (cx - px) * .2, y: py + (cy - py) * .2, c: c };
+      });
+    });
+    this._hdSpots = out;
+    return out;
+  }
+  /* Every entry the Atlas can open, once, keyed chapter:slug where the slug is
+     the one atlasItem has always stored. */
+  atlasEntries() {
+    if (this._hdEnt) return this._hdEnt;
+    const A = this.A();
+    if (!A) return [];
+    const out = [], sl = s => this.atlasSlug(s);
+    const add = (ch, id, name, glyph, sub, d) => out.push({ ch: ch, slug: sl(id), key: ch + ':' + sl(id), name: name, glyph: glyph, sub: sub || '', d: d || {},
+      hay: (name + ' ' + (sub || '') + ' ' + this.atlasHay(d)).toLowerCase() });
+    add('intro', 0, 'What Human Design is', this.HD_SEC_GLYPH.intro, 'the system in brief', { essay: 'intro' });
+    Object.keys(A.TYPES).forEach(k => add('types', k, k, this.HD_SEC_GLYPH.types, A.TYPES[k].pct + ' of people', { type: k }));
+    [1, 2, 3, 4, 5, 6].forEach(n => add('lines', n, 'Line ' + n + ', ' + A.LINES[n].name, String(n), A.LINES[n].theme, { line: n }));
+    Object.keys(A.PROFILES).forEach(k => add('profiles', k, k + ', ' + A.PROFILES[k].name, k, A.PROFILES[k].line, { profile: k }));
+    Object.keys(A.CENTERS).forEach(k => add('centers', k, A.CENTERS[k].label, this.HD_SEC_GLYPH.centers, this.apFirst(A.CENTERS[k].fn, 48), { center: k }));
+    Object.keys(A.GATES).map(Number).sort((a, b) => a - b).forEach(n => add('gates', 'g' + n, 'Gate ' + n + ', ' + A.GATES[n][0], String(n), this.hdCenterOf(n) + ' · ' + this.apFirst(A.GATES[n][2], 40), { gate: n }));
+    Object.keys(A.CHANNELS).forEach(k => add('channels', k, k + ', ' + A.CHANNELS[k][0], k, A.CHANNELS[k][1], { channel: k }));
+    (A.CIRCUITS || []).forEach(c => add('circuitry', c.name, c.name, this.HD_SEC_GLYPH.circuitry, c.keynote, { circuit: c.name }));
+    (A.DEFINITION || []).forEach(dn => add('definition', dn.name, dn.name, this.HD_SEC_GLYPH.definition, this.apFirst(dn.text, 48), { definition: dn.name }));
+    if (A.CROSS) [['what', 'What the Cross is'], ['how', 'How it is read'], ['angles', 'The three angles']].forEach(([k, t]) => add('cross', k, t, this.HD_SEC_GLYPH.cross, this.apFirst(A.CROSS[k], 48), { cross: k }));
+    A.STRATEGIES.forEach(s => add('strategies', s.name, s.name, this.HD_SEC_GLYPH.strategies, s.who, { strategy: s.name }));
+    A.AUTHORITIES.forEach(a => add('authorities', a.name, a.name, this.HD_SEC_GLYPH.authorities, this.apFirst(a.how, 48), { authority: a.name }));
+    Object.keys(A.CENTERS).forEach(k => add('open', k, A.CENTERS[k].label + ', open and defined', this.HD_SEC_GLYPH.open, this.apFirst(A.CENTERS[k].wisdom, 48), { openc: k }));
+    (A.TERMS || []).forEach(t => add('terms', t.name, t.name, this.HD_SEC_GLYPH.terms, this.apFirst(t.text, 48), { term: t.name }));
+    add('example', 0, 'An example wiring', this.HD_SEC_GLYPH.example, 'a chart that belongs to nobody', { essay: 'example' });
+    this._hdEnt = out;
+    return out;
+  }
+  /* The words a search in the room reads: the entry's own writing, not only
+     its name. */
+  atlasHay(d) {
+    const A = this.A(), v = x => Object.keys(x || {}).map(k => typeof x[k] === 'string' ? x[k] : '').join(' ');
+    if (d.type) return v(A.TYPES[d.type]);
+    if (d.line) return v(A.LINES[d.line]);
+    if (d.profile) return v(A.PROFILES[d.profile]);
+    if (d.center || d.openc) return v(A.CENTERS[d.center || d.openc]);
+    if (d.gate) return (A.GATES[d.gate] || []).join(' ');
+    if (d.channel) return (A.CHANNELS[d.channel] || []).join(' ');
+    if (d.circuit) return v((A.CIRCUITS || []).find(x => x.name === d.circuit));
+    if (d.definition) return v((A.DEFINITION || []).find(x => x.name === d.definition));
+    if (d.cross) return A.CROSS[d.cross] || '';
+    if (d.strategy) return v(A.STRATEGIES.find(x => x.name === d.strategy));
+    if (d.authority) return v(A.AUTHORITIES.find(x => x.name === d.authority));
+    if (d.term) return v((A.TERMS || []).find(x => x.name === d.term));
+    if (d.essay === 'intro') return A.INTRO.what + ' ' + A.INTRO.history;
+    return '';
+  }
+  hdSkyNow() {
+    const HT = window.HDTransit, W = this.HW();
+    if (!HT || !W) return [];
+    const ms = HT.minuteStart(Date.now());
+    if (!this._gnow || this._gnow.ms !== ms) this._gnow = { ms: ms, r: HT.reading((n, t) => this.lonOf(n, t), ms, { wheel: W }) };
+    return ((this._gnow.r || {}).activations || []).filter(a => a && a.gate);
+  }
+  atlasPick(key, scroll) {
+    const e = this.atlasEntries().find(x => x.key === key);
+    if (!e) return;
+    this._atlasScrolled = e.slug;
+    this.setState({ atlasSec: e.ch, atlasItem: e.slug, atlasPeek: null, atlasFlip: (this.state.atlasFlip || 0) + 1 });
+    this.speak(e.name + '.', 'polite');
+    if (scroll) setTimeout(() => {
+      const f = document.querySelector('[data-hd-folio]');
+      let box = f ? f.parentElement : null;
+      while (box && !box.matches('[data-vt-scroll],[data-vt-pager]')) {
+        const oy = getComputedStyle(box).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight + 1) break;
+        box = box.parentElement;
+      }
+      if (!f || !box || box.matches('[data-vt-scroll],[data-vt-pager]')) return;
+      const y = box.scrollTop + f.getBoundingClientRect().top - box.getBoundingClientRect().top - 12;
+      if (Math.abs(y - box.scrollTop) > 40) box.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 40);
+  }
   atlasVals() {
     const st = this.state;
     if (!(this.curTab() === 'library' && st.libView === 'hdatlas')) return { libAtlas: false };
-    const A = this.A();
-    if (!A) return { libAtlas: false };
-    const counts = { types: '5', lines: '6', profiles: '12', centers: '9', gates: '64', channels: '36',
-      circuitry: '3', definition: '5', cross: '192 of them', strategies: '4', authorities: '7',
-      open: '9', terms: '16', example: '8 steps', intro: '' };
-    /* Every block and row carries an anchor, so Learn from Atlas, the chart
-       popup and the search bar can land on the entry itself rather than the
-       top of its section. The entry asked for wears an edge so the eye finds
-       it after the scroll. atlasItem is stored already slugged. */
-    const hit = '2px solid rgba(47,255,143,.42)', miss = '0px solid transparent';
-    const want = st.atlasItem ? 'incommon-atlas-' + st.atlasSec + '-' + st.atlasItem : null;
-    const mark = k => this.atlasBlocks(k).map((b, i) => {
-      const anchor = 'incommon-atlas-' + k + '-' + this.atlasSlug(b.id != null ? b.id : i);
-      return { ...b, anchor, bl: anchor === want ? hit : miss, pl: anchor === want ? '10px' : '0px',
-        rows: b.rows.map((r, j) => {
-          const ra = r.id != null ? 'incommon-atlas-' + k + '-' + this.atlasSlug(r.id) : anchor + '-r' + j;
-          return { ...r, anchor: ra, bl: ra === want ? hit : miss, pl: ra === want ? '10px' : '0px' };
-        }) };
+    const A = this.A(), all = this.atlasEntries();
+    if (!A || !all.length) return { libAtlas: false };
+    const lv = this.studyPath(), sample = this.usingSampleBirth();
+    const hd = this.hdChart(), mine = !sample, pr = mine ? this.hdProfile() : null;
+    const find = k => all.find(x => x.key === k);
+    const chapters = A.SECTIONS.map(s => s[0]);
+    const chap = chapters.indexOf(st.atlasSec) !== -1 ? st.atlasSec : 'intro';
+    const e = (st.atlasItem && find(chap + ':' + st.atlasItem)) || all.find(x => x.ch === chap) || all[0];
+    const yourType = mine ? hd.type : null;
+    const myGates = new Set(mine ? hd.gates.map(g => g.gate) : []);
+    const myChan = new Set(mine ? hd.activeChannels.map(c => c[0] + '-' + c[1]) : []);
+    const sky = this.hdSkyNow(), skyGates = new Set(sky.map(a => a.gate));
+    const authOf = name => this.HD_AUTH_CENTRE[String(name || '').split(/[\s(:]/)[0].toLowerCase()];
+    const myAuth = mine ? (A.AUTHORITIES.find(a => { const f = String(hd.authority).split(':')[0].trim().split(/\s+/)[0].toLowerCase(); return a.name.toLowerCase().indexOf(f) === 0; }) || null) : null;
+    const myStrat = mine ? A.STRATEGIES.find(s => s.who.indexOf(hd.type) !== -1) : null;
+    const myDef = mine ? String(hd.definition || '').split(':')[0].trim() : '';
+    const crossGates = mine ? hd.acts.filter(a => a.body === 'Sun' || a.body === 'Earth') : [];
+    const pct = (v, m) => (v / m * 100).toFixed(3) + '%';
+    const peek = (id, at, text, key) => () => {
+      if (lv === 'first' && st.atlasPeek !== id) this.setState({ atlasPeek: id, atlasPeekAt: { l: at.l, t: at.t, text: text, key: key } });
+      else this.atlasPick(key, false);
+    };
+    /* What the open entry lights. */
+    const litC = new Set(), litG = new Set(), litK = new Set(), d = e.d;
+    if (d.type) (this.HD_TYPE_LIGHT[d.type] || []).forEach(c => litC.add(c));
+    if (d.center) litC.add(d.center);
+    if (d.openc) litC.add(d.openc);
+    if (d.gate) { litG.add(d.gate); litC.add(this.hdCenterOf(d.gate)); (A.channelsFor(d.gate) || []).forEach(c => { litK.add(c.key); litG.add(c.partner); }); }
+    if (d.channel) { const p = d.channel.split('-').map(Number); litK.add(d.channel); p.forEach(g => { litG.add(g); litC.add(this.hdCenterOf(g)); }); }
+    if (d.authority) { const c = authOf(d.authority); if (c) litC.add(c); }
+    if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy); Object.keys(this.HD_TYPE_LIGHT).forEach(t => { if (s && s.who.indexOf(t) !== -1) (this.HD_TYPE_LIGHT[t] || []).forEach(c => litC.add(c)); }); }
+    if (d.cross) crossGates.forEach(a => litG.add(a.gate));
+    if (d.essay === 'example') { (A.EXAMPLE.definedCenters || []).forEach(c => litC.add(c)); (A.EXAMPLE.channels || []).forEach(k => litK.add(k)); (A.EXAMPLE.gates || []).forEach(g => litG.add(g)); }
+    const spots = this.hdGateSpots();
+    const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
+      const lit = litK.has(k), own = myChan.has(k);
+      return a && b ? { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
+        c: lit ? 'var(--ac2-hi)' : own ? 'rgba(var(--atmc2),.75)' : 'var(--chl)', w: lit ? '3' : own ? '2.4' : '1.3', o: lit || own ? '1' : '.9' } : null; }).filter(Boolean);
+    const centres = Object.keys(this.BG_POS).map(name => {
+      const P = this.hdShape(name), defined = mine && hd.defined.has(name), lit = litC.has(name);
+      const col = A.CENTERS[name] ? A.CENTERS[name].color : '';
+      const q = this.BG_POS[name];
+      return { pts: P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '),
+        fill: defined ? col : 'rgba(var(--atmc),.07)', fo: defined ? '.82' : '1',
+        stroke: lit ? 'var(--ac2-hi)' : defined ? col : 'var(--chl)', sw: lit ? '3' : '1.5',
+        glow: lit ? 'drop-shadow(0 0 8px rgba(var(--atmc2),.75))' : 'none',
+        l: pct(q[0] + q[2] / 2, 300), t: pct(q[1] + q[3] / 2 + (name === 'Head' || name === 'Heart' ? q[3] * .16 : name === 'Ajna' ? -q[3] * .16 : 0), 520),
+        label: this.BG_SHORT[name], lc: defined ? 'rgba(5,6,10,.85)' : lit ? 'var(--tx)' : 'var(--mut)',
+        go: peek('c:' + name, { l: pct(q[0] + q[2] / 2, 300), t: pct(q[1], 520) }, A.CENTERS[name] ? A.CENTERS[name].label : name, 'centers:' + this.atlasSlug(name)) };
     });
+    const gates = Object.keys(spots).map(Number).map(n => { const s = spots[n], lit = litG.has(n), own = myGates.has(n), now = skyGates.has(n);
+      return { l: pct(s.x, 300), t: pct(s.y, 520), size: lit ? '9px' : own ? '7px' : '5px',
+        fill: lit ? 'var(--ac2-hi)' : own ? 'var(--tx)' : 'rgba(var(--atmc),.75)',
+        ring: now ? '0 0 0 2px var(--blue),0 0 10px var(--blue)' : lit ? '0 0 10px rgba(var(--atmc2),.9)' : 'none',
+        anim: now ? 'pulseGentle 2.4s ease-in-out infinite' : 'none',
+        tip: 'Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''),
+        go: peek('g:' + n, { l: pct(s.x, 300), t: pct(s.y, 520) }, 'Gate ' + n + ' · ' + (A.GATES[n] ? A.GATES[n][0] : ''), 'gates:g' + n) }; });
+    /* The folio. */
+    const facets = [], links = [], yours = [], terms = [];
+    let kicker = '', lead = '', essay = [], dropcap = false;
+    const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
+    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key) terms.push({ label: label, g: '?', go: () => this.atlasPick(key, false) }); };
+    const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
+    const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
+    if (d.type) { const t = A.TYPES[d.type];
+      kicker = t.pct + ' of people'; lead = t.def;
+      [['Aura', t.aura], ['Strategy', t.strategy], ['Authority', t.authority], ['Signature', t.signature], ['Not-self theme', t.notSelf],
+        ['Strengths', t.strengths], ['Challenges', t.challenges], ['Opportunities', t.opportunities], ['Obstacles', t.obstacles],
+        ['In men', t.male], ['In women', t.female]].forEach(([l, x]) => x && facets.push({ label: l, text: x }));
+      const s = A.STRATEGIES.find(x => x.who.indexOf(d.type) !== -1); if (s) link('Strategy, ' + s.name, '', 'strategies:' + this.atlasSlug(s.name));
+      term('Aura', 'terms:aura'); term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
+      if (yourType === d.type) yourLine('Your type', d.type); }
+    if (d.line) { const L = A.LINES[d.line];
+      kicker = L.theme; lead = L.behavior; facets.push({ label: 'In men', text: L.male }, { label: 'In women', text: L.female });
+      Object.keys(A.PROFILES).filter(k => k.split('/').indexOf(String(d.line)) !== -1).forEach(k => link('Profile ' + k, k, 'profiles:' + this.atlasSlug(k)));
+      if (pr && pr.c === d.line) yourLine('Your conscious line', 'Personality Sun, line ' + pr.c);
+      if (pr && pr.u === d.line) yourLine('Your unconscious line', 'Design Sun, line ' + pr.u); }
+    if (d.profile) { const P = A.PROFILES[d.profile], ls = d.profile.split('/').map(Number);
+      kicker = P.name; lead = P.line; facets.push({ label: 'How it plays', text: P.how });
+      ls.forEach((n, i) => link((i ? 'Unconscious' : 'Conscious') + ', line ' + n, String(n), 'lines:' + n));
+      term('Profile lines', 'lines:' + ls[0]);
+      if (pr && pr.key === d.profile) yourLine('Your profile', d.profile + ', ' + P.name); }
+    if (d.center || d.openc) { const k = d.center || d.openc, C = A.CENTERS[k];
+      kicker = C.fn;
+      if (d.center) facets.push({ label: 'Defined', text: C.defined }, { label: 'Undefined', text: C.open }, { label: 'Wisdom when open', text: C.wisdom });
+      else { lead = C.wisdom; facets.push({ label: 'Defined means consistent', text: C.defined }, { label: 'Undefined means variable', text: C.open }); }
+      link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
+      Object.keys(A.GATES).map(Number).filter(n => this.hdCenterOf(n) === k).slice(0, 12).forEach(n => link('Gate ' + n, String(n), 'gates:g' + n));
+      term('Defined and undefined', 'open:' + this.atlasSlug(k)); term('Conditioning', 'terms:conditioning');
+      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held'); }
+    if (d.gate) { const g = A.GATES[d.gate];
+      kicker = this.hdCenterOf(d.gate) + ' centre'; lead = g[2];
+      facets.push({ label: 'Held low', text: g[3] }, { label: 'Held high', text: g[4] });
+      link('Its centre, ' + this.hdCenterOf(d.gate), '', 'centers:' + this.atlasSlug(this.hdCenterOf(d.gate)));
+      (A.channelsFor(d.gate) || []).forEach(c => link('Channel ' + c.key + ', ' + c.name, '⟷', 'channels:' + this.atlasSlug(c.key)));
+      links.push({ label: 'Hexagram ' + d.gate + ' in the Book of Changes', glyph: '☷', c: 'var(--ac2-hi)', aria: 'Hexagram ' + d.gate + ' in the Book of Changes',
+        go: () => this.setState({ libSub: 'readings', libView: 'iching', icSec: null, icHex: d.gate, icQuery: String(d.gate), selId: null }) });
+      term('Line', 'lines:1'); term('Hanging gate', 'terms:hanging-gate');
+      if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line));
+      sky.filter(a => a.gate === d.gate).forEach(a => yours.push({ label: a.body + ' now', text: 'line ' + a.line, go: () => this.atlasPick('terms:transits', false) })); }
+    if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
+      kicker = c[1]; lead = c[2];
+      p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
+      term('Circuitry', 'circuitry:individual-circuitry'); term('Definition', 'definition:single-definition');
+      if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
+      else if (mine && p.some(n => myGates.has(n))) yourLine('Half held in your chart', 'gate ' + p.filter(n => myGates.has(n)).join(' and ') + ', a hanging gate'); }
+    if (d.circuit) { const c = A.CIRCUITS.find(x => x.name === d.circuit); kicker = c.keynote; lead = c.text; facets.push({ label: 'Within it', text: c.sub }); }
+    if (d.definition) { const dn = A.DEFINITION.find(x => x.name === d.definition); lead = dn.text; dropcap = true;
+      if (myDef && d.definition.toLowerCase().indexOf(myDef.toLowerCase()) === 0) yourLine('Your definition', myDef); }
+    if (d.cross) { lead = A.CROSS[d.cross]; dropcap = true; link('Profiles', '', 'profiles:' + this.atlasSlug(Object.keys(A.PROFILES)[0]));
+      crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
+    if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy);
+      kicker = 'for ' + s.who; facets.push({ label: 'When', text: s.when }, { label: 'Correct timing', text: s.recognize }, { label: 'Ignored', text: s.ignored });
+      Object.keys(A.TYPES).filter(t => s.who.indexOf(t) !== -1).forEach(t => link(t, '', 'types:' + this.atlasSlug(t)));
+      term('Signature', 'terms:signature'); term('Not-self theme', 'terms:not-self-theme');
+      if (myStrat && myStrat.name === d.strategy) yourLine('Your strategy', d.strategy); }
+    if (d.authority) { const a = A.AUTHORITIES.find(x => x.name === d.authority);
+      lead = a.how; facets.push({ label: 'Recognising it', text: a.recognize }, { label: 'Following it', text: a.follow });
+      const c = authOf(d.authority); if (c) link('Its centre, ' + c, '', 'centers:' + this.atlasSlug(c));
+      if (/emotional/i.test(d.authority)) term('The emotional wave', 'terms:emotional-wave');
+      if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
+    if (d.term) { lead = A.TERMS.find(x => x.name === d.term).text; dropcap = true; }
+    if (d.essay) essay = this.atlasBlocks(d.essay).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
+    const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
+    const step = k => sib[(at + k + sib.length) % sib.length];
+    const q = String(st.atlasQuery || '').trim().toLowerCase();
+    const hits = q.length > 1 ? all.filter(x => x.hay.indexOf(q) !== -1).slice(0, 60) : [];
+    const ownKey = x => (x.d.type && x.d.type === yourType) || (x.d.gate && myGates.has(x.d.gate)) || (x.d.channel && myChan.has(x.d.channel))
+      || (x.d.center && mine && hd.defined.has(x.d.center)) || (x.d.profile && pr && pr.key === x.d.profile) || (x.d.authority && myAuth && myAuth.name === x.d.authority)
+      || (x.d.strategy && myStrat && myStrat.name === x.d.strategy);
+    const tile = x => ({ glyph: x.glyph, gfs: String(x.glyph).length > 2 ? '14px' : '20px', name: x.name, sub: x.sub,
+      c: ownKey(x) ? 'var(--ac2-hi)' : 'var(--tx)', mine: !!ownKey(x), on: x.key === e.key,
+      bd: x.key === e.key ? 'var(--ac2-hi)' : 'var(--bd)', bg: x.key === e.key ? 'rgba(var(--atmc),.2)' : 'var(--sf)',
+      go: () => this.atlasPick(x.key, true) });
+    const where = yours.map(y => y.label);
     return { libAtlas: true,
-      atlasBack: () => this.setState({ libView: null, atlasSec: null, atlasItem: null }),
-      atlasSecs: A.SECTIONS.map(([k, title]) => ({
-        title: title, count: counts[k] || '', open: st.atlasSec === k, icon: st.atlasSec === k ? '\u2212' : '+',
-        anchor: 'incommon-atlas-' + k,
-        bd: st.atlasSec === k ? 'rgba(47,255,143,.42)' : 'var(--bd)',
-        toggle: () => this.setState({ atlasSec: st.atlasSec === k ? null : k, atlasItem: null }),
-        blocks: st.atlasSec === k ? mark(k) : []
-      })) };
+      atlasBack: () => this.setState({ libView: null, atlasSec: null, atlasItem: null, atlasQuery: '' }),
+      atlasSecAnchor: 'incommon-atlas-' + chap,
+      atlasFolioId: 'incommon-atlas-' + e.ch + '-' + e.slug,
+      hdwLabel: 'The wiring' + (mine ? ', your defined centres filled' : '') + ', ' + e.name + ' open',
+      hdwChans: chans, hdwCentres: centres, hdwGates: gates,
+      hdwPeekOn: lv === 'first' && !!st.atlasPeek && !!st.atlasPeekAt,
+      hdwPeekL: st.atlasPeekAt ? st.atlasPeekAt.l : '0%', hdwPeekT: st.atlasPeekAt ? st.atlasPeekAt.t : '0%', hdwPeekText: st.atlasPeekAt ? st.atlasPeekAt.text : '',
+      hdwPeekGo: () => { if (st.atlasPeekAt) this.atlasPick(st.atlasPeekAt.key, false); },
+      hdwKeyOn: lv !== 'deep',
+      hdwKey: (mine ? [{ label: 'Defined', sw: 'conic-gradient(' + Object.keys(A.CENTERS).map(k => A.CENTERS[k].color).filter(Boolean).join(',') + ')', ring: 'none' }, { label: 'Your gates', sw: 'var(--tx)', ring: 'none' }] : [])
+        .concat([{ label: 'Open', sw: 'transparent', ring: 'inset 0 0 0 1.5px var(--mut)' }, { label: 'In the sky now', sw: 'transparent', ring: 'inset 0 0 0 2px var(--blue)' }]),
+      hdwMarks: [].concat(mine ? [['Your type', hd.type, 'types:' + this.atlasSlug(hd.type)], ['Your profile', pr.key, 'profiles:' + this.atlasSlug(pr.key)],
+          ['Your authority', String(hd.authority).split(':')[0], myAuth ? 'authorities:' + this.atlasSlug(myAuth.name) : null]] : [],
+        sky.filter(a => a.body === 'Sun').map(a => ['Sun now', 'gate ' + a.gate, 'gates:g' + a.gate]))
+        .filter(m => m[2]).map(([label, val, key]) => ({ label: label, val: val, on: key === e.key, bd: key === e.key ? 'var(--ac2-hi)' : 'var(--bd)',
+          aria: label + ', ' + val, go: () => this.atlasPick(key, true) })),
+      hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
+      hdFolioLabel: e.name, hdIcon: e.glyph, hdIconFs: String(e.glyph).length > 2 ? '20px' : '34px', hdName: e.name,
+      hdChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
+      hdKicker: kicker, hdKickerOn: !!kicker,
+      hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead,
+      hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
+      hdEssay: essay, hdEssayOn: essay.length > 0,
+      hdFacets: facets, hdFacetsOn: facets.length > 0,
+      hdYours: yours, hdYoursOn: yours.length > 0,
+      hdLinks: links, hdLinksOn: links.length > 0,
+      hdTerms: terms, hdTermsOn: lv !== 'deep' && terms.length > 0,
+      hdStepOn: sib.length > 1,
+      hdPrevLabel: '‹ ' + step(-1).name, hdNextLabel: step(1).name + ' ›',
+      hdPrevAria: 'Previous, ' + step(-1).name, hdNextAria: 'Next, ' + step(1).name,
+      hdPrev: () => this.atlasPick(step(-1).key, false), hdNext: () => this.atlasPick(step(1).key, false),
+      hdWander: () => { let x = e; while (x.key === e.key) x = all[Math.floor(Math.random() * all.length)]; this.atlasPick(x.key, true); },
+      hdKeys: ev => {
+        const k = ev.key;
+        const to = k === 'ArrowLeft' || k === 'ArrowUp' ? step(-1) : k === 'ArrowRight' || k === 'ArrowDown' ? step(1)
+          : k === 'Home' ? sib[0] : k === 'End' ? sib[sib.length - 1] : null;
+        if (!to || ev.target !== ev.currentTarget) return;
+        ev.preventDefault();
+        this.atlasPick(to.key, false);
+      },
+      hdChapters: A.SECTIONS.map(([k, title]) => { const on = !q && k === chap, n = all.filter(x => x.ch === k).length;
+        return { label: title, count: n > 1 ? String(n) : '', on: on,
+          bd: on ? 'var(--ac2-hi)' : 'var(--bd)', bg: on ? 'rgba(var(--atmc),.24)' : 'var(--sf)', c: on ? 'var(--tx)' : 'var(--mut)',
+          go: () => { const only = all.filter(x => x.ch === k);
+            if (only.length === 1) { this.setState({ atlasQuery: '' }); this.atlasPick(only[0].key, true); }
+            else { this._atlasScrolled = e.slug; this.setState({ atlasSec: k, atlasItem: k === e.ch ? e.slug : only[0].slug, atlasQuery: '' }); } } }; }),
+      atlasQuery: st.atlasQuery || '',
+      atlasType: ev => this.setState({ atlasQuery: String(ev.target.value || '').slice(0, 60) }),
+      hdSearching: q.length > 1,
+      hdHitLine: hits.length ? hits.length + (hits.length === 1 ? ' entry' : ' entries') : 'Nothing in the Atlas matches "' + q + '". Try a gate number, a centre or a word like "response".',
+      hdHits: hits.map(tile),
+      hdGrid: q.length > 1 ? [] : all.filter(x => x.ch === chap).map(tile), hdGridOn: q.length < 2
+    };
   }
   /* THE GATES IN THE SKY NOW, and which of them the reader's chart holds.
      hd-transit.js takes the instant and the longitudes and returns numbers;
