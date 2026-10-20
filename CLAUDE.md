@@ -4632,6 +4632,56 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
 
+## The Astropedia is a sky, a folio and thirteen chapters
+Asked for by the owner on 20 October 2026, after the Book of Numbers: "Give
+it the same glamour and enchantment." The room keeps its address
+(`/library/astropedia`), its gate (`libAstropedia`) and `apSec`, which is the
+chapter now; `apOpen` is the entry on the folio and `apQuery` its search. One
+entry is `/library/astropedia/<kind>/<slug>`: `sign/scorpio`, `house/10`,
+`body/saturn`, `point/chiron`, `aspect/trine`, `concept/<slug>`,
+`technique/<slug>`. Search rows open the entry itself, not only its chapter.
+
+**Nothing in it is new writing about astrology.** Every entry is
+`astropedia.js`; the essay chapters (The Birth Chart, Sabian Symbols,
+Stellium, Transits, Synastry, An Example Chart, and Orbs inside Aspects) are
+drawn from `apBlocks()`, which stays for exactly that; and an aspect adds the
+app's own `ASP_SHORT` and `ASP_NATURE`, the same lines the chart reads.
+`apEntries()` is the one list (key, chapter, glyph, line, search text) and is
+built once.
+
+**The wheel is the sky this minute** (`apSky()`, once a minute per chart): the
+natural zodiac in its four element hues, the twelve houses inside it, the ten
+bodies where they stand now, and the reader's own placements as small violet
+stars, which the sample chart does not have. The open entry is drawn on top
+of it: a sign lit, a house lit, a body's homes lit and its exaltation softer,
+an aspect's figure (the trine is a triangle, the square a square) anchored on
+the Sun now, the four triangles of Elements, the three crosses of Modalities,
+the angular houses, the thirty six decans, the horizon for Sect, and the signs
+holding a gathering today for Stellium. Like the Book's mandala it is pointer
+ornament inside `[data-chart]`; the chapters, the grid and the folio's arrow
+keys are the keyboard's way to every entry.
+
+**The element hues are tokens of their own**, `--el-fire`, `--el-earth`,
+`--el-air` and `--el-water`, fixed and declared in all three roots, because the
+wheel's own `SIGN_EL_C` paints earth in `--ac` and a category is not a semantic
+colour. The values are hues the build already carries (the coral of `--warn`,
+the amber of `--cat-ast`, the blue of `--blue`, the teal of `--cat-cen`).
+
+**The folio is what the entry has, never a fixed form**: a kicker, a sign's
+keyword as an epigraph, the lead (with a drop cap for the long single texts),
+what is in that sign now, facets as tiles, "In your chart" (your bodies in a
+sign or a house, your own body, your aspects of that kind, each opening its
+placement page), and links across the book (a sign's ruler and natural house,
+the sign across the wheel, a body's homes and falls, the Lexicon from the
+Sabian essay). Wander opens any entry at random. The folio re-animates through
+`bnFolioA`/`bnFolioB` like the Book's, and a pick from the grid scrolls back to
+it through the same nearest-scroller rule.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room: four identities, hardened and not, at 1440 and 375, with a sign, a body,
+an aspect and an essay open, 64 cases, 54 to 77 elements each, no pair under
+4.5:1 and no control under 44px.
+
 ## The Book of Numbers is a Study room
 Asked for by the owner on 20 October 2026: the matrix that updated the Numbers
 page, as a room in the Library beside the Astropedia and the Human Design
