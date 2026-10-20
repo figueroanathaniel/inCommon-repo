@@ -74,7 +74,7 @@
     var q = '', ios = false;
     try { q = ((/[?&]gfx=([a-z]+)/.exec(location.search) || [])[1]) || ''; } catch (e) { q = ''; }
     try { ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); } catch (e) { ios = false; }
-    return { direct: q === 'direct' || (ios && q !== 'post' && q !== 'nomsaa'), nomsaa: q === 'nomsaa' };
+    return { ios: ios, direct: q === 'direct' || (ios && q !== 'post' && q !== 'nomsaa'), nomsaa: q === 'nomsaa' };
   })();
   function supported() {
     if (okGL !== null) return okGL;
@@ -582,6 +582,11 @@
     if (this.building || this.ready) return;
     this.building = true;
     var self = this;
+    /* The faces are asked for beside three.js, not after it, so when they are
+       in first the content is built once, in them, rather than once in the
+       fallback face and again when they land. */
+    var early = readTokens(this.el.root);
+    if (early) waitFaces(early).then(function () { if (!self.ready && !self.failed) self.fontsOk = true; });
     load().then(function () {
       self.building = false;
       if (self.failed) return;
@@ -606,6 +611,9 @@
     var r = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: false, powerPreference: 'default' });
     r.outputColorSpace = T.LinearSRGBColorSpace;
     r.toneMapping = T.NoToneMapping;
+    /* Reading a program's link status and logs is a round trip that waits for
+       the compile, so on WebKit every program queued behind the last one. */
+    if (GFX.ios && r.debug) r.debug.checkShaderErrors = false;
     this.r = r;
     cv.addEventListener('webglcontextlost', function (e) { e.preventDefault(); self.fail('lost'); });
     this.half = r.extensions.has('EXT_color_buffer_float') || r.extensions.has('EXT_color_buffer_half_float');

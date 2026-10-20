@@ -5292,6 +5292,23 @@ without its multisampled target, the likeliest single culprit) and `direct`.
 screenshot and the fix confirmed on the iPhone, never here; if `nomsaa` comes
 back whole on an iPhone, the bloom can return there without the multisampling.
 
+**The tiles went, and the owner asked for it faster still** (20 October 2026).
+Two changes, both measured in Chromium with an iPhone's screen and a CPU slowed
+four times, which is the nearest this container comes to the phone:
+
+- **Each stage built its whole content twice.** The faces were asked for only
+  after three.js arrived and the content was built, so the first build was
+  always in the fallback face and was thrown away when the faces landed. They
+  are asked for beside three.js now (`early` in `build()`), so when they are in
+  first, which is nearly always, the content is built once. The Cycle Audit's
+  build went from 3.1s to 0.5s, and all three stages were built in the lot in
+  7.1s instead of 9.4. A stage whose faces land after `init()` still rebuilds,
+  exactly as before.
+- **On iOS three.js does not read back each program's link status and logs**
+  (`checkShaderErrors` off when `GFX.ios`). Each read is a round trip that waits
+  for the compile, so on WebKit the programs queued behind one another. A shader
+  that failed to compile would fail silently there; desktop still reports it.
+
 ## The world place list is fetched when a birth place is asked for
 Asked for by the owner on 20 October 2026, as the next load cost after the 3D
 stages above. `app.html` was 12.3 MB, 4.1 MB over the wire with brotli,
