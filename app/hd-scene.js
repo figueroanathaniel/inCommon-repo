@@ -63,6 +63,19 @@
   var MOTORS = { Sacral: 1, Heart: 1, 'Solar Plexus': 1, Root: 1 };
   var ORDER = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
 
+  /* iOS. On the owner's iPhone (Chrome, so WebKit: every browser there is)
+     the offscreen chain drew with tiles missing, hard edged black squares
+     that took about a minute to fill in (20 October 2026). There the scene is
+     drawn straight to the canvas, with the canvas's own antialiasing and no
+     bloom, which is the path the quality ladder already falls to. ?gfx= tries
+     the others on any device without a build: post (the chain as it was),
+     nomsaa (the chain without its multisampled target) or direct. */
+  var GFX = (function () {
+    var q = '', ios = false;
+    try { q = ((/[?&]gfx=([a-z]+)/.exec(location.search) || [])[1]) || ''; } catch (e) { q = ''; }
+    try { ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); } catch (e) { ios = false; }
+    return { direct: q === 'direct' || (ios && q !== 'post' && q !== 'nomsaa'), nomsaa: q === 'nomsaa' };
+  })();
   function supported() {
     if (okGL !== null) return okGL;
     try { var c = document.createElement('canvas'); okGL = !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { okGL = false; }
@@ -1583,7 +1596,7 @@
     if (!this.r || !this.el.root.isConnected) return;
     var b = this.el.root.getBoundingClientRect(), W = Math.max(2, Math.round(b.width)), H = Math.max(2, Math.round(b.height));
     var dpr = window.devicePixelRatio || 1, L = [Math.min(dpr, 2), Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1, 0.75][this.level];
-    var bloom = this.level <= 1;
+    var bloom = this.level <= 1 && !GFX.direct;
     if (W === this.W && H === this.H && L === this.pr && bloom === this.bloom) return;
     this.W = W; this.H = H; this.pr = L; this.bloom = bloom;
     var ui = clamp(Math.min(W, H) / 520, 0.72, 1.2);
@@ -1607,8 +1620,8 @@
     this.post = null;
     if (!this.bloom) return;
     var w = Math.round(this.W * this.pr), h = Math.round(this.H * this.pr), type = this.half ? T.HalfFloatType : T.UnsignedByteType;
-    var rt = function (ww, hh, s) { return new T.WebGLRenderTarget(Math.max(2, ww), Math.max(2, hh), { type: type, samples: s || 0, depthBuffer: !!s }); };
-    this.post = { scene: rt(w, h, 4), a: rt(w / 4, h / 4), b: rt(w / 4, h / 4), c: rt(w / 8, h / 8), d: rt(w / 8, h / 8) };
+    var rt = function (ww, hh, s, d) { return new T.WebGLRenderTarget(Math.max(2, ww), Math.max(2, hh), { type: type, samples: s || 0, depthBuffer: !!(s || d) }); };
+    this.post = { scene: rt(w, h, GFX.nomsaa ? 0 : 4, true), a: rt(w / 4, h / 4), b: rt(w / 4, h / 4), c: rt(w / 8, h / 8), d: rt(w / 8, h / 8) };
     if (!this.postScene) {
       this.postScene = new T.Scene();
       this.postCam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);

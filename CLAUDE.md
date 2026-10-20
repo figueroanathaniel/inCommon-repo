@@ -5277,6 +5277,21 @@ before, 6.4s after, and the main thread's compile stall from 5.9s to 2.4s. What
 is left of that stall is the software rasterizer building its pipelines at the
 first draw, which a real GPU does not do once the programs are linked.
 
+**On iOS the scenes draw straight to the canvas** (`GFX` at the top of each of
+the three scene modules). The owner's iPhone (Chrome, which is WebKit, as every
+browser there is) showed the Cycle Audit's 3D with hard edged black rectangles
+stepped like the GPU's own tiles, filling in over about a minute (20 October
+2026): the offscreen chain, a multisampled half float target blurred and
+composited for the bloom, coming back with tiles missing. The direct path is the
+one the quality ladder already falls to, so it was drawn and tested; it keeps
+the canvas's own antialiasing and loses only the bloom's halo, since every glow
+in these scenes is additive in its own shader. `?gfx=` tries the others on any
+device without a build: `post` (the chain as it was), `nomsaa` (the chain
+without its multisampled target, the likeliest single culprit) and `direct`.
+**This container has no WebKit**, so the fault was diagnosed from the
+screenshot and the fix confirmed on the iPhone, never here; if `nomsaa` comes
+back whole on an iPhone, the bloom can return there without the multisampling.
+
 ## The world place list is fetched when a birth place is asked for
 Asked for by the owner on 20 October 2026, as the next load cost after the 3D
 stages above. `app.html` was 12.3 MB, 4.1 MB over the wire with brotli,
