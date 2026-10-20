@@ -154,9 +154,11 @@ const MODULES = [
   'hd-life.js',
   'hd-teachings.js',
   'gazetteer-us.js',
-  /* Appends into the array gazetteer-us.js exports, so it must stay after it. */
-  'gazetteer-world.js',
-  /* Reads both of the above to derive a time zone, so it comes after both. */
+  /* gazetteer-world.js is not inlined: it is 7.7 MB of what this page was,
+     and the app fetches it beside itself the first time a birth place is
+     asked for (gazWant() in the app). It is copied below as PLACE_FILES. */
+  /* Reads the US list above, and the world list once it has arrived, to derive
+     a time zone, so it comes after the US list. */
   'geocode-online.js',
   /* The connection pass. birth-time.js depends on nothing. hd-composite.js
      reads the channel table out of hd-atlas.js above, so it has to follow it.
@@ -599,6 +601,22 @@ if (!/<a class="enter" href="[^"]+">\s*\S[^<]*<\/a>/.test(cover)) {
 const DASHES = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
 if (DASHES.test(cover)) {
   die('the cover contains an em or en dash; this repo has none anywhere');
+}
+
+/* THE WORLD PLACE LIST sits beside the app as a file and is fetched when a
+   birth place is first asked for, rather than inlined, which made it 7.7 MB
+   of a 12 MB page that every visit downloaded before the first paint. The app
+   names it as ./gazetteer-world.js; a bundle without it is a place search that
+   finds the United States and nothing else, with nothing on screen saying why.
+   It is not precached: a worker that installed it would charge every visit for
+   it again. The worker's own runtime cache keeps it after the first use. */
+const PLACE_FILES = ['gazetteer-world.js'];
+for (const f of PLACE_FILES) {
+  const from = path.join(appDir, f);
+  if (!fs.existsSync(from)) die('missing ' + from + '; the birth place search reads it');
+  if (html.indexOf("'./" + f + "'") === -1) die('the app no longer fetches ./' + f + '; update PLACE_FILES in tools/build-bundle.js to match it');
+  if (html.indexOf('<script src="./' + f + '"') !== -1) die('the app loads ./' + f + ' in its helmet again; it is fetched on demand, and inlining it puts 7.7 MB back on every first paint');
+  fs.copyFileSync(from, path.join(OUT, f));
 }
 
 const THREE_FILES = ['three.module.js', 'three.core.js'];
