@@ -613,13 +613,21 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-for>
           </div>
-          <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
-               the chart below as a lit landscape the reader can move through, and
-               this flat chart stays as its fallback (cycleSceneOn). -->
-          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
+          <!-- THE LONG WEATHER, FLAT OR IN DEPTH (owner, 19 and 20 October 2026):
+               the flat chart is 2D and is drawn first; cycle-scene.js draws 3D, a
+               lit landscape the reader can move through. The flat chart is also the
+               fallback when 3D cannot run, and then the switch is not offered. -->
+          <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
+            <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ cwUiO }};visibility:{{ cwUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+              <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
+                <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
             <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
           </sc-if>
-          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
             <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
               <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
                 <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
@@ -1060,7 +1068,7 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="padding:12px">
             <div data-chart="bodygraph" style="position:relative;width:100%">
         <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
@@ -1080,7 +1088,7 @@ input[type="date"]{color-scheme:dark}
             </div>
           </div>
         </sc-if>
-        <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
           <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
                Wheel views into this host; the 2D wiring above is the third view and the
                fallback (hdViewNow). -->
@@ -1101,7 +1109,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </sc-if>
       </div>
-      <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <div style="display:flex;align-items:center;gap:10px;padding:12px">
             <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
@@ -1390,7 +1398,7 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
-        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
@@ -1429,7 +1437,7 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
         </sc-if>
-        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
           <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
@@ -5141,6 +5149,66 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
       </div>
       </sc-if>
+      <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <!-- 2D: the widget's flat chart, drawn above the reading -->
+      <sc-if value="{{ cyFlatOn }}" hint-placeholder-val="{{ false }}">
+        <div style="background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px 16px">
+          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+              <div style="position:relative;height:{{ cwStarsH }}">
+                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                    </sc-for>
+                  </span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+              <div style="position:relative;height:{{ cwDesignH }}">
+                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                </sc-if>
+                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                  </sc-for>
+                </div>
+                <div style="position:relative;height:16px">
+                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                    </span>
+                  </sc-for>
+                </div>
+              </div>
+              <span></span>
+              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
@@ -6146,13 +6214,21 @@ input[type="date"]{color-scheme:dark}
                   </div>
                 </sc-for>
               </div>
-              <!-- THE LONG WEATHER IN DEPTH (owner, 19 October 2026): cycle-scene.js draws
-                   the chart below as a lit landscape the reader can move through, and
-                   this flat chart stays as its fallback (cycleSceneOn). -->
-              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ true }}">
+              <!-- THE LONG WEATHER, FLAT OR IN DEPTH (owner, 19 and 20 October 2026):
+                   the flat chart is 2D and is drawn first; cycle-scene.js draws 3D, a
+                   lit landscape the reader can move through. The flat chart is also the
+                   fallback when 3D cannot run, and then the switch is not offered. -->
+              <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
+                <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ cwUiO }};visibility:{{ cwUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+                  <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
+                    <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
                 <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
               </sc-if>
-              <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
                 <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
                   <div aria-hidden="true" style="display:grid;grid-template-columns:64px minmax(0,1fr);row-gap:12px;align-items:center">
                     <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
@@ -6598,7 +6674,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
-        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
             <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
@@ -6637,7 +6713,7 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
         </sc-if>
-        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ cvDeep }}" hint-placeholder-val="{{ false }}">
           <!-- THE CHART IN DEPTH (owner, 19 October 2026): chart-scene.js draws the 3D and
                Orbital views into this host; the 2D wheel above is the third view and the
                fallback (chartViewNow). -->
@@ -6942,7 +7018,7 @@ input[type="date"]{color-scheme:dark}
             </div>
             <div style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
               <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
-              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
                 <div style="padding:12px">
                   <div data-chart="bodygraph" style="position:relative;width:100%">
               <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
@@ -6962,7 +7038,7 @@ input[type="date"]{color-scheme:dark}
                   </div>
                 </div>
               </sc-if>
-              <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
                 <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
                      Wheel views into this host; the 2D wiring above is the third view and the
                      fallback (hdViewNow). -->
@@ -6983,7 +7059,7 @@ input[type="date"]{color-scheme:dark}
                 </div>
               </sc-if>
             </div>
-            <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
               <div role="group" aria-label="What is named in the wiring" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf2);opacity:{{ hsUiO }};visibility:{{ hsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
                 <div style="display:flex;align-items:center;gap:10px;padding:12px">
                   <button onClick="{{ hsPrev }}" aria-label="Previous in the wiring" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">&#8249;</button>
@@ -10487,6 +10563,66 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ cyClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;font:400 20px/1 var(--fu);color:var(--tx)">&#215;</button>
       </div>
       </sc-if>
+      <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+          <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <!-- 2D: the widget's flat chart, drawn above the reading -->
+      <sc-if value="{{ cyFlatOn }}" hint-placeholder-val="{{ false }}">
+        <div style="background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px 16px">
+          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+              <div style="position:relative;height:{{ cwStarsH }}">
+                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                    </sc-for>
+                  </span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+              <div style="position:relative;height:{{ cwDesignH }}">
+                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                </sc-if>
+                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                </sc-for>
+              </div>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                  </sc-for>
+                </div>
+                <div style="position:relative;height:16px">
+                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                    </span>
+                  </sc-for>
+                </div>
+              </div>
+              <span></span>
+              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">The reading is written for your chart, not a sample</div>
@@ -11457,9 +11593,9 @@ class Component extends DCLogic {
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
-    pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false, gazTick: 0,
-    chartView: '3d', csFail: false, csFocus: null, csToday: false,
-    hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
+    pmenuOpen: false, callOpen: false, cyOpen: false, cyView: '2d', cwSceneFail: false, cwSceneLive: false, gazTick: 0,
+    chartView: '2d', csFail: false, csFocus: null, csToday: false,
+    hdView: '2d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
     csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null };
 
@@ -11902,6 +12038,8 @@ class Component extends DCLogic {
          way the expanded overlay is. */
       const cv = localStorage.getItem('incommon.chart.view');
       if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
+      const yv = localStorage.getItem('incommon.cycle.view');
+      if (yv === '2d' || yv === '3d') this.setState({ cyView: yv });
       const hv = localStorage.getItem('incommon.hd.view');
       /* The scenes' scripts load async with the rest of the helmet. Until they
          have arrived the deep views hold their place with Loading rather than
@@ -14599,7 +14737,7 @@ class Component extends DCLogic {
       obsTouch: deep && this.touchUi(),
       obsStatus: flying ? 'In flight' : 'At station', obsStatusDot: flying ? 'var(--ac2-hi)' : 'var(--mut)',
       obsAria: 'The Observatory: your chart in open space. W, A, S and D fly, E and Q climb and descend, the arrows look, brackets step between bodies and Enter flies to the one in front.',
-      obsViews: [['3d', '3D'], ['orbit', 'Orbital']].map(([id, label]) => {
+      obsViews: [['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => {
         const on = (st.chartView === 'orbit' ? 'orbit' : '3d') === id;
         return { label, on, bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent', c: on ? 'var(--tx)' : 'var(--dim)',
           go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); } };
@@ -21959,8 +22097,11 @@ class Component extends DCLogic {
   cycleWidgetVals() {
     const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
     const ready = this.cycleReady() && this.cycleDesignReady();
-    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
-    const scene = this.cycleSceneOn() || this.scenePending('CycleScene');
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwViewsOn: false, cwViews: [], cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    /* 2D is the flat chart and is drawn first (owner, 20 October 2026); 3D is
+       the landscape, a choice kept per device like the charts' own. */
+    const canScene = this.cycleSceneOn() || this.scenePending('CycleScene');
+    const scene = canScene && this.state.cyView === '3d';
     const now = new Date(), year = now.getFullYear();
     const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
     const pct = t => (Math.max(0, Math.min(1, (t - s0) / span)) * 100).toFixed(2) + '%';
@@ -22021,7 +22162,8 @@ class Component extends DCLogic {
     const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
     return {
       cwOn: true, cwFinding: false, cwReady: true,
-      cwSceneOn: scene, cwChartOn: !scene, cwVeilO: this.state.cwSceneLive ? '0' : '1', cwVeilV: this.state.cwSceneLive ? 'hidden' : 'visible',
+      cwViewsOn: canScene, cwViews: canScene ? this.cycleViews() : [],
+      cwSceneOn: scene, cwChartOn: !scene, cwUiO: (!scene || this.state.cwSceneLive) ? '1' : '0', cwUiV: (!scene || this.state.cwSceneLive) ? 'visible' : 'hidden', cwVeilO: this.state.cwSceneLive ? '0' : '1', cwVeilV: this.state.cwSceneLive ? 'hidden' : 'visible',
       cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
       cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
       cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
@@ -22059,6 +22201,16 @@ class Component extends DCLogic {
 
      NOTHING NEW LEAVES THE DEVICE. The scene is drawn here; the two positions
      it asks for at the instant the reader is looking at come from cyLon. */
+  cycleViews() {
+    const v = this.state.cyView === '3d' ? '3d' : '2d';
+    return [['2d', '2D'], ['3d', '3D']].map(([id, label]) => ({
+      label, on: v === id,
+      bg: v === id ? 'rgba(var(--atmc),.34)' : 'transparent',
+      bd: v === id ? 'var(--ac2)' : 'transparent',
+      c: v === id ? 'var(--tx)' : 'var(--dim)',
+      go: () => { try { localStorage.setItem('incommon.cycle.view', id); } catch (e) {} this.setState({ cyView: id }); }
+    }));
+  }
   cycleSceneOn() {
     const CS = typeof window !== 'undefined' && window.CycleScene;
     return !!(CS && CS.supported() && !this.state.cwSceneFail);
@@ -22095,28 +22247,29 @@ class Component extends DCLogic {
       stars, design, years, pins, natal, asc, aria: 'The long weather, ' + (year - 1) + ' to ' + (year + this.CY_AHEAD) };
     return this._cySM;
   }
+  cycleSceneMake() {
+    const fmtM = this._fmt('cymonth', { month: 'short', year: 'numeric' }), fmtD = this._fmt('cyday', { day: 'numeric', month: 'long', year: 'numeric' });
+    return window.CycleScene.create({
+      onReady: () => { if (!this.state.cwSceneLive) this.setState({ cwSceneLive: true }); },
+      onFail: () => { this._cyS = null; this.setState({ cwSceneFail: true, cwSceneLive: false }); },
+      onOpen: o => { this._cyFocus = (o && o.focus) || null; this.setState({ cyOpen: true }); },
+      onRead: id => this.cycleSceneRead(id),
+      readLabel: id => document.querySelector('[data-cy-pass="' + id + '"]') ? 'Read the ledger' : 'See it in the list',
+      fmt: (t, kind) => { const d = new Date(t), f = kind === 'day' ? fmtD : fmtM; return f ? f.format(d) : d.toDateString(); },
+      lonAt: (name, t) => this.cyLon(name, this.t2000(new Date(t)))
+    });
+  }
   cycleSceneSync(retry) {
     if (!this.cycleSceneOn()) return;
     const full = document.querySelector('[data-cy-scene="full"]'), mini = document.querySelector('[data-cy-scene="mini"]'), host = full || mini;
     clearTimeout(this._cySyncT);
     if (!host || (this.state.cyOpen && !full && this.cycleReady())) {
-      if (!host && this._cyS) this._cyS.detach();
+      if (!host && this._cyS) this.scenePark(this._cyS);
       const want = this.state.cyOpen || (this.state.ready && this.cycleReady() && (this.curTab() === 'today' || (this.state.dtW || 1440) < this.BP.md));
       if (want && (retry || 0) < 8) this._cySyncT = setTimeout(() => this.cycleSceneSync((retry || 0) + 1), 60);
       if (!host) return;
     }
-    if (!this._cyS) {
-      const fmtM = this._fmt('cymonth', { month: 'short', year: 'numeric' }), fmtD = this._fmt('cyday', { day: 'numeric', month: 'long', year: 'numeric' });
-      this._cyS = window.CycleScene.create({
-        onReady: () => { if (!this.state.cwSceneLive) this.setState({ cwSceneLive: true }); },
-        onFail: () => { this._cyS = null; this.setState({ cwSceneFail: true, cwSceneLive: false }); },
-        onOpen: o => { this._cyFocus = (o && o.focus) || null; this.setState({ cyOpen: true }); },
-        onRead: id => this.cycleSceneRead(id),
-        readLabel: id => document.querySelector('[data-cy-pass="' + id + '"]') ? 'Read the ledger' : 'See it in the list',
-        fmt: (t, kind) => { const d = new Date(t), f = kind === 'day' ? fmtD : fmtM; return f ? f.format(d) : d.toDateString(); },
-        lonAt: (name, t) => this.cyLon(name, this.t2000(new Date(t)))
-      });
-    }
+    if (!this._cyS) this._cyS = this.cycleSceneMake();
     const m = this.cycleSceneModel();
     if (m) this._cyS.setModel(m);
     this._cyS.attach(host, full ? 'full' : 'mini');
@@ -22173,8 +22326,9 @@ class Component extends DCLogic {
      Orbital, because by then the scene already existed). A scene that is not
      on screen waits in the lot, an offscreen box inside the shell's own token
      root, where it keeps its palette and its compiled programs and runs no
-     loop. scenePrewarm() builds the wiring and then the chart there, one at a
-     time, once the app has settled, so the first visit is the fast one. */
+     loop. scenePrewarm() builds the Cycle Audit, the wiring and the chart
+     there, one at a time, once the app has settled, so the first switch from
+     2D to a depth view is the fast one. */
   sceneLot() {
     if (this._sceneLot && this._sceneLot.isConnected) return this._sceneLot;
     const root = document.querySelector('[data-vt]') || document.querySelector('[data-app-root]');
@@ -22190,7 +22344,7 @@ class Component extends DCLogic {
   scenePark(S) {
     const lot = this.sceneLot();
     if (!lot) { S.detach(); return; }
-    if (S.host !== lot || S.el.root.parentNode !== lot) S.attach(lot);
+    if (S.host !== lot || S.el.root.parentNode !== lot) S.attach(lot, S.mode || 'mini');
   }
   scenePrewarm() {
     clearTimeout(this._spT);
@@ -22201,22 +22355,35 @@ class Component extends DCLogic {
     const busy = S => S && !S.failed && (S.building || S._warming || (S.ready && !S.warm && !!S.host));
     if ([this._csS, this._hsS, this._cyS].some(busy)) return later(400);
     const tk = (this.state.themeKey || '') + (this.state.themeHC ? '/hc' : '');
+    /* 2D is what opens (owner, 20 October 2026), so each stage is built for
+       the depth view the reader would switch to: 3D, or the view already
+       showing. The Cycle Audit goes first, because it is on Today. */
+    const deepOf = now => now !== '2d' ? now : '3d';
     const next = [
       () => {
-        if (this.hdViewNow() === '2d' || !this.hdSceneOn() || !this._hsModel) return null;
+        if (!this.cycleSceneOn() || !(this.cycleReady() && this.cycleDesignReady())) return null;
+        if (!this._cyS) {
+          const S = this._cyS = this.cycleSceneMake(), m = this.cycleSceneModel();
+          if (m) S.setModel(m);
+          this._cySTheme = tk;
+        }
+        return this._cyS;
+      },
+      () => {
+        if (!this.hdSceneOn() || !this._hsModel) return null;
         if (!this._hsS) {
           const S = this._hsS = this.hdSceneMake();
-          S.setModel(this._hsModel); S.setView(this.hdViewNow()); S.setLayer(this.state.bgMode || 'both');
+          S.setModel(this._hsModel); S.setView(deepOf(this.hdViewNow())); S.setLayer(this.state.bgMode || 'both');
           S.setSky(this.hdSkyOn() ? this.hdSkyList() : null); S.setFocus(this.state.hsFocus || null, false);
           this._hsTheme = tk;
         }
         return this._hsS;
       },
       () => {
-        if (this.chartViewNow() === '2d' || !this.chartSceneOn() || !this._csModel) return null;
+        if (!this.chartSceneOn() || !this._csModel) return null;
         if (!this._csS) {
           const S = this._csS = this.chartSceneMake(), m = this._csModel;
-          S.setModel(m); S.setView(this.chartViewNow());
+          S.setModel(m); S.setView(deepOf(this.chartViewNow()));
           S.setFocus(this.state.csFocus || (m.bodies[0] ? m.bodies[0].key : null), false);
           this._csTheme = tk;
         }
@@ -22431,8 +22598,9 @@ class Component extends DCLogic {
     const closed = { cyOpen: false, cyListOn: false, cyNone: false, cyFinding: false, cyMoreOn: false, cyRows: [], cyShow: false,
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
       cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
-    const sceneOn = open && (this.cycleSceneOn() || this.scenePending('CycleScene')) && this.cycleReady() && this.cycleDesignReady();
-    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn,
+    const drawn = open && this.cycleReady() && this.cycleDesignReady();
+    const sceneOn = drawn && (this.cycleSceneOn() || this.scenePending('CycleScene')) && st.cyView === '3d';
+    const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn, cyFlatOn: drawn && !sceneOn,
       cyVeilO: st.cwSceneLive ? '0' : '1', cyVeilV: st.cwSceneLive ? 'hidden' : 'visible', cyUiO: st.cwSceneLive ? '1' : '0', cyUiV: st.cwSceneLive ? 'visible' : 'hidden',
       cyGridCols: sceneOn ? 'minmax(0,1fr) minmax(340px,440px)' : 'minmax(0,860px)',
       cyNowGo: () => { if (this._cyS) this._cyS.toNow(); },
@@ -24302,7 +24470,7 @@ class Component extends DCLogic {
             const deepZoom = d => () => { if (this._csS) this._csS.zoom(d); };
             return {
               chartViewsOn: deepOn,
-              chartViews: deepOn ? [['3d', '3D'], ['orbit', 'Orbital'], ['2d', '2D']].map(([id, label]) => ({
+              chartViews: deepOn ? [['2d', '2D'], ['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => ({
                 label, on: view === id,
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',
@@ -24825,7 +24993,7 @@ class Component extends DCLogic {
             const listTab = st.hdList || 'gates';
             return {
               hdViewsOn: deepOn,
-              hdViews: deepOn ? [['3d', '3D'], ['wheel', 'Wheel'], ['2d', '2D']].map(([id, label]) => ({
+              hdViews: deepOn ? [['2d', '2D'], ['wheel', 'Wheel'], ['3d', '3D']].map(([id, label]) => ({
                 label, on: view === id,
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',

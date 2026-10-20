@@ -4626,9 +4626,9 @@ and no control under 44px.
 Asked for by the owner on 19 October 2026: "Update the astrology page to make it
 as if it was built by unreal engine. Make a 3D natal chart, an orbital option,
 and a standard 2D chart. Make the logos fit elegantly." The Birth Chart has a
-**Chart view** radiogroup in both shells, 3D, Orbital and 2D in that order,
+**Chart view** radiogroup in both shells, 2D, Orbital and 3D in that order,
 state `chartView`, kept per device as `incommon.chart.view` the way the
-expanded overlay is. **3D is the default.**
+expanded overlay is. **2D is the default** (see "2D opens first").
 
 **2D is the SVG wheel, untouched**, and it is also the fallback. 3D and Orbital
 are one scene, `app/chart-scene.js` (shell layer, global `ChartScene`), drawn
@@ -4707,8 +4707,9 @@ Asked for by the owner on 19 October 2026: "Redesign the human design page to
 make the ux like it was made by unreal engine. Completely interactive, high
 quality visuals, 3D options with 2D available. Compact, highly engaging, drive
 the experience to reflect the human design philosophy." The Wiring has a
-**Wiring view** radiogroup in both shells, 3D, Wheel and 2D, state `hdView`,
-kept per device as `incommon.hd.view`. **3D is the default.** The layer control
+**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`,
+kept per device as `incommon.hd.view`. **2D is the default** (see "2D opens
+first"). The layer control
 (Personality, Design, Both, `bgMode`) drives every view.
 
 **2D is the SVG wiring, untouched**, and the fallback. 3D and Wheel are one
@@ -4946,8 +4947,9 @@ every program while the reader watched Loading.
 
 **`scenePrewarm()` builds the wiring and then the chart while the reader is
 somewhere else**, one at a time, two seconds after the app is ready, in idle
-time, and only for a view that is deep (`hdViewNow()`, `chartViewNow()` not
-`2d`). A scene with no stage on the page waits in **the lot** (`sceneLot()`): a
+time. Since 2D opens first it builds every stage whatever view is showing, for
+3D or the depth view already chosen, and the Cycle Audit's first, because it is
+on Today. A scene with no stage on the page waits in **the lot** (`sceneLot()`): a
 box at `left:-10000px` inside `[data-vt]` or `[data-app-root]`, so it reads the
 shell's own tokens, `inert` and `aria-hidden`, where its IntersectionObserver
 reports it unseen and no loop runs. A scene whose stage is mounted but off
@@ -4973,6 +4975,36 @@ the address changed on the desktop (4.3s before) and the wiring 0.5s; on the
 phone the wiring 1.2s after entering My Charts and the chart 1.1s after the
 swipe. Opening My Charts straight away on the phone, the chart is now built
 while the reader is on the wiring page and comes up 0.6s after the swipe.
+
+## 2D opens first, and the Cycle Audit has a 2D of its own
+Decided by the owner on 20 October 2026: "Flip the order of the charts from
+3D, wheel/orbital, 2D to 2D, wheel/orbital, 3D. Make a 2D audit cycle and load
+that first as well." The switches read 2D, Orbital, 3D and 2D, Wheel, 3D, and
+the Observatory's own pair reads Orbital, 3D. `chartView` and `hdView` start at
+`2d`; a reader who chose a depth view keeps it, because the choice is stored.
+The streaming hints were flipped with them (`cvFlat`, `hvFlat`, `cwChartOn`
+hint true; the deep ones false), so nothing deep flashes while the page
+streams.
+
+**The Cycle Audit's 2D is the flat chart it already had**, the three lanes on
+one twelve year axis, now a choice rather than only the fallback. State
+`cyView`, kept as `incommon.cycle.view`, `2d` first; the switch (`cwViews`,
+from `cycleViews()`) sits above the chart in the widget in both shells and at
+the top of the sheet, and is drawn only where 3D can run, so a device without
+WebGL 2 sees the flat chart and no choice, as before. In 2D the sheet has no
+stage: it opens on its plain header, the switch and the flat chart in a card
+above the reading (`cyFlatOn`), reading the same `cw*` values the widget draws,
+so the two cannot disagree. The widget's switch waits for the scene like every
+other stage unit (`cwUiO`/`cwUiV`).
+
+**3D stays one press from fast.** `scenePrewarm()` builds all three stages in
+the lot while 2D is showing (see "The stages are built before they are asked
+for"), and `cycleSceneMake()` is shared by the prewarm and the sync. Measured on
+SwiftShader with the stages built: Cycle Audit 0.3 to 0.5s from the press to
+live, the chart 0.2 to 0.6s, the wiring under 0.3s, both shells. The one slower
+reading, about 4s on the Cycle Audit, came when the press landed during another
+stage's first draw in the lot, which is SwiftShader building pipelines and is
+not a cost a real GPU pays.
 
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
