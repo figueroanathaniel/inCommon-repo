@@ -677,6 +677,50 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
           </sc-if>
+          <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
+              <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
+                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
+                </sc-for>
+                <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
+                  <g><title>{{ b.title }}</title>
+                    <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
+                  </g>
+                </sc-for>
+                <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
+                  <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
+                </sc-for>
+                <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
+                  <g><title>{{ r.title }}</title>
+                    <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
+                    <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
+                      <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
+                    </sc-for>
+                  </g>
+                </sc-for>
+                <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
+              </svg>
+              <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
+                <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
+                  <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
+                </sc-for>
+                <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
+                  <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
+                    <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
+                    <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
+                  </span>
+                </sc-for>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
+                  <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                  <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
+                  <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
           <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
             <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
             <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
@@ -5156,57 +5200,103 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
       </sc-if>
-      <!-- 2D: the widget's flat chart, drawn above the reading -->
+      <!-- 2D and Rings: the widget's own drawing, above the reading -->
       <sc-if value="{{ cyFlatOn }}" hint-placeholder-val="{{ false }}">
         <div style="background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px 16px">
-          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-              <div style="position:relative;height:{{ cwStarsH }}">
-                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                    </sc-for>
-                  </span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-              <div style="position:relative;height:{{ cwDesignH }}">
-                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                </sc-if>
-                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-              <div style="display:flex;flex-direction:column;gap:5px">
-                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                  </sc-for>
-                </div>
-                <div style="position:relative;height:16px">
-                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+              <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+                <div style="position:relative;height:{{ cwStarsH }}">
+                  <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                      <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                        <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                      </sc-for>
                     </span>
                   </sc-for>
                 </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+                <div style="position:relative;height:{{ cwDesignH }}">
+                  <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                  </sc-if>
+                  <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                  </sc-for>
+                </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                      <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="position:relative;height:16px">
+                    <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                      <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                        <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <span></span>
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                  </sc-for>
+                </div>
               </div>
-              <span></span>
-              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+              <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+                <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+                <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
+              <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
+                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
                 </sc-for>
+                <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
+                  <g><title>{{ b.title }}</title>
+                    <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
+                  </g>
+                </sc-for>
+                <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
+                  <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
+                </sc-for>
+                <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
+                  <g><title>{{ r.title }}</title>
+                    <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
+                    <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
+                      <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
+                    </sc-for>
+                  </g>
+                </sc-for>
+                <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
+              </svg>
+              <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
+                <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
+                  <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
+                </sc-for>
+                <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
+                  <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
+                    <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
+                    <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
+                  </span>
+                </sc-for>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
+                  <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                  <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
+                  <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
+                </div>
               </div>
             </div>
-            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
-              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-            </div>
-          </div>
+          </sc-if>
         </div>
       </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
@@ -6275,6 +6365,50 @@ input[type="date"]{color-scheme:dark}
                   <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:64px;right:0;pointer-events:none">
                     <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
                     <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
+                <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
+                  <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                    <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
+                      <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
+                    </sc-for>
+                    <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
+                      <g><title>{{ b.title }}</title>
+                        <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
+                      </g>
+                    </sc-for>
+                    <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
+                      <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
+                    </sc-for>
+                    <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
+                      <g><title>{{ r.title }}</title>
+                        <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
+                        <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
+                          <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
+                        </sc-for>
+                      </g>
+                    </sc-for>
+                    <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
+                    <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
+                    <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
+                  </svg>
+                  <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
+                    <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
+                      <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
+                    </sc-for>
+                    <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
+                      <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
+                        <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
+                        <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
+                      </span>
+                    </sc-for>
+                    <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
+                      <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                      <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
+                      <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
+                    </div>
                   </div>
                 </div>
               </sc-if>
@@ -10570,57 +10704,103 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
       </sc-if>
-      <!-- 2D: the widget's flat chart, drawn above the reading -->
+      <!-- 2D and Rings: the widget's own drawing, above the reading -->
       <sc-if value="{{ cyFlatOn }}" hint-placeholder-val="{{ false }}">
         <div style="background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:14px 16px 16px">
-          <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-            <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-              <div style="position:relative;height:{{ cwStarsH }}">
-                <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                    <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                      <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                    </sc-for>
-                  </span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-              <div style="position:relative;height:{{ cwDesignH }}">
-                <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                  <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                </sc-if>
-                <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                  <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                </sc-for>
-              </div>
-              <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-              <div style="display:flex;flex-direction:column;gap:5px">
-                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                    <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                  </sc-for>
-                </div>
-                <div style="position:relative;height:16px">
-                  <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                    <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                      <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
+              <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
+                <div style="position:relative;height:{{ cwStarsH }}">
+                  <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
+                      <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
+                        <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
+                      </sc-for>
                     </span>
                   </sc-for>
                 </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
+                <div style="position:relative;height:{{ cwDesignH }}">
+                  <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
+                  </sc-if>
+                  <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
+                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
+                  </sc-for>
+                </div>
+                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                      <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="position:relative;height:16px">
+                    <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
+                      <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
+                        <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <span></span>
+                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
+                    <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+                  </sc-for>
+                </div>
               </div>
-              <span></span>
-              <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                  <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
+              <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
+                <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
+                <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
+            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
+              <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+                <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
+                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
                 </sc-for>
+                <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
+                  <g><title>{{ b.title }}</title>
+                    <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
+                  </g>
+                </sc-for>
+                <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
+                  <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
+                </sc-for>
+                <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
+                  <g><title>{{ r.title }}</title>
+                    <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
+                    <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
+                      <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
+                    </sc-for>
+                  </g>
+                </sc-for>
+                <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
+                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
+              </svg>
+              <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
+                <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
+                  <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
+                </sc-for>
+                <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
+                  <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
+                    <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
+                    <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
+                  </span>
+                </sc-for>
+                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
+                  <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
+                  <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
+                  <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
+                </div>
               </div>
             </div>
-            <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
-              <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-              <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-            </div>
-          </div>
+          </sc-if>
         </div>
       </sc-if>
             <sc-if value="{{ cySample }}" hint-placeholder-val="{{ false }}">
@@ -12034,13 +12214,10 @@ class Component extends DCLogic {
       if (localStorage.getItem('incommon.chart.expanded') === '1') {
         this.setState({ chartExpandOpen: true, chartMode: 'expanded' });
       }
-      /* The chart view (3D, Orbital or 2D) is a device preference, kept the
-         way the expanded overlay is. */
-      const cv = localStorage.getItem('incommon.chart.view');
-      if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
-      const yv = localStorage.getItem('incommon.cycle.view');
-      if (yv === '2d' || yv === '3d') this.setState({ cyView: yv });
-      const hv = localStorage.getItem('incommon.hd.view');
+      /* Every chart opens on 2D, whatever was chosen last time (owner, 20
+         October 2026), so a view is not kept. The keys an earlier build wrote
+         are cleared once, because nothing reads them now. */
+      ['incommon.chart.view', 'incommon.cycle.view', 'incommon.hd.view'].forEach(k => localStorage.removeItem(k));
       /* The scenes' scripts load async with the rest of the helmet. Until they
          have arrived the deep views hold their place with Loading rather than
          drawing the flat fallback and swapping it out, which is the layout
@@ -12054,7 +12231,6 @@ class Component extends DCLogic {
       };
       sceneWait();
       this._spT = setTimeout(() => this.scenePrewarm(), 1500);
-      if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
       const hr = localStorage.getItem('incommon.hd.read');
       if (hr === 'cards' || hr === 'full') this.setState({ hdRead: hr });
     } catch (e) {}
@@ -14740,7 +14916,7 @@ class Component extends DCLogic {
       obsViews: [['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => {
         const on = (st.chartView === 'orbit' ? 'orbit' : '3d') === id;
         return { label, on, bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent', c: on ? 'var(--tx)' : 'var(--dim)',
-          go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); } };
+          go: () => this.setState({ chartView: id }) };
       }),
       obsHomeGo: () => { if (S) S.home(); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
       obsPanelsGo: () => this.setState({ obsPanels: !panels }),
@@ -21841,7 +22017,7 @@ class Component extends DCLogic {
       for (let i = 0; i < 8; i++) { const m = (a + b) / 2, fm = f(m); if ((fm < 0) === (fa < 0)) { a = m; fa = fm; } else b = m; }
       return (a + b) / 2;
     };
-    const runs = [];
+    const runs = [], nodes = {};
     this.CY_MOVERS.forEach(mover => {
       /* The library is asked once per sample, and everything after that is
          arithmetic on the cubic: the daily walk and every bisection. */
@@ -21854,6 +22030,8 @@ class Component extends DCLogic {
         L[i] = v;
       }
       if (!ok) return;
+      /* kept, so the Orbital view draws each body's path off the same cubic */
+      nodes[mover] = { base, h, L };
       const at = t => {
         const x = (t - base) / h, k = Math.min(n - 3, Math.max(1, Math.floor(x))), u = x - k;
         return L[k - 1] * (-u * (u - 1) * (u - 2) / 6) + L[k] * ((u + 1) * (u - 1) * (u - 2) / 2)
@@ -21917,6 +22095,7 @@ class Component extends DCLogic {
       });
     }));
     this._cyKey = key;
+    this._cyNodes = nodes;
     this._cy = out.sort((a, b) => a.from - b.from);
     return this._cy;
   }
@@ -22097,11 +22276,12 @@ class Component extends DCLogic {
   cycleWidgetVals() {
     const off = { cwOn: false, cwFinding: false, cwReady: false, cwStat: [], cwStars: [], cwDesign: [], cwYears: [], cwPins: [] };
     const ready = this.cycleReady() && this.cycleDesignReady();
-    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwViewsOn: false, cwViews: [], cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
-    /* 2D is the flat chart and is drawn first (owner, 20 October 2026); 3D is
-       the landscape, a choice kept per device like the charts' own. */
-    const canScene = this.cycleSceneOn() || this.scenePending('CycleScene');
-    const scene = canScene && this.state.cyView === '3d';
+    if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwViewsOn: false, cwViews: [], cwSceneOn: false, cwChartOn: false, cwRingsOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
+    /* 2D is the flat chart and is drawn first (owner, 20 October 2026). Rings
+       is the same twelve years wound one turn a year, drawn here as SVG; 3D is
+       the landscape and Orbital the same scene laid out as a sky. A view is
+       chosen for the visit and never kept, like the charts'. */
+    const view = this.cycleViewNow(), scene = view === '3d' || view === 'orbit', rings = view === 'rings';
     const now = new Date(), year = now.getFullYear();
     const s0 = new Date(year - 1, 0, 1).getTime(), s1 = new Date(year - 1 + this.CY_SPAN, 0, 1).getTime(), span = s1 - s0;
     const pct = t => (Math.max(0, Math.min(1, (t - s0) / span)) * 100).toFixed(2) + '%';
@@ -22162,8 +22342,9 @@ class Component extends DCLogic {
     const cwSubOf = w => w.passes.length ? (nextExact ? 'Exact ' + mY(nextExact) : 'Last exact ' + mY(lastExact)) + ' · through ' + mY(w.to) : 'Through ' + mY(w.to);
     return {
       cwOn: true, cwFinding: false, cwReady: true,
-      cwViewsOn: canScene, cwViews: canScene ? this.cycleViews() : [],
-      cwSceneOn: scene, cwChartOn: !scene, cwUiO: (!scene || this.state.cwSceneLive) ? '1' : '0', cwUiV: (!scene || this.state.cwSceneLive) ? 'visible' : 'hidden', cwVeilO: this.state.cwSceneLive ? '0' : '1', cwVeilV: this.state.cwSceneLive ? 'hidden' : 'visible',
+      cwViewsOn: true, cwViews: this.cycleViews(),
+      cwSceneOn: scene, cwChartOn: !scene && !rings, cwRingsOn: rings,
+      ...(rings ? this.cycleRings({ year, s0, s1, ws, starRows, designRows, nums, now }) : {}), cwUiO: (!scene || this.state.cwSceneLive) ? '1' : '0', cwUiV: (!scene || this.state.cwSceneLive) ? 'visible' : 'hidden', cwVeilO: this.state.cwSceneLive ? '0' : '1', cwVeilV: this.state.cwSceneLive ? 'hidden' : 'visible',
       cwGlyph: head ? this.CY_GLYPH[head.mover] : next ? this.CY_GLYPH[next.mover] : '☉',
       cwHead: head ? head.label : next ? 'Next: ' + next.label : 'No long passage ahead',
       cwSub: head ? cwSubOf(head) : next ? 'From ' + mY(next.from) + (next.passes.length ? ' · exact ' + mY(next.passes[0]) : '') : 'The slow sky is quiet over your chart',
@@ -22181,6 +22362,59 @@ class Component extends DCLogic {
         (live.length ? ', ' + live.length + ' under way now' : '') + '. Design: ' + ds.length + ' stay' + (ds.length === 1 ? '' : 's') + ' of a slow body on your gates or channels. Numbers: Personal Year ' + (py && py.v != null ? py.v : '') + ' this year' + (pinNow ? ', Pinnacle ' + pinNow.v : '') + '.',
       cwOpenGo: () => this.setState({ cyOpen: true })
     };
+  }
+  /* RINGS (owner, 20 October 2026). The widget's twelve years wound into a
+     spiral, one turn a year from the centre outward, January at the top and
+     the months running clockwise, so a passage that crosses New Year carries on
+     round the next turn instead of breaking off. The turns alternate two tones
+     of the sky's own blue, the way tree rings do, and a master year wears
+     violet; the passages ride a turn's outer half and the slow bodies' stays
+     on a gate its inner half, and the spine at twelve o'clock names each year
+     and its Personal Year. A number is a category, not an amount, so no tint
+     grows with it. It reads the same packed rows the flat chart draws, so the
+     two cannot disagree, and it is plain SVG, so it needs no WebGL. */
+  cycleRings(c) {
+    const { year, s0, s1, ws, starRows, designRows, nums, now } = c;
+    const C = 200, R0 = 52, R1 = 182, P = (R1 - R0) / this.CY_SPAN, TAU = Math.PI * 2, f1 = x => x.toFixed(1);
+    const jan = y => new Date(y, 0, 1).getTime();
+    const turn = t => { const y = new Date(t).getFullYear(), a = jan(y); return (y - (year - 1)) + (t - a) / (jan(y + 1) - a); };
+    const pt = (t, dr) => { const f = turn(t), th = (f % 1) * TAU, r = R0 + P * f + (dr || 0); return [C + r * Math.sin(th), C - r * Math.cos(th)]; };
+    const arc = (a, b, dr) => {
+      a = Math.max(a, s0); b = Math.min(b, s1 - 864e5);
+      if (b - a < 864e5 * 8) b = a + 864e5 * 8;
+      const n = Math.max(2, Math.ceil((b - a) / (3 * 864e5)));
+      let d = '';
+      for (let i = 0; i <= n; i++) { const q = pt(a + (b - a) * i / n, dr); d += (i ? 'L' : 'M') + f1(q[0]) + ' ' + f1(q[1]); }
+      return d;
+    };
+    const at = (th, r) => ({ x: f1(C + r * Math.sin(th)), y: f1(C - r * Math.cos(th)) });
+    const master = v => v === 11 || v === 22 || v === 33;
+    const pinOf = y => nums.pins.find(p => y >= p.from && y <= p.to);
+    const cwRingBands = nums.years.map(({ y, v }) => {
+      const pin = pinOf(y);
+      return { d: arc(jan(y), jan(y + 1)), c: master(v) ? 'var(--ac2)' : 'rgb(var(--atmc))', o: master(v) ? '.42' : y % 2 ? '.34' : '.18',
+        title: y + (v != null ? ', Personal Year ' + v : '') + (pin ? ', Pinnacle ' + pin.v : '') };
+    });
+    const sOff = [-0.8, 1.6, 3.9], dOff = [-3.0, -4.9];
+    const cwRingStars = starRows.map(({ it: w, row }) => ({
+      d: arc(+w.from, +w.to, sOff[row] || 0), c: w.asp !== 'trine' ? 'var(--ac2-hi)' : 'rgb(var(--atmc2))', title: w.label + ', ' + w.range,
+      ticks: w.passes.filter(d => +d >= s0 && +d < s1).map(d => { const q = pt(+d, sOff[row] || 0); return { x: f1(q[0]), y: f1(q[1]) }; })
+    }));
+    const cwRingDesign = designRows.map(({ it: d, row }) => ({
+      d: arc(+d.from, +d.to, dOff[row] || dOff[0]), dash: d.own ? 'none' : '2.4 2', title: d.label + ', ' + d.range }));
+    const N = 'JFMAMJJASOND';
+    const cwRingSpokes = N.split('').map((_, m) => { const th = m / 12 * TAU, a = at(th, R0 - 4), b = at(th, R1 + 5); return { x1: a.x, y1: a.y, x2: b.x, y2: b.y }; });
+    /* The labels are HTML laid over the drawing, placed in percent of it: the
+       template's text holes are spans, which an SVG text element cannot hold. */
+    const pc = u => (u / 4).toFixed(2) + '%';
+    const cwRingMonths = N.split('').map((t, m) => { const a = at((m + 0.5) / 12 * TAU, R1 + 12); return { t, x: pc(+a.x), y: pc(+a.y) }; });
+    const cwRingYrs = nums.years.map(({ y, v }, k) => ({ y: (y - year) % 2 === 0 ? String(y) : '', v: v == null ? '' : String(v),
+      top: pc(C - (R0 + P * k)), c: master(v) ? 'var(--ac2-hi)' : 'var(--tx)' }));
+    const tn = now.getTime(), q = pt(tn, 0), th = (turn(tn) % 1) * TAU, rn = R0 + P * turn(tn), s = at(th, R0 - 8), e = at(th, rn - 8);
+    const fm = this._fmt('cymonth', { month: 'short', year: 'numeric' }), py = nums.years.find(x => x.y === year);
+    return { cwRingBands, cwRingStars, cwRingDesign, cwRingSpokes, cwRingMonths, cwRingYrs,
+      cwRingNowX: f1(q[0]), cwRingNowY: f1(q[1]), cwRingLx1: s.x, cwRingLy1: s.y, cwRingLx2: e.x, cwRingLy2: e.y,
+      cwRingDate: fm ? fm.format(now) : now.toDateString(), cwRingYear: py && py.v != null ? 'Personal Year ' + py.v : '' };
   }
   /* ---- The Cycle Audit in depth (owner, 19 October 2026) ---------------------
 
@@ -22202,14 +22436,22 @@ class Component extends DCLogic {
      NOTHING NEW LEAVES THE DEVICE. The scene is drawn here; the two positions
      it asks for at the instant the reader is looking at come from cyLon. */
   cycleViews() {
-    const v = this.state.cyView === '3d' ? '3d' : '2d';
-    return [['2d', '2D'], ['3d', '3D']].map(([id, label]) => ({
+    const v = this.cycleViewNow(), deep = this.cycleSceneOn() || this.scenePending('CycleScene');
+    return (deep ? [['2d', '2D'], ['rings', 'Rings'], ['orbit', 'Orbital'], ['3d', '3D']] : [['2d', '2D'], ['rings', 'Rings']]).map(([id, label]) => ({
       label, on: v === id,
       bg: v === id ? 'rgba(var(--atmc),.34)' : 'transparent',
       bd: v === id ? 'var(--ac2)' : 'transparent',
       c: v === id ? 'var(--tx)' : 'var(--dim)',
-      go: () => { try { localStorage.setItem('incommon.cycle.view', id); } catch (e) {} this.setState({ cyView: id }); }
+      go: () => this.setState({ cyView: id })
     }));
+  }
+  /* The view showing: Rings needs nothing but SVG, and the two scene views
+     fall back to 2D where the scene cannot run. */
+  cycleViewNow() {
+    const v = this.state.cyView;
+    if (v === 'rings') return 'rings';
+    if ((v === '3d' || v === 'orbit') && (this.cycleSceneOn() || this.scenePending('CycleScene'))) return v;
+    return '2d';
   }
   cycleSceneOn() {
     const CS = typeof window !== 'undefined' && window.CycleScene;
@@ -22242,9 +22484,24 @@ class Component extends DCLogic {
       const a = natal.find(x => x.name === 'Ascendant');
       asc = a ? a.lon : null;
     } catch (e) { natal = []; }
+    /* Each slow body's longitude every three days across the span, read off
+       the cubic the scan already walked, for the Orbital view's paths. */
+    const paths = {}, nodes = this._cyNodes || {}, step = 3 * 864e5;
+    this.CY_MOVERS.forEach(mv => {
+      const nd = nodes[mv];
+      if (!nd) return;
+      const n = Math.floor((end - s0) / step) + 1, lon = new Float32Array(n), L = nd.L, last = L.length - 3;
+      for (let i = 0; i < n; i++) {
+        const x = (this.t2000(new Date(s0 + i * step)) - nd.base) / nd.h, k = Math.min(last, Math.max(1, Math.floor(x))), u = x - k;
+        lon[i] = L[k - 1] * (-u * (u - 1) * (u - 2) / 6) + L[k] * ((u + 1) * (u - 1) * (u - 2) / 2)
+          + L[k + 1] * (-(u + 1) * u * (u - 2) / 2) + L[k + 2] * ((u + 1) * u * (u - 1) / 6);
+      }
+      paths[mv] = { t0: s0, dt: step, lon };
+    });
+    const HW = typeof window !== 'undefined' && window.HDWheel;
     this._cySMKey = key;
     this._cySM = { key, now: Date.now(), span: { from: s0, to: end }, mini: { from: s0, to: s1 }, miniNarrow: { from: s0, to: jan(year + 6) },
-      stars, design, years, pins, natal, asc, aria: 'The long weather, ' + (year - 1) + ' to ' + (year + this.CY_AHEAD) };
+      stars, design, years, pins, natal, asc, paths, gates: HW ? { order: HW.WHEEL.slice(), start: HW.START, deg: HW.GATE_DEG } : null, aria: 'The long weather, ' + (year - 1) + ' to ' + (year + this.CY_AHEAD) };
     return this._cySM;
   }
   cycleSceneMake() {
@@ -22272,6 +22529,7 @@ class Component extends DCLogic {
     if (!this._cyS) this._cyS = this.cycleSceneMake();
     const m = this.cycleSceneModel();
     if (m) this._cyS.setModel(m);
+    this._cyS.setLayout(this.cycleViewNow() === 'orbit' ? 'orbit' : 'land');
     this._cyS.attach(host, full ? 'full' : 'mini');
     if (full && this._cyFocus) { this._cyS.focus(this._cyFocus); this._cyFocus = null; }
     const tk = (this.state.themeKey || '') + (this.state.themeHC ? '/hc' : '');
@@ -22421,7 +22679,7 @@ class Component extends DCLogic {
         if (b) this.speak('Arrived at ' + b.label + '.', 'polite');
       },
       onFly: on => { if (!!this.state.csFlying !== !!on) this.setState({ csFlying: !!on }); },
-      onToggleView: () => { const v = this.state.chartView === 'orbit' ? '3d' : 'orbit'; try { localStorage.setItem('incommon.chart.view', v); } catch (e) {} this.setState({ chartView: v }); },
+      onToggleView: () => this.setState({ chartView: this.state.chartView === 'orbit' ? '3d' : 'orbit' }),
       onPanels: () => this.setState({ obsPanels: this.state.obsPanels === false }),
       onHelp: () => this.setState({ obsKeys: !this.state.obsKeys })
     });
@@ -22599,7 +22857,7 @@ class Component extends DCLogic {
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
       cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
     const drawn = open && this.cycleReady() && this.cycleDesignReady();
-    const sceneOn = drawn && (this.cycleSceneOn() || this.scenePending('CycleScene')) && st.cyView === '3d';
+    const cv = this.cycleViewNow(), sceneOn = drawn && (cv === '3d' || cv === 'orbit');
     const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn, cyFlatOn: drawn && !sceneOn,
       cyVeilO: st.cwSceneLive ? '0' : '1', cyVeilV: st.cwSceneLive ? 'hidden' : 'visible', cyUiO: st.cwSceneLive ? '1' : '0', cyUiV: st.cwSceneLive ? 'visible' : 'hidden',
       cyGridCols: sceneOn ? 'minmax(0,1fr) minmax(340px,440px)' : 'minmax(0,860px)',
@@ -24475,7 +24733,7 @@ class Component extends DCLogic {
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',
                 c: view === id ? 'var(--tx)' : 'var(--dim)',
-                go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); }
+                go: () => this.setState({ chartView: id })
               })) : [],
               cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
               /* the stage's units wait for the scene: nothing on or under it is shown until it is a utility */
@@ -24998,7 +25256,7 @@ class Component extends DCLogic {
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',
                 c: view === id ? 'var(--tx)' : 'var(--dim)',
-                go: () => { try { localStorage.setItem('incommon.hd.view', id); } catch (e) {} this.setState({ hdView: id }); }
+                go: () => this.setState({ hdView: id })
               })) : [],
               hvFlat: !deep, hvDeep: deep,
               hsVeilO: st.hsLive ? '0' : '1', hsVeilV: st.hsLive ? 'hidden' : 'visible', hsUiO: (!deep || st.hsLive) ? '1' : '0', hsUiV: (!deep || st.hsLive) ? 'visible' : 'hidden',

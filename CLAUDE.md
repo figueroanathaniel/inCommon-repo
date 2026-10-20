@@ -4627,8 +4627,8 @@ Asked for by the owner on 19 October 2026: "Update the astrology page to make it
 as if it was built by unreal engine. Make a 3D natal chart, an orbital option,
 and a standard 2D chart. Make the logos fit elegantly." The Birth Chart has a
 **Chart view** radiogroup in both shells, 2D, Orbital and 3D in that order,
-state `chartView`, kept per device as `incommon.chart.view` the way the
-expanded overlay is. **2D is the default** (see "2D opens first").
+state `chartView`. **2D is where it opens, every time** (see "2D opens
+first").
 
 **2D is the SVG wheel, untouched**, and it is also the fallback. 3D and Orbital
 are one scene, `app/chart-scene.js` (shell layer, global `ChartScene`), drawn
@@ -4707,9 +4707,8 @@ Asked for by the owner on 19 October 2026: "Redesign the human design page to
 make the ux like it was made by unreal engine. Completely interactive, high
 quality visuals, 3D options with 2D available. Compact, highly engaging, drive
 the experience to reflect the human design philosophy." The Wiring has a
-**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`,
-kept per device as `incommon.hd.view`. **2D is the default** (see "2D opens
-first"). The layer control
+**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`.
+**2D is where it opens, every time** (see "2D opens first"). The layer control
 (Personality, Design, Both, `bgMode`) drives every view.
 
 **2D is the SVG wiring, untouched**, and the fallback. 3D and Wheel are one
@@ -4981,17 +4980,26 @@ Decided by the owner on 20 October 2026: "Flip the order of the charts from
 3D, wheel/orbital, 2D to 2D, wheel/orbital, 3D. Make a 2D audit cycle and load
 that first as well." The switches read 2D, Orbital, 3D and 2D, Wheel, 3D, and
 the Observatory's own pair reads Orbital, 3D. `chartView` and `hdView` start at
-`2d`; a reader who chose a depth view keeps it, because the choice is stored.
+`2d`, and so does `cyView`.
+
+**The choice is not kept** (the owner, 20 October 2026: "Start with the 2D
+option as the default"). It was stored per device for one release, and a reader
+who had once pressed 3D kept opening on 3D, which read as the default never
+having changed. A view picked now lasts the visit; the next load opens on 2D.
+`componentDidMount` removes `incommon.chart.view`, `incommon.hd.view` and
+`incommon.cycle.view` once, because nothing reads them, and no switch writes
+them. Do not store a view again without the owner.
 The streaming hints were flipped with them (`cvFlat`, `hvFlat`, `cwChartOn`
 hint true; the deep ones false), so nothing deep flashes while the page
 streams.
 
 **The Cycle Audit's 2D is the flat chart it already had**, the three lanes on
 one twelve year axis, now a choice rather than only the fallback. State
-`cyView`, kept as `incommon.cycle.view`, `2d` first; the switch (`cwViews`,
+`cyView`, `2d` first; the switch (`cwViews`,
 from `cycleViews()`) sits above the chart in the widget in both shells and at
-the top of the sheet, and is drawn only where 3D can run, so a device without
-WebGL 2 sees the flat chart and no choice, as before. In 2D the sheet has no
+the top of the sheet. It reads 2D, Rings, Orbital, 3D where the scene can run
+and 2D, Rings where it cannot (see "The Cycle Audit is drawn four ways").
+In 2D the sheet has no
 stage: it opens on its plain header, the switch and the flat chart in a card
 above the reading (`cyFlatOn`), reading the same `cw*` values the widget draws,
 so the two cannot disagree. The widget's switch waits for the scene like every
@@ -5005,6 +5013,90 @@ live, the chart 0.2 to 0.6s, the wiring under 0.3s, both shells. The one slower
 reading, about 4s on the Cycle Audit, came when the press landed during another
 stage's first draw in the lot, which is SwiftShader building pipelines and is
 not a cost a real GPU pays.
+
+## The Cycle Audit is drawn four ways: 2D, Rings, Orbital and 3D
+Asked for by the owner on 20 October 2026, after asking whether the audit had a
+middle option like the chart's Orbital and the wiring's Wheel: "Both", meaning
+a Rings view and an Orbital view. The switch reads 2D, Rings, Orbital, 3D, and
+`cycleViewNow()` is the one answer to which is showing: Rings needs nothing but
+SVG, and Orbital and 3D fall back to 2D where the scene cannot run. 2D still
+opens first and nothing is kept.
+
+**Rings is the widget's twelve years wound into a spiral** (`cycleRings()`,
+`cwRing*`), one turn a year from the centre outward, January at the top, the
+months clockwise. A passage that crosses New Year carries on round the next
+turn instead of breaking off, which is the thing the flat chart cannot show.
+It reads the same packed rows (`starRows`, `designRows`) and the same numbers
+the flat chart draws, so the two cannot disagree: the passages ride a turn's
+outer half (`--ac2-hi` hard, `--atmc2` easy), the stays on a gate its inner
+half in `--blue`, dashed where the stay completes a channel, the exact dates
+are dots, now is a lit dot with a line in from the centre, and the centre names
+the month and the Personal Year. The spine at twelve o'clock names every other
+year and every year's Personal Year. It is drawn in the widget and in the
+sheet's card, where 2D's flat chart was (`cwRingsOn`, beside `cwChartOn`).
+
+**The turns alternate two tones and a master year is violet.** The first pass
+tinted each turn by its number, blue at 1 to the warm lobe at 9, and the blend
+went grey in the middle years. A Personal Year is a category, not an amount, so
+nothing grows with it now: alternating tones read as tree rings, and a master
+wears violet as it does on the Numbers page. Orbital's paths use the same rule.
+
+**Two template traps, both hit on the way in.** The runtime lowercases a
+camelCase SVG attribute it does not know, so `strokeWidth`, `strokeOpacity`
+and `textAnchor` were silently dropped and the bands drew as thin full strength
+lines: the stroke properties are in `style`, which it passes through. And a
+`{{ }}` hole is an HTML span, which an SVG `text` cannot render, so every
+dynamic label was invisible: the labels are an HTML layer over the drawing,
+placed in percent of it. **Put dynamic text over an SVG, never inside one.**
+
+**Orbital is the same scene as 3D, laid out as a sky** (`setLayout()` in
+`cycle-scene.js`, called from `cycleSceneSync()` before `attach()`). The
+landscape gives way to a polar chart on the same floor: the natal wheel in the
+middle with a spoke from each point out to the zodiac, one band per slow body
+(Saturn innermost, Pluto outermost), and in each band the body's path with time
+running outward across the band and longitude running round. A retrograde is
+the path doubling back, so a passage that is exact five times is the path
+crossing one bearing five times, each crossing a point. The zodiac and the
+sixty four gates, in `HDWheel`'s order from gate 41, ring the outside; a stay
+on a gate lights the gate and a sector of its body's band across the gate's arc
+for as long as it stays. The path alternates tone by year, the bodies stand
+where they are at the probed instant with a line to each natal point they
+touch, now and the probe are rings across every band, and the Personal Year of
+the instant sits in the middle.
+
+**It computes nothing either.** The paths arrive in the model (`paths`, a
+longitude every three days across the span) read off the cubic nodes the scan
+already walked (`_cyNodes`, kept by `cycleWindows()`), so no library position is
+asked for twice; the gate order is `HDWheel`'s, handed in as `gates`.
+
+**The two layouts are one stage and one morph.** The camera eases between the
+landscape's rig and the sky's; the landscape leaves by fog (`fogAdd()`: every
+landscape material is drawn through `fogK`, and the sky, the stars and the
+Orbital layout are not fogged), its labels and dust fade with it, and the sky's
+materials share one uniform, `uOrb`, that brings them up over the second half.
+The probe, the card, the readout and the keys carry across. Every pick carries
+`userData.orb` and `pickAt()` takes only the layout showing. Under reduced
+motion the morph cuts. The warm up shows both layouts for the compile call,
+because `compile()` walks only what is visible and a hidden layout's programs
+would otherwise be linked on the main thread the first time it is chosen.
+
+**The disc is fitted by projecting its rim** (`fitDisc()`), because at a low
+camera the near side is much the larger and a fit from the radius alone cut it
+off; it fits the rim's height and `viewShift()` takes out how far off centre that
+height sits, with a view offset that goes back to none in the landscape, in
+flight and on a resize. The widget's camera height follows the band's shape, low
+for a wide desktop band and higher for a phone's. A sideways drag runs time,
+since the sky has no floor to point at; in the sheet a vertical drag tilts and
+the wheel and the buttons zoom, as in 3D.
+
+**Measured.** With the harness's own `contrastFails()` and `tapTargets()` over
+the widget and the sheet, in Rings and in Orbital, four identities, hardened
+and not, at 1440 and 375: 64 cases, no pair under 4.5:1 and no control under
+44px, the ring labels counted. Driven in Chromium on SwiftShader, desktop and
+phone: the four views in order, Rings drawn with its bands, passages, dates and
+labels, Orbital live and its pixels read back, a drag running the probe, the
+morph to 3D and back, the sheet in Orbital with a tap on an exact date opening
+that passage's card, and Rings in the sheet.
 
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
@@ -5184,6 +5276,38 @@ Measured on SwiftShader, desktop astrology from the address to live: 10.8s
 before, 6.4s after, and the main thread's compile stall from 5.9s to 2.4s. What
 is left of that stall is the software rasterizer building its pipelines at the
 first draw, which a real GPU does not do once the programs are linked.
+
+**On iOS the scenes draw straight to the canvas** (`GFX` at the top of each of
+the three scene modules). The owner's iPhone (Chrome, which is WebKit, as every
+browser there is) showed the Cycle Audit's 3D with hard edged black rectangles
+stepped like the GPU's own tiles, filling in over about a minute (20 October
+2026): the offscreen chain, a multisampled half float target blurred and
+composited for the bloom, coming back with tiles missing. The direct path is the
+one the quality ladder already falls to, so it was drawn and tested; it keeps
+the canvas's own antialiasing and loses only the bloom's halo, since every glow
+in these scenes is additive in its own shader. `?gfx=` tries the others on any
+device without a build: `post` (the chain as it was), `nomsaa` (the chain
+without its multisampled target, the likeliest single culprit) and `direct`.
+**This container has no WebKit**, so the fault was diagnosed from the
+screenshot and the fix confirmed on the iPhone, never here; if `nomsaa` comes
+back whole on an iPhone, the bloom can return there without the multisampling.
+
+**The tiles went, and the owner asked for it faster still** (20 October 2026).
+Two changes, both measured in Chromium with an iPhone's screen and a CPU slowed
+four times, which is the nearest this container comes to the phone:
+
+- **Each stage built its whole content twice.** The faces were asked for only
+  after three.js arrived and the content was built, so the first build was
+  always in the fallback face and was thrown away when the faces landed. They
+  are asked for beside three.js now (`early` in `build()`), so when they are in
+  first, which is nearly always, the content is built once. The Cycle Audit's
+  build went from 3.1s to 0.5s, and all three stages were built in the lot in
+  7.1s instead of 9.4. A stage whose faces land after `init()` still rebuilds,
+  exactly as before.
+- **On iOS three.js does not read back each program's link status and logs**
+  (`checkShaderErrors` off when `GFX.ios`). Each read is a round trip that waits
+  for the compile, so on WebKit the programs queued behind one another. A shader
+  that failed to compile would fail silently there; desktop still reports it.
 
 ## The world place list is fetched when a birth place is asked for
 Asked for by the owner on 20 October 2026, as the next load cost after the 3D
