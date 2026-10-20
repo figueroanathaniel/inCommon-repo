@@ -22,14 +22,17 @@
     E: ['America/New_York', -5, true], C: ['America/Chicago', -6, true],
     M: ['America/Denver', -7, true], P: ['America/Los_Angeles', -8, true],
     Z: ['America/Phoenix', -7, false], A: ['America/Anchorage', -9, true],
-    H: ['Pacific/Honolulu', -10, false]
+    H: ['Pacific/Honolulu', -10, false],
+    /* Puerto Rico keeps Atlantic Standard Time all year. It was filed under E,
+       so every place here drew in New York's zone, an hour out every winter. */
+    R: ['America/Puerto_Rico', -4, false]
   };
 
   var STATE_TZ = {
     AL:'C',AK:'A',AZ:'Z',AR:'C',CA:'P',CO:'M',CT:'E',DE:'E',DC:'E',FL:'E',GA:'E',HI:'H',ID:'M',IL:'C',
     IN:'E',IA:'C',KS:'C',KY:'E',LA:'C',ME:'E',MD:'E',MA:'E',MI:'E',MN:'C',MS:'C',MO:'C',MT:'M',NE:'C',
     NV:'P',NH:'E',NJ:'E',NM:'M',NY:'E',NC:'E',ND:'C',OH:'E',OK:'C',OR:'P',PA:'E',RI:'E',SC:'E',SD:'C',
-    TN:'C',TX:'C',UT:'M',VT:'E',VA:'E',WA:'P',WV:'E',WI:'C',WY:'M',PR:'E'
+    TN:'C',TX:'C',UT:'M',VT:'E',VA:'E',WA:'P',WV:'E',WI:'C',WY:'M',PR:'R'
   };
 
   var STATE_NAME = {
@@ -107,7 +110,7 @@
     WV: 'Charleston,38.3498,-81.6326,48864|Huntington,38.4192,-82.4452,46842|Morgantown,39.6295,-79.9559,30347|Parkersburg,39.2667,-81.5615,29738|Wheeling,40.0640,-80.7209,27062|Martinsburg,39.4562,-77.9639,18777|Fairmont,39.4851,-80.1426,18313|Beckley,37.7782,-81.1882,16240|Clarksburg,39.2806,-80.3445,16061|Harpers Ferry,39.3256,-77.7386,285',
     WI: 'Milwaukee,43.0389,-87.9065,577222|Madison,43.0731,-89.4012,269840|Green Bay,44.5133,-88.0133,107395|Kenosha,42.5847,-87.8212,99986|Racine,42.7261,-87.7829,77816|Appleton,44.2619,-88.4154,75644|Waukesha,43.0117,-88.2315,71158|Eau Claire,44.8113,-91.4985,69421|Oshkosh,44.0247,-88.5426,66816|Janesville,42.6828,-89.0187,65615|La Crosse,43.8014,-91.2396,52680|Sheboygan,43.7508,-87.7145,49929|Wausau,44.9591,-89.6301,39994|Superior,46.7208,-92.1041,26751|Stevens Point,44.5236,-89.5746,25666|Door County Sturgeon Bay,44.8342,-87.3770,9646',
     WY: 'Cheyenne,41.1400,-104.8202,65132|Casper,42.8501,-106.3252,59038|Laramie,41.3114,-105.5911,31407|Gillette,44.2911,-105.5022,33403|Rock Springs,41.5875,-109.2029,23319|Sheridan,44.7972,-106.9562,18737|Jackson,43.4799,-110.7624,10760|Cody,44.5263,-109.0565,10028|Evanston,41.2683,-110.9632,11747|Riverton,43.0247,-108.3801,10682',
-    PR: 'San Juan,18.4655,-66.1057,342259|Bayamon,18.3985,-66.1614,185996|Carolina,18.3808,-65.9574,154815|Ponce,18.0111,-66.6141,137491|Caguas,18.2341,-66.0485,127244|Mayaguez,18.2013,-67.1397,73077|Arecibo,18.4725,-66.7156,87754|Aguadilla,18.4274,-67.1541,50265'
+    PR: 'San Juan,18.4655,-66.1057,342259|Rio Piedras,18.3997,-66.0500,332344|Bayamon,18.3985,-66.1614,185996|Carolina,18.3808,-65.9574,154815|Ponce,18.0111,-66.6141,137491|Caguas,18.2341,-66.0485,127244|Mayaguez,18.2013,-67.1397,73077|Arecibo,18.4725,-66.7156,87754|Aguadilla,18.4274,-67.1541,50265'
   };
 
   /* Landmark proxies. People born "at Yellowstone" or near one give the park,
