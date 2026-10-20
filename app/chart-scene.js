@@ -487,8 +487,15 @@
     } catch (e) { done(); return; }
     Promise.all(jobs).then(done, done);
   };
+  /* Built now, wherever it is: the app builds a stage in its offscreen lot
+     before the reader asks for it, which buildNear() would wait on forever. */
+  P.prebuild = function () {
+    if (this.ready || this.building || this.failed) return;
+    if (this.nio) { this.nio.disconnect(); this.nio = null; }
+    this.build();
+  };
   P.build = function () {
-    if (this.building) return;
+    if (this.building || this.ready) return;
     this.building = true;
     var self = this;
     load().then(function () {
@@ -1884,7 +1891,9 @@
       this.pass(this.mComp, null);
     }
     if (this.mode === 'obs') this.renderPip();
-    if (!this.shown && this.fontsOk) {
+    /* Revealed where it is seen: a stage built in the lot draws its first
+       frames there, and its fade and its wake belong to the reader. */
+    if (!this.shown && this.fontsOk && (this.visible || !this.io)) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
       if (this.o.onReady) this.o.onReady();

@@ -315,7 +315,9 @@
       var self = this;
       this.io = new IntersectionObserver(function (es) { self.visible = es.some(function (x) { return x.isIntersecting; }); self.updateRun(); });
     }
-    if (moved && this.io) { this.io.disconnect(); this.io.observe(this.el.root); }
+    /* unseen until the observer says otherwise, so a stage moved into the
+       lot is never revealed there before its first report */
+    if (moved && this.io) { this.visible = false; this.io.disconnect(); this.io.observe(this.el.root); }
     if (!this.ro && window.ResizeObserver) { var me = this; this.ro = new ResizeObserver(function () { me.resize(); }); }
     if (moved && this.ro) { this.ro.disconnect(); this.ro.observe(this.el.root); }
     if (!this.ready) { this.buildNear(); return; }
@@ -385,8 +387,15 @@
     } catch (e) { done(); return; }
     Promise.all(jobs).then(done, done);
   };
+  /* Built now, wherever it is: the app builds the stage in its offscreen lot
+     before the reader asks for 3D, which buildNear() would wait on forever. */
+  P.prebuild = function () {
+    if (this.ready || this.building || this.failed) return;
+    if (this.nio) { this.nio.disconnect(); this.nio = null; }
+    this.build();
+  };
   P.build = function () {
-    if (this.building) return;
+    if (this.building || this.ready) return;
     this.building = true;
     var self = this;
     load().then(function () {
@@ -1409,7 +1418,9 @@
       cu.tScene.value = p.scene.texture; cu.tB1.value = p.a.texture; cu.tB2.value = p.d.texture; cu.uStr.value = 0.55 + 0.45 * this.cur;
       this.pass(this.mComp, null);
     }
-    if (!this.shown && this.fontsOk) {
+    /* Revealed where it is seen: a stage built in the lot draws there first,
+       and its fade belongs to the reader. */
+    if (!this.shown && this.fontsOk && (this.visible || !this.io)) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
       var me = this;
