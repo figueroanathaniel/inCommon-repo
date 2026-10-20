@@ -173,9 +173,14 @@ input[type="date"]{color-scheme:dark}
    is how it says it cannot be pressed. Nothing here touches transform or
    transition, because the stage units and the sheets own both inline. A new
    control with a surface takes data-lift; data-flat is never needed, because
-   only what is marked lifts. */
+   only what is marked lifts. A container that holds a control and is not a
+   card (a banner, a well, a tinted note, a bar, the sidebar) takes
+   data-lift="box", which is --lift-lo: the same light and a shorter drop, so
+   the thing it holds still stands higher than it does. */
 [data-lift]{box-shadow:var(--lift)!important}
 [data-lift="in"]{box-shadow:var(--lift-in)!important}
+[data-lift="box"]{box-shadow:var(--lift-lo)!important}
+.obs-rail > .obs-glass{box-shadow:var(--lift-lo)}
 @media (hover:hover){:is(button,a,summary)[data-lift]:hover{box-shadow:var(--lift-hi)!important}}
 :is(button,a,summary)[data-lift]:active{box-shadow:var(--lift-in)!important}
 :is(button,a,summary)[data-lift]:is(:disabled,[aria-disabled="true"]){box-shadow:none!important}
@@ -299,7 +304,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./i18n/es.js"></script>
 <script src="./i18n/index.js"></script>
 </helmet>
-<div data-app-root="1" style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--rad:18px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));color:var(--tx);font-family:var(--fu);position:relative;width:100%;height:100dvh;overflow:hidden;background:var(--bg);{{ themeAppVars }}">
+<div data-app-root="1" style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--lift-lo:inset 0 1px 0 rgba(255,255,255,.045),0 1px 2px rgba(0,0,0,.28),0 3px 9px rgba(0,0,0,.2);--rad:18px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));color:var(--tx);font-family:var(--fu);position:relative;width:100%;height:100dvh;overflow:hidden;background:var(--bg);{{ themeAppVars }}">
 <!-- TWO LOBES, TWO CLOCKS. As one element the whole sky slid together and
      read as a single blob moving behind the app. Split, the cold lobe overhead
      and the warm horizon below drift on different periods and in opposite
@@ -540,7 +545,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <sc-if value="{{ shellVertical }}" hint-placeholder-val="{{ false }}">
 
-<div data-vt="1" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
+<div data-vt="1" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--lift-lo:inset 0 1px 0 rgba(255,255,255,.045),0 1px 2px rgba(0,0,0,.28),0 3px 9px rgba(0,0,0,.2);--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
 <sc-if value="{{ booting }}" hint-placeholder-val="{{ true }}">
   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:0 34px;text-align:center">
     <!-- The primary mark, drawn rather than loaded. Two wholes and the lens
@@ -564,7 +569,7 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ ready }}" hint-placeholder-val="{{ false }}">
 <button data-skip="vertical" onClick="{{ skipToMain }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;appearance:none;background:none;color:inherit;font:inherit;cursor:pointer">Skip to the reading</button>
 <span id="incommon-search-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Opens a search sheet over the page. Type to look through every screen and room, your own record, your placements and numbers, the practices, the cards, the hexagrams, the dream images, the gates, the degrees, and the lines that answer.</span>
-<header data-app-header="vertical" data-shell="vertical" style="position:absolute;top:0;left:0;right:0;z-index:60;height:var(--hdr);padding:env(safe-area-inset-top) 18px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:{{ vtHdrBg }};backdrop-filter:{{ vtHdrBlur }};-webkit-backdrop-filter:{{ vtHdrBlur }};border-bottom:1px solid {{ vtHdrLine }};transform:translateY({{ vtHdrY }});transition:transform .3s ease,background .3s ease">
+<header data-lift="box" data-app-header="vertical" data-shell="vertical" style="position:absolute;top:0;left:0;right:0;z-index:60;height:var(--hdr);padding:env(safe-area-inset-top) 18px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:{{ vtHdrBg }};backdrop-filter:{{ vtHdrBlur }};-webkit-backdrop-filter:{{ vtHdrBlur }};border-bottom:1px solid {{ vtHdrLine }};transform:translateY({{ vtHdrY }});transition:transform .3s ease,background .3s ease">
   <svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true" style="flex:none;display:block"><path d="M50 27.5A26 26 0 0 1 50 72.5A26 26 0 0 1 50 27.5Z" fill="#2fff8f"></path><circle cx="37" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6.5"></circle><circle cx="63" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6.5"></circle></svg>
   <span style="flex:1"></span>
   <button onClick="{{ searchOpenGo }}" aria-label="Search" aria-describedby="incommon-search-help" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:var(--ac);-webkit-mask:{{ searchIcon }} center/contain no-repeat;mask:{{ searchIcon }} center/contain no-repeat"></span></button>
@@ -584,7 +589,7 @@ input[type="date"]{color-scheme:dark}
      banner's height at any width and any text size without measuring anything,
      and it is aria-hidden and holds no control. -->
 <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}">
-  <div style="position:absolute;top:var(--hdr);left:0;right:0;z-index:59;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(139,92,246,.17);border-bottom:1px solid var(--bd);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)">
+  <div data-lift="box" style="position:absolute;top:var(--hdr);left:0;right:0;z-index:59;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(139,92,246,.17);border-bottom:1px solid var(--bd);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)">
     <span style="flex:1;font:400 10.5px/1.45 var(--fu);color:var(--ac2-hi)">{{ sampleText }}</span>
     <button data-lift onClick="{{ sampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 10.5px var(--fu);color:var(--ac2-hi)">Use mine</button>
   </div>
@@ -614,7 +619,7 @@ input[type="date"]{color-scheme:dark}
          as a share of that span (cycleWidgetVals). All of it is computed here
          and free; the sheet it opens carries the full lists and the reading. -->
     <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-      <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:16px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
+      <section data-lift="box" aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:16px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
         <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
         <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
           <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
@@ -762,7 +767,7 @@ input[type="date"]{color-scheme:dark}
         </div>
         <span style="flex:none;font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
       </button>
-      <div role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:7px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:8px 9px">
+      <div data-lift="box" role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:7px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:8px 9px">
         <div style="display:flex;align-items:stretch;gap:6px">
           <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
           <div data-lift="card" style="position:relative;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:44px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);padding:5px 8px">
@@ -780,7 +785,7 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:11px">
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:11px">
-              <div style="display:flex;flex-direction:column;gap:11px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:12px 13px 13px">
+              <div data-lift="box" style="display:flex;flex-direction:column;gap:11px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:12px 13px 13px">
                 <div style="display:flex;align-items:center;gap:7px">
                   <button data-lift onClick="{{ hpPrev }}" aria-label="{{ hpPrevLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
                   <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center">
@@ -901,7 +906,7 @@ input[type="date"]{color-scheme:dark}
                         <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:11px">
                           <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
                           <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
-                            <div style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:11px 13px">
+                            <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:11px 13px">
                               <span style="font:600 12.5px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
                               <div style="display:flex;flex-wrap:wrap;gap:10px">
                                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
@@ -956,7 +961,7 @@ input[type="date"]{color-scheme:dark}
               </div>
               <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Show your working</span>
               <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
-                <div style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:7px 10px">
+                <div data-lift="box" style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:7px 10px">
                   <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;width:100%">
                     <span aria-hidden="true" style="flex:none;display:block;width:15px;height:15px;background-color:{{ r.edge }};-webkit-mask:{{ r.icon }} center/contain no-repeat;mask:{{ r.icon }} center/contain no-repeat"></span>
                     <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
@@ -1733,7 +1738,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
     </div>
     <div data-lift="card" role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
-      <div onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:128px;position:relative;height:370px;overflow:hidden;perspective:760px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
+      <div data-lift="box" onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:128px;position:relative;height:370px;overflow:hidden;perspective:760px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
         <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
         <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
         <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
@@ -1767,7 +1772,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
+      <div data-lift="box" style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
         <button data-lift onClick="{{ nsPrev }}" aria-label="Previous number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
           <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
@@ -1827,7 +1832,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ noBirthName }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:14px 15px">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:14px 15px">
           <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Expression and Soul Urge are drawn from the full name on your birth certificate. Add it to see them. It stays on this device, with your profile.</div>
           <input data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
           <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
@@ -2148,7 +2153,7 @@ input[type="date"]{color-scheme:dark}
      birth moment appearing in somebody's app because they tapped a link is
      the opposite of the point. -->
 <sc-if value="{{ synCardInShow }}" hint-placeholder-val="{{ false }}">
-  <div style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.09);border:1px solid rgba(47,255,143,.42);border-radius:var(--rad);padding:15px 16px">
+  <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.09);border:1px solid rgba(47,255,143,.42);border-radius:var(--rad);padding:15px 16px">
     <div style="font:400 15px var(--fd);color:var(--tx)">{{ synCardInName }} shared their chart with you</div>
     <div style="font:400 11.5px/1.6 var(--fu);color:var(--dim)">{{ synCardInDetail }}</div>
     <div style="display:flex;gap:10px">
@@ -3949,7 +3954,7 @@ input[type="date"]{color-scheme:dark}
             </div>
           </sc-if>
           <sc-if value="{{ orMoreOn }}" hint-placeholder-val="{{ false }}">
-            <div role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
+            <div data-lift="box" role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
               <p style="margin:0;font:italic 400 15px/1.5 var(--fb);color:var(--mut)">{{ orMoreText }}</p>
               <sc-if value="{{ orMoreRetry }}" hint-placeholder-val="{{ false }}">
                 <button data-lift onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
@@ -4088,7 +4093,7 @@ input[type="date"]{color-scheme:dark}
         </button>
       </sc-for>
             <sc-if value="{{ makeDefaultOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
           <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx)">{{ makeDefaultText }}</div>
           <div style="display:flex;gap:9px">
             <button data-lift onClick="{{ makeDefaultCancel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Cancel</button>
@@ -4303,7 +4308,7 @@ input[type="date"]{color-scheme:dark}
   </div>
 </section>
 </div>
-<nav data-app-nav="vertical" role="navigation" aria-label="Sections" style="position:absolute;left:0;right:0;bottom:0;z-index:60;height:var(--nav);padding:0 6px env(safe-area-inset-bottom);box-sizing:border-box;display:flex;align-items:stretch;background:rgba(13,12,17,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd)">
+<nav data-lift="box" data-app-nav="vertical" role="navigation" aria-label="Sections" style="position:absolute;left:0;right:0;bottom:0;z-index:60;height:var(--nav);padding:0 6px env(safe-area-inset-bottom);box-sizing:border-box;display:flex;align-items:stretch;background:rgba(13,12,17,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd)">
   <sc-for list="{{ vtNav }}" as="n" hint-placeholder-count="6">
     <button onClick="{{ n.go }}" aria-current="{{ n.cur }}" aria-label="{{ n.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-top:6px">
       <span style="width:4px;height:4px;border-radius:50%;background:{{ n.dot }};box-shadow:{{ n.glow }}"></span>
@@ -4708,7 +4713,7 @@ input[type="date"]{color-scheme:dark}
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
         <span style="flex:1"></span>
-        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+        <div data-lift="box" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
             <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
           </sc-for>
@@ -4741,12 +4746,12 @@ input[type="date"]{color-scheme:dark}
 
       <sc-if value="{{ obsRailsOn }}" hint-placeholder-val="{{ true }}">
         <div class="obs-rail obs-l">
-          <div class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
+          <div data-lift="box" class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
             <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="3">
               <button data-lift onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
             </sc-for>
           </div>
-          <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+          <div data-lift="box" class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
               <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
                 <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
@@ -4832,7 +4837,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
         <div class="obs-rail obs-r">
-          <div style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+          <div data-lift="box" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
               <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
                 <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
@@ -5268,7 +5273,7 @@ input[type="date"]{color-scheme:dark}
   <div data-immersive="1" onClick="{{ cyClose }}" style="position:fixed;inset:0;background:var(--bg);display:flex;z-index:84">
     <div role="dialog" data-immersive="1" aria-label="The Cycle Audit" onClick="{{ swallow }}" style="width:100%;height:100%;display:flex;flex-direction:column;box-sizing:border-box;background:var(--bg);animation:fadeUp .25s ease">
       <sc-if value="{{ cySceneOn }}" hint-placeholder-val="{{ false }}">
-        <div style="position:relative;flex:none;height:52vh;min-height:300px;border-bottom:1px solid var(--bd);background:var(--bg)">
+        <div data-lift="box" style="position:relative;flex:none;height:52vh;min-height:300px;border-bottom:1px solid var(--bd);background:var(--bg)">
           <div data-cy-scene="full" data-noswipe="1" style="position:absolute;inset:0"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cyVeilO }};visibility:{{ cyVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
           <div style="position:absolute;top:14px;left:16px;right:72px;pointer-events:none;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 14px var(--bg),0 0 4px var(--bg)">
             <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The long weather</span>
@@ -5564,7 +5569,7 @@ input[type="date"]{color-scheme:dark}
         </article>
       </sc-if>
       <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+        <section data-lift="box" aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
           <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
           <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
@@ -5590,7 +5595,7 @@ input[type="date"]{color-scheme:dark}
         </section>
       </sc-if>
       <sc-if value="{{ cyDOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+        <section data-lift="box" aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">&#9672; The Design</div>
           <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your gates under the slow sky</h2>
           <sc-if value="{{ cyDNone }}" hint-placeholder-val="{{ false }}">
@@ -5668,7 +5673,7 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ quickClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:83">
     <div role="dialog" aria-label="Your profile" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
-      <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
+      <div data-lift="box" style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
         <div style="display:flex;align-items:center;gap:14px">
           <span aria-hidden="true" style="position:relative;flex:none;width:54px;height:54px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontL }};color:var(--onac)">{{ avaText }}</span>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
@@ -5837,7 +5842,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <button onClick="{{ geoManualGo }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);color:var(--ac)">{{ geoManualLabel }}</button>
       <sc-if value="{{ formIsNew }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:9px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:9px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
           <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--ac)">How this is used</div>
           <div style="font:400 12px/1.65 var(--fb);color:var(--tx)">inCommon reads your birth information to draw your astrology chart, your numerology profile, your human design type, and your degree images. This happens automatically so she can guide you accurately. You can delete your profile and all derived data at any time.</div>
           <button onClick="{{ ackToggle }}" role="checkbox" aria-checked="{{ ackOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
@@ -6075,7 +6080,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
         <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
-        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+        <div data-lift="box" style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
           <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
           <button data-lift onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
         </div>
@@ -6218,7 +6223,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <sc-if value="{{ shellDesktop }}" hint-placeholder-val="{{ true }}">
 
-<div style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:15.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--rad:16px;height:100%;width:100%;box-sizing:border-box;overflow:hidden;position:relative;display:flex;background:transparent;color:var(--tx);font-family:var(--fu);{{ themeDtVars }}">
+<div style="--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--blue:#7d9bff;--ok:#59b37d;--warn:#e08d7d;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:15.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--lift-lo:inset 0 1px 0 rgba(255,255,255,.045),0 1px 2px rgba(0,0,0,.28),0 3px 9px rgba(0,0,0,.2);--rad:16px;height:100%;width:100%;box-sizing:border-box;overflow:hidden;position:relative;display:flex;background:transparent;color:var(--tx);font-family:var(--fu);{{ themeDtVars }}">
 <sc-if value="{{ booting }}" hint-placeholder-val="{{ true }}">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:dtIn .3s ease">
     <svg viewBox="0 0 100 100" width="92" height="92" role="img" aria-label="inCommon" style="display:block;animation:markIn .8s cubic-bezier(.2,.8,.2,1) both">
@@ -6242,7 +6247,7 @@ input[type="date"]{color-scheme:dark}
 <button data-skip="desktop" onClick="{{ skipToMain }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;appearance:none;background:none;color:inherit;font:inherit;cursor:pointer">Skip to the reading</button>
 <span id="incommon-search-help" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Opens a search sheet over the page. Type to look through every screen and room, your own record, your placements and numbers, the practices, the cards, the hexagrams, the dream images, the gates, the degrees, and the lines that answer.</span>
 <sc-if value="{{ sideWide }}" hint-placeholder-val="{{ true }}">
-  <aside data-side="wide" style="flex:none;width:256px;box-sizing:border-box;height:100%;overflow-y:auto;display:flex;flex-direction:column;gap:20px;padding:20px 14px 18px;border-right:1px solid var(--bd);background:linear-gradient(180deg,var(--rail1),var(--rail2))">
+  <aside data-lift="box" data-side="wide" style="flex:none;width:256px;box-sizing:border-box;height:100%;overflow-y:auto;display:flex;flex-direction:column;gap:20px;padding:20px 14px 18px;border-right:1px solid var(--bd);background:linear-gradient(180deg,var(--rail1),var(--rail2))">
     <div style="display:flex;align-items:center;gap:10px;padding:0 4px">
       <svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true" style="flex:none;display:block">
         <path d="M50 27.5A26 26 0 0 1 50 72.5A26 26 0 0 1 50 27.5Z" fill="#2fff8f"></path>
@@ -6273,7 +6278,7 @@ input[type="date"]{color-scheme:dark}
   </aside>
 </sc-if>
 <sc-if value="{{ sideRail }}" hint-placeholder-val="{{ false }}">
-  <aside data-side="rail" style="flex:none;width:76px;box-sizing:border-box;height:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px 0 18px;border-right:1px solid var(--bd);background:linear-gradient(180deg,var(--rail1),var(--rail2))">
+  <aside data-lift="box" data-side="rail" style="flex:none;width:76px;box-sizing:border-box;height:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px 0 18px;border-right:1px solid var(--bd);background:linear-gradient(180deg,var(--rail1),var(--rail2))">
     <button onClick="{{ sideToggle }}" aria-label="Expand sidebar" title="Expand sidebar (Cmd B)" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 100 100" width="30" height="30" aria-hidden="true" style="flex:none;display:block"><path d="M50 27.5A26 26 0 0 1 50 72.5A26 26 0 0 1 50 27.5Z" fill="#2fff8f"></path><circle cx="37" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6"></circle><circle cx="63" cy="50" r="26" fill="none" stroke="#8b5cf6" stroke-width="6"></circle></svg></button>
     <button data-lift onClick="{{ searchOpenGo }}" aria-label="Search" aria-describedby="incommon-search-help" title="Search (Cmd K)" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;font:400 15px var(--fb);color:var(--dim)">⚲</button>
     <nav data-app-nav="desktop" role="navigation" aria-label="Sections" style="flex:0 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;width:100%;align-items:center">
@@ -6288,7 +6293,7 @@ input[type="date"]{color-scheme:dark}
   </aside>
 </sc-if>
 <main data-shell="desktop" role="main" data-main-region="1" aria-label="Your readings" style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;position:relative">
-  <div data-app-header="desktop" style="flex:none;display:flex;align-items:center;gap:16px;padding:9px clamp(20px,2.4vw,40px);border-bottom:1px solid var(--bd);background:rgba(19,17,24,.6)">
+  <div data-lift="box" data-app-header="desktop" style="flex:none;display:flex;align-items:center;gap:16px;padding:9px clamp(20px,2.4vw,40px);border-bottom:1px solid var(--bd);background:rgba(19,17,24,.6)">
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
       <div style="display:flex;align-items:center;gap:10px">
         <h1 style="margin:0;font:400 clamp(19px,1.5vw,23px) var(--fd);color:var(--tx)">{{ headTitle }}</h1>
@@ -6309,7 +6314,7 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
   </div>
   <sc-if value="{{ hasErrBanner }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:none;display:flex;align-items:center;gap:10px;margin:12px clamp(20px,2.4vw,40px) 0;background:rgba(255,107,97,.09);border:1px solid rgba(255,107,97,.4);border-radius:10px;padding:9px 14px">
+    <div data-lift="box" style="flex:none;display:flex;align-items:center;gap:10px;margin:12px clamp(20px,2.4vw,40px) 0;background:rgba(255,107,97,.09);border:1px solid rgba(255,107,97,.4);border-radius:10px;padding:9px 14px">
       <span style="flex:1;font:400 11.5px/1.5 var(--fu);color:var(--tx)">{{ errBanner }}</span>
       <button onClick="{{ errDismiss }}" aria-label="Dismiss error" style="all:unset;cursor:pointer;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;color:var(--dim)">✕</button>
     </div>
@@ -6318,7 +6323,7 @@ input[type="date"]{color-scheme:dark}
        The wheel and the bodygraph are where an invented birth moment is most
        convincing, so they are exactly where the label has to survive. -->
   <sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:none;display:flex;align-items:center;gap:12px;margin:12px clamp(20px,2.4vw,40px) 0;background:rgba(139,92,246,.15);border:1px solid var(--ac2-hi);border-radius:10px;padding:10px 15px">
+    <div data-lift="box" style="flex:none;display:flex;align-items:center;gap:12px;margin:12px clamp(20px,2.4vw,40px) 0;background:rgba(139,92,246,.15);border:1px solid var(--ac2-hi);border-radius:10px;padding:10px 15px">
       <span style="flex:1;font:400 11.5px/1.5 var(--fu);color:var(--ac2-hi)">{{ sampleText }}</span>
       <button data-lift onClick="{{ sampleGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 16px;border:1px solid var(--ac2-hi);border-radius:999px;font:600 11.5px var(--fu);color:var(--ac2-hi)">Enter my birth moment</button>
     </div>
@@ -6381,7 +6386,7 @@ input[type="date"]{color-scheme:dark}
              as a share of that span (cycleWidgetVals). All of it is computed here
              and free; the sheet it opens carries the full lists and the reading. -->
         <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-          <section aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
+          <section data-lift="box" aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
             <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
             <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
               <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
@@ -6526,7 +6531,7 @@ input[type="date"]{color-scheme:dark}
             <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Today’s Alignment</span>
             <span style="flex:none;font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
           </div>
-          <div role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:9px 11px">
+          <div data-lift="box" role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:9px 11px">
             <div style="display:flex;align-items:center;gap:8px">
             <button data-lift onClick="{{ horoPrevWk }}" aria-label="Back one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 14px var(--fb);color:var(--ac)">‹‹</button>
             <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
@@ -6545,7 +6550,7 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:14px">
               <div style="display:flex;flex-direction:column;gap:12px">
-                <div style="display:flex;flex-direction:column;gap:13px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:15px 17px 16px">
+                <div data-lift="box" style="display:flex;flex-direction:column;gap:13px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:15px 17px 16px">
                   <div style="display:flex;align-items:center;gap:10px">
                     <button data-lift onClick="{{ hpPrev }}" aria-label="{{ hpPrevLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 16px var(--fb);color:var(--ac)">‹</button>
                     <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center">
@@ -6674,7 +6679,7 @@ input[type="date"]{color-scheme:dark}
                           <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
                             <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
                             <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
-                              <div style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
+                              <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
                                 <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
                                 <div style="display:flex;flex-wrap:wrap;gap:11px">
                                   <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
@@ -6729,7 +6734,7 @@ input[type="date"]{color-scheme:dark}
                 </div>
                 <span style="font:600 9px var(--fu);letter-spacing:.15em;text-transform:uppercase;color:var(--dim)">Show your working</span>
                 <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
-                  <div style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:8px 12px">
+                  <div data-lift="box" style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:8px 12px">
                     <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
                       <span aria-hidden="true" style="flex:none;display:block;width:15px;height:15px;background-color:{{ r.edge }};-webkit-mask:{{ r.icon }} center/contain no-repeat;mask:{{ r.icon }} center/contain no-repeat"></span>
                       <span style="flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;text-align:left">
@@ -7847,7 +7852,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
       </div>
       <div data-lift="card" role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
-        <div onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:225px;position:relative;height:500px;overflow:hidden;perspective:1100px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
+        <div data-lift="box" onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:225px;position:relative;height:500px;overflow:hidden;perspective:1100px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
           <span aria-hidden="true" style="position:absolute;right:12px;top:12px;width:18px;height:18px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
           <span aria-hidden="true" style="position:absolute;left:12px;bottom:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2);pointer-events:none"></span>
@@ -7881,7 +7886,7 @@ input[type="date"]{color-scheme:dark}
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
+        <div data-lift="box" style="display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--bd);background:var(--sf2)">
           <button data-lift onClick="{{ nsPrev }}" aria-label="Previous number" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font:400 22px/1 var(--fd);color:var(--ac2-hi)">‹</button>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
             <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
@@ -7978,7 +7983,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </sc-if>
         <sc-if value="{{ noBirthName }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;flex-direction:column;gap:11px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:16px 18px;max-width:720px">
+          <div data-lift="box" style="display:flex;flex-direction:column;gap:11px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:16px 18px;max-width:720px">
             <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">Expression and Soul Urge are drawn from the full name on your birth certificate. Add it to see them. It stays on this device, with your profile.</div>
             <input data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
             <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
@@ -8323,7 +8328,7 @@ input[type="date"]{color-scheme:dark}
      birth moment appearing in somebody's app because they tapped a link is
      the opposite of the point. -->
 <sc-if value="{{ synCardInShow }}" hint-placeholder-val="{{ false }}">
-  <div style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.09);border:1px solid rgba(47,255,143,.42);border-radius:var(--rad);padding:15px 16px">
+  <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.09);border:1px solid rgba(47,255,143,.42);border-radius:var(--rad);padding:15px 16px">
     <div style="font:400 15px var(--fd);color:var(--tx)">{{ synCardInName }} shared their chart with you</div>
     <div style="font:400 11.5px/1.6 var(--fu);color:var(--dim)">{{ synCardInDetail }}</div>
     <div style="display:flex;gap:10px">
@@ -10131,7 +10136,7 @@ input[type="date"]{color-scheme:dark}
             </div>
           </sc-if>
           <sc-if value="{{ orMoreOn }}" hint-placeholder-val="{{ false }}">
-            <div role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
+            <div data-lift="box" role="status" style="display:flex;flex-direction:column;gap:9px;border:1px dashed var(--bd);border-radius:var(--rad);padding:14px 16px">
               <p style="margin:0;font:italic 400 15px/1.5 var(--fb);color:var(--mut)">{{ orMoreText }}</p>
               <sc-if value="{{ orMoreRetry }}" hint-placeholder-val="{{ false }}">
                 <button data-lift onClick="{{ orAskGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;color:var(--tx);font:600 12.5px var(--fu)">&#8635; Ask again</button>
@@ -10264,7 +10269,7 @@ input[type="date"]{color-scheme:dark}
         </button>
       </sc-for>
             <sc-if value="{{ makeDefaultOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
           <div style="font:400 12.5px/1.6 var(--fb);color:var(--tx)">{{ makeDefaultText }}</div>
           <div style="display:flex;gap:9px">
             <button data-lift onClick="{{ makeDefaultCancel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Cancel</button>
@@ -10541,7 +10546,7 @@ input[type="date"]{color-scheme:dark}
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
         <span style="flex:1"></span>
-        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+        <div data-lift="box" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
             <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
           </sc-for>
@@ -10574,12 +10579,12 @@ input[type="date"]{color-scheme:dark}
 
       <sc-if value="{{ obsRailsOn }}" hint-placeholder-val="{{ true }}">
         <div class="obs-rail obs-l">
-          <div class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
+          <div data-lift="box" class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
             <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="3">
               <button data-lift onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
             </sc-for>
           </div>
-          <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+          <div data-lift="box" class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
               <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
                 <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
@@ -10665,7 +10670,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
         <div class="obs-rail obs-r">
-          <div style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+          <div data-lift="box" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
               <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
                 <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
@@ -11398,7 +11403,7 @@ input[type="date"]{color-scheme:dark}
         </article>
       </sc-if>
       <sc-if value="{{ cyListOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+        <section data-lift="box" aria-label="Your long passages" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9796; The Cycle Audit</div>
           <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your long passages</h2>
           <sc-if value="{{ cyNone }}" hint-placeholder-val="{{ false }}">
@@ -11424,7 +11429,7 @@ input[type="date"]{color-scheme:dark}
         </section>
       </sc-if>
       <sc-if value="{{ cyDOn }}" hint-placeholder-val="{{ false }}">
-        <section aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
+        <section data-lift="box" aria-label="Your gates under the slow sky" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">&#9672; The Design</div>
           <h2 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">Your gates under the slow sky</h2>
           <sc-if value="{{ cyDNone }}" hint-placeholder-val="{{ false }}">
@@ -11502,7 +11507,7 @@ input[type="date"]{color-scheme:dark}
 <sc-if value="{{ quickOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ quickClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.72);display:flex;align-items:flex-end;justify-content:center;z-index:13">
     <div role="dialog" aria-label="Your profile" onClick="{{ swallow }}" style="width:100%;max-width:640px;max-height:90%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .25s ease">
-      <div style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
+      <div data-lift="box" style="box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:18px;border:1px solid var(--bd);background:linear-gradient(160deg,rgba(var(--atmc),.16),var(--sf2) 70%)">
         <div style="display:flex;align-items:center;gap:14px">
           <span aria-hidden="true" style="position:relative;flex:none;width:54px;height:54px;border-radius:50%;overflow:hidden;background:{{ avaBg }};background-image:{{ avaBgImg }};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font:{{ avaFontL }};color:var(--onac)">{{ avaText }}</span>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
@@ -11671,7 +11676,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <button onClick="{{ geoManualGo }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);color:var(--ac)">{{ geoManualLabel }}</button>
       <sc-if value="{{ formIsNew }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:9px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:9px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:12px;padding:13px 15px">
           <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--ac)">How this is used</div>
           <div style="font:400 12px/1.65 var(--fb);color:var(--tx)">inCommon reads your birth information to draw your astrology chart, your numerology profile, your human design type, and your degree images. This happens automatically so she can guide you accurately. You can delete your profile and all derived data at any time.</div>
           <button onClick="{{ ackToggle }}" role="checkbox" aria-checked="{{ ackOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px">
@@ -11963,7 +11968,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ mfStepSetup }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Scan this with your authenticator app, or type the setup key into it. Then enter the 6 digit code the app shows.</div>
         <div role="img" aria-label="QR code for your authenticator app" style="align-self:center;width:188px;height:188px;flex:none;border-radius:12px;background-color:#fff;background-image:{{ mfQrBg }};background-size:164px 164px;background-position:center;background-repeat:no-repeat"></div>
-        <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
+        <div data-lift="box" style="display:flex;align-items:center;gap:10px;border:1px solid var(--bd);border-radius:12px;padding:6px 6px 6px 13px">
           <div style="flex:1;min-width:0;font:600 13px/1.5 var(--fu);color:var(--tx);letter-spacing:.06em;word-break:break-all;user-select:all">{{ mfSecret }}</div>
           <button data-lift onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
         </div>

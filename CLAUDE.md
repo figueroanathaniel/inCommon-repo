@@ -1963,6 +1963,21 @@ in Chromium over Today, My Charts, the Library and Settings, both shells, Deep
 Field and Dawn: every surfaced control lifted, the reading cards and the dashed
 card flat.
 
+**Their containers lift too, slightly less** (the owner, 20 October 2026:
+"Slightly lift their containers now, too."). Anything with a surface that holds
+a control and is not already a card takes `data-lift="box"`, which is
+`--lift-lo`: the same edge of light and a shorter, fainter drop, so the
+control inside still stands higher than what holds it. That is the sample
+banner, the Cycle Audit section, the Alignment stepper and its readings, the
+tinted notes and wells, the headers, the phone's tab bar and the desktop
+sidebar; the Observatory's rail panels take it from `.obs-rail > .obs-glass`.
+Left out on purpose: the shell roots and anything full screen (`--bg:` set,
+`inset:0`, `position:fixed`, a height of 100% on anything but the sidebar),
+dialogs and menus (they carry their own shadows), and the phone's Get Help dock
+strip, which is a fade to black under the square rather than a surface
+(`pointer-events:none`). On Today, both shells, no surfaced container that
+holds a control is left flat apart from that strip.
+
 ## Touch targets
 44px minimum on every control in both shells. There are exactly two exceptions,
 both marked with an attribute so the tests can tell the difference, and neither
