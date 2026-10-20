@@ -33434,6 +33434,34 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ trOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ trClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:85">
+    <div role="dialog" aria-label="Transit detail" onClick="{{ swallow }}" style="width:100%;max-width:400px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--sf);border:1px solid {{ trx.c }};border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:11px;animation:fadeUp .2s ease">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span aria-hidden="true" style="flex:none;font:400 30px var(--fb);color:{{ trx.c }}">{{ trx.ga }}</span>
+        <span aria-hidden="true" style="flex:none;font:400 30px var(--fb);color:{{ trx.c }}">{{ trx.gb }}</span>
+        <span style="flex:1;font:400 19px/1.25 var(--fd);color:var(--tx)">{{ trx.title }}</span>
+        <button onClick="{{ trClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
+      </div>
+      <div style="font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ trx.orb }}</div>
+      <sc-if value="{{ trx.winOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ trx.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+          <div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.range }} · {{ trx.exactOn }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
+      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
+      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      </div>
+      <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
+      <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ trx.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fu);color:var(--ac)">{{ trx.goLabel }}</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 
 <sc-if value="{{ lexCardOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ lexCardClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:85">
@@ -39322,6 +39350,34 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ trOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ trClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:15">
+    <div role="dialog" aria-label="Transit detail" onClick="{{ swallow }}" style="width:100%;max-width:400px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:var(--sf);border:1px solid {{ trx.c }};border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:11px;animation:fadeUp .2s ease">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span aria-hidden="true" style="flex:none;font:400 30px var(--fb);color:{{ trx.c }}">{{ trx.ga }}</span>
+        <span aria-hidden="true" style="flex:none;font:400 30px var(--fb);color:{{ trx.c }}">{{ trx.gb }}</span>
+        <span style="flex:1;font:400 19px/1.25 var(--fd);color:var(--tx)">{{ trx.title }}</span>
+        <button onClick="{{ trClose }}" aria-label="Close" style="all:unset;cursor:pointer;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--dim)">×</button>
+      </div>
+      <div style="font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ok)">{{ trx.orb }}</div>
+      <sc-if value="{{ trx.winOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ trx.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+          <div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.range }} · {{ trx.exactOn }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
+      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
+      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      </div>
+      <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
+      <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ trx.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fu);color:var(--ac)">{{ trx.goLabel }}</button>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 
 <sc-if value="{{ lexCardOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ lexCardClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:15">
@@ -39727,7 +39783,7 @@ class Component extends DCLogic {
     alignOpen: false, sabQuery: '', sabSign: null, ack: true, geoManual: false, geoLat: '', geoLon: '',
     geoNet: { status: 'idle', q: '', hits: [], msg: '' }, geoNetSay: '',
     welcomeFor: null, welcomePick: {}, makeDefault: null,
-    chartMode: 'basic', openBody: null, placeSel: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
+    chartMode: 'basic', openBody: null, placeSel: null, aspSel: null, trSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
     chartExpandOpen: false, chartExpandSearch: '', chartExpandGroup: true, chartExpandSortBy: 'lon', chartExpandSortDir: 'asc',
     alignMode: 'today', alignHit: null, alignGate: null, alignNum: null, alignLast: null, alignSeed: 0,
     libView: null, lexQuery: '', lexSign: null, lexMode: 'mandala', lexDeg: null,
@@ -45336,6 +45392,77 @@ class Component extends DCLogic {
       open: () => this.setState({ dpSel: { kind: 'house', h: h } }), openLabel: 'Open', openAria: 'Open the ' + ctx.ordinal(h) + ' house',
       aria: 'House ' + h + ', ' + (inside.length ? inside.map(x => x.m).join(', ') + ' crossing' : 'empty today') };
   }
+  /* A TRANSIT OPENS A PULL UP, as a natal aspect does (owner, 20 October
+     2026). Both transit lists under the Birth Chart open one sheet (trSel,
+     transitDetail()): the contact, whether it is building, exact or easing, the
+     run of days it holds inside the row's own orb with the day it comes closest,
+     and a reading. A personal transit reads the Timing Lexicon's contact for that
+     mover and natal point; a sky transit is two bodies meeting overhead, so it is
+     read through where the two land in the reader's own houses, and asks that
+     house's question. The South Node is the North Node turned round, here as on
+     the cards, and the Moon has no run of days, so it carries its pace instead. */
+  transitSkyLon(n, soon) {
+    const S = this.impactSky(), v = (soon ? S.soon : S.lon)[n === 'South Node' ? 'North Node' : n];
+    return v == null ? null : n === 'South Node' ? this.norm360(v + 180) : v;
+  }
+  transitDayLon(n, i) {
+    const D = this.impactDays(), k = D.movers.indexOf(n === 'South Node' ? 'North Node' : n);
+    if (k < 0) return null;
+    const v = D.lons[k][i];
+    return v !== v ? null : n === 'South Node' ? this.norm360(v + 180) : v;
+  }
+  /* The run of days a contact holds inside its orb, walked out from today. b is a
+     natal longitude when natal is true and a sky body's name otherwise. */
+  transitRun(a, b, natal, ang, orb) {
+    const D = this.impactDays(), N = D.N;
+    const off = i => { const la = this.transitDayLon(a, i), lb = natal ? b : this.transitDayLon(b, i);
+      return la == null || lb == null ? 99 : Math.abs(this.impactSep(la, lb) - ang); };
+    if (off(N) > orb) return null;
+    let from = N, to = N, ex = N, best = off(N);
+    while (from > 0 && off(from - 1) <= orb) { from--; const o = off(from); if (o < best) { best = o; ex = from; } }
+    while (to < 2 * N && off(to + 1) <= orb) { to++; const o = off(to); if (o < best) { best = o; ex = to; } }
+    return { from: from - N, to: to - N, exact: ex - N, orb: best, openStart: from === 0, openEnd: to === 2 * N };
+  }
+  transitDetail(x, personal, o) {
+    const A = this.ASPECTS.find(r => r[1] === x.asp) || [0, x.asp, 8], ang = A[0], orb = A[2], TL = window.TimingLexicon;
+    const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+    const a0 = this.transitSkyLon(x.a.name), a1 = this.transitSkyLon(x.a.name, true);
+    const b0 = personal ? x.b.lon : this.transitSkyLon(x.b.name), b1 = personal ? x.b.lon : this.transitSkyLon(x.b.name, true);
+    const now = a0 == null || b0 == null ? x.orb : Math.abs(this.impactSep(a0, b0) - ang);
+    const soon = a1 == null || b1 == null ? now : Math.abs(this.impactSep(a1, b1) - ang);
+    const phase = now < .25 ? 'exact' : soon < now ? 'building' : 'easing';
+    const run = this.transitRun(x.a.name, personal ? x.b.lon : x.b.name, personal, ang, orb);
+    const fast = personal || (this.IMPACT_W[x.a.name] || 9) <= (this.IMPACT_W[x.b.name] || 9) ? x.a.name : x.b.name;
+    const paceOf = TL && TL.PACE ? TL.PACE[fast === 'South Node' ? 'North Node' : fast] : '';
+    let paras = [], ask = '';
+    if (personal) {
+      const L = TL ? TL.transit(x.a.name, x.asp, x.b.name) : null;
+      if (L) { paras = [L.move, L.meet]; ask = L.ask; }
+      else {
+        const mv = TL && TL.MOVE[x.a.name] ? TL.MOVE[x.a.name][x.asp] : '';
+        paras = [mv, x.b.mean ? 'Your natal ' + x.b.name + ' carries ' + x.b.mean + '.' : ''].filter(Boolean);
+        ask = this.IMPACT_ASK.other;
+      }
+    } else {
+      const ha = o.houseOfLon(a0 == null ? x.a.lon : a0), hb = o.houseOfLon(b0 == null ? x.b.lon : b0);
+      const slow = (this.IMPACT_W[x.a.name] || 0) >= (this.IMPACT_W[x.b.name] || 0) ? ha : hb;
+      paras = [cap(x.a.mean || x.a.name) + ' meets ' + (x.b.mean || x.b.name) + ' overhead: ' + (this.ASP_POSS[x.asp] || this.ASP_MEAN[x.asp]) + '.',
+        ha === hb
+          ? 'In your chart both stand in the ' + o.ordinal(ha) + ' house, so the meeting happens in one room: ' + this.HOUSE_THEMES[ha - 1] + '.'
+          : 'In your chart it runs between the ' + o.ordinal(ha) + ' house and the ' + o.ordinal(hb) + ' house: ' + this.HOUSE_THEMES[ha - 1] + ', and ' + this.HOUSE_THEMES[hb - 1] + '.'];
+      ask = this.HOUSE_ASK[slow - 1];
+    }
+    const span = run && run.to > run.from ? Math.max(0, Math.min(100, (0 - run.from) / (run.to - run.from) * 100)) : 50;
+    return { c: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', ga: x.a.glyph, gb: x.b.glyph,
+      title: x.a.name + ' ' + cap(x.asp) + (personal ? ' your natal ' : ' ') + x.b.name,
+      orb: 'Within ' + now.toFixed(1) + '° · ' + this.IMPACT_PHASE_WORD[phase],
+      winOn: !!run, pct: span.toFixed(0) + '%', range: run ? this.impactRange(run) : '',
+      exactOn: run ? (run.orb < .25 ? 'exact ' : 'closest ') + (run.exact === 0 ? 'today' : 'on ' + this.fmtDay(this.impactDay(run.exact))) : '',
+      paceOn: !run && !!paceOf, pace: paceOf ? 'Lasts ' + paceOf + '.' : '',
+      nature: this.ASP_NATURE[x.asp] || '', paras: paras.map(t => ({ t })), askOn: !!ask, ask: ask,
+      goOn: personal, goLabel: 'See your natal ' + x.b.name,
+      go: () => { this.setState({ trSel: null }); if (personal) o.openBody(x.b.name); } };
+  }
   fcFlip(id) {
     const cur = this.state.fcFlip || {}, on = !cur[id], a = document.activeElement;
     const mine = !!(a && a.closest && a.closest('[data-fc-card]') && a.closest('[data-fc-card]').getAttribute('data-fc-card') === id);
@@ -45417,15 +45544,22 @@ class Component extends DCLogic {
     const aspects = group('aspects', o.expanded ? 'Aspects' : 'Major Aspects', o.asps.slice(0, 40).map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
-    const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map(x => row({
+    const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
-      sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => o.openBody(x.b.name) })));
-    const trS = group('tr-sky', 'Current Transits', o.tr.global.map(x => row({
+      sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 'p', i: i } }) })));
+    /* The two nodes are always exactly opposite, so that pair is a fact about
+       the nodes rather than a transit, and its pull up had nothing to say. */
+    const skyTr = o.tr.global.filter(x => !(x.a.name.indexOf('Node') !== -1 && x.b.name.indexOf('Node') !== -1));
+    const trS = group('tr-sky', 'Current Transits', skyTr.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
-      sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })));
+      sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 's', i: i } }) })));
+    const ts = st.trSel, tList = ts ? (ts.k === 'p' ? o.tr.personal : skyTr) : null, tx = tList ? tList[ts.i] : null;
+    const trBits = { trOpen: !!tx, trClose: () => this.setState({ trSel: null }),
+      trx: tx ? this.transitDetail(tx, ts.k === 'p', ctx) : { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', winOn: false, pct: '0%', range: '', exactOn: '',
+        paceOn: false, pace: '', nature: '', paras: [], askOn: false, ask: '', goOn: false, goLabel: '', go: () => {} } };
     const headed = (list, heads) => list.map(g => heads[g.key] ? { ...g, headOn: true, head: heads[g.key] } : g);
     const first = pts.length ? pts[0].key : 'houses';
-    return {
+    return { ...trBits,
       chgPhone: headed(pts.concat([aspects, houses, trP, trS]), { [first]: 'Placements & Angles', aspects: 'Aspects', houses: 'Houses', 'tr-personal': 'Transits' }),
       chgL: headed(pts.concat([houses]), { [first]: 'Placements', houses: 'Houses' }),
       chgM: headed([aspects], { aspects: 'Aspects' }),
@@ -48826,7 +48960,7 @@ class Component extends DCLogic {
     if (PM && prof && prof.id) PM.updateProfile(prof.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
     try { localStorage.removeItem(this.FIRSTRUN_KEY); } catch (e) {}
     this.setState({ auth: 'birth', af: {}, authErr: '', tab: 'today',
-      spiritView: null, placeSel: null, aspSel: null, dpSel: null, numSel: null,
+      spiritView: null, placeSel: null, aspSel: null, trSel: null, dpSel: null, numSel: null,
       libView: null, selId: null, hdSel: null, memSel: null, revealPI: false });
   }
   /* LOG OUT, FROM THE PROFILE MENU. The account is signed out and the reader
@@ -52356,7 +52490,7 @@ class Component extends DCLogic {
     this._trapEl = el;
     this._trapReturn = document.activeElement;
     this._trapKey = e => {
-      if (e.key === 'Escape') { e.preventDefault(); this.dialogEscape(); return; }
+      if (e.key === 'Escape') { e.preventDefault(); if (this.state.aspSel != null || this.state.trSel) e.__chartSheet = true; this.dialogEscape(); return; }
       if (e.key !== 'Tab') return;
       const f = [].slice.call(el.querySelectorAll(this.FOCUSABLE)).filter(n => n.offsetWidth || n.offsetHeight || n === document.activeElement);
       if (!f.length) return;
@@ -52420,7 +52554,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
+      avaDraft: null, dpSel: null, aspSel: null, trSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
   }
 
   /* G15: arrow keys move and select, Home and End jump to the ends. Space
@@ -52496,7 +52630,7 @@ class Component extends DCLogic {
       radioKeys: e => this.radioKeys(e),
       /* G11: the plain language summary leaves the accessibility tree while a
          detail sheet is open, so the sheet is not read behind the wheel. */
-      chartSummaryOff: (st.dpSel || st.placeSel || st.aspSel) ? 'true' : 'false',
+      chartSummaryOff: (st.dpSel || st.placeSel || st.aspSel || st.trSel) ? 'true' : 'false',
       afBdateBad: fe.bdate ? 'true' : 'false', afBdateHasErr: !!fe.bdate, afBdateErr: fe.bdate || '',
       afBtimeBad: fe.btime ? 'true' : 'false', afBtimeHasErr: !!fe.btime, afBtimeErr: fe.btime || '',
       afBplaceBad: fe.bplace ? 'true' : 'false', afBplaceHasErr: !!fe.bplace, afBplaceErr: fe.bplace || '',
@@ -52979,7 +53113,7 @@ class Component extends DCLogic {
               ...stagger(placedRows.filter(r => r.ring === 2), 136, 20, 4) };
             // Clicking a body anywhere in the chart now opens its own placement
             // page rather than an inline accordion.
-            const openBody = n => this.setState({ spiritView: 'placement', placeSel: n, aspSel: null });
+            const openBody = n => this.setState({ spiritView: 'placement', placeSel: n, aspSel: null, trSel: null });
             const degMeaning = r => {
               const d = Math.floor(r.deg), dec = Math.floor(d / 10);
               const band = d <= 2 ? 'the opening degrees, where the sign is raw and unmixed'
@@ -54351,7 +54485,7 @@ class Component extends DCLogic {
       if (e.key === 'Escape') {
         if (this.state.dtSearch) { this.setState({ dtSearch: false, dtQuery: '' }); return; }
         if (this.state.voiceOpen) { this.voiceCloseGo(); return; }
-        this.setState({ helpOpen: false, quickOpen: false, addOpen: false, aspSel: null, lexDeg: null, dpSel: null });
+        this.setState({ helpOpen: false, quickOpen: false, addOpen: false, aspSel: null, trSel: null, lexDeg: null, dpSel: null });
       }
     };
     document.addEventListener('keydown', this._dtKey);
@@ -54858,7 +54992,7 @@ class Component extends DCLogic {
      before it. */
   vtSwipeStep(dir) {
     const st = this.state, sec = st.vtSec || 0, last = this.VT_SECTIONS.length - 1;
-    if (st.libView || st.selId || st.placeSel || st.numSel || st.dpSel || st.aspSel || st.ddOpen) return;
+    if (st.libView || st.selId || st.placeSel || st.numSel || st.dpSel || st.aspSel || st.trSel || st.ddOpen) return;
     if (sec === 1) {
       const n = (st.vtTab || 0) + dir;
       if (n >= 0 && n < this.VT_TABS.length) { this.vtGoTab(n); return; }
@@ -55022,6 +55156,12 @@ class Component extends DCLogic {
   vtBind() {
     this._vtKey = e => {
       if (e.key !== 'Escape') return;
+      /* A sheet open over the chart (an aspect or a transit) is what Escape
+         closes, and nothing under it: this listener is bound in both shells,
+         and without this the desktop's aspect and transit sheets also emptied
+         spiritView and sent the reader back to the hub. The trap closes the
+         sheet first, so it marks the key press (__chartSheet) for this one. */
+      if (e.__chartSheet || this.state.aspSel != null || this.state.trSel) { this.setState({ aspSel: null, trSel: null }); return; }
       if (this.state.vtSearch) { this.setState({ vtSearch: false, vtQuery: '' }); return; }
       if (this.state.voiceOpen) { this.voiceCloseGo(); return; }
       this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, helpOpen: false, quickOpen: false, addOpen: false, ddOpen: null });
@@ -55091,7 +55231,7 @@ class Component extends DCLogic {
      placement, an aspect, an atlas section. dtNav and the desktop tabs row
      already did half of this and are now built from the same list. */
   sectionRoot(id) {
-    const shared = { placeSel: null, aspSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
+    const shared = { placeSel: null, aspSel: null, trSel: null, dpSel: null, numSel: null, memSel: null, lexDeg: null };
     if (id === 'spirit') return { ...shared, spiritView: null, focusToday: false, hdSel: null, ttCard: null, icHex: null, dlOpen: null };
     if (id === 'library') return { ...shared, libView: null, selId: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null, ypCat: null, ypPick: false, ttCard: null, icHex: null, dlOpen: null };
     if (id === 'today') return { ...shared, dropOpen: false, focusToday: false };

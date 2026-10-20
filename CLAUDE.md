@@ -4756,6 +4756,30 @@ shells: the dropdowns open and close, the switch, a keyboard turn and its focus,
 a touch swipe that moves the deck and leaves the screen where it is, a tap that
 turns a card, and an orb that moves when the clock does.
 
+**Both transit lists open a pull up, as the aspects do** (owner, 20 October
+2026: "Personal transits and current transits need to have a pull up like the
+natal transits do"). A row sets `trSel` (`{ k: 'p' | 's', i }`) and
+`transitDetail()` fills one sheet, "Transit detail", placed beside the aspect
+sheet in both shells, so on the phone it is a bottom sheet like every vertical
+dialog. It carries the contact, building, exact or easing, the run of days it
+holds inside the row's own orb with its closest day (`transitRun()`, walked out
+from today over the `impactDays()` table), the aspect's teaching
+(`ASP_NATURE`), a reading and a question. A personal transit reads the Timing
+Lexicon's contact and opens the natal point; a sky transit is two bodies
+meeting overhead, so it is read through the reader's houses the two stand in
+and asks that house's `HOUSE_ASK`. The Moon has no run of days and shows its
+`PACE`. **The North Node opposite the South Node is not a Current Transit**:
+that pair is exact by definition, so the row was always first and its sheet
+had nothing to say.
+
+**Escape closes the sheet and nothing under it.** `vtBind()`'s Escape listener
+is bound in both shells and empties `spiritView`, so on the desktop Escape from
+the aspect sheet (before this) and the transit sheet sent the reader back to the
+hub. The focus trap closes the sheet first, so it marks the key press
+(`e.__chartSheet`) and the shell listener only closes the sheet. Measured over
+the sheet in all 16 theme cases at 1440 and 390: no pair under 4.5:1 and no
+control under 44px.
+
 ## The wiring is drawn three ways: 3D, Wheel and 2D
 Asked for by the owner on 19 October 2026: "Redesign the human design page to
 make the ux like it was made by unreal engine. Completely interactive, high
