@@ -1924,6 +1924,60 @@ The anchors are on the HD atlas markup only. Astropedia shares the block and
 row markup byte for byte, so an edit to it has to be anchored on `atlasSecs`, or
 a replace across the file lands on four sites instead of two.
 
+## Anything that can be pressed is lifted; only ornament is flat
+Decided by the owner on 20 October 2026: "All flat items in the app that have
+interactive pieces to them, lift them a little. The only flat items on the site
+should be ornamental." So every control with a surface of its own, and every
+card that holds a control, stands a little off the page; reading, ornament and
+the dashed "coming soon" card stay flat, which is now part of how they say they
+are not controls.
+
+**The markup says what lifts, never a selector on the style text.** The runtime
+re-serialises every inline style, so `all:unset` arrives in the DOM as forty
+longhands, `box-shadow: unset` among them, with spaces after the colons: a
+`[style*="..."]` rule never sees what was written, and the first pass of this
+matched five buttons out of two hundred. Instead `data-lift` is written on the
+element: bare on a button, link or summary with a fill or a border,
+`data-lift="card"` on a `--sf`, `--sf2` or card gradient surface with a radius
+that holds a control, and `data-lift="in"` on a field, which is the one thing
+set INTO the page, because it is where something is put. The head stylesheet
+turns those into `--lift`, `--lift-hi` on hover and `--lift-in` on press, all
+three tokens declared in all three roots so a theme can tune them, and
+`!important` because `all:unset` inline outranks any rule. A disabled control
+goes flat.
+
+**What is not marked, on purpose.** A control whose inline style sets its own
+`box-shadow` (a glow, a ring, a selected state's halo) is already off the page,
+and its shadow is a signal of its own (a `box-shadow` inside a `transition`
+list does not count). A text control with no fill and no border (the sidebar's
+idle items, the Library tab strip, Forgot password) has no surface to lift, and
+a shadow round nothing reads as a smudge. Dialogs keep their own shadows. The
+lift sets `box-shadow` only, never `transform` or `transition`, because the
+Numbers cards tilt through inline `transform` and the stage units fade through
+inline `transition`.
+
+**A new control with a surface takes `data-lift`**, and a new card holding one
+takes `data-lift="card"`; nothing lifts that is not marked. On the cover the
+sign in buttons lift and the fields are set in, written in its own sheet. Run
+in Chromium over Today, My Charts, the Library and Settings, both shells, Deep
+Field and Dawn: every surfaced control lifted, the reading cards and the dashed
+card flat.
+
+**Their containers lift too, slightly less** (the owner, 20 October 2026:
+"Slightly lift their containers now, too."). Anything with a surface that holds
+a control and is not already a card takes `data-lift="box"`, which is
+`--lift-lo`: the same edge of light and a shorter, fainter drop, so the
+control inside still stands higher than what holds it. That is the sample
+banner, the Cycle Audit section, the Alignment stepper and its readings, the
+tinted notes and wells, the headers, the phone's tab bar and the desktop
+sidebar; the Observatory's rail panels take it from `.obs-rail > .obs-glass`.
+Left out on purpose: the shell roots and anything full screen (`--bg:` set,
+`inset:0`, `position:fixed`, a height of 100% on anything but the sidebar),
+dialogs and menus (they carry their own shadows), and the phone's Get Help dock
+strip, which is a fade to black under the square rather than a surface
+(`pointer-events:none`). On Today, both shells, no surfaced container that
+holds a control is left flat apart from that strip.
+
 ## Touch targets
 44px minimum on every control in both shells. There are exactly two exceptions,
 both marked with an attribute so the tests can tell the difference, and neither
