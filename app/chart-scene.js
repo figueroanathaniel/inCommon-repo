@@ -583,12 +583,14 @@
     if (full === this.full) return;
     this.full = full;
     this.hud.root.style.display = full ? 'block' : 'none';
-    this.el.pad.style.touchAction = full ? 'none' : 'pan-y';
+    this.el.pad.style.touchAction = full || this.explore ? 'none' : 'pan-y';
     this.fly = false; this.tgt = null;
     if (full) {
       if (!this.tm.userOff) { this.tm.on = true; if (this.tm.t == null || this.tm.inline) this.tm.t = Date.now(); }
       this.tm.inline = false;
-      this.intro = this.reduced ? 1 : 0;
+      /* The full view opens at rest like every scene: nothing moves on
+         arrival but the fade (owner, 19 October 2026). */
+      this.intro = 1;
       this.rig = null;
     } else {
       this.tm.playing = false; this.tm.on = false; this.intro = 1; this.rig = null;
@@ -626,7 +628,7 @@
     on = !!on;
     if (this.explore === on) return;
     this.explore = on;
-    this.el.pad.style.touchAction = on ? 'none' : 'pan-y';
+    this.el.pad.style.touchAction = on || this.full ? 'none' : 'pan-y';
     this.lift(0.2);
     this.kick();
   };

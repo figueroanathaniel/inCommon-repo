@@ -4953,13 +4953,18 @@ except the Moon's, and not while the clock is running faster than a week a
 second, or it would never stop flashing. **The scene asks; it does not compute.**
 `chartSkyAt(t)` is the app's: positions from `lonRaw()`, the same library the
 chart is drawn from, and the contacts from `ASPECTS`. Reduced motion holds the
-sky still: the opening, the camera flight and Play are all off, and the steps,
+sky still: the camera flight and Play are off, and the steps,
 Birth and Now still work.
 
-**It opens with a sequence and never forces it.** The disc is drawn outward
-from the centre by a scan front, the bodies rise onto their pillars one after
-another, and the camera comes in from far and high, about three seconds. Any
-press or key ends it. Choosing a point (the Manifest, the Inspector's ‹ ›, J and
+**It opens at rest, behind Loading, like every stage.** It was built with an
+opening sequence (the disc scanned outward, the bodies rising, the camera
+coming in from far), and that went before it shipped, by the rule in "The
+scenes say Loading, open at rest": nothing moves on arrival but the fade.
+`intro` is held at 1 in full mode, so the scan and the rise stay in the code
+unused rather than half removed. The stage carries its own `role="status"`
+veil and holds its zoom behind it (`cxVeilO`, `cxUiO`, read off `csLive`), so
+opening the overlay on a view whose scene has not drawn yet shows Loading,
+then the scene. Choosing a point (the Manifest, the Inspector's ‹ ›, J and
 K, or a tap on the stage) brings it forward and **flies the camera to it**,
 circling slowly until the reader takes the controls; the second press on the
 same point opens its reading, the two press rule every stage in this app keeps.

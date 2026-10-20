@@ -4553,7 +4553,8 @@ input[type="date"]{color-scheme:dark}
     <div class="cx-stage" style="position:relative;min-height:0;min-width:0;overflow:hidden;background:var(--bg)">
       <sc-if value="{{ cxDeep }}" hint-placeholder-val="{{ true }}">
         <div data-chart="sky" data-cs-scene="full" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:absolute;inset:0;outline:none"></div>
-        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px">
+        <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cxVeilO }};visibility:{{ cxVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px;opacity:{{ cxUiO }};visibility:{{ cxUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <button onClick="{{ cxZoomIn }}" aria-label="Zoom in" title="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">+</button>
           <button onClick="{{ cxZoomOut }}" aria-label="Zoom out" title="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">−</button>
           <button onClick="{{ cxZoomReset }}" aria-label="Reset the camera" title="Reset the camera" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55);color:var(--ac2-hi)">◎</button>
@@ -9748,7 +9749,8 @@ input[type="date"]{color-scheme:dark}
     <div class="cx-stage" style="position:relative;min-height:0;min-width:0;overflow:hidden;background:var(--bg)">
       <sc-if value="{{ cxDeep }}" hint-placeholder-val="{{ true }}">
         <div data-chart="sky" data-cs-scene="full" data-noswipe="1" tabindex="0" role="group" aria-roledescription="astrological chart" aria-label="{{ csAria }}" aria-describedby="incommon-wheel-summary" style="position:absolute;inset:0;outline:none"></div>
-        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px">
+        <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cxVeilO }};visibility:{{ cxVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+        <div class="cx-wide" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:6px;opacity:{{ cxUiO }};visibility:{{ cxUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
           <button onClick="{{ cxZoomIn }}" aria-label="Zoom in" title="Zoom in" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">+</button>
           <button onClick="{{ cxZoomOut }}" aria-label="Zoom out" title="Zoom out" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55)">−</button>
           <button onClick="{{ cxZoomReset }}" aria-label="Reset the camera" title="Reset the camera" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:rgba(255,255,255,.03);font:600 15px var(--fu);color:var(--tx);background:rgba(0,0,0,.55);color:var(--ac2-hi)">◎</button>
@@ -14353,6 +14355,10 @@ class Component extends DCLogic {
       cxHelpGo: () => this.setState({ cxHelp: !st.cxHelp }),
       cxKeys: e => this.cxKeys(e),
       cxFlat: !deep, cxDeep: deep,
+      /* The stage keeps Loading over it until the scene has drawn, and its zoom
+         waits behind it, as every 3D stage does. */
+      cxVeilO: deep && !st.csLive ? '1' : '0', cxVeilV: deep && !st.csLive ? 'visible' : 'hidden',
+      cxUiO: !deep || st.csLive ? '1' : '0', cxUiV: !deep || st.csLive ? 'visible' : 'hidden',
       cxZoomIn: () => { if (this._csS) this._csS.zoom(-1); },
       cxZoomOut: () => { if (this._csS) this._csS.zoom(1); },
       cxZoomReset: () => { if (this._csS) this._csS.zoom(0); },
