@@ -28,6 +28,19 @@
    frame when something changes and never animates on its own, because the
    setting asks for stillness, and the camera cuts rather than flies.
 
+   ORBITAL IS THE SAME TWENTY YEARS AS A SKY (owner, 20 October 2026). The
+   landscape's content gives way to a polar chart on the same floor: the natal
+   wheel in the middle, one band per slow body around it, and in each band the
+   body's path with time running outward and longitude running round, so a
+   retrograde is the path doubling back and a passage that is exact five times
+   is the path crossing one bearing five times. The zodiac and the sixty four
+   gates ring the outside, a stay on a gate is a lit sector in its body's band,
+   the path alternates tone year by year with a master year in violet, and
+   the Personal Year of the instant sits in the middle of the wheel. The two layouts
+   are one scene: the camera moves between their rigs and the landscape fogs
+   out as the sky comes up, so the reader keeps the probe, the card and the
+   readout. setLayout() chooses; the paths arrive in the model.
+
    THE FALLBACK IS THE APP'S CHART. Without WebGL 2, or when three.js does not
    load, or when the context is lost, opts.onFail tells the app, which puts its
    own flat chart back. The scene never paints a broken frame in its place.
@@ -51,6 +64,10 @@
   var DAY = 864e5, YEAR = 365.2425 * DAY, U = 2;
   var STAR_Z0 = -2.5, STAR_DZ = 0.9, DES_Z0 = -0.55, DES_DZ = 0.62, TILE_Z = 1.95, PIN_Z = 3.0, YEAR_Z = 3.7;
   var TARGET_Z = -1.2, TARGET_Y = 0.35;
+  /* The Orbital layout: one band per slow body, time outward across it. */
+  var OB = { Saturn: [3.3, 4.75], Uranus: [5.05, 6.35], Neptune: [6.65, 7.9], Pluto: [8.2, 9.6] };
+  var OB_ORDER = ['Saturn', 'Uranus', 'Neptune', 'Pluto'], OB_GLYPH = { Saturn: '♄', Uranus: '♅', Neptune: '♆', Pluto: '♇' };
+  var R_NAT = 2.6, R_ZOD0 = 10.0, R_ZOD1 = 10.7, R_GATE0 = 10.9, R_GATE1 = 11.4, R_FIT = 12.2;
 
   function supported() {
     if (okGL !== null) return okGL;
@@ -172,6 +189,27 @@
     'uniform vec3 uC1; uniform vec3 uC2; uniform float uAlpha; varying float vA; varying float vR;',
     'void main(){ vec2 q = gl_PointCoord - 0.5; float d = length(q) * 2.0; if (d > 1.0) discard;',
     ' gl_FragColor = vec4(mix(uC1, uC2, vR) * exp(-d * d * 5.0) * vA * uAlpha, 1.0); }'].join('\n');
+  /* Orbital: drawn flat on the floor and never fogged, because the fog is
+     what takes the landscape away while this comes up. */
+  var V_OSTRIP = 'attribute vec3 aCol; attribute vec2 aP; varying vec3 vC; varying vec2 vP; void main(){ vC = aCol; vP = aP; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+  var F_OBASE = 'uniform float uOrb; uniform float uI; varying vec3 vC; varying vec2 vP; void main(){ gl_FragColor = vec4(vC * (1.0 - vP.y * vP.y * 0.75) * uI * uOrb, 1.0); }';
+  var F_OPASS = [
+    'uniform vec3 uA; uniform vec3 uB; uniform float uTime; uniform float uHover; uniform float uLive; uniform float uGlow; uniform float uDim; uniform float uOrb;',
+    'varying vec3 vC; varying vec2 vP;',
+    'void main(){ vec3 c = mix(uA, uB, smoothstep(0.0, 1.0, vP.x));',
+    ' float ends = smoothstep(0.0, 0.03, vP.x) * smoothstep(1.0, 0.97, vP.x);',
+    ' float fl = pow(0.5 + 0.5 * sin((vP.x * 4.0 - uTime * (0.16 + 0.42 * uLive)) * 6.2832), 12.0);',
+    ' float core = 1.0 - smoothstep(0.1, 1.0, abs(vP.y));',
+    ' float e = (0.6 + 0.4 * core + fl * (0.35 + 0.55 * uLive)) * (0.75 + 0.8 * uHover + 0.3 * uLive) * uGlow * uDim * uOrb;',
+    ' gl_FragColor = vec4(c * e * ends * (0.3 + 0.7 * core), 1.0); }'].join('\n');
+  var V_OSEC = 'attribute vec2 aP; varying vec2 vP; void main(){ vP = aP; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+  var F_OSEC = [
+    'uniform vec3 uC; uniform vec2 uSize; uniform float uFill; uniform float uEdge; uniform float uHover; uniform float uLive; uniform float uDim; uniform float uOrb;',
+    'varying vec2 vP;',
+    'void main(){ vec2 f = vec2(fract(vP.x), vP.y); float m = min(min(f.x, 1.0 - f.x) * uSize.x, min(f.y, 1.0 - f.y) * uSize.y);',
+    ' float edge = 1.0 - smoothstep(0.0, 0.05, m);',
+    ' float e = (edge * uEdge + uFill) * (0.7 + 0.8 * uHover + 0.7 * uLive) * uDim * uOrb;',
+    ' gl_FragColor = vec4(uC * e, 1.0); }'].join('\n');
   var V_POST = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
   var F_BRIGHT = 'uniform sampler2D tIn; uniform float uThr; varying vec2 vUv; void main(){ vec3 c = texture2D(tIn, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(uThr, uThr + 0.4, l), 1.0); }';
   var F_BLUR = [
@@ -238,6 +276,7 @@
     this.down = null; this.pinch = null; this.hover = null; this.focusId = null; this.card = null;
     this.rig = null; this.goal = null; this.user = { center: null, dist: null, elev: null };
     this.level = 0; this.frames = []; this.labels = [];
+    this.layout = 'land'; this.morph = 0; this.orbI = 0; this.landI = 1;
     this.reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.dom();
   }
@@ -381,10 +420,15 @@
     this._warming = true;
     var self = this, r = this.r, jobs = [];
     var done = function () { self._warming = false; self.warm = true; if (!self.failed) self.kick(); };
+    /* compile() walks only what is visible, and the layout not showing is
+       hidden: shown for the call, so its programs are linked now too */
+    var hid = [];
+    [this.content, this.orb].forEach(function (g) { if (g) g.traverse(function (x) { if (!x.visible) { hid.push(x); x.visible = true; } }); });
     try {
       jobs.push(r.compileAsync(this.scene, this.cam));
       if (this.post && this.quad) [this.mBright, this.mBlur, this.mComp].forEach(function (m) { self.quad.material = m; jobs.push(r.compileAsync(self.postScene, self.postCam)); });
-    } catch (e) { done(); return; }
+    } catch (e) { hid.forEach(function (x) { x.visible = false; }); done(); return; }
+    hid.forEach(function (x) { x.visible = false; });
     Promise.all(jobs).then(done, done);
   };
   /* Built now, wherever it is: the app builds the stage in its offscreen lot
@@ -435,7 +479,7 @@
     this.scene.add(this.cam);
     this.U = {
       uCam: { value: new T.Vector3() }, uFog: { value: 0.03 }, uTime: { value: 0 }, uGlow: { value: 1 }, uBreath: { value: 0 },
-      uPR: { value: 1 }
+      uPR: { value: 1 }, uOrb: { value: 0 }
     };
     this.world = new T.Group(); this.scene.add(this.world);
     this.content = null;
@@ -547,6 +591,7 @@
     var s = new T.Sprite(mat);
     s.center.set(0.5, o.anchorY == null ? 0.5 : o.anchorY);
     s.userData.lab = { px: px * 1.6, aspect: w / h };
+    s.userData.op0 = mat.opacity;
     s.renderOrder = 5;
     this.labels.push(s);
     this.sizeLabel(s);
@@ -729,6 +774,7 @@
     if (this.probeLabel) { this.scene.remove(this.probeLabel); this.dispose(this.probeLabel); this.probeLabel = null; this._probeTxt = null; }
     this.now.position.x = 0;
     this.floorMat.uniforms.uNowX.value = 0;
+    this.buildOrbit();
     this.applyModeVisibility();
     this.orreryNatal();
   };
@@ -741,6 +787,10 @@
       if (o.userData && (o.userData.kind === 'star' || o.userData.kind === 'design')) o.visible = full || o.userData.mini;
     });
     if (this.orrery) this.orrery.visible = full;
+    if (this.orb) this.orb.traverse(function (o) {
+      if (o.userData && o.userData.fullOnly) o.visible = full;
+      if (o.userData && o.userData.ob) o.visible = full || o.userData.ob.mini;
+    });
   };
 
   /* ---- The sky wheel, in the full view ------------------------------------ */
@@ -865,6 +915,388 @@
     this.orrery.rotation.set(pitch, yaw, 0);
   };
 
+  /* ---- Orbital: the same years as a sky ----------------------------------- */
+  function sectorInto(A, r0, r1, a0, a1, segs, x0) {
+    var base = A.pos.length / 3;
+    for (var i = 0; i <= segs; i++) {
+      var u = i / segs, a = a0 + (a1 - a0) * u, c = Math.cos(a), sn = -Math.sin(a);
+      A.pos.push(c * r0, 0, sn * r0, c * r1, 0, sn * r1);
+      A.ap.push(x0 + u, 0, x0 + u, 1);
+      if (i) { var b = base + (i - 1) * 2; A.idx.push(b, b + 2, b + 1, b + 1, b + 2, b + 3); }
+    }
+  }
+  function stripInto(A, pts, cols, u, w) {
+    var n = pts.length / 2, base = A.pos.length / 3;
+    for (var i = 0; i < n; i++) {
+      var i0 = Math.max(0, i - 1), i1 = Math.min(n - 1, i + 1);
+      var tx = pts[i1 * 2] - pts[i0 * 2], tz = pts[i1 * 2 + 1] - pts[i0 * 2 + 1], L = Math.hypot(tx, tz) || 1;
+      var nx = -tz / L * w / 2, nz = tx / L * w / 2, x = pts[i * 2], z = pts[i * 2 + 1];
+      A.pos.push(x + nx, 0, z + nz, x - nx, 0, z - nz);
+      if (cols) A.col.push(cols[i * 3], cols[i * 3 + 1], cols[i * 3 + 2], cols[i * 3], cols[i * 3 + 1], cols[i * 3 + 2]);
+      A.ap.push(u[i], 1, u[i], -1);
+      if (i) { var b = base + (i - 1) * 2; A.idx.push(b, b + 1, b + 2, b + 1, b + 3, b + 2); }
+    }
+  }
+  function geoOf(A) {
+    var g = new T.BufferGeometry();
+    g.setAttribute('position', new T.Float32BufferAttribute(A.pos, 3));
+    g.setAttribute('aP', new T.Float32BufferAttribute(A.ap, 2));
+    if (A.col && A.col.length) g.setAttribute('aCol', new T.Float32BufferAttribute(A.col, 3));
+    g.setIndex(A.idx);
+    return g;
+  }
+  function circleInto(pos, col, r, c, segs) {
+    for (var i = 0; i < segs; i++) {
+      var a = i / segs * Math.PI * 2, b = (i + 1) / segs * Math.PI * 2;
+      pos.push(Math.cos(a) * r, 0, -Math.sin(a) * r, Math.cos(b) * r, 0, -Math.sin(b) * r);
+      col.push(c[0], c[1], c[2], c[0], c[1], c[2]);
+    }
+  }
+  /* Time runs outward across a body's band, the whole span from its inner
+     edge to its outer one; longitude runs round, from the app's own path. */
+  P.obR = function (mv, t) {
+    var b = OB[mv], sp = this.model.span;
+    return b[0] + (b[1] - b[0]) * clamp((t - sp.from) / (sp.to - sp.from), 0, 1);
+  };
+  P.obLon = function (mv, t) {
+    var p = this.model.paths && this.model.paths[mv];
+    if (!p || !p.lon || p.lon.length < 2) return null;
+    var x = clamp((t - p.t0) / p.dt, 0, p.lon.length - 1.0001), i = Math.floor(x), u = x - i;
+    return p.lon[i] + (p.lon[i + 1] - p.lon[i]) * u;
+  };
+  P.obPt = function (mv, t) {
+    var L = this.obLon(mv, t);
+    if (L == null) return null;
+    var a = this.orAngle(L), r = this.obR(mv, t);
+    return [Math.cos(a) * r, -Math.sin(a) * r];
+  };
+  /* A year's tint, as the Rings view paints it: alternate years in two tones
+     of the sky, so the path reads in years like tree rings, and a master
+     year in violet. A number is a category, so no tint grows with it. */
+  P.pyCol = function (y) {
+    var tk = this.tok, yr = this._py && this._py[y];
+    if (yr && yr.master) return tk.hi;
+    var c = mix3(tk.atm, tk.tx, 0.3), k = y % 2 ? 1 : 0.55;
+    return [c[0] * k, c[1] * k, c[2] * k];
+  };
+  P.secMat = function (c, size, fill, edge, dim) {
+    return new T.ShaderMaterial({ vertexShader: V_OSEC, fragmentShader: F_OSEC, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending, side: T.DoubleSide,
+      uniforms: { uC: { value: v3(c) }, uSize: { value: new T.Vector2(size[0], size[1]) }, uFill: { value: fill }, uEdge: { value: edge },
+        uHover: { value: 0 }, uLive: { value: 0 }, uDim: { value: dim == null ? 1 : dim }, uOrb: this.U.uOrb } });
+  };
+  P.obLines = function (pos, col, op) {
+    var g = new T.BufferGeometry();
+    g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    g.setAttribute('color', new T.Float32BufferAttribute(col, 3));
+    var mt = new T.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending, opacity: 0 });
+    mt.userData.op0 = op == null ? 1 : op;
+    this.obLineMats.push(mt);
+    var l = new T.LineSegments(g, mt);
+    l.frustumCulled = false; l.renderOrder = 3;
+    return l;
+  };
+  P.obPoints = function (n) {
+    var g = new T.BufferGeometry();
+    g.setAttribute('position', new T.BufferAttribute(new Float32Array(n * 3), 3));
+    g.setAttribute('aSize', new T.BufferAttribute(new Float32Array(n), 1));
+    g.setAttribute('aCol', new T.BufferAttribute(new Float32Array(n * 3), 3));
+    var p = new T.Points(g, new T.ShaderMaterial({ vertexShader: V_POINTS, fragmentShader: F_POINTS, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending,
+      uniforms: { uPR: this.U.uPR, uScale: { value: 14 }, uTime: this.U.uTime, uI: this.U.uOrb } }));
+    p.frustumCulled = false; p.renderOrder = 4;
+    return p;
+  };
+  P.buildOrbit = function () {
+    if (this.orb) { this.world.remove(this.orb); this.dispose(this.orb); this.orb = null; }
+    var m = this.model;
+    if (!m) return;
+    var tk = this.tok, self = this, TAU = Math.PI * 2, span = m.span, o = new T.Group();
+    this.orb = o; this.world.add(o);
+    this.obLineMats = []; this.obItems = []; this.obLive = []; this._obT = null; this._obYr = null; this.obYrLab = null; this._fadeK = null;
+    this.orbX = (this.x(m.mini.from) + this.x(m.mini.to)) / 2;
+    o.position.set(this.orbX, 0.02, TARGET_Z);
+    o.visible = this.orbI > 0.001;
+    this._py = {};
+    m.years.forEach(function (y) { self._py[y.y] = y; });
+    var dimTx = function (k) { return [tk.tx[0] * k, tk.tx[1] * k, tk.tx[2] * k]; };
+    var lab = function (text, opt, x, z, flag, parent) {
+      var l = self.label(text, opt);
+      l.position.set(x, 0.05, z); l.renderOrder = 6;
+      if (flag) l.userData[flag] = true;
+      (parent || o).add(l);
+      return l;
+    };
+    var A;
+
+    /* The bands, one per slow body, and a faint ring at every New Year. */
+    OB_ORDER.forEach(function (mv) {
+      var b = OB[mv], B = { pos: [], ap: [], idx: [] };
+      sectorInto(B, b[0], b[1], 0, TAU, 180, 0);
+      var bm = new T.Mesh(geoOf(B), self.secMat(tk.atm, [1e4, b[1] - b[0]], 0.035, 0.28, 1));
+      bm.renderOrder = 1; o.add(bm);
+    });
+    var yp = [], yc = [], y0 = new Date(span.from).getFullYear(), y1 = new Date(span.to).getFullYear(), y, t;
+    for (y = y0 + 1; y <= y1; y++) {
+      t = new Date(y, 0, 1).getTime();
+      if (t >= span.to) break;
+      OB_ORDER.forEach(function (mv) { circleInto(yp, yc, self.obR(mv, t), dimTx(y % 5 === 0 ? 0.2 : 0.085), 128); });
+    }
+    o.add(this.obLines(yp, yc, 1));
+
+    /* The natal wheel: a ring, a dot for every point and a spoke from it out
+       to the zodiac, so a path crossing a natal bearing is seen to cross it. */
+    var nat = m.natal || [], np = [], nc = [], targets = {};
+    m.stars.forEach(function (st) { if (st.mini) targets[st.natal] = true; });
+    circleInto(np, nc, R_NAT, dimTx(0.24), 96);
+    nat.forEach(function (n) {
+      var a = self.orAngle(n.lon), c = dimTx(n.name === 'Ascendant' || n.name === 'Midheaven' ? 0.2 : 0.11);
+      np.push(Math.cos(a) * (R_NAT + 0.15), 0, -Math.sin(a) * (R_NAT + 0.15), Math.cos(a) * R_ZOD0, 0, -Math.sin(a) * R_ZOD0);
+      nc.push(c[0], c[1], c[2], c[0], c[1], c[2]);
+    });
+    o.add(this.obLines(np, nc, 1));
+    if (nat.length) {
+      var nd = this.obPoints(nat.length), na = nd.geometry.attributes;
+      nat.forEach(function (n, i) {
+        var a = self.orAngle(n.lon), g = n.glyph || '', small = g.replace(/︎/g, '').length > 1;
+        na.position.setXYZ(i, Math.cos(a) * R_NAT, 0, -Math.sin(a) * R_NAT); na.aSize.setX(i, 18); na.aCol.setXYZ(i, tk.tx[0] * 0.85, tk.tx[1] * 0.85, tk.tx[2] * 0.85);
+        lab(g, { px: small ? 8.5 : 11, font: small ? tk.fu : tk.fd, weight: small ? 700 : 400, color: tk.cTx, glow: tk.cBg, depthTest: false },
+          Math.cos(a) * (R_NAT - 0.62), -Math.sin(a) * (R_NAT - 0.62), targets[n.name] ? null : 'fullOnly');
+      });
+      o.add(nd);
+    }
+
+    /* The zodiac, and the sixty four gates outside it in the wheel's order. */
+    A = { pos: [], ap: [], idx: [] };
+    sectorInto(A, R_ZOD0, R_ZOD1, 0, TAU, 240, 0);
+    var zm = new T.Mesh(geoOf(A), this.secMat(tk.ac2, [1e4, R_ZOD1 - R_ZOD0], 0.06, 0.55, 1));
+    zm.renderOrder = 1; o.add(zm);
+    var SIGNS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'], zp = [], zc = [], zk = dimTx(0.32), rz = (R_ZOD0 + R_ZOD1) / 2;
+    SIGNS.forEach(function (sg, i) {
+      var a = self.orAngle(i * 30), am = self.orAngle(i * 30 + 15);
+      zp.push(Math.cos(a) * R_ZOD0, 0, -Math.sin(a) * R_ZOD0, Math.cos(a) * R_ZOD1, 0, -Math.sin(a) * R_ZOD1);
+      zc.push(zk[0], zk[1], zk[2], zk[0], zk[1], zk[2]);
+      lab(sg + '︎', { px: 11, font: tk.fd, color: tk.cMut, depthTest: false }, Math.cos(am) * rz, -Math.sin(am) * rz);
+    });
+    o.add(this.obLines(zp, zc, 1));
+    var G = m.gates;
+    if (G && G.order && G.order.length === 64) {
+      var gArc = (R_GATE0 + R_GATE1) / 2 * G.deg * Math.PI / 180;
+      A = { pos: [], ap: [], idx: [] };
+      G.order.forEach(function (g, i) { var l0 = G.start + i * G.deg; sectorInto(A, R_GATE0, R_GATE1, self.orAngle(l0), self.orAngle(l0 + G.deg), 6, i); });
+      var gm = new T.Mesh(geoOf(A), this.secMat(tk.atm, [gArc, R_GATE1 - R_GATE0], 0.02, 0.32, 1));
+      gm.renderOrder = 1; o.add(gm);
+      /* A stay on a gate: the gate lit in the ring, and a sector of the body's
+         own band across the gate's arc for as long as it stays. */
+      var byGate = {};
+      m.design.forEach(function (d) { (byGate[d.gate] || (byGate[d.gate] = [])).push(d); });
+      Object.keys(byGate).forEach(function (gk) {
+        var list = byGate[gk].slice().sort(function (a, b) { return a.from - b.from; }), i = G.order.indexOf(+gk);
+        if (i === -1) return;
+        var l0 = G.start + i * G.deg, a0 = self.orAngle(l0), a1 = self.orAngle(l0 + G.deg), own = list.some(function (x) { return x.own; });
+        var B = { pos: [], ap: [], idx: [] };
+        sectorInto(B, R_GATE0, R_GATE1, a0, a1, 6, 0);
+        var gmat = self.secMat(tk.blue, [gArc, R_GATE1 - R_GATE0], own ? 0.45 : 0.04, 1, 1), seg = new T.Mesh(geoOf(B), gmat);
+        seg.renderOrder = 2;
+        seg.userData.pick = { kind: 'design', id: list[0].id }; seg.userData.orb = true;
+        var gg = new T.Group(); gg.userData.ob = { mini: list.some(function (x) { return x.mini; }) };
+        gg.add(seg); o.add(gg); self.picks.push(seg);
+        self.obItems.push({ id: list[0].id, u: gmat.uniforms.uHover, h: 0 });
+        self.obLive.push({ u: gmat.uniforms.uLive, spans: list.map(function (x) { return [x.from, x.to]; }) });
+        var am = (a0 + a1) / 2, rr = R_GATE1 + 0.42;
+        lab(String(+gk), { px: 10, weight: 600, color: tk.cBlue, glow: tk.cBg, depthTest: false }, Math.cos(am) * rr, -Math.sin(am) * rr, 'fullOnly', gg);
+        list.forEach(function (d) {
+          var b = OB[d.mover];
+          if (!b) return;
+          var r0 = self.obR(d.mover, d.from), r1 = Math.min(b[1], Math.max(r0 + 0.08, self.obR(d.mover, d.to))), C = { pos: [], ap: [], idx: [] };
+          sectorInto(C, r0, r1, a0, a1, 6, 0);
+          var dm = self.secMat(tk.blue, [(r0 + r1) / 2 * G.deg * Math.PI / 180, r1 - r0], d.own ? 0.4 : 0.05, 0.9, d.past ? 0.4 : 1), sm = new T.Mesh(geoOf(C), dm);
+          sm.renderOrder = 2;
+          sm.userData.pick = { kind: 'design', id: d.id }; sm.userData.orb = true;
+          var sg = new T.Group(); sg.userData.ob = { mini: !!d.mini };
+          sg.add(sm); o.add(sg); self.picks.push(sm);
+          self.obItems.push({ id: d.id, u: dm.uniforms.uHover, h: 0 });
+          self.obLive.push({ u: dm.uniforms.uLive, spans: [[d.from, d.to]] });
+        });
+      });
+    }
+
+    /* Each body's path across the span, tinted year by year. */
+    OB_ORDER.forEach(function (mv) {
+      var p = m.paths && m.paths[mv];
+      if (!p || !p.lon || p.lon.length < 2) return;
+      var n = p.lon.length, pts = new Float32Array(n * 2), cols = new Float32Array(n * 3), u = new Float32Array(n), yLast = null, c = null;
+      for (var i = 0; i < n; i++) {
+        var ti = p.t0 + i * p.dt, a = self.orAngle(p.lon[i]), r = self.obR(mv, ti), yi = new Date(ti).getFullYear();
+        if (yi !== yLast) { yLast = yi; c = self.pyCol(yi); }
+        pts[i * 2] = Math.cos(a) * r; pts[i * 2 + 1] = -Math.sin(a) * r;
+        cols[i * 3] = c[0]; cols[i * 3 + 1] = c[1]; cols[i * 3 + 2] = c[2]; u[i] = i / (n - 1);
+      }
+      var R = { pos: [], ap: [], idx: [], col: [] };
+      stripInto(R, pts, cols, u, 0.09);
+      var rm = new T.Mesh(geoOf(R), new T.ShaderMaterial({ vertexShader: V_OSTRIP, fragmentShader: F_OBASE, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending, side: T.DoubleSide,
+        uniforms: { uOrb: self.U.uOrb, uI: { value: 0.85 } } }));
+      rm.renderOrder = 2; o.add(rm);
+    });
+
+    /* The passages, lit along the stretch of path they cover, with a point at
+       every exact date. The wide strip beneath each is what a pointer finds. */
+    m.stars.forEach(function (st) {
+      if (!(m.paths && m.paths[st.mover])) return;
+      var a = st.from, b = Math.max(st.to, st.from + 25 * DAY), n = Math.max(8, Math.ceil((b - a) / (2 * DAY)));
+      var pts = new Float32Array((n + 1) * 2), u = new Float32Array(n + 1);
+      for (var i = 0; i <= n; i++) { var q = self.obPt(st.mover, a + (b - a) * i / n); pts[i * 2] = q[0]; pts[i * 2 + 1] = q[1]; u[i] = i / n; }
+      var dim = st.past ? 0.3 : st.mini ? 1 : 0.45, cA = st.hard ? tk.ac2 : tk.atm, cB = st.hard ? tk.hi : tk.ac2;
+      var S = { pos: [], ap: [], idx: [] }, K = { pos: [], ap: [], idx: [] };
+      stripInto(S, pts, null, u, 0.2); stripInto(K, pts, null, u, 0.55);
+      var mat = new T.ShaderMaterial({ vertexShader: V_OSTRIP, fragmentShader: F_OPASS, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending, side: T.DoubleSide,
+        uniforms: { uA: { value: v3(cA) }, uB: { value: v3(cB) }, uTime: self.U.uTime, uHover: { value: 0 }, uLive: { value: st.now ? 1 : 0 }, uGlow: self.U.uGlow, uDim: { value: dim }, uOrb: self.U.uOrb } });
+      var mesh = new T.Mesh(geoOf(S), mat), pick = new T.Mesh(geoOf(K), new T.MeshBasicMaterial({ visible: false }));
+      mesh.renderOrder = 3;
+      pick.userData.pick = { kind: 'star', id: st.id }; pick.userData.orb = true;
+      var g = new T.Group(); g.userData.ob = { mini: !!st.mini };
+      g.add(mesh); g.add(pick);
+      if (st.passes && st.passes.length) {
+        var pp = self.obPoints(st.passes.length), pa = pp.geometry.attributes;
+        st.passes.forEach(function (tp, k) {
+          var q = self.obPt(st.mover, tp);
+          pa.position.setXYZ(k, q[0], 0, q[1]); pa.aSize.setX(k, 22); pa.aCol.setXYZ(k, tk.tx[0] * dim, tk.tx[1] * dim, tk.tx[2] * dim);
+        });
+        g.add(pp);
+      }
+      o.add(g); self.picks.push(pick);
+      self.obItems.push({ id: st.id, u: mat.uniforms.uHover, h: 0 });
+    });
+
+    /* Now as a ring across every band, the probe as another, and the four
+       bodies where they stand at the instant the reader is looking at. */
+    var cp = [], cc = [], pp2 = [], pc2 = [];
+    OB_ORDER.forEach(function (mv) { circleInto(cp, cc, self.obR(mv, m.now), tk.hi, 160); circleInto(pp2, pc2, OB[mv][0], tk.tx, 160); });
+    o.add(this.obLines(cp, cc, 0.5));
+    this.obProbe = this.obLines(pp2, pc2, 0);
+    this.obProbe.material.userData.probe = true;
+    o.add(this.obProbe);
+    this.obMovers = this.obPoints(4);
+    var mc = this.obMovers.geometry.attributes;
+    for (var i = 0; i < 4; i++) { mc.aSize.setX(i, 54); mc.aCol.setXYZ(i, tk.hi[0], tk.hi[1], tk.hi[2]); }
+    o.add(this.obMovers);
+    this.obMoverLabs = OB_ORDER.map(function (mv) { var l = lab(OB_GLYPH[mv] + '︎', { px: 14, font: tk.fd, color: tk.cHi, glow: tk.cBg, depthTest: false }, 0, 0); l.renderOrder = 7; return l; });
+    var lg = new T.BufferGeometry();
+    lg.setAttribute('position', new T.BufferAttribute(new Float32Array(16 * 6), 3));
+    lg.setAttribute('color', new T.BufferAttribute(new Float32Array(16 * 6), 3));
+    lg.setDrawRange(0, 0);
+    var lmt = new T.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, depthTest: false, blending: T.AdditiveBlending, opacity: 0 });
+    lmt.userData.op0 = 1; this.obLineMats.push(lmt);
+    this.obAct = new T.LineSegments(lg, lmt);
+    this.obAct.frustumCulled = false; this.obAct.renderOrder = 4;
+    o.add(this.obAct);
+    /* The years along the near side of the outermost band, in the full view. */
+    for (y = y0; y <= y1; y++) {
+      if (y !== y0 && y % 5) continue;
+      t = Math.max(span.from, new Date(y, 0, 1).getTime());
+      if (t >= span.to) continue;
+      lab(String(y), { px: 9.5, weight: 600, color: tk.cMut, glow: tk.cBg, depthTest: false }, 0, this.obR('Pluto', t), 'fullOnly');
+    }
+  };
+  P.orbitAt = function (T0) {
+    if (!this.orb || !this.model || !this.obMovers) return;
+    var day = Math.round(T0 / DAY);
+    if (this._obT === day) return;
+    this._obT = day;
+    var self = this, m = this.model, tk = this.tok, TAU = Math.PI * 2, mp = this.obMovers.geometry.attributes.position, lonAt = {};
+    OB_ORDER.forEach(function (mv, i) {
+      var L = self.obLon(mv, T0), lb = self.obMoverLabs[i];
+      if (L == null) { mp.setXYZ(i, 0, -50, 0); lb.visible = false; return; }
+      lonAt[mv] = L;
+      var a = self.orAngle(L), r = self.obR(mv, T0), rl = r + 0.62;
+      mp.setXYZ(i, Math.cos(a) * r, 0, -Math.sin(a) * r);
+      lb.visible = true; lb.position.set(Math.cos(a) * rl, 0.05, -Math.sin(a) * rl);
+    });
+    mp.needsUpdate = true;
+    var lp = this.obAct.geometry.attributes.position, lc = this.obAct.geometry.attributes.color, n = 0, full = this.mode === 'full';
+    m.stars.filter(function (st) { return st.from <= T0 && T0 <= st.to && (full || st.mini); }).slice(0, 16).forEach(function (st) {
+      var nat = (m.natal || []).find(function (x) { return x.name === st.natal; });
+      if (!nat || lonAt[st.mover] == null) return;
+      var a = self.orAngle(lonAt[st.mover]), r = self.obR(st.mover, T0), b = self.orAngle(nat.lon), c = st.hard ? tk.hi : tk.atm2;
+      lp.setXYZ(n * 2, Math.cos(a) * r, 0, -Math.sin(a) * r); lp.setXYZ(n * 2 + 1, Math.cos(b) * R_NAT, 0, -Math.sin(b) * R_NAT);
+      lc.setXYZ(n * 2, c[0], c[1], c[2]); lc.setXYZ(n * 2 + 1, c[0] * 0.5, c[1] * 0.5, c[2] * 0.5);
+      n++;
+    });
+    this.obAct.geometry.setDrawRange(0, n * 2);
+    lp.needsUpdate = true; lc.needsUpdate = true;
+    var pp = this.obProbe.geometry.attributes.position, k = 0;
+    OB_ORDER.forEach(function (mv) {
+      var r = self.obR(mv, T0);
+      for (var i = 0; i < 160; i++) {
+        var a0 = i / 160 * TAU, a1 = (i + 1) / 160 * TAU;
+        pp.setXYZ(k++, Math.cos(a0) * r, 0, -Math.sin(a0) * r); pp.setXYZ(k++, Math.cos(a1) * r, 0, -Math.sin(a1) * r);
+      }
+    });
+    pp.needsUpdate = true;
+    this.obLive.forEach(function (x) { x.u.value = x.spans.some(function (sp) { return sp[0] <= T0 && T0 <= sp[1]; }) ? 1 : 0; });
+    /* The Personal Year of the instant, in the middle of the wheel. */
+    var yr = new Date(T0).getFullYear();
+    if (this._obYr !== yr) {
+      this._obYr = yr;
+      if (this.obYrLab) { this.orb.remove(this.obYrLab); this.dispose(this.obYrLab); this.obYrLab = null; }
+      var py = this._py && this._py[yr];
+      if (py && py.v != null) {
+        var l = this.label(String(py.v), { px: 22, font: tk.fd, color: py.master ? tk.cHi : tk.cTx, glow: tk.cBg, depthTest: false });
+        l.position.set(0, 0.05, 0); l.renderOrder = 7; l.material.opacity = l.userData.op0 * this.orbI;
+        this.orb.add(l); this.obYrLab = l;
+      }
+    }
+  };
+  /* The two layouts share one stage: what fades and by how much. */
+  P.applyFade = function () {
+    var L = this.landI, O = this.orbI;
+    if (this.content) this.content.traverse(function (x) { if (x.isSprite && x.userData.op0 != null) x.material.opacity = x.userData.op0 * L; });
+    if (this.orb) this.orb.traverse(function (x) { if (x.isSprite && x.userData.op0 != null) x.material.opacity = x.userData.op0 * O; });
+    (this.obLineMats || []).forEach(function (mt) { if (!mt.userData.probe) mt.opacity = mt.userData.op0 * O; });
+  };
+  /* The distance at which the whole rim sits inside the frame, found by
+     projecting it: at a low camera the near side is much the larger, and a
+     fit from the radius alone cut it off. It fits the rim's height rather than
+     its distance from the middle, and keeps how far off centre that height
+     sits (_fitY), which placeCamera takes out with a view offset. */
+  P.fitDisc = function (el) {
+    var tv = Math.tan(this.cam.fov * Math.PI / 360), asp = this.cam.aspect, key = el.toFixed(3) + '|' + tv.toFixed(4) + '|' + asp.toFixed(3);
+    if (this._fitK === key) return this._fitD;
+    var ce = Math.cos(el), se = Math.sin(el);
+    var span = null;
+    var fits = function (d) {
+      var cy = TARGET_Y + se * d, cz = ce * d, fy = TARGET_Y - cy, fz = -cz, fl = Math.hypot(fy, fz);
+      fy /= fl; fz /= fl;
+      /* right is +x, so up is right x forward */
+      var uy = -fz, uz = fy;
+      var y0 = 9, y1 = -9;
+      for (var i = 0; i < 32; i++) {
+        var a = i / 32 * Math.PI * 2, px = Math.cos(a) * R_FIT, py = -cy, pz = Math.sin(a) * R_FIT - cz;
+        var z = py * fy + pz * fz, y = py * uy + pz * uz;
+        if (z <= 0.1 || Math.abs(px / (z * tv * asp)) > 0.94) return false;
+        y /= z * tv; y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+      span = [y0, y1];
+      return y1 - y0 <= 1.84;
+    };
+    var lo = 6, hi = 160;
+    for (var k = 0; k < 24; k++) { var mid = (lo + hi) / 2; if (fits(mid)) hi = mid; else lo = mid; }
+    fits(hi);
+    this._fitK = key; this._fitD = hi; this._fitY = span ? (span[0] + span[1]) / 2 : 0;
+    return hi;
+  };
+  P.obElev = function () { return this.mode === 'full' ? (this.user.oElev != null ? this.user.oElev : 0.98) : clamp(Math.asin(clamp(1 / (this.cam ? this.cam.aspect : 2), 0, 1)) * 0.95, 0.4, 0.9); };
+  P.setLayout = function (l) {
+    l = l === 'orbit' ? 'orbit' : 'land';
+    if (this.layout === l) return;
+    this.layout = l;
+    if (!this.ready) return;
+    if (this.isFlying()) this.flyRelease();
+    this.hideCard(); this.setHover(null); this.hideTip();
+    if (this.reduced) this.morph = l === 'orbit' ? 1 : 0;
+    this._obT = null; this._fadeK = null;
+    this.lift(0.3);
+    this.kick();
+  };
+
   /* ---- The camera ---------------------------------------------------------- */
   P.win = function () {
     var m = this.model, nar = this.cam.aspect < 1.9;
@@ -877,6 +1309,7 @@
   P.enterMode = function (moved) {
     if (!this.model || !this.cam) return;
     var full = this.mode === 'full', w = this.win();
+    this.user.oDist = null; this.user.oElev = null;
     this.applyModeVisibility();
     this.el.card.style.display = 'none';
     this.card = null;
@@ -897,6 +1330,8 @@
       var g = this.goal;
       /* it opens where it rests: no fly-in (owner, 19 October 2026) */
       this.rig = { x: g.x, dist: g.dist, elev: g.elev, yaw: g.yaw };
+      this.morph = this.layout === 'orbit' ? 1 : 0;
+      this._fadeK = null;
     }
     this.lift(0.35);
     if (this.focusId && full) this.focus(this.focusId);
@@ -906,6 +1341,14 @@
     var m = this.model, c = this.c, full = this.mode === 'full', w = this.win();
     var x0 = this.x(w.from), x1 = this.x(w.to), cx = (x0 + x1) / 2;
     var g = this.goal || (this.goal = {});
+    if (this.layout === 'orbit' && this.orb) {
+      var el = this.obElev();
+      g.x = this.orbX;
+      g.dist = (full && this.user.oDist != null ? this.user.oDist : this.fitDisc(el)) * (1 - 0.05 * c);
+      g.elev = el - 0.04 * c;
+      g.yaw = (this.reduced ? 0 : Math.sin(this.time * 0.045) * 0.06) + (this.ptr.on ? this.ptr.x * 0.14 : 0);
+      return g;
+    }
     if (full) {
       g.x = this.user.center; g.dist = this.user.dist * (1 - 0.06 * c); g.elev = clamp(this.user.elev - 0.05 * c, 0.2, 1.1);
     } else {
@@ -926,8 +1369,9 @@
   P.isFlying = function () { return this.flyOk() && this.flying(); };
   P.placeCamera = function (k) {
     if (this.isFlying() && this.flyPose(this._dt)) {
+      this.viewShift(0);
       this.U.uCam.value.copy(this.cam.position);
-      this.U.uFog.value = 1 / (Math.abs(this.cam.position.z - TARGET_Z) * 2.6 + 30);
+      this.U.uFog.value = 1 / (Math.abs(this.cam.position.z - TARGET_Z) * 2.6 + 30) + this.fogAdd();
       this.sky.position.copy(this.cam.position);
       this.stars.position.copy(this.cam.position);
       return;
@@ -938,15 +1382,29 @@
     this.cam.position.set(r.x + Math.sin(r.yaw) * ce * r.dist, TARGET_Y + Math.sin(r.elev) * r.dist, TARGET_Z + Math.cos(r.yaw) * ce * r.dist);
     this.cam.lookAt(r.x, TARGET_Y, TARGET_Z);
     this.cam.updateMatrixWorld();
+    this.viewShift(this.layout === 'orbit' && !this.user.oDist ? this.morph : 0);
     if (this.flyOk()) this.flyBlend(this._dt);
     this.U.uCam.value.copy(this.cam.position);
-    this.U.uFog.value = 1 / (r.dist * 2.6 + 18);
+    this.U.uFog.value = 1 / (r.dist * 2.6 + 18) + this.fogAdd();
     this.sky.position.copy(this.cam.position);
     this.stars.position.copy(this.cam.position);
+  };
+ /* The landscape leaves by fog: everything in it is drawn through fogK, so
+     thickening the fog takes it to the background while the sky, the stars
+     and the Orbital layout, which are not fogged, stay. */
+  P.fogAdd = function () { var k = 1 - this.landI; return k * k * 0.5; };
+  /* Centres the sky's rim in the frame; nothing in the landscape. */
+  P.viewShift = function (k) {
+    var dy = Math.round(-(this._fitY || 0) * (this.H || 300) / 2 * k);
+    if (dy === (this._vsY || 0)) return;
+    this._vsY = dy;
+    if (dy) this.cam.setViewOffset(this.W || 300, this.H || 300, 0, dy, this.W || 300, this.H || 300);
+    else this.cam.clearViewOffset();
   };
   P.settled = function () {
     var r = this.rig, g = this.goal;
     if (!r || !g) return true;
+    if (Math.abs(this.morph - (this.layout === 'orbit' ? 1 : 0)) > 0.002) return false;
     return Math.abs(r.x - g.x) < 0.002 && Math.abs(r.dist - g.dist) < 0.004 && Math.abs(r.elev - g.elev) < 0.0005 && Math.abs(r.yaw - g.yaw) < 0.0005;
   };
 
@@ -975,7 +1433,12 @@
   };
   P.zoom = function (dir) {
     if (this.isFlying()) { if (dir === 0) this.flyRelease(); else this.flyNudge([0, 0, dir < 0 ? 1.2 : -1.2]); this.kick(); return; }
-    if (this.mode !== 'full' || !this.user.dist) return;
+    if (this.mode !== 'full') return;
+    if (this.layout === 'orbit') {
+      this.user.oDist = clamp((this.user.oDist != null ? this.user.oDist : this.fitDisc(this.obElev())) * (dir < 0 ? 0.8 : 1.25), 8, 90);
+      this.lift(0.15); this.kick(); return;
+    }
+    if (!this.user.dist) return;
     this.user.dist = clamp(this.user.dist * (dir < 0 ? 0.8 : 1.25), 7, 90);
     this.lift(0.15);
     this.kick();
@@ -988,7 +1451,7 @@
     t = clamp(t, m.span.from, m.span.to);
     this.probeT = t;
     this.probeHold = performance.now();
-    if (this.mode === 'full') {
+    if (this.mode === 'full' && this.layout !== 'orbit') {
       var px = this.x(t), half = this.user.dist * Math.tan(this.cam.fov * Math.PI / 360) * this.cam.aspect * 0.8;
       if (Math.abs(px - this.user.center) > half) this.user.center = px - Math.sign(px - this.user.center) * half;
     }
@@ -1097,8 +1560,8 @@
   P.pickAt = function (n) {
     if (!this.cam || !this.picks) return null;
     this.ray.setFromCamera(new T.Vector2(n.x, n.y), this.cam);
-    var full = this.mode === 'full';
-    var hits = this.ray.intersectObjects(this.picks.filter(function (p) { return p.parent && (full || p.parent.visible !== false) && p.visible !== false && (!p.parent.parent || p.parent.visible); }), false);
+    var full = this.mode === 'full', orb = this.layout === 'orbit';
+    var hits = this.ray.intersectObjects(this.picks.filter(function (p) { return !!p.userData.orb === orb && p.parent && (full || p.parent.visible !== false) && p.visible !== false && (!p.parent.parent || p.parent.visible); }), false);
     for (var i = 0; i < hits.length; i++) { var pk = hits[i].object.userData.pick; if (pk) return pk; }
     return null;
   };
@@ -1110,13 +1573,14 @@
     var ids = Object.keys(this.pts);
     if (ids.length === 2 && this.mode === 'full') {
       var a = this.pts[ids[0]], b = this.pts[ids[1]];
-      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), dist: this.user.dist };
+      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), dist: this.layout === 'orbit' ? (this.user.oDist != null ? this.user.oDist : this.fitDisc(this.obElev())) : this.user.dist };
       this.down = null;
       return;
     }
     this.keyed = false;
     this.el.slider.style.boxShadow = 'none';
-    this.down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, elev: this.user.elev, center: this.user.center };
+    this.down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, elev: this.user.elev, center: this.user.center,
+      t0: this.probeT == null ? (this.model ? this.model.now : 0) : this.probeT, oElev: this.obElev() };
     this.lift(0.08);
   };
   P.onMove = function (e) {
@@ -1132,6 +1596,7 @@
       if (ids.length === 2) {
         var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
         if (this.isFlying()) { this.flyNudge([0, 0, (d - (this.pinch.ld || this.pinch.d)) / (this.H || 300) * 3.2], 0.9); this.pinch.ld = d; }
+        else if (this.layout === 'orbit') this.user.oDist = clamp(this.pinch.dist * this.pinch.d / Math.max(20, d), 8, 90);
         else this.user.dist = clamp(this.pinch.dist * this.pinch.d / Math.max(20, d), 7, 90);
       }
       this.kick();
@@ -1146,12 +1611,18 @@
         if (dn.axis === 'x') this.el.slider.style.cursor = 'grabbing';
       }
       if (dn.axis === 'look') { this.flyLook(e.clientX - dn.lx, e.clientY - dn.ly); dn.lx = e.clientX; dn.ly = e.clientY; }
-      else if (dn.axis === 'x') {
+      else if (dn.axis === 'x' && this.layout === 'orbit') {
+        /* the sky has no floor to point at: a sideways drag runs time */
+        var mm = this.model, win = this.mode === 'full' ? (mm.span.to - mm.span.from) * 0.5 : (mm.mini.to - mm.mini.from) * 0.8;
+        this.setProbe(dn.t0 + dx / (this.W || 300) * win); this.probeShow = 1; this.showRead(true); this.hideTip();
+        this.lift(0.02);
+      } else if (dn.axis === 'x') {
         var f = this.floorAt(n);
         if (f) { this.setProbe(this.t(f.x)); this.probeShow = 1; this.showRead(true); this.hideTip(); }
         this.lift(0.02);
       } else if (dn.axis === 'y' && this.mode === 'full') {
-        this.user.elev = clamp(dn.elev + dy * 0.004, 0.2, 1.1);
+        if (this.layout === 'orbit') this.user.oElev = clamp(dn.oElev + dy * 0.004, 0.35, 1.45);
+        else this.user.elev = clamp(dn.elev + dy * 0.004, 0.2, 1.1);
       }
     }
     this.kick();
@@ -1175,7 +1646,7 @@
       var it = this.items[pk.id];
       if (it) { this.showCard(pk.kind, it.userData.item); if (pk.kind !== 'year') this.setProbe(clamp(this.probeT || this.model.now, it.userData.item.from, it.userData.item.to)); }
     } else {
-      var f = this.floorAt(n);
+      var f = this.layout === 'orbit' ? null : this.floorAt(n);
       if (f) this.setProbe(this.t(f.x));
       this.hideCard();
     }
@@ -1189,6 +1660,11 @@
     if (this.isFlying()) { e.preventDefault(); this.flyNudge([0, 0, clamp(-e.deltaY * 0.004, -1.5, 1.5)], 0.8); this.lift(0.03); this.kick(); return; }
     if (this.mode !== 'full' || !this.ready) return;
     e.preventDefault();
+    if (this.layout === 'orbit') {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) this.setProbe((this.probeT == null ? this.model.now : this.probeT) + e.deltaX * DAY * 3);
+      else this.user.oDist = clamp((this.user.oDist != null ? this.user.oDist : this.fitDisc(this.obElev())) * Math.exp(e.deltaY * 0.0012), 8, 90);
+      this.lift(0.04); this.kick(); return;
+    }
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       this.user.center += e.deltaX * 0.01 * (this.user.dist / 20);
     } else {
@@ -1291,6 +1767,19 @@
     var m = this.model;
     if (!m || !this.cam) return;
     var rm = this.reduced;
+    /* Between the landscape and the sky: one number, the landscape fogging
+       out over the first half and the sky coming up over the second. */
+    var mGoal = this.layout === 'orbit' && this.orb ? 1 : 0;
+    this.morph = rm ? mGoal : damp(this.morph, mGoal, 1 - Math.exp(-dt * 3.2));
+    if (Math.abs(this.morph - mGoal) < 0.002) this.morph = mGoal;
+    var orbI = clamp((this.morph - 0.35) / 0.65, 0, 1);
+    this.landI = clamp(1 - this.morph * 1.8, 0, 1); this.orbI = orbI * orbI * (3 - 2 * orbI);
+    this.U.uOrb.value = this.orbI;
+    if (this.orb) this.orb.visible = this.orbI > 0.001;
+    if (this.content) this.content.visible = this.landI > 0.001;
+    this.now.visible = this.probe.visible = this.landI > 0.01;
+    var fk = Math.round(this.landI * 1000) + Math.round(this.orbI * 1000) * 1001;
+    if (this._fadeK !== fk) { this._fadeK = fk; this.applyFade(); }
     if (!rm && !still) this.time += dt;
     this.c = Math.max(0, this.c - dt / 8);
     this.cur = damp(this.cur, this.c, rm ? 1 : 1 - Math.exp(-dt * 4));
@@ -1301,7 +1790,7 @@
     if (!rm && !still) this.drift += dt * (0.12 + 0.55 * c);
     this.dustMat.uniforms.uDrift.value = this.drift;
     this.dustMat.uniforms.uAttract.value = this.ptr.on ? 0.3 + 0.7 * c : 0;
-    this.dustMat.uniforms.uAlpha.value = 0.4 + 0.45 * c;
+    this.dustMat.uniforms.uAlpha.value = (0.4 + 0.45 * c) * this.landI;
     this.updateHover();
     var pw = this.ptr.world;
     if (pw) { this.dustMat.uniforms.uPtr.value.copy(pw); this.floorMat.uniforms.uPtr.value.set(pw.x, pw.z); }
@@ -1320,7 +1809,8 @@
     this.probeMat.uniforms.uI.value = this.probeShow * (0.75 + 0.25 * c);
     if (this.probeT != null) { var ppx = this.x(this.probeT); this.probe.position.x = ppx; this.floorMat.uniforms.uProbeX.value = ppx; }
     this.floorMat.uniforms.uProbeOn.value = this.probeShow;
-    if (this.probeLabel) { this.probeLabel.visible = this.probeShow > 0.05; this.probeLabel.material.opacity = this.probeShow; }
+    if (this.probeLabel) { this.probeLabel.visible = this.probeShow > 0.05 && this.landI > 0.01; this.probeLabel.material.opacity = this.probeShow * this.landI; }
+    if (this.obProbe) this.obProbe.material.opacity = 0.55 * this.probeShow * this.orbI;
     this.nowMat.uniforms.uI.value = 0.75 + 0.2 * breath + 0.25 * c;
 
     /* Hover, and the lanes moving between the two views' row layouts. */
@@ -1346,10 +1836,16 @@
       it.userData.tile.material.uniforms.uHover.value = it.userData.hover;
     });
 
+    if (this.orb && this.orbI > 0.001) {
+      this.orbitAt(this.probeT == null ? m.now : this.probeT);
+      var kh = rm ? 1 : 1 - Math.exp(-dt * 10);
+      this.obItems.forEach(function (it) { var hv = hov === it.id || (self.card && self.card.id === it.id) ? 1 : 0; it.h = damp(it.h, hv, kh); it.u.value = it.h; });
+    }
     this.goals();
     this._dt = dt;
     this.placeCamera(rm ? 1 : 1 - Math.exp(-dt * 2.6));
     this.placeOrrery();
+    if (this.orrery) this.orrery.visible = this.mode === 'full' && this.landI > 0.5;
     /* Billboards: the exact date pillars and the two columns of light turn to
        face the camera around their own vertical axis. */
     var cp = this.cam.position, face = function (o) { var w = new T.Vector3(); o.getWorldPosition(w); o.rotation.y = Math.atan2(cp.x - w.x, cp.z - w.z); };
@@ -1369,6 +1865,7 @@
     this.r.setSize(W, H, false);
     this.cam.aspect = W / H;
     this.cam.fov = W / H < 1.2 ? 44 : 34;
+    this._vsY = null; this.cam.clearViewOffset();
     this.cam.updateProjectionMatrix();
     this.U.uPR.value = L;
     var self = this;

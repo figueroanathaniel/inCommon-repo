@@ -4997,8 +4997,9 @@ streams.
 one twelve year axis, now a choice rather than only the fallback. State
 `cyView`, `2d` first; the switch (`cwViews`,
 from `cycleViews()`) sits above the chart in the widget in both shells and at
-the top of the sheet, and is drawn only where 3D can run, so a device without
-WebGL 2 sees the flat chart and no choice, as before. In 2D the sheet has no
+the top of the sheet. It reads 2D, Rings, Orbital, 3D where the scene can run
+and 2D, Rings where it cannot (see "The Cycle Audit is drawn four ways").
+In 2D the sheet has no
 stage: it opens on its plain header, the switch and the flat chart in a card
 above the reading (`cyFlatOn`), reading the same `cw*` values the widget draws,
 so the two cannot disagree. The widget's switch waits for the scene like every
@@ -5012,6 +5013,90 @@ live, the chart 0.2 to 0.6s, the wiring under 0.3s, both shells. The one slower
 reading, about 4s on the Cycle Audit, came when the press landed during another
 stage's first draw in the lot, which is SwiftShader building pipelines and is
 not a cost a real GPU pays.
+
+## The Cycle Audit is drawn four ways: 2D, Rings, Orbital and 3D
+Asked for by the owner on 20 October 2026, after asking whether the audit had a
+middle option like the chart's Orbital and the wiring's Wheel: "Both", meaning
+a Rings view and an Orbital view. The switch reads 2D, Rings, Orbital, 3D, and
+`cycleViewNow()` is the one answer to which is showing: Rings needs nothing but
+SVG, and Orbital and 3D fall back to 2D where the scene cannot run. 2D still
+opens first and nothing is kept.
+
+**Rings is the widget's twelve years wound into a spiral** (`cycleRings()`,
+`cwRing*`), one turn a year from the centre outward, January at the top, the
+months clockwise. A passage that crosses New Year carries on round the next
+turn instead of breaking off, which is the thing the flat chart cannot show.
+It reads the same packed rows (`starRows`, `designRows`) and the same numbers
+the flat chart draws, so the two cannot disagree: the passages ride a turn's
+outer half (`--ac2-hi` hard, `--atmc2` easy), the stays on a gate its inner
+half in `--blue`, dashed where the stay completes a channel, the exact dates
+are dots, now is a lit dot with a line in from the centre, and the centre names
+the month and the Personal Year. The spine at twelve o'clock names every other
+year and every year's Personal Year. It is drawn in the widget and in the
+sheet's card, where 2D's flat chart was (`cwRingsOn`, beside `cwChartOn`).
+
+**The turns alternate two tones and a master year is violet.** The first pass
+tinted each turn by its number, blue at 1 to the warm lobe at 9, and the blend
+went grey in the middle years. A Personal Year is a category, not an amount, so
+nothing grows with it now: alternating tones read as tree rings, and a master
+wears violet as it does on the Numbers page. Orbital's paths use the same rule.
+
+**Two template traps, both hit on the way in.** The runtime lowercases a
+camelCase SVG attribute it does not know, so `strokeWidth`, `strokeOpacity`
+and `textAnchor` were silently dropped and the bands drew as thin full strength
+lines: the stroke properties are in `style`, which it passes through. And a
+`{{ }}` hole is an HTML span, which an SVG `text` cannot render, so every
+dynamic label was invisible: the labels are an HTML layer over the drawing,
+placed in percent of it. **Put dynamic text over an SVG, never inside one.**
+
+**Orbital is the same scene as 3D, laid out as a sky** (`setLayout()` in
+`cycle-scene.js`, called from `cycleSceneSync()` before `attach()`). The
+landscape gives way to a polar chart on the same floor: the natal wheel in the
+middle with a spoke from each point out to the zodiac, one band per slow body
+(Saturn innermost, Pluto outermost), and in each band the body's path with time
+running outward across the band and longitude running round. A retrograde is
+the path doubling back, so a passage that is exact five times is the path
+crossing one bearing five times, each crossing a point. The zodiac and the
+sixty four gates, in `HDWheel`'s order from gate 41, ring the outside; a stay
+on a gate lights the gate and a sector of its body's band across the gate's arc
+for as long as it stays. The path alternates tone by year, the bodies stand
+where they are at the probed instant with a line to each natal point they
+touch, now and the probe are rings across every band, and the Personal Year of
+the instant sits in the middle.
+
+**It computes nothing either.** The paths arrive in the model (`paths`, a
+longitude every three days across the span) read off the cubic nodes the scan
+already walked (`_cyNodes`, kept by `cycleWindows()`), so no library position is
+asked for twice; the gate order is `HDWheel`'s, handed in as `gates`.
+
+**The two layouts are one stage and one morph.** The camera eases between the
+landscape's rig and the sky's; the landscape leaves by fog (`fogAdd()`: every
+landscape material is drawn through `fogK`, and the sky, the stars and the
+Orbital layout are not fogged), its labels and dust fade with it, and the sky's
+materials share one uniform, `uOrb`, that brings them up over the second half.
+The probe, the card, the readout and the keys carry across. Every pick carries
+`userData.orb` and `pickAt()` takes only the layout showing. Under reduced
+motion the morph cuts. The warm up shows both layouts for the compile call,
+because `compile()` walks only what is visible and a hidden layout's programs
+would otherwise be linked on the main thread the first time it is chosen.
+
+**The disc is fitted by projecting its rim** (`fitDisc()`), because at a low
+camera the near side is much the larger and a fit from the radius alone cut it
+off; it fits the rim's height and `viewShift()` takes out how far off centre that
+height sits, with a view offset that goes back to none in the landscape, in
+flight and on a resize. The widget's camera height follows the band's shape, low
+for a wide desktop band and higher for a phone's. A sideways drag runs time,
+since the sky has no floor to point at; in the sheet a vertical drag tilts and
+the wheel and the buttons zoom, as in 3D.
+
+**Measured.** With the harness's own `contrastFails()` and `tapTargets()` over
+the widget and the sheet, in Rings and in Orbital, four identities, hardened
+and not, at 1440 and 375: 64 cases, no pair under 4.5:1 and no control under
+44px, the ring labels counted. Driven in Chromium on SwiftShader, desktop and
+phone: the four views in order, Rings drawn with its bands, passages, dates and
+labels, Orbital live and its pixels read back, a drag running the probe, the
+morph to 3D and back, the sheet in Orbital with a tap on an exact date opening
+that passage's card, and Rings in the sheet.
 
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
