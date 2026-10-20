@@ -210,6 +210,14 @@
     'uniform vec3 uC1; uniform vec3 uC2; uniform float uAlpha; varying float vA; varying float vR;',
     'void main(){ vec2 q = gl_PointCoord - 0.5; float d = length(q) * 2.0; if (d > 1.0) discard;',
     ' gl_FragColor = vec4(mix(uC1, uC2, vR) * exp(-d * d * 5.0) * vA * uAlpha, 1.0); }'].join('\n');
+  var V_MOTE = [
+    'attribute float aEnd; attribute float aR; uniform vec3 uCamP; uniform vec3 uVel; uniform float uBox;',
+    'varying float vA;',
+    'void main(){ vec3 p = mod(position - uCamP + uBox * 0.5, uBox) - uBox * 0.5 + uCamP;',
+    ' float sp = length(uVel); p -= uVel * aEnd * (0.035 + 0.02 * aR);',
+    ' float d = distance(p, uCamP); vA = smoothstep(uBox * 0.5, uBox * 0.15, d) * smoothstep(0.05, 0.4, d) * (0.25 + 0.75 * aR) * (0.35 + min(1.0, sp * 0.25)) * (1.0 - aEnd * 0.85);',
+    ' gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }'].join('\n');
+  var F_MOTE = 'uniform vec3 uC; varying float vA; void main(){ gl_FragColor = vec4(uC * vA, 1.0); }';
   var V_POST = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
   var F_BRIGHT = 'uniform sampler2D tIn; uniform float uThr; varying vec2 vUv; void main(){ vec3 c = texture2D(tIn, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(uThr, uThr + 0.4, l), 1.0); }';
   var F_BLUR = [
@@ -286,6 +294,9 @@
     this.todayOn = false; this.todayK = 0;
     this.rig = null; this.user = { yaw: 0, pitch: null, zoom: 1 };
     this.level = 0; this.frames = []; this.labels = [];
+    /* 'stage' is the card; 'obs' is the Observatory, the full screen view */
+    this.mode = 'stage'; this.fly = null; this.ret = null; this.globes = null; this.globeCount = 0;
+    this.hoverKey = null; this.hud = null; this.booted = false;
     this.reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.dom();
   }
@@ -329,10 +340,14 @@
     var moved = this.host !== host || this.el.root.parentNode !== host;
     if (moved) {
       if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
+      if (this.host && this._onKeyUp) this.host.removeEventListener('keyup', this._onKeyUp);
       host.appendChild(this.el.root);
       var self = this;
       this._onKey = this._onKey || function (e) { self.onKey(e); };
+      this._onKeyUp = this._onKeyUp || function (e) { if (self.fly && self.mode !== 'obs') self.fly.key(e, false); };
       host.addEventListener('keydown', this._onKey);
+      host.addEventListener('keyup', this._onKeyUp);
+      if (!this._onBlur) { this._onBlur = function () { if (self.fly) self.fly.blur(); }; window.addEventListener('blur', this._onBlur); }
     }
     this.host = host;
     if (!this.io && window.IntersectionObserver) {
@@ -348,6 +363,7 @@
     if (moved && this.io) { this.io.disconnect(); this.io.observe(this.el.root); }
     if (!this.ro && window.ResizeObserver) { var m2 = this; this.ro = new ResizeObserver(function () { m2.resize(); }); }
     if (moved && this.ro) { this.ro.disconnect(); this.ro.observe(this.el.root); }
+    if (moved && this.mode === 'obs') this.bindObs();
     if (!this.ready) { this.build(); return; }
     if (!this.tokOk) this.setTheme();
     this.resize();
@@ -357,6 +373,7 @@
   };
   P.detach = function () {
     if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
+    if (this.host && this._onKeyUp) this.host.removeEventListener('keyup', this._onKeyUp);
     this.host = null;
     this.stop();
   };
@@ -540,6 +557,23 @@
     rib.setIndex(idx);
     this.ribGeo = rib;
 
+    /* motes for flight: what tells the eye it is moving in open space */
+    var mn = phone ? 260 : 520, mp = new Float32Array(mn * 6), me = new Float32Array(mn * 2), mr = new Float32Array(mn * 2), BOX = 14;
+    for (var mi = 0; mi < mn; mi++) {
+      var mx = (Math.random() - 0.5) * BOX, my = (Math.random() - 0.5) * BOX, mz = (Math.random() - 0.5) * BOX, rv = Math.random();
+      mp.set([mx, my, mz, mx, my, mz], mi * 6); me[mi * 2] = 0; me[mi * 2 + 1] = 1; mr[mi * 2] = mr[mi * 2 + 1] = rv;
+    }
+    var mg = new T.BufferGeometry();
+    mg.setAttribute('position', new T.BufferAttribute(mp, 3));
+    mg.setAttribute('aEnd', new T.BufferAttribute(me, 1));
+    mg.setAttribute('aR', new T.BufferAttribute(mr, 1));
+    this.spaceDust = new T.LineSegments(mg, new T.ShaderMaterial({ vertexShader: V_MOTE, fragmentShader: F_MOTE, transparent: true, depthWrite: false, blending: T.AdditiveBlending,
+      uniforms: { uCamP: this.U.uCam, uVel: { value: new T.Vector3() }, uBox: { value: BOX }, uC: { value: new T.Vector3(0.75, 0.78, 0.9) } } }));
+    this.spaceDust.frustumCulled = false; this.spaceDust.visible = false;
+    this.scene.add(this.spaceDust);
+    /* the close-up camera sees the worlds, the stars and the sky, nothing else */
+    this.sky.layers.enable(1); this.stars.layers.enable(1);
+
     this.world = new T.Group(); this.scene.add(this.world);
     this.content = null; this.todayG = null;
     this.post = null;
@@ -563,6 +597,7 @@
     this.walls.signIn.material.uniforms.uC.value.set(t.hi[0] * 0.7, t.hi[1] * 0.7, t.hi[2] * 0.7);
     this.walls.inner.material.uniforms.uC.value.set(t.atm2[0] * 0.5, t.atm2[1] * 0.5, t.atm2[2] * 0.5);
     var dm = this.dustMat.uniforms; dm.uC1.value.set(t.tx[0], t.tx[1], t.tx[2]); dm.uC2.value.set(t.atm2[0], t.atm2[1], t.atm2[2]);
+    if (this.spaceDust) this.spaceDust.material.uniforms.uC.value.set(t.tx[0] * 0.8, t.tx[1] * 0.8, t.tx[2] * 0.85);
     var c = this.starCol;
     for (var i = 0; i < c.length / 3; i++) { var k = (i * 0.61803) % 1, a = k < 0.7 ? t.tx : k < 0.88 ? t.atm2 : t.hi; c[i * 3] = a[0] * 0.8; c[i * 3 + 1] = a[1] * 0.8; c[i * 3 + 2] = a[2] * 0.8; }
     this.stars.geometry.attributes.aCol.needsUpdate = true;
@@ -571,7 +606,7 @@
   /* ---- Glyphs and labels, drawn once to a canvas and held at a pixel size --- */
   P.sprite = function (c, px, aspect, o) {
     var tex = new T.CanvasTexture(c); tex.minFilter = T.LinearFilter; tex.generateMipmaps = false;
-    var mat = new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, sizeAttenuation: false, opacity: 1 });
+    var mat = new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: this.mode === 'obs', sizeAttenuation: false, opacity: 1 });
     var s = new T.Sprite(mat);
     s.center.set(0.5, o && o.anchorY != null ? o.anchorY : 0.5);
     s.userData.lab = { px: px, aspect: aspect };
@@ -678,6 +713,7 @@
   P.buildContent = function () {
     if (!this.model || !this.r) return;
     if (this.content) { this.world.remove(this.content); this.dispose(this.content); }
+    if (this.globes) this.clearGlobes();
     var m = this.model, tk = this.tok, g = new T.Group(), self = this, ui = this.ui || 1;
     this.builtUi = ui;
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
@@ -846,7 +882,7 @@
     var gR = mix(sc(294), O_GLYPH, e);
     this.signs.forEach(function (s) { s.position.copy(self.at(s.userData.lon, gR, 0.3 * w1 + 0.12)); });
     this.houseLabels.forEach(function (l) { l.material.opacity = w1; l.visible = w1 > 0.02; });
-    var focusKey = this.focusKey, hov = this.hover, hovBody = hov && hov.kind === 'body' ? hov.key : null;
+    var focusKey = this.focusKey, hov = this.hover, hovBody = (hov && hov.kind === 'body' ? hov.key : null) || this.hoverKey;
     var lit = hovBody || focusKey;
     this.bodies.forEach(function (o) {
       var p = o.pos.copy(o.p3).lerp(o.pO, e);
@@ -909,8 +945,10 @@
   P.defaultPitch = function () { return this.kGoal > 0.5 ? 0.82 : 0.98; };
   P.fit = function () {
     var e = ease(clamp(this.k, 0, 1)), Rc = mix(R_OUT + 0.8, O_SIGN_OUT + 0.7, e), pitch = this.rig ? this.rig.pitch : this.defaultPitch();
-    var tv = Math.tan(this.cam.fov * Math.PI / 360);
-    var dw = Rc / (tv * this.cam.aspect), dh = (Rc * Math.sin(pitch) + 2.6 * Math.cos(pitch)) / tv;
+    var tv = Math.tan((this.baseFov || this.cam.fov) * Math.PI / 360);
+    var ins = this.mode === 'obs' && this.inset ? this.inset : null;
+    var asp = ins && this.H ? Math.max(0.45, (this.W - ins.l - ins.r) / this.H) : this.cam.aspect;
+    var dw = Rc / (tv * asp), dh = (Rc * Math.sin(pitch) + 2.6 * Math.cos(pitch)) / tv;
     return Math.max(dw, dh) * 1.04;
   };
   P.turnTo = function (key) {
@@ -931,6 +969,13 @@
     };
   };
   P.placeCamera = function (k) {
+    var f = this.fly;
+    if (f && f.active) {
+      f.apply(this.cam);
+      this.camTail(Math.hypot(this.cam.position.x, this.cam.position.y, this.cam.position.z), f.kick);
+      this._settled = true;
+      return;
+    }
     var g = this.goals();
     /* The scene opens where it rests: no fly-in, so nothing moves on arrival but
        the fade (owner, 19 October 2026). */
@@ -939,17 +984,477 @@
     r.yaw = damp(r.yaw, g.yaw, k); r.pitch = damp(r.pitch, g.pitch, k); r.dist = damp(r.dist, g.dist, k);
     var cp = Math.cos(r.pitch), ty = 0.35;
     this.cam.position.set(Math.sin(r.yaw) * cp * r.dist, ty + Math.sin(r.pitch) * r.dist, Math.cos(r.yaw) * cp * r.dist);
+    this.cam.rotation.order = 'XYZ';
     this.cam.lookAt(0, ty, 0);
     this.cam.updateMatrixWorld();
+    this._settled = Math.abs(r.yaw - g.yaw) < 0.0005 && Math.abs(r.pitch - g.pitch) < 0.0005 && Math.abs(r.dist - g.dist) < 0.005;
+    /* Coming home from flight: the camera eases from where the reader left it
+       back onto the resting rig, rather than jumping there. */
+    if (this.ret) {
+      var rt = this.ret;
+      rt.t = Math.min(1, rt.t + (this._dt || 0.016) / (this.reduced ? 0.01 : 0.9));
+      var e = ease(rt.t), toP = this.cam.position.clone(), toQ = this.cam.quaternion.clone();
+      this.cam.position.lerpVectors(rt.pos, toP, e);
+      this.cam.quaternion.slerpQuaternions(rt.q, toQ, e);
+      this.cam.updateMatrixWorld();
+      if (rt.t >= 1) this.ret = null; else this._settled = false;
+    }
+    this.camTail(r.dist, 0);
+  };
+  /* What every camera pose needs after it is set: the shaders told where it
+     is, the sky and the stars kept round it, and the lens. */
+  P.camTail = function (dist, kick) {
     this.U.uCam.value.copy(this.cam.position);
-    this.U.uFog.value = 1 / (r.dist * 3.2 + 30);
+    this.U.uFog.value = 1 / (dist * 3.2 + 30);
     this.sky.position.copy(this.cam.position);
     this.stars.position.copy(this.cam.position);
-    this._settled = Math.abs(r.yaw - g.yaw) < 0.0005 && Math.abs(r.pitch - g.pitch) < 0.0005 && Math.abs(r.dist - g.dist) < 0.005;
+    /* In the Observatory the lens is centred on the open sky between the
+       panels, not on the whole screen, so the reticle and the station frame
+       the chart where the reader can see it. */
+    var ins = this.mode === 'obs' && this.inset ? this.inset : null, sh = ins ? (ins.r - ins.l) / 2 : 0;
+    if (sh !== (this._sh || 0)) {
+      this._sh = sh;
+      if (sh) this.cam.setViewOffset(this.W || 1, this.H || 1, sh, 0, this.W || 1, this.H || 1); else this.cam.clearViewOffset();
+      if (this.hud) this.hud.ret.style.left = 'calc(50% + ' + (-sh) + 'px)';
+    }
+    var flying = !!(this.fly && this.fly.active), near = flying ? 0.008 : 0.1, fov = (this.baseFov || 36) + (this.reduced ? 0 : 15 * (kick || 0));
+    if (Math.abs(this.cam.fov - fov) > 0.01 || this.cam.near !== near) { this.cam.fov = fov; this.cam.near = near; this.cam.updateProjectionMatrix(); }
+    if (this.mComp) this.mComp.uniforms.uVig.value = 0.4 + 0.35 * (kick || 0);
+    if (this.spaceDust) this.spaceDust.visible = flying;
+  };
+
+  /* ---- Flight (flight.js), on the card and in the Observatory -------------- */
+  P.flyer = function () {
+    if (this.fly) return this.fly;
+    var F = root.Flight;
+    if (!F) return null;
+    var self = this;
+    this.fly = F.create({ reduced: this.reduced,
+      onWake: function () { self.updateRun(); self.kick(); },
+      onDash: function () { self.lift(0.25); },
+      onPad: function (what) {
+        if (what === 'engage') { if (self.focusKey) self.flyTo(self.focusKey); return; }
+        var nk = self.step(what === 'next' ? 1 : -1);
+        if (nk) { self.setFocus(nk, false); if (self.o.onFocus) self.o.onFocus(nk, 'key'); }
+      } });
+    return this.fly;
+  };
+  /* Take the controls from wherever the camera is now. */
+  P.flyEngage = function () {
+    var f = this.flyer();
+    if (!f || !this.cam) return null;
+    if (!f.active) {
+      var d = new T.Vector3();
+      this.cam.getWorldDirection(d);
+      f.engage([this.cam.position.x, this.cam.position.y, this.cam.position.z], [d.x, d.y, d.z]);
+      this.ret = null;
+      if (this.o.onFly) this.o.onFly(true);
+    }
+    this.updateRun();
+    return f;
+  };
+  /* Back to the resting view, eased. */
+  P.flyRelease = function () {
+    var f = this.fly;
+    if (!f || !f.active || !this.cam) return;
+    this.ret = { t: 0, pos: this.cam.position.clone(), q: this.cam.quaternion.clone() };
+    f.release();
+    this.lift(0.2);
+    if (this.o.onFly) this.o.onFly(false);
+    this.updateRun();
+    this.kick();
+  };
+  P.flying = function () { return !!(this.fly && this.fly.active); };
+  P.flyEnv = function () {
+    var self = this;
+    return this._env || (this._env = { bound: 70, minV: 0.2, maxV: 9, near: function (p) { return self.nearest(p); } });
+  };
+  /* The closest surface: a body, or the face of the disc while over it. */
+  P.nearest = function (p) {
+    var best = null, bd = 1e9;
+    (this.bodies || []).forEach(function (o) {
+      var c = o.orb.position, r = o.size;
+      var d = Math.sqrt((p[0] - c.x) * (p[0] - c.x) + (p[1] - c.y) * (p[1] - c.y) + (p[2] - c.z) * (p[2] - c.z)) - r;
+      if (d < bd) { bd = d; best = { d: d, c: [c.x, c.y, c.z], r: r, o: o }; }
+    });
+    var rr = Math.sqrt(p[0] * p[0] + p[2] * p[2]), dd = Math.abs(p[1]) + 0.35;
+    if (rr < R_OUT + 1 && (!best || dd < best.d)) best = { d: dd, c: null, r: 0 };
+    return best;
+  };
+  P.bodyObj = function (key) { return (this.bodies || []).filter(function (o) { return o.b.key === key; })[0] || null; };
+  P.sunPos = function () {
+    var s = (this.bodies || []).filter(function (o) { return o.b.name === 'Sun'; })[0];
+    return s ? s.orb.position : (this._origin || (this._origin = new T.Vector3(0, 0.35, 0)));
+  };
+  var RINGED = { Saturn: 7.2, Uranus: 6, chiron: 5, chariklo: 5, haumea: 6.5 };
+  /* Autopilot to a body: arrive on its lit side, a little above, close
+     enough that it fills the view and far enough that its rings fit. */
+  P.flyTo = function (key) {
+    var o = this.bodyObj(key);
+    if (!o || !this.cam) return;
+    var f = this.flyEngage();
+    if (!f) return;
+    if (this.focusKey !== key) { this.setFocus(key, false); if (this.o.onFocus) this.o.onFocus(key, 'fly'); }
+    var c = o.orb.position.clone(), sun = this.sunPos();
+    var dir = new T.Vector3().subVectors(this.cam.position, c);
+    if (dir.lengthSq() < 1e-6) dir.set(0, 0.3, 1);
+    dir.normalize();
+    var toSun = new T.Vector3().subVectors(sun, c);
+    if (toSun.lengthSq() > 1e-4) { toSun.normalize(); dir.lerp(toSun, 0.5).normalize(); }
+    dir.y = Math.max(dir.y, 0.2); dir.normalize();
+    var R = o.size * (RINGED[o.b.name] || RINGED[o.b.key] || 4.2);
+    var to = c.clone().add(dir.multiplyScalar(R)), self = this;
+    f.travel([to.x, to.y, to.z], [c.x, c.y, c.z], { done: function () { if (self.o.onArrive) self.o.onArrive(key); self.kick(); } });
+    this.lift(0.3); this.updateRun(); this.kick();
+  };
+  /* A contact: frame both ends from above the line between them. */
+  P.flyToPair = function (aKey, bKey) {
+    var A = this.bodyObj(aKey), B = this.bodyObj(bKey);
+    if (!A || !B) return;
+    var f = this.flyEngage();
+    if (!f) return;
+    var a = A.orb.position, b = B.orb.position, m = a.clone().add(b).multiplyScalar(0.5), span = Math.max(0.8, a.distanceTo(b));
+    var side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x);
+    if (side.lengthSq() < 1e-6) side.set(1, 0, 0);
+    side.normalize();
+    if (side.dot(new T.Vector3().subVectors(this.cam.position, m)) < 0) side.negate();
+    var to = m.clone().add(side.multiplyScalar(span * 0.75)); to.y += span * 0.55 + 0.4;
+    f.travel([to.x, to.y, to.z], [m.x, m.y, m.z]);
+    this.lift(0.3); this.updateRun(); this.kick();
+  };
+  /* A house: look down onto its sector of the band. */
+  P.flyToHouse = function (n) {
+    if (!this.model) return;
+    var f = this.flyEngage();
+    if (!f) return;
+    var lon = this.model.zero + (n - 1) * 30 + 15, rMid = (R_HOUSE + R_OUT) / 2;
+    var at = this.at(lon, rMid, 0), from = this.at(lon, rMid * 0.45, 3.6);
+    this.sel = { aspect: this.sel.aspect, house: n, body: this.sel.body };
+    f.travel([from.x, from.y, from.z], [at.x, at.y, at.z]);
+    this.lift(0.3); this.updateRun(); this.kick();
+  };
+  /* The station: the resting view of the whole chart. */
+  P.station = function () {
+    var g = this.goals(), cp = Math.cos(g.pitch), d = this.fit();
+    return { pos: [Math.sin(g.yaw) * cp * d, 0.35 + Math.sin(g.pitch) * d, Math.cos(g.yaw) * cp * d], at: [0, 0.35, 0] };
+  };
+  P.home = function () {
+    var f = this.flyEngage();
+    if (!f) return;
+    var st = this.station();
+    f.travel(st.pos, st.at);
+    this.lift(0.3); this.updateRun(); this.kick();
+  };
+  P.setHoverKey = function (key) { if (this.hoverKey === (key || null)) return; this.hoverKey = key || null; this.lift(0.05); this.kick(); };
+
+  /* ---- Bodies seen up close (body-globes.js) -------------------------------- */
+  P.updateGlobes = function (dt) {
+    var BG = root.BodyGlobes;
+    if (!BG || !this.bodies || !this.cam) return;
+    if (!this.globes) {
+      this.globes = BG.create(T);
+      this.globeG = new T.Group();
+      this.world.add(this.globeG);
+      this.GU = { uTime: this.U.uTime, uSun: { value: new T.Vector3() }, uCamW: { value: new T.Vector3() } };
+    }
+    var cp = this.cam.position, sun = this.sunPos(), self = this, step = this.reduced ? 0 : dt;
+    var tgt = this.mode === 'obs' && this.pipOn ? this.focusKey : null;
+    this.GU.uSun.value.copy(sun); this.GU.uCamW.value.copy(cp);
+    this.bodies.forEach(function (o) {
+      var ratio = cp.distanceTo(o.orb.position) / o.size;
+      var k = clamp((30 - ratio) / 16, 0, 1); k = k * k * (3 - 2 * k);
+      var want = k > 0.001 || o.b.key === tgt;
+      if (want && !o.globe && self.globeCount < 16) {
+        o.globe = self.globes.make(o.b, self.GU, o.col.v);
+        o.globe.traverse(function (x) { x.layers.enable(1); });
+        self.globeG.add(o.globe);
+        self.globeCount++;
+      } else if (!want && o.globe && ratio > 46) {
+        self.globeG.remove(o.globe); self.globes.dispose(o.globe); o.globe = null; self.globeCount--;
+      }
+      o.gk = k;
+      if (o.globe) {
+        o.globe.position.copy(o.orb.position);
+        o.globe.scale.setScalar(o.size);
+        o.globe.visible = k > 0.001;
+        if (o.globe.visible) self.globes.update(o.globe, step, k, sun, cp, o.size);
+      }
+      /* the orb steps inside the globe and goes out under it */
+      o.orb.material.uniforms.uOp.value *= 1 - k;
+      if (k > 0) o.orb.scale.multiplyScalar(1 - 0.25 * k);
+      o.orb.visible = k < 0.995;
+      /* the glyph gives way to the world it names */
+      var mk = clamp((ratio - 7) / 8, 0, 1);
+      o.med.material.opacity *= mk;
+      if (o.medF) o.medF.material.opacity = mk;
+      if (mk < 0.02) { o.med.visible = false; if (o.medF) o.medF.visible = false; }
+    });
+  };
+  P.clearGlobes = function () {
+    var self = this;
+    (this.bodies || []).forEach(function (o) { if (o.globe) { self.globeG.remove(o.globe); self.globes.dispose(o.globe); o.globe = null; } });
+    this.globeCount = 0;
+  };
+
+  /* ---- The Observatory ------------------------------------------------------
+     The same scene, full screen, flying from the first frame. The screen
+     around it is the app's; what moves every frame (the reticle, the target's
+     bracket, the telemetry, the close-up) is drawn here, never through state. */
+  P.setMode = function (m) {
+    m = m === 'obs' ? 'obs' : 'stage';
+    if (this.mode === m) { if (m === 'obs') this.bindObs(); return; }
+    this.mode = m;
+    var self = this;
+    this.labels.forEach(function (sp) { sp.material.depthTest = m === 'obs'; });
+    if (m === 'obs') {
+      this.buildHud();
+      this.hud.root.style.display = '';
+      this.bindObs();
+      this.launchPending = true;
+    } else {
+      this.unbindObs();
+      if (this.hud) { this.hud.root.style.display = 'none'; this.hud.root.style.opacity = '0'; }
+      if (this.fly) { this.fly.release(); this.fly.unmountPad(); }
+      this.ret = null; this.rig = null; this.pipEl = null; this.pipOn = false; this.hoverKey = null; this.inset = null;
+      this.sel = { aspect: this.sel.aspect, house: null, body: this.sel.body };
+      if (this.o.onFly) this.o.onFly(false);
+    }
+    this.updateRun();
+    this.kick();
+  };
+  P.bindObs = function () {
+    var r = this.host && this.host.closest ? (this.host.closest('[data-obs]') || this.host) : null;
+    if (r === this.obsRoot && this._obsDown) return;
+    this.unbindObs();
+    this.obsRoot = r;
+    if (!r) return;
+    var self = this;
+    this._obsDown = function (e) { self.onObsKey(e, true); };
+    this._obsUp = function (e) { self.onObsKey(e, false); };
+    r.addEventListener('keydown', this._obsDown);
+    r.addEventListener('keyup', this._obsUp);
+  };
+  P.unbindObs = function () {
+    if (this.obsRoot && this._obsDown) { this.obsRoot.removeEventListener('keydown', this._obsDown); this.obsRoot.removeEventListener('keyup', this._obsUp); }
+    this._obsDown = this._obsUp = null;
+    this.obsRoot = null;
+  };
+  P.onObsKey = function (e, down) {
+    var F = root.Flight;
+    if (!this.ready || this.mode !== 'obs' || !F || e.defaultPrevented) return;
+    if (F.claimedElsewhere(e)) return;
+    var f = this.flyEngage();
+    if (!f) return;
+    if (!down) { f.key(e, false); return; }
+    if (f.key(e, true)) { e.preventDefault(); this.lift(0.03); this.updateRun(); this.kick(); return; }
+    var c = e.code, done = true;
+    if (c === 'BracketRight' || c === 'BracketLeft') {
+      var nk = this.step(c === 'BracketRight' ? 1 : -1);
+      if (nk) { this.setFocus(nk, false); if (this.o.onFocus) this.o.onFocus(nk, 'key'); }
+    } else if (c === 'Enter' || c === 'NumpadEnter' || c === 'KeyT') { if (this.focusKey) this.flyTo(this.focusKey); }
+    else if (c === 'KeyO') { if (this.focusKey && this.o.onOpen) this.o.onOpen(this.focusKey); }
+    else if (c === 'KeyH' || c === 'Home' || c === 'Digit0' || c === 'Numpad0') this.home();
+    else if (c === 'KeyV') { if (this.o.onToggleView) this.o.onToggleView(); }
+    else if (c === 'KeyP') { if (this.o.onPanels) this.o.onPanels(); }
+    else if (e.key === '?') { if (this.o.onHelp) this.o.onHelp(); }
+    else done = false;
+    if (done) { e.preventDefault(); this.lift(0.08); this.kick(); }
+  };
+  /* Arriving: from further out, down onto the station, once the canvas is up.
+     The card opens where it rests; the Observatory is a place the reader
+     travels into, so it is the one view that arrives. */
+  P.launch = function () {
+    this.launchPending = false;
+    this.readInset();
+    var f = this.flyer();
+    if (!f) return;
+    var st = this.station(), p = st.pos, k = this.reduced ? 1 : 1.75;
+    var from = [p[0] * k, p[1] * k + (this.reduced ? 0 : 2.5), p[2] * k], d = [st.at[0] - from[0], st.at[1] - from[1], st.at[2] - from[2]];
+    f.release();
+    f.engage(from, d);
+    if (this.o.onFly) this.o.onFly(true);
+    if (!this.reduced) f.travel(p, st.at, { dur: 2.6 });
+    if (!this.booted) { this.booted = true; this.boot(); }
+  };
+
+  /* ---- The HUD: drawn over the canvas, aria-hidden, written per frame ------ */
+  var MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+  var SIGNS3 = ['ARI', 'TAU', 'GEM', 'CAN', 'LEO', 'VIR', 'LIB', 'SCO', 'SAG', 'CAP', 'AQU', 'PIS'];
+  P.buildHud = function () {
+    if (this.hud) return;
+    var d = document, h = d.createElement('div');
+    h.setAttribute('aria-hidden', 'true');
+    h.setAttribute('data-obs-hud', '1');
+    h.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:hidden;clip-path:inset(0 var(--obs-r,0px) 0 var(--obs-l,0px));opacity:0;transition:opacity .9s ease .4s;font:600 10.5px/1.2 ' + MONO + ';color:var(--tx);letter-spacing:.06em';
+    var el = function (css, parent, txt) { var e = d.createElement('div'); e.style.cssText = css; if (txt) e.textContent = txt; (parent || h).appendChild(e); return e; };
+    /* the reticle */
+    var ret = el('position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:1px solid rgba(var(--atmc2),.42);box-shadow:0 0 14px rgba(var(--atmc),.35)');
+    [[16, -6, 1, 8], [16, 32, 1, 8], [-6, 16, 8, 1], [32, 16, 8, 1]].forEach(function (t) { el('position:absolute;left:' + t[0] + 'px;top:' + t[1] + 'px;width:' + t[2] + 'px;height:' + t[3] + 'px;background:rgba(var(--atmc2),.6)', ret); });
+    el('position:absolute;left:15px;top:15px;width:2px;height:2px;border-radius:50%;background:var(--tx)', ret);
+    /* the target's bracket, its label, and the arrow when it is off screen */
+    var br = el('position:absolute;left:0;top:0;width:10px;height:10px;transition:opacity .2s ease;opacity:0');
+    var corners = [];
+    for (var i = 0; i < 4; i++) corners.push(el('position:absolute;width:12px;height:12px;border-color:var(--ac2-hi);border-style:solid;border-width:0', br));
+    corners[0].style.cssText += ';left:0;top:0;border-left-width:2px;border-top-width:2px';
+    corners[1].style.cssText += ';right:0;top:0;border-right-width:2px;border-top-width:2px';
+    corners[2].style.cssText += ';left:0;bottom:0;border-left-width:2px;border-bottom-width:2px';
+    corners[3].style.cssText += ';right:0;bottom:0;border-right-width:2px;border-bottom-width:2px';
+    var lab = el('position:absolute;left:50%;top:100%;transform:translate(-50%,8px);white-space:nowrap;padding:4px 8px;border-radius:7px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);font:600 10.5px ' + MONO, br);
+    var arrow = el('position:absolute;left:0;top:0;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid var(--ac2-hi);opacity:0;filter:drop-shadow(0 0 6px rgba(var(--atmc),.8))');
+    /* telemetry */
+    var strip = el('position:absolute;left:calc(var(--obs-l,0px) + (100% - var(--obs-l,0px) - var(--obs-r,0px)) / 2);top:var(--obs-top,72px);transform:translateX(-50%);display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--bg);border:1px solid var(--bd);box-shadow:0 8px 30px rgba(0,0,0,.35)');
+    var cell = function (k) {
+      var c = el('display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:5px 8px;border-radius:9px', strip);
+      el('font:700 8.5px ' + MONO + ';letter-spacing:.16em;color:var(--mut)', c, k);
+      return el('font:600 12px ' + MONO + ';color:var(--tx);white-space:nowrap', c, '...');
+    };
+    var tel = { hdg: cell('HDG'), alt: cell('ALT'), vel: cell('VEL'), rng: cell('RNG'), utc: cell('UTC') };
+    var spd = el('position:absolute;left:0;bottom:0;height:2px;width:0;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi));transition:width .1s linear', strip);
+    /* an approach, named as it begins */
+    var ban = el('position:absolute;left:calc(var(--obs-l,0px) + (100% - var(--obs-l,0px) - var(--obs-r,0px)) / 2);top:58%;transform:translate(-50%,0);padding:7px 14px;border-radius:999px;background:var(--bg);border:1px solid var(--ac2);color:var(--tx);font:700 11px ' + MONO + ';letter-spacing:.2em;opacity:0;transition:opacity .5s ease');
+    /* the boot lines, once */
+    var boot = el('position:absolute;left:calc(var(--obs-l,0px) + (100% - var(--obs-l,0px) - var(--obs-r,0px)) / 2);top:40%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:7px;padding:14px 18px;border-radius:14px;background:var(--bg);border:1px solid var(--bd);opacity:0;transition:opacity .6s ease');
+    this.el.root.appendChild(h);
+    this.hud = { root: h, ret: ret, br: br, lab: lab, arrow: arrow, strip: strip, tel: tel, spd: spd, ban: ban, boot: boot, t: 0, banT: 0, near: null };
+  };
+  P.boot = function () {
+    var H = this.hud;
+    if (!H) return;
+    var lines = ['HULL SEALED', 'GUIDANCE ONLINE', 'FLIGHT ARMED'], d = document;
+    H.boot.textContent = '';
+    var rows = lines.map(function (t) {
+      var r = d.createElement('div');
+      r.style.cssText = 'display:flex;align-items:center;gap:10px;opacity:.35;font:700 10.5px ' + MONO + ';letter-spacing:.2em;color:var(--tx)';
+      var dot = d.createElement('span'); dot.style.cssText = 'width:7px;height:7px;border-radius:50%;border:1px solid var(--ac2-hi)';
+      var tx = d.createElement('span'); tx.textContent = t;
+      r.appendChild(dot); r.appendChild(tx); H.boot.appendChild(r);
+      return { r: r, dot: dot };
+    });
+    if (this.reduced) return;
+    H.boot.style.opacity = '1';
+    rows.forEach(function (x, i) { setTimeout(function () { x.r.style.opacity = '1'; x.dot.style.background = 'var(--ac2-hi)'; }, 500 + i * 420); });
+    setTimeout(function () { H.boot.style.opacity = '0'; }, 2700);
+  };
+  P.fmt = function (v) { return (v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : Math.round(v) + ''); };
+  P.readInset = function () {
+    if (!this.obsRoot) return;
+    var cs = getComputedStyle(this.obsRoot), l = parseFloat(cs.getPropertyValue('--obs-l')) || 0, r = parseFloat(cs.getPropertyValue('--obs-r')) || 0;
+    if (!this.inset || this.inset.l !== l || this.inset.r !== r) { this.inset = { l: l, r: r }; this.kick(); }
+  };
+  P.updateHud = function (dt) {
+    var H = this.hud;
+    if (!H || this.mode !== 'obs' || !this.cam) return;
+    if (this.shown && H.root.style.opacity !== '1') H.root.style.opacity = '1';
+    var cam = this.cam, W = this.W || 300, Hh = this.H || 300, o = this.focusKey ? this.bodyObj(this.focusKey) : null, f = this.fly;
+    var rng = null;
+    if (o) {
+      var p = o.orb.position, dist = cam.position.distanceTo(p);
+      rng = Math.max(0, dist - o.size);
+      var v = p.clone().project(cam), behind = v.z > 1;
+      var sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * Hh;
+      var on = !behind && sx > 0 && sx < W && sy > 0 && sy < Hh;
+      if (on) {
+        var pr = o.size / (dist * Math.tan(cam.fov * Math.PI / 360)) * Hh / 2, half = Math.max(16, Math.min(W, Hh) * 0.45 > pr * 1.25 ? pr * 1.25 : Math.min(W, Hh) * 0.45);
+        H.br.style.opacity = '1';
+        H.br.style.width = H.br.style.height = (half * 2).toFixed(0) + 'px';
+        H.br.style.transform = 'translate(' + (sx - half).toFixed(1) + 'px,' + (sy - half).toFixed(1) + 'px)';
+        H.arrow.style.opacity = '0';
+      } else {
+        H.br.style.opacity = '0';
+        /* the arrow rides the edge of the open sky, never under a panel */
+        var ins = this.inset || { l: 0, r: 0 }, cx = ins.l + (W - ins.l - ins.r) / 2, hw = (W - ins.l - ins.r) / 2;
+        var dx = sx - cx, dy = sy - Hh / 2;
+        if (behind) { dx = -dx; dy = -dy; }
+        var a = Math.atan2(dy, dx), m = Math.min((hw - 34) / Math.max(1e-3, Math.abs(Math.cos(a))), (Hh / 2 - 90) / Math.max(1e-3, Math.abs(Math.sin(a))));
+        H.arrow.style.opacity = '1';
+        H.arrow.style.transform = 'translate(' + (cx + Math.cos(a) * m - 9).toFixed(1) + 'px,' + (Hh / 2 + Math.sin(a) * m - 8).toFixed(1) + 'px) rotate(' + (a * 180 / Math.PI + 90).toFixed(1) + 'deg)';
+      }
+    } else { H.br.style.opacity = '0'; H.arrow.style.opacity = '0'; }
+    /* text ten times a second is plenty, and is what keeps this cheap */
+    H.t += dt;
+    if (H.t < 0.1 && !this.reduced) return;
+    H.t = 0;
+    this.readInset();
+    var fw = new T.Vector3(); cam.getWorldDirection(fw);
+    var th = Math.atan2(-fw.z, fw.x), lon = ((th / RAD - 180 + (this.model ? this.model.zero : 0)) % 360 + 720) % 360;
+    H.tel.hdg.textContent = SIGNS3[Math.floor(lon / 30) % 12] + ' ' + Math.floor(lon % 30) + '°';
+    H.tel.alt.textContent = this.fmt(Math.abs(cam.position.y)) + (cam.position.y < 0 ? ' S' : '');
+    var sp = f && f.active ? f.speedNow : 0;
+    H.tel.vel.textContent = this.fmt(sp);
+    H.tel.rng.textContent = rng == null ? '--' : this.fmt(rng);
+    var nd = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    H.tel.utc.textContent = pad(nd.getUTCHours()) + ':' + pad(nd.getUTCMinutes()) + ':' + pad(nd.getUTCSeconds());
+    H.spd.style.width = (Math.min(1, sp / 9) * 100).toFixed(1) + '%';
+    if (o) H.lab.textContent = o.b.label + '  ·  ' + (rng == null ? '' : this.fmt(rng));
+    /* the panel's own range line, if the screen draws one */
+    if (this.obsRoot) { var rt = rng == null ? '' : this.fmt(rng); [].forEach.call(this.obsRoot.querySelectorAll('[data-obs-range]'), function (x) { if (x.textContent !== rt) x.textContent = rt; }); }
+    /* an approach: the nearest body inside twelve of its radii, named once */
+    var nb = this.nearest([cam.position.x, cam.position.y, cam.position.z]);
+    var close = nb && nb.o && nb.d < nb.r * 11 ? nb.o : null;
+    if (close && close !== H.near) {
+      H.near = close;
+      H.ban.textContent = 'APPROACH  ·  ' + close.b.label.toUpperCase();
+      H.ban.style.opacity = '1';
+      H.banT = 2.4;
+      if (this.o.onApproach) this.o.onApproach(close.b.key);
+    } else if (!close) H.near = null;
+    if (H.banT > 0) { H.banT -= 0.1; if (H.banT <= 0) H.ban.style.opacity = '0'; }
+    /* the touch pad, where the screen offers one */
+    if (f && this.obsRoot) {
+      var padBox = this.obsRoot.querySelector('[data-obs-pad]');
+      if (padBox) f.mountPad(padBox); else if (f.pad) f.unmountPad();
+    }
+  };
+  /* The close-up: the target's world, turning slowly in the panel's window,
+     drawn into the same canvas under the panel rather than a second one. */
+  P.renderPip = function () {
+    var el = this.pipEl;
+    if (!el || !el.isConnected) el = this.pipEl = this.obsRoot ? this.obsRoot.querySelector('[data-obs-pip]') : null;
+    var o = this.focusKey ? this.bodyObj(this.focusKey) : null;
+    this.pipOn = !!(el && o && el.offsetWidth > 8);
+    if (!this.pipOn || !o.globe || !this.globes) return;
+    var cb = this.el.canvas.getBoundingClientRect(), eb = el.getBoundingClientRect();
+    var x = eb.left - cb.left, y = cb.bottom - eb.bottom, w = eb.width, h = eb.height;
+    if (w < 8 || h < 8 || x + w < 0 || y + h < 0 || x > cb.width || y > cb.height) return;
+    var pc = this.pipCam || (this.pipCam = new T.PerspectiveCamera(28, 1, 0.002, 400));
+    pc.layers.set(1);
+    pc.aspect = w / h;
+    var g = o.globe, spec = g.userData.spec || {}, c = o.orb.position, sun = this.sunPos();
+    var R = o.size * (spec.rings ? 7.6 : spec.corona ? 6.5 : spec.kind === 7 ? 9 : 4.1);
+    var to = new T.Vector3().subVectors(sun, c);
+    if (to.lengthSq() < 1e-6) to.set(1, 0, 0.4);
+    var base = Math.atan2(to.z, to.x) + 0.75 + Math.sin(this.time * 0.18) * 0.45;
+    pc.position.set(c.x + Math.cos(base) * R, c.y + R * 0.3, c.z + Math.sin(base) * R);
+    pc.lookAt(c);
+    pc.updateProjectionMatrix(); pc.updateMatrixWorld();
+    var vis = g.visible;
+    g.visible = true;
+    this.GU.uCamW.value.copy(pc.position);
+    this.globes.update(g, 0, 1, sun, pc.position, o.size);
+    var r = this.r;
+    r.setRenderTarget(null);
+    r.autoClear = false;
+    r.setScissorTest(true);
+    r.setScissor(x, y, w, h); r.setViewport(x, y, w, h);
+    r.clear(true, true, false);
+    r.render(this.scene, pc);
+    r.setScissorTest(false);
+    r.setViewport(0, 0, this.W, this.H);
+    r.autoClear = true;
+    this.GU.uCamW.value.copy(this.cam.position);
+    g.visible = vis;
+    this.globes.update(g, 0, o.gk || 0, sun, this.cam.position, o.size);
   };
 
   /* ---- Public moves --------------------------------------------------------- */
   P.zoom = function (dir) {
+    if (this.mode === 'obs') {
+      if (dir === 0) this.home();
+      else { var f = this.flyEngage(); if (f) f.nudge([0, 0, dir < 0 ? 1.2 : -1.2]); }
+      this.kick();
+      return;
+    }
+    if (dir === 0 && this.flying()) this.flyRelease();
     if (dir === 0) { this.user.zoom = 1; this.user.yaw = 0; this.user.pitch = null; }
     else this.user.zoom = clamp(this.user.zoom * (dir < 0 ? 1.25 : 0.8), 0.6, 3.2);
     this.lift(0.15);
@@ -1025,11 +1530,11 @@
     var ids = Object.keys(this.pts);
     if (ids.length === 2) {
       var a = this.pts[ids[0]], b = this.pts[ids[1]];
-      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), zoom: this.user.zoom };
+      this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), zoom: this.user.zoom, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
       this.down = null;
       return;
     }
-    this.down = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, yaw: this.user.yaw, pitch: this.user.pitch != null ? this.user.pitch : this.defaultPitch() };
+    this.down = { x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, id: e.pointerId, axis: null, type: e.pointerType, yaw: this.user.yaw, pitch: this.user.pitch != null ? this.user.pitch : this.defaultPitch() };
     this.lift(0.06);
   };
   P.onMove = function (e) {
@@ -1041,7 +1546,20 @@
     if (this.pts && this.pts[e.pointerId]) this.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
     if (this.pinch && this.pts) {
       var ids = Object.keys(this.pts);
-      if (ids.length === 2) { var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y); this.user.zoom = clamp(this.pinch.zoom * d / Math.max(20, this.pinch.d), 0.6, 3.2); }
+      if (ids.length === 2) {
+        var a = this.pts[ids[0]], b = this.pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+        /* Two fingers fly when flight is possible: the pair moving is a strafe
+           or a climb, and spreading them is forward (Free look, or the
+           Observatory, which is always flying). Otherwise a pinch zooms. */
+        if (this.mode === 'obs' || this.explore || this.flying()) {
+          var f = this.flyEngage();
+          if (f) {
+            var cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2, Hd = this.H || 300;
+            f.nudge([-(cx - this.pinch.cx) / Hd * 2.2, (cy - this.pinch.cy) / Hd * 2.2, (d - this.pinch.d) / Hd * 3.2], 0.9);
+            this.pinch.cx = cx; this.pinch.cy = cy; this.pinch.d = d;
+          }
+        } else this.user.zoom = clamp(this.pinch.zoom * d / Math.max(20, this.pinch.d), 0.6, 3.2);
+      }
       this.kick();
       return;
     }
@@ -1051,10 +1569,15 @@
       if (!dn.axis && Math.hypot(dx, dy) > 7) {
         /* On a touch screen a vertical drag is the page scrolling, so only a
            sideways one turns the chart; a mouse may tilt it too. */
-        dn.axis = dn.type === 'mouse' || this.explore ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+        dn.axis = this.mode === 'obs' || (this.flying() && (dn.type === 'mouse' || this.explore)) ? 'look' : dn.type === 'mouse' || this.explore ? 'free' : Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
         if (dn.axis !== 'y') { try { this.el.pad.setPointerCapture(e.pointerId); } catch (er) { /* not capturable */ } this.el.pad.style.cursor = 'grabbing'; this.hideTip(); }
       }
-      if (dn.axis === 'x' || dn.axis === 'free') {
+      if (dn.axis === 'look') {
+        var fl = this.flyEngage(), Hl = this.H || 300;
+        if (fl) fl.look(-(e.clientX - dn.lx) / Hl * 2.1, -(e.clientY - dn.ly) / Hl * 2.1);
+        dn.lx = e.clientX; dn.ly = e.clientY;
+        this.lift(0.02);
+      } else if (dn.axis === 'x' || dn.axis === 'free') {
         var Wd = this.W || 300;
         this.user.yaw = dn.yaw - dx / Wd * Math.PI * 1.1;
         if (dn.axis === 'free') this.user.pitch = clamp(dn.pitch + dy * 0.005, 0.2, 1.42);
@@ -1074,24 +1597,42 @@
     if (e.pointerType !== 'mouse') { this.ptr.on = false; this.hideTip(); }
     this.lift(0.2);
     if (!pk) { this.kick(); return; }
+    var obs = this.mode === 'obs';
     if (pk.kind === 'body') {
       /* The first press brings a body forward and names it; a second press on
-         the same body, or a mouse click on one already named, opens it. */
-      if (pk.key === this.focusKey) { if (this.o.onOpen) this.o.onOpen(pk.key); }
-      else { this.setFocus(pk.key); if (this.o.onFocus) this.o.onFocus(pk.key, 'tap'); }
-    } else if (pk.kind === 'aspect') { if (this.o.onAspect) this.o.onAspect(pk.i); }
-    else if (pk.kind === 'house') { if (this.o.onHouse) this.o.onHouse(pk.n); }
+         the same body, or a mouse click on one already named, opens it. In
+         the Observatory the second press travels there instead, and the
+         reading is a button in the target panel. */
+      if (pk.key === this.focusKey) { if (obs) this.flyTo(pk.key); else if (this.o.onOpen) this.o.onOpen(pk.key); }
+      else { this.setFocus(pk.key, !obs); if (this.o.onFocus) this.o.onFocus(pk.key, 'tap'); }
+    } else if (pk.kind === 'aspect') {
+      if (this.o.onAspect) this.o.onAspect(pk.i);
+      if (obs) { var ax = (this.model.aspects || []).filter(function (x) { return x.i === pk.i; })[0]; if (ax) this.flyToPair(ax.a, ax.b); }
+    }
+    else if (pk.kind === 'house') { if (this.o.onHouse) this.o.onHouse(pk.n); if (obs) this.flyToHouse(pk.n); }
     this.kick();
   };
   P.onWheel = function (e) {
     if (!this.ready) return;
     e.preventDefault();
+    if (this.mode === 'obs' || this.flying()) {
+      var f = this.flyEngage();
+      if (f) f.nudge([0, 0, clamp(-e.deltaY * 0.004, -1.5, 1.5)], 0.8);
+      this.lift(0.03); this.kick();
+      return;
+    }
     this.user.zoom = clamp(this.user.zoom * Math.exp(-e.deltaY * 0.0012), 0.6, 3.2);
     this.lift(0.04);
     this.kick();
   };
   P.onKey = function (e) {
-    if (!this.ready || !this.model || e.target !== this.host) return;
+    if (!this.ready || !this.model || e.target !== this.host || this.mode === 'obs') return;
+    var F = root.Flight, flying = this.flying();
+    if (F && ((F.isMoveKey(e.code) && (e.code !== 'Space' || flying)) || e.code === 'KeyX' || (flying && /^Arrow/.test(e.code)))) {
+      var fl = this.flyEngage();
+      if (fl) { fl.key(e, true); e.preventDefault(); this.lift(0.04); this.kick(); return; }
+    }
+    if (e.key === 'Escape' && flying) { e.preventDefault(); e.stopPropagation(); this.flyRelease(); return; }
     var k = e.key, done = true;
     if (k === 'ArrowRight' || k === 'ArrowLeft') {
       var nk = this.step(k === 'ArrowRight' ? 1 : -1);
@@ -1141,7 +1682,9 @@
   /* ---- The loop --------------------------------------------------------------- */
   P.updateRun = function () {
     var want = this.ready && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
-    if (want && this.reduced) { this.stop(); this.kick(); return; }
+    /* reduced motion draws on change, except while the reader is flying,
+       because flying is a change every frame */
+    if (want && this.reduced && !this.flying()) { this.stop(); this.kick(); return; }
     if (want && !this.running) { this.running = true; this.last = 0; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
   };
@@ -1160,8 +1703,9 @@
     if (!this.running) return;
     this.raf = requestAnimationFrame(this._tick);
     if (!this.host || !this.el.root.isConnected) { this.stop(); return; }
-    var dt = this.last ? Math.min(0.1, (ts - this.last) / 1000) : 0.016;
-    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.todayK - (this.todayOn ? 1 : 0)) > 0.001;
+    var dt = this.last ? Math.min(this.flying() ? 0.25 : 0.1, (ts - this.last) / 1000) : 0.016;
+    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.todayK - (this.todayOn ? 1 : 0)) > 0.001 ||
+      (this.fly && this.fly.busy()) || !!this.ret || this.mode === 'obs';
     if (!busy && ts - this.lastDraw < 31) return;
     this.last = ts;
     if (this.lastDraw) this.measure(ts - this.lastDraw, busy);
@@ -1195,12 +1739,15 @@
     var tg = this.todayOn ? 1 : 0;
     this.todayK = rm ? tg : damp(this.todayK, tg, 1 - Math.exp(-dt * 3));
     this.updateHover();
+    this._dt = dt;
+    if (this.launchPending && this.mode === 'obs' && this.W) this.launch();
+    if (this.fly && this.fly.active) { this.fly.update(dt, this.flyEnv()); if (this.spaceDust) this.spaceDust.material.uniforms.uVel.value.fromArray(this.fly.velocity()); }
     this.discMat.uniforms.uPtrOn.value = damp(this.discMat.uniforms.uPtrOn.value, this.ptr.on && this._ptrOn && this.ptrType === 'mouse' ? 0.5 + 0.5 * c : 0, rm ? 1 : 1 - Math.exp(-dt * 6));
     this.place();
 
     /* Hover and focus: a body named lights its aspects and the rest go quiet. */
     var kh = rm ? 1 : 1 - Math.exp(-dt * 10), self = this, hov = this.hover;
-    var hovBody = hov && hov.kind === 'body' ? hov.key : null, lit = hovBody || this.focusKey || this.sel.body;
+    var hovBody = (hov && hov.kind === 'body' ? hov.key : null) || this.hoverKey, lit = hovBody || this.focusKey || this.sel.body;
     var hovAsp = hov && hov.kind === 'aspect' ? hov.i : null;
     this.bodies.forEach(function (o) {
       var on = o.b.key === hovBody || o.b.key === self.focusKey || o.b.key === self.sel.body ? 1 : 0;
@@ -1219,6 +1766,8 @@
     });
 
     this.placeCamera(rm ? 1 : 1 - Math.exp(-dt * 3));
+    this.updateGlobes(dt);
+    if (this.mode === 'obs') this.updateHud(dt);
     var cp = this.cam.position, w = new T.Vector3();
     var face = function (o) { o.getWorldPosition(w); o.rotation.y = Math.atan2(cp.x - w.x, cp.z - w.z); };
     this.content.traverse(function (o) { if (o.userData && o.userData.bill) face(o); });
@@ -1239,7 +1788,7 @@
     this.r.setPixelRatio(L);
     this.r.setSize(W, H, false);
     this.cam.aspect = W / H;
-    this.cam.fov = W / H < 0.9 ? 42 : 36;
+    this.cam.fov = this.baseFov = W / H < 0.9 ? (this.mode === 'obs' ? 46 : 42) : this.mode === 'obs' ? 40 : 36;
     this.cam.updateProjectionMatrix();
     this.U.uPR.value = L;
     this.U.uRes.value.set(W, H);
@@ -1288,6 +1837,7 @@
       cu.tScene.value = p.scene.texture; cu.tB1.value = p.a.texture; cu.tB2.value = p.d.texture; cu.uStr.value = 0.5 + 0.4 * this.cur;
       this.pass(this.mComp, null);
     }
+    if (this.mode === 'obs') this.renderPip();
     if (!this.shown && this.fontsOk) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
@@ -1297,6 +1847,10 @@
 
   P.destroy = function () {
     this.stop();
+    this.unbindObs();
+    if (this._onBlur) window.removeEventListener('blur', this._onBlur);
+    if (this.fly) this.fly.unmountPad();
+    if (this.globes) this.clearGlobes();
     if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
@@ -1310,6 +1864,8 @@
 
   root.ChartScene = {
     supported: supported,
+    /* what kind of world a body is drawn as, for the screen's own words */
+    kindOf: function (b) { return root.BodyGlobes ? root.BodyGlobes.kindOf(b) : 'point'; },
     create: function (opts) { return new Scene(opts); }
   };
 })(typeof window !== 'undefined' ? window : this);

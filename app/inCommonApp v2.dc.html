@@ -82,7 +82,6 @@ a{color:#2fff8f;text-decoration:none}a:hover{color:#7dffb9}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes veilIn{from{opacity:0}to{opacity:1}}
-@keyframes chartxScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
 html{scroll-behavior:smooth}
 html,body{max-width:100%;overflow-x:hidden}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
@@ -90,19 +89,38 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:#000}
 @keyframes pulseGentle{0%,100%{opacity:1}50%{opacity:.6}}[data-dropcap]::first-letter{float:left;font-family:var(--fd);font-size:4.2rem;line-height:.85;padding:6px 10px 0 0;color:var(--ac2-hi);text-shadow:0 0 18px rgba(var(--atmc2),.5)}
 button{font-family:inherit;transition:background-color .2s ease,border-color .3s ease,color .2s ease}button:focus-visible{outline:2px solid #2fff8f;outline-offset:2px}
 .syn-cell{opacity:1}.syn-cell:hover{opacity:.8}
-.chartx-grid{display:grid;grid-template-columns:150px 1fr 320px;grid-template-rows:1fr auto;grid-template-areas:"houses wheel points" "aspects aspects aspects";gap:0;width:92vw;height:90vh;max-width:1400px;animation:chartxScale .2s ease-out}
-.chartx-row:hover{background:rgba(47,255,143,.08)}
-.chartx-panel-left{grid-area:houses}
-.chartx-panel-center{grid-area:wheel;width:min(60vh,60vw);height:min(60vh,60vw);margin:auto;justify-self:center;align-self:center}
-.chartx-panel-right{grid-area:points}
-.chartx-panel-aspects{grid-area:aspects;overflow-x:auto;overflow-y:hidden}
-.chartx-tabbar{display:none}
-@media (max-width:900px){
-  .chartx-grid{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"wheel" "tabbar" "content";width:96vw;height:92vh}
-  .chartx-panel-center{width:min(60vh,60vw,90vw);height:min(60vh,60vw,90vw)}
-  .chartx-panel-left,.chartx-panel-right,.chartx-panel-aspects{grid-area:content;max-height:none;overflow-x:auto}
-  .chartx-tabbar{display:flex;grid-area:tabbar}
-}
+.obs{position:absolute;inset:0;overflow:hidden;background:var(--bg);color:var(--tx);--obs-top:68px;--obs-l:0px;--obs-r:0px;animation:veilIn .45s ease-out}
+.obs[data-panels="1"]{--obs-l:348px;--obs-r:372px}
+.obs-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600}
+.obs-glass{background:var(--sf2);-webkit-backdrop-filter:blur(16px) saturate(1.15);backdrop-filter:blur(16px) saturate(1.15)}
+.obs-top{position:absolute;left:0;right:0;top:0;z-index:6;min-height:60px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:8px max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));background:linear-gradient(180deg,var(--bg) 40%,transparent)}
+.obs-btn{all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 13px;display:flex;align-items:center;gap:7px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx);transition:border-color .2s ease,opacity .6s ease .6s}
+.obs-btn:hover,.obs-btn[aria-expanded="true"],.obs-btn[aria-pressed="true"]{border-color:var(--ac2-hi)}
+.obs-sq{padding:0;justify-content:center;width:44px}
+.obs-ico{font:400 15px/1 var(--fu);color:var(--ac2-hi)}
+.obs-pill{all:unset;cursor:pointer;box-sizing:border-box;position:absolute;z-index:5;left:50%;top:calc(var(--obs-top) + 54px);transform:translateX(-50%);max-width:calc(100% - 28px);min-height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border-radius:999px;border:1px solid var(--ac2);background:var(--bg);box-shadow:0 6px 26px rgba(0,0,0,.4);transition:opacity .6s ease .6s}
+.obs-pad{position:absolute;top:0;bottom:0;left:var(--obs-l);right:var(--obs-r);z-index:4;pointer-events:none}
+.obs-rail{position:absolute;top:70px;bottom:14px;z-index:5;display:flex;flex-direction:column;gap:8px;animation:obsIn .6s cubic-bezier(.2,.7,.2,1) both .2s}
+.obs-l{left:14px;width:320px}.obs-r{right:14px;width:344px}
+.obs-sheet{position:absolute;left:0;right:0;bottom:0;z-index:7;height:min(68vh,620px);display:flex;flex-direction:column;border-top:1px solid var(--bd);border-radius:20px 20px 0 0;overflow:hidden;padding-bottom:env(safe-area-inset-bottom);animation:vtSheet .28s ease-out;box-shadow:0 -20px 50px rgba(0,0,0,.5)}
+.obs-scroll{overflow-y:auto;overscroll-behavior:contain;min-height:0}
+.obs-row{all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:48px;display:flex;align-items:center;gap:10px;padding:4px 12px 4px 10px;border-left:2px solid transparent;transition:background-color .15s ease}
+.obs-row:hover{background:rgba(var(--atmc),.16)!important}
+.obs-chk{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;font:600 11px var(--fu);color:var(--tx)}
+.obs-box{width:16px;height:16px;border:1px solid var(--bd);border-radius:5px;display:flex;align-items:center;justify-content:center;font:700 10px var(--fu);color:var(--ac2-hi);background:var(--bg)}
+.obs-sort{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 8px;border-radius:10px;font:700 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)}
+.obs-sort:hover{background:rgba(var(--atmc),.16)}
+.obs-cell{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);min-width:0}
+.obs-ck{font:700 8.5px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+.obs-cv{font-size:12.5px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.obs-keys{position:absolute;z-index:8;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 28px));max-height:calc(100% - 140px);overflow-y:auto;border:1px solid var(--bd);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55);animation:obsIn .3s ease-out both}
+.obs-keygrid{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:8px 14px;padding:4px 16px 16px;font:400 13px/1.35 var(--fu);color:var(--tx)}
+.obs-k{font:700 11px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ac2-hi);white-space:nowrap}
+@keyframes obsIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.obs:has(.obs-sheet) [data-obs-hud],.obs:has(.obs-keys) [data-obs-hud]{visibility:hidden}
+.obs-sheet [data-obs-pip]{max-height:22vh}
+@media (max-width:480px){.obs-mark{display:none!important}.obs-title{font-size:17px!important}.obs-top{gap:6px}.obs-view{min-width:46px!important;padding:0 8px!important}}
+.obs-keys{animation-name:obsKeysIn}@keyframes obsKeysIn{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
 input[type="date"]{color-scheme:dark}
@@ -241,6 +259,8 @@ input[type="date"]{color-scheme:dark}
 <script src="./pair-cache.js"></script>
 <script src="./hd-composite.js"></script>
 <script src="./hd-circle.js"></script>
+<script src="./flight.js"></script>
+<script src="./body-globes.js"></script>
 <script src="./cycle-scene.js"></script>
 <script src="./chart-scene.js"></script>
 <script src="./hd-scene.js"></script>
@@ -4446,161 +4466,415 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
-    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
-        <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
-        <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
-          <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
-            <span style="color:var(--dim)">{{ hc.h }}</span>
-            <span>{{ hc.sign }} {{ hc.deg }}°</span>
-          </div>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-center" style="background:var(--sf);border-right:1px solid var(--bd);overflow:hidden;display:flex;flex-direction:column;position:relative">
-        <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(139,92,246,.2);color:var(--ac2-hi);font:600 18px system-ui">×</button>
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div data-chart="expand-wheel" style="position:relative;width:100%;height:100%">
-            <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
-              <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-              <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-              <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-              <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
-              <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
-                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
-              </sc-for>
-              <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
-                <g>
-                  <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
-                  <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
-                </g>
-              </sc-for>
-              <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-                <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
-              </sc-for>
-              <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
-                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
-              </sc-for>
-              <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                <g>
-                  <title>{{ p.tip }}</title>
-                  <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                  <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
-                </g>
-              </sc-for>
-            </svg>
-            <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-              <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
-            </sc-for>
+  <!-- THE OBSERVATORY (owner, 19 October 2026): the chart full screen, flown
+       rather than looked at. The scene draws the sky, the worlds, the reticle,
+       the bracket and the telemetry; this markup is the station around it:
+       the header, the manifest, the target and its close-up, the controls. -->
+  <div data-immersive="1" style="position:fixed;inset:0;z-index:400;display:flex;background:var(--bg)">
+    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="The Observatory" data-immersive="1" data-obs="1" data-panels="{{ obsPanelsAttr }}" class="obs">
+      <p id="incommon-obs-keys" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">W, A, S and D fly forward, back and to either side. E or Space climbs, Q or C descends. The arrow keys look. Hold Shift to go faster. Tap a move key twice, or press X, to dash. The square brackets step between bodies, Enter or T flies to the one in front, O opens its reading, H returns to the station, V changes the view and Escape leaves.</p>
+      <sc-if value="{{ obsDeep }}" hint-placeholder-val="{{ true }}">
+        <div data-chart="observatory" data-cs-scene="obs" data-noswipe="1" tabindex="0" role="group" aria-roledescription="observatory" aria-label="{{ obsAria }}" aria-describedby="incommon-obs-keys" style="position:absolute;inset:0;outline:none;background:var(--bg)">
+          <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);font:italic 400 18px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ obsVeilO }};visibility:{{ obsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ obsFlat }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:66px 14px 14px;display:flex;align-items:center;justify-content:center">
+          <div style="position:relative;width:min(78vh,92vw);aspect-ratio:1/1">
+            <div data-chart="expand-wheel" aria-hidden="false" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
           </div>
         </div>
-      </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
-        <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
-            Group
-          </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
-            Comets on wheel
-          </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
-            Minor aspects
-          </button>
+      </sc-if>
+
+      <div class="obs-top">
+        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac2-hi)"></span></span>
+        <div style="flex:none;display:flex;flex-direction:column;gap:1px;min-width:0">
+          <h2 class="obs-title" style="margin:0;font:400 20px/1.1 var(--fd);color:var(--tx);white-space:nowrap">Observatory</h2>
+          <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandCount }}</div>
-        <div style="flex:1;overflow-y:auto;font:400 10.5px var(--fu)">
-          <div style="position:sticky;top:0;z-index:1;background:var(--sf);border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px">
-            <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 6px;text-align:left;font-weight:600;color:var(--ac2-hi)">Point</button>
-            <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;text-align:right;font-weight:600;color:var(--ac2-hi)">Position</button>
-            <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 6px;text-align:center;font-weight:600;color:var(--ac2-hi)">House</button>
-            <span style="display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-weight:600;color:var(--ac2-hi)">Speed</span>
-            <span style="display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ac2-hi)">R</span>
-            <span style="display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:600;color:var(--ac2-hi)">Status</span>
+        <span style="flex:1"></span>
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+          <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ obsWide }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
+          <button onClick="{{ obsPanelsGo }}" aria-pressed="{{ obsPanelsOn }}" class="obs-btn"><span aria-hidden="true" class="obs-ico">&#9707;</span>Panels</button>
+          <button onClick="{{ obsHomeGo }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
+        </sc-if>
+        <sc-if value="{{ obsNarrow }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ obsDrawerGo }}" aria-expanded="{{ obsDrawerOn }}" aria-label="Manifest" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px var(--fu);color:var(--ac2-hi)">&#9776;</span></button>
+        </sc-if>
+        <button onClick="{{ chartExpandClose }}" aria-label="Close the Observatory" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fu)">&#215;</span></button>
+      </div>
+
+      <sc-if value="{{ obsNarrow }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ obsPillGo }}" class="obs-pill" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}">
+            <span aria-hidden="true" style="flex:none;font:400 18px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ obsTName }}</span>
+            <span class="obs-mono" data-obs-range="1" aria-hidden="true" style="flex:none;font-size:11px;color:var(--mut)"></span>
+            <span aria-hidden="true" style="flex:none;font:400 14px var(--fu);color:var(--ac2-hi)">&#8250;</span>
+          </button>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ obsTouch }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-pad="1" class="obs-pad" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></div>
+      </sc-if>
+
+      <sc-if value="{{ obsRailsOn }}" hint-placeholder-val="{{ true }}">
+        <div class="obs-rail obs-l">
+          <div class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
+            <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="3">
+              <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+            </sc-for>
           </div>
-          <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
-            <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
-              <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
-              <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                  <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                  <span style="text-align:center">{{ r.house }}</span>
-                  <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                  <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                  <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
-                </button>
-              </sc-for>
-            </sc-for>
-          </sc-if>
-          <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
-            <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                <span style="text-align:center">{{ r.house }}</span>
-                <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
-              </button>
-            </sc-for>
-          </sc-if>
-          <div style="border-top:1px solid var(--bd);margin-top:6px">
-            <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
-              <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
-                  <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
-                  <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
-                  <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
-                </button>
-                <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
-                  <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                      <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                      <span style="text-align:center">{{ r.house }}</span>
+          <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+<sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
+                <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
+                  <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
+                  <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
+                  <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandMinorAspectsMark }}</span>Minor contacts</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandCount }}</span>
+                  <button onClick="{{ chartExpandSortNameGo }}" class="obs-sort">Name</button>
+                  <button onClick="{{ chartExpandSortLonGo }}" class="obs-sort">Position</button>
+                  <button onClick="{{ chartExpandSortHouseGo }}" class="obs-sort">House</button>
+                </div>
+              </div>
+              <div class="obs-scroll" style="flex:1">
+                <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+                    <div class="obs-mono" style="padding:9px 12px 5px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">{{ grp.label }}</div>
+                    <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+                      <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                        <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                          <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                        </span>
+                        <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                      </button>
+                    </sc-for>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+                    <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                      <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                        <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                      </span>
+                      <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
                     </button>
                   </sc-for>
                 </sc-if>
               </div>
-            </sc-for>
+            </sc-if>
+            <sc-if value="{{ obsAspectsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--bd)">
+                <span class="obs-mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandAspectCount }}</span>
+                <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                    <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+                <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="4">
+                    <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div class="obs-scroll" style="flex:1">
+                <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="8">
+                  <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" class="obs-row" style="box-shadow:{{ a.ring }}">
+                    <span aria-hidden="true" style="flex:none;width:16px;height:0;border-top:2px solid {{ a.color }}"></span>
+                    <span aria-hidden="true" style="flex:none;font:400 15px/1 Georgia,serif;color:var(--ac2-hi)">{{ a.glyphA }}</span>
+                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:600 12px var(--fu);color:var(--tx)">{{ a.nameA }} <span style="font-weight:400;color:var(--mut)">{{ a.aspLabel }}</span> {{ a.nameB }}</span>
+                    <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ a.orb }}</span>
+                    <span aria-hidden="true" style="flex:none;width:10px;font-size:9px;color:var(--ac2-hi)">{{ a.exactMark }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ obsHousesOn }}" hint-placeholder-val="{{ false }}">
+              <div class="obs-scroll" style="flex:1;padding:6px 0">
+                <sc-for list="{{ obsHouseRows }}" as="hc" hint-placeholder-count="12">
+                  <button onClick="{{ hc.go }}" aria-pressed="{{ hc.on }}" class="obs-row" style="background:{{ hc.bg }}">
+                    <span class="obs-mono" style="flex:none;width:28px;font-size:13px;color:var(--ac2-hi)">{{ hc.h }}</span>
+                    <span style="flex:1;text-align:left;font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }}</span>
+                    <span class="obs-mono" style="flex:none;font-size:11px;color:var(--mut)">{{ hc.deg }}&#176;</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </div>
-      </div>
-      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
-        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
-          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
-          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
+        <div class="obs-rail obs-r">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+<sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
+              <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
+                <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
+                <button onClick="{{ obsTPrev }}" aria-label="Previous body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8249;</span></button>
+                <button onClick="{{ obsTNext }}" aria-label="Next body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8250;</span></button>
+              </div>
+              <div data-obs-pip="1" aria-hidden="true" style="position:relative;flex:none;aspect-ratio:16/11;max-height:34vh;background:transparent">
+                <span style="position:absolute;left:10px;top:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;right:10px;top:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;left:10px;bottom:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;right:10px;bottom:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+              </div>
+              <div class="obs-glass obs-scroll" style="flex:1;display:flex;flex-direction:column;gap:12px;padding:14px;border-top:1px solid var(--bd)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span aria-hidden="true" style="flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ obsTColor }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.28),rgba(var(--atmc),.24) 55%,var(--bg) 100%);font:400 22px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <span style="font:400 22px/1.15 var(--fd);color:var(--tx)">{{ obsTName }}</span>
+                    <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsTCat }}</span>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+                  <div class="obs-cell"><span class="obs-ck">Position</span><span class="obs-cv">{{ obsTPos }}</span></div>
+                  <div class="obs-cell"><span class="obs-ck">Range</span><span class="obs-cv obs-mono" data-obs-range="1"></span></div>
+                  <div class="obs-cell"><span class="obs-ck">House</span><span class="obs-cv">{{ obsTHouse }}</span></div>
+                  <div class="obs-cell"><span class="obs-ck">Motion</span><span class="obs-cv obs-mono">{{ obsTSpeed }}<sc-if value="{{ obsTRetro }}" hint-placeholder-val="{{ false }}"> &#183; R</sc-if></span></div>
+                </div>
+                <sc-if value="{{ obsTMean }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font:italic 400 13.5px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsTMean }}</p></sc-if>
+                <sc-if value="{{ obsTContactsOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span class="obs-mono" style="font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)">Contacts</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ obsTContacts }}" as="c" hint-placeholder-count="4">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid {{ c.bd }};background:var(--bg);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="width:14px;height:0;border-top:2px solid {{ c.color }}"></span>{{ c.asp }} <span aria-hidden="true" style="font:400 14px/1 Georgia,serif;color:var(--ac2-hi)">{{ c.glyph }}</span> {{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+                <sc-if value="{{ obsTKnown }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ obsTFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Fly there <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+                </sc-if>
+                <button onClick="{{ obsTOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Open the reading</button>
+              </div>
+            </sc-if>
+          </div>
         </div>
-        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
-          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ obsDrawerOn }}" hint-placeholder-val="{{ false }}">
+        <div class="obs-sheet">
+          <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:4px;padding:8px 10px 6px;border-radius:20px 20px 0 0;border-bottom:1px solid var(--bd)">
+            <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest" style="flex:1;display:flex;gap:2px;overflow-x:auto">
+              <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;min-width:64px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <button onClick="{{ obsDrawerClose }}" aria-label="Close the manifest" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#8964;</span></button>
+          </div>
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+            <sc-if value="{{ obsTargetOn }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
+                <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
+                  <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
+                  <button onClick="{{ obsTPrev }}" aria-label="Previous body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8249;</span></button>
+                  <button onClick="{{ obsTNext }}" aria-label="Next body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8250;</span></button>
+                </div>
+                <div data-obs-pip="1" aria-hidden="true" style="position:relative;flex:none;aspect-ratio:16/11;max-height:34vh;background:transparent">
+                  <span style="position:absolute;left:10px;top:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;right:10px;top:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;left:10px;bottom:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;right:10px;bottom:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                </div>
+                <div class="obs-glass obs-scroll" style="flex:1;display:flex;flex-direction:column;gap:12px;padding:14px;border-top:1px solid var(--bd)">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span aria-hidden="true" style="flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ obsTColor }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.28),rgba(var(--atmc),.24) 55%,var(--bg) 100%);font:400 22px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:400 22px/1.15 var(--fd);color:var(--tx)">{{ obsTName }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsTCat }}</span>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+                    <div class="obs-cell"><span class="obs-ck">Position</span><span class="obs-cv">{{ obsTPos }}</span></div>
+                    <div class="obs-cell"><span class="obs-ck">Range</span><span class="obs-cv obs-mono" data-obs-range="1"></span></div>
+                    <div class="obs-cell"><span class="obs-ck">House</span><span class="obs-cv">{{ obsTHouse }}</span></div>
+                    <div class="obs-cell"><span class="obs-ck">Motion</span><span class="obs-cv obs-mono">{{ obsTSpeed }}<sc-if value="{{ obsTRetro }}" hint-placeholder-val="{{ false }}"> &#183; R</sc-if></span></div>
+                  </div>
+                  <sc-if value="{{ obsTMean }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font:italic 400 13.5px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsTMean }}</p></sc-if>
+                  <sc-if value="{{ obsTContactsOn }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <span class="obs-mono" style="font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)">Contacts</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ obsTContacts }}" as="c" hint-placeholder-count="4">
+                          <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid {{ c.bd }};background:var(--bg);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="width:14px;height:0;border-top:2px solid {{ c.color }}"></span>{{ c.asp }} <span aria-hidden="true" style="font:400 14px/1 Georgia,serif;color:var(--ac2-hi)">{{ c.glyph }}</span> {{ c.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+                <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+                  <sc-if value="{{ obsTKnown }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ obsTFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Fly there <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+                  </sc-if>
+                  <button onClick="{{ obsTOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Open the reading</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ obsTargetOff }}" hint-placeholder-val="{{ true }}">
+              <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
+                  <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
+                    <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                    <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
+                      <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
+                      <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
+                      <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandMinorAspectsMark }}</span>Minor contacts</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px">
+                      <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandCount }}</span>
+                      <button onClick="{{ chartExpandSortNameGo }}" class="obs-sort">Name</button>
+                      <button onClick="{{ chartExpandSortLonGo }}" class="obs-sort">Position</button>
+                      <button onClick="{{ chartExpandSortHouseGo }}" class="obs-sort">House</button>
+                    </div>
+                  </div>
+                  <div class="obs-scroll" style="flex:1">
+                    <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+                      <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+                        <div class="obs-mono" style="padding:9px 12px 5px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">{{ grp.label }}</div>
+                        <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+                          <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                            <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                              <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                            </span>
+                            <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                          </button>
+                        </sc-for>
+                      </sc-for>
+                    </sc-if>
+                    <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+                      <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+                        <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                          <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                            <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                          </span>
+                          <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                        </button>
+                      </sc-for>
+                    </sc-if>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ obsAspectsOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--bd)">
+                    <span class="obs-mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandAspectCount }}</span>
+                    <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px">
+                      <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                    <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px">
+                      <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="4">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div class="obs-scroll" style="flex:1">
+                    <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="8">
+                      <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" class="obs-row" style="box-shadow:{{ a.ring }}">
+                        <span aria-hidden="true" style="flex:none;width:16px;height:0;border-top:2px solid {{ a.color }}"></span>
+                        <span aria-hidden="true" style="flex:none;font:400 15px/1 Georgia,serif;color:var(--ac2-hi)">{{ a.glyphA }}</span>
+                        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:600 12px var(--fu);color:var(--tx)">{{ a.nameA }} <span style="font-weight:400;color:var(--mut)">{{ a.aspLabel }}</span> {{ a.nameB }}</span>
+                        <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ a.orb }}</span>
+                        <span aria-hidden="true" style="flex:none;width:10px;font-size:9px;color:var(--ac2-hi)">{{ a.exactMark }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ obsHousesOn }}" hint-placeholder-val="{{ false }}">
+                  <div class="obs-scroll" style="flex:1;padding:6px 0">
+                    <sc-for list="{{ obsHouseRows }}" as="hc" hint-placeholder-count="12">
+                      <button onClick="{{ hc.go }}" aria-pressed="{{ hc.on }}" class="obs-row" style="background:{{ hc.bg }}">
+                        <span class="obs-mono" style="flex:none;width:28px;font-size:13px;color:var(--ac2-hi)">{{ hc.h }}</span>
+                        <span style="flex:1;text-align:left;font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }}</span>
+                        <span class="obs-mono" style="flex:none;font-size:11px;color:var(--mut)">{{ hc.deg }}&#176;</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--bd)">
+              <button onClick="{{ obsHomeGo }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
+              <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
-          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
-              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
-              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
-              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
-            </button>
-          </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ obsKeysOn }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="Flight controls" class="obs-keys obs-glass">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 8px">
+            <span class="obs-mono" style="flex:1;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Flight controls</span>
+            <button onClick="{{ obsKeysClose }}" aria-label="Close flight controls" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-keygrid">
+            <span class="obs-k">W A S D</span><span>Forward, back, strafe left and right</span>
+            <span class="obs-k">E &#183; Space</span><span>Ascend</span>
+            <span class="obs-k">Q &#183; C</span><span>Descend</span>
+            <span class="obs-k">Arrows &#183; drag</span><span>Look up, down, left and right</span>
+            <span class="obs-k">Two keys</span><span>Diagonal, any pair</span>
+            <span class="obs-k">Shift</span><span>Boost while held</span>
+            <span class="obs-k">Tap twice &#183; X</span><span>Dash that way</span>
+            <span class="obs-k">[ &#183; ]</span><span>Previous and next body</span>
+            <span class="obs-k">Enter &#183; T</span><span>Fly to the body in front</span>
+            <span class="obs-k">O</span><span>Open its reading</span>
+            <span class="obs-k">H</span><span>Return to the station</span>
+            <span class="obs-k">V</span><span>3D or Orbital</span>
+            <span class="obs-k">Stick &#183; pinch</span><span>On a touch screen: move, and spread to go forward</span>
+            <span class="obs-k">Gamepad</span><span>Sticks, triggers to climb, A to dash, Y to fly</span>
+          </div>
         </div>
-      </div>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -9537,161 +9811,415 @@ input[type="date"]{color-scheme:dark}
   </div>
 </main>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ chartExpandClose }}" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:veilIn .2s ease-out">
-    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded natal chart" class="chartx-grid" style="background:var(--bg);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
-      <div class="chartx-panel-left chartx-panel" style="background:var(--sf);border-right:1px solid var(--bd);padding:12px 10px;font:400 11px var(--fu);color:var(--tx);overflow-y:auto;display:{{ chartExpandHousesDisplay }};flex-direction:column">
-        <div style="font:600 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi);margin-bottom:8px">Houses</div>
-        <sc-for list="{{ chartExpandHouses }}" as="hc" hint-placeholder-count="12">
-          <div style="display:flex;justify-content:space-between;gap:6px;padding:3px 0;border-bottom:1px solid var(--bd)">
-            <span style="color:var(--dim)">{{ hc.h }}</span>
-            <span>{{ hc.sign }} {{ hc.deg }}°</span>
-          </div>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-center" style="background:var(--sf);border-right:1px solid var(--bd);overflow:hidden;display:flex;flex-direction:column;position:relative">
-        <button onClick="{{ chartExpandClose }}" aria-label="Close expanded chart" title="Close" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(139,92,246,.2);color:var(--ac2-hi);font:600 18px system-ui">×</button>
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div data-chart="expand-wheel" style="position:relative;width:100%;height:100%">
-            <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
-              <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-              <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-              <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-              <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
-              <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
-                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
-              </sc-for>
-              <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
-                <g>
-                  <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
-                  <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
-                </g>
-              </sc-for>
-              <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-                <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
-              </sc-for>
-              <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
-                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
-              </sc-for>
-              <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
-                <g>
-                  <title>{{ p.tip }}</title>
-                  <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                  <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
-                </g>
-              </sc-for>
-            </svg>
-            <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
-              <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
-            </sc-for>
+  <!-- THE OBSERVATORY (owner, 19 October 2026): the chart full screen, flown
+       rather than looked at. The scene draws the sky, the worlds, the reticle,
+       the bracket and the telemetry; this markup is the station around it:
+       the header, the manifest, the target and its close-up, the controls. -->
+  <div data-immersive="1" style="position:fixed;inset:0;z-index:400;display:flex;background:var(--bg)">
+    <div onClick="{{ chartExpandSwallow }}" role="dialog" aria-modal="true" aria-label="The Observatory" data-immersive="1" data-obs="1" data-panels="{{ obsPanelsAttr }}" class="obs">
+      <p id="incommon-obs-keys" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">W, A, S and D fly forward, back and to either side. E or Space climbs, Q or C descends. The arrow keys look. Hold Shift to go faster. Tap a move key twice, or press X, to dash. The square brackets step between bodies, Enter or T flies to the one in front, O opens its reading, H returns to the station, V changes the view and Escape leaves.</p>
+      <sc-if value="{{ obsDeep }}" hint-placeholder-val="{{ true }}">
+        <div data-chart="observatory" data-cs-scene="obs" data-noswipe="1" tabindex="0" role="group" aria-roledescription="observatory" aria-label="{{ obsAria }}" aria-describedby="incommon-obs-keys" style="position:absolute;inset:0;outline:none;background:var(--bg)">
+          <div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:var(--bg);font:italic 400 18px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ obsVeilO }};visibility:{{ obsVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ obsFlat }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:66px 14px 14px;display:flex;align-items:center;justify-content:center">
+          <div style="position:relative;width:min(78vh,92vw);aspect-ratio:1/1">
+            <div data-chart="expand-wheel" aria-hidden="false" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
           </div>
         </div>
-      </div>
-      <div class="chartx-panel-right chartx-panel" style="background:var(--bg);display:{{ chartExpandPointsDisplay }};flex-direction:column;overflow:hidden">
-        <div style="padding:10px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search points…" aria-label="Search points" style="flex:1;min-width:90px;min-height:36px;padding:0 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 12px var(--fu);border-radius:8px">
-          <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandGroupMark }}</span>
-            Group
-          </button>
-          <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" title="Show comets on the wheel itself; they always list below regardless" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--cat-com)">{{ chartExpandCometsMark }}</span>
-            Comets on wheel
-          </button>
-          <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" title="Include asteroids, centaurs, TNOs, comets and hypotheticals in the aspect lines" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;padding:0 4px;font:400 10px var(--fu);color:var(--dim);display:flex;align-items:center;gap:4px">
-            <span aria-hidden="true" style="width:14px;height:14px;border:1px solid var(--bd);border-radius:4px;display:flex;align-items:center;justify-content:center;font:700 9px var(--fu);color:var(--ac)">{{ chartExpandMinorAspectsMark }}</span>
-            Minor aspects
-          </button>
+      </sc-if>
+
+      <div class="obs-top">
+        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac2-hi)"></span></span>
+        <div style="flex:none;display:flex;flex-direction:column;gap:1px;min-width:0">
+          <h2 class="obs-title" style="margin:0;font:400 20px/1.1 var(--fd);color:var(--tx);white-space:nowrap">Observatory</h2>
+          <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
         </div>
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandCount }}</div>
-        <div style="flex:1;overflow-y:auto;font:400 10.5px var(--fu)">
-          <div style="position:sticky;top:0;z-index:1;background:var(--sf);border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px">
-            <button onClick="{{ chartExpandSortNameGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 6px;text-align:left;font-weight:600;color:var(--ac2-hi)">Point</button>
-            <button onClick="{{ chartExpandSortLonGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px;text-align:right;font-weight:600;color:var(--ac2-hi)">Position</button>
-            <button onClick="{{ chartExpandSortHouseGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;justify-content:center;padding:0 6px;text-align:center;font-weight:600;color:var(--ac2-hi)">House</button>
-            <span style="display:flex;align-items:center;justify-content:flex-end;padding:0 6px;font-weight:600;color:var(--ac2-hi)">Speed</span>
-            <span style="display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--ac2-hi)">R</span>
-            <span style="display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:600;color:var(--ac2-hi)">Status</span>
+        <span style="flex:1"></span>
+        <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Observatory view" style="flex:none;display:flex;gap:3px;padding:3px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
+          <sc-for list="{{ obsViews }}" as="v" hint-placeholder-count="2">
+            <button onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" class="obs-view" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:56px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ v.c }}">{{ v.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ obsWide }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
+          <button onClick="{{ obsPanelsGo }}" aria-pressed="{{ obsPanelsOn }}" class="obs-btn"><span aria-hidden="true" class="obs-ico">&#9707;</span>Panels</button>
+          <button onClick="{{ obsHomeGo }}" class="obs-btn" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
+        </sc-if>
+        <sc-if value="{{ obsNarrow }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ obsDrawerGo }}" aria-expanded="{{ obsDrawerOn }}" aria-label="Manifest" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px var(--fu);color:var(--ac2-hi)">&#9776;</span></button>
+        </sc-if>
+        <button onClick="{{ chartExpandClose }}" aria-label="Close the Observatory" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fu)">&#215;</span></button>
+      </div>
+
+      <sc-if value="{{ obsNarrow }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ obsPillGo }}" class="obs-pill" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }}">
+            <span aria-hidden="true" style="flex:none;font:400 18px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+            <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ obsTName }}</span>
+            <span class="obs-mono" data-obs-range="1" aria-hidden="true" style="flex:none;font-size:11px;color:var(--mut)"></span>
+            <span aria-hidden="true" style="flex:none;font:400 14px var(--fu);color:var(--ac2-hi)">&#8250;</span>
+          </button>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ obsTouch }}" hint-placeholder-val="{{ false }}">
+        <div data-obs-pad="1" class="obs-pad" style="opacity:{{ obsUiO }};visibility:{{ obsUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s"></div>
+      </sc-if>
+
+      <sc-if value="{{ obsRailsOn }}" hint-placeholder-val="{{ true }}">
+        <div class="obs-rail obs-l">
+          <div class="obs-glass" style="flex:none;display:flex;gap:2px;padding:4px;border:1px solid var(--bd);border-radius:16px" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest">
+            <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="3">
+              <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+            </sc-for>
           </div>
-          <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
-            <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
-              <div style="padding:5px 6px;font-weight:600;color:var(--ac2-hi);font-size:9px;text-transform:uppercase;background:rgba(139,92,246,.08)">{{ grp.label }}</div>
-              <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
-                <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                  <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                  <span style="text-align:center">{{ r.house }}</span>
-                  <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                  <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                  <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
-                </button>
-              </sc-for>
-            </sc-for>
-          </sc-if>
-          <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
-            <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
-              <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px 54px 14px 40px;gap:3px;align-items:center;padding:3px 6px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                <span style="text-align:center">{{ r.house }}</span>
-                <span style="text-align:right;font-size:9px;color:var(--dim)">{{ r.speed }}</span>
-                <span style="text-align:center;color:var(--warn)">{{ r.retro }}</span>
-                <span style="text-align:center;font-size:9px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.statusLabel }}</span>
-              </button>
-            </sc-for>
-          </sc-if>
-          <div style="border-top:1px solid var(--bd);margin-top:6px">
-            <sc-for list="{{ chartExpandSubTables }}" as="sub" hint-placeholder-count="7">
-              <div>
-                <button onClick="{{ sub.toggle }}" aria-expanded="{{ sub.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid var(--bd);background:rgba(139,92,246,.05)">
-                  <span aria-hidden="true" style="flex:none;font:400 10px var(--fu);color:var(--ac)">{{ sub.mark }}</span>
-                  <span style="flex:1;font-weight:600;color:var(--ac2-hi);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em">{{ sub.label }}</span>
-                  <span style="flex:none;font:400 9px var(--fu);color:var(--dim)">{{ sub.count }}</span>
-                </button>
-                <sc-if value="{{ sub.open }}" hint-placeholder-val="{{ false }}">
-                  <sc-for list="{{ sub.rows }}" as="r" hint-placeholder-count="6">
-                    <button onClick="{{ r.go }}" title="{{ r.tip }}" class="chartx-row" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:grid;grid-template-columns:1fr 76px 30px;gap:3px;align-items:center;padding:3px 6px 3px 22px;border-bottom:1px solid var(--bd);opacity:{{ r.dim }};color:var(--tx);font:inherit;text-align:left">
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ r.catColor }}">{{ r.glyph }}</span> {{ r.name }}</span>
-                      <span style="text-align:right;font-size:9.5px">{{ r.pos }}</span>
-                      <span style="text-align:center">{{ r.house }}</span>
+          <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+<sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
+                <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
+                  <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
+                  <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
+                  <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandMinorAspectsMark }}</span>Minor contacts</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandCount }}</span>
+                  <button onClick="{{ chartExpandSortNameGo }}" class="obs-sort">Name</button>
+                  <button onClick="{{ chartExpandSortLonGo }}" class="obs-sort">Position</button>
+                  <button onClick="{{ chartExpandSortHouseGo }}" class="obs-sort">House</button>
+                </div>
+              </div>
+              <div class="obs-scroll" style="flex:1">
+                <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+                    <div class="obs-mono" style="padding:9px 12px 5px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">{{ grp.label }}</div>
+                    <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+                      <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                        <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                          <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                        </span>
+                        <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                      </button>
+                    </sc-for>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+                    <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                      <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                        <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                      </span>
+                      <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
                     </button>
                   </sc-for>
                 </sc-if>
               </div>
-            </sc-for>
+            </sc-if>
+            <sc-if value="{{ obsAspectsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--bd)">
+                <span class="obs-mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandAspectCount }}</span>
+                <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                    <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+                <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="4">
+                    <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div class="obs-scroll" style="flex:1">
+                <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="8">
+                  <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" class="obs-row" style="box-shadow:{{ a.ring }}">
+                    <span aria-hidden="true" style="flex:none;width:16px;height:0;border-top:2px solid {{ a.color }}"></span>
+                    <span aria-hidden="true" style="flex:none;font:400 15px/1 Georgia,serif;color:var(--ac2-hi)">{{ a.glyphA }}</span>
+                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:600 12px var(--fu);color:var(--tx)">{{ a.nameA }} <span style="font-weight:400;color:var(--mut)">{{ a.aspLabel }}</span> {{ a.nameB }}</span>
+                    <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ a.orb }}</span>
+                    <span aria-hidden="true" style="flex:none;width:10px;font-size:9px;color:var(--ac2-hi)">{{ a.exactMark }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ obsHousesOn }}" hint-placeholder-val="{{ false }}">
+              <div class="obs-scroll" style="flex:1;padding:6px 0">
+                <sc-for list="{{ obsHouseRows }}" as="hc" hint-placeholder-count="12">
+                  <button onClick="{{ hc.go }}" aria-pressed="{{ hc.on }}" class="obs-row" style="background:{{ hc.bg }}">
+                    <span class="obs-mono" style="flex:none;width:28px;font-size:13px;color:var(--ac2-hi)">{{ hc.h }}</span>
+                    <span style="flex:1;text-align:left;font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }}</span>
+                    <span class="obs-mono" style="flex:none;font-size:11px;color:var(--mut)">{{ hc.deg }}&#176;</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </div>
-      </div>
-      <div class="chartx-tabbar" onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Chart panels" style="display:{{ chartExpandTabBarDisplay }};gap:2px;padding:4px 10px;background:var(--sf);border-top:1px solid var(--bd)">
-        <sc-for list="{{ chartExpandTabs }}" as="t" hint-placeholder-count="3">
-          <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:{{ t.c }};border-bottom:2px solid {{ t.c }}">{{ t.label }}</button>
-        </sc-for>
-      </div>
-      <div class="chartx-panel-aspects chartx-panel" style="display:{{ chartExpandAspectsDisplay }};flex-direction:column;background:var(--bg);border-top:1px solid var(--bd)">
-        <div style="padding:4px 10px;font:400 9px var(--fu);color:var(--dim);border-bottom:1px solid var(--bd)">{{ chartExpandAspectCount }}</div>
-        <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 0">
-          <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
+        <div class="obs-rail obs-r">
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+<sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
+              <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
+                <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
+                <button onClick="{{ obsTPrev }}" aria-label="Previous body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8249;</span></button>
+                <button onClick="{{ obsTNext }}" aria-label="Next body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8250;</span></button>
+              </div>
+              <div data-obs-pip="1" aria-hidden="true" style="position:relative;flex:none;aspect-ratio:16/11;max-height:34vh;background:transparent">
+                <span style="position:absolute;left:10px;top:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;right:10px;top:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;left:10px;bottom:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                <span style="position:absolute;right:10px;bottom:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+              </div>
+              <div class="obs-glass obs-scroll" style="flex:1;display:flex;flex-direction:column;gap:12px;padding:14px;border-top:1px solid var(--bd)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span aria-hidden="true" style="flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ obsTColor }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.28),rgba(var(--atmc),.24) 55%,var(--bg) 100%);font:400 22px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <span style="font:400 22px/1.15 var(--fd);color:var(--tx)">{{ obsTName }}</span>
+                    <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsTCat }}</span>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+                  <div class="obs-cell"><span class="obs-ck">Position</span><span class="obs-cv">{{ obsTPos }}</span></div>
+                  <div class="obs-cell"><span class="obs-ck">Range</span><span class="obs-cv obs-mono" data-obs-range="1"></span></div>
+                  <div class="obs-cell"><span class="obs-ck">House</span><span class="obs-cv">{{ obsTHouse }}</span></div>
+                  <div class="obs-cell"><span class="obs-ck">Motion</span><span class="obs-cv obs-mono">{{ obsTSpeed }}<sc-if value="{{ obsTRetro }}" hint-placeholder-val="{{ false }}"> &#183; R</sc-if></span></div>
+                </div>
+                <sc-if value="{{ obsTMean }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font:italic 400 13.5px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsTMean }}</p></sc-if>
+                <sc-if value="{{ obsTContactsOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span class="obs-mono" style="font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)">Contacts</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ obsTContacts }}" as="c" hint-placeholder-count="4">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid {{ c.bd }};background:var(--bg);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="width:14px;height:0;border-top:2px solid {{ c.color }}"></span>{{ c.asp }} <span aria-hidden="true" style="font:400 14px/1 Georgia,serif;color:var(--ac2-hi)">{{ c.glyph }}</span> {{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+                <sc-if value="{{ obsTKnown }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ obsTFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Fly there <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+                </sc-if>
+                <button onClick="{{ obsTOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Open the reading</button>
+              </div>
+            </sc-if>
+          </div>
         </div>
-        <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 10px 8px">
-          <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 10px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:400 9.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
-          </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ obsDrawerOn }}" hint-placeholder-val="{{ false }}">
+        <div class="obs-sheet">
+          <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:4px;padding:8px 10px 6px;border-radius:20px 20px 0 0;border-bottom:1px solid var(--bd)">
+            <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Manifest" style="flex:1;display:flex;gap:2px;overflow-x:auto">
+              <sc-for list="{{ obsTabs }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;min-width:64px;padding:0 6px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid {{ t.bd }};font:700 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:{{ t.c }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <button onClick="{{ obsDrawerClose }}" aria-label="Close the manifest" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#8964;</span></button>
+          </div>
+          <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+            <sc-if value="{{ obsTargetOn }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ obsTOn }}" hint-placeholder-val="{{ true }}">
+                <div class="obs-glass" style="flex:none;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 14px;border-bottom:1px solid var(--bd)">
+                  <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Target <span style="color:var(--mut)">&#183; {{ obsTIdx }}</span></span>
+                  <button onClick="{{ obsTPrev }}" aria-label="Previous body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8249;</span></button>
+                  <button onClick="{{ obsTNext }}" aria-label="Next body" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 20px/1 var(--fd);color:var(--ac2-hi)">&#8250;</span></button>
+                </div>
+                <div data-obs-pip="1" aria-hidden="true" style="position:relative;flex:none;aspect-ratio:16/11;max-height:34vh;background:transparent">
+                  <span style="position:absolute;left:10px;top:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;right:10px;top:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;left:10px;bottom:10px;width:16px;height:16px;border-left:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                  <span style="position:absolute;right:10px;bottom:10px;width:16px;height:16px;border-right:1.5px solid var(--ac2);border-bottom:1.5px solid var(--ac2)"></span>
+                </div>
+                <div class="obs-glass obs-scroll" style="flex:1;display:flex;flex-direction:column;gap:12px;padding:14px;border-top:1px solid var(--bd)">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span aria-hidden="true" style="flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ obsTColor }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.28),rgba(var(--atmc),.24) 55%,var(--bg) 100%);font:400 22px/1 Georgia,serif;color:{{ obsTColor }}">{{ obsTGlyph }}</span>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:400 22px/1.15 var(--fd);color:var(--tx)">{{ obsTName }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ obsTCat }}</span>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px">
+                    <div class="obs-cell"><span class="obs-ck">Position</span><span class="obs-cv">{{ obsTPos }}</span></div>
+                    <div class="obs-cell"><span class="obs-ck">Range</span><span class="obs-cv obs-mono" data-obs-range="1"></span></div>
+                    <div class="obs-cell"><span class="obs-ck">House</span><span class="obs-cv">{{ obsTHouse }}</span></div>
+                    <div class="obs-cell"><span class="obs-ck">Motion</span><span class="obs-cv obs-mono">{{ obsTSpeed }}<sc-if value="{{ obsTRetro }}" hint-placeholder-val="{{ false }}"> &#183; R</sc-if></span></div>
+                  </div>
+                  <sc-if value="{{ obsTMean }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font:italic 400 13.5px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ obsTMean }}</p></sc-if>
+                  <sc-if value="{{ obsTContactsOn }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <span class="obs-mono" style="font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)">Contacts</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ obsTContacts }}" as="c" hint-placeholder-count="4">
+                          <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 11px;border-radius:999px;border:1px solid {{ c.bd }};background:var(--bg);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="width:14px;height:0;border-top:2px solid {{ c.color }}"></span>{{ c.asp }} <span aria-hidden="true" style="font:400 14px/1 Georgia,serif;color:var(--ac2-hi)">{{ c.glyph }}</span> {{ c.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+                <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--bd)">
+                  <sc-if value="{{ obsTKnown }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ obsTFly }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--ac);font:700 11px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--onac)">Fly there <span aria-hidden="true" style="font:400 14px var(--fb)">&#187;</span></button>
+                  </sc-if>
+                  <button onClick="{{ obsTOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);font:700 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)">Open the reading</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ obsTargetOff }}" hint-placeholder-val="{{ true }}">
+              <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
+                  <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
+                    <input value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                    <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
+                      <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
+                      <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
+                      <button onClick="{{ chartExpandMinorAspectsGo }}" role="checkbox" aria-checked="{{ chartExpandShowMinorAspects }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandMinorAspectsMark }}</span>Minor contacts</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px">
+                      <span class="obs-mono" style="flex:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandCount }}</span>
+                      <button onClick="{{ chartExpandSortNameGo }}" class="obs-sort">Name</button>
+                      <button onClick="{{ chartExpandSortLonGo }}" class="obs-sort">Position</button>
+                      <button onClick="{{ chartExpandSortHouseGo }}" class="obs-sort">House</button>
+                    </div>
+                  </div>
+                  <div class="obs-scroll" style="flex:1">
+                    <sc-if value="{{ chartExpandGroup }}" hint-placeholder-val="{{ true }}">
+                      <sc-for list="{{ chartExpandGrouped }}" as="grp" hint-placeholder-count="2">
+                        <div class="obs-mono" style="padding:9px 12px 5px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ac2-hi)">{{ grp.label }}</div>
+                        <sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="8">
+                          <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                            <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                              <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                            </span>
+                            <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                          </button>
+                        </sc-for>
+                      </sc-for>
+                    </sc-if>
+                    <sc-if value="{{ chartExpandUngrouped }}" hint-placeholder-val="{{ false }}">
+                      <sc-for list="{{ chartExpandRows }}" as="r" hint-placeholder-count="17">
+                        <button onClick="{{ r.go }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" title="{{ r.tip }}" aria-current="{{ r.on }}" class="obs-row" style="opacity:{{ r.dim }};background:{{ r.rowBg }};border-left-color:{{ r.rowBd }}">
+                          <span aria-hidden="true" style="flex:none;width:22px;text-align:center;font:400 16px/1 Georgia,serif;color:{{ r.catColor }}">{{ r.glyph }}</span>
+                          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                            <span class="obs-mono" style="font-size:10px;color:var(--mut)">{{ r.pos }}</span>
+                          </span>
+                          <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ r.house }}</span>
+                        </button>
+                      </sc-for>
+                    </sc-if>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ obsAspectsOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px;border-bottom:1px solid var(--bd)">
+                    <span class="obs-mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ chartExpandAspectCount }}</span>
+                    <div role="group" aria-label="Filter by aspect type" style="display:flex;flex-wrap:wrap;gap:4px">
+                      <sc-for list="{{ chartExpandAspTypeChips }}" as="c" hint-placeholder-count="5">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                    <div role="group" aria-label="Filter by category involved" style="display:flex;flex-wrap:wrap;gap:4px">
+                      <sc-for list="{{ chartExpandAspCatChips }}" as="c" hint-placeholder-count="4">
+                        <button onClick="{{ c.go }}" aria-pressed="{{ c.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 11px;border:1px solid {{ c.bd }};border-radius:999px;background:{{ c.bg }};font:600 10.5px var(--fu);color:{{ c.c }};display:flex;align-items:center">{{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div class="obs-scroll" style="flex:1">
+                    <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="8">
+                      <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" class="obs-row" style="box-shadow:{{ a.ring }}">
+                        <span aria-hidden="true" style="flex:none;width:16px;height:0;border-top:2px solid {{ a.color }}"></span>
+                        <span aria-hidden="true" style="flex:none;font:400 15px/1 Georgia,serif;color:var(--ac2-hi)">{{ a.glyphA }}</span>
+                        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font:600 12px var(--fu);color:var(--tx)">{{ a.nameA }} <span style="font-weight:400;color:var(--mut)">{{ a.aspLabel }}</span> {{ a.nameB }}</span>
+                        <span class="obs-mono" style="flex:none;font-size:10px;color:var(--mut)">{{ a.orb }}</span>
+                        <span aria-hidden="true" style="flex:none;width:10px;font-size:9px;color:var(--ac2-hi)">{{ a.exactMark }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ obsHousesOn }}" hint-placeholder-val="{{ false }}">
+                  <div class="obs-scroll" style="flex:1;padding:6px 0">
+                    <sc-for list="{{ obsHouseRows }}" as="hc" hint-placeholder-count="12">
+                      <button onClick="{{ hc.go }}" aria-pressed="{{ hc.on }}" class="obs-row" style="background:{{ hc.bg }}">
+                        <span class="obs-mono" style="flex:none;width:28px;font-size:13px;color:var(--ac2-hi)">{{ hc.h }}</span>
+                        <span style="flex:1;text-align:left;font:600 12.5px var(--fu);color:var(--tx)">{{ hc.sign }}</span>
+                        <span class="obs-mono" style="flex:none;font-size:11px;color:var(--mut)">{{ hc.deg }}&#176;</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+            <div class="obs-glass" style="flex:none;display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--bd)">
+              <button onClick="{{ obsHomeGo }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#8962;</span>Station</button>
+              <button onClick="{{ obsKeysGo }}" aria-expanded="{{ obsKeysOn }}" class="obs-btn" style="flex:1;justify-content:center"><span aria-hidden="true" class="obs-ico">&#9000;</span>Controls</button>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;padding:0 10px 10px;overflow-x:auto">
-          <sc-for list="{{ chartExpandAspectRows }}" as="a" hint-placeholder-count="6">
-            <button onClick="{{ a.go }}" aria-pressed="{{ a.on }}" title="{{ a.tip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:168px;display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid {{ a.color }};border-radius:10px;background:var(--sf);box-shadow:{{ a.ring }};font:400 11px var(--fu);color:var(--tx)">
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphA }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameA }}</span>
-              <span style="color:var(--dim);font-size:9px;text-transform:uppercase">{{ a.aspLabel }}</span>
-              <span aria-hidden="true" style="color:{{ a.color }}">{{ a.glyphB }}</span>
-              <span style="max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nameB }}</span>
-              <span style="color:var(--dim);font-size:9px">{{ a.orb }}</span>
-              <span aria-hidden="true" style="color:var(--ac);font-size:9px">{{ a.exactMark }}</span>
-            </button>
-          </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ obsKeysOn }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="Flight controls" class="obs-keys obs-glass">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px 8px">
+            <span class="obs-mono" style="flex:1;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Flight controls</span>
+            <button onClick="{{ obsKeysClose }}" aria-label="Close flight controls" class="obs-btn obs-sq"><span aria-hidden="true" style="font:400 18px/1 var(--fu)">&#215;</span></button>
+          </div>
+          <div class="obs-keygrid">
+            <span class="obs-k">W A S D</span><span>Forward, back, strafe left and right</span>
+            <span class="obs-k">E &#183; Space</span><span>Ascend</span>
+            <span class="obs-k">Q &#183; C</span><span>Descend</span>
+            <span class="obs-k">Arrows &#183; drag</span><span>Look up, down, left and right</span>
+            <span class="obs-k">Two keys</span><span>Diagonal, any pair</span>
+            <span class="obs-k">Shift</span><span>Boost while held</span>
+            <span class="obs-k">Tap twice &#183; X</span><span>Dash that way</span>
+            <span class="obs-k">[ &#183; ]</span><span>Previous and next body</span>
+            <span class="obs-k">Enter &#183; T</span><span>Fly to the body in front</span>
+            <span class="obs-k">O</span><span>Open its reading</span>
+            <span class="obs-k">H</span><span>Return to the station</span>
+            <span class="obs-k">V</span><span>3D or Orbital</span>
+            <span class="obs-k">Stick &#183; pinch</span><span>On a touch screen: move, and spread to go forward</span>
+            <span class="obs-k">Gamepad</span><span>Sticks, triggers to climb, A to dash, Y to fly</span>
+          </div>
         </div>
-      </div>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -10900,7 +11428,8 @@ class Component extends DCLogic {
     pmenuOpen: false, callOpen: false, cyOpen: false, cwSceneFail: false, cwSceneLive: false,
     chartView: '3d', csFail: false, csFocus: null, csToday: false,
     hdView: '3d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
-    csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0 };
+    csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
+    csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null };
 
   TAGC = { CALCULATED: ['#59b37d', 'rgba(89,179,125,.16)'], REPORTED: ['#7d9bff', 'rgba(125,155,255,.16)'], TRADITIONAL: ['#2fff8f', 'rgba(var(--atmc),.32)'], POSSIBILITY: ['#b79bff', 'rgba(139,92,246,.16)'], SYNTHESIS: ['#7dffb9', 'rgba(232,202,160,.14)'], OBSERVED: ['#59b37d', 'rgba(89,179,125,.16)'], PRACTICE: ['#eef0f8', 'rgba(238,240,248,.12)'], SAFETY: ['#e08d7d', 'rgba(224,141,125,.16)'], DERIVED: ['#7d9bff', 'rgba(125,155,255,.16)'], RELATIONSHIP_CONTEXT: ['#c9a0dc', 'rgba(201,160,220,.16)'], SUPPORT: ['#b79bff', 'rgba(139,92,246,.14)'], THIS_APP: ['#7d9bff', 'rgba(125,155,255,.14)'] };
   CATS = [['birthData', 'Birth Data'], ['journal', 'Journal Entries'], ['relationships', 'Relationships'], ['assessments', 'Assessments'], ['mood', 'Mood Check-ins']];
@@ -11306,7 +11835,7 @@ class Component extends DCLogic {
          is the ceiling: past it the fallback is the honest answer. */
       this._sceneT0 = Date.now();
       const sceneWait = () => {
-        const all = ['ChartScene', 'HDScene', 'CycleScene'].every(n => window[n]);
+        const all = ['ChartScene', 'HDScene', 'CycleScene', 'Flight', 'BodyGlobes'].every(n => window[n]);
         if (all || Date.now() - this._sceneT0 > 8000) { this._scenesSettled = true; this.setState({ sceneTick: (this.state.sceneTick || 0) + 1 }); return; }
         this._sceneWaitT = setTimeout(sceneWait, 120);
       };
@@ -13928,11 +14457,112 @@ class Component extends DCLogic {
   // one. 'astral body' and 'angle' stay out of this list: they are the sixteen
   // core points, always visible in the main table, never folded away.
   SUBTABLE_CATS = ['asteroid', 'centaur', 'tno', 'node', 'hypothetical', 'comet', 'derived'];
+  /* THE OBSERVATORY (owner, 19 October 2026): "Make the full screen expansion
+     an Observatory. People should feel like they're going in a certified
+     space expedition facility." The overlay the maximize button opened is the
+     same chart, full screen, flown rather than looked at. Everything that
+     moves every frame is the scene's; what is here changes only when the
+     reader does something: the target, the tab, a panel, the view.
+
+     ONE TARGET, SHARED WITH THE CARD. The body in front is csFocus, the same
+     state the card's panel reads, so leaving the Observatory leaves the card
+     on the body the reader was looking at. A first press on a body or a row
+     targets it and travels there; a second press on the target opens its
+     reading, the same two press rule as every stage in the app. */
+  obsTarget(key, known) {
+    const S = this._csS;
+    if (this.state.csFocus === key) {
+      this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null });
+      return;
+    }
+    this.setState({ csFocus: key, obsTab: this.state.obsTab === 'target' ? 'target' : this.state.obsTab });
+    if (S && known !== false) { S.setFocus(key, false); S.flyTo(key); }
+  }
+  /* A control that closes a part of the station takes its own focus away
+     with it, and focus left on the page is outside the dialog's trap, where
+     Escape and the flight keys no longer reach. So it comes back inside. */
+  obsRefocus(sel) {
+    setTimeout(() => {
+      const d = document.querySelector('[data-obs]');
+      if (!d || d.contains(document.activeElement)) return;
+      const el = (sel && d.querySelector(sel)) || d.querySelector('[data-cs-scene="obs"]') || d.querySelector('button');
+      if (el) try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    }, 0);
+  }
+  obsVals(rows, allRows, houses, asps, narrow) {
+    const st = this.state, S = this._csS;
+    const wide = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) >= 1100;
+    const deep = this.chartSceneOn() || this.scenePending('ChartScene'), live = !!st.csLive;
+    const tab = st.obsTab || 'bodies', panels = st.obsPanels !== false;
+    const known = allRows.filter(r => r.known);
+    const key = st.csFocus || (known[0] && known[0].id) || null;
+    const row = allRows.find(r => r.id === key) || null, src = rows.find(r => this.pointKey(r) === key) || null;
+    const reg = src ? this.EXPANDED_REGISTRY.find(x => x.id === src.id) : null;
+    const at = known.findIndex(r => r.id === key);
+    const stepT = d => () => {
+      if (!known.length) return;
+      const n = known[((at < 0 ? 0 : at) + d + known.length) % known.length];
+      this.setState({ csFocus: n.id });
+      if (S) { S.setFocus(n.id, false); S.flyTo(n.id); }
+      this.speak(n.name + ', ' + n.pos + '.', 'polite');
+    };
+    const tabs = (narrow || !wide ? [['target', 'Target']] : []).concat([['bodies', 'Bodies'], ['aspects', 'Aspects'], ['houses', 'Houses']]);
+    const shown = !wide && tab === 'target' ? 'target' : (tab === 'target' ? 'bodies' : tab);
+    const contacts = asps.filter(a => a.keyA === key || a.keyB === key).slice(0, 12).map(a => ({
+      id: a.id, label: (a.keyA === key ? a.nameB : a.nameA), glyph: (a.keyA === key ? a.glyphB : a.glyphA), asp: a.aspLabel, orb: a.orb, color: a.color,
+      on: st.chartExpandAspSel === a.id ? 'true' : 'false', bd: st.chartExpandAspSel === a.id ? 'var(--ac2-hi)' : 'var(--bd)',
+      go: () => { this.setState({ chartExpandAspSel: a.id }); if (S) S.flyToPair(a.keyA, a.keyB); }
+    }));
+    const flying = !!st.csFlying;
+    return {
+      obsDeep: deep, obsFlat: !deep, obsWide: wide, obsNarrow: !wide,
+      obsVeilO: live ? '0' : '1', obsVeilV: live ? 'hidden' : 'visible',
+      obsUiO: live || !deep ? '1' : '0', obsUiV: live || !deep ? 'visible' : 'hidden',
+      obsPanelsAttr: wide && panels ? '1' : '0', obsDrawerAttr: !wide && st.obsDrawer ? '1' : '0',
+      obsRailsOn: wide && panels, obsDrawerOn: !wide && !!st.obsDrawer,
+      obsTouch: deep && this.touchUi(),
+      obsStatus: flying ? 'In flight' : 'At station', obsStatusDot: flying ? 'var(--ac2-hi)' : 'var(--mut)',
+      obsAria: 'The Observatory: your chart in open space. W, A, S and D fly, E and Q climb and descend, the arrows look, brackets step between bodies and Enter flies to the one in front.',
+      obsViews: [['3d', '3D'], ['orbit', 'Orbital']].map(([id, label]) => {
+        const on = (st.chartView === 'orbit' ? 'orbit' : '3d') === id;
+        return { label, on, bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent', c: on ? 'var(--tx)' : 'var(--dim)',
+          go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); } };
+      }),
+      obsHomeGo: () => { if (S) S.home(); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
+      obsPanelsGo: () => this.setState({ obsPanels: !panels }),
+      obsPanelsOn: panels,
+      obsKeysOn: !!st.obsKeys, obsKeysGo: () => this.setState({ obsKeys: !st.obsKeys, obsDrawer: false }, () => this.obsRefocus()),
+      obsKeysClose: () => this.setState({ obsKeys: false }, () => this.obsRefocus()),
+      obsDrawerGo: () => this.setState({ obsDrawer: !st.obsDrawer }, () => this.obsRefocus('[aria-label="Manifest"]')),
+      obsDrawerClose: () => this.setState({ obsDrawer: false }, () => this.obsRefocus('[aria-label="Manifest"]')),
+      obsPillGo: () => this.setState({ obsDrawer: true, obsTab: 'target' }),
+      obsTabs: tabs.map(([id, label]) => ({ id, label, on: shown === id ? 'true' : 'false', c: shown === id ? 'var(--tx)' : 'var(--dim)', bd: shown === id ? 'var(--ac2-hi)' : 'transparent',
+        go: () => this.setState({ obsTab: id }) })),
+      obsTargetOn: wide ? panels : shown === 'target', obsTargetOff: !wide && shown !== 'target', obsBodiesOn: shown === 'bodies', obsAspectsOn: shown === 'aspects', obsHousesOn: shown === 'houses',
+      obsHouseRows: houses.map(h => ({ ...h, on: st.obsHouse === h.h ? 'true' : 'false', bg: st.obsHouse === h.h ? 'rgba(var(--atmc),.24)' : 'transparent',
+        go: () => { this.setState({ obsHouse: h.h }); if (S) S.flyToHouse(h.h); } })),
+      obsTOn: !!row,
+      obsTName: row ? row.name : '', obsTGlyph: row ? row.glyph : '', obsTColor: row ? row.catColor : 'var(--ac2-hi)',
+      obsTPos: row ? row.pos : '', obsTHouse: row && row.house !== 'n/a' ? 'House ' + row.house : '', obsTCat: row ? row.categoryLabel : '',
+      obsTSpeed: row && row.speed !== 'n/a' ? row.speed : '', obsTRetro: !!(row && row.retro), obsTKnown: !!(row && row.known),
+      obsTMean: src ? (this.PL_MEAN[src.name] || (reg && reg.tooltip) || '') : '',
+      obsTIdx: at < 0 ? '' : (at + 1) + ' of ' + known.length,
+      obsTPrev: stepT(-1), obsTNext: stepT(1),
+      obsTFly: () => { if (S && key) S.flyTo(key); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
+      obsTOpen: () => { if (key) this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }); },
+      obsTContacts: contacts, obsTContactsOn: contacts.length > 0
+    };
+  }
   chartExpandVals() {
     const st = this.state;
     const base = {
       chartExpandOpen: !!st.chartExpandOpen,
-      chartExpandGo: () => this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null }),
+      chartExpandGo: () => {
+        /* The first visit opens on the flight controls, once per device. */
+        let seen = true;
+        try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
+        this.setState({ chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+      },
       chartExpandClose: () => this.setState({ chartExpandOpen: false, chartExpandAspSel: null }),
       chartExpandSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
     };
@@ -13969,7 +14599,12 @@ class Component extends DCLogic {
         catColor: this.CAT_COLOR[r.category] || 'var(--ac)',
         tip: this.pointTooltip(r, h ? 'House ' + h : ''),
         known: known, dim: known ? '1' : '.55',
-        go: () => this.setState({ chartExpandOpen: false, spiritView: 'placement', placeSel: r.id || r.name, aspSel: null })
+        on: st.csFocus === (r.id || r.name) ? 'true' : 'false',
+        rowBg: st.csFocus === (r.id || r.name) ? 'rgba(var(--atmc),.24)' : 'transparent',
+        rowBd: st.csFocus === (r.id || r.name) ? 'var(--ac2-hi)' : 'transparent',
+        go: () => this.obsTarget(r.id || r.name, known),
+        enter: () => { if (this._csS && known) this._csS.setHoverKey(r.id || r.name); },
+        leave: () => { if (this._csS) this._csS.setHoverKey(null); }
       };
     });
 
@@ -13995,22 +14630,6 @@ class Component extends DCLogic {
       category: cat, label: this.CAT_LABEL[cat], rows: sorted.filter(r => r.category === cat)
     })).filter(g => g.rows.length);
 
-    // The seven collapsible sub-tables: independent of search/sort/group on
-    // the main table above, a plain browsable reference the way the
-    // Library's rooms are (see CLAUDE.md's "browsable now" precedent for
-    // the dream registry). Closed by default so the panel opens tidy at 80+
-    // points; chartExpandSubOpen is a plain {category: bool} map on state.
-    const subOpen = st.chartExpandSubOpen || {};
-    const subTables = this.SUBTABLE_CATS.map(cat => {
-      const catRows = allRows.filter(r => r.category === cat);
-      return {
-        category: cat, label: this.CAT_LABEL[cat], count: catRows.length,
-        open: !!subOpen[cat], mark: subOpen[cat] ? '▾' : '▸',
-        toggle: () => this.setState({ chartExpandSubOpen: { ...subOpen, [cat]: !subOpen[cat] } }),
-        rows: catRows
-      };
-    }).filter(s => s.count);
-
     // The aspects grid: the SAME rich aspect pass the wheel's own lines use
     // (identical options), so the grid and the wheel can never disagree
     // about which contacts exist. "Horizontally scrollable" per the brief -
@@ -14029,8 +14648,9 @@ class Component extends DCLogic {
     // wheel highlight at a different pair than the one that was clicked.
     const aspectRowsAll = asps.map((x, i) => {
       const exact = x.orb <= EXACT_ORB, aspLabel = this.aspName(x.asp);
+      const kA = this.pointKey(x.a), kB = this.pointKey(x.b);
       return {
-        id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name,
+        id: i, glyphA: x.a.glyph, nameA: x.a.name, glyphB: x.b.glyph, nameB: x.b.name, keyA: kA, keyB: kB,
         asp: x.asp, aspLabel: aspLabel, orb: x.orb.toFixed(1) + '°',
         exact: exact, exactMark: exact ? '●' : '',
         tip: x.a.name + ' ' + aspLabel + ' ' + x.b.name + ', orb ' + x.orb.toFixed(1) + '°' + (exact ? ', exact' : ''),
@@ -14040,7 +14660,11 @@ class Component extends DCLogic {
         ring: st.chartExpandAspSel === i ? '0 0 0 2px var(--ac) inset' : 'none',
         // Highlights the pair on the wheel; a second click on the same row
         // clears it rather than toggling something else, per the brief.
-        go: () => this.setState({ chartExpandAspSel: st.chartExpandAspSel === i ? null : i })
+        go: () => {
+          const off = st.chartExpandAspSel === i;
+          this.setState({ chartExpandAspSel: off ? null : i });
+          if (!off && this._csS) this._csS.flyToPair(kA, kB);
+        }
       };
     });
     // Filter chips: aspect type and category involvement, both multi-select
@@ -14071,20 +14695,11 @@ class Component extends DCLogic {
         go: () => this.setState({ chartExpandAspCatSel: sel ? aspCatSel.filter(x => x !== cat) : aspCatSel.concat(cat) }) };
     });
 
-    // Below 900px (this.chartx-grid's own breakpoint), Houses/Points/Aspects
-    // become tabs instead of a stack: three panels shown at once is how a
-    // table with a Speed and a Status column stopped being readable on a
-    // phone. dtW is the same tracked width syncSectionToTab and friends
-    // already read; window.innerWidth is the fallback for the first render
-    // before it is set.
     const narrow = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) < 900;
-    const tab = st.chartExpandTab || 'points';
-    const tabGo = t => () => this.setState({ chartExpandTab: t });
-    const panelDisplay = key => (!narrow || tab === key) ? 'flex' : 'none';
 
     return {
       ...base,
-      chartExpandHouses: houses,
+      ...this.obsVals(rows, allRows, houses, aspectRowsAll, narrow),
       chartExpandRows: sorted,
       chartExpandGrouped: grouped,
       chartExpandGroup: !!st.chartExpandGroup,
@@ -14097,7 +14712,6 @@ class Component extends DCLogic {
       chartExpandSortLonGo: sortGo('lon'),
       chartExpandSortHouseGo: sortGo('house'),
       chartExpandCount: sorted.length + (sorted.length === 1 ? ' point' : ' points'),
-      chartExpandSubTables: subTables,
       chartExpandShowComets: !!st.chartExpandShowComets,
       chartExpandCometsMark: st.chartExpandShowComets ? '✓' : '',
       chartExpandCometsGo: () => this.setState({ chartExpandShowComets: !st.chartExpandShowComets }),
@@ -14108,16 +14722,7 @@ class Component extends DCLogic {
       chartExpandAspectCount: aspectRows.length + (aspectRows.length === 1 ? ' aspect' : ' aspects') +
         (aspectRows.length !== aspectRowsAll.length ? ' of ' + aspectRowsAll.length : ''),
       chartExpandAspTypeChips: aspTypeChips,
-      chartExpandAspCatChips: aspCatChips,
-      chartExpandTabs: [
-        { id: 'points', label: 'Points', on: tab === 'points' ? 'true' : 'false', c: tab === 'points' ? 'var(--ac)' : 'var(--dim)', go: tabGo('points') },
-        { id: 'aspects', label: 'Aspects', on: tab === 'aspects' ? 'true' : 'false', c: tab === 'aspects' ? 'var(--ac)' : 'var(--dim)', go: tabGo('aspects') },
-        { id: 'houses', label: 'Houses', on: tab === 'houses' ? 'true' : 'false', c: tab === 'houses' ? 'var(--ac)' : 'var(--dim)', go: tabGo('houses') }
-      ],
-      chartExpandTabBarDisplay: narrow ? 'flex' : 'none',
-      chartExpandHousesDisplay: panelDisplay('houses'),
-      chartExpandPointsDisplay: panelDisplay('points'),
-      chartExpandAspectsDisplay: panelDisplay('aspects')
+      chartExpandAspCatChips: aspCatChips
     };
   }
   // 360° -> screen. The Ascendant sits at the left edge (9 o'clock) and
@@ -21474,16 +22079,21 @@ class Component extends DCLogic {
   }
   chartSceneSync(retry) {
     if (!this.chartSceneOn()) return;
-    const st = this.state, view = this.chartViewNow(), host = view === '2d' ? null : document.querySelector('[data-cs-scene]');
+    /* THE OBSERVATORY is the same scene in the full screen host: while it is
+       open the scene lives there whatever the card's own view is, and the
+       card's host behind it is never taken in its place. */
+    const st = this.state, obs = !!st.chartExpandOpen;
+    const view = obs ? (st.chartView === 'orbit' ? 'orbit' : '3d') : this.chartViewNow();
+    const host = obs ? document.querySelector('[data-cs-scene="obs"]') : view === '2d' ? null : document.querySelector('[data-cs-scene="1"]');
     const vertical = (st.dtW || 1440) < this.BP.md;
     clearTimeout(this._csSyncT);
     if (!host) {
       if (this._csS) this._csS.detach();
-      const want = st.ready && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology');
+      const want = st.ready && (obs || (view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology')));
       if (want && (retry || 0) < 8) this._csSyncT = setTimeout(() => this.chartSceneSync((retry || 0) + 1), 60);
       return;
     }
-    if (!this._csS && vertical && this.curTab() !== 'spirit') return;
+    if (!this._csS && !obs && vertical && this.curTab() !== 'spirit') return;
     if (!this._csS) {
       this._csS = window.ChartScene.create({
         onFail: () => { this._csS = null; this.setState({ csFail: true }); },
@@ -21494,20 +22104,31 @@ class Component extends DCLogic {
           const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
           if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
         },
-        onOpen: key => this.setState({ spiritView: 'placement', placeSel: key, aspSel: null }),
-        onAspect: i => this.setState({ aspSel: i }),
-        onHouse: n => this.setState({ dpSel: { kind: 'house', h: n } }),
-        lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t)))
+        onOpen: key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }),
+        onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects' } : { aspSel: i }),
+        onHouse: n => this.setState(this.state.chartExpandOpen ? { obsHouse: n } : { dpSel: { kind: 'house', h: n } }),
+        lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t))),
+        /* the Observatory's own moves, all of them discrete */
+        onArrive: key => {
+          const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
+          if (b) this.speak('Arrived at ' + b.label + '.', 'polite');
+        },
+        onFly: on => { if (!!this.state.csFlying !== !!on) this.setState({ csFlying: !!on }); },
+        onToggleView: () => { const v = this.state.chartView === 'orbit' ? '3d' : 'orbit'; try { localStorage.setItem('incommon.chart.view', v); } catch (e) {} this.setState({ chartView: v }); },
+        onPanels: () => this.setState({ obsPanels: this.state.obsPanels === false }),
+        onHelp: () => this.setState({ obsKeys: !this.state.obsKeys })
       });
     }
     const m = this._csModel, S = this._csS;
     if (m) S.setModel(m);
     S.setView(view);
     S.setFocus(st.csFocus || (m && m.bodies[0] ? m.bodies[0].key : null), false);
-    S.setSelection({ aspect: st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
+    S.setSelection(obs ? { aspect: st.chartExpandAspSel, house: st.obsHouse || null, body: null }
+      : { aspect: st.aspSel, house: st.dpSel && st.dpSel.kind === 'house' ? st.dpSel.h : null, body: st.placeSel });
     S.setToday(view === 'orbit' && !!st.csToday);
-    S.setExplore(!!st.csFree);
+    S.setExplore(!obs && !!st.csFree);
     S.attach(host);
+    S.setMode(obs ? 'obs' : 'stage');
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
     if (this._csTheme !== tk) { if (this._csTheme != null) S.setTheme(); this._csTheme = tk; }
   }
