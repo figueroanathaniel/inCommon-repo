@@ -62,6 +62,17 @@
     if (!loading) loading = import('./three.module.js').then(function (m) { T = m; return m; }, function (e) { loading = null; throw e; });
     return loading;
   }
+
+  /* LOADING, FAST. The faces the scene draws its labels in are waited for by
+     name, not through document.fonts.ready: that waits on every face the page
+     is fetching, and a theme preview elsewhere on the page asking for Petrona
+     held the scene behind Loading for two seconds it never needed. */
+  function waitFaces(tok) {
+    var fs = document.fonts;
+    if (!fs || !fs.load) return Promise.resolve();
+    var want = ['400 16px ' + tok.fu, '600 16px ' + tok.fu, '700 16px ' + tok.fu, '400 16px ' + tok.fd];
+    return Promise.all(want.map(function (f) { return fs.load(f).catch(function () { return null; }); }));
+  }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function damp(cur, goal, k) { return cur + (goal - cur) * k; }
 
@@ -307,7 +318,7 @@
     if (moved && this.io) { this.io.disconnect(); this.io.observe(this.el.root); }
     if (!this.ro && window.ResizeObserver) { var me = this; this.ro = new ResizeObserver(function () { me.resize(); }); }
     if (moved && this.ro) { this.ro.disconnect(); this.ro.observe(this.el.root); }
-    if (!this.ready) { this.build(); return; }
+    if (!this.ready) { this.buildNear(); return; }
     if (!this.tokOk) this.setTheme();
     this.resize();
     if (modeChanged) this.enterMode(moved);
@@ -340,6 +351,40 @@
     try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
     if (this.o.onFail) this.o.onFail(why || 'failed');
   };
+  /* A stage is built when it is about to be seen, not when it is mounted: the
+     phone mounts every section at once, and three scenes compiling together
+     held every one of them behind Loading. The margin reaches one page to
+     either side, so the chart beside the one in view is ready before a
+     swipe gets there. */
+  P.buildNear = function () {
+    if (this.ready || this.building) return;
+    if (!window.IntersectionObserver) { this.build(); return; }
+    var self = this;
+    if (!this.nio) {
+      this.nio = new IntersectionObserver(function (es) {
+        if (!es.some(function (x) { return x.isIntersecting; })) return;
+        self.nio.disconnect(); self.nio = null;
+        self.build();
+      }, { rootMargin: '25% 100%' });
+    }
+    this.nio.disconnect();
+    this.nio.observe(this.el.root);
+  };
+  /* The shaders are compiled before the first frame, in parallel where the
+     browser offers KHR_parallel_shader_compile, rather than on the first
+     render, which linked every program on the main thread and froze the page
+     for seconds with the stage dark behind its veil. */
+  P.warmUp = function () {
+    if (this._warming) return;
+    this._warming = true;
+    var self = this, r = this.r, jobs = [];
+    var done = function () { self._warming = false; self.warm = true; if (!self.failed) self.kick(); };
+    try {
+      jobs.push(r.compileAsync(this.scene, this.cam));
+      if (this.post && this.quad) [this.mBright, this.mBlur, this.mComp].forEach(function (m) { self.quad.material = m; jobs.push(r.compileAsync(self.postScene, self.postCam)); });
+    } catch (e) { done(); return; }
+    Promise.all(jobs).then(done, done);
+  };
   P.build = function () {
     if (this.building) return;
     this.building = true;
@@ -357,7 +402,7 @@
       }
       /* Shown only once the faces are in, so its labels never jump. */
       var faces = function () { if (self.fontsOk || self.failed) return; self.fontsOk = true; if (self.ready) { self.buildContent(); self.kick(); } };
-      if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') { document.fonts.ready.then(faces); setTimeout(faces, 3000); } else self.fontsOk = true;
+      waitFaces(self.tok).then(faces); setTimeout(faces, 3000);
     }, function () { self.building = false; self.fail('load'); });
   };
 
@@ -1347,6 +1392,7 @@
   P.render = function () {
     if (!this.r || !this.model || !this.cam) return;
     var r = this.r;
+    if (!this.warm) { this.warmUp(); return; }
     if (!this.post) {
       r.setRenderTarget(null);
       r.render(this.scene, this.cam);
@@ -1373,6 +1419,7 @@
   };
 
   P.destroy = function () {
+    if (this.nio) { this.nio.disconnect(); this.nio = null; }
     this.stop();
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();

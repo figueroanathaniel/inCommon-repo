@@ -5061,6 +5061,52 @@ is an index into the one rich pass the wheel draws, the filter chips are built
 from what is present, and comets are off the wheel until the Comets box is
 ticked.
 
+## The 3D stages compile in parallel, build when near, and wait for their own faces
+Reported by the owner on 20 October 2026: "opening the app shows a bunch of
+black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
+which is near black under Deep Field, held up for seconds. A CPU profile of the
+astrology page found where the seconds went, and there were three causes:
+
+- **The first frame linked every shader on the main thread.** three.js compiles
+  a material's program on its first render, and its first `getUniforms` waits
+  for the link: 5.9 of the 6 seconds between three.js arriving and the stage
+  going live, with the page frozen. Each scene now calls `warmUp()` from
+  `render()` before its first frame: `compileAsync` over the scene and over the
+  post quad with each of its three materials, which uses
+  `KHR_parallel_shader_compile` where the browser has it, and the scene renders
+  nothing until that resolves. Measured with `renderer.info.programs`, all
+  thirteen of the chart's programs exist before the first frame and the frame
+  adds none.
+- **A phone built every stage at once.** The phone mounts every section, so the
+  Cycle Audit widget, the wiring and the wheel all built and compiled together.
+  `attach()` calls `buildNear()` now, an IntersectionObserver with a quarter of
+  a screen of margin vertically and one screen either side, so a stage builds
+  as it comes into view and the chart beside it in the pager follows. (The
+  pager clips its pages, so in practice the neighbour builds as the swipe
+  reveals it, behind its veil, without freezing anything.)
+- **The faces gate waited on every face the page was loading.** It used
+  `document.fonts.ready`, and Settings' theme previews ask for Petrona, which no
+  scene draws in: two seconds behind Loading for nothing. `waitFaces()` loads
+  the scene's own `--fu` (400, 600, 700) and `--fd` by name, with the same three
+  second ceiling.
+
+**The veil is sky, not a black box.** Every Loading veil (`cs`, `hs`, `cw`,
+`cy`, `obs`) paints the atmosphere the scene will come up in, two radial washes
+of `--atmc` and `--atmc2` over `--bg`, rather than `--bg` alone. Loading still
+holds the place and the scene still fades up through it, by "The 3D scenes fade
+in from behind Loading".
+
+Measured on SwiftShader, desktop astrology from the address to live: 10.8s
+before, 6.4s after, and the main thread's compile stall from 5.9s to 2.4s. What
+is left of that stall is the software rasterizer building its pipelines at the
+first draw, which a real GPU does not do once the programs are linked.
+
+**The next load cost is the page itself.** `app.html` is 12 MB, 4 MB over the
+wire with brotli, and 7.7 MB of it is `gazetteer-world.js` inlined, which only
+the birth place search reads. `ensureProfiles()` re-resolves old profiles
+against it at boot and first run searches it, so moving it out of the page has
+to keep both working when it arrives late. Not done here.
+
 ## Where the Codex computed better, inCommon took its method
 The owner asked on 29 September 2026 for the same attention paid to where the
 Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
