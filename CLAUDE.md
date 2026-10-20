@@ -4937,6 +4937,43 @@ before the scene was live. In every one the order was the veil alone, the
 canvas through the veil, then the units; with WebGL off the 2D wheel came up
 with its zoom cluster showing and no veil.
 
+## The stages are built before they are asked for
+Reported by the owner on 20 October 2026: 3D loaded slowly when opened, and at
+once after a trip through 2D, Orbital or Wheel and back. The trip was the clue:
+by then the scene object existed, compiled, and moving it between hosts costs
+nothing. The first visit was paying for three.js, the renderer, the content and
+every program while the reader watched Loading.
+
+**`scenePrewarm()` builds the wiring and then the chart while the reader is
+somewhere else**, one at a time, two seconds after the app is ready, in idle
+time, and only for a view that is deep (`hdViewNow()`, `chartViewNow()` not
+`2d`). A scene with no stage on the page waits in **the lot** (`sceneLot()`): a
+box at `left:-10000px` inside `[data-vt]` or `[data-app-root]`, so it reads the
+shell's own tokens, `inert` and `aria-hidden`, where its IntersectionObserver
+reports it unseen and no loop runs. A scene whose stage is mounted but off
+screen, the phone's next chart page, is built where it stands. `prebuild()` in
+each scene module builds now rather than waiting on `buildNear()`'s observer,
+which would never fire in the lot, and disconnects that observer so a second
+build cannot start when the stage scrolls into view; `build()` refuses once
+ready for the same reason.
+
+**A scene is revealed where it is seen** (`shown` waits for `visible`, or for
+no IntersectionObserver at all). A stage built in the lot draws and compiles
+there, but its fade, its `onReady` and the wiring's wake belong to the moment
+the reader arrives, so `csLive` and `hsLive` mean on screen and drawn, as before.
+
+**Leaving a stage parks the scene in the lot instead of detaching it**
+(`scenePark()`), so it keeps a connected root, its palette and a theme change
+made while it waits. The two creation paths share `chartSceneMake()` and
+`hdSceneMake()`, so a prewarmed scene and one made on the stage carry the same
+callbacks.
+
+Measured on SwiftShader after twelve seconds on Today: the chart live 1.3s after
+the address changed on the desktop (4.3s before) and the wiring 0.5s; on the
+phone the wiring 1.2s after entering My Charts and the chart 1.1s after the
+swipe. Opening My Charts straight away on the phone, the chart is now built
+while the reader is on the wiring page and comes up 0.6s after the swipe.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space

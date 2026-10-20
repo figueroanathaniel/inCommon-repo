@@ -19635,8 +19635,15 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     } catch (e) { done(); return; }
     Promise.all(jobs).then(done, done);
   };
+  /* Built now, wherever it is: the app builds a stage in its offscreen lot
+     before the reader asks for it, which buildNear() would wait on forever. */
+  P.prebuild = function () {
+    if (this.ready || this.building || this.failed) return;
+    if (this.nio) { this.nio.disconnect(); this.nio = null; }
+    this.build();
+  };
   P.build = function () {
-    if (this.building) return;
+    if (this.building || this.ready) return;
     this.building = true;
     var self = this;
     load().then(function () {
@@ -21032,7 +21039,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       this.pass(this.mComp, null);
     }
     if (this.mode === 'obs') this.renderPip();
-    if (!this.shown && this.fontsOk) {
+    /* Revealed where it is seen: a stage built in the lot draws its first
+       frames there, and its fade and its wake belong to the reader. */
+    if (!this.shown && this.fontsOk && (this.visible || !this.io)) {
       this.shown = true;
       this.el.canvas.style.opacity = '1';
       if (this.o.onReady) this.o.onReady();
@@ -21627,8 +21636,15 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     } catch (e) { done(); return; }
     Promise.all(jobs).then(done, done);
   };
+  /* Built now, wherever it is: the app builds a stage in its offscreen lot
+     before the reader asks for it, which buildNear() would wait on forever. */
+  P.prebuild = function () {
+    if (this.ready || this.building || this.failed) return;
+    if (this.nio) { this.nio.disconnect(); this.nio = null; }
+    this.build();
+  };
   P.build = function () {
-    if (this.building) return;
+    if (this.building || this.ready) return;
     this.building = true;
     var self = this;
     load().then(function () {
@@ -22704,7 +22720,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       cu.tScene.value = p.scene.texture; cu.tB1.value = p.a.texture; cu.tB2.value = p.d.texture; cu.uStr.value = 0.5 + 0.4 * this.cur;
       this.pass(this.mComp, null);
     }
-    if (!this.shown && this.fontsOk) {
+    /* Revealed where it is seen: a stage built in the lot draws its first
+       frames there, and its fade and its wake belong to the reader. */
+    if (!this.shown && this.fontsOk && (this.visible || !this.io)) {
       this.shown = true;
       if (this.wakeAt == null && !this.wakeWait) this.wakeAt = now();
       this.wakeT0 = now();
@@ -38875,6 +38893,7 @@ class Component extends DCLogic {
         this._sceneWaitT = setTimeout(sceneWait, 120);
       };
       sceneWait();
+      this._spT = setTimeout(() => this.scenePrewarm(), 1500);
       if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
       const hr = localStorage.getItem('incommon.hd.read');
       if (hr === 'cards' || hr === 'full') this.setState({ hdRead: hr });
@@ -39029,7 +39048,7 @@ class Component extends DCLogic {
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
     if (this._csS) { this._csS.destroy(); this._csS = null; }
     if (this._hsS) { this._hsS.destroy(); this._hsS = null; }
-    clearTimeout(this._hsSyncT); clearTimeout(this._sceneWaitT);
+    clearTimeout(this._hsSyncT); clearTimeout(this._sceneWaitT); clearTimeout(this._spT);
     clearTimeout(this._cySyncT);
     if (this._onHide) { this._onHide(); window.removeEventListener('pagehide', this._onHide); this._onHide = null; }
     if (this._onPageShow) { window.removeEventListener('pageshow', this._onPageShow); this._onPageShow = null; }
@@ -49127,6 +49146,97 @@ class Component extends DCLogic {
     const v = this.state.chartView;
     return (v === '3d' || v === 'orbit') && (this.chartSceneOn() || this.scenePending('ChartScene')) ? v : '2d';
   }
+  /* THE STAGES ARE BUILT BEFORE THEY ARE ASKED FOR (owner, 20 October 2026:
+     3D came up slowly when opened, and at once after a trip through 2D and
+     Orbital, because by then the scene already existed). A scene that is not
+     on screen waits in the lot, an offscreen box inside the shell's own token
+     root, where it keeps its palette and its compiled programs and runs no
+     loop. scenePrewarm() builds the wiring and then the chart there, one at a
+     time, once the app has settled, so the first visit is the fast one. */
+  sceneLot() {
+    if (this._sceneLot && this._sceneLot.isConnected) return this._sceneLot;
+    const root = document.querySelector('[data-vt]') || document.querySelector('[data-app-root]');
+    if (!root) return null;
+    const lot = document.createElement('div');
+    lot.setAttribute('data-scene-lot', '');
+    lot.setAttribute('aria-hidden', 'true');
+    lot.inert = true;
+    lot.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + Math.min(window.innerWidth || 640, 900) + 'px;height:520px;overflow:hidden;pointer-events:none';
+    root.appendChild(lot);
+    return (this._sceneLot = lot);
+  }
+  scenePark(S) {
+    const lot = this.sceneLot();
+    if (!lot) { S.detach(); return; }
+    if (S.host !== lot || S.el.root.parentNode !== lot) S.attach(lot);
+  }
+  scenePrewarm() {
+    clearTimeout(this._spT);
+    const later = ms => { this._spT = setTimeout(() => this.scenePrewarm(), ms); };
+    if (!this.state.ready || document.hidden) return later(1500);
+    if (!this._spReadyAt) this._spReadyAt = Date.now();
+    if (Date.now() - this._spReadyAt < 2000) return later(500);
+    const busy = S => S && !S.failed && (S.building || S._warming || (S.ready && !S.warm && !!S.host));
+    if ([this._csS, this._hsS, this._cyS].some(busy)) return later(400);
+    const tk = (this.state.themeKey || '') + (this.state.themeHC ? '/hc' : '');
+    const next = [
+      () => {
+        if (this.hdViewNow() === '2d' || !this.hdSceneOn() || !this._hsModel) return null;
+        if (!this._hsS) {
+          const S = this._hsS = this.hdSceneMake();
+          S.setModel(this._hsModel); S.setView(this.hdViewNow()); S.setLayer(this.state.bgMode || 'both');
+          S.setSky(this.hdSkyOn() ? this.hdSkyList() : null); S.setFocus(this.state.hsFocus || null, false);
+          this._hsTheme = tk;
+        }
+        return this._hsS;
+      },
+      () => {
+        if (this.chartViewNow() === '2d' || !this.chartSceneOn() || !this._csModel) return null;
+        if (!this._csS) {
+          const S = this._csS = this.chartSceneMake(), m = this._csModel;
+          S.setModel(m); S.setView(this.chartViewNow());
+          S.setFocus(this.state.csFocus || (m.bodies[0] ? m.bodies[0].key : null), false);
+          this._csTheme = tk;
+        }
+        return this._csS;
+      }
+    ];
+    for (const pick of next) {
+      const S = pick();
+      if (!S || S.failed || S.ready || S.building) continue;
+      /* a stage that is mounted but off screen (the phone's next chart page)
+         is built where it stands; one with no stage waits in the lot */
+      if (!S.host) this.scenePark(S);
+      const go = () => { if (!S.failed && !S.ready && S.host) S.prebuild(); later(400); };
+      if (window.requestIdleCallback) window.requestIdleCallback(go, { timeout: 1500 }); else setTimeout(go, 50);
+      return;
+    }
+  }
+  chartSceneMake() {
+    return window.ChartScene.create({
+      onFail: () => { this._csS = null; this.setState({ csFail: true }); },
+      onReady: () => { if (!this.state.csLive) this.setState({ csLive: true }); },
+      onExploreEnd: () => { if (this.state.csFree) this.setState({ csFree: false }); },
+      onFocus: (key, how) => {
+        this.setState({ csFocus: key });
+        const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
+        if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
+      },
+      onOpen: key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }),
+      onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects' } : { aspSel: i }),
+      onHouse: n => this.setState(this.state.chartExpandOpen ? { obsHouse: n } : { dpSel: { kind: 'house', h: n } }),
+      lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t))),
+      /* the Observatory's own moves, all of them discrete */
+      onArrive: key => {
+        const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
+        if (b) this.speak('Arrived at ' + b.label + '.', 'polite');
+      },
+      onFly: on => { if (!!this.state.csFlying !== !!on) this.setState({ csFlying: !!on }); },
+      onToggleView: () => { const v = this.state.chartView === 'orbit' ? '3d' : 'orbit'; try { localStorage.setItem('incommon.chart.view', v); } catch (e) {} this.setState({ chartView: v }); },
+      onPanels: () => this.setState({ obsPanels: this.state.obsPanels === false }),
+      onHelp: () => this.setState({ obsKeys: !this.state.obsKeys })
+    });
+  }
   chartSceneSync(retry) {
     if (!this.chartSceneOn()) return;
     /* THE OBSERVATORY is the same scene in the full screen host: while it is
@@ -49138,37 +49248,13 @@ class Component extends DCLogic {
     const vertical = (st.dtW || 1440) < this.BP.md;
     clearTimeout(this._csSyncT);
     if (!host) {
-      if (this._csS) this._csS.detach();
+      if (this._csS) this.scenePark(this._csS);
       const want = st.ready && (obs || (view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'astrology')));
       if (want && (retry || 0) < 8) this._csSyncT = setTimeout(() => this.chartSceneSync((retry || 0) + 1), 60);
       return;
     }
     if (!this._csS && !obs && vertical && this.curTab() !== 'spirit') return;
-    if (!this._csS) {
-      this._csS = window.ChartScene.create({
-        onFail: () => { this._csS = null; this.setState({ csFail: true }); },
-        onReady: () => { if (!this.state.csLive) this.setState({ csLive: true }); },
-        onExploreEnd: () => { if (this.state.csFree) this.setState({ csFree: false }); },
-        onFocus: (key, how) => {
-          this.setState({ csFocus: key });
-          const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
-          if (b && how === 'key') this.speak(b.label + ', ' + b.deg + ' degrees ' + b.sign + '.', 'polite');
-        },
-        onOpen: key => this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }),
-        onAspect: i => this.setState(this.state.chartExpandOpen ? { chartExpandAspSel: i, obsTab: 'aspects' } : { aspSel: i }),
-        onHouse: n => this.setState(this.state.chartExpandOpen ? { obsHouse: n } : { dpSel: { kind: 'house', h: n } }),
-        lonAt: (name, t) => this.lonOf(name, this.t2000(new Date(t))),
-        /* the Observatory's own moves, all of them discrete */
-        onArrive: key => {
-          const b = this._csModel && this._csModel.bodies.find(x => x.key === key);
-          if (b) this.speak('Arrived at ' + b.label + '.', 'polite');
-        },
-        onFly: on => { if (!!this.state.csFlying !== !!on) this.setState({ csFlying: !!on }); },
-        onToggleView: () => { const v = this.state.chartView === 'orbit' ? '3d' : 'orbit'; try { localStorage.setItem('incommon.chart.view', v); } catch (e) {} this.setState({ chartView: v }); },
-        onPanels: () => this.setState({ obsPanels: this.state.obsPanels === false }),
-        onHelp: () => this.setState({ obsKeys: !this.state.obsKeys })
-      });
-    }
+    if (!this._csS) this._csS = this.chartSceneMake();
     const m = this._csModel, S = this._csS;
     if (m) S.setModel(m);
     S.setView(view);
@@ -49227,30 +49313,31 @@ class Component extends DCLogic {
     if (!this._hdGl) { this._hdGl = {}; this.PLNS.forEach(([n, g]) => { this._hdGl[n] = g; }); this._hdGl.Earth = '\u2295'; }
     return this._hdGl;
   }
+  hdSceneMake() {
+    return window.HDScene.create({
+      onFail: () => { this._hsS = null; this.setState({ hsFail: true }); },
+      onReady: () => { if (!this.state.hsLive) this.setState({ hsLive: true }); },
+      onExploreEnd: () => { if (this.state.hsFree) this.setState({ hsFree: false }); },
+      onFocus: (key, how) => {
+        this.setState({ hsFocus: key });
+        if (how === 'key') { const h = this.hdHudOf(key); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite'); }
+      },
+      onOpen: key => { const sel = this.hdSelOf(key); if (sel) this.setState({ hdSel: sel }); }
+    });
+  }
   hdSceneSync(retry) {
     if (!this.hdSceneOn()) return;
     const st = this.state, view = this.hdViewNow(), host = view === '2d' ? null : document.querySelector('[data-hs-scene]');
     const vertical = (st.dtW || 1440) < this.BP.md;
     clearTimeout(this._hsSyncT);
     if (!host) {
-      if (this._hsS) this._hsS.detach();
+      if (this._hsS) this.scenePark(this._hsS);
       const want = st.ready && view !== '2d' && (vertical ? this.curTab() === 'spirit' : st.spiritView === 'humanDesign');
       if (want && (retry || 0) < 8) this._hsSyncT = setTimeout(() => this.hdSceneSync((retry || 0) + 1), 60);
       return;
     }
     if (!this._hsS && vertical && this.curTab() !== 'spirit') return;
-    if (!this._hsS) {
-      this._hsS = window.HDScene.create({
-        onFail: () => { this._hsS = null; this.setState({ hsFail: true }); },
-        onReady: () => { if (!this.state.hsLive) this.setState({ hsLive: true }); },
-        onExploreEnd: () => { if (this.state.hsFree) this.setState({ hsFree: false }); },
-        onFocus: (key, how) => {
-          this.setState({ hsFocus: key });
-          if (how === 'key') { const h = this.hdHudOf(key); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite'); }
-        },
-        onOpen: key => { const sel = this.hdSelOf(key); if (sel) this.setState({ hdSel: sel }); }
-      });
-    }
+    if (!this._hsS) this._hsS = this.hdSceneMake();
     const m = this._hsModel, S = this._hsS;
     if (m) S.setModel(m);
     S.setView(view);
