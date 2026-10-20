@@ -1978,6 +1978,22 @@ strip, which is a fade to black under the square rather than a surface
 (`pointer-events:none`). On Today, both shells, no surfaced container that
 holds a control is left flat apart from that strip.
 
+**Relatively nothing reads flat now** (the owner, 20 October 2026: "We can
+make it pop a little bit more. I want relatively nothing to appear flat in the
+app."). The tokens are stronger (a brighter top edge, a dark bottom edge and a
+deeper drop; hover adds a faint `--atmc` rim and, without reduced motion,
+`translate: 0 -1px`, a property separate from `transform` so the Numbers tilt
+is untouched), and the marking covers every surface that holds content, not
+only the ones holding a control: `box` for any card, note or panel, `chip`
+(`--lift-xs`) for a badge, an avatar or a tile, and `in` for what is a place
+rather than a thing: a well on a black wash, a dashed slot (the "coming soon"
+card and "Add a profile" are set in, which still says they are not controls),
+a track 14px or shorter, a toggle track and a check square. **Empty is
+ornament**: a surfaced element with no text and no child stays flat, which is
+how the dots, bars and dividers keep reading as drawing. Measured on Today,
+the Library, Settings and the astrology page at 1440 and Today at 390: no
+surfaced element over 30x20 left flat except the Get Help fade.
+
 ## Touch targets
 44px minimum on every control in both shells. There are exactly two exceptions,
 both marked with an attribute so the tests can tell the difference, and neither
