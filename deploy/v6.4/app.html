@@ -27749,6 +27749,7 @@ input[type="date"]{color-scheme:dark}
 [data-hd-deck]::-webkit-scrollbar{display:none}
 [data-hd-deck]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:2px;border-radius:var(--rad)}
 [data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
+@keyframes bnDotIn{from{transform:scale(0)}to{transform:scale(1)}}@keyframes bnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}@keyframes bnFolioA{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@keyframes bnFolioB{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@media (hover:hover){[data-bn-dot]:hover > span{transform:scale(1.7)!important;opacity:1!important}[data-bn-dot]:hover{z-index:6!important}}[data-bn-folio]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -29577,13 +29578,13 @@ input[type="date"]{color-scheme:dark}
           </span>
           <span style="flex:none;font:400 14px var(--fb);color:var(--ac)">→</span>
         </button>
-        <div role="group" aria-label="The Numbers, coming soon" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;background:var(--sf);border:1px dashed var(--bd);border-radius:var(--rad);padding:13px 15px">
-          <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.18);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--mut);-webkit-mask:{{ libNumIcon }} center/contain no-repeat;mask:{{ libNumIcon }} center/contain no-repeat"></span></span>
+        <button data-lift onClick="{{ goNumBook }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(var(--atmc),.17),var(--sf));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:13px 15px;transition:border-color .3s ease,background-color .3s ease">
+          <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--ac2-hi);-webkit-mask:{{ libNumIcon }} center/contain no-repeat;mask:{{ libNumIcon }} center/contain no-repeat"></span></span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
-            <span style="font:400 16px var(--fd);color:var(--mut)">The Numbers</span>
+            <span style="font:400 16px var(--fd);color:var(--tx)">The Book of Numbers</span>
           </span>
-          <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ac2-hi);background:rgba(var(--atmc),.22)">COMING SOON</span>
-        </div>
+          <span style="flex:none;font:400 14px var(--fb);color:var(--ac2-hi)">&#8594;</span>
+        </button>
         <button data-lift onClick="{{ goTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(var(--atmc),.17),var(--sf));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:13px 15px;transition:border-color .3s ease,background-color .3s ease">
           <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--ac2-hi);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Crect%20x%3D%226.2%22%20y%3D%223.4%22%20width%3D%2211.6%22%20height%3D%2217.2%22%20rx%3D%222.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%209.23A3.2%203.2%200%200%201%2012%2014.77A3.2%203.2%200%200%201%2012%209.23Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Crect%20x%3D%226.2%22%20y%3D%223.4%22%20width%3D%2211.6%22%20height%3D%2217.2%22%20rx%3D%222.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%209.23A3.2%203.2%200%200%201%2012%2014.77A3.2%203.2%200%200%201%2012%209.23Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
@@ -30293,6 +30294,179 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
       </div>
     </sc-for>
+  </div>
+</sc-if>
+
+<!-- THE BOOK OF NUMBERS. Ninety compounds on nine roots. The mandala is
+     pointer ornament inside [data-chart]; the folio holds the open one and
+     takes the arrow keys; the index under them is every compound again as a
+     control. Written once and placed in both shells. -->
+<sc-if value="{{ libNumBook }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Library / The Book of Numbers" data-bn-room style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 18px 32px;display:flex;flex-direction:column;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ bnBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
+        <div style="font:400 24px/1.25 var(--fd)">The Book of Numbers</div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
+          <div data-chart="book-of-numbers" role="img" aria-label="{{ bnMandalaLabel }}" style="position:relative;width:100%;max-width:410px;aspect-ratio:1/1">
+            <div aria-hidden="true" style="position:absolute;inset:4%;border-radius:50%;background:radial-gradient(circle,rgba(var(--atmc2),.17),rgba(var(--atmc),.11) 46%,transparent 71%);animation:lensBreathe 7s ease-in-out infinite;pointer-events:none"></div>
+            <div aria-hidden="true" style="position:absolute;inset:1.5%;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,rgba(var(--atmc),.24) 26deg,transparent 64deg);-webkit-mask:radial-gradient(circle,transparent 19%,#000 20%);mask:radial-gradient(circle,transparent 19%,#000 20%);animation:nsOrbit 26s linear infinite;pointer-events:none"></div>
+            <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(var(--atmc),.5);animation:nsOrbit 180s linear infinite reverse;pointer-events:none"></div>
+            <svg viewBox="0 0 360 360" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+              <circle cx="180" cy="180" r="44" fill="none" style="stroke:rgba(var(--atmc),.55);stroke-width:1"></circle>
+              <circle cx="180" cy="180" r="70" fill="none" style="stroke:var(--chl);stroke-width:1"></circle>
+              <sc-for list="{{ bnSpokes }}" as="sp" hint-placeholder-count="9">
+                <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
+              </sc-for>
+              <sc-if value="{{ bnConsteOn }}" hint-placeholder-val="{{ false }}">
+                <polyline points="{{ bnConste }}" fill="none" style="stroke:var(--tx);stroke-opacity:.32;stroke-width:1;stroke-dasharray:2 4"></polyline>
+              </sc-if>
+              <line x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
+            </svg>
+            <sc-for list="{{ bnRoots }}" as="ro" hint-placeholder-count="9">
+              <span onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
+            </sc-for>
+            <sc-for list="{{ bnDots }}" as="d" hint-placeholder-count="90">
+              <span data-bn-dot onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
+              </span>
+            </sc-for>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none">
+              <span style="font:400 clamp(28px,8vw,38px)/1 var(--fd);color:{{ bnCenterC }};text-shadow:0 0 18px rgba(var(--atmc2),.5)">{{ bnCenter }}</span>
+              <span style="font:600 10.5px var(--fu);letter-spacing:.12em;color:var(--mut)">{{ bnCenterRoot }}</span>
+            </div>
+          </div>
+          <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+            <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
+              <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
+                <span style="font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-bn-folio data-lift="card" tabindex="0" role="region" aria-label="{{ bnFolioLabel }}" onKeyDown="{{ bnKeys }}" style="flex:1 1 360px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
+          <div style="display:flex;flex-direction:column;gap:15px;animation:{{ bnAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+              <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:{{ bnCatC }};background:{{ bnCatBg }}">{{ bnCat }}</span>
+              <sc-if value="{{ bnWhereOn }}" hint-placeholder-val="{{ false }}">
+                <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;color:var(--ac2-hi);border:1px solid var(--ac2)">{{ bnWhere }}</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <span style="font:400 clamp(64px,16vw,92px)/.92 var(--fd);color:{{ bnInk }};letter-spacing:-.02em;text-shadow:0 0 30px rgba(var(--atmc2),.42)">{{ bnN }}</span>
+              <span style="font:400 26px var(--fd);color:var(--mut)">{{ bnRootDigit }}</span>
+            </div>
+            <div style="font:400 clamp(22px,4.6vw,28px)/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ bnTitle }}</div>
+            <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
+            <sc-if value="{{ bnSeasonOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--warn);padding-left:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)">{{ bnSeasonHead }}</div>
+                <div style="font:400 17px/1.3 var(--fd);color:var(--tx)">{{ bnSeasonTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnSeasonDesc }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bnRootOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--bd);padding-top:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ bnRootHead }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnRootText }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bnOppOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">An opening</div>
+                <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnOpp }}</div>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">On the same root</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ bnKin }}" as="k" hint-placeholder-count="9">
+                  <button data-lift onClick="{{ k.go }}" aria-label="{{ k.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf2);font:400 17px var(--fd);color:{{ k.c }}">{{ k.n }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button data-lift onClick="{{ bnPrev }}" aria-label="{{ bnPrevAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:64px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 13px var(--fu);color:var(--tx)">{{ bnPrevLabel }}</button>
+              <button data-lift onClick="{{ bnDraw }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">&#10022; Draw a number</button>
+              <button data-lift onClick="{{ bnNext }}" aria-label="{{ bnNextAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:64px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 13px var(--fu);color:var(--tx)">{{ bnNextLabel }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div role="radiogroup" aria-label="Filter the book" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ bnFilters }}" as="f" hint-placeholder-count="5">
+            <button data-lift role="radio" aria-checked="{{ f.on }}" onClick="{{ f.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px;border:1px solid {{ f.bd }};border-radius:999px;background:{{ f.bg }};font:600 11.5px var(--fu);color:{{ f.c }}">
+              <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ f.dot }}"></span>
+              <span>{{ f.label }}</span>
+              <span style="font:600 10px var(--fu);color:var(--mut)">{{ f.count }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <input data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <sc-if value="{{ bnFlat }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ bnHitLine }}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
+              <sc-for list="{{ bnHits }}" as="h" hint-placeholder-count="6">
+                <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                  <span style="flex:none;width:42px;font:400 26px/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.n }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                    <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.title }}</span>
+                    <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ h.cat }}</span>
+                  </span>
+                  <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                    <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ bnByRoot }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ bnRootSecs }}" as="rs" hint-placeholder-count="9">
+              <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ rs.bd }};border-radius:var(--rad);padding:8px 14px;transition:border-color .3s ease">
+                <button onClick="{{ rs.toggle }}" aria-expanded="{{ rs.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;align-items:center;gap:13px">
+                  <span style="flex:none;width:36px;font:400 30px/1 var(--fd);color:var(--ac2-hi);text-align:center">{{ rs.d }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;text-align:left">
+                    <span style="font:400 16px var(--fd);color:var(--tx)">{{ rs.name }}</span>
+                    <span aria-hidden="true" style="display:flex;gap:5px;align-items:center">
+                      <sc-for list="{{ rs.peek }}" as="pk" hint-placeholder-count="10">
+                        <span style="flex:none;width:{{ pk.size }};height:{{ pk.size }};border-radius:50%;background:{{ pk.fill }}"></span>
+                      </sc-for>
+                    </span>
+                  </span>
+                  <span style="flex:none;font:400 18px var(--fu);color:var(--ac2-hi)">{{ rs.icon }}</span>
+                </button>
+                <sc-if value="{{ rs.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;padding-bottom:6px;animation:fadeUp .22s ease-out">
+                    <sc-for list="{{ rs.rows }}" as="h" hint-placeholder-count="10">
+                      <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                        <span style="flex:none;width:42px;font:400 26px/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.n }}</span>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                          <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.title }}</span>
+                          <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ h.cat }}</span>
+                        </span>
+                        <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                          <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                        </sc-if>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
   </div>
 </sc-if>
 
@@ -35751,13 +35925,13 @@ input[type="date"]{color-scheme:dark}
           </span>
           <span style="flex:none;font:400 14px var(--fb);color:var(--ac)">→</span>
         </button>
-        <div role="group" aria-label="The Numbers, coming soon" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;background:var(--sf);border:1px dashed var(--bd);border-radius:var(--rad);padding:13px 15px">
-          <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.18);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--mut);-webkit-mask:{{ libNumIcon }} center/contain no-repeat;mask:{{ libNumIcon }} center/contain no-repeat"></span></span>
+        <button data-lift onClick="{{ goNumBook }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(var(--atmc),.17),var(--sf));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:13px 15px;transition:border-color .3s ease,background-color .3s ease">
+          <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--ac2-hi);-webkit-mask:{{ libNumIcon }} center/contain no-repeat;mask:{{ libNumIcon }} center/contain no-repeat"></span></span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
-            <span style="font:400 16px var(--fd);color:var(--mut)">The Numbers</span>
+            <span style="font:400 16px var(--fd);color:var(--tx)">The Book of Numbers</span>
           </span>
-          <span style="flex:none;font:700 8px var(--fu);letter-spacing:.1em;padding:3px 7px;border-radius:5px;color:var(--ac2-hi);background:rgba(var(--atmc),.22)">COMING SOON</span>
-        </div>
+          <span style="flex:none;font:400 14px var(--fb);color:var(--ac2-hi)">&#8594;</span>
+        </button>
         <button data-lift onClick="{{ goTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,rgba(var(--atmc),.17),var(--sf));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:13px 15px;transition:border-color .3s ease,background-color .3s ease">
           <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:11px;background:rgba(var(--atmc),.3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:21px;height:21px;background-color:var(--ac2-hi);-webkit-mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Crect%20x%3D%226.2%22%20y%3D%223.4%22%20width%3D%2211.6%22%20height%3D%2217.2%22%20rx%3D%222.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%209.23A3.2%203.2%200%200%201%2012%2014.77A3.2%203.2%200%200%201%2012%209.23Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat;mask:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20color%3D%22%23000%22%3E%3Crect%20x%3D%226.2%22%20y%3D%223.4%22%20width%3D%2211.6%22%20height%3D%2217.2%22%20rx%3D%222.4%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%209.23A3.2%203.2%200%200%201%2012%2014.77A3.2%203.2%200%200%201%2012%209.23Z%22%20fill%3D%22currentColor%22%2F%3E%3C%2Fsvg%3E) center/contain no-repeat"></span></span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
@@ -36477,6 +36651,179 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
       </div>
     </sc-for>
+  </div>
+</sc-if>
+
+<!-- THE BOOK OF NUMBERS. Ninety compounds on nine roots. The mandala is
+     pointer ornament inside [data-chart]; the folio holds the open one and
+     takes the arrow keys; the index under them is every compound again as a
+     control. Written once and placed in both shells. -->
+<sc-if value="{{ libNumBook }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Library / The Book of Numbers" data-bn-room style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 18px 32px;display:flex;flex-direction:column;animation:fadeUp .25s ease">
+    <div style="width:100%;max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ bnBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
+        <div style="font:400 24px/1.25 var(--fd)">The Book of Numbers</div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start">
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:16px;align-items:center">
+          <div data-chart="book-of-numbers" role="img" aria-label="{{ bnMandalaLabel }}" style="position:relative;width:100%;max-width:410px;aspect-ratio:1/1">
+            <div aria-hidden="true" style="position:absolute;inset:4%;border-radius:50%;background:radial-gradient(circle,rgba(var(--atmc2),.17),rgba(var(--atmc),.11) 46%,transparent 71%);animation:lensBreathe 7s ease-in-out infinite;pointer-events:none"></div>
+            <div aria-hidden="true" style="position:absolute;inset:1.5%;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,rgba(var(--atmc),.24) 26deg,transparent 64deg);-webkit-mask:radial-gradient(circle,transparent 19%,#000 20%);mask:radial-gradient(circle,transparent 19%,#000 20%);animation:nsOrbit 26s linear infinite;pointer-events:none"></div>
+            <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(var(--atmc),.5);animation:nsOrbit 180s linear infinite reverse;pointer-events:none"></div>
+            <svg viewBox="0 0 360 360" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+              <circle cx="180" cy="180" r="44" fill="none" style="stroke:rgba(var(--atmc),.55);stroke-width:1"></circle>
+              <circle cx="180" cy="180" r="70" fill="none" style="stroke:var(--chl);stroke-width:1"></circle>
+              <sc-for list="{{ bnSpokes }}" as="sp" hint-placeholder-count="9">
+                <line x1="{{ sp.x1 }}" y1="{{ sp.y1 }}" x2="{{ sp.x2 }}" y2="{{ sp.y2 }}" style="stroke:{{ sp.c }};stroke-opacity:{{ sp.o }};stroke-width:{{ sp.w }}"></line>
+              </sc-for>
+              <sc-if value="{{ bnConsteOn }}" hint-placeholder-val="{{ false }}">
+                <polyline points="{{ bnConste }}" fill="none" style="stroke:var(--tx);stroke-opacity:.32;stroke-width:1;stroke-dasharray:2 4"></polyline>
+              </sc-if>
+              <line x1="180" y1="180" x2="{{ bnTx }}" y2="{{ bnTy }}" style="stroke:var(--ac2-hi);stroke-opacity:.5;stroke-width:1.2"></line>
+            </svg>
+            <sc-for list="{{ bnRoots }}" as="ro" hint-placeholder-count="9">
+              <span onClick="{{ ro.go }}" style="position:absolute;left:{{ ro.l }};top:{{ ro.t }};transform:translate(-50%,-50%);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px var(--fu);color:{{ ro.c }};transition:color .3s ease">{{ ro.d }}</span>
+            </sc-for>
+            <sc-for list="{{ bnDots }}" as="d" hint-placeholder-count="90">
+              <span data-bn-dot onClick="{{ d.go }}" title="{{ d.tip }}" style="position:absolute;left:{{ d.l }};top:{{ d.t }};z-index:{{ d.z }};width:22px;height:22px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                <span style="flex:none;width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.fill }};opacity:{{ d.op }};box-shadow:{{ d.ring }};animation:{{ d.anim }};animation-delay:{{ d.delay }};transition:width .35s ease,height .35s ease,opacity .35s ease,box-shadow .35s ease"></span>
+              </span>
+            </sc-for>
+            <div aria-hidden="true" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none">
+              <span style="font:400 clamp(28px,8vw,38px)/1 var(--fd);color:{{ bnCenterC }};text-shadow:0 0 18px rgba(var(--atmc2),.5)">{{ bnCenter }}</span>
+              <span style="font:600 10.5px var(--fu);letter-spacing:.12em;color:var(--mut)">{{ bnCenterRoot }}</span>
+            </div>
+          </div>
+          <div role="group" aria-label="Today, and your numbers" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+            <sc-for list="{{ bnMarks }}" as="m" hint-placeholder-count="5">
+              <button data-lift onClick="{{ m.go }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 13px;border:1px solid {{ m.bd }};border-radius:999px;background:var(--sf)">
+                <span style="font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ m.label }}</span>
+                <span style="font:400 18px/1 var(--fd);color:{{ m.c }}">{{ m.n }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-bn-folio data-lift="card" tabindex="0" role="region" aria-label="{{ bnFolioLabel }}" onKeyDown="{{ bnKeys }}" style="flex:1 1 360px;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;background:linear-gradient(165deg,rgba(var(--atmc),.18),var(--sf) 40%,var(--sf-g));border:1px solid rgba(var(--atmc),.44);border-radius:var(--rad);padding:20px 20px 18px">
+          <div style="display:flex;flex-direction:column;gap:15px;animation:{{ bnAnim }} .6s cubic-bezier(.2,.7,.2,1) both">
+            <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+              <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:{{ bnCatC }};background:{{ bnCatBg }}">{{ bnCat }}</span>
+              <sc-if value="{{ bnWhereOn }}" hint-placeholder-val="{{ false }}">
+                <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;color:var(--ac2-hi);border:1px solid var(--ac2)">{{ bnWhere }}</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <span style="font:400 clamp(64px,16vw,92px)/.92 var(--fd);color:{{ bnInk }};letter-spacing:-.02em;text-shadow:0 0 30px rgba(var(--atmc2),.42)">{{ bnN }}</span>
+              <span style="font:400 26px var(--fd);color:var(--mut)">{{ bnRootDigit }}</span>
+            </div>
+            <div style="font:400 clamp(22px,4.6vw,28px)/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ bnTitle }}</div>
+            <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnDesc }}</div>
+            <sc-if value="{{ bnSeasonOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--warn);padding-left:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)">{{ bnSeasonHead }}</div>
+                <div style="font:400 17px/1.3 var(--fd);color:var(--tx)">{{ bnSeasonTitle }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnSeasonDesc }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bnRootOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--bd);padding-top:12px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ bnRootHead }}</div>
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnRootText }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ bnOppOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">An opening</div>
+                <div style="font:italic 400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ bnOpp }}</div>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">On the same root</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ bnKin }}" as="k" hint-placeholder-count="9">
+                  <button data-lift onClick="{{ k.go }}" aria-label="{{ k.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:12px;background:var(--sf2);font:400 17px var(--fd);color:{{ k.c }}">{{ k.n }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button data-lift onClick="{{ bnPrev }}" aria-label="{{ bnPrevAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:64px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 13px var(--fu);color:var(--tx)">{{ bnPrevLabel }}</button>
+              <button data-lift onClick="{{ bnDraw }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">&#10022; Draw a number</button>
+              <button data-lift onClick="{{ bnNext }}" aria-label="{{ bnNextAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:64px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 13px var(--fu);color:var(--tx)">{{ bnNextLabel }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div role="radiogroup" aria-label="Filter the book" onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ bnFilters }}" as="f" hint-placeholder-count="5">
+            <button data-lift role="radio" aria-checked="{{ f.on }}" onClick="{{ f.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px;border:1px solid {{ f.bd }};border-radius:999px;background:{{ f.bg }};font:600 11.5px var(--fu);color:{{ f.c }}">
+              <span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;background:{{ f.dot }}"></span>
+              <span>{{ f.label }}</span>
+              <span style="font:600 10px var(--fu);color:var(--mut)">{{ f.count }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <input data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <sc-if value="{{ bnFlat }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ bnHitLine }}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
+              <sc-for list="{{ bnHits }}" as="h" hint-placeholder-count="6">
+                <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                  <span style="flex:none;width:42px;font:400 26px/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.n }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                    <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.title }}</span>
+                    <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ h.cat }}</span>
+                  </span>
+                  <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                    <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ bnByRoot }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ bnRootSecs }}" as="rs" hint-placeholder-count="9">
+              <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ rs.bd }};border-radius:var(--rad);padding:8px 14px;transition:border-color .3s ease">
+                <button onClick="{{ rs.toggle }}" aria-expanded="{{ rs.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:54px;display:flex;align-items:center;gap:13px">
+                  <span style="flex:none;width:36px;font:400 30px/1 var(--fd);color:var(--ac2-hi);text-align:center">{{ rs.d }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;text-align:left">
+                    <span style="font:400 16px var(--fd);color:var(--tx)">{{ rs.name }}</span>
+                    <span aria-hidden="true" style="display:flex;gap:5px;align-items:center">
+                      <sc-for list="{{ rs.peek }}" as="pk" hint-placeholder-count="10">
+                        <span style="flex:none;width:{{ pk.size }};height:{{ pk.size }};border-radius:50%;background:{{ pk.fill }}"></span>
+                      </sc-for>
+                    </span>
+                  </span>
+                  <span style="flex:none;font:400 18px var(--fu);color:var(--ac2-hi)">{{ rs.icon }}</span>
+                </button>
+                <sc-if value="{{ rs.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;padding-bottom:6px;animation:fadeUp .22s ease-out">
+                    <sc-for list="{{ rs.rows }}" as="h" hint-placeholder-count="10">
+                      <button data-lift onClick="{{ h.go }}" aria-current="{{ h.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid {{ h.bd }};border-radius:14px;background:{{ h.bg }}">
+                        <span style="flex:none;width:42px;font:400 26px/1 var(--fd);color:{{ h.c }};text-align:center">{{ h.n }}</span>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                          <span style="font:400 15px/1.25 var(--fd);color:var(--tx)">{{ h.title }}</span>
+                          <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">{{ h.cat }}</span>
+                        </span>
+                        <sc-if value="{{ h.mine }}" hint-placeholder-val="{{ false }}">
+                          <span style="flex:none;font:700 8.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Yours</span>
+                        </sc-if>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
   </div>
 </sc-if>
 
@@ -40426,12 +40773,12 @@ class Component extends DCLogic {
     return h.charAt(0) === '/' ? h.replace(/\/+$/, '') || '/today' : '';
   }
   SPIRIT_PATHS = { astrology: 'astrology', humanDesign: 'human-design', numerology: 'numerology' };
-  LIB_PATHS = { lexicon: '/library/sabian-lexicon', hdatlas: '/library/human-design-atlas', astropedia: '/library/astropedia', tarot: '/library/tarot', dreams: '/library/dreams', iching: '/library/i-ching', help: '/library/yellow-pages', angel: '/library/synchronicities', dreamj: '/library/dream-journal', reading: '/library/readings/tarot' };
+  LIB_PATHS = { lexicon: '/library/sabian-lexicon', hdatlas: '/library/human-design-atlas', astropedia: '/library/astropedia', tarot: '/library/tarot', dreams: '/library/dreams', iching: '/library/i-ching', help: '/library/yellow-pages', angel: '/library/synchronicities', dreamj: '/library/dream-journal', reading: '/library/readings/tarot', numbers: '/library/book-of-numbers' };
   /* The six Library tabs, in order, and the tab each room belongs to. A room is
      entered from its own tab and Back returns to it, so the pair has to be one
      table rather than a string written at every call site. */
   LIB_SUBS = [['study', 'Study'], ['journal', 'Journal'], ['readings', 'Readings'], ['throughline', 'Throughline'], ['archive', 'Archive'], ['commons', 'The Commons']];
-  LIB_VIEW_SUB = { hdatlas: 'study', astropedia: 'study', tarot: 'study', dreams: 'study', lexicon: 'study', angel: 'journal', dreamj: 'journal', iching: 'readings', reading: 'readings' };
+  LIB_VIEW_SUB = { hdatlas: 'study', astropedia: 'study', numbers: 'study', tarot: 'study', dreams: 'study', lexicon: 'study', angel: 'journal', dreamj: 'journal', iching: 'readings', reading: 'readings' };
   libSubOf() { const k = this.state.libSub; return this.LIB_SUBS.some(s => s[0] === k) ? k : 'study'; }
   currentPath() {
     const st = this.state, tab = this.curTab();
@@ -40522,6 +40869,9 @@ class Component extends DCLogic {
         const AS = window.AnimalSymbolism, name = AS ? (AS.names || []).find(n => this.slug(n) === key) : null;
         if (name) { this.animalPick(name); return go({ tab: 'library', libSub: 'journal', libView: 'angel', sightMode: 'animal' }); }
       }
+      if (room === 'book-of-numbers' && kind === 'number' && /^\d{2}$/.test(key) && window.NumberMatrix && window.NumberMatrix.has(Number(key))) {
+        return go({ tab: 'library', libSub: 'study', libView: 'numbers', bnSel: Number(key), bnQuery: '', bnCat: 'all', bnRoot: null });
+      }
       const base = '/library/' + room;
       if (Object.keys(this.LIB_PATHS).some(k => this.LIB_PATHS[k] === base)) return this.openPath(base);
     }
@@ -40531,7 +40881,7 @@ class Component extends DCLogic {
          is the old address of the shelf the practices lived on, which is the Journal
          tab now. */
       const tabKey = seg[1] === 'practices' ? 'journal' : (this.LIB_SUBS.some(s => s[0] === seg[1]) ? seg[1] : null);
-      return go({ tab: 'library', libSub: view ? (this.LIB_VIEW_SUB[view] || this.libSubOf()) : (tabKey || 'study'), libView: view, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, atlasItem: null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
+      return go({ tab: 'library', libSub: view ? (this.LIB_VIEW_SUB[view] || this.libSubOf()) : (tabKey || 'study'), libView: view, bnSel: null, bnQuery: '', bnRoot: null, apSec: view === 'astropedia' ? 'signs' : null, atlasSec: view === 'hdatlas' ? 'intro' : null, atlasItem: null, ttSec: view === 'tarot' ? 'major' : null, icSec: view === 'iching' ? 'heaven' : null, icHex: null, icQuery: '' });
     }
     /* /support is the address the Terms and the Privacy Policy point at: it
        lands on Settings with Contact Support open. */
@@ -46681,6 +47031,220 @@ class Component extends DCLogic {
         blocks: st.apSec === k ? this.apBlocks(k) : []
       })) };
   }
+  /* THE BOOK OF NUMBERS, the Study room the owner asked for on 20 October
+     2026, beside the Astropedia and the Human Design Atlas. It reads
+     number-matrix.js and nothing else for the ninety compounds, so a title on
+     the Numbers page and a title here cannot disagree, and it reads
+     numerology-content.js for the root each one comes to rest on.
+
+     The mandala is nine petals, one per root, ten compounds each, which is the
+     owner's principle drawn: a single digit is where a number ends, and the
+     double digits that end there are what it is. It is pointer ornament over
+     [data-chart], and the index under it is the keyboard's way through the
+     same ninety. The reader's own compounds are ringed and joined, and the
+     open one is drawn in the folio. Nothing here is stored but the choice on
+     screen, and every count and colour is computed from the matrix. */
+  BN_CAT = { 'Master Number': 'master', 'Elite Auspicious': 'auspicious', 'Karmic Debt': 'karmic', 'Standard Sub-Frequency': 'standard' };
+  BN_CATS = [['all', 'All'], ['master', 'Master Numbers'], ['auspicious', 'Elite Auspicious'], ['karmic', 'Karmic Debt'], ['standard', 'Sub-Frequencies']];
+  BN_INK = { master: 'var(--ac2-hi)', auspicious: 'var(--blue)', karmic: 'var(--warn)', standard: 'var(--tx)' };
+  BN_FILL = { master: 'var(--ac2-hi)', auspicious: 'var(--blue)', karmic: 'var(--warn)', standard: 'var(--mut)' };
+  /* Where a compound sits on the mandala, in the 360 box: the petal is its
+     root, nine of them at forty degrees from the top, and the ten compounds of
+     a root climb it in two lanes, so a petal reads as a seed head rather than
+     a ruler. */
+  bnSpot(n) {
+    const root = ((n - 1) % 9) + 1, k = Math.floor((n - 10) / 9);
+    const r = 84 + Math.floor(k / 2) * 21, lane = k % 2 ? 1 : -1;
+    const th = ((root - 1) * 40 - 90) * Math.PI / 180 + lane * (9.5 / r);
+    return { root: root, x: 180 + r * Math.cos(th), y: 180 + r * Math.sin(th) };
+  }
+  /* The reader's own compounds, once a day per chart and name. A birth number
+     passes its debts too, the way numCmp() reads them; the cycles are read as
+     cycles. Today's number is the date's own, the same for everybody, which
+     is why it is offered under the sample chart as well. */
+  bnMine() {
+    const core = window.InCommonCore, NC = window.NumerologyContent, now = new Date();
+    const p = this.activeProfile(), sample = this.usingSampleBirth(), name = this.birthName();
+    const key = (p ? p.birthStamp : '') + '|' + this.dob() + '|' + name + '|' + sample + '|' + now.toDateString();
+    if (this._bnMineKey === key) return this._bnMine;
+    const ok = c => c != null && c >= 10 && c <= 99;
+    const marks = [];
+    const add = (label, c, natal) => { if (ok(c)) marks.push({ label: label, c: c, natal: !!natal }); };
+    if (core && core.compound) {
+      const ds = String(now.getFullYear()) + String(now.getMonth() + 1) + String(now.getDate());
+      const s = ds.split('').reduce((a, ch) => a + +ch, 0);
+      add('Today', core.compound(s >= 10 ? s : now.getFullYear() + now.getMonth() + 1 + now.getDate()), false);
+    }
+    if (core && !sample) {
+      const n = this.numerology(), dob = this.dob();
+      add('Life Path', n.lpC, true);
+      (n.lpK || []).filter(k => k !== n.lpC).forEach(k => add('Life Path debt', k, true));
+      add('Birthday', n.rdC, true);
+      (n.rdK || []).filter(k => k !== n.rdC).forEach(k => add('Birthday debt', k, true));
+      const nm = NC ? NC.fromName(name) : null;
+      if (nm) [['expression', 'Expression'], ['soulUrge', 'Soul Urge'], ['personality', 'Personality']].forEach(([k, l]) => {
+        const c = (nm.compounds || {})[k];
+        add(l, c, true);
+        ((nm.karmic || {})[k] || []).filter(x => x !== c).forEach(x => add(l + ' debt', x, true));
+      });
+      const py = core.personalYear(dob, now.getFullYear()), pm = py && py.value != null ? core.personalMonth(py.value, now.getMonth() + 1) : null;
+      if (py) add('Personal Year', py.compound, false);
+      if (pm) { add('Personal Month', pm.compound, false); add('Personal Day', core.compound(pm.value + now.getDate()), false); }
+    }
+    this._bnMineKey = key;
+    this._bnMine = { marks: marks, sample: sample };
+    return this._bnMine;
+  }
+  bnPick(n, scroll) {
+    const M = window.NumberMatrix, e = M ? M.get(n) : null;
+    if (!e) return;
+    this.setState({ bnSel: n, bnFlip: (this.state.bnFlip || 0) + 1 });
+    const ms = this.bnMine().marks.filter(m => m.c === n), cyc = e.karmic && ms.length && ms.every(m => !m.natal) ? M.get(n, { cycle: true }) : null;
+    this.speak(n + ', ' + (cyc ? cyc.title : e.title + '. ' + e.category) + '.', 'polite');
+    /* The folio is brought back into view by its nearest scroller, which is
+       the room on the desktop and the Library page on the phone. Never the
+       snapped column or the pager: moving those changes the section. */
+    if (scroll) setTimeout(() => {
+      const f = document.querySelector('[data-bn-folio]');
+      let box = f ? f.parentElement : null;
+      while (box && !box.matches('[data-vt-scroll],[data-vt-pager]')) {
+        const oy = getComputedStyle(box).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight + 1) break;
+        box = box.parentElement;
+      }
+      if (!f || !box || box.matches('[data-vt-scroll],[data-vt-pager]')) return;
+      const y = box.scrollTop + f.getBoundingClientRect().top - box.getBoundingClientRect().top - 12;
+      if (Math.abs(y - box.scrollTop) > 40) box.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 40);
+  }
+  numBookVals() {
+    const st = this.state, M = window.NumberMatrix, NC = window.NumerologyContent;
+    const vertical = (st.dtW || window.innerWidth || 1440) < this.BP.md;
+    const on = st.libView === 'numbers' && (vertical || this.curTab() === 'library');
+    if (!on || !M) return { libNumBook: false };
+    const all = [];
+    for (let n = 10; n <= 99; n++) { const e = M.get(n); if (e) all.push({ ...e, cat: this.BN_CAT[e.category] || 'standard' }); }
+    const mine = this.bnMine(), marksOf = n => mine.marks.filter(m => m.c === n);
+    const yours = new Set(mine.marks.filter(m => m.label !== 'Today').map(m => m.c));
+    const lp = mine.marks.find(m => m.label === 'Life Path'), today = mine.marks.find(m => m.label === 'Today');
+    const sel = M.has(st.bnSel) ? st.bnSel : (lp ? lp.c : (today ? today.c : 33));
+    const e = all.find(x => x.n === sel);
+    const cat = this.BN_CATS.some(c => c[0] === st.bnCat) ? st.bnCat : 'all';
+    const q = String(st.bnQuery || '').trim().toLowerCase();
+    const hit = x => (cat === 'all' || x.cat === cat) &&
+      (!q || (/^\d+$/.test(q) ? String(x.n).indexOf(q) === 0 : (x.title + ' ' + x.category + ' ' + x.desc).toLowerCase().indexOf(q) !== -1));
+    const pct = v => (v / 360 * 100).toFixed(3) + '%';
+    const nameOf = r => { const t = NC ? NC.name(r) : ''; return t.charAt(0).toUpperCase() + t.slice(1); };
+    const step = d => { let n = sel + d; if (n > 99) n = 10; if (n < 10) n = 99; return n; };
+    const row = x => ({ n: String(x.n), title: x.title, cat: x.category, c: this.BN_INK[x.cat], on: x.n === sel,
+      bd: x.n === sel ? 'var(--ac2-hi)' : 'var(--bd)', bg: x.n === sel ? 'rgba(var(--atmc),.2)' : 'var(--sf)',
+      mine: yours.has(x.n), go: () => this.bnPick(x.n, true) });
+    const filtered = all.filter(hit);
+    const openRoot = st.bnRoot === 0 ? 0 : (st.bnRoot || this.bnSpot(sel).root);
+    const spot = this.bnSpot(sel);
+    /* The reader's constellation: their birth numbers in the order the page
+       reads them, joined. A line needs two stars. */
+    const natal = [];
+    mine.marks.filter(m => m.natal).forEach(m => { if (natal.indexOf(m.c) === -1) natal.push(m.c); });
+    const conste = natal.length > 1 ? natal.map(c => { const s = this.bnSpot(c); return s.x.toFixed(1) + ',' + s.y.toFixed(1); }).join(' ') : '';
+    const rootN = e.master ? sel : e.root, rc = NC ? NC.content(rootN) : null;
+    const opp = rc && rc.opportunities && rc.opportunities.length ? rc.opportunities[sel % rc.opportunities.length] : '';
+    const cyc = e.karmic ? M.get(sel, { cycle: true }) : null;
+    const where = marksOf(sel).map(m => m.label);
+    /* A debt compound reached only as a cycle (today, or a Personal Year,
+       Month or Day) is read as its season, the rule numCmp() keeps: the
+       folio leads with the season and the book's own entry sits under it. */
+    const asCycle = !!(cyc && cyc.title !== e.title && where.length && marksOf(sel).every(m => !m.natal));
+    const kin = all.filter(x => x.root === e.root && x.n !== sel);
+    return { libNumBook: true,
+      bnBack: () => this.setState({ libView: null, bnQuery: '', bnRoot: null }),
+      /* The mandala. Dots are pointer ornament inside [data-chart]; the
+         index below is every one of them again as a control. */
+      bnDots: all.map((x, i) => {
+        const s = this.bnSpot(x.n), isSel = x.n === sel, dim = !hit(x), own = yours.has(x.n);
+        const size = isSel ? 22 : x.cat === 'master' ? 15 : x.cat === 'standard' ? 9 : 12;
+        return { l: pct(s.x), t: pct(s.y), size: size + 'px', fill: this.BN_FILL[x.cat],
+          op: dim ? '.16' : '1', z: isSel ? '4' : own ? '3' : '1',
+          ring: isSel ? '0 0 0 3px var(--bg),0 0 0 5px var(--ac2-hi),0 0 26px 6px rgba(var(--atmc2),.55)'
+            : own ? '0 0 0 2px var(--bg),0 0 0 3.5px var(--tx)'
+            : x.cat === 'master' ? '0 0 12px 2px rgba(var(--atmc),.7)' : 'none',
+          anim: isSel ? 'bnPulse 2.8s ease-in-out infinite' : 'bnDotIn .7s cubic-bezier(.2,.7,.2,1) both',
+          delay: isSel ? '0ms' : (i * 11) + 'ms',
+          tip: x.n + ' · ' + x.title, go: () => this.bnPick(x.n, false) };
+      }),
+      bnSpokes: Array.from({ length: 9 }, (_, i) => {
+        const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
+        return { x1: (180 + 70 * Math.cos(th)).toFixed(1), y1: (180 + 70 * Math.sin(th)).toFixed(1),
+          x2: (180 + 176 * Math.cos(th)).toFixed(1), y2: (180 + 176 * Math.sin(th)).toFixed(1),
+          c: lit ? 'var(--ac2-hi)' : 'var(--chl)', o: lit ? '.6' : '.9', w: lit ? '1.4' : '1' };
+      }),
+      bnRoots: Array.from({ length: 9 }, (_, i) => {
+        const th = (i * 40 - 90) * Math.PI / 180, lit = i + 1 === spot.root;
+        return { d: String(i + 1), l: pct(180 + 57 * Math.cos(th)), t: pct(180 + 57 * Math.sin(th)),
+          c: lit ? 'var(--ac2-hi)' : 'var(--mut)',
+          go: () => { const r = i + 1, seq = all.filter(x => x.root === r).map(x => x.n), at = seq.indexOf(sel);
+            this.setState({ bnRoot: r }); this.bnPick(seq[(at + 1) % seq.length], false); } };
+      }),
+      bnTx: spot.x.toFixed(1), bnTy: spot.y.toFixed(1),
+      bnConste: conste, bnConsteOn: !!conste,
+      bnCenter: String(sel), bnCenterC: this.BN_INK[e.cat], bnCenterRoot: '/' + e.root,
+      bnMandalaLabel: 'The ninety compounds on their nine roots, ' + sel + ' open',
+      /* Today and the reader's own, as chips into the folio. */
+      bnMarks: mine.marks.map(m => {
+        const x = all.find(y => y.n === m.c);
+        return { label: m.label, n: String(m.c), c: x ? this.BN_INK[x.cat] : 'var(--tx)',
+          on: m.c === sel, bd: m.c === sel ? 'var(--ac2-hi)' : 'var(--bd)',
+          aria: m.label + ', ' + m.c + (x ? ', ' + x.title : ''), go: () => this.bnPick(m.c, true) };
+      }),
+      /* The folio. */
+      bnAnim: (st.bnFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
+      bnFolioLabel: sel + ', ' + (asCycle ? cyc.title : e.title), bnN: String(sel), bnRootDigit: '/' + e.root, bnInk: this.BN_INK[e.cat],
+      bnTitle: asCycle ? cyc.title : e.title, bnCat: asCycle ? 'A season' : e.category, bnDesc: asCycle ? cyc.desc : e.desc,
+      bnCatC: asCycle ? 'var(--blue)' : this.BN_INK[e.cat],
+      bnCatBg: e.cat === 'karmic' && !asCycle ? 'rgba(var(--atmc2),.14)' : 'rgba(var(--atmc),.2)',
+      bnSeasonOn: !!(cyc && cyc.title !== e.title), bnSeasonHead: asCycle ? 'In the book' : 'As a season',
+      bnSeasonTitle: cyc ? (asCycle ? e.title : cyc.title) : '', bnSeasonDesc: cyc ? (asCycle ? e.desc : cyc.desc) : '',
+      bnWhereOn: where.length > 0, bnWhere: where.join(' · '),
+      bnRootHead: e.master ? sel + ' · ' + nameOf(sel) : 'Root ' + e.root + ' · ' + nameOf(e.root),
+      bnRootText: rc ? rc.universal : '', bnRootOn: !!rc,
+      bnOpp: opp, bnOppOn: !!opp,
+      bnKin: kin.map(x => ({ n: String(x.n), c: this.BN_INK[x.cat], aria: x.n + ', ' + x.title, go: () => this.bnPick(x.n, false) })),
+      bnPrevLabel: '‹ ' + step(-1), bnNextLabel: step(1) + ' ›',
+      bnPrevAria: 'Previous, ' + step(-1), bnNextAria: 'Next, ' + step(1),
+      bnPrev: () => this.bnPick(step(-1), false), bnNext: () => this.bnPick(step(1), false),
+      bnDraw: () => { let n = sel; while (n === sel) n = 10 + Math.floor(Math.random() * 90); this.bnPick(n, true); },
+      bnKeys: ev => {
+        const k = ev.key;
+        const to = k === 'ArrowLeft' || k === 'ArrowUp' ? step(-1) : k === 'ArrowRight' || k === 'ArrowDown' ? step(1)
+          : k === 'Home' ? 10 : k === 'End' ? 99 : null;
+        if (to == null || ev.target !== ev.currentTarget) return;
+        ev.preventDefault();
+        this.bnPick(to, false);
+      },
+      /* The index: a filter that doubles as the legend, a search, and the
+         ninety by root, one root open at a time. */
+      bnFilters: this.BN_CATS.map(([k, label]) => {
+        const count = k === 'all' ? all.length : all.filter(x => x.cat === k).length, onF = cat === k;
+        return { label: label, count: String(count), on: onF, dot: k === 'all' ? 'var(--tx)' : this.BN_FILL[k],
+          bd: onF ? 'var(--ac2-hi)' : 'var(--bd)', bg: onF ? 'rgba(var(--atmc),.24)' : 'var(--sf)', c: onF ? 'var(--tx)' : 'var(--mut)',
+          go: () => this.setState({ bnCat: k }) };
+      }),
+      bnQuery: st.bnQuery || '',
+      bnType: ev => this.setState({ bnQuery: String(ev.target.value || '').slice(0, 40) }),
+      bnFlat: !!q || cat !== 'all', bnByRoot: !q && cat === 'all',
+      bnHitLine: filtered.length ? filtered.length + (filtered.length === 1 ? ' compound' : ' compounds')
+        : 'Nothing in the book matches "' + (q || cat) + '". Try a number from 10 to 99.',
+      bnHits: filtered.map(row),
+      bnRootSecs: Array.from({ length: 9 }, (_, i) => {
+        const r = i + 1, open = openRoot === r, list = all.filter(x => x.root === r);
+        return { d: String(r), name: nameOf(r), open: open, icon: open ? '−' : '+',
+          bd: open ? 'rgba(var(--atmc),.6)' : 'var(--bd)',
+          peek: list.map(x => ({ fill: this.BN_FILL[x.cat], size: x.cat === 'standard' ? '6px' : '8px' })),
+          toggle: () => this.setState({ bnRoot: open ? 0 : r }),
+          rows: open ? list.map(row) : [] };
+      })
+    };
+  }
   atlasVals() {
     const st = this.state;
     if (!(this.curTab() === 'library' && st.libView === 'hdatlas')) return { libAtlas: false };
@@ -52736,7 +53300,7 @@ class Component extends DCLogic {
       ...(() => { const h = heads[st.tab] || heads.today;
         return { headTitle: h[0], headSub: h[1], hasHeadSub: !!h[1] }; })(),
       libLexicon: st.tab === 'library' && st.libView === 'lexicon',
-      libShell: st.tab === 'library' && st.libView !== 'angel' && st.libView !== 'hdatlas' && st.libView !== 'astropedia' && st.libView !== 'tarot' && st.libView !== 'dreams' && st.libView !== 'iching' && st.libView !== 'help' && st.libView !== 'dreamj' && st.libView !== 'reading',
+      libShell: st.tab === 'library' && st.libView !== 'angel' && st.libView !== 'hdatlas' && st.libView !== 'astropedia' && st.libView !== 'tarot' && st.libView !== 'dreams' && st.libView !== 'iching' && st.libView !== 'help' && st.libView !== 'dreamj' && st.libView !== 'reading' && st.libView !== 'numbers',
       lexGo: () => this.setState({ libSub: 'study', libView: 'lexicon', selId: null, lexQuery: '', lexSign: null, lexDeg: null }),
       lexBack: () => this.setState({ libView: null, lexDeg: null }),
       ...(() => {
@@ -52913,6 +53477,7 @@ class Component extends DCLogic {
           ...this.hdTeachVals(),
           ...this.atlasVals(),
           ...this.apVals(),
+          ...this.numBookVals(),
           ...this.tarotVals(),
           ...this.dreamVals(),
           ...this.oracleVals(),
@@ -52929,6 +53494,7 @@ class Component extends DCLogic {
           goCharts: () => this.setState({ tab: 'spirit', spiritView: null, placeSel: null, focusToday: false, hdSel: null }),
           goTarot: () => this.setState({ tab: 'library', libSub: 'study', libView: 'tarot', ttSec: 'major', ttCard: null, selId: null, spiritView: null }),
           goAstropedia: () => this.setState({ tab: 'library', libSub: 'study', libView: 'astropedia', apSec: 'signs', selId: null, spiritView: null }),
+          goNumBook: () => this.setState({ tab: 'library', libSub: 'study', libView: 'numbers', bnSel: null, bnQuery: '', bnCat: 'all', bnRoot: null, selId: null, spiritView: null }),
           ...this.arcVals(),
           ...this.delMemVals(),
           ...this.memSelVals(),
@@ -54458,6 +55024,7 @@ class Component extends DCLogic {
         selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
         ttSec: null, ttCard: null, icSec: null, icHex: null, icQuery: '',
         dlSec: null, dlOpen: null, dlQuery: '', lexSign: null, lexDeg: null, lexQuery: '', tlOpen: null,
+        bnSel: null, bnQuery: '', bnCat: 'all', bnRoot: null,
         dtSearch: false, dtQuery: '', vtSearch: false, vtQuery: '' };
       this.setState({ ...clean, ...((vertical ? t.vt : t.dt) || t.dt || {}) });
       if (vertical && t.sec != null) {
@@ -54542,6 +55109,7 @@ class Component extends DCLogic {
       L('Sabian Lexicon', 'all 360 degrees, each with its image', '✧', 'sabian lexicon degrees symbols 360 images mandala', this.searchLib('lexicon')),
       L('Human Design Atlas', 'types, lines, profiles, centres, gates and channels', '◈', 'human design atlas reference gates channels centres centers types lines profiles authorities strategies', this.searchLib('hdatlas', { atlasSec: 'intro' })),
       L('Astropedia', 'signs, houses, astral bodies, points and aspects', '☄', 'astropedia astrology reference signs houses astral bodies aspects points asteroids orbs', this.searchLib('astropedia', { apSec: 'signs' })),
+      L('The Book of Numbers', 'every compound from 10 to 99, on its root', '\u221e', 'book of numbers compound compounds master numbers karmic debt elite auspicious numerology matrix double digit 11 22 33', this.searchLib('numbers')),
       L('The Tarot deck', 'all 78 cards, as reference', '✳', 'tarot deck cards major arcana minor wands cups swords pentacles suits', this.searchLib('tarot', { ttSec: 'major' })),
       L('Dream Symbols', 'every image the Dream Journal can read', '☁', 'dream symbols images registry animals weather water places lookup', this.searchLib('dreams')),
       L('The Book of Changes', 'the 64 hexagrams, and a consultation', '☷', 'i ching iching book of changes hexagram hexagrams yarrow coins oracle trigram', this.searchLib('iching', { icSec: 'heaven' })),
@@ -54590,6 +55158,17 @@ class Component extends DCLogic {
           sub: 'from ' + p.from + ' · open your numerology',
           target: this.searchSpirit('numerology', 2) };
       }), 6));
+    }
+
+    /* The ninety compounds, by number, title or category, each landing open in
+       the Book of Numbers. */
+    const NMX = window.NumberMatrix;
+    if (NMX) {
+      const bn = [];
+      for (let n = 10; n <= 99; n++) { const e = NMX.get(n);
+        if (e) bn.push({ glyph: '\u221e', title: n + ' \u00b7 ' + e.title, keys: 'compound ' + n + ' ' + e.category,
+          sub: e.category + ' \u00b7 root ' + e.root, body: e.desc, target: this.searchLib('numbers', { bnSel: n }) }); }
+      push('The Book of Numbers', this.searchRank(q, bn, 6));
     }
 
     const PL = window.PracticeLibrary;
@@ -55296,7 +55875,8 @@ class Component extends DCLogic {
       libShell: st.libView !== 'hdatlas' && st.libView !== 'astropedia' &&
                st.libView !== 'tarot' && st.libView !== 'dreams' &&
                st.libView !== 'iching' && st.libView !== 'help' &&
-               st.libView !== 'angel' && st.libView !== 'dreamj' && st.libView !== 'reading',
+               st.libView !== 'angel' && st.libView !== 'dreamj' && st.libView !== 'reading' &&
+               st.libView !== 'numbers',
       /* 'hdatlas' is the key everywhere else: LIB_PATHS declares it, the
          Library list sets it, and hdAtlasVals gates on it. This line alone
          said 'atlas', so opening the Human Design Atlas in the vertical shell
@@ -55305,6 +55885,7 @@ class Component extends DCLogic {
          nothing else, with no way back, because the back control lives inside
          the panel that was switched off. */
       libAtlas: st.libView === 'hdatlas', libAstropedia: st.libView === 'astropedia',
+      libNumBook: st.libView === 'numbers',
       libTarot: st.libView === 'tarot', libDreams: st.libView === 'dreams',
       libIChing: st.libView === 'iching',
       libHelp: st.libView === 'help', tlTimeline: true

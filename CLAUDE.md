@@ -247,7 +247,7 @@ device can hold the old `library` key.
 
 | Tab | Holds, in this order |
 |---|---|
-| Study | Human Design Atlas, Astropedia, The Numbers (coming soon: a dashed card, deliberately not a control), My Tarot, Dream Symbols, Sabian Lexicon |
+| Study | Human Design Atlas, Astropedia, The Book of Numbers, My Tarot, Dream Symbols, Sabian Lexicon |
 | Journal | Synchronicities, Dream Journal, then the ten practices grouped by caution: Universal caution first, then Mild caution, each group alphabetical. A leading quotation mark does not count when sorting, so the Spiritual Bypass check is filed under S |
 | Readings | Tarot on the left half and The Book of Changes on the right, a divider between. Each half opens its own room (`libView` `reading` and `iching`) |
 | Throughline | the record, as it was |
@@ -1809,7 +1809,7 @@ under two characters.
 N37 to N39 are the coverage, and they drive rather than read: the control is
 clicked, the field is typed into through a real input event, and the row is
 clicked, because the failure this surface can have is the one that reads as
-correct. N37b names all thirteen groups one query at a time, so a shelf that
+correct. N37b names all fourteen groups one query at a time, so a shelf that
 silently drops out of the index is a red row rather than a quiet absence.
 
 ## The Timing Lexicon, and why the Together slide reads from it
@@ -1930,7 +1930,8 @@ interactive pieces to them, lift them a little. The only flat items on the site
 should be ornamental." So every control with a surface of its own, and every
 card that holds a control, stands a little off the page; reading, ornament and
 the dashed "coming soon" card stay flat, which is now part of how they say they
-are not controls.
+are not controls. (That card became the Book of Numbers, a lifted control, on
+20 October 2026; the rule stands for any card of its kind.)
 
 **The markup says what lifts, never a selector on the style text.** The runtime
 re-serialises every inline style, so `all:unset` arrives in the DOM as forty
@@ -4630,6 +4631,66 @@ the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answer
 `numCmp()` asks for it whenever no `debts` list is passed, which is exactly the
 cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
 other row with either, and a cycle reading that says debt. U19 holds it.
+
+## The Book of Numbers is a Study room
+Asked for by the owner on 20 October 2026: the matrix that updated the Numbers
+page, as a room in the Library beside the Astropedia and the Human Design
+Atlas, "dynamic, entrancing, riveting, fascinating, beautiful, encouraging,
+wholesome, poetic, and nice to look at". It took the seat of the dashed "The
+Numbers, coming soon" card on the Study tab, in both shells. `libView`
+`numbers`, address `/library/book-of-numbers`, gate `libNumBook`, vals
+`numBookVals()`, and one compound is `/library/book-of-numbers/number/<n>`.
+Both `libShell` lists name it, and the phone's override sets `libNumBook`.
+
+**It reads the matrix and writes nothing of its own about a compound.** Every
+title, category and description is `NumberMatrix.get()`, so the room and the
+Numbers page cannot disagree. The root under each one is
+`NumerologyContent.content()` (the master's own entry for 11, 22 and 33), and
+the line under "An opening" is one of that number's `opportunities`, chosen by
+the compound, because those are already written as what there is room for. The
+reduction math stays undrawn, as on the Numbers page: the folio shows `33/6`,
+the notation `numCmp()` writes, and nothing more.
+
+**The mandala is the owner's principle drawn**: nine petals, one per root, the
+ten compounds that end on it climbing the petal in two lanes (`bnSpot()`). A
+dot's colour is its category (violet master, blue Elite Auspicious, `--warn`
+Karmic Debt, `--mut` the rest), the reader's own are ringed and joined by a
+dashed line, and the open one glows with a thread to the centre. **The dots are
+pointer ornament inside `[data-chart]`**, spans with no tab stop inside a
+`role="img"`, because ninety 44px targets do not fit a phone's mandala. The
+keyboard's way through the same ninety is the index under it (a filter that is
+also the legend, a search, and the nine roots, one open at a time) and the
+folio, which takes the arrow keys, Home and End. Do not make the dots buttons:
+ninety tab stops before the folio is the wrong first room.
+
+**Today and the reader's own are marks** (`bnMine()`, once a day per chart and
+name): today's number is the date's own digits and is the same for everybody,
+so it is offered under the sample chart too; the Life Path, Birthday, name
+numbers and their debts, and the Personal Year, Month and Day are offered only
+for a chart of the reader's own. The room opens on the Life Path, or on today
+when there is none.
+
+**A debt compound reached only as a cycle leads with its season.** On 20
+October 2026 today's number was 13, and the room opened every sample reader on
+"The Debt of Hard Work". By the rule in "A debt compound on a cycle has a name
+of its own", the folio leads with The Season of Steady Labor when every mark
+on the compound is a cycle, and keeps the book's own entry under "In the
+book". Opened any other way, a debt compound leads with the book and shows its
+season under "As a season".
+
+**Two things are easy to undo.** The folio re-animates by alternating two
+identical keyframes (`bnFolioA`, `bnFolioB`) on every pick, because the
+runtime keeps the element and an unchanged animation never replays. And a pick
+from the index scrolls the folio back by its nearest real scroller, the room on
+the desktop and the Library page on the phone, never `[data-vt-scroll]` or the
+pager, which would change the section.
+
+The search bar has a fourteenth group, The Book of Numbers, and every row lands
+open in the room. N41 presses the Study card and asks for the room, its
+address and its ninety dots; N37b reaches the group. Measured with the
+harness's own `contrastFails()` and `tapTargets()` over the room, four
+identities, hardened and not, at 1440 and 375, with a master and a debt open:
+32 cases, no pair under 4.5:1 and no control under 44px.
 
 ## The Numbers stage
 Asked for by the owner on 19 October 2026: the Numbers page "interactive, as if
