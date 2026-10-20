@@ -1833,7 +1833,7 @@ movers, five aspects and sixteen natal points are 960 contacts and every one
 reads differently. A gate is `GATE[n]` (`sky`, `held`, `open`, `ask`),
 `GATE_LINE[n][0..5]` (all 384 lines, each written for its own gate) and
 `CHANNEL` (the 36 pairs, read when a transit completes one with a natal gate).
-`LINE[1..6]` stays as the description of what each position is, returned as
+`SKY` (55 pairs, see "Both transit lists open a pull up") reads two bodies in aspect overhead rather than a mover on a natal point. `LINE[1..6]` stays as the description of what each position is, returned as
 `lineKind`, and is the fallback only if a gate's line were ever missing. A number is `NUMBER[v][role]` for day, month, year, Life
 Path, Challenge (0 to 8) and Pinnacle, masters included where the role can
 reach them. No origin or method field, by the owner's rule of 11 October.
@@ -4763,14 +4763,27 @@ natal transits do"). A row sets `trSel` (`{ k: 'p' | 's', i }`) and
 sheet in both shells, so on the phone it is a bottom sheet like every vertical
 dialog. It carries the contact, building, exact or easing, the run of days it
 holds inside the row's own orb with its closest day (`transitRun()`, walked out
-from today over the `impactDays()` table), the aspect's teaching
-(`ASP_NATURE`), a reading and a question. A personal transit reads the Timing
-Lexicon's contact and opens the natal point; a sky transit is two bodies
-meeting overhead, so it is read through the reader's houses the two stand in
-and asks that house's `HOUSE_ASK`. The Moon has no run of days and shows its
-`PACE`. **The North Node opposite the South Node is not a Current Transit**:
-that pair is exact by definition, so the row was always first and its sheet
-had nothing to say.
+from today over the `impactDays()` table), the reading and a question. The Moon
+has no run of days and shows its `PACE`.
+
+**Every line is about that transit, never only about the reader** (owner, the
+same day: "they need descriptors relevant to the specific transits, not just the
+readers placement"). The row's line is `transitLine()`: for a personal transit
+the lexicon's meeting of that mover with that natal point, and for a body
+meeting its own natal place at any angle but the conjunction the mover's line
+instead, because the meeting line reads as a return. The sheet adds the mover's
+line and the point's question. A Current Transit is two bodies in aspect
+overhead, which the lexicon had no words for, so it carries them now:
+`TimingLexicon.SKY`, the fifty five pairs of the eleven movers, each with a
+conjunction, an easy and a hard reading and its own question, read through
+`sky(a, asp, b)`. The sheet leads with that reading and puts where the two
+stand in the reader's houses second. The generic aspect paragraph is not on this
+sheet. TL16 holds the table: every pair, every part distinct, all 325 contacts
+resolving whichever way round, and the South Node read as the North Node turned
+round (conjunct becomes opposite, sextile trine). **The South Node is not in
+Current Transits at all**: it is always exactly opposite the North Node, so the
+node pair said nothing and every South Node contact was a North Node one listed
+twice; the list is drawn from the sky without it (`skyTr`).
 
 **Escape closes the sheet and nothing under it.** `vtBind()`'s Escape listener
 is bound in both shells and empties `spiritView`, so on the desktop Escape from

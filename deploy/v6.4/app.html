@@ -8004,6 +8004,310 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return { move: m[k], meet: meet[target], area: pl.area, ask: pl[aspClass(k)], pace: PACE[mover] };
   }
 
+  /* THE SKY'S OWN CONTACTS. Two moving bodies in aspect to each other overhead,
+     the weather everybody stands in, rather than a mover meeting a natal point.
+     Keyed by the pair in MOVERS order, and read by the kind of contact: c the
+     conjunction, e the sextile and the trine, h the square and the opposition.
+     Each pair carries its own question. The South Node is the North Node turned
+     round, so it has no row: sky() reads a South Node contact as the North Node
+     contact it mirrors. Pairs that cannot reach an angle in the real sky (the
+     Sun and Mercury past a conjunction, say) still have the sentence, so the
+     table answers whatever it is asked. */
+  var SKY = {
+    'Sun|Moon': {
+      c: 'The New Moon: the two lights share one degree and the sky goes dark for a night, the oldest signal there is for planting something that cannot be seen yet.',
+      e: 'The lights work in step: what is wanted and what is felt point the same way, and plans made in this stretch of the month tend to sit comfortably in the body.',
+      h: 'The lights pull against each other, a quarter or a Full Moon, and whatever was started at the last New Moon reaches a test or a reveal that cannot be postponed.',
+      ask: 'What was begun at the last New Moon, and where has it got to?' },
+    'Sun|Mercury': {
+      c: 'Mercury passes the Sun, a cazimi or a combust stretch, and thinking fuses with intention: a moment when the mind says plainly what the will has been circling.',
+      e: 'Clear speech and clear purpose agree, which helps any message that has to carry conviction as well as information.',
+      h: 'What is meant and what is said slip apart, and a careful reread before sending is worth more than usual.',
+      ask: 'Which sentence has been waiting to be said in exactly your own words?' },
+    'Sun|Venus': {
+      c: 'Venus meets the Sun, the start or the turning point of its long cycle, and questions of value and affection come into full light for everyone at once.',
+      e: 'Warmth and will cooperate, so generosity costs less than it usually does and asking for what is wanted lands gently.',
+      h: 'Wanting to be liked and wanting to be true to oneself pull opposite ways, and a pleasing answer may not be the honest one.',
+      ask: 'What is worth loving openly, even if nobody approves of it yet?' },
+    'Sun|Mars': {
+      c: 'Mars stands with the Sun and the collective engine runs hot: heat, haste and a strong urge to start, with tempers close to the surface.',
+      e: 'Courage has a clear target and effort gets results without forcing, a good stretch for physical work and plain decisions.',
+      h: 'Will meets resistance head on; arguments flare quickly and settle quickly, and the useful move is to aim the heat instead of spending it.',
+      ask: 'Where would a single direct action settle more than another week of talk?' },
+    'Sun|Jupiter': {
+      c: 'Jupiter joins the Sun, a yearly high tide of optimism, when doors look wider than usual and the appetite for more is everywhere.',
+      e: 'Confidence and opportunity line up easily, and a generous bet placed now has the weather behind it.',
+      h: 'Hope runs ahead of the facts: promises get large, budgets get loose, and the honest question is how much is enough.',
+      ask: 'What would a wise kind of more look like, rather than simply more?' },
+    'Sun|Saturn': {
+      c: 'Saturn and the Sun share a degree, the yearly reckoning with limits, when what has been built is weighed and found either sound or short.',
+      e: 'Steady effort pays off and structure feels supportive rather than confining, a good window for commitments meant to last.',
+      h: 'Authority and ambition collide; delays and refusals test whether a goal is wanted badly enough to work slowly for it.',
+      ask: 'Which commitment is worth the slow way round?' },
+    'Sun|Uranus': {
+      c: 'Uranus meets the Sun and the year receives its jolt: sudden news, unexpected freedoms, and a restless wish to break a routine.',
+      e: 'Change arrives as a welcome surprise, and small experiments find more room than usual to work.',
+      h: 'The urge to break free strains against what is in place, and abrupt exits are tempting where a planned change would serve better.',
+      ask: 'Which routine has quietly become a cage, and what is the smallest door out of it?' },
+    'Sun|Neptune': {
+      c: 'Neptune and the Sun merge, a yearly dissolving, when edges soften, compassion rises, and it is harder than usual to see things exactly as they are.',
+      e: 'Imagination and purpose flow together, a gentle stretch for art, rest and acts of quiet kindness.',
+      h: 'Fog over the facts: tiredness, mixed signals and the pull to escape, so anything that needs precision deserves a second look.',
+      ask: 'What is being imagined that could be given a real shape?' },
+    'Sun|Pluto': {
+      c: 'Pluto meets the Sun in the yearly descent, when questions of control and what lies underneath surface for everybody at once.',
+      e: 'Depth becomes usable, and focused effort can transform something that has resisted lighter attention for a long time.',
+      h: 'Power struggles come into the open and someone insists on the last word; what is buried tends to come up whether it is invited or not.',
+      ask: 'Where is a struggle for control really about something else?' },
+    'Sun|North Node': {
+      c: 'The Sun reaches the North Node, an eclipse season or its threshold, and the collective is nudged hard toward an unfamiliar direction.',
+      e: 'Effort and the unfamiliar direction cooperate, so a step toward something new costs less nerve than it would on another day.',
+      h: 'The Sun crosses the nodal axis at an angle, and the old habit and the new direction both ask for attention in the same week.',
+      ask: 'Which unfamiliar step keeps reappearing, and what has stopped it so far?' },
+    'Moon|Mercury': {
+      c: 'The Moon passes Mercury and feelings find words for a few hours, a good window for the conversation that has been put off.',
+      e: 'Mood and mind cooperate, so notes, messages and small talk all go a little more easily than usual.',
+      h: 'Feelings and reasons disagree for a few hours, and what is said in a mood may need taking back by evening.',
+      ask: 'What feeling has been waiting for the right sentence?' },
+    'Moon|Venus': {
+      c: 'The Moon joins Venus for a few hours of softness, when comfort, beauty and affection are the easiest things in the world to offer.',
+      e: 'Pleasure comes without effort for a little while, a fine stretch for meals, gifts, and mending a small rift.',
+      h: 'Needs and wants pull at each other briefly, and a craving for comfort can cost more than it gives.',
+      ask: 'What small pleasure would actually restore something that has run low?' },
+    'Moon|Mars': {
+      c: 'The Moon passes Mars and the collective temper shortens: a few hours that suit action and do not suit patience.',
+      e: 'Feeling turns readily into doing, a good few hours for exercise, chores, and a task that needs momentum.',
+      h: 'Irritation runs close to the skin for a few hours; a short walk usually serves better than a sharp reply.',
+      ask: 'What is the anger in the room actually protecting?' },
+    'Moon|Jupiter': {
+      c: 'The Moon meets Jupiter and the mood swells generously for a few hours, warm, hopeful and inclined to overdo it.',
+      e: 'Goodwill is easy to find for a little while, and kindness given now tends to come back quickly.',
+      h: 'Feelings run larger than the occasion, and the second helping or the extra promise is the thing to notice.',
+      ask: 'Where would generosity help, and where would it only fill a gap?' },
+    'Moon|Saturn': {
+      c: 'The Moon passes Saturn and the mood sobers for a few hours: tired, dutiful, and clear about what still has to be done.',
+      e: 'Feelings steady and settle, a useful few hours for routines, paperwork and keeping a quiet promise.',
+      h: 'Loneliness or heaviness visits briefly, and care that is practical helps more than care that is only spoken.',
+      ask: 'What would make the heaviest task of the week a little lighter?' },
+    'Moon|Uranus': {
+      c: 'The Moon meets Uranus and moods change without warning for a few hours, restless, excitable and impatient with the expected.',
+      e: 'A small change of scene or plan refreshes the whole day, and spontaneity is welcome for a while.',
+      h: 'Nerves jangle for a few hours; plans wobble, and the need for room is better asked for than taken.',
+      ask: 'Where is more room needed, and how could it be asked for kindly?' },
+    'Moon|Neptune': {
+      c: 'The Moon dissolves into Neptune for a few hours, dreamy, porous and quick to absorb what others feel.',
+      e: 'Sensitivity becomes a gift for a little while, a lovely window for music, prayer, or a long bath.',
+      h: 'Moods blur and boundaries thin for a few hours, so what belongs to someone else can be mistaken for one’s own.',
+      ask: 'Which feeling around you right now belongs to someone else?' },
+    'Moon|Pluto': {
+      c: 'The Moon meets Pluto and feelings run deep for a few hours, intense, private and hard to set aside.',
+      e: 'Emotional honesty goes further than usual for a little while, and a deep conversation can clear old silt.',
+      h: 'Old hurts stir briefly and control becomes a theme in small exchanges; letting a feeling pass is its own strength.',
+      ask: 'What old feeling is asking to be finished rather than relived?' },
+    'Moon|North Node': {
+      c: 'For a few hours the Moon sits on the North Node, and the mood leans toward the untried, curious rather than cautious.',
+      e: 'Instinct and direction cooperate briefly, and a gut feeling about the next step is worth trusting.',
+      h: 'Comfort and growth tug in different directions for a few hours, and the familiar option looks safer than it is.',
+      ask: 'Which comfort has started to cost more than it gives?' },
+    'Mercury|Venus': {
+      c: 'Mercury joins Venus and words turn graceful: compliments, negotiations and love letters all find their phrasing.',
+      e: 'Tact comes naturally, a good stretch for agreements, creative writing, and smoothing a misunderstanding.',
+      h: 'Pleasant words and honest ones part company, and a kind tone can paper over a point that needs making.',
+      ask: 'What needs saying kindly that has only been said politely?' },
+    'Mercury|Mars': {
+      c: 'Mercury meets Mars and talk sharpens: quick decisions, blunt messages, and debates that start before anyone has finished listening.',
+      e: 'Thought becomes action efficiently, a good window for decisive emails, repairs and getting a plan moving.',
+      h: 'Words become weapons easily; arguments escalate on wording alone, and waiting an hour before replying is good practice.',
+      ask: 'Which argument is really about how something was said?' },
+    'Mercury|Jupiter': {
+      c: 'Mercury meets Jupiter and the big picture fills every conversation: ideas, plans, teaching, and a tendency to say too much.',
+      e: 'Learning and sharing flow well, a good stretch for study, publishing, travel plans and good news.',
+      h: 'Details get lost in grand claims, and a plan that sounds wonderful deserves a check on the arithmetic.',
+      ask: 'Which big idea needs its small print read before it is shared?' },
+    'Mercury|Saturn': {
+      c: 'Mercury meets Saturn and thinking turns serious and careful: contracts, structure, and the hard sentence nobody wanted to write.',
+      e: 'Focus is easy to hold, a fine window for planning, editing, and anything that rewards precision.',
+      h: 'Doubt and delay slow every message; criticism stings more than it should, and patience with the process helps.',
+      ask: 'What would be said if it only had to be accurate, not impressive?' },
+    'Mercury|Uranus': {
+      c: 'Mercury meets Uranus and ideas strike like lightning: breakthroughs, sudden news, and conversations that change direction mid sentence.',
+      e: 'Original thinking is welcome, a good stretch for invention, technology and seeing an old problem freshly.',
+      h: 'The mind runs too fast for its own good; plans change abruptly, devices misbehave, and nerves fray.',
+      ask: 'Which unusual idea deserves a fair test rather than a quick dismissal?' },
+    'Mercury|Neptune': {
+      c: 'Mercury meets Neptune and language turns poetic and imprecise: wonderful for imagination, risky for contracts and directions.',
+      e: 'Intuition informs thinking, a gentle stretch for writing, music and reading between the lines.',
+      h: 'Misunderstandings multiply; rumours travel and details vanish, so anything important is worth confirming twice.',
+      ask: 'What is being assumed here that has never actually been said?' },
+    'Mercury|Pluto': {
+      c: 'Mercury meets Pluto and talk goes underground: research, secrets, persuasion, and conversations that will not stay on the surface.',
+      e: 'Concentration runs deep, a strong window for investigation, therapy and getting to the root of a problem.',
+      h: 'Words carry hidden pressure; persuasion tips into manipulation, and silence can be a move as well as a pause.',
+      ask: 'What question would get to the bottom of this, if it were asked plainly?' },
+    'Mercury|North Node': {
+      c: 'With Mercury on the North Node, conversations tilt toward the future: new contacts, unfamiliar subjects, a name heard for the first time.',
+      e: 'Learning something new comes easily, and a single conversation can open a road that was not on the map.',
+      h: 'Old ways of thinking and new information clash, and the habit of explaining things the usual way is worth catching.',
+      ask: 'What would be worth learning if nobody were grading it?' },
+    'Venus|Mars': {
+      c: 'Venus meets Mars and desire is in the air: attraction, creative fire, and the meeting of what is wanted with the nerve to go after it.',
+      e: 'Love and action cooperate, a warm window for romance, collaboration and making something with real feeling in it.',
+      h: 'Wanting and getting pull apart; attraction and friction come together, and passion and irritation can be hard to tell apart.',
+      ask: 'What desire would be honoured by acting on it, and what by waiting?' },
+    'Venus|Jupiter': {
+      c: 'Venus joins Jupiter, the classic sky of abundance, when pleasure, generosity and goodwill are all in generous supply.',
+      e: 'Good feeling spreads easily, a fine stretch for celebrations, gifts, and a creative project with room to grow.',
+      h: 'Too much of a good thing: indulgence, overspending, and promises made in a warm mood that need keeping in a cool one.',
+      ask: 'Where would enough be more satisfying than plenty?' },
+    'Venus|Saturn': {
+      c: 'Venus meets Saturn and love gets serious: commitments, boundaries, and an honest look at what a relationship is built on.',
+      e: 'Loyalty and steadiness are easy to show, a good window for long term agreements and patient craft.',
+      h: 'Coolness and distance test affection; money tightens, and what is valued has to prove it can bear weight.',
+      ask: 'Which bond is worth the work of making it durable?' },
+    'Venus|Uranus': {
+      c: 'Venus meets Uranus and attraction turns electric: sudden crushes, unconventional tastes, and a strong appetite for freedom in love.',
+      e: 'A fresh approach to pleasure or money pays off, and surprises in relationships tend to be welcome ones.',
+      h: 'The wish for closeness and the wish for space collide, and a relationship or a budget can wobble without warning.',
+      ask: 'How much freedom does closeness need in order to stay close?' },
+    'Venus|Neptune': {
+      c: 'Venus melts into Neptune: romance, art, and longing at their most beautiful and least discerning.',
+      e: 'Compassion and creativity flow, a lovely stretch for music, devotion and forgiving something small.',
+      h: 'Idealism blurs judgement in love and money, and the person or the purchase may not be what the dream suggests.',
+      ask: 'What is being loved here: the thing itself, or the hope attached to it?' },
+    'Venus|Pluto': {
+      c: 'Venus meets Pluto and attraction runs deep and possessive, with intensity, jealousy and transformation all close together.',
+      e: 'Depth enriches love and value, a strong window for repairing trust or investing in something for the long term.',
+      h: 'Power plays enter affection and money; obsession and control are the risks, and honesty about need is the remedy.',
+      ask: 'Where is love being used to hold on, rather than to give?' },
+    'Venus|North Node': {
+      c: 'Venus on the North Node brings new tastes, new people and new values into view, each one hinting at a road not yet walked.',
+      e: 'Pleasure and growth cooperate, so a new friendship or a new taste may turn out to be a real step forward.',
+      h: 'Old comforts and new values disagree, and the familiar thing that is loved can stand in the way of the next thing.',
+      ask: 'Which new taste deserves more room than the old habit allows?' },
+    'Mars|Jupiter': {
+      c: 'Mars meets Jupiter and confidence surges: bold moves, big ventures, and an energy that wants a large field to run in.',
+      e: 'Effort and luck cooperate, a strong window for sport, enterprise, and a campaign that needs momentum.',
+      h: 'Overconfidence and overreach are the hazards; energy is high, judgement less so, and limits get tested for the sake of it.',
+      ask: 'Which bold move would still look wise next month?' },
+    'Mars|Saturn': {
+      c: 'Mars meets Saturn and the accelerator and the brake are pressed together: frustration, discipline, and hard work that has to be paced.',
+      e: 'Effort becomes efficient and durable, a fine stretch for building, training, and finishing what was started.',
+      h: 'Blocked energy builds up; obstacles test patience and tempers, and careful method beats brute force.',
+      ask: 'Where would slow, steady effort get further than force?' },
+    'Mars|Uranus': {
+      c: 'Mars meets Uranus and the sky turns volatile: sudden action, accidents of haste, and a rebellious streak in everyone.',
+      e: 'Bold innovation works, a good window for a daring change, new technique, or a break with stale method.',
+      h: 'Impatience and impulsiveness spike; things break, people snap, and slowing down is the protective choice.',
+      ask: 'What change needs courage, and what change only needs a pause first?' },
+    'Mars|Neptune': {
+      c: 'Mars meets Neptune and drive dissolves into dream: inspired action for a cause, or energy that leaks away without a target.',
+      e: 'Effort serves an ideal, a good stretch for compassionate work, dance, or acting on a quiet intuition.',
+      h: 'Motivation fogs; fatigue, confusion and passive resistance slow things down, so rest is not the same as giving up.',
+      ask: 'Which cause is worth the energy, and which is quietly draining it?' },
+    'Mars|Pluto': {
+      c: 'Mars meets Pluto and the force in the sky becomes formidable: determination, confrontation, and power that will not take no for an answer.',
+      e: 'Concentrated effort can move something heavy, a strong window for deep work, recovery and decisive change.',
+      h: 'Power struggles turn fierce; coercion and resistance meet, and how force is used matters more than winning.',
+      ask: 'Where is strength being asked to protect rather than to dominate?' },
+    'Mars|North Node': {
+      c: 'Mars standing on the North Node aims courage at the unfamiliar, a shove toward acting on what has only been considered.',
+      e: 'Action and growth cooperate, so the step that has been rehearsed in thought can finally be taken.',
+      h: 'Old fights and new directions compete for energy, and the familiar battle is the one to decline.',
+      ask: 'Which old battle could be left unfought, to free energy for the new direction?' },
+    'Jupiter|Saturn': {
+      c: 'Jupiter meets Saturn, the twenty year turning point of the social sky, when growth and structure agree on a new shape for the age.',
+      e: 'Expansion and caution cooperate, a rare stretch when plans can be both ambitious and realistic.',
+      h: 'Growth and limit argue at the level of institutions; the question of what to keep and what to grow is asked everywhere.',
+      ask: 'What structure would let something keep growing for twenty years?' },
+    'Jupiter|Uranus': {
+      c: 'Jupiter meets Uranus, a once in fourteen years spark, when breakthroughs, windfalls and sudden openings change the field.',
+      e: 'Opportunity arrives through innovation, a good stretch for unusual ventures and lucky breaks.',
+      h: 'Excitement outruns stability; markets jump and plans leap, and freedom gained in a rush may need tidying later.',
+      ask: 'What sudden opening would be worth preparing for in advance?' },
+    'Jupiter|Neptune': {
+      c: 'Jupiter meets Neptune, a thirteen year tide of faith and imagination, when ideals swell and the line between vision and fantasy blurs.',
+      e: 'Compassion and belief expand together, a fertile stretch for spiritual practice, art and charity.',
+      h: 'Hope inflates into illusion; promises outrun substance, and generosity needs a clear eye to land where it helps.',
+      ask: 'Which hope is worth acting on, and which only feels good to hold?' },
+    'Jupiter|Pluto': {
+      c: 'Jupiter meets Pluto, a twelve year surge of power, when wealth, influence and ambition gather force across the collective.',
+      e: 'Growth goes deep, a strong stretch for long term investment, healing and work that changes a field.',
+      h: 'Ambition and control escalate together; large forces contend, and the cost of winning big is worth counting.',
+      ask: 'What would power be for, if it were gathered on purpose?' },
+    'Jupiter|North Node': {
+      c: 'When Jupiter sits on the North Node, teachers, journeys and beliefs appear that widen the way ahead.',
+      e: 'Luck favours the new direction, so a step into unfamiliar territory is met with more support than expected.',
+      h: 'Comfortable beliefs and a new direction disagree, and outgrowing an old creed is part of the work.',
+      ask: 'Which belief has been outgrown without anybody saying so?' },
+    'Saturn|Uranus': {
+      c: 'Saturn meets Uranus, a generational clash and handshake between the old order and the new, when structures reform rather than simply break.',
+      e: 'Tradition and innovation cooperate, a rare stretch when change can be built to last.',
+      h: 'Old and new grind against each other; rules tighten while pressure to change mounts, and both sides have a point.',
+      ask: 'What part of the old way is worth carrying into the new one?' },
+    'Saturn|Neptune': {
+      c: 'Saturn meets Neptune, a thirty six year meeting of dream and form, when ideals are tested against what can actually be built.',
+      e: 'Vision and discipline cooperate, a good stretch for giving a dream a sound foundation.',
+      h: 'Reality and ideal erode each other; disillusion is possible, and so is the clarity it leaves behind.',
+      ask: 'Which ideal could survive being made practical, and what would it look like built?' },
+    'Saturn|Pluto': {
+      c: 'Saturn meets Pluto, a thirty odd year reckoning with power and structure, when what is rotten is cleared and what is sound is rebuilt.',
+      e: 'Endurance and depth cooperate, a strong stretch for rebuilding something from the ground up.',
+      h: 'Pressure on institutions and authorities peaks; hard limits meet hard truths, and survival depends on what is essential.',
+      ask: 'What is essential enough to rebuild, if everything else were cleared away?' },
+    'Saturn|North Node': {
+      c: 'Saturn on the North Node asks the future for a signature: a slow, serious commitment to ground not yet known.',
+      e: 'Discipline supports growth, so patience invested in a new direction now has a long return.',
+      h: 'Duty to the past and the call of the future compete, and an old obligation may need renegotiating.',
+      ask: 'Which old duty is ready to be renegotiated?' },
+    'Uranus|Neptune': {
+      c: 'Uranus meets Neptune, a once in a hundred and seventy years seeding of new ideals, felt as a generation’s shared dream.',
+      e: 'Inspiration and invention cooperate across the collective, a long backdrop for visionary change.',
+      h: 'Revolution and dissolution strain against each other in the background, and ideals change faster than structures can follow.',
+      ask: 'Which ideal of your generation is still worth defending?' },
+    'Uranus|Pluto': {
+      c: 'Uranus meets Pluto, a once in more than a century upheaval, when radical change and deep transformation reshape the collective.',
+      e: 'Reform and renewal cooperate in the background, a long season in which change can go deep without breaking things.',
+      h: 'Upheaval and power struggle grind on at the collective level, a backdrop of restless change that touches every life.',
+      ask: 'What part of a larger upheaval is yours to carry, and what is not?' },
+    'Uranus|North Node': {
+      c: 'Uranus at the North Node delivers the future as a surprise, an opening nobody scheduled that leads somewhere unfamiliar.',
+      e: 'Change and growth cooperate, so an unexpected turn may turn out to be the road forward.',
+      h: 'Sudden change and the long direction disagree, and not every disruption is a path worth taking.',
+      ask: 'Which surprise could become a direction, and which is only noise?' },
+    'Neptune|Pluto': {
+      c: 'Neptune meets Pluto, a five century meeting of dream and depth, a background current older than anyone alive.',
+      e: 'The long sextile between Neptune and Pluto runs under the whole age, a slow background of spiritual and cultural renewal.',
+      h: 'Dream and power pull against each other at a depth few lives feel directly, felt instead as the mood of an era.',
+      ask: 'What does this era seem to be dreaming of becoming, and what part of that dream is yours?' },
+    'Neptune|North Node': {
+      c: 'Neptune on the North Node makes the road ahead something sensed rather than seen, intuition and ideals leaning the same unfamiliar way.',
+      e: 'Compassion and growth cooperate, so service, art and faith can open a new direction gently.',
+      h: 'Illusion and direction mix; the path ahead is hard to see clearly, and patience with uncertainty helps.',
+      ask: 'Which intuition about the future keeps returning, however often it is set aside?' },
+    'Pluto|North Node': {
+      c: 'Pluto at the North Node makes the change of course a deep one, reaching down to what the future will be built on.',
+      e: 'Depth and growth cooperate, so a profound change can open a road that stays open.',
+      h: 'What must end and what must begin pull hard against each other, and the deepest letting go makes room for the next step.',
+      ask: 'What ending would make room for the direction that keeps calling?' }
+  };
+  var SKY_FLIP = { conjunct: 'opposite', opposite: 'conjunct', sextile: 'trine', trine: 'sextile', square: 'square' };
+  /* A reading for two moving bodies in aspect overhead. Order does not matter,
+     the South Node is read as the North Node contact it mirrors, and the two
+     nodes with each other answer null: that pair is always exactly opposite. */
+  function sky(a, asp, b) {
+    var k = aspKey(asp);
+    if (ASPECTS.indexOf(k) === -1) return null;
+    var aN = a === 'South Node', bN = b === 'South Node';
+    if (aN) { a = 'North Node'; k = SKY_FLIP[k]; }
+    if (bN) { b = 'North Node'; k = SKY_FLIP[k]; }
+    if (a === b) return null;
+    var ia = MOVERS.indexOf(a), ib = MOVERS.indexOf(b);
+    if (ia === -1 || ib === -1) return null;
+    var e = SKY[ia < ib ? a + '|' + b : b + '|' + a];
+    if (!e) return null;
+    return { text: e[aspClass(k)], ask: e.ask, asp: k };
+  }
+
   /* GATES. Each gate in four parts. sky: what the gate carries for everyone
      while a moving body holds it. held: how that lands in a chart that already
      carries the gate. open: how it lands in a chart that does not, where the
@@ -8857,9 +9161,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   var api = {
     VERSION: '1.0.0',
     MOVERS: MOVERS, ASPECTS: ASPECTS, TARGETS: TARGETS, ROLES: ROLES,
-    PACE: PACE, MOVE: MOVE, MEET: MEET, PLACE: PLACE,
+    PACE: PACE, MOVE: MOVE, MEET: MEET, PLACE: PLACE, SKY: SKY,
     GATE: GATE, LINE: LINE, GATE_LINE: GATE_LINE, CHANNEL: CHANNEL, NUMBER: NUMBER,
-    transit: transit, gate: gate, number: number, coverage: coverage
+    transit: transit, sky: sky, gate: gate, number: number, coverage: coverage
   };
   if (typeof window !== 'undefined') window.TimingLexicon = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -33451,9 +33755,8 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
-      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
-        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ p.t }}</div></sc-for>
       </div>
       <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
       <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
@@ -39367,9 +39670,8 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
-      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
-        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ p.t }}</div></sc-for>
       </div>
       <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
       <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
@@ -45423,6 +45725,24 @@ class Component extends DCLogic {
     while (to < 2 * N && off(to + 1) <= orb) { to++; const o = off(to); if (o < best) { best = o; ex = to; } }
     return { from: from - N, to: to - N, exact: ex - N, orb: best, openStart: from === 0, openEnd: to === 2 * N };
   }
+  /* The line under a transit row says what THIS transit does: the Timing
+     Lexicon's meeting of this mover with this natal point, or its reading of
+     these two bodies at this angle overhead (owner, 20 October 2026: "they
+     need descriptors relevant to the specific transits, not just the readers
+     placement"). The old composed line of the two bodies' keywords is the
+     fallback for a pair the lexicon does not carry. */
+  transitLine(x, personal) {
+    const TL = window.TimingLexicon;
+    if (personal) {
+      /* A body meeting its own natal place reads as its return, which is true
+         of the conjunction only; at any other angle the line is the mover's. */
+      const L = TL ? TL.transit(x.a.name, x.asp, x.b.name) : null;
+      if (L) return x.a.name === x.b.name && x.asp !== 'conjunct' ? L.move : L.meet;
+      return x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp];
+    }
+    const SK = TL && TL.sky ? TL.sky(x.a.name, x.asp, x.b.name) : null;
+    return SK ? SK.text : x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp];
+  }
   transitDetail(x, personal, o) {
     const A = this.ASPECTS.find(r => r[1] === x.asp) || [0, x.asp, 8], ang = A[0], orb = A[2], TL = window.TimingLexicon;
     const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
@@ -45437,7 +45757,7 @@ class Component extends DCLogic {
     let paras = [], ask = '';
     if (personal) {
       const L = TL ? TL.transit(x.a.name, x.asp, x.b.name) : null;
-      if (L) { paras = [L.move, L.meet]; ask = L.ask; }
+      if (L) { paras = x.a.name === x.b.name && x.asp !== 'conjunct' ? [L.move] : [L.meet, L.move]; ask = L.ask; }
       else {
         const mv = TL && TL.MOVE[x.a.name] ? TL.MOVE[x.a.name][x.asp] : '';
         paras = [mv, x.b.mean ? 'Your natal ' + x.b.name + ' carries ' + x.b.mean + '.' : ''].filter(Boolean);
@@ -45446,11 +45766,12 @@ class Component extends DCLogic {
     } else {
       const ha = o.houseOfLon(a0 == null ? x.a.lon : a0), hb = o.houseOfLon(b0 == null ? x.b.lon : b0);
       const slow = (this.IMPACT_W[x.a.name] || 0) >= (this.IMPACT_W[x.b.name] || 0) ? ha : hb;
-      paras = [cap(x.a.mean || x.a.name) + ' meets ' + (x.b.mean || x.b.name) + ' overhead: ' + (this.ASP_POSS[x.asp] || this.ASP_MEAN[x.asp]) + '.',
+      const SK = TL && TL.sky ? TL.sky(x.a.name, x.asp, x.b.name) : null;
+      paras = [SK ? SK.text : cap(x.a.mean || x.a.name) + ' meets ' + (x.b.mean || x.b.name) + ' overhead: ' + (this.ASP_POSS[x.asp] || this.ASP_MEAN[x.asp]) + '.',
         ha === hb
           ? 'In your chart both stand in the ' + o.ordinal(ha) + ' house, so the meeting happens in one room: ' + this.HOUSE_THEMES[ha - 1] + '.'
           : 'In your chart it runs between the ' + o.ordinal(ha) + ' house and the ' + o.ordinal(hb) + ' house: ' + this.HOUSE_THEMES[ha - 1] + ', and ' + this.HOUSE_THEMES[hb - 1] + '.'];
-      ask = this.HOUSE_ASK[slow - 1];
+      ask = SK ? SK.ask : this.HOUSE_ASK[slow - 1];
     }
     const span = run && run.to > run.from ? Math.max(0, Math.min(100, (0 - run.from) / (run.to - run.from) * 100)) : 50;
     return { c: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', ga: x.a.glyph, gb: x.b.glyph,
@@ -45459,7 +45780,7 @@ class Component extends DCLogic {
       winOn: !!run, pct: span.toFixed(0) + '%', range: run ? this.impactRange(run) : '',
       exactOn: run ? (run.orb < .25 ? 'exact ' : 'closest ') + (run.exact === 0 ? 'today' : 'on ' + this.fmtDay(this.impactDay(run.exact))) : '',
       paceOn: !run && !!paceOf, pace: paceOf ? 'Lasts ' + paceOf + '.' : '',
-      nature: this.ASP_NATURE[x.asp] || '', paras: paras.map(t => ({ t })), askOn: !!ask, ask: ask,
+      paras: paras.map(t => ({ t })), askOn: !!ask, ask: ask,
       goOn: personal, goLabel: 'See your natal ' + x.b.name,
       go: () => { this.setState({ trSel: null }); if (personal) o.openBody(x.b.name); } };
   }
@@ -45546,17 +45867,19 @@ class Component extends DCLogic {
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
     const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
-      sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 'p', i: i } }) })));
-    /* The two nodes are always exactly opposite, so that pair is a fact about
-       the nodes rather than a transit, and its pull up had nothing to say. */
-    const skyTr = o.tr.global.filter(x => !(x.a.name.indexOf('Node') !== -1 && x.b.name.indexOf('Node') !== -1));
+      sub: this.transitLine(x, true), go: () => this.setState({ trSel: { k: 'p', i: i } }) })));
+    /* The sky's own contacts, without the South Node: it is always exactly
+       opposite the North Node, so the node pair said nothing and every South
+       Node contact was the same fact as a North Node one, listed twice. */
+    const skyBodies = o.tr.today.filter(p => p.name !== 'South Node');
+    const skyTr = this.aspectPairs(skyBodies, skyBodies, true).slice(0, 6);
     const trS = group('tr-sky', 'Current Transits', skyTr.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
-      sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 's', i: i } }) })));
+      sub: this.transitLine(x, false), go: () => this.setState({ trSel: { k: 's', i: i } }) })));
     const ts = st.trSel, tList = ts ? (ts.k === 'p' ? o.tr.personal : skyTr) : null, tx = tList ? tList[ts.i] : null;
     const trBits = { trOpen: !!tx, trClose: () => this.setState({ trSel: null }),
       trx: tx ? this.transitDetail(tx, ts.k === 'p', ctx) : { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', winOn: false, pct: '0%', range: '', exactOn: '',
-        paceOn: false, pace: '', nature: '', paras: [], askOn: false, ask: '', goOn: false, goLabel: '', go: () => {} } };
+        paceOn: false, pace: '', paras: [], askOn: false, ask: '', goOn: false, goLabel: '', go: () => {} } };
     const headed = (list, heads) => list.map(g => heads[g.key] ? { ...g, headOn: true, head: heads[g.key] } : g);
     const first = pts.length ? pts[0].key : 'houses';
     return { ...trBits,

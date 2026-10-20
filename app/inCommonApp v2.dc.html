@@ -5890,9 +5890,8 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
-      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
-        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ p.t }}</div></sc-for>
       </div>
       <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
       <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
@@ -11806,9 +11805,8 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ trx.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ trx.pace }}</div></sc-if>
-      <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ trx.nature }}</div>
-      <div style="display:flex;flex-direction:column;gap:9px;border-left:2px solid var(--bd);padding-left:11px">
-        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13px/1.7 var(--fb);color:var(--mut)">{{ p.t }}</div></sc-for>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ trx.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 13.5px/1.7 var(--fb);color:var(--tx)">{{ p.t }}</div></sc-for>
       </div>
       <sc-if value="{{ trx.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx)">{{ trx.ask }}</div></sc-if>
       <sc-if value="{{ trx.goOn }}" hint-placeholder-val="{{ false }}">
@@ -17862,6 +17860,24 @@ class Component extends DCLogic {
     while (to < 2 * N && off(to + 1) <= orb) { to++; const o = off(to); if (o < best) { best = o; ex = to; } }
     return { from: from - N, to: to - N, exact: ex - N, orb: best, openStart: from === 0, openEnd: to === 2 * N };
   }
+  /* The line under a transit row says what THIS transit does: the Timing
+     Lexicon's meeting of this mover with this natal point, or its reading of
+     these two bodies at this angle overhead (owner, 20 October 2026: "they
+     need descriptors relevant to the specific transits, not just the readers
+     placement"). The old composed line of the two bodies' keywords is the
+     fallback for a pair the lexicon does not carry. */
+  transitLine(x, personal) {
+    const TL = window.TimingLexicon;
+    if (personal) {
+      /* A body meeting its own natal place reads as its return, which is true
+         of the conjunction only; at any other angle the line is the mover's. */
+      const L = TL ? TL.transit(x.a.name, x.asp, x.b.name) : null;
+      if (L) return x.a.name === x.b.name && x.asp !== 'conjunct' ? L.move : L.meet;
+      return x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp];
+    }
+    const SK = TL && TL.sky ? TL.sky(x.a.name, x.asp, x.b.name) : null;
+    return SK ? SK.text : x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp];
+  }
   transitDetail(x, personal, o) {
     const A = this.ASPECTS.find(r => r[1] === x.asp) || [0, x.asp, 8], ang = A[0], orb = A[2], TL = window.TimingLexicon;
     const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
@@ -17876,7 +17892,7 @@ class Component extends DCLogic {
     let paras = [], ask = '';
     if (personal) {
       const L = TL ? TL.transit(x.a.name, x.asp, x.b.name) : null;
-      if (L) { paras = [L.move, L.meet]; ask = L.ask; }
+      if (L) { paras = x.a.name === x.b.name && x.asp !== 'conjunct' ? [L.move] : [L.meet, L.move]; ask = L.ask; }
       else {
         const mv = TL && TL.MOVE[x.a.name] ? TL.MOVE[x.a.name][x.asp] : '';
         paras = [mv, x.b.mean ? 'Your natal ' + x.b.name + ' carries ' + x.b.mean + '.' : ''].filter(Boolean);
@@ -17885,11 +17901,12 @@ class Component extends DCLogic {
     } else {
       const ha = o.houseOfLon(a0 == null ? x.a.lon : a0), hb = o.houseOfLon(b0 == null ? x.b.lon : b0);
       const slow = (this.IMPACT_W[x.a.name] || 0) >= (this.IMPACT_W[x.b.name] || 0) ? ha : hb;
-      paras = [cap(x.a.mean || x.a.name) + ' meets ' + (x.b.mean || x.b.name) + ' overhead: ' + (this.ASP_POSS[x.asp] || this.ASP_MEAN[x.asp]) + '.',
+      const SK = TL && TL.sky ? TL.sky(x.a.name, x.asp, x.b.name) : null;
+      paras = [SK ? SK.text : cap(x.a.mean || x.a.name) + ' meets ' + (x.b.mean || x.b.name) + ' overhead: ' + (this.ASP_POSS[x.asp] || this.ASP_MEAN[x.asp]) + '.',
         ha === hb
           ? 'In your chart both stand in the ' + o.ordinal(ha) + ' house, so the meeting happens in one room: ' + this.HOUSE_THEMES[ha - 1] + '.'
           : 'In your chart it runs between the ' + o.ordinal(ha) + ' house and the ' + o.ordinal(hb) + ' house: ' + this.HOUSE_THEMES[ha - 1] + ', and ' + this.HOUSE_THEMES[hb - 1] + '.'];
-      ask = this.HOUSE_ASK[slow - 1];
+      ask = SK ? SK.ask : this.HOUSE_ASK[slow - 1];
     }
     const span = run && run.to > run.from ? Math.max(0, Math.min(100, (0 - run.from) / (run.to - run.from) * 100)) : 50;
     return { c: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', ga: x.a.glyph, gb: x.b.glyph,
@@ -17898,7 +17915,7 @@ class Component extends DCLogic {
       winOn: !!run, pct: span.toFixed(0) + '%', range: run ? this.impactRange(run) : '',
       exactOn: run ? (run.orb < .25 ? 'exact ' : 'closest ') + (run.exact === 0 ? 'today' : 'on ' + this.fmtDay(this.impactDay(run.exact))) : '',
       paceOn: !run && !!paceOf, pace: paceOf ? 'Lasts ' + paceOf + '.' : '',
-      nature: this.ASP_NATURE[x.asp] || '', paras: paras.map(t => ({ t })), askOn: !!ask, ask: ask,
+      paras: paras.map(t => ({ t })), askOn: !!ask, ask: ask,
       goOn: personal, goLabel: 'See your natal ' + x.b.name,
       go: () => { this.setState({ trSel: null }); if (personal) o.openBody(x.b.name); } };
   }
@@ -17985,17 +18002,19 @@ class Component extends DCLogic {
       edge: this.ASP_COLOR[x.asp] ? this.ASP_COLOR[x.asp][0] : 'var(--bd)', sub: this.ASP_SHORT[x.asp] || '', go: () => this.setState({ aspSel: i }) })));
     const trP = group('tr-personal', 'Personal Transits', o.tr.personal.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' your natal ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb', edge: 'var(--ac2-hi)',
-      sub: x.a.mean + ' meeting your ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 'p', i: i } }) })));
-    /* The two nodes are always exactly opposite, so that pair is a fact about
-       the nodes rather than a transit, and its pull up had nothing to say. */
-    const skyTr = o.tr.global.filter(x => !(x.a.name.indexOf('Node') !== -1 && x.b.name.indexOf('Node') !== -1));
+      sub: this.transitLine(x, true), go: () => this.setState({ trSel: { k: 'p', i: i } }) })));
+    /* The sky's own contacts, without the South Node: it is always exactly
+       opposite the North Node, so the node pair said nothing and every South
+       Node contact was the same fact as a North Node one, listed twice. */
+    const skyBodies = o.tr.today.filter(p => p.name !== 'South Node');
+    const skyTr = this.aspectPairs(skyBodies, skyBodies, true).slice(0, 6);
     const trS = group('tr-sky', 'Current Transits', skyTr.map((x, i) => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
-      sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp], go: () => this.setState({ trSel: { k: 's', i: i } }) })));
+      sub: this.transitLine(x, false), go: () => this.setState({ trSel: { k: 's', i: i } }) })));
     const ts = st.trSel, tList = ts ? (ts.k === 'p' ? o.tr.personal : skyTr) : null, tx = tList ? tList[ts.i] : null;
     const trBits = { trOpen: !!tx, trClose: () => this.setState({ trSel: null }),
       trx: tx ? this.transitDetail(tx, ts.k === 'p', ctx) : { c: 'var(--bd)', ga: '', gb: '', title: '', orb: '', winOn: false, pct: '0%', range: '', exactOn: '',
-        paceOn: false, pace: '', nature: '', paras: [], askOn: false, ask: '', goOn: false, goLabel: '', go: () => {} } };
+        paceOn: false, pace: '', paras: [], askOn: false, ask: '', goOn: false, goLabel: '', go: () => {} } };
     const headed = (list, heads) => list.map(g => heads[g.key] ? { ...g, headOn: true, head: heads[g.key] } : g);
     const first = pts.length ? pts[0].key : 'houses';
     return { ...trBits,

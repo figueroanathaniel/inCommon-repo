@@ -51,7 +51,7 @@ function strings() {
     if (typeof o === 'string') out.push({ at: at, s: o });
     else if (o && typeof o === 'object') Object.keys(o).forEach(k => walk(o[k], at + '.' + k));
   };
-  ['PACE', 'MOVE', 'MEET', 'PLACE', 'GATE', 'LINE', 'GATE_LINE', 'CHANNEL', 'NUMBER'].forEach(k => walk(L[k], k));
+  ['PACE', 'MOVE', 'MEET', 'PLACE', 'SKY', 'GATE', 'LINE', 'GATE_LINE', 'CHANNEL', 'NUMBER'].forEach(k => walk(L[k], k));
   return out;
 }
 
@@ -128,6 +128,26 @@ row('TL5', '960 distinct transit readings from 60 distinct moves and 192 distinc
   tset.size === 960 && moves.size === moveN && moveN === 60 && meets.size === meetN && meetN === 192,
   tset.size + ' / ' + moves.size + ' / ' + meets.size);
 
+/* TL16: the sky's own contacts. Every pair of the eleven movers that are not
+   the South Node has a conjunction, an easy and a hard reading and a question,
+   all distinct; every mover pair the app's sky can produce resolves for all five
+   aspects, the South Node read as the North Node turned round; and the two nodes
+   with each other answer null, because that pair is always exactly opposite. */
+const skyMovers = L.MOVERS.filter(m => m !== 'South Node');
+const skyKeys = [];
+skyMovers.forEach((a, i) => skyMovers.forEach((b, j) => { if (j > i) skyKeys.push(a + '|' + b); }));
+const skyParts = [];
+let skyOk = JSON.stringify(Object.keys(L.SKY).sort()) === JSON.stringify(skyKeys.slice().sort());
+skyKeys.forEach(k => ['c', 'e', 'h', 'ask'].forEach(p => { const v = L.SKY[k] && L.SKY[k][p]; if (typeof v !== 'string' || v.split(/\s+/).length < 8) skyOk = false; else skyParts.push(v); }));
+let skyRes = 0;
+L.MOVERS.forEach((a, i) => L.MOVERS.forEach((b, j) => { if (j <= i) return; L.ASPECTS.forEach(asp => {
+  const r = L.sky(a, asp, b), nodes = a.indexOf('Node') !== -1 && b.indexOf('Node') !== -1;
+  if (nodes ? r !== null : !(r && r.text && r.ask && L.sky(b, asp, a).text === r.text)) skyOk = false; else if (!nodes) skyRes++;
+}); }));
+const snFlip = L.sky('South Node', 'conjunct', 'Saturn').text === L.sky('North Node', 'opposite', 'Saturn').text;
+row('TL16', skyKeys.length + ' sky pairs, ' + skyParts.length + ' distinct readings and questions, ' + skyRes + ' contacts resolve, the South Node mirrored',
+  skyOk && skyKeys.length === 55 && new Set(skyParts).size === skyParts.length && skyRes === 325 && snFlip);
+
 /* TL6: every gate says its own thing in every part. */
 const parts = { sky: new Set(), held: new Set(), open: new Set(), ask: new Set() };
 let gOk = true;
@@ -179,6 +199,7 @@ const asks = [];
 L.TARGETS.forEach(t => ['c', 'e', 'h'].forEach(k => asks.push(L.PLACE[t][k])));
 for (let g = 1; g <= 64; g++) asks.push(L.GATE[g].ask);
 Object.keys(L.NUMBER).forEach(k => asks.push(L.NUMBER[k].ask));
+Object.keys(L.SKY).forEach(k => asks.push(L.SKY[k].ask));
 row('TL12', asks.length + ' questions, each ending in a question mark, none repeated',
   asks.every(q => /\?$/.test(q)) && new Set(asks).size === asks.length);
 
