@@ -3696,14 +3696,29 @@ Supabase faked, and P1 to P15 of the password drive still 15 of 15; the layout
 sweep at nine sizes now walks `code`, `set` and `back` through the real script,
 with the phone on its side scrolling as designed and nothing else out of place.
 
-## The first run is the Codex's page, and inCommon's is tucked away
+## The first run is three stations on one line, and inCommon's old form is tucked away
 The owner asked on 29 September 2026 for the Celestial Codex's birth page to
-become the first run, with inCommon's put away rather than deleted. So the page a
-reader meets has the Codex's layout and words: "The First Inscription", "Tell
-the Codex *when you arrived.*", the three coordinates line, one card with the
-full birth name, the date and the time side by side, a place search that lists
-candidates with their coordinates and zone, and "Cast my Codex". The word Codex
-is on it on purpose; the owner is merging the two and chose the page as it was.
+become the first run, with inCommon's put away rather than deleted, and on 20
+October 2026 for that page to be re-imagined without "Cast My Codex". So the
+Codex's words are gone ("The First Inscription", "Tell the Codex when you
+arrived", the three coordinates line, the button), and what came from it in
+substance stays: one card, the full birth name, the date and the time side by
+side where there is room, and a place search that lists candidates with their
+coordinates and zone.
+
+**The page now.** The wordmark between two `--ac2` bars, a horizon drawn in SVG
+(half the zodiac's ring, a tick at every sign boundary, a light at the top,
+`aria-hidden`; no `img`, `canvas` or `iframe`, which G4 refuses inside the
+gate), "Where your sky begins." in the display face, and no line under it, by
+"No disclaimers". The card is three stations on a rail: **Your name**, **The
+moment** (date, time, the unknown switch) and **The place**. Each station has a
+node on the rail that fills with `--ac2` once it is answered (`cxN1` to `cxN3`
+in `authVals()`: a name typed; a whole date and either a whole time or the
+switch; a place that resolved), so the page shows how far along the reader is
+without a sentence saying so. The nodes are fills, never text. The one action
+is "Reveal my sky", a pill in `--ac`, and Skip for now stays under the card (R2,
+G4). The state names still say `authCodex` and `cx*`: they are identifiers, and
+renaming them would buy nothing.
 
 **Tucked away means one flag.** `FIRSTRUN_CLASSIC` on the logic class is false,
 `authVals()` sets `authCodex` or `authBirth` from it, and inCommon's form is still
@@ -3722,8 +3737,8 @@ this page adds the offset that applied on the birth date and whether daylight
 saving was in effect, which is the part that moves the Ascendant. Errors stay
 field level, with `aria-invalid` and `aria-errormessage` per field, because G7
 holds that. And the page is drawn in tokens: the one action wears `--ac`, the
-labels wear `--ac2-hi` because `--ac2` is never text, the corner brackets wear
-`--ac2` as borders, and the heading's gradient runs between `--tx` and
+labels wear `--ac2-hi` because `--ac2` is never text, the rail, nodes and
+horizon wear `--ac2` as fills and strokes, and the heading's gradient runs between `--tx` and
 `--ac2-hi` so it holds its contrast in every identity. The Codex's gold has no
 token here, and a hex in the template is exactly what the theme boundary bars.
 
