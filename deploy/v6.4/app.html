@@ -39035,13 +39035,10 @@ class Component extends DCLogic {
       if (localStorage.getItem('incommon.chart.expanded') === '1') {
         this.setState({ chartExpandOpen: true, chartMode: 'expanded' });
       }
-      /* The chart view (3D, Orbital or 2D) is a device preference, kept the
-         way the expanded overlay is. */
-      const cv = localStorage.getItem('incommon.chart.view');
-      if (cv === '2d' || cv === 'orbit' || cv === '3d') this.setState({ chartView: cv });
-      const yv = localStorage.getItem('incommon.cycle.view');
-      if (yv === '2d' || yv === '3d') this.setState({ cyView: yv });
-      const hv = localStorage.getItem('incommon.hd.view');
+      /* Every chart opens on 2D, whatever was chosen last time (owner, 20
+         October 2026), so a view is not kept. The keys an earlier build wrote
+         are cleared once, because nothing reads them now. */
+      ['incommon.chart.view', 'incommon.cycle.view', 'incommon.hd.view'].forEach(k => localStorage.removeItem(k));
       /* The scenes' scripts load async with the rest of the helmet. Until they
          have arrived the deep views hold their place with Loading rather than
          drawing the flat fallback and swapping it out, which is the layout
@@ -39055,7 +39052,6 @@ class Component extends DCLogic {
       };
       sceneWait();
       this._spT = setTimeout(() => this.scenePrewarm(), 1500);
-      if (hv === '2d' || hv === 'wheel' || hv === '3d') this.setState({ hdView: hv });
       const hr = localStorage.getItem('incommon.hd.read');
       if (hr === 'cards' || hr === 'full') this.setState({ hdRead: hr });
     } catch (e) {}
@@ -41741,7 +41737,7 @@ class Component extends DCLogic {
       obsViews: [['orbit', 'Orbital'], ['3d', '3D']].map(([id, label]) => {
         const on = (st.chartView === 'orbit' ? 'orbit' : '3d') === id;
         return { label, on, bg: on ? 'rgba(var(--atmc),.34)' : 'transparent', bd: on ? 'var(--ac2)' : 'transparent', c: on ? 'var(--tx)' : 'var(--dim)',
-          go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); } };
+          go: () => this.setState({ chartView: id }) };
       }),
       obsHomeGo: () => { if (S) S.home(); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
       obsPanelsGo: () => this.setState({ obsPanels: !panels }),
@@ -49100,7 +49096,7 @@ class Component extends DCLogic {
     const ready = this.cycleReady() && this.cycleDesignReady();
     if (!ready) { this.cycleSoon(); return { ...off, cwOn: true, cwFinding: true, cwViewsOn: false, cwViews: [], cwSceneOn: false, cwChartOn: false, cwOpenGo: () => this.setState({ cyOpen: true }) }; }
     /* 2D is the flat chart and is drawn first (owner, 20 October 2026); 3D is
-       the landscape, a choice kept per device like the charts' own. */
+       the landscape, chosen for the visit and never kept, like the charts'. */
     const canScene = this.cycleSceneOn() || this.scenePending('CycleScene');
     const scene = canScene && this.state.cyView === '3d';
     const now = new Date(), year = now.getFullYear();
@@ -49209,7 +49205,7 @@ class Component extends DCLogic {
       bg: v === id ? 'rgba(var(--atmc),.34)' : 'transparent',
       bd: v === id ? 'var(--ac2)' : 'transparent',
       c: v === id ? 'var(--tx)' : 'var(--dim)',
-      go: () => { try { localStorage.setItem('incommon.cycle.view', id); } catch (e) {} this.setState({ cyView: id }); }
+      go: () => this.setState({ cyView: id })
     }));
   }
   cycleSceneOn() {
@@ -49422,7 +49418,7 @@ class Component extends DCLogic {
         if (b) this.speak('Arrived at ' + b.label + '.', 'polite');
       },
       onFly: on => { if (!!this.state.csFlying !== !!on) this.setState({ csFlying: !!on }); },
-      onToggleView: () => { const v = this.state.chartView === 'orbit' ? '3d' : 'orbit'; try { localStorage.setItem('incommon.chart.view', v); } catch (e) {} this.setState({ chartView: v }); },
+      onToggleView: () => this.setState({ chartView: this.state.chartView === 'orbit' ? '3d' : 'orbit' }),
       onPanels: () => this.setState({ obsPanels: this.state.obsPanels === false }),
       onHelp: () => this.setState({ obsKeys: !this.state.obsKeys })
     });
@@ -51476,7 +51472,7 @@ class Component extends DCLogic {
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',
                 c: view === id ? 'var(--tx)' : 'var(--dim)',
-                go: () => { try { localStorage.setItem('incommon.chart.view', id); } catch (e) {} this.setState({ chartView: id }); }
+                go: () => this.setState({ chartView: id })
               })) : [],
               cvFlat: !deep, cvDeep: deep, cvOrbit: view === 'orbit', zoomDir: deep ? 'row' : 'column',
               /* the stage's units wait for the scene: nothing on or under it is shown until it is a utility */
@@ -51999,7 +51995,7 @@ class Component extends DCLogic {
                 bg: view === id ? 'rgba(var(--atmc),.34)' : 'transparent',
                 bd: view === id ? 'var(--ac2)' : 'transparent',
                 c: view === id ? 'var(--tx)' : 'var(--dim)',
-                go: () => { try { localStorage.setItem('incommon.hd.view', id); } catch (e) {} this.setState({ hdView: id }); }
+                go: () => this.setState({ hdView: id })
               })) : [],
               hvFlat: !deep, hvDeep: deep,
               hsVeilO: st.hsLive ? '0' : '1', hsVeilV: st.hsLive ? 'hidden' : 'visible', hsUiO: (!deep || st.hsLive) ? '1' : '0', hsUiV: (!deep || st.hsLive) ? 'visible' : 'hidden',

@@ -4627,8 +4627,8 @@ Asked for by the owner on 19 October 2026: "Update the astrology page to make it
 as if it was built by unreal engine. Make a 3D natal chart, an orbital option,
 and a standard 2D chart. Make the logos fit elegantly." The Birth Chart has a
 **Chart view** radiogroup in both shells, 2D, Orbital and 3D in that order,
-state `chartView`, kept per device as `incommon.chart.view` the way the
-expanded overlay is. **2D is the default** (see "2D opens first").
+state `chartView`. **2D is where it opens, every time** (see "2D opens
+first").
 
 **2D is the SVG wheel, untouched**, and it is also the fallback. 3D and Orbital
 are one scene, `app/chart-scene.js` (shell layer, global `ChartScene`), drawn
@@ -4707,9 +4707,8 @@ Asked for by the owner on 19 October 2026: "Redesign the human design page to
 make the ux like it was made by unreal engine. Completely interactive, high
 quality visuals, 3D options with 2D available. Compact, highly engaging, drive
 the experience to reflect the human design philosophy." The Wiring has a
-**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`,
-kept per device as `incommon.hd.view`. **2D is the default** (see "2D opens
-first"). The layer control
+**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`.
+**2D is where it opens, every time** (see "2D opens first"). The layer control
 (Personality, Design, Both, `bgMode`) drives every view.
 
 **2D is the SVG wiring, untouched**, and the fallback. 3D and Wheel are one
@@ -4981,14 +4980,22 @@ Decided by the owner on 20 October 2026: "Flip the order of the charts from
 3D, wheel/orbital, 2D to 2D, wheel/orbital, 3D. Make a 2D audit cycle and load
 that first as well." The switches read 2D, Orbital, 3D and 2D, Wheel, 3D, and
 the Observatory's own pair reads Orbital, 3D. `chartView` and `hdView` start at
-`2d`; a reader who chose a depth view keeps it, because the choice is stored.
+`2d`, and so does `cyView`.
+
+**The choice is not kept** (the owner, 20 October 2026: "Start with the 2D
+option as the default"). It was stored per device for one release, and a reader
+who had once pressed 3D kept opening on 3D, which read as the default never
+having changed. A view picked now lasts the visit; the next load opens on 2D.
+`componentDidMount` removes `incommon.chart.view`, `incommon.hd.view` and
+`incommon.cycle.view` once, because nothing reads them, and no switch writes
+them. Do not store a view again without the owner.
 The streaming hints were flipped with them (`cvFlat`, `hvFlat`, `cwChartOn`
 hint true; the deep ones false), so nothing deep flashes while the page
 streams.
 
 **The Cycle Audit's 2D is the flat chart it already had**, the three lanes on
 one twelve year axis, now a choice rather than only the fallback. State
-`cyView`, kept as `incommon.cycle.view`, `2d` first; the switch (`cwViews`,
+`cyView`, `2d` first; the switch (`cwViews`,
 from `cycleViews()`) sits above the chart in the widget in both shells and at
 the top of the sheet, and is drawn only where 3D can run, so a device without
 WebGL 2 sees the flat chart and no choice, as before. In 2D the sheet has no
