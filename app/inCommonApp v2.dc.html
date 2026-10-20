@@ -2786,11 +2786,21 @@ input[type="date"]{color-scheme:dark}
                 </sc-if>
               </div>
             </div>
+            <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
+                <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
+                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
+              </div>
+            </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
             </sc-if>
             <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
               <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdNowOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;font:600 11px var(--fu);color:var(--blue)"><span aria-hidden="true" style="flex:none;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:pulseGentle 2.6s ease-in-out infinite"></span>{{ hdNow }}</div>
             </sc-if>
             <sc-if value="{{ hdEssayOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:14px">
@@ -9677,11 +9687,21 @@ input[type="date"]{color-scheme:dark}
                 </sc-if>
               </div>
             </div>
+            <sc-if value="{{ hdEpiOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--atmc2),.5))"></span>
+                <span style="font:italic 400 19px var(--fb);color:var(--tx);text-align:center;text-wrap:balance">{{ hdEpi }}</span>
+                <span aria-hidden="true" style="flex:1;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.5),transparent)"></span>
+              </div>
+            </sc-if>
             <sc-if value="{{ hdLeadOn }}" hint-placeholder-val="{{ false }}">
               <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
             </sc-if>
             <sc-if value="{{ hdLeadCap }}" hint-placeholder-val="{{ false }}">
               <div data-dropcap style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdLead }}</div>
+            </sc-if>
+            <sc-if value="{{ hdNowOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;font:600 11px var(--fu);color:var(--blue)"><span aria-hidden="true" style="flex:none;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:pulseGentle 2.6s ease-in-out infinite"></span>{{ hdNow }}</div>
             </sc-if>
             <sc-if value="{{ hdEssayOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:14px">
@@ -21438,13 +21458,15 @@ class Component extends DCLogic {
         go: peek('g:' + n, { l: pct(s.x, 300), t: pct(s.y, 520) }, 'Gate ' + n + ' · ' + (A.GATES[n] ? A.GATES[n][0] : ''), 'gates:g' + n) }; });
     /* The folio. */
     const facets = [], links = [], yours = [], terms = [];
-    let kicker = '', lead = '', essay = [], dropcap = false;
+    let kicker = '', lead = '', essay = [], dropcap = false, epi = '', now = '';
+    const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
+    const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
     const term = (label, key) => { const x = find(key); if (x && x.key !== e.key) terms.push({ label: label, g: '?', go: () => this.atlasPick(key, false) }); };
     const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
     const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
-      kicker = t.pct + ' of people'; lead = t.def;
+      kicker = t.pct + ' of people'; lead = t.def; epi = String(t.signature || '').split(/[.,]/)[0].trim();
       [['Aura', t.aura], ['Strategy', t.strategy], ['Authority', t.authority], ['Signature', t.signature], ['Not-self theme', t.notSelf],
         ['Strengths', t.strengths], ['Challenges', t.challenges], ['Opportunities', t.opportunities], ['Obstacles', t.obstacles],
         ['In men', t.male], ['In women', t.female]].forEach(([l, x]) => x && facets.push({ label: l, text: x }));
@@ -21468,9 +21490,10 @@ class Component extends DCLogic {
       link(d.center ? 'Open and defined, ' + C.label : C.label, '', (d.center ? 'open:' : 'centers:') + this.atlasSlug(k));
       Object.keys(A.GATES).map(Number).filter(n => this.hdCenterOf(n) === k).slice(0, 12).forEach(n => link('Gate ' + n, String(n), 'gates:g' + n));
       term('Defined and undefined', 'open:' + this.atlasSlug(k)); term('Conditioning', 'terms:conditioning');
-      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held'); }
+      if (mine) yourLine(hd.defined.has(k) ? 'Defined in your chart' : 'Open in your chart', hd.gates.filter(g => this.hdCenterOf(g.gate) === k).map(g => g.gate).join(', ') || 'no gates held');
+      now = skyLine(sky.filter(a => this.hdCenterOf(a.gate) === k).map(a => a.body + ' in gate ' + a.gate)); }
     if (d.gate) { const g = A.GATES[d.gate];
-      kicker = this.hdCenterOf(d.gate) + ' centre'; lead = g[2];
+      kicker = this.hdCenterOf(d.gate) + ' centre'; lead = g[2]; epi = hexName(d.gate);
       facets.push({ label: 'Held low', text: g[3] }, { label: 'Held high', text: g[4] });
       link('Its centre, ' + this.hdCenterOf(d.gate), '', 'centers:' + this.atlasSlug(this.hdCenterOf(d.gate)));
       (A.channelsFor(d.gate) || []).forEach(c => link('Channel ' + c.key + ', ' + c.name, '⟷', 'channels:' + this.atlasSlug(c.key)));
@@ -21478,9 +21501,10 @@ class Component extends DCLogic {
         go: () => this.setState({ libSub: 'readings', libView: 'iching', icSec: null, icHex: d.gate, icQuery: String(d.gate), selId: null }) });
       term('Line', 'lines:1'); term('Hanging gate', 'terms:hanging-gate');
       if (mine) hd.acts.filter(a => a.gate === d.gate).forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'line ' + a.line));
-      sky.filter(a => a.gate === d.gate).forEach(a => yours.push({ label: a.body + ' now', text: 'line ' + a.line, go: () => this.atlasPick('terms:transits', false) })); }
+      now = skyLine(sky.filter(a => a.gate === d.gate).map(a => a.body + ', line ' + a.line)); }
     if (d.channel) { const c = A.CHANNELS[d.channel], p = d.channel.split('-').map(Number);
-      kicker = c[1]; lead = c[2];
+      kicker = c[1]; lead = c[2]; epi = p.map(hexName).filter(Boolean).join(' · ');
+      now = skyLine(sky.filter(a => p.indexOf(a.gate) !== -1).map(a => a.body + ' in gate ' + a.gate));
       p.forEach(n => link('Gate ' + n + ', ' + (A.GATES[n] ? A.GATES[n][0] : ''), String(n), 'gates:g' + n));
       term('Circuitry', 'circuitry:individual-circuitry'); term('Definition', 'definition:single-definition');
       if (myChan.has(d.channel)) yourLine('Defined in your chart', 'both gates held');
@@ -21534,7 +21558,8 @@ class Component extends DCLogic {
       hdAnim: (st.atlasFlip || 0) % 2 ? 'bnFolioA' : 'bnFolioB',
       hdFolioLabel: e.name, hdIcon: e.glyph, hdIconFs: String(e.glyph).length > 2 ? '20px' : '34px', hdName: e.name,
       hdChapterName: (A.SECTIONS.find(s => s[0] === e.ch) || ['', ''])[1],
-      hdKicker: kicker, hdKickerOn: !!kicker,
+      hdKicker: kicker, hdKickerOn: !!kicker, hdEpi: epi, hdEpiOn: !!epi,
+      hdNow: now, hdNowOn: !!now,
       hdLeadOn: !!lead && !dropcap, hdLeadCap: !!lead && dropcap, hdLead: lead,
       hdFamOn: lv === 'first' && where.length > 0, hdFam: where.slice(0, 2).join(' · '),
       hdEssay: essay, hdEssayOn: essay.length > 0,

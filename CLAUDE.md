@@ -4672,6 +4672,14 @@ to its gates; a profile to its two lines; a type to its strategy; an authority
 to its centre. "In your chart" is the reader's own activations, centres,
 channels and Cross, and opens the wiring on My Charts.
 
+**The folio carries an epigraph and the sky now, as the Astropedia's does.**
+The epigraph is the type's signature, the gate's hexagram name from
+`iching.js` (gate N is hexagram N), or a channel's two hexagram names; the
+"In the sky now" line names the bodies on a gate, a channel's gates or a
+centre's gates this minute, from the same `hdSkyNow()` reading the wiring rings.
+It replaced the "Sun now" rows that sat under In your chart, because the sky is
+not the reader's own.
+
 **The study paths reach it.** `studyVals()` serves all three rooms, the five
 guides apply as they do in the other two (the first-path lead is the reader's
 own entry, "Your type"), and `STUDY_TUT.hdatlas` holds three tutorials: First
