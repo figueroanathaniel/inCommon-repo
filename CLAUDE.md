@@ -300,6 +300,182 @@ now, because it would paint the room under every Library tab.
 `scrollLeft` so a tab chosen by an address or a search row is on screen.
 It must not use `scrollIntoView`, which would also move the snapped page.
 
+## The Library shelf is lit plates
+Asked for by the owner on 21 October 2026 ("Today, we make the pages look
+fire"), who chose the Library shelves first and cosmic depth as the feel. The
+Study tab's six rooms and the Journal tab's two rooms are plates: a card of sky
+with the room drawn in light on it (the nine centres wired, the zodiac with a
+sun, the nine petals, three cards fanned, a crescent over water, the 360
+degrees with a needle, a light met again and again, a page open under the
+moon), and the Readings tab's two halves are portals of the same sky with the
+drawing large and the button under it, and a thin warm seam between them, which is
+the divider the Library table names and N43 measures: it has to be the Tarot
+portal's next sibling and no wider than 2px. Study is a grid that is two columns on a
+phone and three on the desktop from one rule,
+`repeat(auto-fill,minmax(max(148px,30%),1fr))`; Journal's two plates and
+Readings' two halves are two columns everywhere, because the owner put tarot on
+the left and the Book of Changes on the right.
+
+**The shelf is written once and placed in both shells.** The two Library blocks
+were byte identical before this and are byte identical after it, so a change to
+one is a change to the other or it is a fault.
+
+**No category colour.** Every plate is the same wash, `--atmc` overhead and
+`--atmc2` under, lines in `--ac2-hi` over a halo in `--ac2`, warm fills in
+`--atmc2`. A room is told apart by its drawing and its name, by "A category is
+not a semantic colour"; the green the Astropedia and Lexicon rows used to wear
+is gone. Plates carry no description, by "No disclaimers".
+
+**What moves, and when.** The stars and the warm fills breathe on their own,
+which is opacity only. Everything else (a ring turning, petals turning, the
+channels flowing, the cards and the moon floating) is `paused` and runs only
+under a hovering pointer or keyboard focus, because the phone draws every
+section at once and six turning drawings nobody is looking at are a battery
+cost with no reader. There is no CSS `filter` anywhere in a drawing: the glow is
+the same lines drawn twice, wide and faint under narrow and bright, because a
+filter over something animating repaints every frame. Under reduced motion
+nothing animates.
+
+**The tilt is the Numbers cards' idiom**: `plateTilt()` and `plateTiltOff()`
+write the element's own style, never state, and the drawing drifts against the
+pointer so it sits deeper than the card. A plate sets its own `box-shadow`, so
+it does not take `data-lift`, by "Anything that can be pressed is lifted"; its
+border and shadow change on hover through `--plb` and `--plsh`, custom
+properties the head sheet sets, which an inline `all:unset` does not reset. The
+entrance animation is `backwards` and never `both`: a finished animation that
+holds `transform: none` beats the inline transform the tilt writes, and the
+card would never lean.
+
+**A translucent surface under a drawing shows what is behind it.** `--sf` and
+`--sf2` carry alpha under Deep Field, so the front tarot card is painted over
+an opaque `--bg` first, or the back card's outline reads through it.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+three tabs: four identities, hardened and not, at 1440 and 375, 48 cases, no
+pair under 4.5:1 and no control under 44px. Driven in both shells: every plate
+and both reading buttons land on their room and address, Enter on a focused
+plate opens it, and a hover tilts the plate, lights it and runs its drawing.
+
+## My Charts in light, and the attribute names SVG will take
+The owner's next page on 21 October 2026, after the Library shelf, and all three
+charts were chosen. Same feel, cosmic depth, and nothing on the page explains
+how any of it is drawn.
+
+**The 2D wiring is drawn as the Atlas draws it.** It was nine rounded boxes in
+the atlas colours with a line per defined channel. It is now the centres in the
+field's shapes (`hdShape()`), all thirty six channels drawn gate to gate from
+`hdGateSpots()`, and every channel split into two halves that each light from
+their own gate: `--tx` for personality, `--hd-des` for design, a braid of both
+when both hold it, `--chl` when nobody does. That is the language the 3D scene
+already speaks, so the three views of one chart read alike, and it is what makes
+a hanging gate visible in 2D at all. A defined channel carries a breathing warm
+underlay, a defined centre a halo in its own colour, and a key under the figure
+names the three inks. The centre buttons keep their boxes and their accessible
+names; a triangle's label sits toward its wide side through `jc` and a few
+pixels of `pad`. **A padding percentage is a percentage of the width**, which is
+how the first pass put HEAD under AJNA.
+
+**The wheel card and the wiring card are sky**: the plates' wash and starfield
+behind the figure, the zodiac ring with a faint breathing glow, the inner disc
+lit a little, and each body with a soft halo in its own colour. The Numbers
+cards take the same wash under the tilt and sheen they already had.
+
+**SVG takes hyphenated attribute names, never camelCase.** The runtime lowercases
+a camelCase attribute it does not know, so `strokeWidth` arrives as
+`strokewidth`, which SVG ignores. Sixty six of them were in the markup: every
+ring, house line and aspect on the wheel drew at 1px, the aspect dashes the
+legend under the wheel promises never drew, the Expanded Chart's wheel had the
+same fault, the dream radar's fill was solid where it was written at 26% and its
+labels were unanchored, and the Lexicon mandala's ticks ignored their widths.
+All of them are `stroke-width`, `stroke-dasharray`, `fill-opacity`,
+`text-anchor`, `stroke-linejoin` and `dominant-baseline` now, and the wheel's
+aspects are measured drawing at 1.4 to 2.4px with their dashes. `viewBox` and
+event handlers are untouched: the runtime knows those. A grep for
+`strokeWidth|strokeDasharray|textAnchor|fillOpacity` in the template should
+return nothing.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+wiring card, the wheel card and the Numbers cards: four identities, hardened and
+not, at 1440 and 375, 48 cases, clean.
+
+## Bedrock, Weather, Horizon: how the chart pages sort what they hold
+Asked for by the owner on 21 October 2026 ("Organize the tiles, come up with
+some imaginative system of organization for the collections of data"), and of
+three systems put to them this is the one chosen. Every chart page sorts its
+tiles by time, under three headed bands that read the same on all three charts:
+
+| Band | What it holds |
+|---|---|
+| Bedrock | what the birth fixed. Astrology: Stellium, the placements, Houses, Aspects. Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
+| Weather | what the sky is doing to it now. Astrology: Important Today, Current Retrogrades, the two transit lists. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
+| Horizon | what is coming. Astrology: Eclipses and Windows Opening. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+
+**The bands are headings and nothing more.** A glyph (strata, a body on its
+orbit, a sun on the horizon line), the name in the display face and a rule. No
+line under them says what a band means, by "Discovery belongs to the reader":
+the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
+than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+
+**A card can change band on its own.** An eclipse inside its five-day window is
+Weather and further off it is Horizon (`when` on each `chartFeatures` row), so
+the page reorganises itself as the sky moves and nobody moves the card. The
+desktop puts Bedrock left of the wheel, Weather right of it and Horizon under it,
+so what is fixed, what is now and what is coming sit round the chart they are
+about; the phone stacks all three. Aspects moved out from under the wheel into
+Bedrock for this.
+
+**Closeness: no list may become the only thing on the screen** (the owner, 21
+October 2026: "Fill out the page ... no list scrolls so far down that it's the
+only thing left on the screen ... Closeness is the effect I want to give the
+reader"). Every open list in a chart group (`data-ch-list`) stops at
+`min(42vh, 420px)` and every open card (`data-ch-feat`) at `min(52vh, 480px)`,
+both `min(36vh, 340px)` on the phone, where a card's own header already takes a
+fifth of the screen, and each scrolls inside itself with its scroll contained. From 1180px up each
+desktop column (`data-ch-col`) is held to `100dvh - 210px`, the screen less the
+header and the sample banner, so a short page scroll puts all three columns on
+the screen at once and each scrolls on its own. The wheel's column is the one
+that never scrolls: the wheel keeps its place and only the Horizon under it
+(`data-ch-mid`) scrolls, so nothing opened there can carry the wheel away.
+**Not sticky:** the first pass made the columns `position: sticky`, and a column
+as tall as its row has nowhere to stick to, so they slid under the banner.
+Below 1180px the columns wrap and nothing is held, because a held column in a
+wrapped row is a scroller inside a scroller.
+
+**Windows Opening is the transit scan, read forward.** The soonest eight windows
+of `transitWindows()` that open after today, each opening the natal body it
+lands on. It is the one new collection in this change, and it reads a scan the
+Throughline already runs, so it costs nothing.
+
+**The Human Design Weather is numbers only**, by the rule the gates now card on
+Today keeps (Open Gate 5): a body, a gate and a line, sorted into Meeting yours
+(the sky on one of the reader's gates), Completing a channel (the partner of one
+of their hanging gates, with the channel's key) and Passing through. Each tile
+opens its gate. A sample chart is nobody's, so it gets the sky unsplit.
+
+**The life ribbon** (`numBands()`) lays the pinnacles and the cycles on one age
+axis from birth, at least to ninety, with a line at the reader's age. Segments
+are contiguous: a pinnacle runs from its first year to the next one's first
+year, so "0 to 33" and "34 to 42" meet at 34 rather than leaving a year of gap.
+The current segment is lit in `--ac2-hi`, never `--ac`: being in a pinnacle is
+not an action. The ribbon is at least 720px wide and scrolls sideways on a
+phone, inside `data-noswipe`, because a nine year pinnacle at a phone's width
+is narrower than a touch target. The pinnacle, cycle and challenge lists are
+gone: the ribbon carries the first two and Bedrock the third.
+
+**A splice that cuts on a line can cut a tag.** The first pass of the Numbers
+bands cut from a heading's line to the line holding the next section's heading,
+which took that section's opening `<div>` and left its `</div>`. Nothing
+threw. On the phone the stray close ended the Spirit section early and the
+Library section was drawn on top of it. Count the tags after any template
+splice: `div`, `section`, `sc-if`, `sc-for`, `button` and `span` must each open
+as often as they close, and after this change they do.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+bands on all three pages: four identities, hardened and not, at 1440 and 375, 48
+cases, clean. Driven on a chart of the reader's own: the Human Design Weather
+splits, every tile opens its gate, Windows Opening lists the soonest eight, and
+a ribbon segment opens its pinnacle.
+
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
@@ -2839,6 +3015,19 @@ pans and zooms) or on `[data-noswipe]`; and `vtSwipeStep` does nothing inside a
 room (`libView`), with a placement, number, dream or aspect selected, or while a
 dropdown is open.
 
+**A page scrolls up and down and never sideways** (reported by the owner on
+21 October 2026 as "the pages wiggle"). `[data-vt-page]` carries
+`overflow-x: hidden` and the section inside it `overflow-x: clip`, because a
+page's `overflow-y: auto` makes its `overflow-x` auto as well, and the Book of
+Numbers' turning sweep is a square whose box grows as it turns: the Library
+page's width breathed between 402 and 434 at 390 wide, so the page jittered and
+could be pushed sideways. It also stopped the swipe, because
+`vtHScrollableAt()` counts any page that scrolls sideways as a strip and
+refuses a swipe that starts on it. `clip` rather than `hidden` on the section,
+because clip makes no scroller of its own, so the vertical scroll and anything
+sticky are untouched. The sideways strips inside a page (the Library tabs, the
+reading deck, the chart cards) scroll themselves and are not affected.
+
 **It lands exactly, because it goes through the existing routes.** Sections use
 `vtGoSection` and pages use `vtGoTab`, which pin the scroll offset after the
 smooth scroll, so `scrollTop` equals the section's `offsetTop` and the pager
@@ -5002,8 +5191,9 @@ asteroids centaurs houses etc into dropdown menus. Create flash cards for them
 as well, centered around the impact they are having on the reader. This will be
 mutable, consistently updating as time goes on and the effects evolve over time
 for the reader." Every list under the Birth Chart, in both shells, is one
-dropdown (`chartGroupVals()`, `chgPhone` on the phone, `chgL`, `chgM` and `chgR`
-in the desktop's three columns): the points one per category (Astral Bodies,
+dropdown (`chartGroupVals()`, sorted into the bands `chBands` on the phone and
+`chBandL` and `chBandR` either side of the desktop's wheel; see "Bedrock,
+Weather, Horizon"): the points one per category (Astral Bodies,
 Nodes & Lunar Points, Angles, and in the Expanded Chart the asteroids, centaurs,
 TNOs, comets, hypotheticals and derived points), then the houses, the aspects
 and the two transit lists. They open closed (`chgOpen`), and a header carries
