@@ -308,7 +308,9 @@ with the room drawn in light on it (the nine centres wired, the zodiac with a
 sun, the nine petals, three cards fanned, a crescent over water, the 360
 degrees with a needle, a light met again and again, a page open under the
 moon), and the Readings tab's two halves are portals of the same sky with the
-drawing large and the button under it. Study is a grid that is two columns on a
+drawing large and the button under it, and a thin warm seam between them, which is
+the divider the Library table names and N43 measures: it has to be the Tarot
+portal's next sibling and no wider than 2px. Study is a grid that is two columns on a
 phone and three on the desktop from one rule,
 `repeat(auto-fill,minmax(max(148px,30%),1fr))`; Journal's two plates and
 Readings' two halves are two columns everywhere, because the owner put tarot on
@@ -353,6 +355,48 @@ three tabs: four identities, hardened and not, at 1440 and 375, 48 cases, no
 pair under 4.5:1 and no control under 44px. Driven in both shells: every plate
 and both reading buttons land on their room and address, Enter on a focused
 plate opens it, and a hover tilts the plate, lights it and runs its drawing.
+
+## My Charts in light, and the attribute names SVG will take
+The owner's next page on 21 October 2026, after the Library shelf, and all three
+charts were chosen. Same feel, cosmic depth, and nothing on the page explains
+how any of it is drawn.
+
+**The 2D wiring is drawn as the Atlas draws it.** It was nine rounded boxes in
+the atlas colours with a line per defined channel. It is now the centres in the
+field's shapes (`hdShape()`), all thirty six channels drawn gate to gate from
+`hdGateSpots()`, and every channel split into two halves that each light from
+their own gate: `--tx` for personality, `--hd-des` for design, a braid of both
+when both hold it, `--chl` when nobody does. That is the language the 3D scene
+already speaks, so the three views of one chart read alike, and it is what makes
+a hanging gate visible in 2D at all. A defined channel carries a breathing warm
+underlay, a defined centre a halo in its own colour, and a key under the figure
+names the three inks. The centre buttons keep their boxes and their accessible
+names; a triangle's label sits toward its wide side through `jc` and a few
+pixels of `pad`. **A padding percentage is a percentage of the width**, which is
+how the first pass put HEAD under AJNA.
+
+**The wheel card and the wiring card are sky**: the plates' wash and starfield
+behind the figure, the zodiac ring with a faint breathing glow, the inner disc
+lit a little, and each body with a soft halo in its own colour. The Numbers
+cards take the same wash under the tilt and sheen they already had.
+
+**SVG takes hyphenated attribute names, never camelCase.** The runtime lowercases
+a camelCase attribute it does not know, so `strokeWidth` arrives as
+`strokewidth`, which SVG ignores. Sixty six of them were in the markup: every
+ring, house line and aspect on the wheel drew at 1px, the aspect dashes the
+legend under the wheel promises never drew, the Expanded Chart's wheel had the
+same fault, the dream radar's fill was solid where it was written at 26% and its
+labels were unanchored, and the Lexicon mandala's ticks ignored their widths.
+All of them are `stroke-width`, `stroke-dasharray`, `fill-opacity`,
+`text-anchor`, `stroke-linejoin` and `dominant-baseline` now, and the wheel's
+aspects are measured drawing at 1.4 to 2.4px with their dashes. `viewBox` and
+event handlers are untouched: the runtime knows those. A grep for
+`strokeWidth|strokeDasharray|textAnchor|fillOpacity` in the template should
+return nothing.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+wiring card, the wheel card and the Numbers cards: four identities, hardened and
+not, at 1440 and 375, 48 cases, clean.
 
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now

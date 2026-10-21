@@ -28704,25 +28704,38 @@ input[type="date"]{color-scheme:dark}
           <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
         </sc-for>
       </div>
-      <div data-lift="card" style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+      <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
         <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
-          <div style="padding:12px">
-            <div data-chart="bodygraph" style="position:relative;width:100%">
-        <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
-                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
-                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
+          <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
+              <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
+              <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
+                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
+                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
+                </sc-for>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
+                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
                 </sc-for>
                 <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                  <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
+                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
+                  <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
-                  <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                  <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
               </sc-for>
+            </div>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
             </div>
           </div>
         </sc-if>
@@ -29034,39 +29047,41 @@ input[type="date"]{color-scheme:dark}
         </div>
         <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="Expand chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)">⛶</button>
       </div>
-      <div data-lift="card" style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+      <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-<svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
-            <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-            <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-            <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-            <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+<svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
+            <circle cx="400" cy="400" r="206" style="fill:rgba(var(--atmc),.07)"></circle>
+            <circle data-pl="breath" cx="400" cy="400" r="386" fill="none" style="stroke:rgba(var(--atmc),.5);stroke-width:12;stroke-opacity:.35"></circle>
+            <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+            <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+            <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+            <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
             <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
               <g>
-                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
               </g>
             </sc-for>
             <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
               <g>
                 <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none" onClick="{{ h.go }}" role="button" tabIndex="0" aria-label="{{ h.aria }}" style="cursor:pointer"></path>
-                <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
               </g>
             </sc-for>
             <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-              <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}" onClick="{{ a.go }}" style="cursor:pointer"></line>
+              <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}" onClick="{{ a.go }}" style="cursor:pointer"></line>
             </sc-for>
             <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
               <g>
-                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
               </g>
             </sc-for>
             <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="11">
               <g onClick="{{ p.go }}" style="cursor:pointer">
                 <title>{{ p.tip }}</title>
-                <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
               </g>
             </sc-for>
           </svg>
@@ -29364,7 +29379,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
-          <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+          <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
             <div style="display:flex;align-items:baseline;gap:8px">
               <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
@@ -29384,7 +29399,7 @@ input[type="date"]{color-scheme:dark}
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
             <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="3">
-              <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+              <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:11px 12px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
                 <div style="font:400 26px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                 <div style="font:600 8.5px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                 <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
@@ -29422,7 +29437,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
       <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:11px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
           <div style="font:400 13.5px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
           <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
           <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</div>
@@ -29433,7 +29448,7 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Challenges</div>
       <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
           <span style="flex:none;width:30px;font:400 22px var(--fd);color:var(--warn)">{{ c.v }}</span>
           <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
             <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
@@ -29644,13 +29659,14 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
       <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
-        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
-          <div role="group" aria-label="Tarot" data-portal="1" data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.02s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:9px">
+          <div role="group" aria-label="Tarot" data-portal="1" data-lift="card" style="flex:1 1 0;position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.02s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
             <div style="position:relative;font:400 clamp(18px,1.6vw,23px)/1.2 var(--fd);color:var(--tx)">Tarot</div>
             <div aria-hidden="true" style="position:relative;flex:1;min-height:150px;display:flex;align-items:center;justify-content:center;padding:6px 0"><span style="display:block;width:min(100%,300px);aspect-ratio:1"><svg viewBox="0 0 120 120" style="display:block;width:100%;height:100%;overflow:visible"><g transform="rotate(-16 60 100)"><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><g transform="rotate(16 60 100)"><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><g data-pl="float"><g ><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><path d="M60 40l4.6 9.3 10.2 1.5-7.4 7.2 1.8 10.2L60 63.4l-9.2 4.8 1.8-10.2-7.4-7.2 10.2-1.5z" style="fill:rgba(var(--atmc2),0.9)" stroke="var(--ac2-hi)" stroke-width="1.1" stroke-linejoin="round"></path></g><circle data-pl="tw" cx="14" cy="18" r="1" style="fill:var(--tx);animation-delay:-1.4s"></circle><circle data-pl="tw" cx="106" cy="14" r="0.9" style="fill:var(--tx);animation-delay:-0.3s"></circle><circle data-pl="tw" cx="108" cy="104" r="1.1" style="fill:var(--tx);animation-delay:-2.4s"></circle><circle data-pl="tw" cx="12" cy="98" r="0.8" style="fill:var(--tx);animation-delay:-3.3s"></circle></svg></span></div>
             <button data-lift onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:relative;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;white-space:nowrap;border:1px solid var(--ac);border-radius:999px;background:var(--sf);font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
-          <div role="group" aria-label="The Book of Changes" data-portal="1" data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.08s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
+          <div aria-hidden="true" style="flex:none;width:1px;margin:28px 0;background:linear-gradient(transparent,rgba(var(--atmc2),.55) 30%,rgba(var(--atmc2),.55) 70%,transparent)"></div>
+          <div role="group" aria-label="The Book of Changes" data-portal="1" data-lift="card" style="flex:1 1 0;position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.08s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
             <div style="position:relative;font:400 clamp(18px,1.6vw,23px)/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
             <div aria-hidden="true" style="position:relative;flex:1;min-height:150px;display:flex;align-items:center;justify-content:center;padding:6px 0"><span style="display:block;width:min(100%,300px);aspect-ratio:1"><svg viewBox="0 0 120 120" style="display:block;width:100%;height:100%;overflow:visible"><rect x="22" y="26" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="26" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:0.00s"></rect><rect x="22" y="39" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="39" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-0.55s"></rect><rect x="65" y="39" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="39" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-0.55s"></rect><rect x="22" y="52" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="52" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.10s"></rect><rect x="22" y="65" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="65" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.65s"></rect><rect x="65" y="65" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="65" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.65s"></rect><rect x="22" y="78" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="78" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.20s"></rect><rect x="22" y="91" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="91" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.75s"></rect><rect x="65" y="91" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="91" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.75s"></rect><circle data-pl="tw" cx="12" cy="14" r="1" style="fill:var(--tx);animation-delay:-1.3s"></circle><circle data-pl="tw" cx="108" cy="16" r="0.9" style="fill:var(--tx);animation-delay:-2.5s"></circle><circle data-pl="tw" cx="110" cy="108" r="1" style="fill:var(--tx);animation-delay:-0.6s"></circle><circle data-pl="tw" cx="10" cy="106" r="0.8" style="fill:var(--tx);animation-delay:-3.4s"></circle></svg></span></div>
             <button data-lift onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:relative;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;white-space:nowrap;border:1px solid var(--ac);border-radius:999px;background:var(--sf);font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
@@ -30095,15 +30111,15 @@ input[type="date"]{color-scheme:dark}
             <sc-if value="{{ lexMandala }}" hint-placeholder-val="{{ true }}">
               <div data-chart="mandala" style="position:relative;width:100%;max-width:320px;margin:0 auto">
                 <svg viewBox="0 0 320 320" role="img" aria-label="Zodiac mandala, twelve signs" style="display:block;width:100%;height:auto">
-                  <circle cx="160" cy="160" r="152" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                  <circle cx="160" cy="160" r="108" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                  <circle cx="160" cy="160" r="152" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                  <circle cx="160" cy="160" r="108" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
                   <sc-for list="{{ lexSegs }}" as="s" hint-placeholder-count="12">
                     <g>
-                      <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1" onClick="{{ s.go }}" style="cursor:pointer"></path>
+                      <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1" onClick="{{ s.go }}" style="cursor:pointer"></path>
                     </g>
                   </sc-for>
                   <sc-for list="{{ lexTicks }}" as="t" hint-placeholder-count="30">
-                    <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="{{ t.c }}" strokeWidth="{{ t.w }}" onClick="{{ t.go }}" style="cursor:pointer"></line>
+                    <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="{{ t.c }}" stroke-width="{{ t.w }}" onClick="{{ t.go }}" style="cursor:pointer"></line>
                   </sc-for>
                 </svg>
                 <sc-for list="{{ lexLabels }}" as="w" hint-placeholder-count="14">
@@ -31606,14 +31622,14 @@ input[type="date"]{color-scheme:dark}
               <div style="display:flex;justify-content:center;padding:6px 0">
                 <svg viewBox="-40 -8 288 224" role="img" aria-label="A radar of the archetypes active in this dream" style="display:block;width:100%;max-width:300px;height:auto">
                   <sc-for list="{{ dreamRadarRings }}" as="g" hint-placeholder-count="3">
-                    <polygon points="{{ g.pts }}" fill="none" stroke="var(--bd)" strokeWidth="1"></polygon>
+                    <polygon points="{{ g.pts }}" fill="none" stroke="var(--bd)" stroke-width="1"></polygon>
                   </sc-for>
                   <sc-for list="{{ dreamRadarSpokes }}" as="k" hint-placeholder-count="6">
-                    <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" strokeWidth="1"></line>
+                    <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" stroke-width="1"></line>
                   </sc-for>
-                  <polygon points="{{ dreamRadarPoly }}" fill="var(--ac2)" fillOpacity=".26" stroke="var(--ac2)" strokeWidth="1.6" strokeLinejoin="round"></polygon>
+                  <polygon points="{{ dreamRadarPoly }}" fill="var(--ac2)" fill-opacity=".26" stroke="var(--ac2)" stroke-width="1.6" stroke-linejoin="round"></polygon>
                   <sc-for list="{{ dreamRadarLabels }}" as="l" hint-placeholder-count="6">
-                    <text x="{{ l.x }}" y="{{ l.y }}" textAnchor="{{ l.anchor }}" dominantBaseline="middle" fill="var(--ac2-hi)" style="font:600 9px var(--fu);letter-spacing:.04em">{{ l.name }}</text>
+                    <text x="{{ l.x }}" y="{{ l.y }}" text-anchor="{{ l.anchor }}" dominant-baseline="middle" fill="var(--ac2-hi)" style="font:600 9px var(--fu);letter-spacing:.04em">{{ l.name }}</text>
                   </sc-for>
                 </svg>
               </div>
@@ -32948,30 +32964,30 @@ input[type="date"]{color-scheme:dark}
           <div style="position:relative;width:min(78vh,92vw);aspect-ratio:1/1">
             <div data-chart="expand-wheel" aria-hidden="false" style="position:relative;width:100%;height:100%">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
-                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
                         <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
-                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
                         </sc-for>
                         <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
                           <g>
                             <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
-                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
                           </g>
                         </sc-for>
                         <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
                         </sc-for>
                         <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
-                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
                           <g>
                             <title>{{ p.tip }}</title>
-                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
                           </g>
                         </sc-for>
                       </svg>
@@ -35289,39 +35305,41 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
-      <div data-lift="card" style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+      <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
-<svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="display:block;width:100%;height:auto">
-            <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-            <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-            <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-            <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+<svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
+            <circle cx="400" cy="400" r="206" style="fill:rgba(var(--atmc),.07)"></circle>
+            <circle data-pl="breath" cx="400" cy="400" r="386" fill="none" style="stroke:rgba(var(--atmc),.5);stroke-width:12;stroke-opacity:.35"></circle>
+            <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+            <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+            <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+            <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
             <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
               <g>
-                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
               </g>
             </sc-for>
             <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
               <g>
                 <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none" onClick="{{ h.go }}" role="button" tabIndex="0" aria-label="{{ h.aria }}" style="cursor:pointer"></path>
-                <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
               </g>
             </sc-for>
             <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-              <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}" onClick="{{ a.go }}" style="cursor:pointer"></line>
+              <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}" onClick="{{ a.go }}" style="cursor:pointer"></line>
             </sc-for>
             <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
               <g>
-                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
               </g>
             </sc-for>
             <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="11">
               <g onClick="{{ p.go }}" style="cursor:pointer">
                 <title>{{ p.tip }}</title>
-                <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
               </g>
             </sc-for>
           </svg>
@@ -35861,28 +35879,41 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
             </div>
-            <div data-lift="card" style="position:relative;overflow:hidden;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad)">
+            <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
               <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
               <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
-                <div style="padding:12px">
-                  <div data-chart="bodygraph" style="position:relative;width:100%">
-              <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="display:block;width:100%;height:auto">
-                      <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="4">
-                        <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" stroke="{{ ln.stroke }}" strokeWidth="{{ ln.w }}" strokeLinecap="round"></line>
-                      </sc-for>
-                      <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                        <rect x="{{ c.x }}" y="{{ c.y }}" width="{{ c.w }}" height="{{ c.h }}" rx="{{ c.r }}" fill="{{ c.fill }}" stroke="{{ c.stroke }}" strokeWidth="1.5"></rect>
-                      </sc-for>
-                    </svg>
-                    <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                      <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:8px">
-                        <span style="font:600 11px var(--fu);letter-spacing:.04em;color:{{ c.labelC }}">{{ c.short }}</span>
-                        <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
-                      </button>
-                    </sc-for>
-                  </div>
-                </div>
-              </sc-if>
+          <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div data-chart="bodygraph" style="position:relative;width:100%;max-width:400px">
+              <div aria-hidden="true" style="position:absolute;inset:-4% -14%;border-radius:50%;background:radial-gradient(ellipse at 50% 52%,rgba(var(--atmc2),.12),rgba(var(--atmc),.16) 45%,transparent 70%);animation:lensBreathe 8s ease-in-out infinite;pointer-events:none"></div>
+              <svg viewBox="0 0 300 520" role="img" aria-roledescription="human design wiring" aria-describedby="incommon-bg-summary" aria-label="The wiring" style="position:relative;display:block;width:100%;height:auto;overflow:visible">
+                <sc-for list="{{ bgGlows }}" as="gl" hint-placeholder-count="2">
+                  <line data-pl="breath" x1="{{ gl.x1 }}" y1="{{ gl.y1 }}" x2="{{ gl.x2 }}" y2="{{ gl.y2 }}" style="stroke:rgba(var(--atmc2),.26);stroke-width:9;stroke-linecap:round"></line>
+                </sc-for>
+                <sc-for list="{{ bgChannels }}" as="ln" hint-placeholder-count="72">
+                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="stroke:{{ ln.c }};stroke-opacity:{{ ln.o }};stroke-width:{{ ln.w }};stroke-linecap:round"></line>
+                </sc-for>
+                <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                  <polygon points="{{ c.pts }}" style="fill:none;stroke:{{ c.halo }};stroke-opacity:.3;stroke-width:9;stroke-linejoin:round"></polygon>
+                  <polygon points="{{ c.pts }}" style="fill:{{ c.fill }};fill-opacity:{{ c.fo }};stroke:{{ c.stroke }};stroke-width:1.6;stroke-linejoin:round"></polygon>
+                </sc-for>
+                <sc-for list="{{ bgGates }}" as="gd" hint-placeholder-count="64">
+                  <circle cx="{{ gd.x }}" cy="{{ gd.y }}" r="{{ gd.r }}" style="fill:{{ gd.fill }};stroke:{{ gd.ring }};stroke-width:{{ gd.rw }}"></circle>
+                </sc-for>
+              </svg>
+              <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                  <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
+                  <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div role="group" aria-label="Key" style="display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center">
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--tx)"></span>Personality</span>
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:3px;border-radius:2px;background:var(--hd-des)"></span>Design</span>
+              <span style="display:flex;align-items:center;gap:7px;font:600 10.5px var(--fu);letter-spacing:.04em;color:var(--mut)"><span aria-hidden="true" style="flex:none;width:16px;height:5px;border-radius:3px;background:linear-gradient(var(--hd-des) 0 30%,var(--tx) 30% 70%,var(--hd-des) 70%)"></span>Both</span>
+            </div>
+          </div>
+        </sc-if>
               <sc-if value="{{ hvDeep }}" hint-placeholder-val="{{ false }}">
                 <!-- THE WIRING IN DEPTH (owner, 19 October 2026): hd-scene.js draws the 3D and
                      Wheel views into this host; the 2D wiring above is the third view and the
@@ -36189,7 +36220,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px">
           <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
-            <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:var(--sf);border:1px solid var(--bd);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+            <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
               <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
@@ -36218,7 +36249,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
           <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:13px 15px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <div style="font:400 14px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
               <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</div>
@@ -36229,7 +36260,7 @@ input[type="date"]{color-scheme:dark}
         <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Challenges</div>
           <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <span style="flex:none;width:36px;font:400 26px var(--fd);color:var(--warn)">{{ c.v }}</span>
               <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
                 <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
@@ -36246,7 +36277,7 @@ input[type="date"]{color-scheme:dark}
           <div style="display:flex;flex-direction:column;gap:11px">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px">
               <sc-for list="{{ nameNumbers }}" as="n" hint-placeholder-count="3">
-                <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:13px;padding:14px 16px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+                <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:13px;padding:14px 16px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
                   <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
                   <div style="font:600 8.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
                   <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
@@ -36529,13 +36560,14 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libReadings }}" hint-placeholder-val="{{ false }}">
       <div style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 24px;display:flex;flex-direction:column;animation:fadeUp .22s ease">
-        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
-          <div role="group" aria-label="Tarot" data-portal="1" data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.02s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
+        <div style="flex:1;min-height:max(330px,calc(100dvh - 500px));display:flex;align-items:stretch;gap:9px">
+          <div role="group" aria-label="Tarot" data-portal="1" data-lift="card" style="flex:1 1 0;position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.02s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
             <div style="position:relative;font:400 clamp(18px,1.6vw,23px)/1.2 var(--fd);color:var(--tx)">Tarot</div>
             <div aria-hidden="true" style="position:relative;flex:1;min-height:150px;display:flex;align-items:center;justify-content:center;padding:6px 0"><span style="display:block;width:min(100%,300px);aspect-ratio:1"><svg viewBox="0 0 120 120" style="display:block;width:100%;height:100%;overflow:visible"><g transform="rotate(-16 60 100)"><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><g transform="rotate(16 60 100)"><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf2)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><g data-pl="float"><g ><rect x="41" y="22" width="38" height="62" rx="5" fill="none" stroke="var(--ac2)" stroke-width="3.8" opacity=".3"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--bg)"></rect><rect x="41" y="22" width="38" height="62" rx="5" style="fill:var(--sf)" stroke="var(--ac2-hi)" stroke-width="1.3"></rect></g><path d="M60 40l4.6 9.3 10.2 1.5-7.4 7.2 1.8 10.2L60 63.4l-9.2 4.8 1.8-10.2-7.4-7.2 10.2-1.5z" style="fill:rgba(var(--atmc2),0.9)" stroke="var(--ac2-hi)" stroke-width="1.1" stroke-linejoin="round"></path></g><circle data-pl="tw" cx="14" cy="18" r="1" style="fill:var(--tx);animation-delay:-1.4s"></circle><circle data-pl="tw" cx="106" cy="14" r="0.9" style="fill:var(--tx);animation-delay:-0.3s"></circle><circle data-pl="tw" cx="108" cy="104" r="1.1" style="fill:var(--tx);animation-delay:-2.4s"></circle><circle data-pl="tw" cx="12" cy="98" r="0.8" style="fill:var(--tx);animation-delay:-3.3s"></circle></svg></span></div>
             <button data-lift onClick="{{ goReadingTarot }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:relative;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;white-space:nowrap;border:1px solid var(--ac);border-radius:999px;background:var(--sf);font:600 12px var(--fu);color:var(--ac)">Draw a reading</button>
           </div>
-          <div role="group" aria-label="The Book of Changes" data-portal="1" data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.08s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
+          <div aria-hidden="true" style="flex:none;width:1px;margin:28px 0;background:linear-gradient(transparent,rgba(var(--atmc2),.55) 30%,rgba(var(--atmc2),.55) 70%,transparent)"></div>
+          <div role="group" aria-label="The Book of Changes" data-portal="1" data-lift="card" style="flex:1 1 0;position:relative;overflow:hidden;isolation:isolate;min-width:0;display:flex;flex-direction:column;gap:10px;padding:16px 12px 12px;border-radius:var(--rad);border:1px solid rgba(var(--atmc),.46);background:radial-gradient(120% 85% at 50% 6%,rgba(var(--atmc),.42),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.14),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));animation:plIn .6s cubic-bezier(.22,1,.36,1) backwards;animation-delay:0.08s"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);opacity:.32"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%);background-position:37px 23px"></span>
             <div style="position:relative;font:400 clamp(18px,1.6vw,23px)/1.2 var(--fd);color:var(--tx)">The Book of Changes</div>
             <div aria-hidden="true" style="position:relative;flex:1;min-height:150px;display:flex;align-items:center;justify-content:center;padding:6px 0"><span style="display:block;width:min(100%,300px);aspect-ratio:1"><svg viewBox="0 0 120 120" style="display:block;width:100%;height:100%;overflow:visible"><rect x="22" y="26" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="26" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:0.00s"></rect><rect x="22" y="39" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="39" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-0.55s"></rect><rect x="65" y="39" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="39" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-0.55s"></rect><rect x="22" y="52" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="52" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.10s"></rect><rect x="22" y="65" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="65" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.65s"></rect><rect x="65" y="65" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="65" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-1.65s"></rect><rect x="22" y="78" width="76" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="78" width="76" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.20s"></rect><rect x="22" y="91" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="22" y="91" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.75s"></rect><rect x="65" y="91" width="33" height="7" rx="3.5" fill="none" stroke="var(--ac2)" stroke-width="3.2" opacity=".22"></rect><rect data-pl="breath" x="65" y="91" width="33" height="7" rx="3.5" style="fill:var(--ac2-hi);animation-delay:-2.75s"></rect><circle data-pl="tw" cx="12" cy="14" r="1" style="fill:var(--tx);animation-delay:-1.3s"></circle><circle data-pl="tw" cx="108" cy="16" r="0.9" style="fill:var(--tx);animation-delay:-2.5s"></circle><circle data-pl="tw" cx="110" cy="108" r="1" style="fill:var(--tx);animation-delay:-0.6s"></circle><circle data-pl="tw" cx="10" cy="106" r="0.8" style="fill:var(--tx);animation-delay:-3.4s"></circle></svg></span></div>
             <button data-lift onClick="{{ goIChingLib }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:relative;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;white-space:nowrap;border:1px solid var(--ac);border-radius:999px;background:var(--sf);font:600 12px var(--fu);color:var(--ac)">Consult the book</button>
@@ -36982,15 +37014,15 @@ input[type="date"]{color-scheme:dark}
             <sc-if value="{{ lexMandala }}" hint-placeholder-val="{{ true }}">
               <div data-chart="mandala" style="position:relative;width:100%;max-width:320px;margin:0 auto">
                 <svg viewBox="0 0 320 320" role="img" aria-label="Zodiac mandala, twelve signs" style="display:block;width:100%;height:auto">
-                  <circle cx="160" cy="160" r="152" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                  <circle cx="160" cy="160" r="108" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
+                  <circle cx="160" cy="160" r="152" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                  <circle cx="160" cy="160" r="108" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
                   <sc-for list="{{ lexSegs }}" as="s" hint-placeholder-count="12">
                     <g>
-                      <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1" onClick="{{ s.go }}" style="cursor:pointer"></path>
+                      <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1" onClick="{{ s.go }}" style="cursor:pointer"></path>
                     </g>
                   </sc-for>
                   <sc-for list="{{ lexTicks }}" as="t" hint-placeholder-count="30">
-                    <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="{{ t.c }}" strokeWidth="{{ t.w }}" onClick="{{ t.go }}" style="cursor:pointer"></line>
+                    <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="{{ t.c }}" stroke-width="{{ t.w }}" onClick="{{ t.go }}" style="cursor:pointer"></line>
                   </sc-for>
                 </svg>
                 <sc-for list="{{ lexLabels }}" as="w" hint-placeholder-count="14">
@@ -38202,14 +38234,14 @@ input[type="date"]{color-scheme:dark}
               <div style="display:flex;justify-content:center;padding:6px 0">
                 <svg viewBox="-40 -8 288 224" role="img" aria-label="A radar of the archetypes active in this dream" style="display:block;width:100%;max-width:300px;height:auto">
                   <sc-for list="{{ dreamRadarRings }}" as="g" hint-placeholder-count="3">
-                    <polygon points="{{ g.pts }}" fill="none" stroke="var(--bd)" strokeWidth="1"></polygon>
+                    <polygon points="{{ g.pts }}" fill="none" stroke="var(--bd)" stroke-width="1"></polygon>
                   </sc-for>
                   <sc-for list="{{ dreamRadarSpokes }}" as="k" hint-placeholder-count="6">
-                    <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" strokeWidth="1"></line>
+                    <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" stroke-width="1"></line>
                   </sc-for>
-                  <polygon points="{{ dreamRadarPoly }}" fill="var(--ac2)" fillOpacity=".26" stroke="var(--ac2)" strokeWidth="1.6" strokeLinejoin="round"></polygon>
+                  <polygon points="{{ dreamRadarPoly }}" fill="var(--ac2)" fill-opacity=".26" stroke="var(--ac2)" stroke-width="1.6" stroke-linejoin="round"></polygon>
                   <sc-for list="{{ dreamRadarLabels }}" as="l" hint-placeholder-count="6">
-                    <text x="{{ l.x }}" y="{{ l.y }}" textAnchor="{{ l.anchor }}" dominantBaseline="middle" fill="var(--ac2-hi)" style="font:600 9px var(--fu);letter-spacing:.04em">{{ l.name }}</text>
+                    <text x="{{ l.x }}" y="{{ l.y }}" text-anchor="{{ l.anchor }}" dominant-baseline="middle" fill="var(--ac2-hi)" style="font:600 9px var(--fu);letter-spacing:.04em">{{ l.name }}</text>
                   </sc-for>
                 </svg>
               </div>
@@ -39492,30 +39524,30 @@ input[type="date"]{color-scheme:dark}
           <div style="position:relative;width:min(78vh,92vw);aspect-ratio:1/1">
             <div data-chart="expand-wheel" aria-hidden="false" style="position:relative;width:100%;height:100%">
                       <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
-                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" strokeWidth="1.5"></circle>
-                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" strokeWidth="1"></circle>
-                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" strokeWidth="1"></circle>
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
                         <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
-                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" strokeWidth="1"></path>
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
                         </sc-for>
                         <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
                           <g>
                             <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
-                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" strokeWidth="{{ h.w }}"></line>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
                           </g>
                         </sc-for>
                         <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
-                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" strokeWidth="{{ a.w }}" strokeDasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
                         </sc-for>
                         <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
-                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" strokeWidth="1.4" opacity=".55"></line>
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
                         </sc-for>
                         <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
                           <g>
                             <title>{{ p.tip }}</title>
-                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" strokeWidth="1" opacity=".5"></line>
-                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" strokeWidth="{{ p.sw }}"></circle>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
                           </g>
                         </sc-for>
                       </svg>
@@ -56002,29 +56034,52 @@ class Component extends DCLogic {
             const shown = hd.gates.filter(g => mode === 'both' ? true : g.kind === mode);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
-            const cen = c => { const q = this.BG_POS[c]; return { x: q[0] + q[2] / 2, y: q[1] + q[3] / 2 }; };
-            const pairSeen = {};
-            const lines = hd.activeChannels.map(ch => {
-              const a = cen(ch[2]), b = cen(ch[3]), k = ch[2] + '|' + ch[3];
-              const ix = (pairSeen[k] = (pairSeen[k] || 0) + 1) - 1, off = (ix - 0.5) * 9;
-              const live = shownSet.has(ch[0]) || shownSet.has(ch[1]);
-              return { x1: a.x + off, y1: a.y, x2: b.x + off, y2: b.y, w: live ? 3.5 : 2,
-                stroke: live ? 'rgba(211,173,110,.75)' : 'rgba(238,240,248,.18)' };
+            /* The 2D wiring is drawn as the Atlas draws it: the centres in their
+               own shapes, every channel as two halves that each light from their
+               own gate, and the gates round each centre. A half lights in --tx for
+               personality and --hd-des for design, both when both hold it, the
+               same language the 3D scene speaks. */
+            const spots = this.hdGateSpots();
+            const layer = {};
+            shown.forEach(g => { layer[g.gate] = layer[g.gate] && layer[g.gate] !== g.kind ? 'both' : g.kind; });
+            const ink = { personality: 'var(--tx)', design: 'var(--hd-des)' };
+            const keys = A ? Object.keys(A.CHANNELS) : hd.activeChannels.map(ch => ch[0] + '-' + ch[1]);
+            const lines = [], glows = [];
+            const f1 = v => v.toFixed(1);
+            keys.forEach(k => {
+              const pq = k.split('-').map(Number), a = spots[pq[0]], b = spots[pq[1]];
+              if (!a || !b) return;
+              const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+              if (layer[pq[0]] && layer[pq[1]]) glows.push({ x1: f1(a.x), y1: f1(a.y), x2: f1(b.x), y2: f1(b.y) });
+              [[a, pq[0]], [b, pq[1]]].forEach(([e, n]) => {
+                const L = layer[n], seg = { x1: f1(e.x), y1: f1(e.y), x2: f1(m.x), y2: f1(m.y) };
+                if (!L) lines.push(Object.assign({ c: 'var(--chl)', w: '1.4', o: '1' }, seg));
+                else if (L === 'both') lines.push(Object.assign({ c: ink.design, w: '4', o: '1' }, seg), Object.assign({ c: ink.personality, w: '1.6', o: '1' }, seg));
+                else lines.push(Object.assign({ c: ink[L], w: '2.6', o: '1' }, seg));
+              });
             });
             const centers = Object.keys(this.BG_POS).map(name => {
               const q = this.BG_POS[name], defined = hd.defined.has(name);
-              const col = A && A.CENTERS[name] ? A.CENTERS[name].color : '#2fff8f';
+              const col = A && A.CENTERS[name] ? A.CENTERS[name].color : 'var(--ac2-hi)';
               const n = shown.filter(g => this.hdCenterOf(g.gate) === name).length;
-              return { x: q[0], y: q[1], w: q[2], h: q[3], r: name === 'G' ? 14 : 8,
-                fill: defined ? col : 'rgba(23,21,30,.9)', stroke: defined ? col : 'rgba(238,240,248,.28)',
+              const P = this.hdShape(name);
+              return { pts: P.map(pt => f1(pt[0]) + ',' + f1(pt[1])).join(' '),
+                fill: defined ? col : 'rgba(var(--atmc),.08)', fo: defined ? '.9' : '1',
+                stroke: defined ? col : 'rgba(var(--atmc),.6)', halo: defined ? col : 'transparent',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
+                jc: name === 'Head' || name === 'Heart' ? 'flex-end' : name === 'Ajna' ? 'flex-start' : 'center',
+                pad: name === 'Head' || name === 'Heart' ? '0 0 4px' : name === 'Ajna' ? '3px 0 0' : '0',
                 name: name, short: this.BG_SHORT[name],
-                labelC: defined ? '#171520' : 'rgba(238,240,248,.62)',
-                subC: defined ? 'rgba(23,21,30,.72)' : 'rgba(238,240,248,.42)',
+                labelC: defined ? 'rgba(5,6,10,.88)' : 'var(--mut)',
+                subC: defined ? 'rgba(5,6,10,.7)' : 'var(--mut)',
                 count: n ? n + (n === 1 ? ' gate' : ' gates') : '',
                 go: this.hdOpen({ kind: 'center', name: name }) };
             });
+            const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], L = layer[n];
+              return { x: f1(sp.x), y: f1(sp.y), r: L ? '3.3' : '1.7',
+                fill: L === 'design' ? ink.design : L ? ink.personality : 'rgba(var(--atmc),.75)',
+                ring: L === 'both' ? ink.design : 'none', rw: L === 'both' ? '1.8' : '0' }; });
             const byCenter = {};
             shown.forEach(g => { (byCenter[this.hdCenterOf(g.gate)] = byCenter[this.hdCenterOf(g.gate)] || []).push(g); });
             const inChannel = new Set();
@@ -56042,7 +56097,7 @@ class Component extends DCLogic {
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
                   go: this.hdOpen({ kind: 'gate', gate: g.gate, line: g.line }) })) };
             });
-            return { bgModes: modes, bgChannels: lines, bgCenters: centers, hdCenterGates: centerGates,
+            return { bgModes: modes, bgChannels: lines, bgGlows: glows, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
               hdGateCount: shown.length + (mode === 'both' ? ' in total' : ' in the ' + mode + ' chart'),
               /* The gloss on first use. inCommon names the surface; the field's
                  own word is then used descriptively, which is how the two stay
