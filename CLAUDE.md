@@ -2839,6 +2839,19 @@ pans and zooms) or on `[data-noswipe]`; and `vtSwipeStep` does nothing inside a
 room (`libView`), with a placement, number, dream or aspect selected, or while a
 dropdown is open.
 
+**A page scrolls up and down and never sideways** (reported by the owner on
+21 October 2026 as "the pages wiggle"). `[data-vt-page]` carries
+`overflow-x: hidden` and the section inside it `overflow-x: clip`, because a
+page's `overflow-y: auto` makes its `overflow-x` auto as well, and the Book of
+Numbers' turning sweep is a square whose box grows as it turns: the Library
+page's width breathed between 402 and 434 at 390 wide, so the page jittered and
+could be pushed sideways. It also stopped the swipe, because
+`vtHScrollableAt()` counts any page that scrolls sideways as a strip and
+refuses a swipe that starts on it. `clip` rather than `hidden` on the section,
+because clip makes no scroller of its own, so the vertical scroll and anything
+sticky are untouched. The sideways strips inside a page (the Library tabs, the
+reading deck, the chart cards) scroll themselves and are not affected.
+
 **It lands exactly, because it goes through the existing routes.** Sections use
 `vtGoSection` and pages use `vtGoTab`, which pin the scroll offset after the
 smooth scroll, so `scrollTop` equals the section's `offsetTop` and the pager
