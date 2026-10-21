@@ -27753,7 +27753,9 @@ input[type="date"]{color-scheme:dark}
 [data-hs-scene]:focus-visible::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px var(--ac2-hi);pointer-events:none;z-index:3}
 @keyframes bnDotIn{from{transform:scale(0)}to{transform:scale(1)}}@keyframes bnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}@keyframes bnFolioA{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@keyframes bnFolioB{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@media (hover:hover){[data-bn-dot]:hover > span{transform:scale(1.7)!important;opacity:1!important}[data-bn-dot]:hover{z-index:6!important}}[data-bn-folio]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}
 /* The Library shelf is a row of lit plates. Each draws its room in light; the stars and the warm fills breathe on their own, and the rest moves only under a hovering pointer or keyboard focus, so a phone that draws every section at once is not turning six wheels nobody is looking at. */
-[data-plate]{--plb:rgba(var(--atmc),.46);--plsh:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.42)}[data-plate]:focus-visible,[data-plate]:hover{--plb:color-mix(in srgb,var(--ac2-hi) 62%,transparent);--plsh:inset 0 1px 0 rgba(255,255,255,.12),0 4px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5),0 0 38px color-mix(in srgb,var(--ac2) 40%,transparent)}[data-plate]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}[data-plate]:hover [data-plate-go],[data-plate]:focus-visible [data-plate-go]{transform:translateX(3px)}[data-plate]:active{transform:scale(.985)!important}@keyframes plIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@keyframes plTw{0%,100%{opacity:.18}50%{opacity:.9}}@keyframes plSpin{to{transform:rotate(360deg)}}@keyframes plFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes plFlow{to{stroke-dashoffset:-16}}@keyframes plBreath{0%,100%{opacity:.55}50%{opacity:1}}[data-pl]{transform-box:fill-box;transform-origin:center}[data-pl="tw"]{animation:plTw 3.8s ease-in-out infinite}[data-plate-tw]{animation:plTw 6.5s ease-in-out infinite}[data-pl="breath"]{animation:plBreath 4.6s ease-in-out infinite}[data-pl="spin"]{animation:plSpin 60s linear infinite paused}[data-pl="spinr"]{animation:plSpin 80s linear infinite reverse paused}[data-pl="float"]{animation:plFloat 4.8s ease-in-out infinite paused}[data-pl="flow"]{stroke-dasharray:3 5;animation:plFlow 1.4s linear infinite paused}[data-plate]:hover [data-pl],[data-plate]:focus-visible [data-pl],[data-portal]:hover [data-pl],[data-portal]:focus-within [data-pl]{animation-play-state:running}@media (prefers-reduced-motion:reduce){[data-pl],[data-plate-tw]{animation:none!important}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
+[data-plate]{--plb:rgba(var(--atmc),.46);--plsh:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.42)}[data-plate]:focus-visible,[data-plate]:hover{--plb:color-mix(in srgb,var(--ac2-hi) 62%,transparent);--plsh:inset 0 1px 0 rgba(255,255,255,.12),0 4px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5),0 0 38px color-mix(in srgb,var(--ac2) 40%,transparent)}[data-plate]:focus-visible{outline:2px solid var(--ac2-hi);outline-offset:3px}[data-plate]:hover [data-plate-go],[data-plate]:focus-visible [data-plate-go]{transform:translateX(3px)}[data-plate]:active{transform:scale(.985)!important}@keyframes plIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}@keyframes plTw{0%,100%{opacity:.18}50%{opacity:.9}}@keyframes plSpin{to{transform:rotate(360deg)}}@keyframes plFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes plFlow{to{stroke-dashoffset:-16}}@keyframes plBreath{0%,100%{opacity:.55}50%{opacity:1}}[data-pl]{transform-box:fill-box;transform-origin:center}[data-pl="tw"]{animation:plTw 3.8s ease-in-out infinite}[data-plate-tw]{animation:plTw 6.5s ease-in-out infinite}[data-pl="breath"]{animation:plBreath 4.6s ease-in-out infinite}[data-pl="spin"]{animation:plSpin 60s linear infinite paused}[data-pl="spinr"]{animation:plSpin 80s linear infinite reverse paused}[data-pl="float"]{animation:plFloat 4.8s ease-in-out infinite paused}[data-pl="flow"]{stroke-dasharray:3 5;animation:plFlow 1.4s linear infinite paused}[data-plate]:hover [data-pl],[data-plate]:focus-visible [data-pl],[data-portal]:hover [data-pl],[data-portal]:focus-within [data-pl]{animation-play-state:running}@media (prefers-reduced-motion:reduce){[data-pl],[data-plate-tw]{animation:none!important}}
+/* Closeness on the chart page (owner, 21 October 2026): no list may grow until it is the only thing on the screen. An open list and an open card stop at under half the screen and scroll inside themselves; on a wide desktop each of the three columns is held to the screen less the header and the banner and scrolls on its own, so once the title has scrolled away all three are on the screen together. The wheel's column never scrolls: the wheel holds its place and only the Horizon under it scrolls, so a list opened there cannot carry the wheel away. Not sticky: a column as tall as its row has nowhere to stick to. */
+[data-ch-list]{max-height:min(42vh,420px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent}[data-ch-feat]{max-height:min(52vh,480px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding-right:4px}@media (min-width:1180px){[data-ch-col]{max-height:calc(100dvh - 210px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 6px 14px;margin:-2px -6px 0}[data-ch-col="wheel"]{overflow:visible!important}[data-ch-col="wheel"] > *{flex-shrink:0}[data-ch-col="wheel"] > [data-ch-mid]{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent;padding:2px 4px 10px;margin:0 -4px}}@keyframes spLit{0%,100%{filter:none}50%{filter:drop-shadow(0 0 7px rgba(var(--atmc2),1)) brightness(1.7)}}@keyframes spDim{0%,100%{opacity:1}14%,84%{opacity:.18}}@keyframes spAll{0%,100%{filter:none}50%{filter:drop-shadow(0 0 16px rgba(var(--atmc2),.85)) brightness(1.35)}}[data-sp-show="part"] [data-lit="1"]{animation:spLit .86s ease-in-out 3!important}[data-sp-show="part"] [data-lit="0"]{animation:spDim 2.6s ease both!important}[data-sp-show="all"]{animation:spAll 1.3s ease-in-out 2!important}@media (prefers-reduced-motion:reduce){[data-sp-show="part"] [data-lit="0"]{opacity:.22!important}[data-sp-show="part"] [data-lit="1"],[data-sp-show="all"]{filter:drop-shadow(0 0 8px rgba(var(--atmc2),1))!important}}
 @keyframes nsOrbit{to{transform:rotate(360deg)}}@keyframes nsHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* G1c: the skip link's focused state. It was written as style-focus="..." on
@@ -29146,7 +29148,7 @@ input[type="date"]{color-scheme:dark}
             </span>
           </button>
           <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:fadeUp .22s ease-out">
+            <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:fadeUp .22s ease-out">
               <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:3px">
                   <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -29204,7 +29206,7 @@ input[type="date"]{color-scheme:dark}
                 </div>
               </sc-if>
               <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;flex-direction:column">
+                <div data-ch-list="1" style="display:flex;flex-direction:column">
                   <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
                     <div>
                     <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
@@ -35155,7 +35157,7 @@ input[type="date"]{color-scheme:dark}
         <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="Expand chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)">⛶</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
-        <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
+        <div data-ch-col="1" style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
           <sc-for list="{{ chBandL }}" as="bd" hint-placeholder-count="1">
   <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
     <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
@@ -35169,7 +35171,7 @@ input[type="date"]{color-scheme:dark}
                 </span>
               </button>
               <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
+                <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
                   <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                     <div style="display:flex;flex-direction:column;gap:3px">
                       <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -35227,7 +35229,7 @@ input[type="date"]{color-scheme:dark}
                       </div>
                     </sc-if>
                     <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
-                      <div style="display:flex;flex-direction:column">
+                      <div data-ch-list="1" style="display:flex;flex-direction:column">
                         <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
                           <div>
                           <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
@@ -35335,7 +35337,7 @@ input[type="date"]{color-scheme:dark}
   </section>
 </sc-for>
         </div>
-        <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <div data-ch-col="wheel" style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
@@ -35419,10 +35421,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
-          
-        </div>
-        <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <sc-for list="{{ chBandR }}" as="bd" hint-placeholder-count="1">
+          <div data-ch-mid="1" style="display:flex;flex-direction:column;gap:16px"><sc-for list="{{ chBandM }}" as="bd" hint-placeholder-count="1">
   <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
     <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
     <sc-for list="{{ bd.feats }}" as="f" hint-placeholder-count="1">
@@ -35435,7 +35434,7 @@ input[type="date"]{color-scheme:dark}
                 </span>
               </button>
               <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
+                <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
                   <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
                     <div style="display:flex;flex-direction:column;gap:3px">
                       <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
@@ -35493,7 +35492,188 @@ input[type="date"]{color-scheme:dark}
                       </div>
                     </sc-if>
                     <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
-                      <div style="display:flex;flex-direction:column">
+                      <div data-ch-list="1" style="display:flex;flex-direction:column">
+                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                          <div>
+                          <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
+                            <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
+                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                                <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
+                                <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                                <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                              </span>
+                              <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
+                              <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
+                            </button>
+                          </sc-if>
+                          <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
+                            <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
+                              <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
+                              <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
+                              <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
+                            </div>
+                          </sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
+                      <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
+                        <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
+                          <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
+                            <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
+                              <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
+                                <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
+                                  <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
+                                </span>
+                                <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
+                                <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
+                                <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
+                                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
+                                </span>
+                                <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
+                                <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
+                              </button>
+                              <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
+                                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
+                                  <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
+                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+                                    <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
+                                    <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
+                                  </span>
+                                </div>
+                                <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
+                                  <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
+                                  <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                                        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
+                                        <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
+                                        <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
+                                      </div>
+                                      <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
+                                        <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
+                                      </sc-if>
+                                      <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
+                                      <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
+                                    </div>
+                                  </sc-for>
+                                  <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
+                                    <div style="display:flex;flex-direction:column;gap:5px">
+                                      <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
+                                      <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
+                                    </div>
+                                  </sc-for>
+                                  <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
+                                  <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
+                                    <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
+                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
+                                      <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
+                                    </div>
+                                  </sc-if>
+                                  <div style="display:flex;flex-direction:column;gap:3px">
+                                    <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
+                                    <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
+                                    <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
+                                  </div>
+                                  <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
+                                </div>
+                                <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
+                                  <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
+                                  <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+  </section>
+</sc-for></div>
+          
+        </div>
+        <div data-ch-col="1" style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
+          <sc-for list="{{ chBandR }}" as="bd" hint-placeholder-count="1">
+  <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
+    <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
+    <sc-for list="{{ bd.feats }}" as="f" hint-placeholder-count="1">
+            <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ f.bd }};border-radius:12px;padding:14px 16px">
+              <button onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
+                <span style="flex:none;font:400 11px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ f.rot }});transition:transform .3s ease">▶</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                  <span style="font:400 17px var(--fd);color:var(--tx)">{{ f.title }}</span>
+                  <span style="font:400 10.5px var(--fu);color:var(--dim)">{{ f.sub }}</span>
+                </span>
+              </button>
+              <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                <div data-ch-feat="1" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
+                  <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                        <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                      </sc-if>
+                      <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ f.hasTabs }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:2px">
+                      <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="2">
+                        <button data-lift onClick="{{ t.go }}" aria-pressed="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:1px;min-height:44px;padding:6px 15px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }}">
+                          <span style="font:400 14px var(--fd);color:{{ t.c }}">{{ t.name }}</span>
+                          <span style="font:600 8.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:{{ t.sc }}">{{ t.phase }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ f.hasBody }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:13px;border-top:1px solid var(--bd);padding-top:12px">
+                      <sc-for list="{{ f.body }}" as="b" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
+                          <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+    <sc-for list="{{ bd.groups }}" as="g" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
+              </sc-if>
+              <div data-lift="card" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
+                <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
+                  <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
+                    <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
+                    <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
+                  </span>
+                  <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
+                  <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
+                </button>
+                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                  <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
+                    <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
+                      <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
+                        <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
+                          <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
+                      <div data-ch-list="1" style="display:flex;flex-direction:column">
                         <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
                           <div>
                           <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
@@ -46854,7 +47034,8 @@ class Component extends DCLogic {
     return {
       chBands: bands,
       chBandL: bands.filter(b => b.key === 'bedrock'),
-      chBandR: bands.filter(b => b.key !== 'bedrock')
+      chBandR: bands.filter(b => b.key === 'weather'),
+      chBandM: bands.filter(b => b.key === 'horizon')
     };
   }
   lunationsAhead(from, days) {

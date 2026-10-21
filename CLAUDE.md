@@ -419,9 +419,26 @@ than `UI_ICONS`, because nothing asks `uiIcon()` for them.
 **A card can change band on its own.** An eclipse inside its five-day window is
 Weather and further off it is Horizon (`when` on each `chartFeatures` row), so
 the page reorganises itself as the sky moves and nobody moves the card. The
-desktop puts Bedrock left of the wheel and Weather and Horizon right of it; the
-phone stacks all three. Aspects moved out from under the wheel into Bedrock for
-this, which is what let the wheel take the middle column whole.
+desktop puts Bedrock left of the wheel, Weather right of it and Horizon under it,
+so what is fixed, what is now and what is coming sit round the chart they are
+about; the phone stacks all three. Aspects moved out from under the wheel into
+Bedrock for this.
+
+**Closeness: no list may become the only thing on the screen** (the owner, 21
+October 2026: "Fill out the page ... no list scrolls so far down that it's the
+only thing left on the screen ... Closeness is the effect I want to give the
+reader"). Every open list in a chart group (`data-ch-list`) stops at
+`min(42vh, 420px)` and every open card (`data-ch-feat`) at `min(52vh, 480px)`,
+and each scrolls inside itself with its scroll contained. From 1180px up each
+desktop column (`data-ch-col`) is held to `100dvh - 210px`, the screen less the
+header and the sample banner, so a short page scroll puts all three columns on
+the screen at once and each scrolls on its own. The wheel's column is the one
+that never scrolls: the wheel keeps its place and only the Horizon under it
+(`data-ch-mid`) scrolls, so nothing opened there can carry the wheel away.
+**Not sticky:** the first pass made the columns `position: sticky`, and a column
+as tall as its row has nowhere to stick to, so they slid under the banner.
+Below 1180px the columns wrap and nothing is held, because a held column in a
+wrapped row is a scroller inside a scroller.
 
 **Windows Opening is the transit scan, read forward.** The soonest eight windows
 of `transitWindows()` that open after today, each opening the natal body it
