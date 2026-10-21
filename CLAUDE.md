@@ -300,6 +300,60 @@ now, because it would paint the room under every Library tab.
 `scrollLeft` so a tab chosen by an address or a search row is on screen.
 It must not use `scrollIntoView`, which would also move the snapped page.
 
+## The Library shelf is lit plates
+Asked for by the owner on 21 October 2026 ("Today, we make the pages look
+fire"), who chose the Library shelves first and cosmic depth as the feel. The
+Study tab's six rooms and the Journal tab's two rooms are plates: a card of sky
+with the room drawn in light on it (the nine centres wired, the zodiac with a
+sun, the nine petals, three cards fanned, a crescent over water, the 360
+degrees with a needle, a light met again and again, a page open under the
+moon), and the Readings tab's two halves are portals of the same sky with the
+drawing large and the button under it. Study is a grid that is two columns on a
+phone and three on the desktop from one rule,
+`repeat(auto-fill,minmax(max(148px,30%),1fr))`; Journal's two plates and
+Readings' two halves are two columns everywhere, because the owner put tarot on
+the left and the Book of Changes on the right.
+
+**The shelf is written once and placed in both shells.** The two Library blocks
+were byte identical before this and are byte identical after it, so a change to
+one is a change to the other or it is a fault.
+
+**No category colour.** Every plate is the same wash, `--atmc` overhead and
+`--atmc2` under, lines in `--ac2-hi` over a halo in `--ac2`, warm fills in
+`--atmc2`. A room is told apart by its drawing and its name, by "A category is
+not a semantic colour"; the green the Astropedia and Lexicon rows used to wear
+is gone. Plates carry no description, by "No disclaimers".
+
+**What moves, and when.** The stars and the warm fills breathe on their own,
+which is opacity only. Everything else (a ring turning, petals turning, the
+channels flowing, the cards and the moon floating) is `paused` and runs only
+under a hovering pointer or keyboard focus, because the phone draws every
+section at once and six turning drawings nobody is looking at are a battery
+cost with no reader. There is no CSS `filter` anywhere in a drawing: the glow is
+the same lines drawn twice, wide and faint under narrow and bright, because a
+filter over something animating repaints every frame. Under reduced motion
+nothing animates.
+
+**The tilt is the Numbers cards' idiom**: `plateTilt()` and `plateTiltOff()`
+write the element's own style, never state, and the drawing drifts against the
+pointer so it sits deeper than the card. A plate sets its own `box-shadow`, so
+it does not take `data-lift`, by "Anything that can be pressed is lifted"; its
+border and shadow change on hover through `--plb` and `--plsh`, custom
+properties the head sheet sets, which an inline `all:unset` does not reset. The
+entrance animation is `backwards` and never `both`: a finished animation that
+holds `transform: none` beats the inline transform the tilt writes, and the
+card would never lean.
+
+**A translucent surface under a drawing shows what is behind it.** `--sf` and
+`--sf2` carry alpha under Deep Field, so the front tarot card is painted over
+an opaque `--bg` first, or the back card's outline reads through it.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+three tabs: four identities, hardened and not, at 1440 and 375, 48 cases, no
+pair under 4.5:1 and no control under 44px. Driven in both shells: every plate
+and both reading buttons land on their room and address, Enter on a focused
+plate opens it, and a hover tilts the plate, lights it and runs its drawing.
+
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
