@@ -429,7 +429,8 @@ October 2026: "Fill out the page ... no list scrolls so far down that it's the
 only thing left on the screen ... Closeness is the effect I want to give the
 reader"). Every open list in a chart group (`data-ch-list`) stops at
 `min(42vh, 420px)` and every open card (`data-ch-feat`) at `min(52vh, 480px)`,
-and each scrolls inside itself with its scroll contained. From 1180px up each
+both `min(36vh, 340px)` on the phone, where a card's own header already takes a
+fifth of the screen, and each scrolls inside itself with its scroll contained. From 1180px up each
 desktop column (`data-ch-col`) is held to `100dvh - 210px`, the screen less the
 header and the sample banner, so a short page scroll puts all three columns on
 the screen at once and each scrolls on its own. The wheel's column is the one
