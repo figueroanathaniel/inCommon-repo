@@ -398,6 +398,66 @@ Measured with the harness's own `contrastFails()` and `tapTargets()` over the
 wiring card, the wheel card and the Numbers cards: four identities, hardened and
 not, at 1440 and 375, 48 cases, clean.
 
+## Bedrock, Weather, Horizon: how the chart pages sort what they hold
+Asked for by the owner on 21 October 2026 ("Organize the tiles, come up with
+some imaginative system of organization for the collections of data"), and of
+three systems put to them this is the one chosen. Every chart page sorts its
+tiles by time, under three headed bands that read the same on all three charts:
+
+| Band | What it holds |
+|---|---|
+| Bedrock | what the birth fixed. Astrology: Stellium, the placements, Houses, Aspects. Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
+| Weather | what the sky is doing to it now. Astrology: Important Today, Current Retrogrades, the two transit lists. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
+| Horizon | what is coming. Astrology: Eclipses and Windows Opening. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+
+**The bands are headings and nothing more.** A glyph (strata, a body on its
+orbit, a sun on the horizon line), the name in the display face and a rule. No
+line under them says what a band means, by "Discovery belongs to the reader":
+the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
+than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+
+**A card can change band on its own.** An eclipse inside its five-day window is
+Weather and further off it is Horizon (`when` on each `chartFeatures` row), so
+the page reorganises itself as the sky moves and nobody moves the card. The
+desktop puts Bedrock left of the wheel and Weather and Horizon right of it; the
+phone stacks all three. Aspects moved out from under the wheel into Bedrock for
+this, which is what let the wheel take the middle column whole.
+
+**Windows Opening is the transit scan, read forward.** The soonest eight windows
+of `transitWindows()` that open after today, each opening the natal body it
+lands on. It is the one new collection in this change, and it reads a scan the
+Throughline already runs, so it costs nothing.
+
+**The Human Design Weather is numbers only**, by the rule the gates now card on
+Today keeps (Open Gate 5): a body, a gate and a line, sorted into Meeting yours
+(the sky on one of the reader's gates), Completing a channel (the partner of one
+of their hanging gates, with the channel's key) and Passing through. Each tile
+opens its gate. A sample chart is nobody's, so it gets the sky unsplit.
+
+**The life ribbon** (`numBands()`) lays the pinnacles and the cycles on one age
+axis from birth, at least to ninety, with a line at the reader's age. Segments
+are contiguous: a pinnacle runs from its first year to the next one's first
+year, so "0 to 33" and "34 to 42" meet at 34 rather than leaving a year of gap.
+The current segment is lit in `--ac2-hi`, never `--ac`: being in a pinnacle is
+not an action. The ribbon is at least 720px wide and scrolls sideways on a
+phone, inside `data-noswipe`, because a nine year pinnacle at a phone's width
+is narrower than a touch target. The pinnacle, cycle and challenge lists are
+gone: the ribbon carries the first two and Bedrock the third.
+
+**A splice that cuts on a line can cut a tag.** The first pass of the Numbers
+bands cut from a heading's line to the line holding the next section's heading,
+which took that section's opening `<div>` and left its `</div>`. Nothing
+threw. On the phone the stray close ended the Spirit section early and the
+Library section was drawn on top of it. Count the tags after any template
+splice: `div`, `section`, `sc-if`, `sc-for`, `button` and `span` must each open
+as often as they close, and after this change they do.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+bands on all three pages: four identities, hardened and not, at 1440 and 375, 48
+cases, clean. Driven on a chart of the reader's own: the Human Design Weather
+splits, every tile opens its gate, Windows Opening lists the soonest eight, and
+a ribbon segment opens its pinnacle.
+
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
@@ -5113,8 +5173,9 @@ asteroids centaurs houses etc into dropdown menus. Create flash cards for them
 as well, centered around the impact they are having on the reader. This will be
 mutable, consistently updating as time goes on and the effects evolve over time
 for the reader." Every list under the Birth Chart, in both shells, is one
-dropdown (`chartGroupVals()`, `chgPhone` on the phone, `chgL`, `chgM` and `chgR`
-in the desktop's three columns): the points one per category (Astral Bodies,
+dropdown (`chartGroupVals()`, sorted into the bands `chBands` on the phone and
+`chBandL` and `chBandR` either side of the desktop's wheel; see "Bedrock,
+Weather, Horizon"): the points one per category (Astral Bodies,
 Nodes & Lunar Points, Angles, and in the Expanded Chart the asteroids, centaurs,
 TNOs, comets, hypotheticals and derived points), then the houses, the aspects
 and the two transit lists. They open closed (`chgOpen`), and a header carries

@@ -28785,6 +28785,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
     </div>
+    <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
     <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
       <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
         <span style="flex:none;font:700 11px var(--fu);letter-spacing:.18em;text-transform:uppercase;padding:7px 13px;border-radius:8px;color:var(--ac);background:rgba(var(--atmc),.3);border:1px solid rgba(47,255,143,.32)">{{ hdType }}</span>
@@ -28963,6 +28964,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
     </div>
+    <sc-if value="{{ hdwxOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Weather" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconW }} center/contain no-repeat;mask:{{ bandIconW }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Weather</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><sc-for list="{{ hdwx }}" as="wg" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:8px"><sc-if value="{{ wg.headOn }}" hint-placeholder-val="{{ true }}"><div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ wg.head }}</div></sc-if><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px"><sc-for list="{{ wg.tiles }}" as="wt" hint-placeholder-count="4"><button data-lift onClick="{{ wt.go }}" aria-label="{{ wt.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid {{ wt.bd }};border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ wt.body }}</span><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ wt.gl }}</span><sc-if value="{{ wt.tagOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ wt.tag }}</span></sc-if></button></sc-for></div></div></sc-for></section></sc-if>
     <button data-lift onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
       <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
         <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
@@ -29130,9 +29132,11 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Chart Features</div>
-      <sc-for list="{{ chartFeatures }}" as="f" hint-placeholder-count="2">
+    <div style="display:flex;flex-direction:column;gap:22px">
+    <sc-for list="{{ chBands }}" as="bd" hint-placeholder-count="1">
+      <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
+        <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
+        <sc-for list="{{ bd.feats }}" as="f" hint-placeholder-count="1">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ f.bd }};border-radius:12px;padding:13px 15px;transition:border-color .3s ease">
           <button onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
             <span style="flex:none;font:400 11px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ f.rot }});transition:transform .3s ease">▶</span>
@@ -29175,8 +29179,7 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
       </sc-for>
-    </div>
-    <sc-for list="{{ chgPhone }}" as="g" hint-placeholder-count="6">
+        <sc-for list="{{ bd.groups }}" as="g" hint-placeholder-count="2">
       <div style="display:flex;flex-direction:column;gap:8px">
         <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
           <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
@@ -29306,6 +29309,9 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
     </sc-for>
+      </section>
+    </sc-for>
+    </div>
   </div>
 </sc-if>
 
@@ -29375,10 +29381,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ numerSummary.head }}</div>
       <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numerSummary.text }}</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:26px"><section aria-label="Bedrock" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ numerBedrock }}" as="n" hint-placeholder-count="5">
           <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
             <div style="display:flex;align-items:baseline;gap:8px">
               <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
@@ -29389,12 +29392,8 @@ input[type="date"]{color-scheme:dark}
             <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
             <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
           </button>
-        </sc-for>
-      </div>
-      <div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ numerYearSpan }}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your Name</div>
+        </sc-for></div><div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your name</div>
       <sc-if value="{{ hasBirthName }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
@@ -29419,45 +29418,29 @@ input[type="date"]{color-scheme:dark}
           <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
         </div>
       </sc-if>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Pinnacles</div>
-      <sc-for list="{{ numerPinnacles }}" as="p" hint-placeholder-count="4">
-        <button data-lift onClick="{{ p.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-          <span style="flex:none;width:30px;font:400 22px var(--fd);color:{{ p.c }}">{{ p.v }}</span>
-          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-            <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
-            <span style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ p.mean }}</span>
-            <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
-          </span>
-          <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
-      <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:11px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-          <div style="font:400 13.5px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
-          <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
-          <div style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</div>
-          <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
-        </button>
-      </sc-for>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Challenges</div>
-      <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-        <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:52px;display:flex;align-items:center;gap:11px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:10px 13px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-          <span style="flex:none;width:30px;font:400 22px var(--fd);color:var(--warn)">{{ c.v }}</span>
-          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-            <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
-            <span style="font:400 11.5px/1.5 var(--fb);color:var(--dim)">{{ c.mean }}</span>
-          </span>
-          <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-        </button>
-      </sc-for>
-    </div>
+    </div></section><section aria-label="Weather" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconW }} center/contain no-repeat;mask:{{ bandIconW }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Weather</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ numerWeather }}" as="n" hint-placeholder-count="5">
+          <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
+              <div style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+              <div style="font:400 12px var(--fb);color:var(--ac)">→</div>
+            </div>
+            <div style="font:italic 400 11px/1.5 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+            <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+            <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
+          </button>
+        </sc-for></div><div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ numerYearSpan }}</div></section><section aria-label="Horizon" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconH }} center/contain no-repeat;mask:{{ bandIconH }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Horizon</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div data-noswipe="1" style="overflow-x:auto;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:radial-gradient(110% 90% at 50% 0%,rgba(var(--atmc),.26),transparent 64%),var(--sf)"><div role="group" aria-label="Your life, from birth" style="position:relative;min-width:720px;box-sizing:border-box;padding:30px 16px 10px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ nrLanes }}" as="ln" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:5px"><div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ ln.name }}</div><div style="position:relative;height:50px"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="4"><button data-lift onClick="{{ sg.go }}" aria-label="{{ sg.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:0;bottom:0;left:{{ sg.l }};width:{{ sg.w }};padding:0 2px"><span style="box-sizing:border-box;height:100%;display:flex;align-items:center;gap:8px;padding:0 10px;overflow:hidden;border:1px solid {{ sg.bd }};border-radius:10px;background:{{ sg.bg }}"><span style="flex:none;font:400 20px/1 var(--fd);color:{{ sg.vc }}">{{ sg.v }}</span><span style="min-width:0;font:600 9.5px/1.3 var(--fu);letter-spacing:.04em;color:{{ sg.c }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sg.years }}</span></span></button></sc-for></div></div></sc-for><div aria-hidden="true" style="position:relative;height:16px;margin:0 2px"><sc-for list="{{ nrTicks }}" as="tk" hint-placeholder-count="10"><span style="position:absolute;left:{{ tk.l }};transform:translateX(-50%);font:600 9px var(--fu);color:var(--dim)">{{ tk.t }}</span></sc-for></div><sc-if value="{{ nrHereOn }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position:absolute;top:8px;bottom:26px;left:calc(16px + (100% - 32px) * {{ nrHereF }});width:0;border-left:1.5px solid var(--ac2-hi);box-shadow:0 0 12px var(--ac2-hi);pointer-events:none"><span style="position:absolute;top:-2px;left:6px;white-space:nowrap;font:600 9.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ nrHereLabel }}</span></div></sc-if></div></div><sc-if value="{{ numerNextOn }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ numerNext }}" as="n" hint-placeholder-count="5">
+          <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:14px;padding:12px 14px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <div style="font:400 30px/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
+              <div style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+              <div style="font:400 12px var(--fb);color:var(--ac)">→</div>
+            </div>
+            <div style="font:italic 400 11px/1.5 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+            <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+            <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 9.5px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
+          </button>
+        </sc-for></div></sc-if></section></div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your complete numerology picture</div>
       <div style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
@@ -35173,7 +35156,53 @@ input[type="date"]{color-scheme:dark}
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
         <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <sc-for list="{{ chgL }}" as="g" hint-placeholder-count="4">
+          <sc-for list="{{ chBandL }}" as="bd" hint-placeholder-count="1">
+  <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
+    <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
+    <sc-for list="{{ bd.feats }}" as="f" hint-placeholder-count="1">
+            <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ f.bd }};border-radius:12px;padding:14px 16px">
+              <button onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
+                <span style="flex:none;font:400 11px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ f.rot }});transition:transform .3s ease">▶</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
+                  <span style="font:400 17px var(--fd);color:var(--tx)">{{ f.title }}</span>
+                  <span style="font:400 10.5px var(--fu);color:var(--dim)">{{ f.sub }}</span>
+                </span>
+              </button>
+              <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px;animation:dtIn .22s ease">
+                  <sc-for list="{{ f.lines }}" as="l" hint-placeholder-count="3">
+                    <div style="display:flex;flex-direction:column;gap:3px">
+                      <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                        <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                      </sc-if>
+                      <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ f.hasTabs }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:2px">
+                      <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="2">
+                        <button data-lift onClick="{{ t.go }}" aria-pressed="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:1px;min-height:44px;padding:6px 15px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }}">
+                          <span style="font:400 14px var(--fd);color:{{ t.c }}">{{ t.name }}</span>
+                          <span style="font:600 8.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:{{ t.sc }}">{{ t.phase }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ f.hasBody }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:13px;border-top:1px solid var(--bd);padding-top:12px">
+                      <sc-for list="{{ f.body }}" as="b" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ b.head }}</div>
+                          <div style="font:400 12.5px/1.75 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ b.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+    <sc-for list="{{ bd.groups }}" as="g" hint-placeholder-count="2">
             <div style="display:flex;flex-direction:column;gap:8px">
               <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
                 <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
@@ -35303,6 +35332,8 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
           </sc-for>
+  </section>
+</sc-for>
         </div>
         <div style="flex:2.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
@@ -35388,139 +35419,13 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
-          <sc-for list="{{ chgM }}" as="g" hint-placeholder-count="1">
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
-                <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
-              </sc-if>
-              <div data-lift="card" style="display:flex;flex-direction:column;background:var(--sf);border:1px solid {{ g.bd }};border-radius:12px;transition:border-color .3s ease">
-                <button onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" aria-controls="{{ g.pid }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px">
-                  <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac2-hi);display:inline-block;transform:rotate({{ g.rot }});transition:transform .3s ease">▶</span>
-                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                    <span style="font:400 16px/1.25 var(--fd);color:var(--tx)">{{ g.label }}</span>
-                    <sc-if value="{{ g.peekOn }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="font:400 13px/1.3 var(--fb);letter-spacing:.06em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.peek }}</span></sc-if>
-                  </span>
-                  <sc-if value="{{ g.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:6px;font:600 10px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>{{ g.lit }}</span></sc-if>
-                  <span style="flex:none;min-width:28px;text-align:center;padding:3px 8px;border:1px solid var(--bd);border-radius:999px;font:600 10.5px var(--fu);font-variant-numeric:tabular-nums;color:var(--mut)">{{ g.count }}</span>
-                </button>
-                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
-                  <div id="{{ g.pid }}" role="region" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding:10px 10px 12px;animation:fadeUp .22s ease-out">
-                    <sc-if value="{{ g.modesOn }}" hint-placeholder-val="{{ false }}">
-                      <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="{{ g.label }} view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px">
-                        <sc-for list="{{ g.modes }}" as="m" hint-placeholder-count="2">
-                          <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ m.bd }};background:{{ m.bg }};font:600 11px var(--fu);letter-spacing:.08em;color:{{ m.c }};transition:background .3s ease,border-color .3s ease">{{ m.label }}</button>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                    <sc-if value="{{ g.listOn }}" hint-placeholder-val="{{ true }}">
-                      <div style="display:flex;flex-direction:column">
-                        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
-                          <div>
-                          <sc-if value="{{ r.btn }}" hint-placeholder-val="{{ true }}">
-                            <button id="{{ r.anchor }}" onClick="{{ r.go }}" aria-label="{{ r.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
-                              <sc-if value="{{ r.glyphOn }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:none;width:26px;text-align:center;font:400 17px var(--fb);color:var(--ac2-hi)">{{ r.glyph }}</span></sc-if>
-                              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                                <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}<sc-if value="{{ r.hiOn }}" hint-placeholder-val="{{ true }}"> · <span style="color:var(--ac2-hi)">{{ r.hi }}</span></sc-if></span>
-                                <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
-                                <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
-                              </span>
-                              <sc-if value="{{ r.litOn }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:flex;align-items:center;gap:5px;font:600 9px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px rgba(var(--atmc),.9)"></span>Lit</span></sc-if>
-                              <span aria-hidden="true" style="flex:none;font:400 13px var(--fu);color:var(--dim)">{{ r.arrow }}</span>
-                            </button>
-                          </sc-if>
-                          <sc-if value="{{ r.plain }}" hint-placeholder-val="{{ false }}">
-                            <div style="box-sizing:border-box;width:100%;min-height:46px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:8px 6px 8px 8px;border-bottom:1px solid var(--bd);border-left:3px solid {{ r.edge }}">
-                              <span style="font:400 14px/1.35 var(--fd);color:var(--tx)">{{ r.title }}</span>
-                              <sc-if value="{{ r.metaOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ r.meta }}</span></sc-if>
-                              <span style="font:400 11px/1.5 var(--fb);color:var(--dim)">{{ r.sub }}</span>
-                            </div>
-                          </sc-if>
-                          </div>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                    <sc-if value="{{ g.cardsOn }}" hint-placeholder-val="{{ false }}">
-                      <div data-fc-deck="1" data-noswipe="1" role="region" aria-roledescription="carousel" aria-label="{{ g.deckAria }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 12px;scrollbar-width:thin;overscroll-behavior-x:contain">
-                        <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="3">
-                          <div data-fc-card="{{ c.id }}" role="group" aria-roledescription="flash card" aria-label="{{ c.aria }}" style="flex:0 0 min(86%,300px);scroll-snap-align:start;perspective:1100px">
-                            <div style="position:relative;display:grid;height:380px;transform-style:preserve-3d;transform:rotateY({{ c.rot }});transition:transform .6s cubic-bezier(.22,1,.36,1)">
-                              <button data-fc-front="1" onClick="{{ c.flip }}" aria-label="{{ c.frontAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;grid-area:1 / 1;-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.frontV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 16px 14px;border:1px solid var(--bd);border-radius:var(--rad);background:radial-gradient(110% 70% at 50% 0%,rgba(var(--atmc),.26),transparent 62%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28)">
-                                <span style="align-self:stretch;display:flex;align-items:center;justify-content:flex-end">
-                                  <span style="padding:3px 9px;border:1px solid var(--ac2);border-radius:999px;font:600 9.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.chip }}</span>
-                                </span>
-                                <span aria-hidden="true" style="flex:none;margin-top:6px;width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.ring }};background:radial-gradient(circle at 34% 28%,rgba(var(--atmc2),.26),rgba(var(--atmc),.26) 55%,var(--bg) 100%);box-shadow:0 0 26px rgba(var(--atmc),.55);font:400 34px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
-                                <span style="font:400 23px/1.2 var(--fd);color:var(--tx);text-align:center">{{ c.name }}</span>
-                                <span style="font:600 11.5px/1.45 var(--fu);letter-spacing:.04em;color:var(--ac2-hi);text-align:center">{{ c.pos }}</span>
-                                <span aria-hidden="true" style="display:flex;align-items:flex-end;gap:4px;height:22px;margin-top:4px">
-                                  <sc-for list="{{ c.bars }}" as="b" hint-placeholder-count="5"><span style="width:7px;height:{{ b.h }};border-radius:2px;background:{{ b.bg }}"></span></sc-for>
-                                </span>
-                                <span style="flex:1;font:400 13px/1.55 var(--fb);color:var(--tx);text-align:center;text-wrap:pretty">{{ c.status }}</span>
-                                <span aria-hidden="true" style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">↻ Turn</span>
-                              </button>
-                              <div style="grid-area:1 / 1;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;visibility:{{ c.backV }};transition:visibility 0s linear {{ c.vDelay }};display:flex;flex-direction:column;min-height:0;border:1px solid var(--ac2);border-radius:var(--rad);background:radial-gradient(120% 70% at 100% 0%,rgba(var(--atmc),.22),transparent 60%),linear-gradient(160deg,var(--sf),var(--sf-g));box-shadow:0 10px 26px rgba(0,0,0,.28);overflow:hidden">
-                                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:13px 15px 10px;border-bottom:1px solid var(--bd)">
-                                  <span aria-hidden="true" style="flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid {{ c.ring }};font:400 17px/1 var(--fb);color:var(--tx)">{{ c.glyph }}</span>
-                                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
-                                    <span style="font:400 16px/1.2 var(--fd);color:var(--tx)">{{ c.name }}</span>
-                                    <span style="font:600 10px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ c.pos }}</span>
-                                  </span>
-                                </div>
-                                <div style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px;padding:12px 15px">
-                                  <sc-if value="{{ c.houseOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12px/1.6 var(--fb);color:var(--mut)">{{ c.house }}</div></sc-if>
-                                  <sc-for list="{{ c.contacts }}" as="k" hint-placeholder-count="1">
-                                    <div style="display:flex;flex-direction:column;gap:5px">
-                                      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-                                        <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span>
-                                        <span style="font:400 14.5px var(--fd);color:var(--tx)">{{ k.title }}</span>
-                                        <span style="font:600 9px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--ac2-hi)">{{ k.phase }}</span>
-                                      </div>
-                                      <sc-if value="{{ k.winOn }}" hint-placeholder-val="{{ false }}">
-                                        <div aria-hidden="true" style="position:relative;height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
-                                        <div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.range }} · {{ k.exactOn }}</div>
-                                      </sc-if>
-                                      <sc-if value="{{ k.paceOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ k.orb }} · {{ k.pace }}</div></sc-if>
-                                      <sc-for list="{{ k.paras }}" as="p" hint-placeholder-count="2"><div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ p.t }}</div></sc-for>
-                                    </div>
-                                  </sc-for>
-                                  <sc-for list="{{ c.inside }}" as="k" hint-placeholder-count="1">
-                                    <div style="display:flex;flex-direction:column;gap:5px">
-                                      <div style="display:flex;align-items:baseline;gap:8px"><span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">{{ k.glyph }}</span><span style="font:400 14px var(--fd);color:var(--tx)">{{ k.title }}</span></div>
-                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ k.pct }};border-radius:4px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></div></div>
-                                      <div style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ k.t }}</div>
-                                    </div>
-                                  </sc-for>
-                                  <sc-if value="{{ c.quietOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 12.5px/1.6 var(--fb);color:var(--mut)">{{ c.quiet }}</div></sc-if>
-                                  <sc-if value="{{ c.roundOn }}" hint-placeholder-val="{{ false }}">
-                                    <div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--bd);padding-top:10px">
-                                      <div aria-hidden="true" style="height:4px;border-radius:4px;background:var(--sf2)"><div style="height:100%;width:{{ c.roundPct }};border-radius:4px;background:linear-gradient(90deg,rgba(var(--atmc2),.9),var(--ac2))"></div></div>
-                                      <div style="font:400 12px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.round }}</div>
-                                    </div>
-                                  </sc-if>
-                                  <div style="display:flex;flex-direction:column;gap:3px">
-                                    <sc-if value="{{ c.pastOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.past }}</div></sc-if>
-                                    <sc-if value="{{ c.nextOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.next }}</div></sc-if>
-                                    <sc-if value="{{ c.heavyOn }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px/1.5 var(--fu);color:var(--mut)">{{ c.heavy }}</div></sc-if>
-                                  </div>
-                                  <sc-if value="{{ c.askOn }}" hint-placeholder-val="{{ false }}"><div style="font:italic 400 15px/1.45 var(--fd);color:var(--tx);text-wrap:pretty">{{ c.ask }}</div></sc-if>
-                                </div>
-                                <div style="flex:none;display:flex;border-top:1px solid var(--bd)">
-                                  <button data-fc-back="1" onClick="{{ c.flip }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true">↺</span> Turn back</button>
-                                  <button onClick="{{ c.open }}" aria-label="{{ c.openAria }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1.3;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bd);font:700 10.5px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">{{ c.openLabel }} <span aria-hidden="true" style="font:400 13px var(--fb)">→</span></button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                  </div>
-                </sc-if>
-              </div>
-            </div>
-          </sc-for>
+          
         </div>
         <div style="flex:1 1 264px;min-width:0;display:flex;flex-direction:column;gap:16px">
-          <sc-for list="{{ chartFeatures }}" as="f" hint-placeholder-count="2">
+          <sc-for list="{{ chBandR }}" as="bd" hint-placeholder-count="1">
+  <section aria-label="{{ bd.name }}" style="display:flex;flex-direction:column;gap:12px">
+    <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:10px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bd.icon }} center/contain no-repeat;mask:{{ bd.icon }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">{{ bd.name }}</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
+    <sc-for list="{{ bd.feats }}" as="f" hint-placeholder-count="1">
             <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid {{ f.bd }};border-radius:12px;padding:14px 16px">
               <button onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;min-height:44px">
                 <span style="flex:none;font:400 11px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ f.rot }});transition:transform .3s ease">▶</span>
@@ -35563,7 +35468,7 @@ input[type="date"]{color-scheme:dark}
               </sc-if>
             </div>
           </sc-for>
-          <sc-for list="{{ chgR }}" as="g" hint-placeholder-count="2">
+    <sc-for list="{{ bd.groups }}" as="g" hint-placeholder-count="2">
             <div style="display:flex;flex-direction:column;gap:8px">
               <sc-if value="{{ g.headOn }}" hint-placeholder-val="{{ false }}">
                 <div style="padding-top:4px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ g.head }}</div>
@@ -35693,6 +35598,8 @@ input[type="date"]{color-scheme:dark}
               </div>
             </div>
           </sc-for>
+  </section>
+</sc-for>
         </div>
       </div>
     </div>
@@ -35962,6 +35869,7 @@ input[type="date"]{color-scheme:dark}
           </div>
         </div>
         <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
             <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
               <span style="flex:none;font:700 clamp(18px,1.6vw,26px) var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac);text-align:left">{{ hdType }}</span>
@@ -36044,6 +35952,7 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
           </div>
+          <sc-if value="{{ hdwxOn }}" hint-placeholder-val="{{ false }}"><section aria-label="Weather" style="display:flex;flex-direction:column;gap:12px;padding-top:6px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconW }} center/contain no-repeat;mask:{{ bandIconW }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Weather</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><sc-for list="{{ hdwx }}" as="wg" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:8px"><sc-if value="{{ wg.headOn }}" hint-placeholder-val="{{ true }}"><div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">{{ wg.head }}</div></sc-if><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px"><sc-for list="{{ wg.tiles }}" as="wt" hint-placeholder-count="4"><button data-lift onClick="{{ wt.go }}" aria-label="{{ wt.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:3px;padding:10px 11px;border:1px solid {{ wt.bd }};border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf)"><span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)">{{ wt.body }}</span><span style="font:400 22px/1 var(--fd);color:var(--tx)">{{ wt.gl }}</span><sc-if value="{{ wt.tagOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--ac2-hi)">{{ wt.tag }}</span></sc-if></button></sc-for></div></div></sc-for></section></sc-if>
           <button data-lift onClick="{{ hdAtlasGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:11px;background:rgba(139,92,246,.09);border:1px solid rgba(139,92,246,.32);border-radius:12px;padding:12px 14px">
             <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
               <span style="font:600 12.5px var(--fu);color:var(--tx)">Human Design Atlas</span>
@@ -36216,10 +36125,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ numerSummary.head }}</div>
         <div style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ numerSummary.text }}</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:11px">
-        <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Core &amp; current</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px">
-          <sc-for list="{{ numerCore }}" as="n" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:26px"><section aria-label="Bedrock" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px"><sc-for list="{{ numerBedrock }}" as="n" hint-placeholder-count="5">
             <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
               <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
@@ -36227,52 +36133,8 @@ input[type="date"]{color-scheme:dark}
               <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
               <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
             </button>
-          </sc-for>
-        </div>
-        <div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ numerYearSpan }}</div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
-        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
-          <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Pinnacles</div>
-          <sc-for list="{{ numerPinnacles }}" as="p" hint-placeholder-count="4">
-            <button data-lift onClick="{{ p.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-            <span style="flex:none;width:36px;font:400 26px var(--fd);color:{{ p.c }}">{{ p.v }}</span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:{{ p.c }}">{{ p.years }}{{ p.nowLabel }}</span>
-                <span style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ p.mean }}</span>
-                <sc-if value="{{ p.cmpOn }}" hint-placeholder-val="{{ false }}"><span style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ p.cmpC }}">{{ p.cmpLine }}</span></sc-if>
-              </span>
-              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-            </button>
-          </sc-for>
-        </div>
-        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
-          <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Period cycles</div>
-          <sc-for list="{{ numerCycles }}" as="c" hint-placeholder-count="3">
-            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:13px 15px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-              <div style="font:400 14px var(--fd)">{{ c.k }} · <span style="color:var(--ac2-hi)">{{ c.v }}</span></div>
-              <div style="font:600 9.5px var(--fu);letter-spacing:.05em;color:var(--ok)">{{ c.years }}</div>
-              <div style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</div>
-              <sc-if value="{{ c.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ c.cmpC }}">{{ c.cmpLine }}</div></sc-if>
-            </button>
-          </sc-for>
-        </div>
-        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:11px">
-          <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Challenges</div>
-          <sc-for list="{{ numerChallenges }}" as="c" hint-placeholder-count="3">
-            <button data-lift onClick="{{ c.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:14px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:12px;padding:12px 15px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
-              <span style="flex:none;width:36px;font:400 26px var(--fd);color:var(--warn)">{{ c.v }}</span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left">
-                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--dim)">{{ c.k }}</span>
-                <span style="font:400 11.5px/1.55 var(--fb);color:var(--dim)">{{ c.mean }}</span>
-              </span>
-              <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-            </button>
-          </sc-for>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:11px">
-        <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Your Name</div>
+          </sc-for></div><div style="display:flex;flex-direction:column;gap:11px">
+        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Your name</div>
         <sc-if value="{{ hasBirthName }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:11px">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px">
@@ -36297,7 +36159,23 @@ input[type="date"]{color-scheme:dark}
             <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
           </div>
         </sc-if>
-      </div>
+      </div></section><section aria-label="Weather" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconW }} center/contain no-repeat;mask:{{ bandIconW }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Weather</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px"><sc-for list="{{ numerWeather }}" as="n" hint-placeholder-count="5">
+            <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+              <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
+              <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+              <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+              <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+              <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
+            </button>
+          </sc-for></div><div style="font:400 10.5px/1.5 var(--fu);color:var(--dim)">{{ numerYearSpan }}</div></section><section aria-label="Horizon" style="display:flex;flex-direction:column;gap:12px"><div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconH }} center/contain no-repeat;mask:{{ bandIconH }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Horizon</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div><div data-noswipe="1" style="overflow-x:auto;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:radial-gradient(110% 90% at 50% 0%,rgba(var(--atmc),.26),transparent 64%),var(--sf)"><div role="group" aria-label="Your life, from birth" style="position:relative;min-width:720px;box-sizing:border-box;padding:30px 16px 10px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ nrLanes }}" as="ln" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:5px"><div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ ln.name }}</div><div style="position:relative;height:50px"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="4"><button data-lift onClick="{{ sg.go }}" aria-label="{{ sg.aria }}" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;top:0;bottom:0;left:{{ sg.l }};width:{{ sg.w }};padding:0 2px"><span style="box-sizing:border-box;height:100%;display:flex;align-items:center;gap:8px;padding:0 10px;overflow:hidden;border:1px solid {{ sg.bd }};border-radius:10px;background:{{ sg.bg }}"><span style="flex:none;font:400 20px/1 var(--fd);color:{{ sg.vc }}">{{ sg.v }}</span><span style="min-width:0;font:600 9.5px/1.3 var(--fu);letter-spacing:.04em;color:{{ sg.c }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sg.years }}</span></span></button></sc-for></div></div></sc-for><div aria-hidden="true" style="position:relative;height:16px;margin:0 2px"><sc-for list="{{ nrTicks }}" as="tk" hint-placeholder-count="10"><span style="position:absolute;left:{{ tk.l }};transform:translateX(-50%);font:600 9px var(--fu);color:var(--dim)">{{ tk.t }}</span></sc-for></div><sc-if value="{{ nrHereOn }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="position:absolute;top:8px;bottom:26px;left:calc(16px + (100% - 32px) * {{ nrHereF }});width:0;border-left:1.5px solid var(--ac2-hi);box-shadow:0 0 12px var(--ac2-hi);pointer-events:none"><span style="position:absolute;top:-2px;left:6px;white-space:nowrap;font:600 9.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">{{ nrHereLabel }}</span></div></sc-if></div></div><sc-if value="{{ numerNextOn }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px"><sc-for list="{{ numerNext }}" as="n" hint-placeholder-count="5">
+            <button data-lift onClick="{{ n.go }}" onPointerMove="{{ numTilt }}" onPointerLeave="{{ numTiltOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:7px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.24),transparent 66%),var(--sf);border:1px solid rgba(var(--atmc),.44);border-radius:15px;padding:18px;text-align:left;position:relative;overflow:hidden;transition:transform .25s ease,border-color .2s ease,box-shadow .2s ease;animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;animation-delay:{{ n.delay }}"><span data-sheen="1" aria-hidden="true" style="position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--atmc2),.10),transparent 65%)"></span>
+              <div style="font:400 clamp(38px,3.4vw,52px)/1 var(--fd);color:var(--ac2-hi)">{{ n.v }}</div>
+              <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ n.k }}</div>
+              <div style="flex:1;font:italic 400 11.5px/1.6 var(--fb);color:var(--dim)">{{ n.mean }}</div>
+              <sc-if value="{{ n.cmpOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:{{ n.cmpC }}">{{ n.cmpLine }}</div></sc-if>
+              <sc-if value="{{ n.debtOn }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px/1.4 var(--fu);letter-spacing:.05em;color:var(--warn)">{{ n.debtLine }}</div></sc-if>
+            </button>
+          </sc-for></div></sc-if></section></div>
       <div style="display:flex;flex-direction:column;gap:11px">
         <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Your complete numerology picture</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:13px">
@@ -46853,6 +46731,41 @@ class Component extends DCLogic {
      carry a List and Flash cards switch (chgMode). A card's turn is fcFlip.
      Cards are built only for a group that is open on its cards, so a closed
      page pays for the lit counts and nothing more. */
+  /* The three bands every chart sorts by. The glyphs are drawn here rather
+     than in UI_ICONS because nothing asks uiIcon() for them: strata for what
+     was laid down at birth, a body on its orbit for the sky now, and a sun on
+     the horizon line for what is coming. */
+  BAND_NAMES = { bedrock: 'Bedrock', weather: 'Weather', horizon: 'Horizon' };
+  BAND_SVG = {
+    bedrock: '<path d="M3 7.5h18M5 12.5h14M7.5 17.5h9" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>',
+    weather: '<ellipse cx="12" cy="12" rx="9.5" ry="5" fill="none" stroke="#000" stroke-width="1.8" transform="rotate(-24 12 12)"/><circle cx="12" cy="12" r="3.2" fill="#000"/><circle cx="20" cy="8.4" r="1.9" fill="#000"/>',
+    horizon: '<path d="M3 17.5h18" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/><path d="M7 17.5a5 5 0 0 1 10 0" fill="none" stroke="#000" stroke-width="2"/><path d="M12 6.5v2.6M6.4 9l1.7 1.7M17.6 9l-1.7 1.7" fill="none" stroke="#000" stroke-width="1.9" stroke-linecap="round"/>'
+  };
+  bandIcon(k) { return 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' + this.BAND_SVG[k] + '</svg>') + '")'; }
+  chartBand(k, feats, groups) { return { key: k, name: this.BAND_NAMES[k], icon: this.bandIcon(k), feats: feats, groups: groups }; }
+  /* The Human Design page's Weather: the gates the sky holds this minute, the
+     same hd-transit reading the Today card and the wiring's sky now read.
+     Numbers only, by the rule that card keeps: a body, a gate and a line, and
+     which of the reader's own gates it meets or which of their channels it
+     would complete. A sample chart is nobody's, so it gets the sky unsplit. */
+  hdWeatherVals() {
+    const sky = this.hdSkyNow(), A = this.A();
+    if (!sky.length) return { hdwxOn: false, hdwx: [] };
+    const tile = (a, tag, bd) => ({ body: a.body, gl: a.gate + '.' + a.line, tag: tag, tagOn: !!tag, bd: bd,
+      aria: a.body + ', gate ' + a.gate + ', line ' + a.line + (tag ? ', ' + tag : ''), go: this.hdOpen({ kind: 'gate', gate: a.gate, line: a.line }) });
+    const grp = (head, tiles) => ({ head: head, headOn: !!head, tiles: tiles });
+    if (this.usingSampleBirth()) return { hdwxOn: true, hdwx: [grp('', sky.map(a => tile(a, '', 'var(--bd)')))] };
+    const hd = this.hdChart(), mine = new Set(hd.gates.map(g => g.gate));
+    const made = new Set(hd.activeChannels.map(ch => Math.min(ch[0], ch[1]) + '-' + Math.max(ch[0], ch[1])));
+    const meet = [], done = [], pass = [];
+    sky.forEach(a => {
+      if (mine.has(a.gate)) { meet.push(tile(a, 'your gate', 'var(--ac2-hi)')); return; }
+      const c = A && A.channelsFor ? (A.channelsFor(a.gate) || []).find(x => mine.has(x.partner) && !made.has(Math.min(a.gate, x.partner) + '-' + Math.max(a.gate, x.partner))) : null;
+      if (c) done.push(tile(a, 'completes ' + c.key, 'rgba(var(--atmc2),.75)'));
+      else pass.push(tile(a, '', 'var(--bd)'));
+    });
+    return { hdwxOn: true, hdwx: [grp('Meeting yours', meet), grp('Completing a channel', done), grp('Passing through', pass)].filter(g => g.tiles.length) };
+  }
   chartGroupVals(o) {
     const st = this.state, open = st.chgOpen || {}, mode = st.chgMode || {}, flip = st.fcFlip || {}, rm = this.motionOff();
     const ctx = { ordinal: o.ordinal, houseOf: o.houseOf, openBody: o.openBody,
@@ -46917,13 +46830,31 @@ class Component extends DCLogic {
     const trS = group('tr-sky', 'Current Transits', o.tr.global.map(x => row({
       title: x.a.glyph + ' ' + x.a.name + ' ' + x.asp + ' ' + x.b.glyph + ' ' + x.b.name, meta: x.orb.toFixed(1) + '° orb',
       sub: x.a.mean + ' and ' + x.b.mean + ', ' + this.ASP_MEAN[x.asp] })));
+    /* The windows that open after today, from the same scan the Throughline
+       stamps its entries with: the soonest first, eight at most. */
+    const ahead = (() => { try { return this.transitWindows() || []; } catch (e) { return []; } })()
+      .filter(r => r.fromI > 0).sort((a, b) => a.fromI - b.fromI).slice(0, 8);
+    const trA = group('tr-ahead', 'Windows Opening', ahead.map(r => row({
+      title: r.label, meta: 'opens ' + this.fmtDay(r.from), edge: 'rgba(var(--atmc2),.7)', sub: r.range,
+      go: () => o.openBody(r.natal) })));
     const headed = (list, heads) => list.map(g => heads[g.key] ? { ...g, headOn: true, head: heads[g.key] } : g);
     const first = pts.length ? pts[0].key : 'houses';
+    /* BEDROCK, WEATHER, HORIZON (owner, 21 October 2026). Every chart sorts what
+       it holds by time: what was fixed at birth, what the sky is doing to it
+       now, and what is coming. The bands carry the cards and the groups; an
+       eclipse inside its five-day window is weather, and further off it is
+       horizon, so a card can move band without anybody moving it. */
+    const feats = o.feats || [];
+    const fb = w => feats.filter(f => f.when === w);
+    const bands = [
+      this.chartBand('bedrock', fb('bedrock'), headed(pts.concat([houses, aspects]), pts.length > 1 ? { [first]: 'Placements' } : {})),
+      this.chartBand('weather', fb('weather'), headed([trP, trS], { 'tr-personal': 'Transits' })),
+      this.chartBand('horizon', fb('horizon'), ahead.length ? [trA] : [])
+    ].filter(b => b.feats.length || b.groups.length);
     return {
-      chgPhone: headed(pts.concat([aspects, houses, trP, trS]), { [first]: 'Placements & Angles', aspects: 'Aspects', houses: 'Houses', 'tr-personal': 'Transits' }),
-      chgL: headed(pts.concat([houses]), { [first]: 'Placements', houses: 'Houses' }),
-      chgM: headed([aspects], { aspects: 'Aspects' }),
-      chgR: headed([trP, trS], { 'tr-personal': 'Transits' })
+      chBands: bands,
+      chBandL: bands.filter(b => b.key === 'bedrock'),
+      chBandR: bands.filter(b => b.key !== 'bedrock')
     };
   }
   lunationsAhead(from, days) {
@@ -49969,7 +49900,45 @@ class Component extends DCLogic {
         this.headLine('How to hold it', NC.synthesisPossibility(synthArgs))] : [],
       numTilt: e => this.numTilt(e), numTiltOff: e => this.numTiltOff(e)
     };
-    return { ...out, ...this.numStage(out.numerCore, out.nameNumbers) };
+    return { ...out, ...this.numBands(n, out, mean, open), ...this.numStage(out.numerCore, out.nameNumbers) };
+  }
+  /* BEDROCK, WEATHER, HORIZON on the Numbers page. Bedrock is what the birth
+     date fixed (Life Path, Birthday, the challenges); Weather is the year,
+     month and day now and the pinnacle and cycle being lived; Horizon is the
+     whole life on one ribbon, birth on the left, with the pinnacles and the
+     cycles as bands and a line where the reader stands, and the next of each
+     as tiles. Every tile reads the same values the cards always did. */
+  numBands(n, out, mean, open) {
+    const core = {}; out.numerCore.forEach(t => { core[t.pos] = t; });
+    const tile = (k, v, go, cmp, i) => ({ k: k, v: v == null ? '0' : v, mean: mean(v), delay: (i * 70) + 'ms', go: go, ...(cmp || this.numCmp(null, v)) });
+    const span = str => { const m = /^(birth|\d+)(?: to (\d+)| onward)/.exec(str); return m ? [m[1] === 'birth' ? 0 : +m[1], m[2] ? +m[2] + 1 : null] : [0, null]; };
+    const pins = n.pinnacles.map(([v, years, cc]) => ({ v: v, years: years, cc: cc, r: span(years) }));
+    const cyc = n.cycles.map(([k, v, years, cc]) => ({ k: k, v: v, years: years, cc: cc, r: span(years) }));
+    const age = n.age, last = Math.max(pins[pins.length - 1].r[0], cyc[cyc.length - 1].r[0]);
+    const END = Math.max(90, last + 20, age != null ? age + 8 : 0);
+    const pct = a => (Math.min(a, END) / END * 100).toFixed(2) + '%';
+    const seg = (x, cur, past, go, name) => { const a = x.r[0], b = x.r[1] == null ? END : x.r[1];
+      return { l: pct(a), w: ((b - a) / END * 100).toFixed(2) + '%', v: x.v, years: x.years, go: go,
+        bg: cur ? 'rgba(var(--atmc),.48)' : past ? 'var(--sf2)' : 'rgba(var(--atmc),.18)',
+        bd: cur ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.5)', c: cur ? 'var(--tx)' : 'var(--mut)', vc: cur ? 'var(--tx)' : 'var(--ac2-hi)',
+        aria: name + ' ' + x.v + ', ages ' + x.years + (cur ? ', where you are' : '') }; };
+    const pinGo = x => open('pinnacle', x.v, { range: x.years, c: x.cc }), cycGo = x => open('cycle', x.v, { range: x.years, c: x.cc });
+    const lanes = [
+      { name: 'Pinnacles', segs: pins.map((x, i) => seg(x, n.curPin === i, n.curPin != null && i < n.curPin, pinGo(x), 'Pinnacle')) },
+      { name: 'Cycles', segs: cyc.map((x, i) => seg(x, n.curCycle === i, n.curCycle != null && i < n.curCycle, cycGo(x), x.k + ' cycle')) }
+    ];
+    const ticks = []; for (let a = 0; a <= END; a += 10) ticks.push({ l: pct(a), t: String(a) });
+    const P = n.curPin, C = n.curCycle;
+    const weather = [core.personalYear, core.personalMonth, core.personalDay].filter(Boolean).map(t => ({ ...t }));
+    if (P != null) weather.push(tile('This pinnacle \u00b7 ages ' + pins[P].years, pins[P].v, pinGo(pins[P]), this.numCmp(pins[P].cc, pins[P].v), 3));
+    if (C != null) weather.push(tile(cyc[C].k + ' cycle \u00b7 ages ' + cyc[C].years, cyc[C].v, cycGo(cyc[C]), this.numCmp(cyc[C].cc, cyc[C].v), 4));
+    const next = [];
+    if (P != null && pins[P + 1]) next.push(tile('Next pinnacle \u00b7 from ' + pins[P + 1].r[0], pins[P + 1].v, pinGo(pins[P + 1]), this.numCmp(pins[P + 1].cc, pins[P + 1].v), 0));
+    if (C != null && cyc[C + 1]) next.push(tile(cyc[C + 1].k + ' cycle \u00b7 from ' + cyc[C + 1].r[0], cyc[C + 1].v, cycGo(cyc[C + 1]), this.numCmp(cyc[C + 1].cc, cyc[C + 1].v), 1));
+    const bedrock = [core.lifePath, core.birthday, core.challenge].filter(Boolean).map(t => ({ ...t }))
+      .concat([tile('First sub-challenge', n.subs[0], open('challenge', n.subs[0]), null, 3), tile('Second sub-challenge', n.subs[1], open('challenge', n.subs[1]), null, 4)]);
+    return { numerBedrock: bedrock, numerWeather: weather, numerNext: next, numerNextOn: next.length > 0,
+      nrLanes: lanes, nrTicks: ticks, nrHereOn: age != null, nrHereF: (Math.min(age || 0, END) / END).toFixed(4), nrHereLabel: age != null ? 'you \u00b7 ' + age : '' };
   }
   /* THE NUMBERS STAGE (owner, 19 October 2026: "interactive, as if it were
      made by Unreal Engine"). A real CSS 3D scene rather than a picture of one:
@@ -55767,7 +55736,9 @@ class Component extends DCLogic {
                   go: () => openBody(key) };
                 });
               })(),
-              chartFeatures: (() => {
+              /* Kept on the instance for the one call below it in this literal, which
+                 sorts these cards into the chart's three bands with the groups. */
+              chartFeatures: (this._chFeats = (() => {
                 const T = (t, x) => ({ ...this.tagLine(t, x), hasTag: true });
                 // SIGN_LONG and HOUSE_LONG each hold two or three sentences. Splice only
                 // the first, or the second lands lowercase inside the sentence built here.
@@ -55976,18 +55947,18 @@ class Component extends DCLogic {
                   const n = eclFuture[0];
                   return n ? 'next: ' + n.kind.toLowerCase() + ' eclipse ' + this.fmtDay(n.date) + ' \u00b7 ' + Math.floor(n.deg) + '\u00b0 ' + n.sign : 'none ahead in the scanned window';
                 })();
-                const eclRow = { key: 'eclipse', title: 'Eclipses', sub: eclSub, lines: eclLines, tabs: eclTabs, body: eclBody };
+                const eclRow = { key: 'eclipse', when: eclNow ? 'weather' : 'horizon', title: 'Eclipses', sub: eclSub, lines: eclLines, tabs: eclTabs, body: eclBody };
                 const rows2 = [
-                  { key: 'today', title: 'Important Today', sub: 'what the sky is presently touching', lines: todayLines, body: todayBody },
-                  { key: 'retro', title: 'Current Retrogrades', sub: retroSub, lines: retroLines, tabs: retroTabs, body: retroBody },
-                  { key: 'stellium', title: 'Stellium', sub: stel.any ? 'a gathering in your wheel' : 'no gathering found', lines: stellLines, body: stellBody }
+                  { key: 'today', when: 'weather', title: 'Important Today', sub: 'what the sky is presently touching', lines: todayLines, body: todayBody },
+                  { key: 'retro', when: 'weather', title: 'Current Retrogrades', sub: retroSub, lines: retroLines, tabs: retroTabs, body: retroBody },
+                  { key: 'stellium', when: 'bedrock', title: 'Stellium', sub: stel.any ? 'a gathering in your wheel' : 'no gathering found', lines: stellLines, body: stellBody }
                 ];
                 // An eclipse inside its five-day window is the loudest thing in the sky, so
                 // it sits directly under Important Today. Otherwise it waits its turn after
                 // the retrogrades rather than crowding the panel with a date months away.
                 rows2.splice(eclNow ? 1 : 2, 0, eclRow);
                 return rows2.map(r => ({
-                  title: r.title, sub: r.sub, lines: r.lines,
+                  key: r.key, when: r.when, title: r.title, sub: r.sub, lines: r.lines,
                   hasTabs: !!(r.tabs && r.tabs.length), tabs: r.tabs || [],
                   hasBody: !!(r.body && r.body.length), body: r.body || [],
                   open: st.featOpen === r.key,
@@ -55995,7 +55966,7 @@ class Component extends DCLogic {
                   bd: st.featOpen === r.key ? 'rgba(47,255,143,.42)' : 'var(--bd)',
                   toggle: () => this.setState({ featOpen: st.featOpen === r.key ? null : r.key })
                 }));
-              })(),
+              })()),
               aspOpen: st.aspSel != null && !!asps[st.aspSel],
               aspClose: () => this.setState({ aspSel: null }),
               asp: (() => {
@@ -56012,12 +55983,13 @@ class Component extends DCLogic {
                   goA: () => { this.setState({ aspSel: null }); openBody(x.a.name); },
                   goB: () => { this.setState({ aspSel: null }); openBody(x.b.name); } };
               })(),
-              ...this.chartGroupVals({ rows, asps, houseOf, fmtDeg, openBody, tr, natalSun, asc, ordinal, expanded }),
+              ...this.chartGroupVals({ rows, asps, houseOf, fmtDeg, openBody, tr, natalSun, asc, ordinal, expanded, feats: this._chFeats || [] }),
             };
           })(),
           hdType: hd.type, hdDesc: hd.desc, hdStrategy: hd.strategy, hdAuthority: hd.authority, hdDefinition: hd.definition,
           hdTypeGo: this.hdOpen({ kind: 'type' }), hdStrategyGo: this.hdOpen({ kind: 'strategy' }), hdAuthorityGo: this.hdOpen({ kind: 'authority' }),
           hdProfileGo: this.hdOpen({ kind: 'profile' }),
+          ...this.hdWeatherVals(),
           ...(() => {
             const A = this.A(), pr = this.hdProfile();
             const lc = A && A.LINES[pr.c] ? A.LINES[pr.c] : {}, lu = A && A.LINES[pr.u] ? A.LINES[pr.u] : {};
@@ -56222,6 +56194,7 @@ class Component extends DCLogic {
             libStudy: !sel && !st.libView && this.libSubOf() === 'study', libJournal: !sel && !st.libView && this.libSubOf() === 'journal',
       libReadings: !sel && !st.libView && this.libSubOf() === 'readings', libBanner: !sel && !st.libView, libDetail: !!sel && !st.libView,
       libNumIcon: this.uiIcon('numerology'),
+      bandIconB: this.bandIcon('bedrock'), bandIconW: this.bandIcon('weather'), bandIconH: this.bandIcon('horizon'),
       plTilt: e => this.plateTilt(e), plTiltOff: e => this.plateTiltOff(e),
       q: st.q, typeQ: e => this.setState({ q: e.target.value }),
       /* The Journal groups the practices by caution, Universal first and then Mild,
