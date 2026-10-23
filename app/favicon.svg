@@ -1,33 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="25 25 50 50">
+  <!-- The mark, lit: the same glow build-icons.js draws into the app icons
+       (14 October 2026). Geometry is the identity's: r 13, centres 6.5 either
+       side, stroke 2.3, framed close (viewBox 25 25 50 50) so it still reads at 16px. Green stays inside the rings; violet blooms around them. -->
   <defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+    <radialGradient id="haze" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <filter id="lensbloom" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.2"/></filter>
+    <clipPath id="union"><circle cx="43.5" cy="50" r="13"/><circle cx="56.5" cy="50" r="13"/></clipPath>
+    <clipPath id="lens"><circle cx="43.5" cy="50" r="13"/></clipPath>
   </defs>
-
-  <!-- Background -->
   <rect width="100" height="100" fill="#0b0910"/>
-
-  <!-- Glow effect around the lens (green) -->
-  <circle cx="50" cy="50" r="10.5" fill="#2fff8f" opacity="0.15" filter="url(#glow)"/>
-  <circle cx="50" cy="50" r="8" fill="#2fff8f" opacity="0.10" filter="url(#glow)"/>
-
-  <!-- Left ring (violet) -->
-  <circle cx="43.5" cy="50" r="13" fill="none" stroke="#8b5cf6" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Right ring (violet) -->
-  <circle cx="56.5" cy="50" r="13" fill="none" stroke="#8b5cf6" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Shared lens (green) with glow -->
-  <defs>
-    <mask id="lensMask">
-      <circle cx="43.5" cy="50" r="13" fill="white"/>
-      <circle cx="56.5" cy="50" r="13" fill="white"/>
-    </mask>
-  </defs>
-  <ellipse cx="50" cy="50" rx="5.2" ry="13" fill="#2fff8f" mask="url(#lensMask)" filter="url(#glow)"/>
+  <rect width="100" height="100" fill="url(#haze)"/>
+  <g clip-path="url(#union)" opacity=".55">
+    <circle cx="56.5" cy="50" r="13" fill="#2fff8f" clip-path="url(#lens)" filter="url(#lensbloom)"/>
+  </g>
+  <g fill="none" stroke="#8b5cf6" stroke-width="3.6" opacity=".7" filter="url(#bloom)">
+    <circle cx="43.5" cy="50" r="13"/><circle cx="56.5" cy="50" r="13"/>
+  </g>
+  <circle cx="56.5" cy="50" r="13" fill="#2fff8f" clip-path="url(#lens)"/>
+  <g fill="none" stroke="#8b5cf6" stroke-width="2.3">
+    <circle cx="43.5" cy="50" r="13"/><circle cx="56.5" cy="50" r="13"/>
+  </g>
 </svg>

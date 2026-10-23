@@ -83,6 +83,8 @@ const LAYERS = {
     'hd-teachings.js',
     'placement-content.js',
     'numerology-content.js',
+    'number-matrix.js',            /* the Book of Numbers, generated from the owner's matrix */
+    'timing-lexicon.js',           /* transit, gate and number readings, keyed by what mechanics returns */
     'angel-numbers.js',
     'animal-symbolism.js',
     'dream-symbols.js',
@@ -100,6 +102,20 @@ const LAYERS = {
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
     'oki-api.js', 'oki-post-processor.js', 'oki-prompt-builder.js', 'oki-voice-v144.js',
     'sw.js',
+    /* Flight for every scene: input in, a camera pose out. Knows no chart. */
+    'flight.js',
+    /* The worlds a body becomes up close, generated on the GPU from noise.
+       Computes no position: the scene places each one on its orb. */
+    'body-globes.js',
+    /* The Cycle Audit's scene. It draws what the app hands it and computes
+       nothing: no ephemeris, no chart, no writing beyond its labels. */
+    'cycle-scene.js',
+    /* The natal chart's 3D and orbital views. Draws the model the app hands
+       it; the one position it asks for, today's, comes through the app. */
+    'chart-scene.js',
+    /* The wiring's 3D and Wheel views. Draws the model the app hands it;
+       the sky now arrives from the app's own hd-transit reading. */
+    'hd-scene.js',
 
     /* THE DUAL-BACKEND EPHEMERIS SYSTEM (V1.0.0), unwired like the Oki
        modules above rather than mechanics like ephemeris-cache.js just
@@ -153,6 +169,11 @@ const LAYERS = {
        name, which is why the upstream filenames are kept. */
     'three.module.js',
     'three.core.js',
+    /* Where the ten astral bodies are. astronomy-engine 2.1.19, MIT, copied
+       byte for byte from the npm registry tarball. Vendored rather than
+       fetched for the reason React is, and named with its version the way the
+       Supabase client is, because nothing imports it by an upstream name. */
+    'astronomy-engine-2.1.19.min.js',
   ],
 };
 

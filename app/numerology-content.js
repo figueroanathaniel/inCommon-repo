@@ -316,18 +316,41 @@
     /* Expression / Soul Urge / Personality from a full birth name. Pythagorean. */
     LETTERS: { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9, J: 1, K: 2, L: 3, M: 4, N: 5, O: 6, P: 7, Q: 8, R: 9, S: 1, T: 2, U: 3, V: 4, W: 5, X: 6, Y: 7, Z: 8 },
     VOWELS: 'AEIOU',
+    /* Two routes reach each name number, and the owner's rule of 19 October
+       2026 is that a master met on either is the number: the whole name added
+       letter by letter (the route this page has always shown), and each word
+       reduced on its own and then added (the route InCommonCore takes).
+       settle() in incommon-core.js decides, and `compounds` carries the double
+       digit each number passed through, which number-matrix.js reads. */
     fromName: function (raw) {
-      var s = String(raw || '').toUpperCase().replace(/[^A-Z]/g, '');
+      var words = String(raw || '').toUpperCase().replace(/[^A-Z\s\-']/g, ' ').split(/[\s\-']+/).filter(Boolean);
+      var s = words.join('');
       if (!s) return null;
-      var all = 0, vow = 0, con = 0;
-      for (var i = 0; i < s.length; i++) {
-        var c = s.charAt(i), v = NC.LETTERS[c] || 0;
-        all += v;
-        if (NC.VOWELS.indexOf(c) !== -1) vow += v; else con += v;
-      }
-      var keep = function (t) { return (t === 11 || t === 22 || t === 33) ? t : NC.reduce(t); };
-      return { letters: s.length, expression: keep(all), soulUrge: keep(vow), personality: keep(con),
+      var all = 0, vow = 0, con = 0, wAll = 0, wVow = 0, wCon = 0;
+      words.forEach(function (w) {
+        var a = 0, vo = 0, co = 0;
+        for (var i = 0; i < w.length; i++) {
+          var c = w.charAt(i), v = NC.LETTERS[c] || 0;
+          a += v;
+          if (NC.VOWELS.indexOf(c) !== -1) vo += v; else co += v;
+        }
+        all += a; vow += vo; con += co;
+        wAll += NC.keep(a); wVow += NC.keep(vo); wCon += NC.keep(co);
+      });
+      var e = NC.settle([all, wAll]), su = NC.settle([vow, wVow]), pe = NC.settle([con, wCon]);
+      return { letters: s.length, expression: e.value, soulUrge: su.value, personality: pe.value,
+        compounds: { expression: e.compound, soulUrge: su.compound, personality: pe.compound },
+        karmic: { expression: e.karmic || [], soulUrge: su.karmic || [], personality: pe.karmic || [] },
         rawTotals: { all: all, vowels: vow, consonants: con } };
+    },
+    keep: function (t) { t = Math.abs(+t || 0); while (t > 9 && t !== 11 && t !== 22 && t !== 33) t = String(t).split('').reduce(function (x, c) { return x + +c; }, 0); return t; },
+    /* settle() is the core's; this is only what the page falls back to when
+       incommon-core.js is missing, and it keeps the masters the old way. */
+    settle: function (routes) {
+      var core = typeof window !== 'undefined' && window.InCommonCore;
+      if (core && core.settle) return core.settle(routes);
+      var t = routes[0] || 0;
+      return { value: NC.keep(t), root: NC.reduce(t), compound: null, master: false };
     },
 
     /* [SYNTHESIS] paragraph. Assembled here from the numbers above, and tagged. */

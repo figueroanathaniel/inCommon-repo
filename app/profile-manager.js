@@ -1,20 +1,95 @@
 /* profile-manager.js: inCommon multi-profile data layer. V1.3.0
-   Pure JavaScript, no UI, no framework. Local-only: localStorage, no cloud sync.
+   Pure JavaScript, no UI, no framework. Local first: everything lives in
+   localStorage, and incommon-cloud.js mirrors it to the reader's account and
+   brings other devices' changes back through importSynced().
+   One store per signed in account, and one for the guest: see scope().
    Every profile is fully isolated: consents, memories, conversations, and charts
    are stored under keys scoped by profile id.
 
    Storage map
-     incommon.profiles.v1            { schemaVersion, activeId, profiles[], pairs[] }
+     incommon.profiles.v1            { schemaVersion, activeId, profiles[], pairs[] }, the guest's
+     incommon.profiles.v1.u.<userId> the same, for one signed in account (see scope())
      incommon.consent.<profileId>    consent record (same shape as the legacy global key)
      incommon.consent.data.<pid>     consented source data
      incommon.p.<pid>.memories       [{ id, memory_type, content, created_at, is_private }]
      incommon.p.<pid>.throughline    manual Throughline entries
      incommon.p.<pid>.oki         conversation history
+     incommon.p.<pid>.oracle      Oracle readings kept on this device, per period
+     incommon.p.<pid>.oracleDeep  set once an in-depth reading has been asked for (lets the page prepare the next)
    Legacy (pre-multi-profile) keys are migrated once by migrateLegacyProfile().  */
 (function () {
   'use strict';
   var ROOT = 'incommon.profiles.v1';
   var MAX_PROFILES = 6;
+
+  /* EACH ACCOUNT HAS ITS OWN PROFILES ON A DEVICE. The owner asked on 12
+     October 2026, after three accounts signed in on one browser all opened
+     onto the same birth data. The profile list was one device wide store, and
+     every other profile key is scoped by profile id, so scoping that one store
+     by account separates everything that hangs off it: memories, journal,
+     consents, Oracle readings, saved people, and what the cloud module pushes,
+     since it reads this store.
+
+     The account is read once, at the first read of the store, from the session
+     supabase-js left in localStorage, which is the only way a reader becomes
+     signed in: on the cover, and then by navigating here. Signing out and
+     deleting an account navigate away too, so a page never changes owner while
+     it is open. Signed out, the store is the plain ROOT, the guest's.
+
+     A session the browser has closed (the remember me mark without its cookie)
+     and one that still owes its two-step code read as signed out here, as they
+     do everywhere else, so a password alone does not open the profiles of an
+     account that asked for more. owesCode below is the cover's rule, and K46
+     holds all three copies equal.
+
+     THE FIRST ACCOUNT TO OPEN THE APP ON A DEVICE THAT ALREADY HOLDS PROFILES
+     TAKES THEM. Before this every account and the guest shared one store, and
+     nothing in it records whose it was, so the first sign in after the change
+     claims it, along with the ACCOUNT_KEYS below. Every account after that
+     starts on a blank page, and the guest store starts blank once claimed. */
+  var ACCOUNT_KEYS = ['incommon.firstrun', 'incommon.sample', 'incommon.friends', 'incommon.adverse.log', 'incommon.mem.archived'];
+  var SCOPE = null;
+  function owesCode(st) {
+    try {
+      var f = st && st.user && st.user.factors;
+      if (!Array.isArray(f) || !f.some(function (x) { return x && x.status === 'verified'; })) return false;
+      var p = String(st.access_token || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(p + '==='.slice((p.length + 3) % 4))).aal !== 'aal2';
+    } catch (e) { return true; }
+  }
+  function sessionOwner() {
+    try {
+      if (localStorage.getItem('incommon.signin.ephemeral') === '1'
+          && !/(^|;\s*)incommon_signin_live=1(;|$)/.test((typeof document !== 'undefined' && document.cookie) || '')) return null;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!/^sb-[a-z0-9]+-auth-token$/.test(k || '')) continue;
+        var st = JSON.parse(localStorage.getItem(k) || 'null'), u = st && st.user;
+        if (!st || !st.refresh_token || !u || !u.id || owesCode(st)) return null;
+        return String(u.id);
+      }
+    } catch (e) {}
+    return null;
+  }
+  function scoped(key, owner) { return owner ? key + '.u.' + owner : key; }
+  function scope() {
+    if (SCOPE) return SCOPE;
+    var owner = sessionOwner();
+    SCOPE = { owner: owner, root: scoped(ROOT, owner), claimed: false };
+    try {
+      if (owner && localStorage.getItem(SCOPE.root) == null && localStorage.getItem(ROOT) != null) {
+        localStorage.setItem(SCOPE.root, localStorage.getItem(ROOT));
+        ACCOUNT_KEYS.forEach(function (k) {
+          var v = localStorage.getItem(k), dest = scoped(k, owner);
+          if (v != null && localStorage.getItem(dest) == null) localStorage.setItem(dest, v);
+          localStorage.removeItem(k);
+        });
+        localStorage.removeItem(ROOT);
+        SCOPE.claimed = true;
+      }
+    } catch (e) {}
+    return SCOPE;
+  }
   var CONSENT_TYPES = ['birthData', 'journal', 'relationships', 'assessments', 'mood', 'conversation'];
   var COLORS = ['#d3ad6e', '#59b37d', '#7eb8da', '#c9a0dc', '#e07a5f', '#f2cc8f'];
 
@@ -87,7 +162,7 @@
   }
 
   var PM = {
-    VERSION: '1.4.0',
+    VERSION: '1.5.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -100,18 +175,69 @@
 
     /* ---------- store ---------- */
     _store: function () {
-      var s = read(ROOT, null);
+      var s = read(scope().root, null);
       if (!s || !Array.isArray(s.profiles)) s = { schemaVersion: 2, activeId: null, defaultId: null, profiles: [], pairs: [] };
       if (!Array.isArray(s.pairs)) s.pairs = [];
       if (!s.defaultId && s.profiles.length) s.defaultId = s.activeId || s.profiles[0].id;
       return s;
     },
-    _save: function (s) { write(ROOT, s); this._emit('profiles:changed', {}); return s; },
+    _save: function (s) { write(scope().root, s); this._emit('profiles:changed', {}); return s; },
     _emit: function (name, detail) {
       try { window.dispatchEvent(new CustomEvent(name, { detail: detail || {} })); } catch (e) {}
       (this._subs || []).forEach(function (fn) { try { fn(name, detail); } catch (e) {} });
     },
     subscribe: function (fn) { (this._subs = this._subs || []).push(fn); return function () {}; },
+
+    /* ---------- the account this device's profiles belong to ---------- */
+    /* The signed in account's id, or null for the guest store. */
+    owner: function () { return scope().owner; },
+    /* A device wide key that holds one account's data (ACCOUNT_KEYS): the app
+       reads and writes those through here so each account keeps its own. */
+    accountKey: function (key) { return scoped(key, scope().owner); },
+    /* Every key on this device that belongs to the signed in account: its
+       store, its ACCOUNT_KEYS, and every key scoped to one of its profiles.
+       Erasing these and nothing else is what "erase this device" means once
+       one browser can hold several accounts. */
+    accountStorageKeys: function () {
+      var sc = scope(), ids = this._store().profiles.map(function (p) { return p.id; }), out = [];
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i) || '';
+          if (k === sc.root || ids.some(function (id) { return k.indexOf(id) !== -1; })) out.push(k);
+        }
+      } catch (e) {}
+      ACCOUNT_KEYS.forEach(function (k) { var a = scoped(k, sc.owner); if (out.indexOf(a) === -1) out.push(a); });
+      return out;
+    },
+
+    /* The account is gone and the reader kept what was on the device: it
+       becomes the guest's, which is what the delete dialog promises ("you can
+       keep using inCommon without an account"). Left under the account's key
+       it would belong to an id nobody can sign in as again. Profiles join any
+       the guest already has; an account key moves only where the guest has
+       none of its own. */
+    releaseToGuest: function () {
+      var sc = scope();
+      if (!sc.owner) return false;
+      try {
+        var mine = read(sc.root, null), guest = read(ROOT, null);
+        if (mine && Array.isArray(mine.profiles)) {
+          if (!guest || !Array.isArray(guest.profiles) || !guest.profiles.length) guest = mine;
+          else {
+            guest.profiles = guest.profiles.concat(mine.profiles);
+            guest.pairs = (guest.pairs || []).concat(mine.pairs || []);
+          }
+          write(ROOT, guest);
+        }
+        localStorage.removeItem(sc.root);
+        ACCOUNT_KEYS.forEach(function (k) {
+          var a = scoped(k, sc.owner), v = localStorage.getItem(a);
+          if (v != null && localStorage.getItem(k) == null) localStorage.setItem(k, v);
+          localStorage.removeItem(a);
+        });
+      } catch (e) { return false; }
+      return true;
+    },
 
     /* ---------- scoped keys, every read of profile data goes through here ---------- */
     keyFor: function (base, profileId) {
@@ -326,13 +452,21 @@
       if (s.defaultId === id) s.defaultId = s.profiles[0].id;
       if (s.activeId === id) { s.activeId = s.profiles[0].id; this.clearOkiContext(); }
       this._save(s);
-      /* Cascade: every scoped key for this profile is removed. */
-      ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
-        'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts'
-      ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
-      delete (this._calcCache || {})[id];
+      this._dropProfileKeys(id);
       this._emit('profile:deleted', { id: id });
       return this.getActiveProfile();
+    },
+
+    /* Cascade: every scoped key for this profile is removed. Shared by a
+       deletion here and a deletion another device made, which importSynced
+       applies. */
+    _dropProfileKeys: function (id) {
+      ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
+        'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
+        'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
+        'incommon.p.' + id + '.study'
+      ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
+      delete (this._calcCache || {})[id];
     },
 
     /* ---------- PIN ---------- */
@@ -467,7 +601,9 @@
         return false;
       });
       write(k, after);
-      this._emit('memory:deleted', { profileId: pid, type: opts.type || null, removed: before.length - after.length });
+      /* The id travels with the event, so the cloud module deletes that one
+         row remotely rather than every memory the profile has. */
+      this._emit('memory:deleted', { profileId: pid, type: opts.type || null, id: opts.id || null, removed: before.length - after.length });
       return before.length - after.length;
     },
 
@@ -539,10 +675,19 @@
     },
 
     /* Repairs profiles whose location text never resolved against an older,
-       smaller gazetteer. Returns the ids whose charts must be recomputed. */
+       smaller gazetteer, or that were placed in Puerto Rico with the wrong
+       zone. Returns the ids whose charts must be recomputed. */
     reresolveLocations: function () {
       var s = this._store(), fixed = [], self = this;
       s.profiles.forEach(function (p) {
+        /* A Puerto Rico place saved while the list filed the island under New
+           York's zone carries New_York: an hour out every winter. Its
+           coordinates are right, so only the zone is put back. */
+        if (p.timezone === 'America/New_York' && p.birth_lat >= 17.8 && p.birth_lat <= 18.6 && p.birth_lon >= -67.3 && p.birth_lon <= -65.2) {
+          p.timezone = 'America/Puerto_Rico'; p.tz_offset = -4;
+          fixed.push(p.id);
+          return;
+        }
         if (!p.birth_location || p.birth_lat != null) return;
         var geo = self.geocode(p.birth_location);
         if (!geo.resolved) return;
@@ -572,7 +717,11 @@
         avatarColor: COLORS[0]
       });
       var moved = [];
-      /* Legacy global keys → scoped keys for the new default profile. */
+      /* Legacy global keys → scoped keys for the new default profile. They are
+         the device's history from before profiles, so only the guest store
+         takes them: an account opening a blank store is a new reader, and
+         the claim above already gave the first account what was here. */
+      if (scope().owner) return { migrated: true, profileId: p.id, name: p.name, moved: moved };
       [['incommon.consent', 'incommon.consent'], ['incommon.consent.data', 'incommon.consent.data'],
        ['incommon.throughline.manual', 'incommon.p.' + p.id + '.throughline']
       ].forEach(function (pair) {
@@ -582,6 +731,116 @@
         write(dest, old); moved.push(pair[0]);
       });
       return { migrated: true, profileId: p.id, name: p.name, moved: moved };
+    },
+
+    /* ---------- what another device wrote, brought down by the cloud ----------
+       incommon-cloud.js decides what changed (it holds the record of what
+       this device last synced); this is the one place it is written, so the
+       storage shapes stay this module's. Nothing here is a local act, so it
+       emits sync:pulled and never profile:deleted or memory:deleted: those
+       would queue the same deletion back up to the server.
+
+       d.profiles        full local profile objects, replaced by id or added
+       d.removeProfiles  ids another device deleted (never the last profile)
+       d.activeId        the profile to open, when this device had none of its own
+       d.defaultId       the default, likewise
+       d.pairs           two-person consent records, replaced by key or added
+       d.memories        { pid: { add: [raw rows], remove: [ids] } }
+       d.consents        { pid: [{ ts, id, granted }] } merged into the ledger
+       d.lists           { pid: { throughline: [items], oki: [items] } } appended
+       d.recalc          ids whose birth data changed */
+    importSynced: function (d) {
+      d = d || {};
+      var s = this._store(), self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      (d.removeProfiles || []).forEach(function (id) {
+        if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
+        var before = s.profiles.length;
+        s.profiles = s.profiles.filter(function (p) { return p.id !== id; });
+        if (s.profiles.length === before) return;
+        s.pairs = s.pairs.filter(function (pr) { return pr.a !== id && pr.b !== id; });
+        self._dropProfileKeys(id);
+        out.removed++;
+      });
+      (d.profiles || []).forEach(function (p) {
+        if (!p || !p.id) return;
+        var i = -1;
+        s.profiles.forEach(function (x, j) { if (x.id === p.id) i = j; });
+        if (i !== -1) s.profiles[i] = p;
+        else if (s.profiles.length < MAX_PROFILES) s.profiles.push(p);
+        else return;
+        out.profiles++;
+      });
+      var has = function (id) { return s.profiles.some(function (p) { return p.id === id; }); };
+      if (d.activeId && has(d.activeId)) s.activeId = d.activeId;
+      if (d.defaultId && has(d.defaultId)) s.defaultId = d.defaultId;
+      if (!has(s.activeId)) s.activeId = s.profiles.length ? s.profiles[0].id : null;
+      if (!has(s.defaultId)) s.defaultId = s.activeId;
+      (d.pairs || []).forEach(function (pr) {
+        if (!pr || !pr.key) return;
+        var i = -1;
+        s.pairs.forEach(function (x, j) { if (x.key === pr.key) i = j; });
+        if (i !== -1) s.pairs[i] = pr; else s.pairs.push(pr);
+      });
+      write(scope().root, s);
+
+      var when = function (x) { var t = Date.parse(x); return isNaN(t) ? 0 : t; };
+      Object.keys(d.consents || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        self.initConsents(pid);
+        var k = 'incommon.consent.' + pid, rec = read(k, null), seen = {}, all = [];
+        (rec.events || []).concat(d.consents[pid] || []).forEach(function (e) {
+          if (!e || !e.id) return;
+          var sig = e.id + '@' + e.ts;
+          if (seen[sig]) return;
+          seen[sig] = 1; all.push({ ts: e.ts, id: e.id, granted: !!e.granted });
+        });
+        all.sort(function (a, b) { return when(a.ts) - when(b.ts); });
+        /* The latest event for each consent is its state, whichever device it
+           was made on. */
+        all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
+        rec.events = all.slice(-50);
+        if (all.length) rec.updatedAt = all[all.length - 1].ts;
+        write(k, rec);
+        out.consents++;
+      });
+      Object.keys(d.memories || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        var k = 'incommon.p.' + pid + '.memories', m = d.memories[pid] || {}, gone = {};
+        (m.remove || []).forEach(function (id) { gone[id] = 1; });
+        var list = read(k, []).filter(function (r) { return !gone[r.id]; }), ids = {};
+        list.forEach(function (r) { ids[r.id] = 1; });
+        (m.add || []).forEach(function (r) { if (r && r.id && !ids[r.id]) { ids[r.id] = 1; list.push(r); out.memories++; } });
+        list.sort(function (a, b) { return when(b.created_at) - when(a.created_at); });
+        write(k, list.slice(0, 800));
+      });
+      Object.keys(d.lists || {}).forEach(function (pid) {
+        if (!has(pid)) return;
+        ['throughline', 'oki'].forEach(function (which) {
+          var add = (d.lists[pid] || {})[which];
+          if (!add || !add.length) return;
+          var k = 'incommon.p.' + pid + '.' + which, arr = read(k, []);
+          if (!Array.isArray(arr)) arr = arr ? [arr] : [];
+          arr = arr.concat(add);
+          /* Newest first, the order the app writes them in. An entry's time is
+             its at, else its date, else the stamp in its m<time> id. */
+          var at = function (x) {
+            if (!x) return 0;
+            if (typeof x.at === 'number') return x.at;
+            var t = when(x.date || x.created_at);
+            if (t) return t;
+            var n = /^m(\d{10,})$/.exec(String(x.id || ''));
+            return n ? Number(n[1]) : 0;
+          };
+          if (which === 'throughline') arr = arr.map(function (x, i) { return [x, i]; })
+            .sort(function (a, b) { return (at(b[0]) - at(a[0])) || (a[1] - b[1]); }).map(function (p) { return p[0]; });
+          write(k, arr);
+          out.entries += add.length;
+        });
+      });
+      (d.recalc || []).forEach(function (id) { self.invalidateCalculations(id); });
+      this._emit('profiles:changed', {});
+      this._emit('sync:pulled', out);
+      return out;
     },
 
     /* ---------- export ---------- */

@@ -25,8 +25,12 @@
  * inCommonApp v2.dc.html (PL_EL, EARTH_EL, lonRaw, minorLon) and in
  * minor-bodies-ephemeris.js (Chiron, Ceres, Pallas, Juno, Vesta, fitted
  * against 81 JPL Horizons positions). Reusing those exact constants
- * rather than re-deriving new ones means this module cannot silently
- * disagree with the chart the app already draws.
+ * rather than re-deriving new ones was meant to keep this module from
+ * disagreeing with the chart the app draws. For the ten astral bodies it no
+ * longer does: the app takes them from astronomy-engine now, and the series
+ * copied below is only lonRaw()'s fallback, measured at up to 6.5 degrees
+ * against JPL Horizons by tools/check-astral-bodies.js. Browsers do not run
+ * TypeScript, so nothing in the app reads this file's planets.
  *
  * HONESTY ABOUT COVERAGE. Of the registry's 97 points, this file computes
  * a real position for the ten astral bodies, both lunar nodes, the four angles
@@ -176,7 +180,7 @@ function speedOf(lonAt: (t: number) => number, t: number): number {
 // ============================================================================
 
 /** Sun's geometric ecliptic longitude, low-precision series (Meeus 25.5
- *  truncated to two terms). Same formula lonRaw() uses; ~0.01deg accurate
+ *  truncated to two terms). The formula lonRaw() falls back to; ~0.01deg accurate
  *  near J2000, good to a few hundredths of a degree for centuries either
  *  side. Verified: at t=0 (J2000.0) this returns 280.375..., which is
  *  within 0.1 degree of the textbook value 280.4 degrees. */
@@ -187,7 +191,7 @@ function sunLon(t: number): number {
 }
 
 /** Moon's geometric ecliptic longitude, low-precision series (Meeus 47,
- *  two largest perturbation terms). Same formula lonRaw() uses; good to
+ *  two largest perturbation terms). The formula lonRaw() falls back to; good to
  *  roughly a degree, which is what a Moon phase and a wide aspect need. */
 function moonLon(t: number): number {
   const Mp = norm360(134.963 + 13.064993 * t) * RAD;

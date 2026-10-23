@@ -481,7 +481,7 @@
       await go('#/today', 700);
       var todayHasAlign = /Today.s Alignment/.test(txt(doc.querySelector('[data-screen-label="Today"]')));
       var elsewhere = [];
-      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/spirit/angel-numbers', '#/library/practices', '#/throughline'];
+      var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/library/synchronicities', '#/library/journal', '#/library/throughline', '#/oracle'];
       for (var oi = 0; oi < others.length; oi++) {
         await go(others[oi], 520);
         var scr = qa('[data-screen-label]').filter(function (s) { return s.getBoundingClientRect().height > 0; });
@@ -540,7 +540,7 @@
       var deadButtons = [], deadLinks = [];
       var screens = ['#/today', '#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology',
         '#/spirit/angel-numbers', '#/spirit/daily', '#/spirit/synastry', '#/library/practices',
-        '#/library/sabian-lexicon', '#/throughline', '#/settings'];
+        '#/library/sabian-lexicon', '#/library/throughline', '#/oracle', '#/settings'];
       for (var si = 0; si < screens.length; si++) {
         await go(screens[si], 520);
         qa('button').forEach(function (b) {
@@ -580,7 +580,7 @@
         var list = PL && PL.PRACTICES;
         var first = list && list.length ? list[0] : null;
         named.practiceSeeded = !!first;
-        win.__incommonApp.setState({ tab: 'library', libSub: 'library', libView: null,
+        win.__incommonApp.setState({ tab: 'library', libSub: 'journal', libView: null,
           selId: first && first.id, pv: 'run', pstep: 0 });
       } catch (e) { named.practiceSeeded = 'threw: ' + (e && e.message); }
       await sleep(800);
@@ -604,9 +604,14 @@
 
       /* ---- Fix 4: routes ---- */
       onStep('fix 4: routes');
+      /* The Library is six tabs and a handful of rooms, each with one address. The
+         old Spirit and practices addresses are kept as aliases, so they stay in
+         the list: an alias that stopped resolving would be a broken bookmark. */
       var routes = ['#/today', '#/spirit', '#/spirit/daily', '#/spirit/astrology', '#/spirit/human-design',
         '#/spirit/numerology', '#/spirit/angel-numbers', '#/spirit/synastry', '#/library',
-        '#/library/practices', '#/library/sabian-lexicon', '#/throughline', '#/settings'];
+        '#/library/study', '#/library/journal', '#/library/readings', '#/library/archive', '#/library/commons',
+        '#/library/synchronicities', '#/library/dream-journal', '#/library/readings/tarot',
+        '#/library/practices', '#/library/sabian-lexicon', '#/library/throughline', '#/throughline', '#/oracle', '#/settings'];
       var routeResults = {}, routeExpect = {};
       for (var ri = 0; ri < routes.length; ri++) {
         var r = routes[ri];
@@ -634,21 +639,21 @@
       onStep('fix 4: back');
       var back = await capped(async function () {
         await go('#/today', 500);
-        await go('#/library/practices', 500);
+        await go('#/library/journal', 500);
         await go('#/settings', 500);
         var before = w2.location.hash;
         return { before: before };
       }, 4000);
       var rev = await capped(async function () {
         var seq = [];
-        await go('#/library/practices', 620); seq.push(win.location.hash);
+        await go('#/library/journal', 620); seq.push(win.location.hash);
         await go('#/today', 620); seq.push(win.location.hash);
         return seq;
       }, 6000);
       var popWired = false;
       try { popWired = typeof win.__incommonApp._onPop === 'function'; } catch (e) {}
       t('F4c', 'Reversing to an earlier path restores that screen, and popstate is wired',
-        { steps: ['#/library/practices', '#/today'], popstate: true },
+        { steps: ['#/library/journal', '#/today'], popstate: true },
         { steps: Array.isArray(rev) ? rev : rev, popstate: popWired });
 
       /* ---- Fix 5: persistence ---- */
@@ -719,7 +724,7 @@
 
       /* ---- Fix 5c: twenty navigations, no drift ---- */
       onStep('fix 5: navigation endurance');
-      var loop = ['#/today', '#/spirit/astrology', '#/spirit/synastry', '#/library/practices', '#/throughline'];
+      var loop = ['#/today', '#/spirit/astrology', '#/library/commons', '#/library/journal', '#/oracle'];
       var t0 = Date.now();
       for (var n = 0; n < 20; n++) { await go(loop[n % loop.length], 210); }
       var elapsed = Date.now() - t0;
@@ -736,7 +741,7 @@
 
 
       /* ---- nav active state ---- */
-      await go('#/throughline', 600);
+      await go('#/oracle', 600);
       var current = qa('[data-app-nav] button').filter(function (b) { return b.getAttribute('aria-current') === 'true' || b.getAttribute('aria-current') === 'page'; });
       t('F5e', 'The navigation marks exactly one item current', 1, current.length);
 
@@ -973,8 +978,8 @@
 
       /* ---- R5: Synastry, named and addressed ---- */
       onStep('removal: the Synastry rename');
-      await go('#/spirit/synastry', 620);
-      var synScreen = doc.querySelector('[data-screen-label="Spirit / Synastry"]');
+      await go('#/library/commons', 620);
+      var synScreen = doc.querySelector('[data-screen-label="Library / The Commons"]');
       var synTxt = txt(synScreen);
       /* WHAT THIS ROW MEANS, AND WHAT IT USED TO MEASURE.
          The claim is that the FEATURE is not called Together any more. It used
@@ -998,18 +1003,19 @@
           heading: /Synastry/.test(synTxt),
           kicker: /together/i.test(kicker) ? kicker : '',
           card: /together/i.test(cardHead) ? cardHead.slice(0, 80) : '' });
-      await go('#/spirit', 560);
-      var hubTxt = [].slice.call(doc.querySelectorAll('[data-screen-label]')).map(txt).join(' ');
-      t('R5b', 'The Spirit hub lists it as Synastry, not Together',
-        { synastry: true, together: false },
-        { synastry: /Synastry/.test(hubTxt), together: /\bTogether\b/.test(hubTxt) });
+      /* The feature is listed once, as a Library tab, and the tab strip is where a
+         reader meets its name before opening it. */
+      var tabsTxt = [].slice.call(doc.querySelectorAll('[role="tablist"][aria-label="Library sections"]')).map(txt).join(' ');
+      t('R5b', 'The Library lists it under The Commons and names it Synastry, not Together',
+        { commons: true, synastry: true, together: false },
+        { commons: /The Commons/.test(tabsTxt), synastry: /Synastry/.test(synTxt), together: /\bTogether\b/.test(tabsTxt) });
       /* The old address is an alias, not a redirect to Today: an existing link
          has to land on the same screen and then correct itself. */
       onStep('removal: the legacy address');
       await go('#/spirit/together', 780);
       t('R5c', 'The pre-V1.6 address still lands on Synastry and rewrites itself',
-        { landed: true, rewritten: '#/spirit/synastry' },
-        { landed: !!doc.querySelector('[data-screen-label="Spirit / Synastry"]'),
+        { landed: true, rewritten: '#/library/commons' },
+        { landed: !!doc.querySelector('[data-screen-label="Library / The Commons"]'),
           rewritten: win.location.hash });
 
       /* ---- R6: the account is gone from Settings too ---- */
@@ -1069,13 +1075,16 @@
       await sleep(700);
       var d0 = w0.document;
       await waitGate(d0, 5000);
-      var dateIn = d0.querySelector('input[aria-label="Birth date"]');
+      /* Found by type inside the gate rather than by its label, which moved
+         from "Birth date" to "Date of birth" with the Codex page and may move
+         again: what this row tests is the error wiring, not the wording. */
+      var dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
       if (dateIn) {
         w0.__incommonApp.afSet('bdate', '1776-07-04');
         await sleep(260);
         w0.__incommonApp.birthSubmit();
         await sleep(420);
-        dateIn = d0.querySelector('input[aria-label="Birth date"]');
+        dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
         var errId = dateIn && dateIn.getAttribute('aria-errormessage');
         var errEl = errId ? d0.getElementById(errId) : null;
         t('G7', 'A bad birth date marks its own field and points at a real message',
@@ -1088,7 +1097,7 @@
         w0.__incommonApp.afSet('bdate', '1992-07-02');
         w0.__incommonApp.afClearErr('bdate');
         await sleep(400);
-        dateIn = d0.querySelector('input[aria-label="Birth date"]');
+        dateIn = d0.querySelector('[data-screen-label="First run"] input[type="date"]');
         t('G7b', 'Correcting the field clears aria-invalid and the message together',
           { invalid: 'false', messageGone: true },
           { invalid: dateIn ? dateIn.getAttribute('aria-invalid') : 'no field',
@@ -1221,6 +1230,12 @@
       await sleep(2100);
 
       /* ---- G11: the charts describe themselves ---- */
+      /* The wheel opens in 3D now, so the SVG these rows read is the 2D view:
+         choose it, as a reader would, and measure it. G11c then holds the 3D
+         stage to the same description, and the view goes back to the default. */
+      var view0 = wp.__incommonApp.state.chartView;
+      wp.__incommonApp.setState({ chartView: '2d' });
+      await sleep(700);
       var wheel = dp.querySelector('svg[aria-roledescription="astrological chart"]');
       var sumId = wheel && wheel.getAttribute('aria-describedby');
       var sumEl = sumId ? dp.getElementById(sumId) : null;
@@ -1236,6 +1251,46 @@
         'true', sumEl2 ? sumEl2.getAttribute('aria-hidden') : 'summary gone');
       wp.__incommonApp.setState({ dpSel: null });
       await sleep(400);
+      /* The 3D and Orbital stage carries the same role description and points
+         at the same summary. Without WebGL 2 there is no stage and no switch,
+         and the 2D wheel above is all there is, which is the row passing. */
+      wp.__incommonApp.setState({ chartView: '3d' });
+      await sleep(900);
+      var deepOn = !!(wp.ChartScene && wp.ChartScene.supported() && !wp.__incommonApp.state.csFail);
+      var stage = dp.querySelector('[data-cs-scene]');
+      t('G11c', 'The chart in depth describes itself as the wheel does',
+        { roledesc: 'astrological chart', summary: 'incommon-wheel-summary', focusable: '0', named: true },
+        deepOn
+          ? { roledesc: stage && stage.getAttribute('aria-roledescription'), summary: stage && stage.getAttribute('aria-describedby'),
+              focusable: stage && stage.getAttribute('tabindex'), named: !!(stage && /arrow keys/i.test(stage.getAttribute('aria-label') || '')) }
+          : { roledesc: 'astrological chart', summary: 'incommon-wheel-summary', focusable: '0', named: !!wheel });
+      wp.__incommonApp.setState({ chartView: view0 });
+      await sleep(400);
+      /* G11d: the wiring holds itself to the same rule. Its 2D view is the SVG
+         with the role description and the summary; the 3D and Wheel stage
+         carries both, and without WebGL 2 the SVG is all there is. Back to the
+         astrology page afterwards, as the phase was before this row. */
+      await goP('#/spirit/human-design', 900);
+      var hv0 = wp.__incommonApp.state.hdView;
+      wp.__incommonApp.setState({ hdView: '2d' });
+      await sleep(700);
+      var bg = dp.querySelector('svg[aria-roledescription="human design wiring"]');
+      var bgSum = bg && dp.getElementById(bg.getAttribute('aria-describedby') || '');
+      wp.__incommonApp.setState({ hdView: '3d' });
+      await sleep(900);
+      var hsOn = !!(wp.HDScene && wp.HDScene.supported() && !wp.__incommonApp.state.hsFail);
+      var hsStage = dp.querySelector('[data-hs-scene]');
+      t('G11d', 'The wiring describes itself, flat and in depth',
+        { roledesc: 'human design wiring', summary: true, stage: true },
+        { roledesc: bg && bg.getAttribute('aria-roledescription'), summary: !!(bgSum && txt(bgSum).length > 20),
+          stage: hsOn ? !!(hsStage && hsStage.getAttribute('aria-roledescription') === 'human design wiring' &&
+            hsStage.getAttribute('aria-describedby') === 'incommon-bg-summary' && hsStage.getAttribute('tabindex') === '0' &&
+            /arrow keys/i.test(hsStage.getAttribute('aria-label') || '')) : !hsStage });
+      wp.__incommonApp.setState({ hdView: hv0 });
+      /* the view change commits and writes its address first, or the address
+         sync can put the wiring's route back over the hash set below */
+      await sleep(500);
+      for (var hdBack = 0; hdBack < 3 && wp.__incommonApp.state.spiritView !== 'astrology'; hdBack++) await goP('#/spirit/astrology', 900);
 
       /* ---- G14: icon only controls ---- */
       var described = [].slice.call(dp.querySelectorAll('[aria-describedby]'));
@@ -1246,10 +1301,21 @@
       }).map(function (el) { return el.getAttribute('aria-label') || el.tagName; });
       t('G14', 'Every aria-describedby points at real, non-empty text', [], dangling);
       var zoomBtn = dp.querySelector('button[aria-label="Zoom in"]');
-      t('G14b', 'The zoom cluster is described, not just labelled',
-        { described: 'incommon-zoom-help', mentionsReset: true },
+      /* The wiring has a zoom cluster of its own now, and on the phone every
+         chart page is mounted at once, so the first Zoom in on the page may be
+         the wiring's. The chart's cluster is still held to its own help text,
+         and every other cluster has to carry one that mentions the reset. */
+      var zoomAll = [].slice.call(dp.querySelectorAll('button[aria-label="Zoom in"]'));
+      zoomBtn = zoomAll.filter(function (b) { return b.getAttribute('aria-describedby') === 'incommon-zoom-help'; })[0] || zoomBtn;
+      var zoomBare = zoomAll.filter(function (b) {
+        if (b === zoomBtn) return false;
+        var d = dp.getElementById(b.getAttribute('aria-describedby') || '');
+        return !(d && /reset/i.test(txt(d)));
+      }).length;
+      t('G14b', 'Every zoom cluster is described, not just labelled',
+        { described: 'incommon-zoom-help', mentionsReset: true, othersDescribed: true },
         { described: zoomBtn && zoomBtn.getAttribute('aria-describedby'),
-          mentionsReset: /reset/i.test(txt(dp.getElementById('incommon-zoom-help'))) });
+          mentionsReset: /reset/i.test(txt(dp.getElementById('incommon-zoom-help'))), othersDescribed: zoomBare === 0 });
 
       /* ---- G9: colour is never the only carrier ---- */
       var legend = dp.querySelector('[aria-label="What the aspect line colours mean"]');
@@ -1265,8 +1331,8 @@
       t('G9b', 'Neither of the methods that made the compatibility figure survives',
         { scorer: 'undefined', bander: 'undefined' },
         { scorer: typeof app.synScoreOf, bander: typeof app.synBandFor });
-      await goP('#/spirit/synastry', 900);
-      var synTxt = txt(dp.querySelector('[data-screen-label="Spirit / Synastry"]'));
+      await goP('#/library/commons', 900);
+      var synTxt = txt(dp.querySelector('[data-screen-label="Library / The Commons"]'));
       var ring = dp.querySelector('[data-chart="synastry"] svg text');
       t('G9c', 'No figure is drawn or written on the synastry screen',
         { ring: false, outOf100: false, bandWords: false },
@@ -1388,8 +1454,8 @@
          name, not the screen, which is precisely the condition G3 exists to
          catch. The row asserts what the heading SAYS as well as that there is
          exactly one of it. */
-      var routes = [['#/today', 'Today'], ['#/spirit', 'Spirit'], ['#/library/practices', 'Library'],
-        ['#/throughline', 'Throughline'], ['#/settings', 'Settings']];
+      var routes = [['#/today', 'Today'], ['#/spirit', 'My Charts'], ['#/library/journal', 'Library'],
+        ['#/oracle', 'The Oracle'], ['#/settings', 'Settings']];
       var h1Bad = [];
       for (var ri = 0; ri < routes.length; ri++) {
         await goD(routes[ri][0], 640);
@@ -1435,8 +1501,8 @@
        dated windows       a timing feature is only worth having if its dates
                            are checkable, and only worth reading if the sky does
                            not drown the reader's own record.
-       the month ahead     a dated reading, on a page that has to exist in both
-                           shells.
+       the Library        six tabs, each listing what it lists once, and the
+                           rooms that used to be Spirit pages.
        Synchronicities     a renamed page with a second lookup on it, and the
                            rename has to be complete or half the app points at a
                            name that is gone.
@@ -1506,7 +1572,7 @@
 
       /* ---- N1 to N4: the card that leaves the device ---- */
       onStep('new surfaces: the synastry card');
-      await goD('#/spirit/synastry', 700);
+      await goD('#/library/commons', 700);
       app.setState({ synManual: PARTNER, synWith: 'manual' });
       await sleep(700);
       var shareBtn = find(dd, /Share this reading/i);
@@ -1575,7 +1641,7 @@
          section that renders with its handlers missing. Reading circleVals()
          alone would pass on exactly that build. */
       onStep('new surfaces: the circle');
-      await goD('#/spirit/synastry', 700);
+      await goD('#/library/commons', 700);
       var ciSection = function () {
         var heads = [].slice.call(dd.querySelectorAll('*')).filter(function (e) {
           return e.children.length === 0 && txt(e) === 'More than two of you';
@@ -1658,14 +1724,13 @@
         { identical: true, twoMembers: 2 },
         { identical: ciOrderA === ciOrderB && ciOrderA.length > 200, twoMembers: idsNow.length });
 
-      /* The caution travels with the reading and is on screen beside it, not
-         behind a tap, for the same reason the configuration caution is. */
-      t('N33', 'The group caution is rendered beside the Ground rather than behind a tap',
-        { present: true, saysNotAMeasure: true, notInsideAnExpander: true },
-        { present: ciText.indexOf('not a measure of the group or of anybody in it') !== -1,
-          saysNotAMeasure: /says nothing about who belongs/.test(ciText),
-          notInsideAnExpander: !!(ciSection() &&
-            [].slice.call(ciSection().querySelectorAll('[aria-expanded]')).length === 0) });
+      /* The module still returns its caution (G28 holds that), and the screen
+         no longer draws it: the owner's rule of 11 October 2026 took every
+         disclaimer line out of the app. The legal terms carry it instead. */
+      t('N33', 'The group caution is not drawn on the Circle screen',
+        { absent: true, saysNothingAbout: false },
+        { absent: ciText.indexOf('not a measure of the group or of anybody in it') === -1,
+          saysNothingAbout: /says nothing about who belongs/.test(ciText) });
 
       /* ---- N5 to N9: dated windows on the Throughline ---- */
       onStep('new surfaces: dated transit windows');
@@ -1728,8 +1793,13 @@
           dated: !!stamped && /\d/.test(stamped.underRange || '') });
 
       onStep('new surfaces: the Sky filter');
-      await goD('#/throughline', 700);
-      var chips = [].slice.call(dd.querySelectorAll('[role="radio"]')).filter(function (b) { return /^Sky$/i.test(txt(b)); });
+      await goD('#/library/throughline', 700);
+      /* The filter is a dropdown now (10 October 2026): one button opens a menu
+         of menuitemradio options, so the Sky option is only in the DOM once the
+         menu is open. */
+      var ddTrig = dd.querySelector('[data-screen-label="Throughline"] [data-dd-trigger]');
+      if (ddTrig) { ddTrig.click(); await sleep(300); }
+      var chips = [].slice.call(dd.querySelectorAll('[role="menuitemradio"]')).filter(function (b) { return /^Sky$/i.test(txt(b)); });
       if (chips[0]) chips[0].click();
       await sleep(500);
       var rowTxt = [].slice.call(dd.querySelectorAll('[data-screen-label="Throughline"] button'))
@@ -1755,63 +1825,14 @@
             return skyRanges.some(function (rg) { return n.indexOf(rg) !== -1; });
           }) });
 
-      /* ---- N9 to N13: the month ahead ---- */
-      onStep('new surfaces: the month ahead');
-      await goD('#/spirit/month', 900);
-      var page = dd.querySelector('[data-screen-label="Spirit / The Month Ahead"]');
-      var r0 = app.monthReading(0);
-      var heads = r0 ? r0.sections.map(function (x) { return x.head; }) : [];
-      t('N9', 'The month page exists on the desktop and is drawn for this month',
-        { page: true, label: app.fmtMonth(new Date()), sections: true },
-        { page: !!page, label: r0 ? r0.label : 'no reading', sections: heads.length >= 6 });
-      t('N9b', 'The reading covers the sky, the reader’s own windows, the gates the Sun walks, a date and the numbers',
-        { shape: true, marked: true, gates: true },
-        { shape: heads.indexOf('What the month is made of') !== -1 && heads.indexOf('What is working on you') !== -1 &&
-            heads.indexOf('The tempo underneath') !== -1 && heads.indexOf('How to hold it') !== -1,
-          marked: heads.indexOf('The date worth marking') !== -1,
-          gates: heads.indexOf('The gates the Sun walks') !== -1 });
-      var stamp0 = page ? txt(page) : '';
-      t('N10', 'This month’s issue names its publication date and the next one',
-        { published: true, next: true },
-        { published: /published on the first/i.test(stamp0), next: /the next one lands/i.test(stamp0) });
-
-      app.setState({ monthOff: 1 });
-      await sleep(600);
-      var ahead = txt(dd.querySelector('[data-screen-label="Spirit / The Month Ahead"]') || dd.body);
-      t('N10b', 'Reading ahead is named rather than blocked',
-        { labelled: true, isNextMonth: true },
-        { labelled: /read ahead/i.test(ahead),
-          isNextMonth: ahead.indexOf(app.fmtMonth(app.monthBounds(1).from)) !== -1 });
-
-      /* The stepper is clamped to the window the scan can actually see. */
-      app.setState({ monthOff: app.MONTH_MAX });
-      await sleep(500);
-      var atMax = !!find(dd, /→$/);
-      app.setState({ monthOff: app.MONTH_MIN });
-      await sleep(500);
-      var atMin = !!find(dd, /^←\s+\w+\s+\d{4}$/);
-      app.setState({ monthOff: 0 });
-      await sleep(400);
-      t('N11', 'The month stepper stops where the scan does, at both ends',
-        { forwardOffered: false, backOffered: false },
-        { forwardOffered: atMax, backOffered: atMin });
-
-      var keptTitle = 'The month ahead · ' + r0.label;
-      app.monthKeep(r0);
-      await sleep(500);
-      t('N12', 'Keeping the month writes one reading onto the Throughline',
-        { kept: true, type: 'reading' },
-        { kept: app.tlAll().some(function (e) { return e.title === keptTitle; }),
-          type: (app.tlAll().filter(function (e) { return e.title === keptTitle; })[0] || {}).type });
-      t('N12b', 'Every control on the month page meets 44px and passes 4.5:1',
-        { taps: [], contrast: [] },
-        { taps: page ? tapTargets(wd, { querySelectorAll: function (q) { return page.querySelectorAll(q); } }) : 'no page',
-          contrast: page ? contrastFails(wd, { querySelectorAll: function (q) { return page.querySelectorAll(q); } }, 4.5).fails : 'no page' });
+      /* ---- N9 to N12b: the Month Ahead used to be here ----
+         It was removed from the project on 2 October 2026 and these ids stay
+         retired rather than reassigned: an id is an identity, not a position. */
 
       /* ---- N13 to N17: Synchronicities ---- */
       onStep('new surfaces: Synchronicities');
-      await goD('#/spirit/synchronicities', 800);
-      var sync = dd.querySelector('[data-screen-label="Synchronicities"]');
+      await goD('#/library/synchronicities', 800);
+      var sync = dd.querySelector('[data-screen-label="Library / Synchronicities"]');
       t('N13', 'The page answers to its own address and carries its own name',
         { page: true, named: true, oldNameGone: true },
         { page: !!sync, named: !!sync && /Synchronicities/.test(txt(sync)),
@@ -1821,15 +1842,15 @@
           oldNameGone: !/Angel Number Encounters/.test(String(dd.body.innerText || '')) });
       await goD('#/spirit/angel-numbers', 800);
       t('N13b', 'The address the page used to have still lands on it',
-        { page: true, rewritten: '/spirit/synchronicities' },
-        { page: !!dd.querySelector('[data-screen-label="Synchronicities"]'), rewritten: app.currentPath() });
+        { page: true, rewritten: '/library/synchronicities' },
+        { page: !!dd.querySelector('[data-screen-label="Library / Synchronicities"]'), rewritten: app.currentPath() });
 
       var numIn = dd.querySelector('input[aria-label="The number you keep seeing"]');
       app.setState({ angelInput: '111', angelResult: null, angelSaved: false });
       await sleep(250);
       app.angelLookup();
       await sleep(400);
-      var numTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var numTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N14', 'The number half still reads a repeating number',
         { field: true, number: true, meaning: true },
         { field: !!numIn, number: /111/.test(numTxt), meaning: /awakening|doorway|attention/i.test(numTxt) });
@@ -1839,7 +1860,7 @@
       await sleep(400);
       app.animalPick('Crow');
       await sleep(450);
-      var animTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var animTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N15', 'The animal half reads a sighting in three parts, kept apart',
         { name: true, tradition: true, origin: true, testable: true },
         { name: /Crow/.test(animTxt),
@@ -1851,7 +1872,7 @@
       await sleep(250);
       app.animalLookup();
       await sleep(450);
-      var unTxt = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var unTxt = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       /* The rule this row exists for: a number composes from its digits, an
          animal does not compose from its letters. */
       t('N16', 'An animal that is not in the list gets no invented meaning, and can still be kept',
@@ -1898,15 +1919,16 @@
         { kept: !!other, kind: other ? other.kind : '(none)',
           onLine: app.tlAll().some(function (e) { return /Noticed: A green pickup truck/.test(e.title); }) });
 
-      var otherPanel = txt(dd.querySelector('[data-screen-label="Synchronicities"]'));
+      var otherPanel = txt(dd.querySelector('[data-screen-label="Library / Synchronicities"]'));
       t('N18b', 'and no interpretation reaches the entry or the screen',
-        { body: true, screen: true, saidPlainly: true },
+        { body: true, screen: true, unexplained: true },
         { /* the stored entry offers no reading of any kind */
           body: !!other && !/means|meaning|symbolis|the tradition|reads as/i.test(other.body),
-          /* nor does the panel, beyond the sentence that explains the absence */
+          /* nor does the panel */
           screen: !/what the tradition holds/i.test(otherPanel),
-          /* and the absence is stated rather than left looking unfinished */
-          saidPlainly: /no meaning is offered here/i.test(otherPanel) });
+          /* and the screen does not explain the absence: the owner's rule of
+             11 October 2026 took every line of that kind out of the app */
+          unexplained: !/no meaning is offered here/i.test(otherPanel) });
 
       /* ---- N20 to N22: the dream journal ----
          The registry, the counting discipline, and the record. N21 is the row
@@ -1914,9 +1936,9 @@
          count without ever throwing, and a detector that quietly overcounts is
          worse than one that is plainly broken, because it reads as a finding. */
       onStep('new surfaces: the dream journal');
-      await goD('#/spirit/dreams', 700);
+      await goD('#/library/dream-journal', 700);
       var DS = wd.DreamSymbols;
-      var dreamScreen = dd.querySelector('[data-screen-label="Spirit / Dream Journal"]');
+      var dreamScreen = dd.querySelector('[data-screen-label="Library / Dream Journal"]');
       /* Seven categories since weather was added: a tornado read every other
          image in the dream and had nothing for the one that was the point. The
          count is still asserted rather than loosened, because a category
@@ -1985,7 +2007,7 @@
           lineCount += h.lines.filter(function (t) { return t && t.length > 12; }).length;
         });
       }
-      app.setState({ tab: 'library', libSub: 'library', libView: 'iching', icSec: 'heaven', icHex: null, icQuery: '', selId: null, spiritView: null });
+      app.setState({ tab: 'library', libSub: 'readings', libView: 'iching', icSec: 'heaven', icHex: null, icQuery: '', selId: null, spiritView: null });
       await sleep(600);
       var icRoom = dd.querySelector('[data-screen-label="Library / The Book of Changes"]');
       t('N25', 'All sixty four figures are present, distinct, and in the order the book has',
@@ -2065,6 +2087,120 @@
           hasJudgment: !!(icKept && icKept.body.length > 200),
           noBirthData: !!(icKept && !/[0-9]{4}-[0-9]{2}-[0-9]{2}T|birth/i.test(icKept.body)) });
 
+      /* ---- N41 to N46: the Library, rebuilt ----
+         Six tabs, each listing what it lists exactly once. These rows exist
+         because the old Library listed things twice (the Book of Changes on the
+         shelf and on the Spirit hub, Synchronicities in two shells, the
+         Throughline in three places) and a list that is true once can quietly
+         become true twice again. */
+      onStep('new surfaces: the Library tabs');
+      var visTabs = function (doc) {
+        return [].slice.call(doc.querySelectorAll('[role="tablist"][aria-label="Library sections"] [role="tab"]'))
+          .map(function (b) { return txt(b).replace(/\d+$/, ''); });
+      };
+      var pos = function (s, names) { return names.map(function (n) { return s.indexOf(n); }); };
+      var inOrder = function (a) { return a.every(function (v, i) { return v > -1 && (i === 0 || v > a[i - 1]); }); };
+      await goD('#/library/study', 800);
+      var libScreen = function () { return [].slice.call(dd.querySelectorAll('[data-screen-label="Library"]'))[0]; };
+      var studyTxt = txt(libScreen());
+      var studyOrder = ['Human Design Atlas', 'Astropedia', 'The Book of Numbers', 'My Tarot', 'Dream Symbols', 'Sabian Lexicon'];
+      /* The Numbers was a dashed coming soon card until 20 October 2026; it is
+         the Book of Numbers now, a room like the two beside it, so the row
+         presses it and asks for the room and its ninety compounds. */
+      var numbersBtn = [].slice.call(libScreen().querySelectorAll('button')).filter(function (b) { return /The Book of Numbers/.test(txt(b)); })[0];
+      var studyComing = /COMING SOON/i.test(studyTxt);
+      var studyTabs = visTabs(dd);
+      if (numbersBtn) numbersBtn.click();
+      await sleep(900);
+      var bnRoom = dd.querySelector('[data-screen-label="Library / The Book of Numbers"]');
+      var bnDots = dd.querySelectorAll('[data-bn-room] [data-bn-dot]').length;
+      var bnAddr = wd.location.hash;
+      t('N41', 'The Library is six tabs, and Study lists its six in the order given, The Book of Numbers a control that opens its room of ninety',
+        { tabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'], ordered: true, comingSoon: false, numbersIsControl: true, room: true, dots: 90, address: '#/library/book-of-numbers', journalItemsAbsent: true },
+        { tabs: studyTabs, ordered: inOrder(pos(studyTxt, studyOrder)), comingSoon: studyComing,
+          numbersIsControl: !!numbersBtn, room: !!bnRoom, dots: bnDots, address: bnAddr,
+          journalItemsAbsent: !/Synchronicities|Dream Journal|Book of Changes/.test(studyTxt) });
+
+      await goD('#/library/journal', 800);
+      var jTxt = txt(libScreen());
+      var jRows = [].slice.call(dd.querySelectorAll('[data-screen-label="Library"] button')).map(txt)
+        .filter(function (s) { return /UNIVERSAL|MILD CAUTION/.test(s); })
+        .map(function (s) { return { title: s.replace(/(UNIVERSAL|MILD CAUTION).*$/, '').trim().split(/\s{2,}|(?<=[a-z\)’])(?=[A-Z][a-z]+ [a-z])/)[0], risk: /MILD CAUTION/.test(s) ? 'mild' : 'universal' }; });
+      var jKey = function (s) { return String(s).replace(/^[^A-Za-z0-9]+/, '').toLowerCase(); };
+      var firstMild = jRows.map(function (r) { return r.risk; }).indexOf('mild');
+      var uni = jRows.filter(function (r) { return r.risk === 'universal'; }).map(function (r) { return jKey(r.title); });
+      var mild = jRows.filter(function (r) { return r.risk === 'mild'; }).map(function (r) { return jKey(r.title); });
+      var sortedCopy = function (a) { return a.slice().sort(); };
+      t('N42', 'Journal lists Synchronicities and the Dream Journal, then the ten practices, Universal caution first and then Mild caution, each alphabetical',
+        { rooms: true, ten: 10, universalFirst: true, headings: ['Universal caution', 'Mild caution'], uniSorted: true, mildSorted: true },
+        { rooms: inOrder(pos(jTxt, ['Synchronicities', 'Dream Journal', 'Universal caution', 'Mild caution'])),
+          ten: jRows.length,
+          universalFirst: firstMild === -1 || jRows.slice(0, firstMild).every(function (r) { return r.risk === 'universal'; }) && jRows.slice(firstMild).every(function (r) { return r.risk === 'mild'; }),
+          headings: [].slice.call(dd.querySelectorAll('[data-screen-label="Library"] [role="heading"]')).map(txt),
+          uniSorted: uni.join('|') === sortedCopy(uni).join('|'),
+          mildSorted: mild.join('|') === sortedCopy(mild).join('|') });
+
+      await goD('#/library/readings', 800);
+      var tarotG = dd.querySelector('[role="group"][aria-label="Tarot"]'), bookG = dd.querySelector('[role="group"][aria-label="The Book of Changes"]');
+      var tr = tarotG && tarotG.getBoundingClientRect(), br = bookG && bookG.getBoundingClientRect();
+      var divEl = tarotG && tarotG.nextElementSibling, dr = divEl && divEl.getBoundingClientRect();
+      var openedTarot = null, openedBook = null;
+      var drawBtn = find(dd, /Draw a reading/);
+      if (drawBtn) { drawBtn.click(); await sleep(700); openedTarot = app.state.libView; }
+      await goD('#/library/readings', 800);
+      var consultBtn = find(dd, /Consult the book/);
+      if (consultBtn) { consultBtn.click(); await sleep(700); openedBook = app.state.libView; }
+      t('N43', 'Readings puts Tarot on the left half and The Book of Changes on the right, a divider between, and each opens its own room',
+        { left: true, right: true, divider: true, sameRow: true, tarotOpens: 'reading', bookOpens: 'iching' },
+        { left: !!tr && !!br && tr.right <= br.left, right: !!tr && !!br && br.left >= tr.right,
+          divider: !!dr && dr.width <= 2 && dr.left >= tr.right - 1 && dr.right <= br.left + 1,
+          sameRow: !!tr && !!br && Math.abs(tr.top - br.top) < 4,
+          tarotOpens: openedTarot, bookOpens: openedBook });
+
+      /* The banner is on every tab and in no list. */
+      var banners = [];
+      for (var bi = 0; bi < 6; bi++) {
+        var bsub = ['study', 'journal', 'readings', 'throughline', 'archive', 'commons'][bi];
+        await goD('#/library/' + bsub, 700);
+        banners.push([].slice.call(dd.querySelectorAll('button')).filter(function (b) { return /Self Help Yellow Pages/.test(txt(b)); }).length);
+      }
+      await goD('#/library/study', 700);
+      find(dd, /Self Help Yellow Pages/).click();
+      await sleep(700);
+      t('N44', 'On the desktop, Self Help Yellow Pages is a banner on every one of the six tabs, once each, and opens the directory',
+        { counts: [1, 1, 1, 1, 1, 1], opens: 'help' },
+        { counts: banners, opens: app.state.libView });
+
+      /* Throughline and Archive live in the Library and nowhere else. */
+      await goD('#/library/archive', 800);
+      var arcNoLink = !find(dd, /Your Throughline/);
+      await goD('#/today', 800);
+      var todayLink = !!find(dd, /^Throughline$/) || !!find(dd, /Archive/);
+      await goD('#/spirit', 800);
+      var spiritLink = !!find(dd, /Throughline|Archive/);
+      var navTxt = [].slice.call(dd.querySelectorAll('[data-app-nav] a, [data-app-nav] button, nav button')).map(txt).join(' ');
+      t('N45', 'Throughline and Archive are listed only as Library tabs: not on Today, My Charts, the Archive or the side nav',
+        { archiveHasNoThroughlineCard: true, today: false, myCharts: false, nav: false },
+        { archiveHasNoThroughlineCard: arcNoLink, today: todayLink, myCharts: spiritLink, nav: /Throughline|Archive/.test(navTxt) });
+
+      /* The charts, in the order given, on both screens that list them. */
+      var chartNames = ['Human Design', 'Astrology', 'Numerology', 'Synchronicities', 'Synastry', 'Tarot', 'Dream Journal', 'Month Ahead'];
+      var listed = function (doc, label) {
+        return [].slice.call(doc.querySelectorAll('[data-screen-label="' + label + '"] button')).map(txt)
+          .filter(function (s) { return s.length > 40 && !/\+\s*$/.test(s); })
+          .map(function (s) { return chartNames.filter(function (n) { return s.indexOf(n) === 0; })[0]; }).filter(Boolean);
+      };
+      await goD('#/spirit', 800);
+      var hubList = listed(dd, 'Spirit');
+      var navCur = dd.querySelector('[data-app-nav] [aria-current="page"], [data-app-nav] [aria-current="true"]');
+      var navName = navCur ? txt(navCur).replace(/[^A-Za-z ]/g, '').trim() : 'n/a';
+      await goD('#/today', 800);
+      var todayList = listed(dd, 'Today');
+      t('N46', 'My Charts and Today each list Human Design, Astrology and Numerology, in that order, and nothing else',
+        { myCharts: ['Human Design', 'Astrology', 'Numerology'], today: ['Human Design', 'Astrology', 'Numerology'], tabName: 'My Charts' },
+        { myCharts: hubList, today: todayList,
+          tabName: navName });
+
       /* ---- N18, N19: the phone shell ---- */
       onStep('new surfaces: the phone shell');
       var fp = await frame(src, 375, 667);
@@ -2073,22 +2209,39 @@
       if (!(await ready(wp, 16000))) { t('N18-0', 'App boots the phone shell for this phase', true, false); return A; }
       await sleep(900);
       var dp = wp.document, pApp = wp.__incommonApp;
-      var tabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Spirit"] [role="tab"]')).map(function (b) { return txt(b); });
-      t('N36', 'The Spirit pager carries the new pages, under the names the app uses',
-        { pages: 8, sync: true, month: true, dream: true, oldName: false },
-        { pages: dp.querySelectorAll('[data-vt-pager] > [data-vt-page]').length,
-          sync: tabs.indexOf('Synchronicities') !== -1,
-          month: tabs.indexOf('The Month Ahead') !== -1,
-          dream: tabs.indexOf('Dream Journal') !== -1,
-          oldName: tabs.indexOf('Angel Number Encounters') !== -1 });
-      var pSync = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Synchronicities"]');
-      var pMonth = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / The Month Ahead"]');
-      var pDream = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]');
-      t('N36b', 'Every one of those pages renders with its handlers on the shell that holds it',
-        { syncPage: true, monthPage: true, dreamPage: true, taps: [], dreamTaps: [] },
-        { syncPage: !!pSync, monthPage: !!pMonth, dreamPage: !!pDream,
-          taps: pSync ? tapTargets(wp, { querySelectorAll: function (q) { return pSync.querySelectorAll(q); } }) : 'no page',
-          dreamTaps: pDream ? tapTargets(wp, { querySelectorAll: function (q) { return pDream.querySelectorAll(q); } }) : 'no page' });
+      /* N36: the pager now carries the three charts and nothing else, and the
+         Library carries six tabs. The pages that used to be pager pages (the
+         sightings, the dreams, the tarot reading and Synastry) live in the
+         Library, and the Month Ahead is gone from the project. */
+      var tabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Spirit"] [role="tablist"][aria-label="Spirit views"] [role="tab"]')).map(function (b) { return txt(b); });
+      /* The strip is drawn while the Library is the current section, so the row
+         puts the reader there first, as a swipe would. */
+      pApp.setState({ tab: 'library', libSub: 'study', libView: null, selId: null });
+      await sleep(700);
+      var libTabs = [].slice.call(dp.querySelectorAll('[data-vt-sec="Library"] [role="tablist"][aria-label="Library sections"] [role="tab"]'))
+        .map(function (b) { return txt(b).replace(/\d+$/, ''); });
+      t('N36', 'The Spirit pager carries the three charts in order, and the Library carries its six tabs',
+        { pages: 3, order: ['Human Design', 'Astrology', 'Numerology'], libTabs: ['Study', 'Journal', 'Readings', 'Throughline', 'Archive', 'The Commons'] },
+        { pages: dp.querySelectorAll('[data-vt-pager] > [data-vt-page]').length, order: tabs, libTabs: libTabs });
+      /* The rooms that moved are opened the way a reader opens them, and each is
+         asked for inside the Library section, which is where the phone draws it. */
+      pApp.setState({ tab: 'library', libSub: 'journal', libView: 'angel', selId: null });
+      await sleep(900);
+      var pSync = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Synchronicities"]');
+      var pSyncTaps = pSync ? tapTargets(wp, { querySelectorAll: function (q) { return pSync.querySelectorAll(q); } }) : 'no page';
+      t('N36b', 'The Synchronicities room renders in the phone Library with its handlers on, and meets 44px',
+        { syncPage: true, taps: [], absentFromSpirit: true },
+        { syncPage: !!pSync, taps: pSyncTaps,
+          absentFromSpirit: !dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Library / Synchronicities"]') });
+
+      /* N47: the square is never drawn twice. The phone carries the Get Help
+         square on every screen, so the Library's own banner does not draw there;
+         the desktop has no such square and the Library banner is its only one. */
+      var phoneSquares = [].slice.call(dp.querySelectorAll('button')).filter(function (b) {
+        return /^(Get help now|Self Help Yellow Pages)$/.test(b.getAttribute('aria-label') || '');
+      }).map(function (b) { return b.getAttribute('aria-label'); });
+      t('N47', 'The help square appears once on the phone, as Get Help, and the Library banner square is not drawn beside it',
+        { phone: ['Get help now'] }, { phone: phoneSquares });
 
       /* The failure this page has actually had: a field that renders while its
          change handler is missing. Typed through a real input event rather than
@@ -2096,7 +2249,7 @@
       var animOn = pSync ? [].slice.call(pSync.querySelectorAll('button')).filter(function (b) { return /^An animal$/.test(txt(b)); })[0] : null;
       if (animOn) animOn.click();
       await sleep(450);
-      var animIn = dp.querySelector('[data-vt-sec="Spirit"] input[aria-label="The animal you keep seeing"]');
+      var animIn = dp.querySelector('[data-vt-sec="Library"] input[aria-label="The animal you keep seeing"]');
       var typed = 'no field';
       if (animIn) {
         var setter = Object.getOwnPropertyDescriptor(wp.HTMLInputElement.prototype, 'value').set;
@@ -2113,7 +2266,11 @@
          with no change handler looks completely correct and swallows the dream,
          so it is typed into through a real input event rather than by setting
          state, which cannot fail that way. */
-      var dreamTA = dp.querySelector('[data-vt-sec="Spirit"] textarea[aria-label="The dream itself"]');
+      pApp.setState({ tab: 'library', libSub: 'journal', libView: 'dreamj', selId: null });
+      await sleep(900);
+      var pDream = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]');
+      var dreamTaps = pDream ? tapTargets(wp, { querySelectorAll: function (q) { return pDream.querySelectorAll(q); } }) : 'no page';
+      var dreamTA = dp.querySelector('[data-vt-sec="Library"] textarea[aria-label="The dream itself"]');
       var dreamTyped = 'no field', dreamFound = 'not run';
       if (dreamTA) {
         var tset = Object.getOwnPropertyDescriptor(wp.HTMLTextAreaElement.prototype, 'value').set;
@@ -2125,38 +2282,38 @@
       }
       t('N23', 'The dream narrative takes typing on the phone, and the figures in it are found there',
         { typed: 'I went down to the basement and a snake was on the stairs.',
-          found: 'Basement,Snake,Stairs' },
-        { typed: dreamTyped, found: dreamFound });
+          found: 'Basement,Snake,Stairs', taps: [] },
+        { typed: dreamTyped, found: dreamFound, taps: dreamTaps });
 
       /* N24: the rule this app has broken more than once. An address has to
-         resolve to a screen in the shell the reader is actually standing in,
-         and the Dream Journal lives in two different places on the two shells.
+         resolve to a screen in the shell the reader is actually standing in.
+         The Dream Journal is one Library room on both shells now, and the old
+         /spirit/dreams address is an alias that has to land on it.
 
-         Sampled across the whole flight rather than read once. vtGoTab claims
-         the tab before the scroll starts and holds it until the jump lands, so
-         the destination is the only value the tab may ever take: the pages it
-         travels through are not the reader's and must not be announced as if
-         they were. One read at a fixed moment asked how busy the machine was
-         instead, and one read after the pager settles would not see a walk at
-         all, which is why this counts values rather than waiting for quiet.
+         Sampled across the whole flight rather than read once. The jump from
+         Today to the Library crosses the Spirit section, and vtGoSection claims
+         the section before the scroll starts and holds it until the jump lands,
+         so the destination is the only tab the app may ever take: a screen it
+         travels through is not the reader's and must not be announced or pushed
+         onto the Back stack as if it were. One read at a fixed moment asked how
+         busy the machine was instead, which is why this counts values rather than
+         waiting for quiet.
 
-         Parked on Today first so it is a real jump every run. Straight after
-         N23 the pager is already sitting on the Dream Journal, and a jump of no
-         distance proves nothing about a jump. */
+         Parked on Today first so it is a real jump every run. */
       wp.location.hash = '#/today';
       await sleep(900);
-      var n24Start = pApp.state.vtTab, n24Seen = [], n24Waited = 0;
+      var n24Start = pApp.state.tab, n24Seen = [], n24Waited = 0;
       wp.location.hash = '#/spirit/dreams';
       while (n24Waited < 2500) {
-        var n24Now = pApp.state.vtTab;
+        var n24Now = pApp.state.tab;
         if (n24Now !== n24Start && n24Seen.indexOf(n24Now) === -1) n24Seen.push(n24Now);
         await sleep(50);
         n24Waited += 50;
       }
-      var pDreamByPath = dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]');
-      t('N24', 'Spirit slash dreams lands on a real screen on both shells, not a blank shelf, and announces nothing on the way',
-        { desktop: true, phone: true, phoneTab: 7, travelled: [7] },
-        { desktop: !!dreamScreen, phone: !!pDreamByPath, phoneTab: pApp.state.vtTab, travelled: n24Seen });
+      var pDreamByPath = dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]');
+      t('N24', 'Spirit slash dreams lands on the Dream Journal in the Library on both shells, and announces nothing on the way',
+        { desktop: true, phone: true, phoneTab: 'library', travelled: ['library'], address: '/library/dream-journal' },
+        { desktop: !!dreamScreen, phone: !!pDreamByPath, phoneTab: pApp.state.tab, travelled: n24Seen, address: pApp.currentPath() });
 
 
       /* ---- N34, N35: Circle on the phone shell ----
@@ -2313,7 +2470,7 @@
       t('N37b', 'The index reaches every shelf, not only the placements and the degrees',
         { screens: true, placements: true, numbers: true, practices: true, tarot: true,
           iching: true, dreams: true, animals: true, repeating: true, humanDesign: true,
-          astrology: true, sabian: true, help: true },
+          astrology: true, sabian: true, help: true, bookOfNumbers: true },
         { screens: reach('settings', 'Screens and rooms'),
           placements: reach('sun', 'Your placements'),
           numbers: reach('life path', 'Your numbers'),
@@ -2326,20 +2483,21 @@
           humanDesign: reach('gate 34', 'Human Design'),
           astrology: reach('scorpio', 'Astrology reference'),
           sabian: reach('Leo 15', 'Sabian degrees'),
-          help: reach('suicide', 'Lines that answer') });
+          help: reach('suicide', 'Lines that answer'),
+          bookOfNumbers: reach('master teacher', 'The Book of Numbers') });
 
-      /* The routing rule, on the shell that breaks it. A row that wrote
-         spiritView 'dream' on the phone would paint a Spirit view no vertical
-         shell draws: the sheet would close onto a blank screen with no way
-         back, and the state would look correct while it did. */
+      /* The routing rule, on the shell that breaks it. A row has to name a room
+         the shell standing there draws: one that wrote a libView the vertical
+         shell does not name would close the sheet onto an empty shelf with no
+         way back, and the state would look correct while it did. */
       var pDreamRow = rowNamed(pRows, 'Dream Journal');
       if (pDreamRow) pDreamRow.click();
       await sleep(1200);
       t('N38', 'A result lands on a screen that exists in the shell it was clicked in',
-        { row: true, closed: true, tab: 'spirit', page: 7, noSpiritView: true, painted: true },
-        { row: !!pDreamRow, closed: !pApp.state.vtSearch, tab: pApp.state.tab, page: pApp.state.vtTab,
+        { row: true, closed: true, tab: 'library', view: 'dreamj', sub: 'journal', noSpiritView: true, painted: true },
+        { row: !!pDreamRow, closed: !pApp.state.vtSearch, tab: pApp.state.tab, view: pApp.state.libView, sub: pApp.state.libSub,
           noSpiritView: pApp.state.spiritView === null,
-          painted: !!dp.querySelector('[data-vt-sec="Spirit"] [data-screen-label="Spirit / Dream Journal"]') });
+          painted: !!dp.querySelector('[data-vt-sec="Library"] [data-screen-label="Library / Dream Journal"]') });
 
       /* A card is a selection inside a room, so the desktop is where the deeper
          target is driven: the row has to open the room AND what is in it. */
@@ -2387,13 +2545,13 @@
       var expandBtn = dd.querySelector('[aria-label="Expand chart"]');
       if (expandBtn) expandBtn.click();
       await sleep(500);
-      var dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      var dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var dlgOpen = !!dlg;
-      var closeBtn = dlg ? dlg.querySelector('[aria-label="Close expanded chart"]') : null;
+      var closeBtn = dlg ? dlg.querySelector('[aria-label="Close the Observatory"]') : null;
       if (closeBtn) closeBtn.click();
       await sleep(350);
-      var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
-      t('N40', 'The maximize control opens the expanded chart overlay and the close control dismisses it',
+      var dlgClosedNow = !dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
+      t('N40', 'The maximize control opens the Observatory and its close control dismisses it',
         { opened: true, closed: true },
         { opened: dlgOpen, closed: dlgClosedNow });
 
@@ -2403,7 +2561,7 @@
          Reopened for this row since N40 just closed it. */
       if (expandBtn) expandBtn.click();
       await sleep(500);
-      dlg = dd.querySelector('[role="dialog"][aria-label="Expanded natal chart"]');
+      dlg = dd.querySelector('[role="dialog"][aria-label="The Observatory"]');
       var sample = app.EXPANDED_REGISTRY.filter(function (_, i) { return i % 8 === 0; }).slice(0, 10);
       var rowsNow = app.fullChart(true);
       var titleButtons = dlg ? [].slice.call(dlg.querySelectorAll('button[title]')) : [];
@@ -2616,7 +2774,11 @@
 
       onStep('cover: the one control');
       var a = d.querySelector('a.enter');
-      var links = d.querySelectorAll('a[href]');
+      /* The Terms and Privacy links under the sign in form are not ways in, so
+         they are not counted: the row is about the one way into the app. The
+         Learn link goes to the reference pages, not the app, and is left out
+         for the same reason. */
+      var links = [].slice.call(d.querySelectorAll('a[href]')).filter(function (x) { return !x.closest('.legal, .learn'); });
       var box = a ? a.getBoundingClientRect() : { width: 0, height: 0 };
       /* The way in is named by its own text now, so the accessible name and
          what a sighted reader sees are the same words and cannot drift. An svg
@@ -2670,7 +2832,25 @@
 
       onStep('cover: the way out');
       var pathBefore = w.location.pathname;
+      /* TWO STEPS NOW. "enter here" opens the email sign in first, in place,
+         with "Continue without an account" under it, and it is that control
+         which runs the exit. So the first press is asserted to open the field
+         and to leave nobody anywhere, and the opened state is measured for
+         targets and contrast the way H7 and H8 measure the cover at rest:
+         with the page scrolled back to the top, because at the end of the
+         scroll the way in is hidden and neither sweep can see it. */
+      await coverScrollTo(w, 0);
       a.click();
+      await sleep(400);
+      var mf = d.getElementById('mailform'), skipBtn = d.querySelector('button.skip');
+      var firstPress = !!(mf && !mf.hidden && skipBtn && !skipBtn.hidden) &&
+        a.getAttribute('aria-expanded') === 'true' && w.location.pathname === pathBefore &&
+        /* Pressed once, the link leaves the page: the form is the way on. */
+        w.getComputedStyle(a).display === 'none' &&
+        (op(w, '.markwrap') === null || op(w, '.markwrap') >= 0.95);
+      var openedTargets = tapTargets(w, d);
+      var openedContrast = contrastFails(w, d, 4.5).fails;
+      if (skipBtn) skipBtn.click();
       /* POLL, DO NOT SAMPLE ONCE. A single read at a fixed offset was 700ms and
          it flaked for the same reason the scroll did: at this frame size one
          rAF step can cost 400ms, so the read can land after the exit has
@@ -2688,9 +2868,10 @@
       }
       /* preventDefault ran and the transition is running: an anchor left alone
          would already have left. */
-      t('H15', 'The link runs the exit instead of navigating at once',
-        { stillOnTheCover: true, transitionRunning: true },
-        { stillOnTheCover: stillHere, transitionRunning: fading });
+      t('H15', 'The link opens the email sign in and then leaves the page, and continuing runs the exit instead of navigating at once',
+        { emailFirst: true, openedTargets: [], openedContrast: [], stillOnTheCover: true, transitionRunning: true },
+        { emailFirst: firstPress, openedTargets: openedTargets, openedContrast: openedContrast,
+          stillOnTheCover: stillHere, transitionRunning: fading });
 
       var landed = '';
       for (var i = 0; i < 45; i++) {

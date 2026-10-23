@@ -1,0 +1,24 @@
+server/billing/index.ts, three edits
+====================================
+
+EDIT A. Pin Stripe. Find:
+  npm:stripe@17
+Replace with:
+  npm:stripe@17.7.0
+17.7.0 is the last stable release of the v17 line, so this freezes what the
+floating major already resolves today; nothing about runtime behavior
+changes. Do not jump majors: the code comments about refunds and the API
+version are written against the v17 line.
+
+EDIT B. Pin supabase-js. Find:
+  npm:@supabase/supabase-js@2
+Replace with:
+  npm:@supabase/supabase-js@2.117.2
+(Same replacement also goes into server/oracle/index.ts, Edit 4 of the
+README.)
+
+EDIT C. Replace the returnAddress function. In server/billing/index.ts,
+search for `function returnAddress`. Starting from the comment line that
+reads `// Where Stripe sends the reader back.` (immediately above the
+function), select through the function's closing brace, delete, and paste
+the entire contents of returnAddress.ts in its place.

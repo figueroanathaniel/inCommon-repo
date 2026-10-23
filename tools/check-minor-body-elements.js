@@ -38,12 +38,13 @@ function die(m) { console.error('check-minor-body-elements: ' + m); process.exit
 
 const CEILING_DEG = 0.2;
 /* Computed inside the app itself, not by this module. */
-/* Chiron alone of the five now: Ceres, Pallas, Juno and Vesta are fetched, so
- * this module owns them and the accounting below must see them once, not
- * twice. The app still falls back to window.MinorBodies for all five when
- * this module is missing, which the accounting deliberately cannot see: what
- * it checks is who supplies a body when everything is present. */
-const APP_COMPUTED = ['chiron', 'lilithMean', 'selena',
+/* None of the five fitted bodies now: Ceres, Pallas, Juno and Vesta were
+ * fetched first, and Chiron followed on 29 September 2026, so this module owns
+ * all five and the accounting below must see each of them once, not twice.
+ * The app still falls back to window.MinorBodies for all five when this
+ * module is missing, which the accounting deliberately cannot see: what it
+ * checks is who supplies a body when everything is present. */
+const APP_COMPUTED = ['lilithMean', 'selena',
   'mercuryNode', 'venusNode', 'marsNode', 'jupiterNode', 'saturnNode', 'uranusNode', 'neptuneNode', 'plutoNode',
   'ariesPoint', 'halley', 'halebopp', 'hyakutake', 'vertex', 'antivertex',
   'partOfFortune', 'partOfSpirit', 'sunmoonMidpoint'];

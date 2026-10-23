@@ -1,0 +1,41 @@
+-- server/cloud-schema.sql: the cloud schema of record.
+--
+-- Exported from the dashboard saved query "schema v2" on 13 October 2026.
+-- The security pass of 12-13 October found that this schema lived only in
+-- the Supabase dashboard, which is why the memories column list had to be
+-- discovered live (PGRST204) during the pass. The saved query stays as the
+-- applying copy; this file is the reviewed, diffed, and restorable record.
+-- When the schema changes, change it here first and apply from here.
+--
+-- RECONCILE: paste the full text of the dashboard saved query "schema v2"
+-- immediately below this line, and delete this RECONCILE marker. The saved
+-- query is the authority where anything below disagrees with it.
+
+-- ---------------------------------------------------------------------------
+-- Verified live on 13 October 2026 (information_schema), kept here as the
+-- reconciliation anchor. Delete this block once the saved query is pasted
+-- above, or keep it commented as the audit trail; both are fine.
+--
+-- public.memories:
+--   id            bigint  GENERATED ALWAYS AS IDENTITY (never supply it)
+--   profile_id    uuid    not null
+--   local_id      text    not null
+--   memory_type   text    not null
+--   content       jsonb   not null
+--   created_at    timestamptz not null, no default, must be supplied
+--   is_private    boolean not null default false
+--   consent_required text  nullable
+--   kept          boolean not null default false
+--
+-- create table public.memories (
+--   id         bigint generated always as identity primary key,
+--   profile_id uuid not null references public.profiles(id),
+--   local_id   text not null,
+--   memory_type text not null,
+--   content    jsonb not null,
+--   created_at timestamptz not null,
+--   is_private boolean not null default false,
+--   consent_required text,
+--   kept       boolean not null default false
+-- );
+-- ---------------------------------------------------------------------------

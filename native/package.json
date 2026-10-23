@@ -1,0 +1,23 @@
+{
+  "name": "incommon-native",
+  "private": true,
+  "description": "The inCommon iPhone and Android apps: a Capacitor shell around the built web app. See docs/NATIVE-APP.md.",
+  "scripts": {
+    "build": "node ../tools/build-native.js",
+    "sync": "node ../tools/build-native.js && cap sync",
+    "ios": "node ../tools/build-native.js && cap sync ios && cap open ios",
+    "android": "node ../tools/build-native.js && cap sync android && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

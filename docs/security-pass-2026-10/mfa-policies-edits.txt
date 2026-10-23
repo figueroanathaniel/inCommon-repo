@@ -1,0 +1,37 @@
+server/mfa-policies.sql, three edits
+====================================
+
+EDIT A. Insert this block immediately ABOVE the line that reads `do $$`
+(nothing else in the file changes around it):
+
+-- THE GRANT THE POLICIES BELOW CANNOT RUN WITHOUT. Each policy counts the
+-- caller's verified factors by reading auth.mfa_factors, and a policy
+-- expression runs with the caller's own privileges. Without this grant every
+-- signed-in query on the listed tables fails 42501 "permission denied for
+-- table mfa_factors" instead of returning rows. Found on the live project
+-- 13 October 2026, where it had been failing since the two-step sign-in
+-- work of 11 October; fixed there with this same line. Keep it above the do
+-- block so any re-apply of this file carries it. GRANT is idempotent.
+grant select on auth.mfa_factors to authenticated;
+
+EDIT B. In the array inside the foreach loop, find the element
+'support_requests' and extend that same line so the array ends:
+
+    'support_requests', 'cast_counters', 'entitlements'
+
+(If your editor shows the array on one line instead, the same rule holds:
+add , 'cast_counters', 'entitlements' immediately after 'support_requests'
+and before the closing bracket.)
+
+EDIT C. Append this block at the END of the file:
+
+-- To check it took, after applying: the policy should now list on 13 tables
+-- (the eleven above plus cast_counters and entitlements, added 13 October
+-- 2026 because both were created after this file was written):
+--   select tablename, policyname, permissive from pg_policies
+--   where policyname = 'two-step sign in, when turned on' order by 1;
+-- And a signed-in reader must actually reach their own rows. A 403 whose
+-- body names mfa_factors means the grant at the top of this file is
+-- missing; that exact failure ran undetected on the live project from
+-- 11 October to 13 October 2026:
+--   select id from public.profiles;   -- signed in, expect 200 with rows

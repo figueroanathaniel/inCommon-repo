@@ -8,6 +8,13 @@ and up. **Do not create phone / tablet / 9:16 / desktop forks.** 820px is the
 only breakpoint that changes the component tree.
 
 ## Ephemeris architecture (V1.0.0)
+**Read this first: none of the router below supplies a position.** It is
+initialised in `componentDidMount()` and closed on unmount, and nothing between
+those two calls asks it for anything; `swisseph-wasm` has never been installed.
+Every chart comes from `lonOf()` and `lonRaw()` in the app class, and the ten
+astral bodies there come from `astronomy-engine` now: see "The ten astral bodies
+come from a library" below. The list is kept because the files still load.
+
 **Dual-backend ephemeris system** with graceful fallback. Modules:
 - `ephemeris-points.js`: centralized point registry (17 points, single source of truth)
 - `ephemeris-backend-current.js`: the fallback, existing simplified ephemeris (Kepler + analytical)
@@ -217,65 +224,263 @@ which is how three G6 rows failed on a working implementation.
 ring only draws with a second person on the device, and a rule that can only be
 verified in one setup is a rule that quietly stops being verified.
 
-## Where tarot lives
-Two different things share the word, and they are not on the same tab.
+## My Charts is three charts, and the Library is six tabs
+Decided by the owner on 2 October 2026. The Spirit tab is named **My Charts**
+(the id, the address `/spirit` and the state key stay `spirit`) and holds three
+charts, in this order: Human Design, Astrology, Numerology. On the phone that is
+a pager of three pages (`VT_TABS`), on the desktop the hub of three cards, and
+Today lists the same three through the same `chartCards`. Synchronicities,
+Synastry, the tarot reading, the Dream Journal and the Month Ahead are no longer
+Spirit pages, and the Throughline accordion that sat on the desktop hub is gone.
 
-**The reading is a Spirit page**, beside the wheel and the numbers: a topic, a
-depth, a card count, a seeded shuffle. `tarotVals()`, gate `spiritReading`,
-addressed `/spirit/tarot`, the sixth page of the pager on the phone and a
-`spiritView` on the desktop. It used to hang off the Throughline behind
-`tlFilter === 'reading'`, which put the making of a thing inside the account of
-it, and `vtVals` forced that gate false to keep the timeline whole, so on the
-phone it could not be reached at all.
+**The Month Ahead is removed from the project**, not hidden: `monthVals()`,
+`monthReading()` and its helpers, `gateRuns()`, `fmtMonth()`, the state keys, the
+address, the search row and the N9 to N12b rows are all deleted, and those ids
+stay retired because an id is an identity, not a position. `/spirit/month` now
+lands on the hub like any unknown Spirit address.
 
-**The deck is a Library page**: all 78 cards as reference, nobody draws it.
-`tarotLibVals()`, gate `libTarot`, addressed `/library/tarot`, and it renders
-inside the Library section on both shells.
+**The Library is six tabs, in this order** (`LIB_SUBS`, state key `libSub`, the
+default is `study`): Study, Journal, Readings, Throughline, Archive and The
+Commons. Each room belongs to exactly one tab (`LIB_VIEW_SUB`) and is entered
+from it, so Back returns to it. `libSubOf()` normalises a stored value, because a
+device can hold the old `library` key.
 
-The rule underneath both: **a screen has to exist in the shell the reader is
-standing in.** `vtVals` decides which Library view the vertical shell draws, and
-a `libView` it does not name paints the shelf with every one of its own gates
-switched off, which is a blank screen with no way back. That is what
-`libView: 'angel'` did on the phone for as long as Synchronicities has been a
-Spirit pager page: the Library card wrote an address whose screen was somewhere
-else, and the report was that the number field would not take typing.
-Synchronicities has one home per shell, so `goAngelGo()` and `openPath()` both
-split on the width and send the reader to the page rather than to the address.
+| Tab | Holds, in this order |
+|---|---|
+| Study | Human Design Atlas, Astropedia, The Book of Numbers, My Tarot, Dream Symbols, Sabian Lexicon |
+| Journal | Synchronicities, Dream Journal, then the ten practices grouped by caution: Universal caution first, then Mild caution, each group alphabetical. A leading quotation mark does not count when sorting, so the Spiritual Bypass check is filed under S |
+| Readings | Tarot on the left half and The Book of Changes on the right, a divider between. Each half opens its own room (`libView` `reading` and `iching`) |
+| Throughline | the record, as it was |
+| Archive | the Archive, as it was |
+| The Commons | Synastry, and the Circle that renders inside it |
 
-The matching rule for the values: **the vertical shell renders every Spirit page
-at once**, so a page's vals must be present whenever that shell is up. Both
-`tarotVals()` and `angelVals()` gate on `vertical` alone for that reason. Asking
-for `curTab()` as well paints the page with no handlers on it, which is an input
-with no value binding and no change handler: it looks right and does nothing.
+**Every item is listed once.** The Archive no longer carries a card back to the
+Throughline, the desktop Today page no longer carries a Throughline button, the
+Yellow Pages row is not in the Study list, and the Book of Changes is not in
+Study as well as Readings. Throughline and Archive live in the Library and
+nowhere else: N45 holds that, and N41 to N46 hold the rest of this table, so a
+list that is true once cannot quietly become true twice.
 
-`monthVals()` is the third page under that rule and the newest: `/spirit/month`,
-the seventh page of the phone pager, `spiritView: 'month'` on the desktop,
-reached by `goMonthGo()` and by an `openPath()` branch that splits on the width
-exactly as Synchronicities does.
+**The help square is drawn once per screen.** It is a 52px square carrying the
+inCommon symbol, wearing `--crisis`, never the action colour. On the phone it is
+the Get Help button on every screen (`helpGo`, the dock), and the Library does
+NOT draw its own beside it: the phone's Library shell has no banner (N47). On the
+desktop there is no dock button, so the Library carries the Self Help Yellow Pages
+square as a `position: sticky` footer on every tab (`libBanner`), hidden inside a
+room or a practice because those are not tabs (N44). Do not add a second square
+to a shell that already has one.
 
-**The month reading carries Human Design as its own section**, "The gates the
-Sun walks", between the reader's windows and the marked date. It walks
-`gateRuns()` over the month and asks each run where the gate's centre sits in
-this chart and which channels it closes against a natal gate. The Earth is asked
-too, because it sits opposite and the gate boundaries line up across the wheel,
-so both change gate on the same day. **A gate that is already natal closes
-nothing new**, which is why `closing()` returns empty for it: a channel with
-both gates natal is one the chart already has, and calling it a transit would
-be a false finding. A closing run that begins inside the month joins the marked
-date candidates at weight 2.5, below the lightest transit window, so it names
-the day only when the slower sky offers nothing.
+**Rooms the old Spirit pages became.** `libView` `angel` (Synchronicities,
+`/library/synchronicities`, gate `libAngel`), `dreamj` (the Dream Journal,
+`/library/dream-journal`, `libDreamJ`), `reading` (the tarot reading,
+`/library/readings/tarot`, `libReading`), and The Commons is a tab rather than a
+room (`/library/commons`, `libSyn`). `LIB_PATHS` is keyed by `libView`. The old
+Spirit addresses (`/spirit/synchronicities`, `/spirit/angel-numbers`,
+`/spirit/dreams`, `/spirit/tarot`, `/spirit/synastry`, `/spirit/together`,
+`/spirit/i-ching`) and `/library/practices` are kept as aliases in `openPath()`,
+and `currentPath()` rewrites the address to the new one on arrival.
 
-**A sentence the reader has just read is shortened, not repeated.** Neighbouring
-gates share a centre, so October walks six in a row through the Spleen, and the
-full centre sentence six times over read as the app running out of things to
-say. A run in the same centre as the one before says so in one clause, and each
-long explanation (defined, open, natal, closing, unanswered) is given once per
-month and shortened after.
+**The rule that outlived the move: a screen has to exist in the shell the reader
+is standing in.** The phone and the desktop each carry their own Library markup,
+so the six tabs, the rooms and the banner are written once and placed in both,
+and `vtVals` and `dtVals` both name the rooms in their `libShell` exclusion list.
+A `libView` that list does not name paints the shelf with every gate switched
+off, which is a blank screen with no way back. The old fault of that shape was
+`libView: 'angel'` on the phone while Synchronicities was a pager page.
+
+**The matching rule for the values: a room's vals are present exactly when the
+room is open**, and the room's gate is the state (`libView === 'angel'`), not the
+width. `angelVals()`, `tarotVals()` and `dreamVals()` are asked for on the phone
+only while their room is the one showing. The gate must not be `vertical` alone
+any more: that was right while a page was always mounted in a pager, and wrong
+now, because it would paint the room under every Library tab.
+
+**Six tabs do not fit a phone.** The strip scrolls sideways, and
+`syncLibTabIntoView()` (from the one `componentDidUpdate`) moves its own
+`scrollLeft` so a tab chosen by an address or a search row is on screen.
+It must not use `scrollIntoView`, which would also move the snapped page.
+
+## The Library shelf is lit plates
+Asked for by the owner on 21 October 2026 ("Today, we make the pages look
+fire"), who chose the Library shelves first and cosmic depth as the feel. The
+Study tab's six rooms and the Journal tab's two rooms are plates: a card of sky
+with the room drawn in light on it (the nine centres wired, the zodiac with a
+sun, the nine petals, three cards fanned, a crescent over water, the 360
+degrees with a needle, a light met again and again, a page open under the
+moon), and the Readings tab's two halves are portals of the same sky with the
+drawing large and the button under it, and a thin warm seam between them, which is
+the divider the Library table names and N43 measures: it has to be the Tarot
+portal's next sibling and no wider than 2px. Study is a grid that is two columns on a
+phone and three on the desktop from one rule,
+`repeat(auto-fill,minmax(max(148px,30%),1fr))`; Journal's two plates and
+Readings' two halves are two columns everywhere, because the owner put tarot on
+the left and the Book of Changes on the right.
+
+**The shelf is written once and placed in both shells.** The two Library blocks
+were byte identical before this and are byte identical after it, so a change to
+one is a change to the other or it is a fault.
+
+**No category colour.** Every plate is the same wash, `--atmc` overhead and
+`--atmc2` under, lines in `--ac2-hi` over a halo in `--ac2`, warm fills in
+`--atmc2`. A room is told apart by its drawing and its name, by "A category is
+not a semantic colour"; the green the Astropedia and Lexicon rows used to wear
+is gone. Plates carry no description, by "No disclaimers".
+
+**What moves, and when.** The stars and the warm fills breathe on their own,
+which is opacity only. Everything else (a ring turning, petals turning, the
+channels flowing, the cards and the moon floating) is `paused` and runs only
+under a hovering pointer or keyboard focus, because the phone draws every
+section at once and six turning drawings nobody is looking at are a battery
+cost with no reader. There is no CSS `filter` anywhere in a drawing: the glow is
+the same lines drawn twice, wide and faint under narrow and bright, because a
+filter over something animating repaints every frame. Under reduced motion
+nothing animates.
+
+**The tilt is the Numbers cards' idiom**: `plateTilt()` and `plateTiltOff()`
+write the element's own style, never state, and the drawing drifts against the
+pointer so it sits deeper than the card. A plate sets its own `box-shadow`, so
+it does not take `data-lift`, by "Anything that can be pressed is lifted"; its
+border and shadow change on hover through `--plb` and `--plsh`, custom
+properties the head sheet sets, which an inline `all:unset` does not reset. The
+entrance animation is `backwards` and never `both`: a finished animation that
+holds `transform: none` beats the inline transform the tilt writes, and the
+card would never lean.
+
+**A translucent surface under a drawing shows what is behind it.** `--sf` and
+`--sf2` carry alpha under Deep Field, so the front tarot card is painted over
+an opaque `--bg` first, or the back card's outline reads through it.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+three tabs: four identities, hardened and not, at 1440 and 375, 48 cases, no
+pair under 4.5:1 and no control under 44px. Driven in both shells: every plate
+and both reading buttons land on their room and address, Enter on a focused
+plate opens it, and a hover tilts the plate, lights it and runs its drawing.
+
+## My Charts in light, and the attribute names SVG will take
+The owner's next page on 21 October 2026, after the Library shelf, and all three
+charts were chosen. Same feel, cosmic depth, and nothing on the page explains
+how any of it is drawn.
+
+**The 2D wiring is drawn as the Atlas draws it.** It was nine rounded boxes in
+the atlas colours with a line per defined channel. It is now the centres in the
+field's shapes (`hdShape()`), all thirty six channels drawn gate to gate from
+`hdGateSpots()`, and every channel split into two halves that each light from
+their own gate: `--tx` for personality, `--hd-des` for design, a braid of both
+when both hold it, `--chl` when nobody does. That is the language the 3D scene
+already speaks, so the three views of one chart read alike, and it is what makes
+a hanging gate visible in 2D at all. A defined channel carries a breathing warm
+underlay, a defined centre a halo in its own colour, and a key under the figure
+names the three inks. The centre buttons keep their boxes and their accessible
+names; a triangle's label sits toward its wide side through `jc` and a few
+pixels of `pad`. **A padding percentage is a percentage of the width**, which is
+how the first pass put HEAD under AJNA.
+
+**The wheel card and the wiring card are sky**: the plates' wash and starfield
+behind the figure, the zodiac ring with a faint breathing glow, the inner disc
+lit a little, and each body with a soft halo in its own colour. The Numbers
+cards take the same wash under the tilt and sheen they already had.
+
+**SVG takes hyphenated attribute names, never camelCase.** The runtime lowercases
+a camelCase attribute it does not know, so `strokeWidth` arrives as
+`strokewidth`, which SVG ignores. Sixty six of them were in the markup: every
+ring, house line and aspect on the wheel drew at 1px, the aspect dashes the
+legend under the wheel promises never drew, the Expanded Chart's wheel had the
+same fault, the dream radar's fill was solid where it was written at 26% and its
+labels were unanchored, and the Lexicon mandala's ticks ignored their widths.
+All of them are `stroke-width`, `stroke-dasharray`, `fill-opacity`,
+`text-anchor`, `stroke-linejoin` and `dominant-baseline` now, and the wheel's
+aspects are measured drawing at 1.4 to 2.4px with their dashes. `viewBox` and
+event handlers are untouched: the runtime knows those. A grep for
+`strokeWidth|strokeDasharray|textAnchor|fillOpacity` in the template should
+return nothing.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+wiring card, the wheel card and the Numbers cards: four identities, hardened and
+not, at 1440 and 375, 48 cases, clean.
+
+## Bedrock, Weather, Horizon: how the chart pages sort what they hold
+Asked for by the owner on 21 October 2026 ("Organize the tiles, come up with
+some imaginative system of organization for the collections of data"), and of
+three systems put to them this is the one chosen. Every chart page sorts its
+tiles by time, under three headed bands that read the same on all three charts:
+
+| Band | What it holds |
+|---|---|
+| Bedrock | what the birth fixed. Astrology: Stellium, the placements, Houses, Aspects. Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
+| Weather | what the sky is doing to it now. Astrology: Important Today, Current Retrogrades, the two transit lists. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
+| Horizon | what is coming. Astrology: Eclipses and Windows Opening. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+
+**The bands are headings and nothing more.** A glyph (strata, a body on its
+orbit, a sun on the horizon line), the name in the display face and a rule. No
+line under them says what a band means, by "Discovery belongs to the reader":
+the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
+than `UI_ICONS`, because nothing asks `uiIcon()` for them.
+
+**A card can change band on its own.** An eclipse inside its five-day window is
+Weather and further off it is Horizon (`when` on each `chartFeatures` row), so
+the page reorganises itself as the sky moves and nobody moves the card. The
+desktop puts Bedrock left of the wheel, Weather right of it and Horizon under it,
+so what is fixed, what is now and what is coming sit round the chart they are
+about; the phone stacks all three. Aspects moved out from under the wheel into
+Bedrock for this.
+
+**Closeness: no list may become the only thing on the screen** (the owner, 21
+October 2026: "Fill out the page ... no list scrolls so far down that it's the
+only thing left on the screen ... Closeness is the effect I want to give the
+reader"). Every open list in a chart group (`data-ch-list`) stops at
+`min(42vh, 420px)` and every open card (`data-ch-feat`) at `min(52vh, 480px)`,
+both `min(36vh, 340px)` on the phone, where a card's own header already takes a
+fifth of the screen, and each scrolls inside itself with its scroll contained. From 1180px up each
+desktop column (`data-ch-col`) is held to `100dvh - 210px`, the screen less the
+header and the sample banner, so a short page scroll puts all three columns on
+the screen at once and each scrolls on its own. The wheel's column is the one
+that never scrolls: the wheel keeps its place and only the Horizon under it
+(`data-ch-mid`) scrolls, so nothing opened there can carry the wheel away.
+**Not sticky:** the first pass made the columns `position: sticky`, and a column
+as tall as its row has nowhere to stick to, so they slid under the banner.
+Below 1180px the columns wrap and nothing is held, because a held column in a
+wrapped row is a scroller inside a scroller.
+
+**Windows Opening is the transit scan, read forward.** The soonest eight windows
+of `transitWindows()` that open after today, each opening the natal body it
+lands on. It is the one new collection in this change, and it reads a scan the
+Throughline already runs, so it costs nothing.
+
+**The Human Design Weather is numbers only**, by the rule the gates now card on
+Today keeps (Open Gate 5): a body, a gate and a line, sorted into Meeting yours
+(the sky on one of the reader's gates), Completing a channel (the partner of one
+of their hanging gates, with the channel's key) and Passing through. Each tile
+opens its gate. A sample chart is nobody's, so it gets the sky unsplit.
+
+**The life ribbon** (`numBands()`) lays the pinnacles and the cycles on one age
+axis from birth, at least to ninety, with a line at the reader's age. Segments
+are contiguous: a pinnacle runs from its first year to the next one's first
+year, so "0 to 33" and "34 to 42" meet at 34 rather than leaving a year of gap.
+The current segment is lit in `--ac2-hi`, never `--ac`: being in a pinnacle is
+not an action. The ribbon is at least 720px wide and scrolls sideways on a
+phone, inside `data-noswipe`, because a nine year pinnacle at a phone's width
+is narrower than a touch target. The pinnacle, cycle and challenge lists are
+gone: the ribbon carries the first two and Bedrock the third.
+
+**A splice that cuts on a line can cut a tag.** The first pass of the Numbers
+bands cut from a heading's line to the line holding the next section's heading,
+which took that section's opening `<div>` and left its `</div>`. Nothing
+threw. On the phone the stray close ended the Spirit section early and the
+Library section was drawn on top of it. Count the tags after any template
+splice: `div`, `section`, `sc-if`, `sc-for`, `button` and `span` must each open
+as often as they close, and after this change they do.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+bands on all three pages: four identities, hardened and not, at 1440 and 375, 48
+cases, clean. Driven on a chart of the reader's own: the Human Design Weather
+splits, every tile opens its gate, Windows Opening lists the soonest eight, and
+a ribbon segment opens its pinnacle.
 
 ## Synchronicities is one page with two lookups
 The page was Angel Number Encounters and it read repeating numbers. It is now
 Synchronicities, and it reads a repeating number or a repeated animal sighting.
-The vals function is still `angelVals()` and the gate is still `spiritAngel`,
+The vals function is still `angelVals()` and the gate is `libAngel` (it was
+`spiritAngel` while this was a Spirit page: see "My Charts is three charts"),
 because the number half is still the angel number half; `sightMode` picks which
 lookup is on screen and `animalLookup()` is the second one.
 
@@ -294,8 +499,9 @@ have had to invent. Do not add a composed fallback to `animal-symbolism.js`.
 the tradition holds, where that reading came from, and what it may be doing for
 the person who noticed. The third is never a statement about the reader.
 
-`/spirit/synchronicities` is the address. `/spirit/angel-numbers` is kept as an
-alias in `openPath()`, the same way `/spirit/together` is kept for Synastry.
+`/library/synchronicities` is the address, a Journal room. `/spirit/synchronicities`
+and `/spirit/angel-numbers` are kept as aliases in `openPath()`, the same way
+`/spirit/together` is kept for Synastry.
 
 ## Anything Else logs and does not interpret
 Synchronicities has three tabs now. The number half composes a meaning from the
@@ -355,9 +561,9 @@ time, never a default.
 
 ## The Dream Journal
 `dream-symbols.js` holds the registry, `dreamVals()` the page, gate
-`spiritDream`, addressed `/spirit/dreams`, the eighth page of the phone pager
-and `spiritView: 'dream'` on the desktop. `goDreamGo()` splits on the width
-exactly as `goMonthGo()` does, and there was never a Library address for it.
+`libDreamJ`, addressed `/library/dream-journal`: a Journal room on both shells
+(`libView: 'dreamj'`). It was the eighth Spirit pager page until 2 October 2026,
+and `/spirit/dreams` is kept as an alias.
 
 **A dream is a journal memory with a tag**, the same shape a sighting is, which
 is what puts it on the Throughline stamped with the window covering its date
@@ -390,7 +596,9 @@ exactly that reason, and the negation check stops at it.
 **Nothing here calls a model.** Every line of the analysis is computed on the
 device from the registry, which is why it works offline, why it is identical for
 the same text twice, and why the feature stays inside the V1.6.0 removal instead
-of quietly stepping back through it.
+of quietly stepping back through it. The Oracle is the one screen that calls a
+model, by the owner's decision, and it does not lend that to anything else: see
+"The Oracle took Throughline's seat" below.
 
 **The two kinds of link are never merged.** `dreamLinks()` returns `figures`, a
 dream animal that was then actually seen, and `near`, a sighting inside 48 hours
@@ -587,14 +795,13 @@ state behind a pair key. G37 asserts the module names no storage API.
 follows. A member with no birth time stays in the Ground and is named, with the
 affected mechanics listed.
 
-**Circle renders inside Synastry in both shells, and is not a ninth Spirit
-page.** `circleVals()`, gated on nothing but the modules being present, spread
-beside `synVals()` at the single call site, and the markup sits inside
-`spiritSyn` and OUTSIDE `synOpen` so it is reachable when no pair is chosen.
-Two reasons, and the first is the one that matters: the Spirit pager has eight
-pages and the indices are load bearing, so a ninth renumbers what `openPath()`
-and `vtGoTab()` point at and renumbers N24. The second is that this is where it
-belongs anyway, which is the same call `hd-composite` made.
+**Circle renders inside Synastry in both shells, and Synastry is The Commons
+tab of the Library.** `circleVals()`, gated on nothing but the modules being
+present, spread beside `synVals()` at the single call site, and the markup sits
+inside `libSyn` and OUTSIDE `synOpen` so it is reachable when no pair is chosen.
+It is not a page of its own: this is where it belongs, which is the same call
+`hd-composite` made, and a screen of its own would be a second place to open the
+same group.
 
 **The reader is supplied by the shell, never by the Ground.** hd-circle returns
 no seat, so the person holding the phone is marked on the chip row and nowhere
@@ -652,9 +859,9 @@ They can reach `window.MinorBodies`, which `minor-bodies-ephemeris.js` installs,
 uninstalls and recalibrates, so their answer is not a function of `t` alone.
 Cache a null taken before install and the Expanded Chart says "not computed"
 for the rest of the session. The bench drives that case rather than asserting it.
-The four asteroids now read `minor-body-elements.js` FIRST, which is static
-generated data and is a pure function of `t`, so they could be cached on that
-path. They are not, because the fallback is still there behind them and a cache
+All five now read `minor-body-elements.js` FIRST (the asteroids since their
+fetch, Chiron since 29 September 2026), which is static generated data and is a
+pure function of `t`, so they could be cached on that path. They are not, because the fallback is still there behind them and a cache
 that is only sometimes safe is a cache nobody can reason about.
 
 **Nothing is rounded on the way in.** `designT()` bisects `lonOf` to an
@@ -809,9 +1016,13 @@ measured an RMS of 35 to 110 degrees, flat across every window from 1980-2010 to
 1900-2100, so a wrong phase rather than drift: a reader's Ceres could be in the
 opposite sign and nothing in the build could tell. They are fetched now, at
 0.032 to 0.058 degree, and they earn their degree symbol by that measurement.
-Chiron is deliberately NOT fetched: a fifty year orbit that Saturn and Uranus
-keep perturbing is chaotic, and the fitted single epoch set measures 0.3 degrees
-across 1980-2010, which is what fitting against real positions buys.
+Chiron was left out here on the argument that a fifty year orbit Saturn and
+Uranus keep perturbing is chaotic. That is true of one set of elements carried
+across the century, which is what the fitted fallback is (0.92 degrees at
+worst), and not of an osculating set taken at the nearest epoch, which is what
+this module does for every centaur. **Chiron is fetched now**, since 29
+September 2026, when the Celestial Codex was found asking Horizons for it: 51
+epochs four years apart, 0.025 degrees at worst against 404 references.
 
 **The fetcher merges now, and that is what made a four body change reviewable.**
 `--only id,id` fetches just those and seeds `DATA` from the generated block
@@ -861,17 +1072,19 @@ asteroids into this module also took them out of `APP_COMPUTED`.
 **Degree symbols are earned by that number.** `degreeSafe()` lets a fetched
 body name a degree when its measured worst case is at or under
 `DEGREE_SAFE_WORST` (0.2). The comets do not: one osculating set each,
-unmeasured across a lifetime. **Chiron is the only body left on
-`DEGREE_SAFE_EXCEPT`**, under both spellings, because the expanded chart
-addresses a point by id and the wheel by name and a name only list let `pallas`
-through once. The four asteroids came off that list when they were fetched:
-they earn the degree the way every other fetched body does, by measurement, and
-`degreeSafe()` lowercases a name before asking so the measurement actually
-governs rather than the lookup missing and falling through to the permissive
-default. Group E's row for this asserted a copy of the old list and went red the
-day the list was right; it asserts the RULE now, derived from the elements
-rather than typed, so adding a body with a nine degree fit and forgetting the
-list fails it.
+unmeasured across a lifetime. **There is no list of names any more.**
+`DEGREE_SAFE_EXCEPT` held the four asteroids, then Chiron alone, and went when
+Chiron was fetched: a list is what stays behind when a measurement moves. A
+body this module does not carry, which for Chiron and the four asteroids means
+the fitted fallback is drawing it, is judged by the fallback's own
+`accuracyDeg`, so the same body names a degree from the fetched elements and
+withholds it on the fitted ones. `degreeSafe()` lowercases a name before asking,
+because the expanded chart addresses a point by id and the wheel by name, and a
+name only lookup once let `pallas` through. Group E's row asserted a copy of the
+list, then a rule over the list, and went red on a correct change both times;
+E10 now runs the app's own `degreeSafe()`, lifted out of it, with the fetched
+elements present and with them missing, under both spellings, and E10c names
+Chiron. Making the fallback branch permissive turns both red.
 
 **Readings: 75 entries in `placement-content.js`, keyed by registry id.**
 Same fields and grammar as the 21 core bodies, because the same composer
@@ -1158,11 +1371,17 @@ because those are genuinely mean over the interval for a body Saturn and Uranus
 keep perturbing.
 
 **Accuracy decides which claims a body has earned.** At 0.92 degrees Chiron can
-name a sign and an aspect and cannot name a degree, so `degreeSafe()` withholds
-the Sabian symbol from it and from the four asteroids, and the page says why
-rather than leaving a gap. Group E asserts the reference positions, the worst
-case, that `a` was held, that Kepler still holds, and that the dead model stays
-dead. Measure the body, record the worst case, let that decide what it may say.
+name a sign and an aspect and cannot name a degree, so on this fit
+`degreeSafe()` withholds the Sabian symbol, and the page says why rather than
+leaving a gap. Group E asserts the reference positions, the worst case, that `a`
+was held, that Kepler still holds, and that the dead model stays dead. Measure
+the body, record the worst case, let that decide what it may say.
+
+**This fit is the fallback now.** Since 29 September 2026 Chiron comes from
+`minor-body-elements.js` first, fetched from Horizons at 51 epochs and
+measured at 0.025 degrees, so it names its degree like any fetched body (see
+"Where the Codex computed better"). This fit draws Chiron only when that module
+is missing, and the rule above still governs it there.
 
 ## The Book of Changes
 
@@ -1171,13 +1390,10 @@ dead. Measure the body, record the worst case, let that decide what it may say.
 half and `ichingVals()` for the consultation.
 
 **Both halves are one room, and that is not the shape the other systems use.**
-Tarot is split: the reading is a Spirit page, the deck is a Library page. This
-is not, for two reasons. The vertical shell carries Spirit as a pager and the
-page indices are load bearing, so a tenth page moves what `openPath()` and
-`vtGoTab()` point at and renumbers N24. And it is the wrong shape for this
-system anyway: the Book of Changes is a book you consult, so the consultation
-sits at the front of the room that holds the sixty four. A Spirit page can be
-added later without moving anything.
+Tarot is split: the reading is a Readings room, the deck is a Study room. This
+one is not: the Book of Changes is a book you consult, so the consultation sits
+at the front of the room that holds the sixty four, and the room is listed once,
+on the Readings tab, on the right half beside the tarot reading.
 
 **`iching` is deliberately absent from `SPIRIT_PATHS`.** It was in it, and that
 made `/spirit/i-ching` resolve to a `spiritView` no shell draws, which is a
@@ -1316,10 +1532,15 @@ Britain stayed on summer time, the years Portugal ran on central European time,
 the five years Russia kept daylight saving permanently, the Sydney games
 starting it early, China's brief experiment with it, and three zones whose
 offset is not a whole number of hours. If a future change starts reading a
-stored standard offset again, every summer row goes red at once.
+stored standard offset again, every summer row goes red at once. **Those rows
+check the offset, and an offset can be right while the instant is wrong**: all
+three fractional zones read 5.5, 5.75 and 13.75 correctly while `Date.UTC`
+dropped the fraction on the way to the instant. B13c checks the instant.
 
 **The assumption is returned, never hidden.** A chart with no time is still
-drawn, for 12:00 noon local, because a solar chart is worth having. What is not
+drawn, for 12:00 noon local, because a solar chart is worth having. (Until 29
+September 2026 the sentence said local and the arithmetic took Greenwich; B13b
+holds them together now.) What is not
 allowed is drawing it quietly: `availability()` names what cannot be computed,
 `birthTimeVals()` puts that sentence above the wheel and the bodygraph in both
 shells, and the list is the point of it. A wheel with no house numbers and no
@@ -1383,10 +1604,98 @@ crossing in a window rather than the first, because Saturn and Chiron can cross
 a natal longitude three times and one date for a three pass return is a false
 statement about when something happens. Nothing calls it yet.
 
+## The ten astral bodies come from a library, and they are measured
+Until this pass the Sun, Moon and planets came from a hand written series in
+`lonRaw()`: a two term Moon and a coplanar first order Kepler model for Mercury
+to Pluto. Nothing in the build compared them with anything outside it, while the
+asteroids were held to JPL Horizons to a twentieth of a degree. Against 19,750
+Horizons positions from 1900 to 2100 the series was out by 1.3 degrees on the
+Moon, 3.9 on Venus, 6.5 on Mars and 2.9 on Pluto, and a comment beside it said
+"well inside a degree".
+
+What that changed, over 2,000 random births from 1950 to 2010, with one set of
+Human Design rules and only the positions swapped:
+
+| Changed | Share |
+|---|---|
+| Any activated gate | 74% |
+| Defined channels | 39% |
+| **Authority** | **8.8%** |
+| **Type** | **8.4%** |
+
+It is the same class of error as the 88 day design side, a third of its size,
+and it survived the same way: nineteen gates were green, because every one of
+them tested what it was pointed at and none was pointed at the foundation.
+
+**`astronomy-engine` 2.1.19 (MIT, Don Cross) is vendored** as
+`app/astronomy-engine-2.1.19.min.js`, byte for byte from the npm registry
+tarball, and named with its version the way the Supabase client is. It measures
+0.023 degrees at worst on the Moon and under 0.006 on the other nine. It is one
+browser file and needs no bundler, and needing a bundler was the reason the
+series was hand written in the first place.
+
+**`modulesReady()` waits for `window.Astronomy`.** Helmet scripts are hoisted as
+async tags, so without the wait a chart drawn before the library lands is
+memoised from the fallback for the session, the trap the minor bodies had with
+`window.MinorBodies`. The wait cannot hold the splash forever: `boot()` gives up
+after 50 tries and shows its banner, and `lonRaw()` answers from the old series,
+which is kept as the fallback for exactly that case. Verified both ways in a
+browser: a six second delay boots with the library in place, and a blocked file
+boots at about 9.6 seconds on the fallback.
+
+**Mars outward are read off a four day grid.** A library position costs 20 to
+45us, and 155 for Pluto, whose orbit it integrates numerically.
+`transitWindows()` asks for 1,986 in a row during boot and went from about 10ms
+to over 100. Cubic interpolation between library positions on a grid anchored at
+J2000 measures 0.0003 degrees at worst for Mars and 0.00003 or less for the
+rest, and the scan now takes about 6ms in a browser, less than before. Mercury
+and Venus measure 0.05 and 0.002 on the same grid and are asked for directly, as
+are the Sun and the Moon. Two things about the grid are easy to undo. Neighbours
+are unwrapped onto the middle node before they are mixed, or a crossing of 0
+Aries averages 359 and 1 into 180: this pass made that bug once, in a scratch
+test. And a lone cold call costs four nodes, which the position cache in front
+of `lonOf()` pays once. `bench-ephemeris.js` loads the same file now, so the
+ratios quoted in "The one cache that holds positions" were measured against the
+old series; run the bench rather than quoting them.
+
+**`check-astral-bodies.js` is the gate** and `fetch-astral-bodies.js` makes its
+fixture. It lifts `lonRaw()` out of the app the way `bench-ephemeris.js` does,
+loads the vendored file, and holds all ten bodies to 0.03 degrees, a thirtieth of
+a Human Design line, against every Horizons position. It also asserts that the
+old series FAILS that ceiling with the library removed, which is what proves it
+can go red; walks the grid against the library at a quarter day through all 164
+crossings of 0 Aries in the fixture; pins the vendored file's SHA-256; asserts a
+non-finite instant answers NaN; and checks the two seams that fail silently,
+`modulesReady()` and the `app/sw.js` precache. Each of those was sabotaged once
+and turned it red.
+
+**Only a finite instant reaches the library.** `MakeTime` throws on NaN, where
+the series quietly answered NaN, so a half typed partner birth date that parses
+to an invalid date would have thrown out of a render instead of drawing nothing.
+`lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
+back for all ten bodies.
+
+**`people-library.js` `STATE_VERSION` was 2 for this, and is 3 since the
+Codex comparison changed untimed noon and the angles.** Its own comment says the number
+moves when the arithmetic of `computed_state` changes, and the bump is what
+invalidates `pair-cache.js`, so no stored composite outlives the positions it
+was made from.
+
+**This changes existing readers' charts**, as the design side fix did: about one
+birth in twelve reads as a different Type. It is a correction rather than a
+change, and it is worth saying out loud.
+
+**The deploy bundle was rebuilt in place.** `deploy/v6.3/` carries the library
+and the cover's sign in, so the deploy preview shows what the source does. There
+was no version bump, by the rule in "Where things live in this repository":
+rebuilding does not earn one, and the stamp moves when a build has been deployed
+and confirmed live. The two earlier v6.3 rebuilds made the same call.
+
 ## A routed jump owns the pager tab until it lands
 `vtGoTab()` sets `vtTab` and then smooth scrolls the pager to that page, and
 the pager's scroll handler derives `vtTab` from `scrollLeft` on every scroll
-event. So a jump from the first Spirit page to the ninth walked the state
+event. (The pager has three pages now; the account below is from when it had
+nine, and the guard is unchanged.) So a jump from the first Spirit page to the ninth walked the state
 through every page between them, and everything that follows `vtTab` followed
 it there: `aria-current` crossed the tablist, and the live region announced
 pages nobody asked for. A deep link into the Dream Journal read aloud as five
@@ -1479,8 +1788,9 @@ never `--ac`: whether a gate is natal is not an action.
 the thirty six channels complete only when the two are together, which both
 people already close alone, which one closes and the other does not, and which
 the pair does not reach at all. It renders inside Synastry rather than as a
-ninth Spirit page, because Synastry is already the two person surface and
+page of its own, because Synastry is already the two person surface and
 already carries the consent story, the one sided label and the partner picker.
+Synastry is The Commons tab of the Library now.
 
 **Six states, not four.** Electromagnetic (one gate each, different gates),
 companionship (both hold the whole channel), dominance (one holds it whole, the
@@ -1632,13 +1942,14 @@ the people saved on this device, and the lines that answer.
 
 **A row never writes state. It names a target, and `searchGo()` resolves it
 against the shell standing there.** That is the whole routing rule, and it is
-the one that is easy to undo: the desktop sets a `spiritView`, the phone leaves
-it null and scrolls its pager to the page holding the same thing. A row that set
-`spiritView: 'dream'` on the phone would paint a Spirit view no vertical shell
-draws, which is a blank screen with no way back, and the state would look
-correct while it did. `searchTab()`, `searchSpirit()`, `searchLib()` and
-`searchAngel()` are the four target builders, and Synchronicities needs the
-fourth for exactly the reason `goAngelGo()` is a method rather than a `setState`.
+the one that is easy to undo: the desktop sets a `spiritView` for a chart, the
+phone leaves it null and scrolls its pager to the page holding the same thing.
+A row that wrote a `libView` the vertical shell does not name would close the
+sheet onto an empty shelf with no way back, and the state would look correct
+while it did. `searchTab()`, `searchSpirit()` (the three charts, pages 0 to 2 of
+the pager), `searchLib()` and `searchAngel()` are the target builders.
+`searchLib()` names the tab as well as the room, from `LIB_VIEW_SUB`, so Back
+from the room lands on the tab it was reached from.
 
 **Where the module has its own search, the bar calls it.** The hexagrams, the
 dream images and the animals come back through `IChing.search`,
@@ -1674,8 +1985,79 @@ under two characters.
 N37 to N39 are the coverage, and they drive rather than read: the control is
 clicked, the field is typed into through a real input event, and the row is
 clicked, because the failure this surface can have is the one that reads as
-correct. N37b names all thirteen groups one query at a time, so a shelf that
+correct. N37b names all fourteen groups one query at a time, so a shelf that
 silently drops out of the index is a red row rather than a quiet absence.
+
+## The Timing Lexicon, and why the Together slide reads from it
+The owner reported on 12 October 2026 that the Custom buttons on Today's
+Together slide "don't change much", and asked for a full body of original
+explanations for every transit, gate and number. Both were true and they were
+one problem. Measured by clicking every button in a browser: with the wording
+that shipped, **all ten transit buttons produced the identical paragraph**,
+because `horoTogether()` read `d.hits[0]`, the live sky, rather than
+`dv.hits[0]`, the reader's choice. Gate clicks moved about 12% of the words
+and number clicks 5%, because a choice only dropped a gate name or a three
+word essence into frames picked by a hash of the date.
+
+**`app/timing-lexicon.js` is the corpus, interpretation layer, global
+`TimingLexicon`.** It reads nothing: no ephemeris, no clock, no storage. A
+transit is three pieces written for it: `MOVE[mover][aspect]` (60), what this
+body does at this angle; `MEET[mover][point]` (192), what it does to this
+natal point, naming the return or cycle where a body meets its own place; and
+`PLACE[point][c|e|h]` (48 questions), one per point per kind of contact. Twelve
+movers, five aspects and sixteen natal points are 960 contacts and every one
+reads differently. A gate is `GATE[n]` (`sky`, `held`, `open`, `ask`),
+`GATE_LINE[n][0..5]` (all 384 lines, each written for its own gate) and
+`CHANNEL` (the 36 pairs, read when a transit completes one with a natal gate).
+`LINE[1..6]` stays as the description of what each position is, returned as
+`lineKind`, and is the fallback only if a gate's line were ever missing. A number is `NUMBER[v][role]` for day, month, year, Life
+Path, Challenge (0 to 8) and Pinnacle, masters included where the role can
+reach them. No origin or method field, by the owner's rule of 11 October.
+
+**The 384 lines are each written, not composed, and they are held to it.**
+The owner asked on 12 October 2026 for every gate line to be written. The six
+positions are read as six ways of meeting the gate's theme (the groundwork, the
+gift that works unwatched, the lesson by trial, the door through people, the
+public view others project onto, the long view), and the first draft leaned on
+one sentence frame per position: "comes naturally here, and others..." opened
+about thirty second lines and "seen from a height... were the ones that..."
+about thirty sixth lines. 131 were rewritten for that, and the rule that came
+out of it is the one to keep: **a frame that repeats under the six word cap is
+still a template**, so check four word runs across the lines before believing a
+pass is finished. None of the 384 is a rendering of the oracle text or of
+anybody's line keynotes. TL15 reads the I11 and I12 fixtures out of
+`run-module-tests.js` rather than retyping them, and refuses any six word run
+shared with `iching.js`'s own hexagram lines, because hexagram N is gate N and
+a gate line that leaned on the hexagram line beside it would be one text
+wearing two names. TL6b holds all 384 distinct, six per gate, returned for
+their own gate and line, and free of any span ("this week", "today").
+
+**Gate text is time neutral on purpose.** A gate on this slide can be carried
+by the Moon for hours or Pluto for years, so a gate entry that said "this week"
+was false for most carriers. The span belongs to the mover (`PACE`), never to
+the gate.
+
+**`horoTogetherLexicon()` composes the slide** and returns null when the
+module is missing or a key is unknown, so the old wording still answers. Its
+salt carries the choice, so sentence order moves with what was picked rather
+than with the date alone. The paragraph is drawn as paragraphs
+(`alignTogetherParas`): the transit and where it lands first, the design and
+the number in the seeded order, and the question last. The question follows
+the system the reader last changed (`alignLast`), so a number chosen by hand
+is answered with the number's question. Measured after: ten of ten transit
+paragraphs distinct, about a third of the words changing per transit click,
+38% per gate click now that each line is its own, and 16% per number click.
+
+**`tools/check-timing-lexicon.js` is the gate.** It reads the key sets out of
+the app (`PLNS`, `ASPECTS`, `anglePoints()`) and out of `hd-topology.js`
+rather than typing them, so a body or angle the app starts producing without
+an entry fails rather than quietly falling back. It asserts 960 distinct
+readings, distinct pieces, the six word phrase cap of three the app holds
+itself to, no dash, no "you are", astral body rather than planet, no rating
+vocabulary, and that every question is one. Its detectors are tested on
+planted fixtures first (TL0). Add to the corpus by adding to the module and
+running the gate; a new entry that repeats an old one's phrasing is the fault
+this whole pass removed.
 
 ## Aspects teach what the contact offers
 Five tables, and each has one job. `ASP_MEAN` is the short gloss inside
@@ -1714,9 +2096,65 @@ once per new item. `hdAtlasTo` marks the item it scrolls to itself in
 and leaving the atlas clear `atlasItem`, and every clean bag that clears
 `atlasSec` clears it too.
 
-The anchors are on the HD atlas markup only. Astropedia shares the block and
-row markup byte for byte, so an edit to it has to be anchored on `atlasSecs`, or
-a replace across the file lands on four sites instead of two.
+Since 20 October 2026 the accordion is gone and the anchor is the folio's own
+id (`atlasFolioId`), with the chapter's on a hidden span: see "The Human Design
+Atlas is the wiring, a folio and fifteen chapters". The idents above are
+unchanged, because they are the slugs `atlasItem` stores.
+
+## Anything that can be pressed is lifted; only ornament is flat
+Decided by the owner on 20 October 2026: "All flat items in the app that have
+interactive pieces to them, lift them a little. The only flat items on the site
+should be ornamental." So every control with a surface of its own, and every
+card that holds a control, stands a little off the page; reading, ornament and
+the dashed "coming soon" card stay flat, which is now part of how they say they
+are not controls. (That card became the Book of Numbers, a lifted control, on
+20 October 2026; the rule stands for any card of its kind.)
+
+**The markup says what lifts, never a selector on the style text.** The runtime
+re-serialises every inline style, so `all:unset` arrives in the DOM as forty
+longhands, `box-shadow: unset` among them, with spaces after the colons: a
+`[style*="..."]` rule never sees what was written, and the first pass of this
+matched five buttons out of two hundred. Instead `data-lift` is written on the
+element: bare on a button, link or summary with a fill or a border,
+`data-lift="card"` on a `--sf`, `--sf2` or card gradient surface with a radius
+that holds a control, and `data-lift="in"` on a field, which is the one thing
+set INTO the page, because it is where something is put. The head stylesheet
+turns those into `--lift`, `--lift-hi` on hover and `--lift-in` on press, all
+three tokens declared in all three roots so a theme can tune them, and
+`!important` because `all:unset` inline outranks any rule. A disabled control
+goes flat.
+
+**What is not marked, on purpose.** A control whose inline style sets its own
+`box-shadow` (a glow, a ring, a selected state's halo) is already off the page,
+and its shadow is a signal of its own (a `box-shadow` inside a `transition`
+list does not count). A text control with no fill and no border (the sidebar's
+idle items, the Library tab strip, Forgot password) has no surface to lift, and
+a shadow round nothing reads as a smudge. Dialogs keep their own shadows. The
+lift sets `box-shadow` only, never `transform` or `transition`, because the
+Numbers cards tilt through inline `transform` and the stage units fade through
+inline `transition`.
+
+**A new control with a surface takes `data-lift`**, and a new card holding one
+takes `data-lift="card"`; nothing lifts that is not marked. On the cover the
+sign in buttons lift and the fields are set in, written in its own sheet. Run
+in Chromium over Today, My Charts, the Library and Settings, both shells, Deep
+Field and Dawn: every surfaced control lifted, the reading cards and the dashed
+card flat.
+
+**Their containers lift too, slightly less** (the owner, 20 October 2026:
+"Slightly lift their containers now, too."). Anything with a surface that holds
+a control and is not already a card takes `data-lift="box"`, which is
+`--lift-lo`: the same edge of light and a shorter, fainter drop, so the
+control inside still stands higher than what holds it. That is the sample
+banner, the Cycle Audit section, the Alignment stepper and its readings, the
+tinted notes and wells, the headers, the phone's tab bar and the desktop
+sidebar; the Observatory's rail panels take it from `.obs-rail > .obs-glass`.
+Left out on purpose: the shell roots and anything full screen (`--bg:` set,
+`inset:0`, `position:fixed`, a height of 100% on anything but the sidebar),
+dialogs and menus (they carry their own shadows), and the phone's Get Help dock
+strip, which is a fade to black under the square rather than a surface
+(`pointer-events:none`). On Today, both shells, no surfaced container that
+holds a control is left flat apart from that strip.
 
 ## Touch targets
 44px minimum on every control in both shells. There are exactly two exceptions,
@@ -1756,7 +2194,8 @@ they actually are, and renaming any of them to v5.9 would make them lie.
 `Verification v6.0.dc.html` runs `handoff/tests-v6.0.js`: Checks A to E plus S
 (short desktop), the functional sweep, the theme phase, the removal phase
 (group R, V1.6.0), the ADA phase (group G, V1.7.0) and the new surfaces phase
-(group N). 276 assertions. A full run takes 25+ minutes.
+(group N). 278 assertions (G11c and G11d joined group G on 19 October 2026; group N is 58 rows since 2 October 2026: the Month
+Ahead rows left and seven Library rows, N41 to N47, arrived). A full run takes 25+ minutes.
 
 The theme phase runs four identities now rather than three, which is what took
 the total from 236 to 252: eight cases at two widths at four rows each. The T ids
@@ -1817,7 +2256,7 @@ failure looks like a build defect: G1c reports the skip link as
 test on a throwaway button first, and prints a red banner naming
 `document.activeElement`, `matches(':focus')` and `document.hasFocus()` when
 they disagree. An automated browser pane typically cannot hold that focus even
-after a real click, so **31 of 33 is the expected clean result there, not a
+after a real click, so **32 of 34 is the expected clean result there, not a
 regression**. To separate blocked from broken without focus, check that
 `[data-skip]:focus` still resolves: it carries `min-height:44px !important`,
 `width:auto !important` and `clip:auto !important`, which is exactly what G1c
@@ -1988,7 +2427,9 @@ a dead build, because two empty sections are also identical.
 circle needs other people on the device and a card is how a reader gets one.
 Three stores now, and the finally block restores all three.
 
-**The Spirit pager rows are N36 and N36b, and were `N18`/`N18b` twice over.**
+**The pager rows are N36 and N36b, and were `N18`/`N18b` twice over.** (They
+assert the three chart pages and the six Library tabs now, and that the
+Synchronicities room renders in the phone Library with its handlers on.)
 Two different pairs carried those ids: the third kind of sighting, which
 CLAUDE.md cites above and which sits correctly between N17 and N20, and the
 Spirit pager. Both ran and both passed, so nothing was ever skipped, but the
@@ -2046,7 +2487,10 @@ failure. Do not raise them to quiet a red result. If a check reports green,
 confirm it examined a plausible number of elements before believing it.
 
 ## What V1.6.0 removed
-Four things came out, and the removal phase asserts they stay out.
+Four things came out, and the removal phase asserts they stay out. One screen
+has since brought a model back on purpose, the Oracle, through a server function
+rather than through Oki, and none of what follows is undone by it: see "The
+Oracle took Throughline's seat".
 
 **Oki and the safety router are unwired, not deleted.** No module is loaded,
 no route reaches a chat, `send()` returns with a debug note. The seams to
@@ -2075,6 +2519,657 @@ six literal `POSSIBILITY` spans sat in the markup, and two `sc-if`s had
 **Together is Synastry, but only the two-person feature.** The daily Together
 horoscope page (the three systems read as one) keeps its name, and F1b still
 asserts it on Today. `/spirit/together` is kept as an alias in `openPath()`.
+
+## Discovery belongs to the reader: do not explain a screen before it is opened
+Decided by the owner on 10 October 2026, and it is a design principle rather than
+a one-off edit. A subheader that tells the reader what a control or a reading is
+about, what it holds, or why it exists, takes away the thing they came to do,
+which is find out. The app does not give everything away. When a title and the
+thing it names are enough, the line under the title goes.
+
+**What was removed, and only this.** The owner named each line, and the rule is
+not a licence to strip other subtitles. Removed: the Oracle's "The heavens, read
+for you alone." (phone page and the desktop heading); "the day's omen", "the
+seven-day tide" and "the lunar chapter" under Today, This Week and This Month;
+the numerology "Calculated from the reduced birth month, day, and year in turn."
+line, for the period cycle only (every other number keeps its own "Calculated
+from" line, because it was not listed); the Settings line "Colour and type only.
+Nothing here changes a calculation, and the choice belongs to this profile
+rather than to the device."; the "One profile so far. Add another for a
+partner..." line; and the four theme descriptions (Deep Field, Midnight, Dawn,
+Gold). **Do not remove any other subheader, and do not add one back.** Before
+deleting a line of this kind, ask whether the owner named it.
+
+**What this does not touch.** Consent language, safety copy, error and empty
+states, accessible names and the sentences that say what a calculation cannot do
+(`availability()`, the missing birth time note) are not subheaders. Those exist
+so a reader is not misled, and they stay.
+
+## No disclaimers, and no line saying how a reading is made
+Decided by the owner on 11 October 2026, and it widens the section above. Small
+grey text that tells the reader what a screen is, how a number was worked out,
+where a reading came from, what leaves the device, or what a reading is not, is
+gone from both shells. The owner's words: "they give away the math/process
+behind this. We don't do that."
+
+**What went.** The Oracle's consent paragraph (`orPrivacy`) and its heading; the
+availability note and "Left uncomputed" (`btAvailNote`, `btAvailList`); "What
+this wheel is drawn from" (`chartSummary`); the "Read from ..." lines under the
+three daily readings; orb tables and transit notes on a placement page; the
+degree withheld sentence (`plNoSabianWhy`); every footer that said a reading is
+the tradition's, was not quoted, or was computed on the device (Astropedia,
+the Atlas, the Book of Changes, tarot, the dream registry and journal,
+Synchronicities, numerology); "Calculated from"; the bodygraph gloss
+(`bgNote`); the connection row caution, the Circle caution and its precision
+and footer lines, the one sided synastry note and `synCaveat`; the privacy
+notes beside saving a person and sending a card; the Settings explanations of
+consent, memory, deletion, the PIN, the picture and analytics; the Library and
+Today card descriptions; the "Worth remembering" and "What this is not"
+reading sections and the Astropedia method and caution sections.
+
+**What stays, and why.** Crisis and safety copy (the Get Help lines, "If you are
+in immediate danger", the practice risk levels and their caution), errors,
+empty states, field labels, the two-step setup instructions, the payment terms
+beside the Luminary button (cancellation terms are owed at the point of sale),
+and the sample banner, shortened. The modules still return `CONFIG_CAUTION`,
+`GROUP_CAUTION` and `availability().note`; the screen no longer draws them.
+
+**This overrides earlier sections where they disagree**: the availability line
+above the wheel ("The birth moment has three states"), the gloss ("The
+wiring"), the caution rendered beside the row ("Connection charts" and
+"Circles"), `otherNote` ("Anything Else logs and does not interpret"), and the
+consent sentence on the Oracle. Harness rows N18b and N33 assert the absence
+now, with the owner's approval of 11 October 2026.
+
+**What a disclaimer said now lives in the legal pages**, which is where the
+owner put it: see "The Terms, the Privacy Policy and Contact Support" below.
+The Oracle's consent paragraph is Privacy Policy section 6, nearly word for
+word, and the button that sends is still the reader's own press.
+
+**Do not add a line of this kind back.** Before writing a sentence under a
+title, ask whether it explains the screen, the method or the source. If it
+does, it does not ship.
+
+**One exception, and only in the store apps**: the Oracle names Moonshot AI in a
+one line footer there, because Apple requires it (owner, 12 October 2026; see
+"The app stores"). The website still carries no such line.
+
+## The Terms, the Privacy Policy and Contact Support
+Asked for by the owner on 11 October 2026: the Oracle's disclosure in a privacy
+policy, a generic and accurate About that discloses no method, folded into
+Terms & Conditions, and the Terms "right above the privacy policy". The owner's
+answers decide four facts written into both pages: **Nathaniel J. Figueroa, an
+individual in Florida**, until an LLC is formed; **Florida law and courts**;
+**16** as the minimum age (a parent's permission to subscribe under 18); and
+**Contact Support** as the contact route, because there is no domain for an
+email address yet. `docs/LEGAL-SETUP.md` is the owner's half, including what a
+lawyer should read before launch.
+
+**Two plain pages, `app/terms.html` and `app/privacy.html`.** No script, no web
+font and no third party request, so reading the privacy policy sends nothing
+anywhere, and they print. `build-bundle.js` copies both beside `index.html`,
+rewrites their way back to `./app.html`, refuses a dash, and refuses a cover
+that links the Privacy Policy above the Terms. `_headers` revalidates both.
+
+**The Terms sit directly above the Privacy Policy everywhere they are linked**:
+the cover (`.legal.links`, shown only once the form is open), Settings in both
+shells twice (Support & legal, under the crisis rows, and again in the page's
+`<footer>` above the credit line, the owner's request of 11 October 2026), and
+the Luminary purchase, where the automatic renewal sentence sits beside them
+because Florida and California both want renewal terms before the purchase.
+The cover's Create New Account mode shows `.agree`, the line that makes signing
+up an agreement to both. H5 counts the cover's links outside `.legal` and
+`.learn`, because neither is a way in.
+
+**The pages describe the build, so they move with it.** A new outside service,
+anything new sent to the Oracle, a price or plan, the SMS provider, the LLC or
+the domain each needs both pages and the date changed in the same change. K55
+holds the facts that would drift first: the operator, Florida, 16, the Oracle's
+sent and not sent lists, the support route, the renewal sentence, the link
+order in the app and on the cover, and no dash.
+
+**Contact Support writes one row to `support_requests` (`server/support.sql`).**
+Anybody may insert, nobody may read back through the API, user_id and status
+cannot be chosen by the sender, and a trigger throttles five per address per day
+and two hundred an hour. `supportSend()` in `incommon-cloud.js` posts to the
+REST API directly, with the reader's token when fully signed in and the anon key
+otherwise, because the client is absent for a reader who never signed in and a
+session held for its two-step code would be refused by the restrictive policy
+(the table is in `server/mfa-policies.sql`'s list). It sends topic, email and
+message and nothing else (K54). `#/support` lands on Settings with the dialog
+open, which is the address both pages link. Driven against the real SQL on
+Postgres 16: anonymous and signed in sends land, a forged user id or status is
+refused, an aal1 session with a factor is refused, nothing reads back, and the
+sixth send from one address is refused.
+
+**The About card says what inCommon is and nothing about how.** The old card
+named the safety gate, the claim tags and the device storage, two of which were
+no longer true. The Settings card and the Terms carry the same opening; the
+disclaimers went to the Terms, sections 3 and 4.
+
+## The accessibility statement is the third legal page
+Asked for by the owner on 12 October 2026. `app/accessibility.html` is built the
+same way as the Terms and the Privacy Policy (no script, no web font, no third
+party request) and `build-bundle.js` copies it with them (`LEGAL_FILES`). It is
+linked in Settings in both shells, in the Support & legal list and in the footer,
+**directly under the Privacy Policy**, and from the two legal pages. K55's order
+rule is untouched: the Terms still sit directly above the Privacy Policy, and the
+statement comes after both.
+
+**Every claim on it is measured, not hoped.** The 4.5:1 floor in every theme,
+the Higher contrast setting, zoom left on, the skip link, focus held and returned
+by dialogs, arrow keys in menus, announcements, the two chart summaries, 44px
+targets, and reduced motion. It says "partially conformant" because there has
+been no independent audit, and it names the known limits: the wheel's house
+numbers (the `[data-chart]` exemption), the cover's WebGL image, the theme sweep
+measuring Today only, and the third party pages. **If a change makes a sentence
+on it untrue, change the page and its date in the same change.** Feedback goes
+through Contact Support under "Something is not working": no new topic was added,
+because `server/support.sql` checks the topic list and a new one would fail until
+the owner ran the SQL again.
+
+## The fonts can be swapped, and the real site still uses Google
+Added 12 October 2026 (`docs/FONTS.md`). The four faces live in `app/fonts/`
+(WOFF2, OFL 1.1, Google's own `@font-face` rules pointed at local files).
+**Every published build still loads Google Fonts.** `build-bundle.js --fonts
+self` swaps a build to the local copy: the block between `<!-- fonts:google -->`
+and `<!-- /fonts:google -->` in the app and the cover becomes one link to
+`./fonts/fonts.css`, the app's `FONTS = 'google'` becomes `'self'` (which
+`faceHref()` reads for Dawn's Petrona), the fonts are copied in, the service
+worker precaches the first screen's faces, and the two Google origins leave the
+CSP. The build refuses if either marker or the `FONTS` word goes missing, so the
+swap cannot quietly stop being possible, and it refuses a self build that still
+names Google anywhere except `faceHref()`'s own Google branch (`FACE_GOOGLE`).
+
+**`--preview <dir>` builds a whole site into its own folder and touches nothing
+else**: no write to `deploy/`, no root `_redirects`, no `netlify.toml`. It is
+seeded from the bundle folder's hand written files and adds `X-Robots-Tag:
+noindex`. It refuses to write inside `deploy/` or `app/`. `preview/fonts-self/`
+is the committed result, and `netlify.toml` gives each `preview/<name>` a branch
+deploy context, `preview-<name>`, so pushing that branch serves it at its own
+address. `check-competitor-surface` skips `preview/`, as it skips `deploy/`.
+
+**Switching the real site is `FONTS_DEFAULT` plus the Privacy Policy, together.**
+A production build refuses a self hosted bundle while `privacy.html` names Google
+Fonts, and a Google bundle once it stops naming it. A google build also puts the
+CSP origins back and takes the font lines out of `sw.js`, so the word can be
+flipped either way and every file follows; on the current bundle it changes none
+of them.
+
+## Luminary is not sold in the EU or the UK yet
+Decided by the owner on 12 October 2026 (`docs/LUMINARY-EU-UK.md`): a seller
+outside them owes VAT from the first sale, so the purchase is held there until
+volume pays for the registrations. Everything else stays free and open.
+
+**Three layers, and only the last one is the wall.** The page guesses a country
+from the time zone (`lumCountry()`, the EU 27, Monaco, the UK and the Isle of
+Man, and nothing else) and sends it with the status and the checkout; the server
+answers `regionOpen: false` and the gate shows "Codex Luminary is not available
+in your country yet." in the existing note slot, with no plans and no button;
+a checkout for that country is refused with `REGION` (reason `region`, K34b)
+before Stripe is asked. And because a time zone is only a guess, the webhook
+reads the billing address and the card's issuing country on
+`checkout.session.completed` and **cancels and refunds** a subscription where
+either is in the EU or the UK (`refuseIfClosed()`). Every step tolerates a
+retried webhook: the cancel is skipped once cancelled, and the refund carries an
+idempotency key. Only an explicit `regionOpen: false` closes the page, so an
+older server sells exactly as before.
+
+**The rest is built and switched off.** `LUMINARY_TAX` turns on Stripe Tax for
+every checkout; `LUMINARY_SELL_EU_UK` opens the two markets and is refused unless
+`LUMINARY_TAX` is on too. Open, an EU or UK reader pays the US price before tax,
+converted at the 12 October 2026 rates (`LOCAL`, EUR 11.59 / 107.01 and GBP
+9.80 / 90.57, the owner's choice), plus their own country's VAT, exactly as the
+US price is plus sales tax. Stripe holds those as tax exclusive prices under
+`incommon_luminary_<plan>_<cur>` on the same product and Stripe Tax adds the VAT;
+the page is shown the total for the guessed country from `VAT`, rounded the way
+Stripe rounds, because EU and UK law want the price shown to be the price paid.
+**A VAT rate that changes has to change in `VAT` the same week**, or the page
+and checkout disagree. VAT number collection and the 14 day withdrawal waiver
+come with it as a required tick.
+The page formats whatever price the status quotes (`lumPriceRows()`), and falls
+back to `LUM_PLANS`; the server's US quote formats identically to it. With both
+switches off, a US checkout sends Stripe exactly the fields it always did: that
+was checked against a fake Stripe, along with the refusal, the refund, the
+retried webhook and both switches on. Do not let a checkout through for a closed
+country "because the page already hid the button": the page is courtesy.
+
+## The app stores
+The owner confirmed on 12 October 2026 that inCommon ships on the App Store and
+Google Play as well as the web. `docs/APP-STORE-SETUP.md` is the requirement list.
+In-app account deletion is built (next section). **The Oracle's disclosure is
+built, in the store apps only**: Apple 5.1.2(i) wants the third party AI named on
+screen before anything is sent, and the owner chose (12 October 2026) one line
+in small type as a footer on the Oracle page, "Your first name and a chart
+summary are sent to Moonshot AI to write each reading.", drawn only when
+`nativeApp()` is true (`orAiNoteOn`). **It is the one exception to "No
+disclaimers"** and it does not reach the website; do not widen it to the web or
+lengthen it without the owner. **Luminary in the apps is the stores' own
+billing, through RevenueCat**, built and switched off until its keys are set:
+see "Luminary in the apps is RevenueCat's" below. The apps never sell through
+Stripe; the one Stripe page they open is a gift, by the owner's decision of 18
+October 2026 (see "The Cycle Audit").
+Apple's minimum EULA terms are Terms section 22, "Apps from Apple and Google"
+(added 12 October 2026 at the owner's request), which still owes the
+developer's postal address before the first submission.
+
+## The store apps are a Capacitor shell around the bundle
+Started 12 October 2026 (`docs/NATIVE-APP.md`). `native/` is Capacitor 8.5.3,
+pinned, with `ios/` (Swift Package Manager) and `android/` generated by the
+Capacitor CLI and committed; `native/www/` and each platform's copy of it are
+generated and ignored. **The app carries its files, never the website**, because
+Apple rejects a remote site in a shell (4.2) and files on the phone are what work
+offline. `tools/build-native.js` makes `www` from `deploy/<version>/`: the app is
+`index.html` (Capacitor opens it, and the app should open on the app), the cover
+is `cover.html`, every link back to the app is rewritten to `./index.html` with
+the count asserted, and the service worker and the host's files are left out. It
+refuses a bundle older than the app source and a bundle without the native check.
+
+**`nativeApp()` asks Capacitor, and six things hang on it and nothing else**:
+the Oracle footer above; Luminary never sold in the app (`lumBuy()` and
+`lumManage()` do nothing there, and no gate is drawn); no service worker
+registered; `coverHref()` answering `./cover.html`; every add-on free
+(`addonsOpen()`); and Support inCommon, the gift (`giftOn()`). The first and
+the last two changed on 18 October 2026: see "Codex Luminary is one payment". Driven in a browser with
+`window.Capacitor` stubbed, and without it: every one of those in the shell, none
+of them on the web; the footer measured clean in all eight themes at 375 and
+1440. `tools/build-icons.js --native` draws the icon and splash sources into
+`native/assets/` from the same definition as every other icon, and
+`@capacitor/assets` cuts the platform sizes from them; the default run is
+unchanged, byte for byte. **The app id `com.incommon.app` is a placeholder** and
+becomes permanent at the first upload, so it is the owner's to choose before
+then.
+
+## Luminary in the apps is RevenueCat's
+**Retired on 18 October 2026, and the plugin is out of `native/`**: nothing is
+sold in the apps (see "Codex Luminary is one payment"). This section is the
+record of what was built. `server/store` stays, dormant, so a store subscription
+that exists keeps counting.
+
+Asked for by the owner on 12 October 2026 ("start the in-app purchases with
+RevenueCat"); `docs/REVENUECAT-SETUP.md` is the owner's half. Inside the apps
+Luminary is bought with Apple's In-App Purchase and Google Play Billing, with
+`@revenuecat/purchases-capacitor` 13.7.3 pinned in `native/` and nothing else
+native. **`RC_KEYS` is the switch**: RevenueCat's two PUBLIC app keys, made to
+ship in an app, and while the one for a platform is empty `rcOn()` is false and
+the app sells nothing, exactly as before this existed. The secret key lives only
+in Supabase.
+
+**The plugin is reached through the bridge by name**, `rcCall()` calling
+`Capacitor.nativePromise('Purchases', method, args)`, because this app has no
+bundler to load the plugin's JavaScript wrapper and the wrapper is only that
+call plus error tidying. The method names and arguments were read out of the
+plugin's own Swift and Kotlin for 13.7.3; a version bump means reading them
+again. A cancel on the store's sheet is code 1 and says nothing.
+
+**The page decides nothing about who paid.** The reader's Supabase user id is
+RevenueCat's app user id (`status().userId`). After a purchase or a restore the
+app calls `storeSync()`, which carries only `{ action: 'sync' }` (K57); the
+`store` function (`server/store/index.ts`, JWT verification off like billing)
+asks RevenueCat's REST API about the reader its token names and writes
+`store_subscriptions` (`server/store/schema.sql`). RevenueCat's webhook, believed
+only on the exact `REVENUECAT_WEBHOOK_AUTH` header, does the same for every
+uuid an event names and nothing else: a webhook body is a list of whom to look
+up, never a statement of what they bought. Billing's status and the Oracle's
+paywall read both tables, so a Luminary is a Luminary wherever they paid, and a
+Stripe checkout is refused for a reader who already holds an app subscription.
+**A table of its own, not a source column**: a `subscriptions` row is a Stripe
+customer, and a reader can hold one of each.
+
+**Each subscription is managed where it was bought.** In the app: the store's
+prices in the reader's currency (`rcPlanRows()`), Restore purchases (Apple
+requires it), renewal terms naming the Apple or Google account, and Manage
+subscription opening the store's own settings. On the website an app subscriber
+sees the plan line marked App Store or Google Play and no Manage billing. The
+website's EU and UK hold does not apply in the apps, because the stores are the
+seller and pay the VAT.
+
+**The legal pages were written ahead of the keys**, by the owner's request of
+12 October 2026: Terms section 7 (an app subscription is priced, cancelled and
+refunded by the store, and deleting the account does not cancel it), section
+12 and section 22 (Apple's minimum terms, Google Play, store billing; Contact
+is 23 now); Privacy Policy sections 2, 7, 11 and 15 (RevenueCat named, with
+what it receives and returns); and `delete-account.html`. If what the store
+function stores or what RevenueCat is sent changes, those change with it.
+Driven with the plugin stubbed, both shells and both platforms: the configure
+call with the user id, offerings, buy, cancel, a failed buy, restore with and
+without a purchase, the member line, Manage, the deletion dialog's store line,
+no key, and the website unchanged; the gate, the member line and the dialog
+measured clean in all 16 theme cases at 1440 and 375. The function was run
+against a fake RevenueCat and database for 27 cases and typechecked strict.
+
+## Deleting an account is the reader's own button
+Built 12 October 2026 at the owner's request, because both stores require it
+(`docs/ACCOUNT-DELETION.md`). **Delete account** sits under Delete this profile in
+the profile card, both shells, drawn only while signed in (`menuAcctDelOn`), and
+opens one dialog (`accountDeleteVals()`, state `adOpen`): what goes, a switch to
+erase this device too (off by default, because the account going does not have to
+take the journal with it), and the word `delete` typed to arm the button, which
+wears `--warn`, never `--crisis`: deleting an account is not a safety control.
+
+**The order is the design.** `server/account/index.ts` cancels Luminary at Stripe
+and deletes the Stripe customer FIRST, because that is the one step that can keep
+charging, and if Stripe fails nothing is deleted; then RevenueCat's customer, when
+it is set up (an app subscription is the store's to cancel, and the dialog says
+so before the reader deletes: `adStoreOn`); then every row, children before
+parents so it is right whether or not the project's keys cascade; then the auth
+user LAST, so a failure above leaves the reader able to sign in and retry. Every
+step is safe to run twice. A table the project never created is skipped, any
+other error stops the run. The server checks the typed word again, and refuses an
+aal1 session on an account with a verified authenticator, like billing and the
+Oracle. Support requests stay, unlinked, as the Privacy Policy says.
+
+**On the device, success forgets the account**: `accountDelete()` removes the sync
+map, the outbox and the remembered login and signs out locally. The map matters
+most: it records rows as uploaded, and a later sign in to a new account would
+otherwise skip them. With the switch on, this account's profiles and every key
+scoped to them go too (`PM.accountStorageKeys()`), and nothing of any other
+account on the browser; with it off they become the guest's
+(`PM.releaseToGuest()`), which is what "you can keep using inCommon without an
+account" needs now that a deleted account's own store could never be opened
+again. See "Each account has its own profiles on a device". Either way the reader reaches the cover through the marked tab Log Out
+uses. K56 holds the module half; the function was driven against a fake Stripe
+and an in memory database (only the reader's rows go, Stripe down deletes
+nothing, a failing table keeps the sign in). `delete-account.html` is the public
+page Google asks for, built like the legal pages and copied by `LEGAL_FILES`; the
+Terms (sections 7 and 17) and the Privacy Policy (sections 15 and 16) name the
+button, dated 12 October 2026. If what the function deletes changes, that page
+and those sections change with it.
+
+## One account reads the same on every device
+Built 13 October 2026 at the owner's request ("build pullAll so accounts sync
+across devices"). Until then the cloud module only pushed: a second phone
+signed in to an account and opened on a blank birth page. `pull()` in
+`incommon-cloud.js` (exported as `pullAll` too) reads the whole account and
+merges it in, and `sync()` is pull then push. It runs when a session starts,
+and the app's `cloudSync()` asks again when the page comes back into view or
+the signal returns, at most once a minute.
+
+**The merge is three way, and the hash cache is the base.** A row whose local
+copy still hashes to what this device last synced was not touched here, so the
+server's copy is taken; a row changed here since keeps the local copy and the
+push after the pull sends it. That is per whole row: two devices editing the
+same profile offline end with the last one to sync. A row this device synced
+and the server no longer holds was deleted elsewhere and is deleted here.
+Throughline entries are append only, so they are only ever added, and a pulled
+one is recorded as sent so it is never uploaded twice.
+
+**Four rules keep a pull from deleting anything it should not**, and each has a
+row that goes red without it (sabotaged and checked): one table that fails to
+read applies nothing (K65); a server holding no profiles deletes nothing (K65);
+a deletion still in the outbox is not undone by the pull (K67); and a device's
+FIRST pull for an account sends an absent row again instead of deleting it
+(K66), because of the bug below. The first pull is recorded per account
+(`map.pulled[userId]`), since one browser can hold several.
+
+**Deleting one memory used to delete them all on the server.**
+`deleteMemory({ id })` emitted `memory:deleted` with no type and no id, and the
+cloud module queued that as `del-memories` for the whole profile. It carries the
+id now and queues `del-memory`, which deletes that row (K62). The first pull
+rule above is what repairs an account an older build already emptied: the
+device that still holds the entries uploads them again.
+
+**ProfileManager writes what came down, through `importSynced()`**, so the
+storage shapes stay its own. It emits `sync:pulled`, never `profile:deleted` or
+`memory:deleted`, because those would queue the same deletion straight back up.
+
+**The sample profile gives way.** `cloudPlaceholders()` names the profile a blank
+device invents while it is still exactly the sample; when the account brings a
+profile of its own the sample is dropped rather than synced, and a device that
+had nothing of its own (`adopted`) skips the birth page, because it was set up
+somewhere else. `cloudPulled()` repaints afterwards.
+
+**Pages, not one answer.** PostgREST returns at most its row limit (1,000 by
+default) whatever is asked, so `fetchAll()` reads by `range()` until a page
+comes back empty (K68 holds a 1,160 memory account against a 1,000 row cap).
+Profiles and pairs are read with `account_id` and the child tables with the
+account's profile ids, on top of RLS rather than instead of it.
+
+**Only the four memory types the server accepts travel** (`SYNC_MEMORY_TYPES`:
+journal, mood, practice_completion, stella_conversation), because
+`public.memories` has a check constraint naming exactly those and one refused
+upsert stops the whole push. The Archive writes `archive_deleted` rows when a
+reader deletes an entry, and until 14 October 2026 that one row stopped every
+later push from that device: no more memories, no Throughline, no deletions.
+Those rows stay on the device. K69 reads the constraint out of
+`server/cloud-schema.sql` and holds the module's list equal to it, so a new
+memory type needs the constraint widened on the server, the schema file and
+the list changed together.
+
+What does not sync, unchanged: memories whose consent is off, `kept` rows, the
+Archive's `archive_deleted` rows, the Oracle's kept readings,
+`incommon.consent.data.<pid>`, saved people, and theme.
+K58 to K68 drive two devices, each the real profile-manager.js and its own copy
+of the cloud module, against one in memory database; the app half was driven in
+Chromium with Supabase faked: a fresh browser signed in, skipped the birth page,
+opened on the account's profile with its journal, consent and Throughline, sent
+no sample up, and picked up an entry written elsewhere when it came back into
+view.
+
+## Each account has its own profiles on a device
+The owner reported on 12 October 2026 that three accounts signed in on one
+browser all opened onto the same birth data. The profile list was one device
+wide store, `incommon.profiles.v1`, and every account and the guest read it.
+Everything else a reader owns is already keyed by profile id (memories,
+journal, consents, Oracle readings, saved people, theme), so scoping that ONE
+store by account separates all of it, and the cloud push follows because
+`buildPlan()` reads the store.
+
+**`scope()` in `profile-manager.js` decides, once per page, at the first read of
+the store.** It reads the session supabase-js left in localStorage
+(`sb-<ref>-auth-token`), which is how anybody becomes signed in: on the cover,
+then by navigating here. Signing out and deleting an account navigate away, so
+no page changes owner while it is open, and caching the answer is correct. A
+signed in account's store is `incommon.profiles.v1.u.<userId>`; signed out it is
+the plain key, the guest's. A session the browser has closed (the remember me
+mark without its cookie) and one still owing its two-step code read as signed
+out, as they do everywhere, so a password alone opens nothing. That module's
+`owesCode` is the third copy of the rule and K46 holds all three equal. It
+lives in this module rather than calling the cloud module because helmet
+scripts load async and the store is read before that module is sure to exist.
+
+**Five device wide keys hold one reader's data and move with the account**
+(`ACCOUNT_KEYS`): first run, the sample marker, received cards, the adverse
+log and archived memories. The app reaches them through `acctKey()`, which is
+why those five are getters on the logic class now rather than string fields.
+Device preferences (`incommon.theme.device`, the sidebar, the section) stay
+device wide on purpose.
+
+**The first account to open the app on a device that already holds profiles
+takes them**, with the `ACCOUNT_KEYS`. Nothing in the old store says whose it
+was, so this is the only rule available offline, and it is right for the common
+case of one reader per device. Every account after that opens onto a blank
+store and the birth page, and the guest store is blank once claimed. An
+account's blank store does not inherit the pre-profile legacy keys either:
+`migrateLegacyProfile()` copies those only into the guest's.
+
+**Log Out keeps the account's data on the device under its key**, and it comes
+back at the next sign in. Deleting an account hands it to the guest unless the
+reader erases it (see "Deleting an account is the reader's own button").
+
+O1 to O7 in `run-module-tests.js` load the real module once per page over one
+shared storage, which is how a browser moves between the cover and the app, and
+all six that test separation go red with the owner forced to null. Driven in
+the built bundle too: a device holding a guest profile, then account A (takes
+it), account B (the birth page), A again (its own profile), signed out (blank).
+
+## Swiping on the phone is one chain, read left to right
+The order is Today, the three charts (Human Design, Astrology, Numerology), the
+six Library tabs, the Oracle, Settings. A sideways swipe moves one step along
+that line, so the last chart hands on to the first Library tab, the last Library
+tab to the Oracle, and the other way back (landing on the last chart or the last
+tab when going backwards). `vtSwipeStep(dir)` does the move and `vtBindTouch()`
+reads the gesture. Three things are easy to undo.
+
+**The pager's own horizontal scroll never fired on a phone.** The section column
+is `touch-action: none` and what is inside inherits it, so a swipe on the
+My Charts pager did nothing at all; this was measured, the pager stayed at
+scrollLeft 0 through a real swipe. The swipe is read from the same touch
+listeners the section bands use. If the browser did move the pager under the
+finger, `vtBindTouch` leaves it alone so a gesture is never handled twice.
+
+**It must not fire where a sideways gesture already means something.**
+`vtHScrollableAt()` refuses a touch that starts on anything scrolling sideways
+(the Library tab strip, a wide table), on a field, on `[data-chart]` (the wheel
+pans and zooms) or on `[data-noswipe]`; and `vtSwipeStep` does nothing inside a
+room (`libView`), with a placement, number, dream or aspect selected, or while a
+dropdown is open.
+
+**A page scrolls up and down and never sideways** (reported by the owner on
+21 October 2026 as "the pages wiggle"). `[data-vt-page]` carries
+`overflow-x: hidden` and the section inside it `overflow-x: clip`, because a
+page's `overflow-y: auto` makes its `overflow-x` auto as well, and the Book of
+Numbers' turning sweep is a square whose box grows as it turns: the Library
+page's width breathed between 402 and 434 at 390 wide, so the page jittered and
+could be pushed sideways. It also stopped the swipe, because
+`vtHScrollableAt()` counts any page that scrolls sideways as a strip and
+refuses a swipe that starts on it. `clip` rather than `hidden` on the section,
+because clip makes no scroller of its own, so the vertical scroll and anything
+sticky are untouched. The sideways strips inside a page (the Library tabs, the
+reading deck, the chart cards) scroll themselves and are not affected.
+
+**It lands exactly, because it goes through the existing routes.** Sections use
+`vtGoSection` and pages use `vtGoTab`, which pin the scroll offset after the
+smooth scroll, so `scrollTop` equals the section's `offsetTop` and the pager
+sits on a multiple of its width. A swipe that wrote scroll offsets itself would
+fight snap and the routed-jump claims described above.
+
+## A row of pills becomes a dropdown when it is a choice of one
+The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
+Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
+which on a phone wrapped to three lines above the content. Each is one button,
+right aligned, naming the current choice, and opening a `role="menu"` of
+`menuitemradio` buttons. State is `ddOpen` (`'hd'` or `'tl'`). Choosing, tapping
+outside, or Escape closes it; Escape hands focus back to the button that opened
+it (`data-dd-trigger`), and the arrows, Home and End move focus without
+choosing (`ddKeys`). The pills are gone from the markup, not hidden, so there is
+no second control for the same choice. The panel is painted over an opaque
+`--bg` with `--sf2` on top, because under Deep Field `--sf2` carries alpha and a
+menu over text must not let the text through. The cap is `min(40vh, 300px)` so it
+stays clear of the dock on a short phone.
+
+## The credit line is the last thing on the Settings page
+"Created and maintained by Nathaniel J. Figueroa." sits at the bottom of the
+Settings page in both shells, centred, in the smallest type in the app (7px,
+below the 7.5px badges). It used to head the About card. It sits inside the
+page's `<footer>`, under the Terms and Privacy Policy links, and the footer
+carries `margin-top: auto` inside the column so it stays at the bottom whatever
+the content above it grows to.
+
+**That footer is the shell's `contentinfo` landmark, and it says so.** G5 asks
+for one. It used to be the method footer on Today, which went with the
+disclaimers on 11 October, and the shell shipped with none: G5 went red on the
+live v6.4 bundle. A `<footer>` nested inside a section or `main` has no
+implicit landmark role, so the attribute is written out (`role="contentinfo"`)
+in both shells. The Terms, the Privacy Policy and the credit line are exactly
+what that landmark is for; do not move the role back onto anything that
+explains a reading.
+
+## The security headers, and where a new outside service has to be named
+Added 11 October 2026, before launch. `docs/SECURITY.md` is the review and the
+owner's dashboard checklist; this is the part a code change can break.
+
+**`deploy/v6.4/_headers` sends a Content-Security-Policy on every page**, and
+`connect-src` names every origin the pages may talk to: this site, the
+project's Supabase (https and wss) and the Nominatim place search. **A new
+outside service has to be added there**, or the browser refuses the request
+with a console error naming the policy and the feature fails while the code
+looks correct. Fonts are `style-src` and `font-src`. `'unsafe-inline'` and
+`'unsafe-eval'` stay because `support.js` compiles templates with
+`new Function` and the pages carry inline scripts; do not remove them without a
+build step that replaces both. `frame-ancestors 'self'` is what lets the
+verification harness frame the app and nobody else. The file is hand written:
+`build-bundle.js` leaves `_headers` alone, so it moves by hand with the folder
+at a version bump. Dragging the repository root does not serve it.
+
+**The free Luminary list counts confirmed addresses only.** `isAdmin()` in both
+server functions requires `email_confirmed_at` as well as a match in
+`LUMINARY_ADMIN_EMAILS`. Matching the address alone gave paid readings to
+whoever registered a listed address first.
+
+## Two-step sign in is optional, and a password alone is refused in three places
+The owner asked on 11 October 2026 for two-step sign in, optional. A reader
+turns it on in the profile card (`mfaVals()`, beside Phone number in both
+shells): a QR code and the setup key from `mfaEnrollStart()`, then the first
+code (`mfaEnrollVerify()`). Turning it off asks for a current code first
+(`mfaDisable()`). The factor is TOTP, an authenticator app, because Supabase
+offers it on every plan and a texted code needs the SMS provider. The owner's
+half is `docs/TWO-STEP-SETUP.md`.
+
+**A password that passed still makes a session**, at aal1, and the code lifts
+it to aal2. So three places refuse an aal1 session for an account with a
+verified authenticator, and each is needed. `incommon-cloud.js` holds it in
+`held` rather than `session`, so every call that asks for a session finds none
+and the app reads as signed out (courtesy). `server/oracle` and
+`server/billing` answer `MFA_REQUIRED`, which the module reads as signedOut.
+And `server/mfa-policies.sql` is a restrictive policy on every table, which is
+the wall: without it a stolen password reads the record straight from the REST
+API. **A table added later has to be added to that file's list.**
+
+`owesCode()` is the rule in the module and a copy of it is in the cover's plain
+script, which reads the stored session before the module loads; K46 holds the
+two equal. A token that cannot be read owes the code: fail closed. Every way the
+cover makes a session (password, emailed link, old sign in link, texted code)
+returns `mfa: true` when it owes, and the cover's `mfa` mode asks for the code
+and then goes on to what the sign in was for (`afterMfa`: the app, a replace
+from an email return, or choosing a new password after a recovery link).
+"Use another account" from that step signs the half session out of the browser.
+
+**Two traps this build hit.** supabase-js prefixes the server's raw SVG with
+`data:image/svg+xml;utf-8,`, and the template runtime splits a style attribute
+at every semicolon, so the QR code painted blank until `mfaQrBg()` rebuilt the
+address without one. And the cover's raytracer starves a software renderer, so
+a browser drive of the sign in steps reads as a hang under SwiftShader; drive
+them with WebGL off, where the plain sign in script runs exactly the same.
+
+K46 to K51 hold the module and the cover's copy of the rule; the rest was
+driven in a browser against a fake auth server, and the database rule against
+a real Postgres. The dialog and the cover's code step measured clean in all 32
+theme cases at 1440 and 375, and at 320x568.
+
+## Cloudflare Turnstile guards the five calls that can be scripted
+Added 11 October 2026. The owner made the widget; the cover carries it
+(`TURNSTILE_SITE_KEY`, action `signin`) and `docs/TURNSTILE-SETUP.md` is the
+owner's half. **Supabase Auth verifies the token itself** once CAPTCHA
+protection is on in the project, so there is no siteverify code in this repo and
+the secret key lives only in the Supabase dashboard.
+
+Supabase's server asks a token of five calls and only these: `/token` for the
+password grant, `/signup`, `/recover`, `/otp` and `/resend`. Code checks,
+refreshes, emailed links and the two-step code are exempt. So the cover asks
+for one on `in`, `up` and `forgot` (`needsToken()`) and on "Text me a new
+code", the module passes it as `captchaToken` on exactly those calls (K52), and
+a refusal reads as `captcha` (K53). **A new call to any of those five
+endpoints has to carry a token**, or it breaks the day the check is switched on.
+
+Three things are easy to undo. The script loads when the form opens, never
+before, so a plain visit to the desktop cover sends nothing to Cloudflare. A token
+is good once, so the widget is reset after every call (`captchaSpent()`) and a
+run already in flight is waited for rather than started twice. And
+`challenges.cloudflare.com` is in `script-src` and `frame-src` in
+`deploy/v6.4/_headers`; K53 holds the cover's origin and the policy equal.
+
+**The check is shown whenever the form is open** (the owner, 11 October 2026),
+as `appearance: 'always'`, in `in`, `up`, `forgot` and `code`. It was shown
+only to hand typed details for one revision, and that hid it from everybody
+whose browser or password manager filled the form, which read as no check at
+all. `open()` loads and runs it (`capRun()`), so the desktop cover still sends
+nothing to Cloudflare until "enter here" is pressed, and a phone, whose form is
+open on arrival, loads it at once. A token that expires while the form sits
+open is fetched again. Nothing is said beside it: the "One more step" sentence
+is gone. The slot is out of the row until the widget is drawn
+(`.captcha.shown`), because an empty frame there pushed Sign in off the
+password's line. A press
+still waiting on the check has sent nothing, so choosing another mode withdraws
+it (`sendGen`, `preSend`); before that, "Sign in instead" did nothing while a
+Create New Account press waited for a tick.
+
+**Deploy the page before switching the check on in Supabase.** The reverse
+order refuses every sign in until the page arrives. Driven in a browser with
+Cloudflare's test keys: the always passing key put a token on sign in, sign up
+and the reset email, the blocking key told the reader and sent Supabase
+nothing, the interactive key drew the box and said why, and no key fetched
+nothing from Cloudflare.
 
 ## Zero em dash
 No em dash or en dash anywhere: not in app copy, not in generated readings, not
@@ -2270,7 +3365,8 @@ in the head for exactly this reason, and without the rule the wordmark would sit
 at full strength on top of the SIGNAL LOST message it is meant to defer to. That
 was live for three revisions after the dim was moved into JS.
 
-**The way in is a subtitle, and it waits for the title.** The arrow in the top
+**The way in is a subtitle, and it waits for the title** (on the desktop; a
+phone shows the sign in form straight away, see "Signing in on the cover"). The arrow in the top
 corner is gone. "enter here" sits under the wordmark inside `.markwrap`, in
 Marcellus at roughly a third of the wordmark's size, and fades in over 2800ms
 starting 3200ms after `body.live`, so the title has finished arriving before
@@ -2394,6 +3490,32 @@ was, so a 400ms frame falls four rungs and a 160ms frame falls two, and a single
 frame over 150ms is enough on its own rather than needing a second. The
 50-frame averaging window still governs ordinary drift in both directions.
 
+**A lower rung must not paint a black hole around the hole.** `uSteps` falls from
+235 to 62 down the ladder, and a ray that passes the hole spends most of its
+budget crawling through the disk zone at `dt` 0.20. At the low rungs it was
+still in flight when the loop ended, neither captured nor escaped, so it took no
+sky: a solid black saucer swallowing the outer disk and the starfield around the
+hole. It was reported as the event horizon "cutting out" on desktop, and it only
+shows once the ladder has fallen, which is why 1280x720 and 1920x940 were whole
+in this container and 2560x1080 was not; a real machine reaches it through a wide
+or dense display on an integrated GPU. The fix is after the loop and leaves the
+integration alone: a ray with an impact parameter above `BCRIT` is never
+captured, so one that ran out of steps is treated as escaped and reads the sky
+along the direction it has. Below `BCRIT`, or inside r 3.0, it stays black. That fallback was not enough on its own: it painted the black away but the
+disk's upper and lower arcs were still missing at the bottom rung, because those
+rays had been abandoned before they reached the disk, and the sky they read was
+smeared into streaks. The real fix is in the integration's step LENGTH, not its
+count: `dts = max(1.0, 190.0 / uSteps)` scales `dt` up as the budget falls (to a
+cap of 4.0), so every ray still finishes its journey at a coarser step. It is
+1.0 at 190 steps and above, so the top three rungs run the code they always ran.
+The test that found it forces a rung: replace `let qi = 2;` with the rung wanted
+and stub `drop()` and the two averaging branches, serve that copy, and render at
+2560x1080. Rung 0 is the truth, rung 8 should show the same picture at a lower
+resolution, and a missing arc or a black dome above the hole is this fault again.
+Do
+not read a screenshot taken at one size as proof of the ladder: the rung is
+chosen by how fast the machine is, so check the render at the bottom rung too.
+
 **The measured symptom to recognise.** `GL_VENDOR = Disabled` and
 `BindToCurrentSequence failed` in the console, WebGL unavailable in every
 browser on the machine including ones that were never pointed at this page, and
@@ -2444,7 +3566,10 @@ the cover forwards it itself, in a synchronous script above the renderer,
 to a screen somebody asked for by name. It runs on document load, which is how
 a real deep link arrives. Testing it by changing the hash on an already loaded
 cover proves nothing: that is a same document navigation and the script does
-not re-run.
+not re-run. One hash is not an address and is left on the cover: one carrying
+`access_token`, `error` or `error_code`, which is how an email the cover sent
+comes back (see "Signing in on the cover"). P9 of that drive holds that a deep
+link is still forwarded.
 
 **`start_url` names the app.** It was `./`, which is the cover now, so an
 installed home screen icon would have opened the door instead of the room.
@@ -2503,6 +3628,2457 @@ app shell, it paints its own Deep Field palette from the shader, and its link
 is cream rather than `--ac` because it is a cover rather than a primary action
 inside the shell. Do not correct that to green.
 
+## Signing in on the cover: a password, and why the emails come back after the #
+The owner asked for Google sign in on the cover on 28 September 2026, as part of
+moving toward the Celestial Codex direction, then for an emailed sign in link
+the next day, and later that day for an email and a password in place of the
+link. It rides the Supabase project the cloud sync already uses, so there is one
+account system, not two. The cloud UI spec's "No provider sign-ins" line
+describes the temporary Settings surface of step 4 and is superseded here for
+the cover.
+
+**Google is gone, not hidden.** It was hidden in v6.4 and taken out on 29
+September 2026 at the owner's request ("for now, take away the google oauth"),
+because a Google Cloud OAuth client is a setup the owner is not paying for. The
+button, its handler, its sentences, `providerEnabled()` and `oauthStart()` are
+all removed. To bring it back: a Google provider in Supabase (Authentication,
+Providers, with a Google Cloud OAuth client whose redirect URI is the project's
+`/auth/v1/callback`), then the button and the two functions from git history
+(commit c098bf4 and before). It would come back as `?code=` on a PKCE client,
+and `oauthFinish()` still finishes exactly that.
+
+**The emailed sign in link is gone too, and the reason is the one to keep.** It
+rode PKCE so that it came back to the cover as `?code=`, before the `#`, where
+neither page routes. The price of PKCE is that the code verifier lives in the
+browser that asked, so the link only finished there. People open email on the
+phone, or in a mail app's own browser, and the report was exactly that: it
+opened in a different browser and did not sign anybody in. The owner asked for a
+password instead ("replace the send link with a password entry").
+
+**A password sign in needs no flow at all, and the two emails left use the
+implicit one.** `signInWithPassword` returns a session in its own response.
+What still sends email is confirming a new address and choosing a new password,
+and on the implicit flow both come back with the session's tokens after the
+`#`: nothing is kept in the asking browser, so they work wherever they are
+opened. So the cover has ONE client, `coverLib()`, on the implicit flow, with
+`detectSessionInUrl` off so a token is taken only where the cover chose to take
+it, and `persistSession` on, writing to the same localStorage key the app's own
+client reads. K15 asserts that shape and goes red on `pkce`.
+
+**The `#` is the router, so the cover's hash forward leaves a token hash alone.**
+Any hash carrying `access_token`, `error` or `error_code` stays on the cover.
+Forwarded, it would arrive in the app as a route with the tokens sitting in its
+address bar. The sign in script reads it, drops it from the address with
+`replaceState` BEFORE anything is asked, and hands the tokens to
+`adoptSession()`, which calls `setSession`: supabase-js checks the access token
+with the server before it stores anything, so a hand written hash signs nobody
+in, and the address the cover then names is the server's, never the url's. A
+`type=recovery` hash opens the form in its set mode and asks for the new
+password (`passwordSet()`, `updateUser` on the adopted session); every other
+type goes on to the app signed in. P7 of the browser drive forged a token and
+nothing was stored.
+
+**Four modes, one form**, and two more since 30 September 2026 (`code` and
+`back`, in the next section). `data-mode` on `#mailform` is `in` (email, password,
+Sign in), `up` (email, a new password of eight or more, the newsletter box,
+Create New Account), `forgot` (email, Send reset link) and `set` (a new password,
+Save password). A mode is a set of rows, never a second form, so what is typed
+in one survives into the next, the password included: somebody who filled in
+both fields and then pressed Create New Account has already chosen it.
+
+**Create New Account is a button, not a link**, in its own full width row under
+Sign in, named as the owner asked for it on 29 September 2026 ("i want to be
+able to click Create New Account and create a new account"). It was a small
+underlined link, which read as secondary on a form whose two jobs are signing in
+and making an account. The first press shows the newsletter box and turns the
+form's own button into Create New Account; the second press makes the account.
+It takes two because the box starts ticked, and a sign up sent before the box
+was ever on screen would record a yes nobody saw asked. Focus goes to the box
+when both fields are already filled, so the reader meets it on the way. The password field's `autocomplete` moves
+with the mode, `current-password` or `new-password`, so a password manager
+saves and fills the right thing. `Continue without an account` is hidden only in
+`set`, where the reader is signed in and the sentence would be false.
+
+**Three answers from a sign up, because Supabase gives three.** With Confirm
+email on, which is the project default and what the newsletter list depends on,
+a new address gets a confirmation link and no session: the cover says so, puts
+the form back on sign in with the address kept, and the link signs them in
+wherever it is opened. With it off, the session comes back at once. And an
+address that already has a confirmed account is answered like a new one, so no
+stranger can test an address for an account; the only tell is a user with no
+identities, which `passwordSignUp()` reports as `exists` so the reader is sent
+to sign in rather than told to wait for an email that will never come. K35.
+
+**Every refusal is a reason, never a throw**, chosen by Supabase's code where it
+sends one and by its message where an older project does not: `wrong`,
+`unconfirmed`, `exists`, `weak`, `same`, `closed`, `rate`, `offline`. The order
+in `authReason()` matters once: a new password equal to the old one is refused
+with a sentence that also matches the weak one, so `same` is tested first. K22
+holds all of it, and goes red if that line is removed. Eight characters is
+checked on the page before anything is sent (K23); a project that asks for more
+still refuses, and that reads as `weak`.
+
+**Readers who signed up by the emailed link have no password.** The wrong
+password sentence says so and points at Forgot password, which sets one: a
+recovery email works for an account with no password exactly as for one with
+one. This includes the owner's own account.
+
+**A link sent before the change still works.** A sign in link already in
+somebody's inbox returns as `?code=`, and `oauthFinish()` still exchanges it: the
+PKCE client stored the verifier under the same key the cover client reads, and
+the exchange does not care which flow the client was made for. K18 and P11.
+
+**Every Supabase call is still in `incommon-cloud.js`**, and none of the cover's
+needs `init()`, because the cover has no ProfileManager. The module's header
+rule, never touching the network without a session, carries its one exception
+in writing: signing in, making an account or asking for a new password on the
+cover, and taking the session an emailed link brings back, none of which
+carries local state. K15 to K25 and K35 to K37 cover the module (K17 was
+Google's and went with it); an eleven case browser drive with Supabase faked
+covers the page, including the confirmation and the reset each opened in a
+fresh browser context. Every cover address has to be in Authentication, URL
+Configuration, Redirect URLs, or Supabase sends the email's reader to the Site
+URL instead. Supabase's built in sender allows only a few emails an hour, and
+confirmation emails count, so launch traffic wants a custom SMTP sender.
+
+**The script is plain, not part of the module, and loads nothing until asked.**
+With no WebGL the module dies at the renderer, and a way in that died with it
+would be a second failure on top of the first. The two files it needs, the
+vendored Supabase client and `incommon-cloud.js`, are loaded on the first submit
+or on the return from an email, never at page load. The app address is read off
+the "enter here" link rather than written a third time, because
+`build-bundle.js` asserts there are exactly two copies of it. The build copies
+both files beside `index.html` as `SIGNIN_FILES` and refuses if the cover stops
+naming either one. Once signed in, the reader goes on through the link, so the
+module's exit runs, exactly as "Continue without an account" does.
+
+**The module is loaded as `./incommon-cloud.js?v=` its own VERSION**, and the
+build refuses a cover whose `?v=` is not the one the module declares. The
+bundle's worker serves everything but a navigation cache first, under a cache
+name that moves once per release, so a device that had loaded the module for
+the emailed link would have been handed that copy by the password cover: no
+`passwordSignIn`, and the reader told the sign in files did not load. Bump the
+module's VERSION and the cover's `?v=` together whenever the cover starts
+calling something new.
+
+**What an email brings back is read for what it means and never echoed.**
+Anybody can write a link to the cover with any `error_description` in it, and a
+sentence of theirs painted on the first screen would read as ours: a crafted
+"call this number" came back as the cover's own fixed sentence and nothing of
+its text. `error_code` is a fixed vocabulary, so it may choose the sentence and
+is still never shown: `otp_expired` says the link expired or was used, and
+everything else reads as did not finish, each pointing at the password and at
+Forgot password. It is read from the hash, where the implicit flow puts it, and
+from the query, where PKCE did. A failed load of the two files is forgotten so
+the next press retries, and a return through the back button lets the held
+button go. `incommon.signin.via`, which chose between the link's sentences, is
+read by nothing now and is removed once from any browser that still holds it.
+
+**One thing on the cover changed that the section above states as a rule.** It
+has more than one control now: H5 still counts one `a[href]`, because the
+sign in controls are buttons that do not navigate by themselves. With Google
+gone, the rim is again the only green of any kind on the cover.
+
+**Opening the form centres the title and the form as one column.** At rest the
+way in hangs below the middle so the title sits over the hole. Four rows hung
+the same way ran off the bottom of a phone, so `body.open` puts the subtitle
+back in the flow and `align-content: safe center` centres the two together; a
+screen too short for the column, a phone on its side, scrolls it. Measured
+across nine sizes from 320x568 to 1920x1080 in every mode: every control inside
+the viewport and at least 44px tall, nothing overlapping the title, the one
+exception the phone on its side, which scrolls as designed.
+
+**"enter here" is the way to signing in, and only that.**
+Decided by the owner on 29 September 2026, in v6.4, and narrowed on 30
+September ("on desktop, enter here should only open up the email and password
+entry area"). A press of "enter here" opens the form in its place, with
+"Continue without an account" under it, and never goes into the app: a second
+press takes the reader back to the first empty field. The way in without an
+account is that button, and Sign in goes in on its own once it succeeds. Three
+things keep it from costing anybody the way in they had:
+
+- **The link is still a real anchor with a real href**, untouched in the markup,
+  so with the sign in script dead it navigates exactly as it always did, and the
+  build's two copies of the app address and its `<a class="enter" href=...>`
+  check are unchanged. `aria-controls` and `aria-expanded` are written by the
+  script for the same reason: only while it runs does the link open anything.
+- **"Continue without an account" goes on through the link** by clicking it,
+  so the module's exit, the rim becoming the mark, runs exactly as before. The
+  plain script's listener is registered before the module's (a plain script
+  runs while the page parses, a module after it), stops every press of the link
+  with `stopImmediatePropagation`, and steps aside only when `through` is set,
+  which only Continue without an account and a finished sign in set.
+- **A return that did not finish opens the form by itself**, an expired link
+  or a refused one, because what that reader needs next is the password or a
+  new link, one field away rather than one press away.
+
+H15 asserts both steps now, in one row so the
+phase stays at 17: the first press opens the form without leaving or starting
+the exit, the opened state passes 44px and 4.5:1 with the page at the top where
+both sweeps can see it, and "Continue without an account" runs the exit. P13 of
+the password drive presses the link twice and three times and stays on the
+cover.
+
+**On a phone there is no "enter here" at all.** The owner asked on 30 September
+2026 for the phone to show the email and password and nothing in front of
+them, so the form is open from the start and the link is not drawn. A phone is
+what the app calls one, narrower than 820, or a touch screen under 500 tall,
+which is the same phone on its side and would otherwise get the desktop's link
+at 844 wide. The sign in script sets `body.phone` and CSS hides the link from
+that class, never from a media query alone: with the script dead the form cannot
+open, and a link hidden by width would leave a phone with no way in at all. The
+anchor stays in the markup either way, because Sign in and Continue without an
+account go on through it. Nothing is focused on load, so the keyboard does not
+spring up over the page before the reader has seen it. P15 drives it at 390 wide
+with touch, and a tablet keeps the desktop's link.
+
+**The password has an eye.** A button at the field's right end shows what was
+typed and hides it again (the owner, 30 September 2026): a slashed eye while it
+is hidden, an open eye while it shows, one fixed name, "Show password", with
+`aria-pressed` carrying the state. Its press is cancelled on `pointerdown` and
+`mousedown` so focus stays in the field, because on a phone focus leaving the
+field drops the keyboard; the click still lands. The field goes back to a
+password field the moment the form is sent, so a password manager sees one when
+it offers to save. It is a 44px target inside the field, which leaves it room.
+The field is wrapped in `.pw` for that, so the mode switch hides the wrapper,
+not the input. P14.
+
+**Without WebGL the way in was invisible, and it is not any more.** The title
+and the way in are revealed by `body.live`, which the module adds on its first
+frame. With no WebGL the module dies before that, so the whole column sat at
+opacity 0 under the SIGNAL LOST message: a device without WebGL could neither
+sign in nor go in. `body.signal-lost`, set by the 9 second fallback, brings the
+column up now, the wordmark at the dim its own rule already gave it. Measured
+with WebGL disabled: both at 0 before, both at 1 after.
+
+**Signing in on a new device brings the account down** (see "One account reads
+the same on every device"). The first run used to say "No account, no sign-in",
+which contradicted a reader who had just signed in on the cover; the Codex page
+below replaced it and does not say it. The tucked away classic form still does, so if it is ever
+brought back, that sentence goes back to the consent language pass.
+
+## Remember me and the phone
+The owner asked on 30 September 2026 for a Remember me box ("i need loyal users
+to have that convenience"), for signing in by phone, and for the phone on the
+profile to recover the password by text. `docs/PHONE-SETUP.md` is the owner's
+half: nothing here sends a text until Supabase has an SMS provider, and until
+then a number is answered with `phoneOff`, in words, and email is untouched.
+
+**The password is never this page's to keep.** A password in localStorage is
+readable by every script that ever runs on the origin and by anybody holding the
+device, and it would be the one secret this app stored in the clear. So
+Remember me keeps three things and the password is not one of them: the login,
+in `incommon.signin.remember`, filled back into the field next time; the
+session, which is what staying signed in is; and the password goes to the
+browser's own password manager, through `PasswordCredential` where Chromium has
+it and through the `username` and `current-password` autocomplete names
+everywhere else. Q1 of the drive scans every stored value for the password and
+K44 does the same in the module.
+
+**Unticked, the session ends with the browser, and that took a sweep.** The
+session sits in localStorage, which survives a closed browser, so a box that
+only forgot the login would change nothing a reader could see. An unremembered
+sign in sets `incommon.signin.ephemeral` and a cookie with no expiry,
+`incommon_signin_live`, which the browser drops on closing. Mark present and
+cookie gone means the browser was closed, and the stored session is removed
+before any client reads it: by `ephemeralSweep()` in `init()` on the app, and by
+the cover's own copy at load. The two copies share four names (the two keys, the
+cookie, and `sb-<project>-auth-token`), and K38 reads both files and holds them
+equal, because the cover loads nothing until asked and so cannot call the
+module to do it. K45 and Q3, reopened with the session cookie dropped, prove it
+on both pages. A browser that restores session cookies on relaunch keeps the
+reader signed in, which is that browser's choice and not a fault here.
+
+**Remembered, the cover offers the way on, not the form.** `back` mode: "Signed
+in as ...", one Continue button that goes in without a request, and "Use another
+account" to reach the form with the login filled. It is read from the stored
+session at load, never from the network. `?signin=1` skips it on purpose: the
+app sends a reader there because it found no session, so a stored one is stale.
+The desktop still opens it with "enter here", by the owner's rule of 30
+September; the phone shows it at once.
+
+**One field takes an email or a number**, "Email or phone", `type=text` so a
+phone keyboard does not hide the digits behind an email layout. The module
+decides which it is (`idOf()`, `normPhone()`): ten digits, or eleven starting
+with 1, is a US or Canadian number, `00` is the international prefix, and
+anything else needs its `+` and country code, because guessing a country is how
+a code goes to a stranger. The cover's `isPhone()` only picks a label and hides
+the newsletter box; it never decides what is sent. Numbers are shown grouped
+only where the grouping is certain, `+1 555 123 4567`, and as sent otherwise.
+
+**A number has two paths through Supabase, and both end in a session.** A sign
+up by phone is `signUp({ phone, password })`, which texts a code with phone
+confirmations on; the code is `verifyOtp` type `sms`. A new password by phone is
+`signInWithOtp` with `shouldCreateUser: false`, then the same `verifyOtp`, then
+`set` mode on the session it brought, which is the step the reset email leads to
+as well. Supabase has no reset text as such, and a code that signs the number's
+account in is the honest equivalent.
+
+**Nobody learns whose number has an account.** Supabase refuses a code for a
+number with no account (`otp_disabled`, "Signups not allowed for otp"), and the
+module answers that exactly as it answers a sent code, as the reset email does
+for an address. Q5 drives both and compares the sentence. `exists` on a sign
+up is the one tell, and it is the same one email already has.
+
+**`code` mode sends a text only when pressed for.** A number that was never
+confirmed (`phoneUnconfirmed`) is taken to the code step with "Text me a new
+code" under it, and nothing is sent until that is pressed: a text costs money,
+and an automatic one on a failed sign in is a way to make the page send texts
+to a number the typist does not hold. Q6 counts zero.
+
+**A phone on an existing account is the app's, not the cover's.** Most accounts
+were made by email, so the profile card (Profile, in the profile menu) has a Phone number item in both shells:
+the number, `updateUser({ phone })`, then the texted code as `verifyOtp` type
+`phone_change`, on the session the app already holds. `phoneAddVerify()` writes
+the confirmed user into the module's session and notifies, so the menu names the
+number at once rather than after the auth event lands. Signed out, the dialog
+says why and offers the cover's sign in. Q7 and Q8 drive it in both shells, Q9
+signed out, and all five states measured clean over the 32 theme cases at 1440
+and 375 (no pair under 4.5:1, nothing under 44px).
+
+**The rows.** K38 to K45 in the module; Q1 to Q9 in a browser drive with
+Supabase faked, and P1 to P15 of the password drive still 15 of 15; the layout
+sweep at nine sizes now walks `code`, `set` and `back` through the real script,
+with the phone on its side scrolling as designed and nothing else out of place.
+
+## The first run is three stations on one line, and inCommon's old form is tucked away
+The owner asked on 29 September 2026 for the Celestial Codex's birth page to
+become the first run, with inCommon's put away rather than deleted, and on 20
+October 2026 for that page to be re-imagined without "Cast My Codex". So the
+Codex's words are gone ("The First Inscription", "Tell the Codex when you
+arrived", the three coordinates line, the button), and what came from it in
+substance stays: one card, the full birth name, the date and the time side by
+side where there is room, and a place search that lists candidates with their
+coordinates and zone.
+
+**The page now.** The wordmark between two `--ac2` bars, a horizon drawn in SVG
+(half the zodiac's ring, a tick at every sign boundary, a light at the top,
+`aria-hidden`; no `img`, `canvas` or `iframe`, which G4 refuses inside the
+gate), "Where your sky begins." in the display face, and no line under it, by
+"No disclaimers". The card is three stations on a rail: **Your name**, **The
+moment** (date, time, the unknown switch) and **The place**. Each station has a
+node on the rail that fills with `--ac2` once it is answered (`cxN1` to `cxN3`
+in `authVals()`: a name typed; a whole date and either a whole time or the
+switch; a place that resolved), so the page shows how far along the reader is
+without a sentence saying so. The nodes are fills, never text. The one action
+is "Reveal my sky", a pill in `--ac`, and Skip for now stays under the card (R2,
+G4). The state names still say `authCodex` and `cx*`: they are identifiers, and
+renaming them would buy nothing.
+
+**Tucked away means one flag.** `FIRSTRUN_CLASSIC` on the logic class is false,
+`authVals()` sets `authCodex` or `authBirth` from it, and inCommon's form is still
+in the markup whole behind `authBirth`. The two pages share every field, handler
+and check, so setting the flag true brings the old page back with nothing else to
+change.
+
+**What was adopted, and what was kept from inCommon because it is correctness
+rather than style.** The Codex's time field was a native `type=time` defaulting
+to 12:00 and marked known, which is exactly the two faults "The birth moment has
+three states" exists to prevent: a platform dependent control, and a noon that
+reads as an answer. So the time stays digits and an explicit 24h, AM or PM, empty
+until typed, and "I don't know my birth time" is a switch that records unknown
+rather than a default. The Codex showed a chosen place's coordinates and zone;
+this page adds the offset that applied on the birth date and whether daylight
+saving was in effect, which is the part that moves the Ascendant. Errors stay
+field level, with `aria-invalid` and `aria-errormessage` per field, because G7
+holds that. And the page is drawn in tokens: the one action wears `--ac`, the
+labels wear `--ac2-hi` because `--ac2` is never text, the rail, nodes and
+horizon wear `--ac2` as fills and strokes, and the heading's gradient runs between `--tx` and
+`--ac2-hi` so it holds its contrast in every identity. The Codex's gold has no
+token here, and a hex in the template is exactly what the theme boundary bars.
+
+**What it requires.** The Codex refused to cast without a name, a date and a
+place. Here the date is required, because a cast with no date casts nothing,
+and a place that was typed has to resolve, because an unplaced city used to save
+quietly and draw whole sign houses. The name is not required: a chart does not
+need one, and inCommon's rule that the date alone is enough to begin still
+holds. Skip for now stays, under the card, and R2 and G4 hold it there.
+
+**The name is split the way the Codex split it.** The full name goes to the
+birth name store the Numbers page reads, `incommon.p.<id>.birthName`, because
+Expression and Soul Urge read every letter; the profile is named by its first
+word, which is what the Codex called the reader.
+
+**The place search is debounced and memoised, and that is measured.** A
+`Gazetteer.search` over 170,000 places costs about 150ms and a
+`PM.geocode` of one exact name about 130ms, and `authVals()` runs on every
+render of this page. So the search reads `afPlaceQ`, a copy of the text that
+settles 350ms after the last keystroke, the Codex's own debounce, and both
+answers are kept for the text they were asked about. Coordinates typed as
+latitude, longitude are an answer rather than a search: their digits otherwise
+matched six towns in Kazakhstan. A place typed out in full counts as picked.
+
+**The page holds still while it is filled in.** It used to be centred with
+`margin: auto`, so every line that appeared moved the whole card: the place
+candidates pushed the button 278px, the unknown time switch took the time field
+away and pulled the place up, and an error banner above the card shifted every
+field down while somebody was typing in them. Now the column is top aligned, the
+place candidates float over the card as a dropdown (`position:absolute` under the
+input), the date and time errors, the place messages and the unknown time note
+each live in a reserved slot, the time field keeps its row when the switch is on,
+and the form error sits inside the card above the button, so the only thing it can
+move is the button. Measured by driving the page: name, date and place stay at the
+same y through typing a place, switching the time off and casting with errors.
+Anything new that appears here belongs in a reserved slot or an overlay, never in
+the flow above a field.
+
+**G7 finds the date field by type now**, inside the gate, because its label moved
+from "Birth date" to "Date of birth". What that row tests is the error wiring,
+and it should not break on a wording change again.
+
+## The phone sample banner is pinned, so every section carries its shadow
+The sample banner in the vertical shell is `position:absolute` under the header,
+deliberately outside the scroll so it is never a snap stop. Every section pads
+its top by `var(--hdr)` alone, so the banner covered the first 62 pixels of each
+page at 390 wide and 78 at 320: the date on Today, the introduction on Spirit.
+`main` had it too.
+
+Each of the five sections now opens with `data-sample-spacer`: the banner's own
+row, laid out the same way, `visibility:hidden`, `aria-hidden`, with spans where
+the banner has a button, behind the same `sampleOn`. It takes the banner's exact
+height at any width and any text size without measuring anything, measured equal
+at 320, 390 and 430. **If the banner's padding, gap, font or button box
+changes, change the spacer with it**, or the page starts short of it again.
+
+## The Oracle took Throughline's seat, and Throughline went to the Library
+The owner asked on 29 September 2026 for Throughline to become a tab in the
+Library and for its place in the nav to go to the Celestial Codex's Oracle,
+"where the user will be able to get their full fix of what they come to find",
+in the Codex's language, and chose a reading written by a model over one
+composed on the device. That reverses the V1.6.0 stance for this screen and for
+this screen alone. It is the owner's call and it is recorded here rather than
+argued again.
+
+**Throughline is the fourth Library tab.** The six tabs are Study, Journal,
+Readings, Throughline, Archive and The Commons (see "My Charts is three charts,
+and the Library is six tabs"), and `libTL` is the gate: `libSub === 'throughline'`
+with no room and no practice open. It is NOT gated on `curTab()`, the way the
+Study, Journal and Readings lists are not, because the phone draws the Library
+section whichever section is in view. The markup is
+the old tab's, moved, with `position:relative` added to its wrapper so the "+"
+still anchors to the record rather than to the section. `/library/throughline`
+is the address, and `/throughline` is kept as an alias in `openPath()`, the same
+way `/spirit/together` is kept for Synastry. Every handler that used to write
+`tab: 'throughline'` writes the Library tab now, and the two search rows go
+through `searchLib()`.
+
+**The Oracle is `tab: 'oracle'`**, `DT_NAV` and `VT_SECTIONS` in the same seat,
+so the phone's section indices did not move and nothing that scrolls to
+Settings by index changed. Its icon is new in `build-ui-icons.js` and
+`icons.json` both, by the registry rule: the sky as a whole with the lens on its
+side, which is an eye. `oracleVals()` is spread beside `dreamVals()`, and the
+vertical shell forces `isOracle` true in `vtVals()` the way it forced
+`isThroughline`.
+
+**The words are the Codex's.** Today, the day's omen; This Week, the seven-day
+tide; This Month, the lunar chapter; Standard and In-Depth; The Stars,
+astrological weather; The Design, your energetic current; The Numbers, the
+cycle's cadence; Love & Kinship, Work & Purpose, Spirit & Body; Celestial
+Currents; Windows of Time; Shadow Work, what asks to be met; For the Journal;
+A Small Ritual, the auspicious hue, and the mantra; and its two loading lines
+and its "silent for now". The screen is drawn in tokens, with every purple
+line in `--ac2-hi` and the one action in `--ac`, like the first run.
+
+**The theme phase does not see this screen**, because it measures `#/today`
+only, so it was measured by hand with the harness's own `contrastFails()` and
+`tapTargets()` lifted out of `tests-v6.0.js` unchanged: four identities, each
+hardened and not, at 1440 and 375 wide, with a full in-depth reading on screen
+(55 elements) and with the consent panel. All 32 cases: no pair under 4.5:1
+and no control under 44px.
+
+**The key is never in the page.** `server/oracle/index.ts` is a Supabase Edge
+Function that holds `MOONSHOT_API_KEY` as a secret; the app calls it through
+`incommon-cloud.js`, which is still the only module that talks to Supabase.
+`oracleRead()` answers every failure as a reason the page can say in words,
+never a throw, and K26 to K29 cover that, K28b the Luminary refusal. The
+function lives in `server/`, not `supabase/functions/`, because this repository
+is connected to Supabase's GitHub integration, which watches a `supabase/`
+folder and can open preview branches that are billed. `docs/ORACLE-SETUP.md` is
+the owner's setup, with the cost of a reading and the prepaid balance that
+bounds it.
+
+**Kimi writes the readings**, Moonshot AI's model, which the owner chose on 29
+September 2026 in place of Claude. It is asked with `fetch`, not a client
+library: the API is one POST to `api.moonshot.ai/v1/chat/completions`, and a
+library would be a dependency that can move under a function pasted into a
+dashboard. The Codex's schema goes as a strict `json_schema` named
+`horoscope`, the instructions as the system message (first and unchanging, so
+Kimi's cache serves them at a sixth of the price), the dossier as the user
+message. What comes back is read leniently, from the first `{` to the last
+`}`, because a code fence around a paid reading is not worth failing it, and
+then held to the schema's required keys, because half a page is worse than an
+error.
+
+**`kimi-k2.6` with thinking off is the default for both depths, and the reason
+is the clock.** Supabase stops a function at 150 seconds on the free plan.
+Kimi's own API writes `kimi-k2.6` at about 70 tokens a second and `kimi-k3` at
+40 to 60, and an in-depth reading is several thousand tokens. The Codex asked
+for more thought before an in-depth reading; that is `ORACLE_DEEP_THINKING`,
+off by default, `on` for `kimi-k2.6` or `kimi-k3`'s own `low`, `high` and
+`max` (it cannot be switched off there, so off means low). The function
+abandons the call at `ORACLE_TIME_LIMIT` (140 seconds) and says TIMEOUT rather
+than being killed mid write with a pending row. Measured speeds are from
+Artificial Analysis, not from this build, which has never called Kimi.
+
+**Kimi's failures map onto the Codex's two codes.** A rate limit or an
+overloaded engine is RATE_LIMITED; an empty balance
+(`exceeded_current_quota_error`, also a 429, so the type decides), a refused
+key, a model name Kimi does not have, a server error or no connection at all is
+OUT_OF_CREDITS, silent for now, and the row is released because nothing was
+written. A content filter is REFUSED and a reading cut off at the token limit
+is TOO_LONG; both count, because Kimi wrote and was paid. The function was run
+under Node against a fake Kimi and a fake Supabase (auth and PostgREST in
+memory) for 37 cases, request shape, every error path, the timeout, the daily
+limit and the knobs, and typechecked strict against the real Supabase types.
+
+**It operates as the Codex's Oracle did, and that was checked, not assumed.**
+The owner made it the condition of merging (29 September 2026), so the Codex's
+own code was read and run rather than recalled. The server asks with the
+Codex's `INSTRUCTIONS` and `DEEP_INSTRUCTIONS` word for word, its two JSON
+schemas key for key, its request line (`Compose the ... horoscope for
+{label}. DOSSIER:`), its period keys and labels, its instants (the day at noon
+UTC, the week at its Thursday, the month at its fifteenth). The page asks the moment the Oracle is open and again
+when the period or the depth changes, as the Codex's query did, shows its orb,
+line and skeleton while it waits, its drop cap, its sections in its order, and
+fails in its words: silent for now with no retry, resting and clouded over with
+Ask again. `oracleDossier()` is the Codex's `buildCosmicContext()` line for
+line, including the first name it sent. The Codex's builder was bundled with
+esbuild and run on the same births, and the dossiers compared line by line.
+
+**Where it does not, and why each one stays.** These are the whole list:
+
+- **The model is Kimi.** The Codex asked an OpenAI model through its own
+  adapter. The instructions and schema are the same; the prose will not be.
+  Nor is the extra thought the Codex asked for before an in-depth reading,
+  which is off by default here for the time limit above.
+- **The first reading waits for one press**, Consult the Oracle, beside the
+  sentence saying what is sent. The Codex kept birth data on its server from
+  sign up; inCommon promises the chart stays on the device until the reader
+  says otherwise. After that press the screen behaves as the Codex's did.
+- **The ask waits 600ms after the screen comes into view**, because the phone
+  draws every section at once and a reader scrolling past must not pay for a
+  reading they never looked at. The Codex's tabs mounted only when chosen.
+- **A daily limit of six attempts**, and a claim on the key before the model is
+  called. The Codex had neither and bounded its bill by caching alone.
+- **No dash reaches the page**, by inCommon's rule: the weekly label says "to"
+  where the Codex wrote a dash, and the server strips any the model writes.
+- **Each reading is given an emphasis, a voice and a well of imagery**
+  (owner, 13 October 2026), so two readers with the same chart get readings
+  that differ in what they lead with and how they sound, never in what they
+  say about the sky. `voiceFor()` picks one of 8 lenses, 6 registers and 5
+  image sources from a hash of the reader's id, the period and its key, and
+  adds a line holding every placement, aspect, gate, number and date to the
+  dossier. It rides in the user message, after the request line, so the
+  system message is still the Codex's text word for word and still the part
+  Kimi's cache serves. One reader keeps one pair for a period (both halves of
+  an in-depth reading match) and the next period turns to another. Two
+  readers land on the same three about one time in 240, and the model's own
+  sampling still separates them then. Nothing new leaves the device.
+- **Where the two apps compute a chart differently, the dossier carries
+  inCommon's chart**, so a reading cannot contradict the wheel, the wiring or
+  the numbers page beside it. Where the Codex computed better, inCommon took
+  its method (see "Where the Codex computed better, inCommon took its
+  method"), so what is left is where inCommon is right or the two are choices:
+  the master numbers inCommon keeps in every personal cycle (a Personal Month
+  or Day of 11 where the Codex reduced it to 2), the Ascendant to within
+  arcseconds (inCommon pairs the apparent sidereal time with the true
+  obliquity where the Codex took the mean one), six of the 64 gate names (2,
+  10, 29, 47, 61, 62), and Black Moon Lilith, which is the mean lunar apogee
+  here: the Codex's formula is the perigee, so its Lilith sat in the opposite
+  sign for every reader, and copying it would have copied that. Run against
+  the Codex's own builder on two births after these changes, 115 of 138
+  dossier lines are identical and every difference is one of those.
+
+**What leaves the device is the Codex's dossier**: the first name, positions,
+houses and aspects, the Human Design type, authority, profile, centres,
+channels and Sun gates, the numbers including the name numbers, and the sky at
+the period's instant with its transits to the chart; the in-depth dossier adds
+the Codex's advanced points, minor aspects and every activation. No journal
+entry, and no birth date, time or place. The positions are enough to work out
+roughly when somebody was born, and the consent panel says exactly that.
+
+**Asking on open is paid for once per period.** A reading is kept on the device
+under `incommon.p.<id>.oracle`, keyed by period, period key, depth and the
+profile's birth stamp, so a corrected birth time finds nothing rather than the
+old chart's reading, which is what the Codex did by deleting its readings when
+the birth data changed. The server keeps it too, keyed by a hash of the
+dossier, so opening the Oracle again, here or on another device, costs
+nothing. The consent is `incommon.p.<id>.oracleConsent`. `deleteProfile()`
+cascades both keys. `oracleAutoAsk()` runs from the one `componentDidUpdate`;
+leaving the screen forgets a failure, so coming back tries again, as the
+Codex's query did on a remount.
+
+**The server holds the limits the page cannot.** A daily limit per reader
+counts readings written or being written, and a failed attempt does not use one
+up (changed 10 October 2026: a timeout was costing readers one of their six
+for nothing); failures are bounded at four times the limit so a broken request
+cannot run up the bill; a row is claimed
+before the model is called, and a partial unique index lets only one pending
+or finished row exist per key, so a double press or a second tab waits rather
+than paying twice. The table is written only by the function with the service
+role; a reader may read their own rows and nothing else, so nobody can delete
+the rows the limit counts. An in-depth reading is refused with
+PREMIUM_REQUIRED before any of this, and before the stored reading is looked
+up, as the Codex's `requirePremium` did, so a refusal costs nothing and counts
+nothing. Every string the model returns has dashes replaced
+before it is stored, by a detector built from char codes.
+
+**The page does not say resting while a reading is on its way.** Two answers
+used to paint "The oracle is resting" over a reading that was being written.
+PENDING is the server saying a reading for this key is already being written,
+which is what a reload in the middle of one looks like, and a phone reloads a
+backgrounded tab often. RATE_LIMITED is Kimi saying it is writing another, and
+on the $1 recharge tier Kimi writes one at a time for the whole app. So while
+the reader is on the screen `oracleAsk()` waits them out (`ORACLE_WAIT`): every
+ten seconds for up to six minutes on PENDING, which outlasts the server's five
+minute release of a stuck row, and at 15, 30 and 45 seconds on RATE_LIMITED,
+with the loading panel up and a line saying which it is. Only then does it rest.
+Leaving the screen stops the waiting, and coming back asks again. The page also
+asks for one reading at a time: another slot in flight or waiting defers the
+next, which says it is waiting its turn, and the one componentDidUpdate asks
+for it once the first is answered. Driven with the function faked: W1 to W5,
+nine rows.
+
+**The server says PENDING before it counts the limit.** It used to count first,
+so asking again for the reader's sixth reading while it was being written came
+back LIMIT and read as silent for now. It looks for a pending row for the same
+key after the finished one and before the count; O38 of the fake Kimi harness
+fails on the old order. Asking again for a reading being written costs nothing:
+no row is claimed and the model is not called.
+
+**A signed out reader is sent to the cover**, `?signin=1`, which opens the
+sign in form at once and drops the query. The Oracle needs an account because a
+reading is written for one person and kept with them; a sample chart is refused
+on the page before anything is sent, because the Oracle writes for one person
+and a sample is nobody.
+
+## The in-depth reading is prepared ahead, and still opened with a press
+The owner asked on 10 October 2026 for the Luminary reading to load in seconds.
+It cannot be written in seconds: an in-depth reading is about six thousand
+tokens, a minute or two of a model writing, and the function gives up at 140.
+So the writing is moved to before the reader asks, and the owner chose that the
+reader should still open it with the **Consult the Oracle** button rather than
+have it appear on its own. This reverses "the page asks the moment the Oracle is
+open" for the in-depth reading only. Standard readings are unchanged and still
+ask when the screen opens.
+
+**What the page does now.** `oracleWillAsk()` is false for `deep`, so nothing is
+asked on open. On the In-Depth screen a Luminary who has agreed once sees
+`orDeepGate`: the button and nothing else, whether the reading is already on the
+device or not. Pressing it (`orDeepGo`) records that this slot is opened
+(`orOpened`) and shows the reading at once if it is kept, or asks for it if it
+is not, with the loading panel and the usual wait. `orOpenDeep()` also sets
+`incommon.p.<id>.oracleDeep`, which is deleted with the profile like the other
+Oracle keys.
+
+**The preparing is `oraclePrepareAuto()`, from the one `componentDidUpdate`.**
+Four seconds after everything is true it asks, quietly, for the current
+period's in-depth reading: the page is ready, the reader is signed in on a chart
+that is theirs, has agreed to the Oracle, has asked for an in-depth reading
+before (`oracleDeep`), and the server has confirmed Luminary. It asks once per
+slot per session, so the daily limit of six attempts is not spent on a page
+nobody opened, and `lumAuto()` asks billing at start for a reader with
+`oracleDeep` set rather than only when the Oracle is open, or the premium
+answer would arrive too late to prepare anything. A reader who has never asked
+for an in-depth reading sends nothing, which is what keeps the promise that the
+chart stays on the device until they say otherwise, and keeps the cost to
+someone who reads them.
+
+**Quiet is a mode of `oracleAsk(period, depth, again, quiet)`.** A quiet ask
+says nothing aloud, keeps the loading panel off the screen (`oracleVals` does not
+count it as busy until the slot is opened), shows no error if it fails, keeps
+waiting out PENDING and RATE_LIMITED when the reader is not on the Oracle, and
+does not make a standard reading wait behind it (`orNonQuietBusy()`). The moment
+the reader presses the button for that slot it is not quiet any more: the
+panel, the announcement and any error are theirs. A failed preparation is
+forgotten, and pressing the button asks again.
+
+**What it does not fix.** The first in-depth reading a reader ever asks for, and
+any period not yet prepared, still takes the full minute or two. Only the
+current period is prepared, so weekly and monthly in-depth readings are written
+when asked. Driven rather than read, in a browser with the cloud module faked:
+no ask on open, the press asks, a prepared reading shows within half a second of
+the press with no second request, a failed preparation is silent and the button
+still works, and a standard reading still asks on open.
+
+## The in-depth reading is written in two calls
+Added 10 October 2026. One call for the whole reading ran past the function's
+wall clock, so `oracleRead()` in `incommon-cloud.js` asks twice for depth `deep`:
+`part: 'a'` (the standard fields written deeper, with `keyTransits`), then
+`part: 'b'` (chapters, timing, shadow work, journal prompts), and the server
+answers b with the two joined. The second half is stored under `chart_key + '.b'`,
+so the table and its unique index are untouched. A reading counts once toward the
+daily limit: `.b` rows are excluded from that count and bounded by it separately,
+and b is refused unless a is done. A server that still answers the first call
+with chapters already in it makes the client skip the second call, so the page
+and the function can be deployed in either order. Do not merge the two schemas
+back into one call, and do not count the b rows as attempts, or a reading costs
+two of the six. K29b holds the client half.
+
+## The first half is shown while the second is written
+Added 10 October 2026. `oracleRead()` takes an optional `onFirst` callback and
+calls it with the first half of an in-depth reading as soon as that call
+answers, before the second is asked for. The page keeps it in `_orFirst[slot]`,
+in memory only, and shows it once the slot has been opened with the button, with
+a dashed status line (`orMoreOn`) saying the chapters, timing, shadow work and
+journal prompts are still being written. It is never passed to `oracleKeep()`:
+the kept reading is the whole one, so a half is never mistaken for it. If the
+second half fails the first stays on screen, the line turns into the error and
+Ask again appears. A new ask clears it. K29c holds the client half.
+
+## In depth is Codex Luminary, and Stripe takes the payment
+The owner asked on 29 September 2026 to charge for the advanced readings with
+the Stripe payment the Celestial Codex had. The Codex's Luminary is ported
+whole: $12.99 a month or $119.99 a year, Stripe Checkout, the billing portal,
+the webhook, the lazy re-sync (a row is asked of Stripe again when it is not
+active, past its paid period, or six hours old, so it comes right with no
+webhook at all), admin addresses that pass without paying, and the Codex's
+words on the gate. In inCommon Luminary unlocks the in-depth reading and
+nothing else; the gate says in a line of its own that every chart, the wiring,
+the numbers and standard readings stay free. `docs/LUMINARY-SETUP.md` is the
+owner's half.
+
+**One function, `server/billing/index.ts`, does the four jobs the Codex had four
+handlers for**: status, checkout and portal for the page, and Stripe's webhook,
+told apart by the `stripe-signature` header. One copy of the code that reads
+Stripe's answer, rather than a webhook function and a billing function that can
+drift. That is why it is deployed with **JWT verification off**: Stripe cannot
+send a Supabase token. Readers are still named by `auth.getUser()` and refused
+without one, and a webhook is believed only when `constructEventAsync` checks
+its signature with the Web Crypto provider, because Deno has no Node crypto.
+
+**inCommon's own lookup keys**, `incommon_luminary_monthly` and `_annual`, not
+the Codex's, so pointing it at the Stripe account the Codex used can never pick
+up or re-price the Codex's product. The first checkout makes the product
+("Codex Luminary") and both prices.
+
+**A 7-day free trial, once per reader, card taken at checkout** (the owner's
+decision of 12 October 2026, both plans). The billing function grants it:
+`trialOpen()` is false for anybody whose row carries a `stripe_subscription_id`
+(syncCustomer keeps one once any subscription has existed, cancelled ones
+included) or who has a `store_subscriptions` row of any status, and checkout
+asks Stripe's own subscription list before adding `trial_period_days`, so a
+missed webhook cannot hand out a second trial. The status carries `trialDays`,
+and the page words the button and the terms beside it from that alone
+("Start your 7-day free trial", the charge date and amount, how to cancel);
+`trialing` already counted as paid in billing and the Oracle. Terms has a
+"Free trial" part under "Price and automatic renewal". The apps' trials are
+store introductory offers, so the page shows none of this in the apps. A
+closed EU or UK country's trial is cancelled by `refuseIfClosed()` with
+nothing to refund, since its first invoice is zero.
+
+**Managed Payments is switched off on every checkout.** Stripe turns it on by
+default for a new account, which makes Stripe the seller of record and refuses
+any product without a tax code; on `2025-02-24.acacia`, the version `stripe@17`
+pins, it refuses the session outright ("Managed Payments is not supported on
+API version"). That is how checkout first failed in the sandbox on 12 October
+2026: the customer and both prices were made and no session came back. inCommon
+is the seller (the Terms, the EU and UK hold, `LUMINARY_TAX`), so the checkout
+sends `managed_payments: { enabled: false }` itself rather than trusting a
+dashboard default, through a widened params type because `stripe@17`'s types
+predate the field. Turning it on would make Stripe the merchant of record and
+is the owner's decision, with the legal pages changed in the same change.
+
+**The website's gate names no price** (owner, 13 October 2026). It invites:
+the plans read Monthly and Yearly, "Billed monthly" and "Billed yearly", the
+annual one marked Best value where it is cheaper, and the button says Become a
+Luminary or Start your 7-day free trial. The figures are Stripe Checkout's to
+show, and it shows the price and the renewal before anything is paid, so the
+renewal sentence beside the button says "at the price shown at checkout" and a
+trial names its charge date without its amount. The store apps keep the prices,
+because Apple wants the price on the purchase screen (3.1.2). The Terms
+name no price either (owner, 13 October 2026): section 7 says the plan's price
+and tax are shown at checkout and confirmed in the receipt, which is why
+Stripe's customer receipts must stay on. A price change still owes 30 days'
+notice, as the Terms promise.
+
+**The paywall is the Oracle function, not the page.** The page's gate is
+courtesy; `server/oracle` reads `subscriptions` itself and answers 402
+PREMIUM_REQUIRED before it looks up a stored reading, as the Codex's
+`requirePremium` did. When the page believed the reader paid and the server
+did not, the page drops its belief, asks billing again with a sync, and shows
+the gate. The table is written only by the billing function with the service
+role, so nobody makes themselves a Luminary by writing a row.
+
+**The page asks billing once, when the Oracle is first opened with a session**
+(`lumAuto()`, from the one `componentDidUpdate`), never on render: the phone
+draws every section at once, and a status per paint would be a Stripe call per
+paint for anybody whose row has gone stale. Stripe returns the reader to the
+page's own address with `?luminary=success` or `cancelled` before the hash;
+`lumReturnRead()` drops it at mount, lands on In-Depth, and asks with a sync up
+to five times while it still reads unpaid, which is the Codex's "Confirming
+your payment with Stripe". A `pageshow` from the back-forward cache lets a held
+checkout button go.
+
+**Driven, not read.** 42 rows in a browser, both shells, against a faked
+Supabase and Stripe: the gate in place of a reading, no in-depth call while
+locked, the plan and price on the button, the checkout request and the
+navigation to Stripe, the return confirming and welcoming, the member line and
+the portal, a cancelled checkout, billing not deployed, and the server
+refusing a page that believed it was paid. The gate and the member line
+measured by hand in all 32 theme cases (four identities, hardened and not, two
+widths): no pair under 4.5:1 and no control under 44px. The function was run
+under Node against a fake Stripe for 25 cases, webhook signatures included,
+and typechecked strict against `stripe@17`. K30 to K34 hold the cloud calls.
+
+## The Cycle Audit: the long passages, pay what you want on the website
+Asked for by the owner on 18 October 2026 as "the Cosmic Tax Ledger": the
+multi-year passages of the slow astral bodies across a chart, each read as what
+it asks to be set down (the Tax) and what it builds (the Dividend), with three
+questions. The owner chose that the Oracle's model writes it on the server,
+that one payment of the reader's choosing opens it for the account for good
+($3 floor, $12 preset), and that the store apps give it away and carry a gift
+instead. Later the same day that payment became Codex Luminary and opens every
+add-on: see "Codex Luminary is one payment" below. `docs/CYCLE-AUDIT.md` is the owner's half.
+
+**It lives on Today now, as a widget and a sheet** (the owner, 19 October
+2026: "treat it like the weather channel widget"). It was the Oracle's fourth
+period for one day and read as awkward there, so `ORACLE_PERIODS` is three
+again and `orPeriodOf()` turns any stored `cycle` back into `daily`. The
+plumbing underneath still calls the period `cycle`: `oracleSlot`, `oracleAsk`,
+the kept reading and the server's period are unchanged, so nothing stored or
+deployed had to move. `oracleAsk` treats the sheet being open (`cyOpen`) as the
+reader being on the screen, and `oracleAutoAsk` leaves `cycle|` slots alone
+while it is.
+
+**The widget is free and draws three studies on one twelve year axis**
+(`cycleWidgetVals()`, `cw*`), placed on Today in both shells: on the phone
+after the greeting, on the desktop at the top of the right column. A hero line
+names the heaviest passage under way (or the next one), three tiles give each
+lane's state, and the chart has three lanes and a Now line through all of
+them. **Stars** is the passages from `cyclePassages()` plus any under way,
+packed into at most three rows, a tick at each exact date. **Design** is
+`cycleDesign()`: Uranus, Neptune and Pluto staying on a gate the reader holds
+(filled) or on a gate that completes a channel with one (outlined), sampled on
+the same `cyLon` walk and memoised by `cycleScanKey()`. Saturn is left out of
+the lane because it changes gate too often to read at this scale; the sheet
+lists it. **Numbers** is the Personal Year for each year with the Pinnacles as
+a band under it, from `numerology()` and the core's `personalYear()`, masters
+in `--ac2-hi`. Every mark has a minimum width so a short stay never paints as a
+sliver.
+
+**Tapping opens the sheet** (`cyOpen`, `cycleSheetVals()`, `cy*`), a full
+screen dialog in both shells with the scene's stage beside or above it. The written reading comes first, because it is what the tap
+was for: the sample, sign in, consent and gate states, then the ledger
+(`cyDash()`, unchanged). Under it the passages list, the Design list (six,
+then all), and the Personal Years. The gate is `lumGateVals('cycle', 'cg')`,
+written as its own `cg*` keys so it cannot collide with the Oracle's; a return
+from Stripe for it lands on `#/today` with the sheet open. `cycleSheetAutoAsk()`
+asks for the reading 400ms after the sheet opens, the same rule the Oracle's
+standard reading follows.
+
+**It is drawn in depth, and the flat chart is its fallback** (the owner, 19
+October 2026: "make the audit cycle completely interactive like it was made on
+Unreal Engines. It should breathe with the reader's curiosity"). `app/cycle-scene.js`
+(shell layer, global `CycleScene`) draws the widget's chart and the sheet's
+stage as one three.js landscape: the Stars lane is an arch of light per passage,
+as tall as its `weight`, with a pillar at each exact date; the Design lane is lit
+slabs (own gate) and outlines (a channel); the Numbers lane is a tile per year as
+tall as its Personal Year with the Pinnacles as a band; Now is a column of light.
+In the full view a wheel of the sky hangs in the corner and turns with the
+instant the reader is looking at, a line from each slow body to the natal point
+it touches. The reader drags (or uses the arrow keys) through the years, hovers
+a passage to name it, taps one for a card that scrolls to its ledger, zooms with
+the wheel, a pinch or the + and minus buttons, and Now brings the probe back.
+Several things are easy to undo:
+
+- **It computes nothing.** Every passage, stay, year and pinnacle arrives in
+  `cycleSceneModel()`, built from the same scan the lists read, and the four
+  positions on the wheel come through `opts.lonAt`, the app's `cyLon`. Nothing
+  new leaves the device and no outside origin was added: three.js is the copy
+  the cover vendors, imported with `import('./three.module.js')` on first use,
+  which resolves beside the page in the source shell, the bundle and the store
+  apps alike.
+- **One renderer, two hosts.** `[data-cy-scene="mini"]` in the widget and
+  `[data-cy-scene="full"]` on the sheet's stage. `cycleSceneSync()`, from the
+  one `componentDidUpdate`, moves the one canvas to whichever is in the
+  document (the sheet's first) and retries a few times 60ms apart, because the
+  runtime commits an `sc-if` a tick after the hook.
+- **It reads its palette off the page, and only once it is in the page.** The
+  first pass read the tokens while its root was out of the document, got empty
+  computed styles, and drew the whole scene in fallback grey. `readTokens()`
+  returns null until the root is connected, the scene keeps Deep Field numbers
+  for that frame, and `attach()` reads again. A theme change reaches it through
+  the same identity key `skySync` uses.
+- **It falls back rather than failing.** WebGL 2 missing (`CycleScene.supported()`),
+  three.js not loading, or a lost context sets `cwSceneFail`, and the flat chart
+  and the sheet's plain header come back (`cwChartOn`, `cySceneOff`).
+- **The sheet is full screen, and the shell's dialog rules had to be told.**
+  `[data-dt-modals] [role=dialog]` caps every desktop dialog at 620px and
+  `[data-vt-modals]` makes every phone dialog a rounded bottom sheet, so the
+  stage came out 180px wide. The overlay and the dialog carry `data-immersive`,
+  which the head stylesheet exempts. Desktop: the stage beside a 340 to 440px
+  panel. Phone: the stage over the panel, at 52vh.
+- **The timeline is a slider.** `role="slider"`, `aria-valuetext` naming the
+  date, the passages under way, the gate and the Personal Year, written directly
+  by the scene (never through state). Keyboard focus holds the probe where the
+  reader left it; a click focuses the slider too, and that must NOT hold it, or
+  a mouse reader's probe never goes back to now. The focus ring is keyboard only
+  for the same reason. The host is `data-noswipe`, and the widget's canvas is
+  `touch-action: pan-y`, so a sideways drag scrubs and a vertical one scrolls.
+- **Breathing is one number.** Curiosity rises with pointer movement, hovering,
+  dragging and keys and decays over eight seconds; it raises the glow, the
+  bloom, the dust's pull toward the pointer and leans the camera in. Under
+  reduced motion nothing animates: frames are drawn on change and the camera
+  cuts.
+- **It runs only where it is seen.** An IntersectionObserver and the page's
+  visibility gate the loop (the phone draws every section at once), it drops to
+  30 frames a second at rest, and a quality ladder lowers the pixel ratio and
+  then the bloom when frames run long.
+- **The passages the audit reads are the lit ones.** The full view draws all
+  twenty years of passages, and drawn alike they summed to white; the rest stand
+  behind at 0.4.
+
+Driven in Chromium on SwiftShader (`sdrive.js`, 42 rows over both shells): it
+paints (pixels read back), hover names a passage, a drag and the keys move the
+probe and its readout, a sideways drag does not turn the page, the probe returns
+to now, Enter and a tap open the full view with the same canvas, the wheel
+shows four bodies, a tap opens the card and its button reaches the passage,
+zoom and Now, all eight theme cases at 1440 and 390 with the scene repainting
+from each palette, the fallback without WebGL and with three.js blocked, and
+reduced motion drawn and still. The flat chart's own drive runs without WebGL.
+
+**The dates are free and computed on the device; only the reading is sold.**
+`cycleWindows()` finds every passage of Saturn, Uranus, Neptune and Pluto across
+the ten natal bodies, the Ascendant and the Midheaven, from the start of last
+year to twenty years ahead, conjunct, square, trine and opposite at 1.5
+degrees, joining runs of one contact less than 400 days apart into one passage
+with every exact date. A computed date cannot be scarce, by the same rule as the
+month reading, so the list is drawn for any chart of the reader's own. The scan
+reads each body off a cubic through library positions every 20 to 40 days
+(`CY_STEP`, measured within a hundredth of a degree), walks it every two days
+and bisects the edges and exact dates: about 1,800 library positions and a tenth
+to a fifth of a second, once a year per profile. It asks the library directly
+(`cyLon`) so a twenty year walk does not flood lonRaw's grid or the position
+cache, and it is never run inside the press that opens the screen: `cycleSoon()`
+runs it on the next tick and the list says it is finding the passages. **It is
+anchored to the calendar year, not to today**, so the dossier, and the reading
+the server keeps for it, do not change every morning.
+
+**The audit reads at most eight passages** (`CY_MAX`), the ones under way first,
+then by `CY_WEIGHT` (the slowest bodies, hard contacts, longer passages), shown
+in the order they arrive. The list opens on those eight and expands to every
+passage. The Pluto case the owner gave is the fixture: Pluto crosses 15 Aquarius
+five times from April 2032 to December 2033 and 28 Aquarius five times from
+April 2041 to December 2042 (Z2 and Z3). The brief said 2029, which is where
+Pluto stands near 10 Aquarius; the dates come from the library, never from a
+brief.
+
+**What leaves the device** (`cycleDossier()`): the first name, the touched
+natal points with sign, degree and house, each passage with its dates, and the
+Human Design type, strategy and authority and the Life Path, which the
+questions are asked through. No birth date, and nothing that moves with today.
+Privacy Policy section 6 says so.
+
+**Each passage is drawn as a ledger** (the owner's layout, 18 October 2026),
+`cyDash()`, in both shells: a header with the passage's state as a badge
+(Active Outer Transit, Outer Transit Ahead) and the natal coordinate it lands
+on; then two columns that stack on a phone, The Surrender Ledger (Deconstruct,
+the Tax, and Reconstruct, the Dividend, as short lists) and Timeline & Shadow
+Integration (the cycle stage, the years, a bar filled to today with a node at
+every exact date, and Cross-System Shadow Prompts, one question each from The
+Stars, The Design and The Numbers). **Everything but the lists and the
+questions is the device's arithmetic, never the model's prose**: a written
+passage is matched to its computed window by name, the dossier's order as the
+fallback, and the title, window, coordinate, stage and timeline come from the
+window. The schema asks for `tax` and `dividend` as lists and each prompt as
+`{system, question}`; a reading kept in the older shape (paragraphs, plain
+questions) is split into its sentences and drawn without the system labels, so
+it still reads. The layout brief labelled the coordinate "NASA Ephemeris
+Precision Coordinate"; it says "Natal Mars" and the like instead, because a
+line naming the method is what "No disclaimers" removed, and because the
+positions come from astronomy-engine, which is not NASA. Its year range used a
+dash, and reads with middle dots. Z8 holds the dashboard against the Pluto
+fixture and an older reading.
+
+**The owner's style sheet was translated into tokens, not pasted.** Inline
+styles only, and the 768px media query became the two shells: two columns in
+the desktop markup, one in the phone's, with the phone's padding at 20px
+rather than 32px because a 390px screen cannot give 64px to padding. Its
+crimson Tax and emerald Dividend became `--ledger-tax` (amber `#e0a458`) and
+`--ledger-div` (teal `#4fb8c4`), fixed hues declared in all three roots like
+the category hues, because crimson sits on `--crisis`, which nothing but
+safety may go near, and emerald on `--ac` and `--ok`, which mean an action and
+a confirmed value. Its ✕ and ✓ markers became a hollow ring and a filled dot
+(set down, built), because a cross and a tick read as wrong and right, and a
+passage is never good or bad. Its violet text (`#c084fc`, `#8b5cf6`) is
+`--ac2-hi`; `system-ui` is `--fu`, the theme's own face, with the prompts in
+`--fb` italic because Karla carries no italic. **Z9 counts every `sc-if` and
+`sc-for` and holds them equal**: the first ledger pass replaced its block by
+slicing between anchors and took the long view's opening `sc-if` with it, and
+the page still drew, because the runtime forgave the stray closer.
+
+**The server writes it with inCommon's own instructions** (`CYCLE_INSTRUCTIONS`
+and `CYCLE_SCHEMA` in `server/oracle/index.ts`), not the Codex's, and they carry
+this file's rules for interpretive writing: what a passage offers and asks,
+never what the reader is, no "you are", never good or bad, no predictions of
+harm, astral body rather than planet, and questions only the reader can close.
+The voice and emphasis line and the dash cleaner apply as to every reading.
+
+**The paywall is the server**, and since the same day it is Codex Luminary's
+(see "Codex Luminary is one payment"): the Oracle refuses a Cycle Audit on the
+website with PREMIUM_REQUIRED unless `opened()` finds the reader Luminary. **The apps are told
+apart by the origin Capacitor gives its web view** (`capacitor://localhost`,
+`https://localhost`), which a browser page cannot write. A script outside a
+browser can, and that is accepted on purpose, because what it would get is what
+installing the app gives anybody.
+
+**Support inCommon is the owner's donate button, in the apps only**
+(`GIFT_IN_APP`, `giftOn()`): beside Contact Support, in the Settings footer
+after Accessibility, and in the profile menu. It is called a gift on every
+surface because inCommon is not a charity and "donate" says tax deductible to
+most people. It needs no account (the `support` action is answered before
+anybody is named), opens Stripe in the device's browser, and comes back to
+`thanks.html`, built like the legal pages and noindex. **Apple and Google may
+refuse a payment link inside an app** (Apple 3.1.1 outside the US storefront,
+Google's payments policy for anything but a registered charity); if review
+does, `GIFT_IN_APP = false` is the whole change.
+
+**The return address was refusing the live site.** `OWN()` in the billing
+function named incommon.netlify.app and not incommonspace.com, so from 16 to 18
+October every checkout from the live site came back BAD_REQUEST. Both names are
+on it now, and the function harness reproduced the refusal on the old code
+before the fix.
+
+Held by Z1 to Z7 (the scan, lifted out of the app), K34c to K34e (the cloud
+calls), K55 (eight Terms links now, the unlock gate in each shell), a 42 row
+browser drive with the cloud module faked (both shells, website and app, the
+gate, the return, the reading, a closed country, an older billing function,
+the gift, eight theme cases at 1440 and 390), and 13 cases of the billing and Oracle functions run under
+Node against a fake Stripe, Supabase and Kimi, typechecked strict.
+
+## Codex Luminary is one payment, of the reader's choosing, and opens every add-on
+Decided by the owner on 18 October 2026: "all add-ons should assume the cycle
+audit's form of payment. One-time reader's choice. For everything." One
+payment opens every add-on, and the Luminary subscription is retired. **This
+overrides the Luminary sections above where they disagree**: "In depth is
+Codex Luminary, and Stripe takes the payment" (the plans, the prices, the
+trial, the renewal terms, the gate's wording), "Luminary in the apps is
+RevenueCat's" (nothing is sold in the apps now), and the RevenueCat half of
+"The app stores".
+
+**The add-ons are the in-depth Oracle readings, Omni tarot and the Cycle
+Audit's readings**, and any added later joins them. What stays free: every
+chart, the numbers, standard readings, Light and Divine tarot, and the dates of
+every Cycle Audit passage. It keeps the name Codex Luminary, and the gate says
+Become a Luminary.
+
+**One unlock, one table.** The billing function's `unlock` opens a one time
+Checkout on a custom amount price (`LUMINARY`, lookup `incommon_luminary_once`,
+$3 floor, $12 preset), and `checkout.session.completed` writes
+`luminary_unlocks` (`server/oracle/schema.sql`), refunding instead a payment
+whose billing or card country is in the EU or the UK while those stay closed
+(`recordUnlock`). A status asked with a sync finds a paid session the webhook
+missed (`recoverUnlock`). The status says `isPremium` for every add-on, `once`
+for a payment, the plan and its end for a subscription, and `floor`, which the
+page names beside the button; a billing function that sends no floor has
+nothing to sell, and the gate says payments are being set up.
+
+**The subscription is retired, not erased.** `checkout` answers RETIRED. A
+reader who subscribed before keeps it on its terms until they cancel: the row
+is still synced from Stripe, a live one still opens every add-on, the member
+line says when it ends, and Manage billing opens the portal. The trial, the
+EUR and GBP prices, the VAT table and RevenueCat's selling code are gone from
+the app and the billing function. `server/store` and the account function's
+RevenueCat cleanup stay, dormant, for any record that exists, so a store
+subscription that exists still opens every add-on on the website and the
+deletion dialog still says to cancel it with the store. The plugin is out of
+`native/` (package, lockfile, and the generated Android and iOS registrations,
+put back to exactly what they were before it went in), so Capacitor's own three
+packages are the whole native dependency list again.
+
+**`opened()` in the Oracle function is the one check**, for in depth, the
+Cycle Audit and Omni alike: an admin, the apps' origin, a `luminary_unlocks`
+row, or a live subscription in either table. The page mirrors it as
+`addonsOpen()`: native, or `lum.isPremium`.
+
+**One gate, written once per screen.** `lumGateVals(from, p)` words it for the
+add-on the reader reached for (`LUM_GATE`: deep, cycle, omni) and returns
+`gate*` for the Oracle and `tg*` for the tarot room, spelled out so
+check-dead-controls can see them. `lumBuy(from)` sends a return address with
+`?lumfrom=` naming that add-on, because the hash cannot say whether the reader
+was on In-Depth, the Cycle Audit or Omni, and `lumReturnRead()` puts them back
+there. In the Cycle Audit's sheet the reading's gate sits above the free lists.
+
+**Omni is written on the server, so the lock holds.** Its composer moved out of
+`app/tarot.js` into `server/oracle/tarot-omni.js`, and the app's `read()`
+answers null for Omni without one. The Oracle function answers `{ kind:
+"tarot", seed, count, topic }` by running that composer against
+`server/oracle/tarot.js`, which `tools/build-bundle.js` copies from
+`app/tarot.js` on every build and the build refuses an app copy that carries
+the composer again. No model and nothing stored: the same shuffle gives the
+same reading, so nothing is limited or kept. The room deals the cards itself
+from the seed and shows the passages the server returns (`tarotReading()`,
+`tarotOmniSoon()`), with a panel for signing in, the gate, waiting and errors.
+The moved composer was checked against the old one over 342 shuffles with no
+difference. A determined reader can still rebuild it from the helpers
+`app/tarot.js` exports for it (`PARTS`); the composed reading is what the
+lock protects.
+
+Held by J1 to J4 (the composer stays on the server, the copies agree, the
+reading is whole and steady, the bundle carries none of it), K32, K34b to
+K34f and K57 (the cloud calls), K55 (one time terms in place of renewal), 14
+function cases against a fake Stripe, Supabase and Kimi (the unlock, RETIRED,
+the refunds, the sync, a subscriber from before, Omni written exactly as the
+composer writes it and refused without Luminary), and a 56 row browser drive.
+
+## Master numbers are kept wherever a number is read
+The owner asked on 29 September 2026 for "the rest of the master numbers".
+`InCommonCore.reduce()` always kept 11, 22 and 33 for the Life Path, the
+Birthday, the name numbers, the Personal Year and the Personal Month; the app
+class reduced the Personal Day, the Personal Week, the pinnacles, the cycles
+and the year and day blend all the way to one digit. `numKeep()` keeps the
+three now, everywhere a number is read. `numReduce()` stays for the two places
+arithmetic needs a single digit: a challenge is a difference of fully reduced
+parts, and the first pinnacle ends at 36 less the Life Path's root. Content
+lookups fall back to the root where a table has no master entry. 44 and the
+other doubled numbers are not masters in the tradition these tables come from
+(nor in the Codex), so they reduce. U1 to U7 lift the methods out of the app
+and hold all of it.
+
+## The double digit is read before the root: the Book of Numbers
+Decided by the owner on 19 October 2026: "My 6 for example would be a 33 before
+reduced to a 6, so my life path is actually Master Number 33. This is the
+fundamental principle of organizing this information." A single digit is where
+a number ends, not what it is. The double digit a reduction passes through is
+the number's own frequency, and it is read first.
+
+**The matrix is the owner's, and it is generated, never typed.**
+`docs/source/book-of-numbers-matrix.csv` holds every compound from 10 to 99:
+its root, the reduction, a title, a category (Master Number, Karmic Debt, Elite
+Auspicious, Standard Sub-Frequency) and a description.
+`tools/build-number-matrix.js` writes `app/number-matrix.js` (global
+`NumberMatrix`, interpretation layer) from it and refuses a matrix with a
+compound missing or doubled, a root that is not the compound's digital root, an
+unknown category or a dash; `--check` says whether the module still matches.
+Change the CSV, then run the tool. The descriptions are the owner's words and
+are drawn as written.
+
+**A master met on any standard route is the number.** `settle(routes)` in
+`incommon-core.js` takes the raw totals the standard methods reach for one
+number and returns `{ value, root, compound, master }`. The Life Path and the
+Personal Year are settled over two routes: each part reduced and added (the
+route the app always took, fixture N1) and every digit of the date added. The
+name numbers are settled over the whole name added letter by letter and each
+word reduced and added (`NumerologyContent.fromName()`, which now returns
+`compounds`). Because a digit sum keeps the value mod 9, every route ends on
+the same root, so the only thing the rule can change is whether that root is
+read as its master: 1985-01-09 is 1 + 9 + 5 = 15 by its parts and 33 by its
+digits, and its Life Path is 33. U8 holds that case, U9 holds over every day
+from 1940 to 2010 that a number only ever moves to a master of its own root.
+
+**This changes existing readers' numbers**, about one Life Path in ten (2,698
+of 25,568 days from 1940 to 2010 moved to 11, 22 or 33), and the Oracle's
+dossier, the profile card's motto and Today read the same value. It is the
+owner's principle rather than a correction of arithmetic, and it is worth saying
+out loud.
+
+**`compound(raw)` is the first value from 10 to 99 on the way down** (128 gives
+11, 199 gives 19). Where a master was met the compound is the master; otherwise
+it is the first route's own double digit, so nothing the page showed moves
+where no master is found. The Numbers page carries it on every number that has
+one: Life Path, Birthday (the day itself), Personal Year, Month and Day, the
+three name numbers, the four Pinnacles and the three period cycles. Challenges
+are differences of single digits and have none.
+
+**`numCmp(c, v)` is the one place a compound becomes a label**: 33/6 for a
+master, 24/6 or 38/11 otherwise, with the matrix title beside it on the card
+and the category, title and description on the number's own page, in both
+shells. Everything wears `--ac2-hi` except a karmic debt on a birth number. The
+reduction math column is kept in the data and never drawn, by "No disclaimers".
+U10 to U15 hold the rest.
+
+**Karmic debt is found on any route and read on the birth numbers only**
+(owner, 19 October 2026, after asking whether the first pass matched the
+tradition; it did not, on both counts). `karmicOf(routes)` in the core walks
+every route all the way to its root and returns each 13, 14, 16 or 19 it
+passes, so 1940-01-04, 10 by its parts and 19 by its digits, owes 19 though its
+compound is 10; 608 Life Paths from 1940 to 2010 had a debt the first pass did
+not show. The modern school reads it on the Life Path, Birthday, Expression,
+Soul Urge and Personality, so only those pass `debts` to `numCmp()`: a debt
+compound there wears `--warn`, and a debt the shown compound does not carry
+gets its own line on the card (`debtLine`) and its own block on the number's
+page (`numDebts`). The Personal Year, Month and Day, the Pinnacles and the
+cycles pass nothing: a compound of 13 to 19 there keeps its title and
+description in the ordinary colour, and its category label is dropped so it is
+never called a debt. A master still sets the number when a route also owes a
+debt; both are shown. **Two choices this does not make for the reader, recorded
+so they are not mistaken for oversights**: 19 is the modern school's debt where
+Cheiro, whose titles fill most of the matrix, reads it as the Prince of Heaven,
+and the owner kept the debt; and a compound's own description can sit beside a
+debt it does not mention (10, "a clean karmic slate", above a debt of 19).
+U16 to U18 hold it.
+
+## A debt compound on a cycle has a name of its own
+Asked for by the owner on 19 October 2026: the Personal Year, Month and Day,
+the Pinnacles and the period cycles read no karmic debt, so their titles should
+not say debt either. The matrix CSV carries two more columns, **Cycle Title**
+and **Cycle Description**, filled on the four Karmic Debt rows and empty on
+every other: 13 The Season of Steady Labor, 14 The Season of Temperance, 16 The
+Tower Season, 19 The Season of Self-Reliance. These four titles and
+descriptions were drafted in this pass, in the matrix's own register, and are
+the owner's to rewrite in the CSV. `NumberMatrix.get(n, { cycle: true })` answers with them and no category;
+`numCmp()` asks for it whenever no `debts` list is passed, which is exactly the
+cycles. `build-number-matrix.js` refuses a Karmic Debt row without both, any
+other row with either, and a cycle reading that says debt. U19 holds it.
+
+## The Human Design Atlas is the wiring, a folio and fifteen chapters
+Asked for by the owner on 20 October 2026 ("Doing the same thing for human
+design"), after the Astropedia and the study paths. The room is the
+Astropedia's shape with the wiring in place of the wheel.
+
+**`atlasSec` and `atlasItem` mean exactly what they meant.** `atlasSec` is the
+chapter (`HDAtlas.SECTIONS`) and `atlasItem` the slugged entry inside it, with
+the same slugs the accordion's anchors used: a Type by name, a profile by key
+(`1-3`), a centre by its key, a gate as `g<n>`, a channel by its pair, the rest
+by name. So `hdAtlasTo()`, Learn from Atlas, the chart popup, the search rows
+and the Learn pages' `/library/human-design-atlas/gate/<n>` all land on the
+entry they name with no change. The folio carries the anchor
+`scrollAtlasIntoView()` looks for (`atlasFolioId`), and a hidden span carries
+the chapter's, so that scroll still lands. `atlasPick()` marks
+`_atlasScrolled` itself, so a pick from the wiring does not also trigger the
+scroll `syncAtlasItem()` runs for an address.
+
+**Every word is `hd-atlas.js`**, and `atlasBlocks()` stays for the two essays
+(What Human Design is, An example wiring). `atlasEntries()` is the one list,
+with `atlasHay()` giving the room's search the writing and not only the names.
+
+**The wiring is drawn from the app's own geometry**: `BG_POS` boxes in the
+shapes the field draws (`hdShape()`), the sixty four gates spaced round each
+centre's outline (`hdGateSpots()`, memoised), and the thirty six channels drawn
+gate to gate. The reader's defined centres wear the atlas's own colours, their
+gates are white and their channels warm, and the gates the sky holds this
+minute are ringed in `--blue` and breathe (`hdSkyNow()`, the same hd-transit
+reading the gates card on Today uses). The open entry is drawn on top: a
+centre, a gate with its channels and partner gates, a channel, a type's
+centres (`HD_TYPE_LIGHT`), an authority's centre (`HD_AUTH_CENTRE`), a
+strategy's types, the reader's four Cross gates, the example wiring. It is
+pointer ornament inside `[data-chart]`, as the other two centrepieces are.
+
+**The folio links the system together**: a gate to its centre, its channels and
+**hexagram N in the Book of Changes**, because gate N is hexagram N; a channel
+to its gates; a profile to its two lines; a type to its strategy; an authority
+to its centre. "In your chart" is the reader's own activations, centres,
+channels and Cross, and opens the wiring on My Charts.
+
+**The folio carries an epigraph and the sky now, as the Astropedia's does.**
+The epigraph is the type's signature, the gate's hexagram name from
+`iching.js` (gate N is hexagram N), or a channel's two hexagram names; the
+"In the sky now" line names the bodies on a gate, a channel's gates or a
+centre's gates this minute, from the same `hdSkyNow()` reading the wiring rings.
+It replaced the "Sun now" rows that sat under In your chart, because the sky is
+not the reader's own.
+
+**The study paths reach it.** `studyVals()` serves all three rooms, the five
+guides apply as they do in the other two (the first-path lead is the reader's
+own entry, "Your type"), and `STUDY_TUT.hdatlas` holds three tutorials: First
+steps (the wiring, type, strategy, authority, the centres, the profile, gates
+and channels), Finding my way (definition, circuits, open and defined, lines,
+the Cross, the example) and Deep study (gate and hexagram, the reader's
+channels, the sky now, hanging gates, strategy beside authority). Steps that
+name the reader's own fall back to a sensible entry under the sample.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room with the tutorial card, a step, the bubble, a gate with its terms and
+links, and the sixty four gate tiles on screen: four identities, hardened and
+not, at 1440 and 375, 48 cases, 85 to 203 elements each, no pair under 4.5:1
+and no control under 44px.
+
+## Study paths, the five guides, and the tutorials
+Asked for by the owner on 20 October 2026, after asking how the Astropedia and
+the Book of Numbers would read to somebody brand new: "Add paths the reader can
+select, and show the five guides based on the reader's preference/level.
+Incorporate tutorials based on the path as well."
+
+**A path is the reader's level**, First steps, Finding my way or Deep study
+(`STUDY_PATHS`), chosen in a radiogroup at the top of each study room and kept per
+profile in `incommon.p.<id>.study` (`studyState()`, `studyPath()`), one choice
+shared by every study room (the Human Design Atlas joined them the same day). First steps is the path until one is chosen.
+`deleteProfile()` drops the key with the profile's others.
+
+**The five guides, by path** (all in `apVals()` and `numBookVals()`):
+
+| Guide | First steps | Finding my way | Deep study |
+|---|---|---|---|
+| A name on the first press of anything on a wheel (`apPeek`, `bnPeek`), opened by the second press or the bubble | yes | no | no |
+| Words here: the terms on a page linked to the entries that explain them (`apTerms`, `bnTerms`) | yes | yes | no |
+| A key under each wheel (`apKey`, `bnKey`) | yes | yes | no |
+| The reader's own number leads the Book's folio (`bnLeadText`) | yes | no | no |
+| A tutorial | yes | yes | yes |
+
+Deep study is the rooms as they were, the tutorial aside.
+
+**Six tutorials** (`STUDY_TUT`), one per path per room, four to seven steps
+each, written for this pass in the app's voice: no dash, no "you are", astral
+body rather than planet, and a question rather than a verdict where one is
+asked. **Every step opens the entry it talks about** (`studyGo()`: an entry,
+the reader's own Sun or Moon sign, their Life Path, today's number, a filter),
+so the reading happens in the room. The card at the top of the room holds the
+path's header and progress; **the step itself is drawn at the top of the
+folio** (`spTutStepOn`), because a step scrolls to the folio and a Next button
+left in the card above was scrolled off the screen. Progress, a finished
+tutorial and a hidden one are kept per room per path.
+
+**Show me shows; it does not navigate** (the owner, 20 October 2026, after
+finding it did nothing: it re-opened the entry Next had just opened).
+`studyTarget()` resolves where a step points without going there, `studyGo()`
+goes, and `studyHere()` asks whether the reader is already on it. On the step,
+Show me (`studyShow()`) pulses the step's own part of the wheel, the wiring or
+the mandala: every element the open entry lights carries `data-lit="1"`, the
+rest `data-lit="0"`, and `data-sp-show` on the figure, written to the DOM and
+taken off again rather than through state, makes the lit parts glow three
+times while the rest dims. An entry that lights nothing (an essay, a profile)
+pulses the whole figure. On the phone the figure sits above the folio, so the
+page rises to it and comes back. Once the reader has opened something else,
+the button becomes "Back to step N" and goes back. A new lit element in any of
+the three figures takes `data-lit` too, or Show me cannot see it.
+
+**This is an exception to "Discovery belongs to the reader" and to "No
+disclaimers", and the owner made it.** The tutorials explain the rooms, which
+those rules otherwise bar. They do so only on a path the reader chose, only
+while the reader keeps the tutorial open (it hides to a pill), and they
+explain the tradition and the room, never how the app computes anything. Do
+not take this as licence for an explanatory line anywhere else.
+
+Driven in Chromium, both shells, with a chart of the reader's own: a first
+press names and a second opens; a tutorial walked from Begin to Finish in each
+room, every step landing on its entry; a term opening its concept; Deep study
+with no key, no terms and a one press wheel; the path shared between the rooms;
+hiding and showing the tutorial. Measured with the harness's own
+`contrastFails()` and `tapTargets()` over both rooms with the tutorial card, a
+step, the bubble, the terms and the key on screen: four identities, hardened
+and not, at 1440 and 375, 64 cases, 70 to 108 elements each, no pair under
+4.5:1 and no control under 44px.
+
+## The Astropedia is a sky, a folio and thirteen chapters
+Asked for by the owner on 20 October 2026, after the Book of Numbers: "Give
+it the same glamour and enchantment." The room keeps its address
+(`/library/astropedia`), its gate (`libAstropedia`) and `apSec`, which is the
+chapter now; `apOpen` is the entry on the folio and `apQuery` its search. One
+entry is `/library/astropedia/<kind>/<slug>`: `sign/scorpio`, `house/10`,
+`body/saturn`, `point/chiron`, `aspect/trine`, `concept/<slug>`,
+`technique/<slug>`. Search rows open the entry itself, not only its chapter.
+
+**Nothing in it is new writing about astrology.** Every entry is
+`astropedia.js`; the essay chapters (The Birth Chart, Sabian Symbols,
+Stellium, Transits, Synastry, An Example Chart, and Orbs inside Aspects) are
+drawn from `apBlocks()`, which stays for exactly that; and an aspect adds the
+app's own `ASP_SHORT` and `ASP_NATURE`, the same lines the chart reads.
+`apEntries()` is the one list (key, chapter, glyph, line, search text) and is
+built once.
+
+**The wheel is the sky this minute** (`apSky()`, once a minute per chart): the
+natural zodiac in its four element hues, the twelve houses inside it, the ten
+bodies where they stand now, and the reader's own placements as small violet
+stars, which the sample chart does not have. The open entry is drawn on top
+of it: a sign lit, a house lit, a body's homes lit and its exaltation softer,
+an aspect's figure (the trine is a triangle, the square a square) anchored on
+the Sun now, the four triangles of Elements, the three crosses of Modalities,
+the angular houses, the thirty six decans, the horizon for Sect, and the signs
+holding a gathering today for Stellium. Like the Book's mandala it is pointer
+ornament inside `[data-chart]`; the chapters, the grid and the folio's arrow
+keys are the keyboard's way to every entry.
+
+**The element hues are tokens of their own**, `--el-fire`, `--el-earth`,
+`--el-air` and `--el-water`, fixed and declared in all three roots, because the
+wheel's own `SIGN_EL_C` paints earth in `--ac` and a category is not a semantic
+colour. The values are hues the build already carries (the coral of `--warn`,
+the amber of `--cat-ast`, the blue of `--blue`, the teal of `--cat-cen`).
+
+**The folio is what the entry has, never a fixed form**: a kicker, a sign's
+keyword as an epigraph, the lead (with a drop cap for the long single texts),
+what is in that sign now, facets as tiles, "In your chart" (your bodies in a
+sign or a house, your own body, your aspects of that kind, each opening its
+placement page), and links across the book (a sign's ruler and natural house,
+the sign across the wheel, a body's homes and falls, the Lexicon from the
+Sabian essay). Wander opens any entry at random. The folio re-animates through
+`bnFolioA`/`bnFolioB` like the Book's, and a pick from the grid scrolls back to
+it through the same nearest-scroller rule.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+room: four identities, hardened and not, at 1440 and 375, with a sign, a body,
+an aspect and an essay open, 64 cases, 54 to 77 elements each, no pair under
+4.5:1 and no control under 44px.
+
+## The Book of Numbers is a Study room
+Asked for by the owner on 20 October 2026: the matrix that updated the Numbers
+page, as a room in the Library beside the Astropedia and the Human Design
+Atlas, "dynamic, entrancing, riveting, fascinating, beautiful, encouraging,
+wholesome, poetic, and nice to look at". It took the seat of the dashed "The
+Numbers, coming soon" card on the Study tab, in both shells. `libView`
+`numbers`, address `/library/book-of-numbers`, gate `libNumBook`, vals
+`numBookVals()`, and one compound is `/library/book-of-numbers/number/<n>`.
+Both `libShell` lists name it, and the phone's override sets `libNumBook`.
+
+**It reads the matrix and writes nothing of its own about a compound.** Every
+title, category and description is `NumberMatrix.get()`, so the room and the
+Numbers page cannot disagree. The root under each one is
+`NumerologyContent.content()` (the master's own entry for 11, 22 and 33), and
+the line under "An opening" is one of that number's `opportunities`, chosen by
+the compound, because those are already written as what there is room for. The
+reduction math stays undrawn, as on the Numbers page: the folio shows `33/6`,
+the notation `numCmp()` writes, and nothing more.
+
+**The mandala is the owner's principle drawn**: nine petals, one per root, the
+ten compounds that end on it climbing the petal in two lanes (`bnSpot()`). A
+dot's colour is its category (violet master, blue Elite Auspicious, `--warn`
+Karmic Debt, `--mut` the rest), the reader's own are ringed and joined by a
+dashed line, and the open one glows with a thread to the centre. **The dots are
+pointer ornament inside `[data-chart]`**, spans with no tab stop inside a
+`role="img"`, because ninety 44px targets do not fit a phone's mandala. The
+keyboard's way through the same ninety is the index under it (a filter that is
+also the legend, a search, and the nine roots, one open at a time) and the
+folio, which takes the arrow keys, Home and End. Do not make the dots buttons:
+ninety tab stops before the folio is the wrong first room.
+
+**Today and the reader's own are marks** (`bnMine()`, once a day per chart and
+name): today's number is the date's own digits and is the same for everybody,
+so it is offered under the sample chart too; the Life Path, Birthday, name
+numbers and their debts, and the Personal Year, Month and Day are offered only
+for a chart of the reader's own. The room opens on the Life Path, or on today
+when there is none.
+
+**A debt compound reached only as a cycle leads with its season.** On 20
+October 2026 today's number was 13, and the room opened every sample reader on
+"The Debt of Hard Work". By the rule in "A debt compound on a cycle has a name
+of its own", the folio leads with The Season of Steady Labor when every mark
+on the compound is a cycle, and keeps the book's own entry under "In the
+book". Opened any other way, a debt compound leads with the book and shows its
+season under "As a season".
+
+**Two things are easy to undo.** The folio re-animates by alternating two
+identical keyframes (`bnFolioA`, `bnFolioB`) on every pick, because the
+runtime keeps the element and an unchanged animation never replays. And a pick
+from the index scrolls the folio back by its nearest real scroller, the room on
+the desktop and the Library page on the phone, never `[data-vt-scroll]` or the
+pager, which would change the section.
+
+The search bar has a fourteenth group, The Book of Numbers, and every row lands
+open in the room. N41 presses the Study card and asks for the room, its
+address and its ninety dots; N37b reaches the group. Measured with the
+harness's own `contrastFails()` and `tapTargets()` over the room, four
+identities, hardened and not, at 1440 and 375, with a master and a debt open:
+32 cases, no pair under 4.5:1 and no control under 44px.
+
+## The Numbers stage
+Asked for by the owner on 19 October 2026: the Numbers page "interactive, as if
+it were made by Unreal Engine". It opens with a real CSS 3D scene, in both
+shells, above the summary: a grid floor tilted 58 degrees under a perspective
+camera, an orbit ring, the Life Path floating over the centre on a beam, and
+every other number standing on the orbit as an upright sprite. Under it, a HUD
+panel names the number in front, its compound and any debt, with previous,
+next and Open. Depth, overlap and the shrink toward the back are the browser's
+perspective, not arithmetic. `numStage()` builds it from the same rows the cards
+use, so the stage and the cards cannot disagree.
+
+**Six things are easy to undo.**
+- **The orbit turns rather than jumping.** The spinner is `rotateZ(numSpin)` and
+  every sprite carries `rotateZ(-numSpin)` under the same transition, so the
+  two cancel at every frame and the numbers ride the ellipse upright.
+  `numFocusTo()` keeps the spin cumulative and always takes the short way, and
+  `numSpinNow()` rests it at 180 so the first number starts in front rather than
+  behind the Life Path. U20 holds that.
+- **Choosing is two presses**, as in a game menu: the first brings a number to
+  the front, the second opens its reading. Arrow keys turn the orbit and carry
+  focus with it; a sideways swipe turns it on a phone (the stage is
+  `data-noswipe`, so the screen chain does not also move).
+- **Nothing per frame goes through state.** The camera tilt (`numCam()`) and
+  the card tilt and highlight (`numTilt()`, `[data-sheen]`) write the element's
+  own style, the way live regions are written, because a setState per pointer
+  move re-renders the whole app. Touch and reduced motion skip both, and the
+  sheet's global rule stills every transition and the two ambient animations
+  (`nsOrbit`, `nsHover`).
+- **The camera layer takes no pointer** (`pointer-events: none` on
+  `[data-ns-cam]`). It sits at screen depth, and the numbers on the far half of
+  the floor are behind it, so without this only the near half could be clicked.
+  The same goes for the sprite buttons: each box ignores the pointer and its
+  visible orb and label take it, because the boxes overlap their neighbours.
+- **The sprite boxes are wider than what they draw**, because Chromium clips a
+  3D layer's shadow to its own box: at the orb's width the Life Path's glow was
+  cut into a lit column.
+- **The Life Path floats high enough that the back of the orbit is never
+  hidden** (a 150px beam on the desktop, 120px on the phone). On the floor it
+  covered whichever number stood behind it.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+Numbers screen, since the theme phase sees Today only: four identities, each
+hardened and not, at 1440 and 375, about 80 elements each, no pair under 4.5:1
+and no control under 44px.
+
+## The natal chart is drawn three ways: 3D, Orbital and 2D
+Asked for by the owner on 19 October 2026: "Update the astrology page to make it
+as if it was built by unreal engine. Make a 3D natal chart, an orbital option,
+and a standard 2D chart. Make the logos fit elegantly." The Birth Chart has a
+**Chart view** radiogroup in both shells, 2D, Orbital and 3D in that order,
+state `chartView`. **2D is where it opens, every time** (see "2D opens
+first").
+
+**2D is the SVG wheel, untouched**, and it is also the fallback. 3D and Orbital
+are one scene, `app/chart-scene.js` (shell layer, global `ChartScene`), drawn
+the way `cycle-scene.js` draws the Cycle Audit: three.js imported from the
+cover's vendored copy on first use, the palette read off the page, bloom, a
+quality ladder, the loop only while the host is on screen, and nothing animated
+under reduced motion. Without WebGL 2, or when three.js does not load, or when
+the context is lost, the scene says so (`csFail`), `chartViewNow()` answers
+`2d`, and the switch is not drawn: a reader never sees a choice that cannot be
+made.
+
+**It draws the model, never its own chart.** `this._csModel` is built inside
+the same vals block that draws the 2D wheel, from the same `placedRows`, the
+same stagger radii (`radiusFor`, so a body stands at the radius the 2D wheel
+puts it, on a pillar whose height is its stagger level), the same
+`natalAspects()` and the same `CAT_COLOR`, so the three views cannot disagree.
+It is rebuilt only when the chart changes (birth stamp, mode, comets, minor
+aspects, name); focus, the selected aspect, the open house and the chosen
+placement travel separately (`setFocus`, `setSelection`). The one position the
+scene asks for itself is today's, for the Orbital view's Today's sky, and it
+comes through `opts.lonAt`, which is the app's `lonOf()`. `SIGN_EL_C` is the one
+table of element colours, read by the 2D labels and handed to the scene.
+
+**3D is the wheel as an astrolabe; Orbital is the same sky as an orrery.** In 3D
+every ring, division and degree tick is drawn in the disc's shader, the rims
+stand up out of it, bodies stand on pillars over their longitude, the aspects
+are ribbons bowed over the inner field and the angles are beams at the rim. In
+Orbital each body sits on its own orbit in the order the bodies stand from the
+Earth, the nodes on the Moon's, the minor points on belts (asteroids between
+Mars and Jupiter, centaurs between Saturn and Uranus, TNOs beyond Pluto), and
+the zodiac slides outward into a belt round all of it. **The angle from the
+centre is still the longitude**, so it is the same chart; only distance has
+been given a meaning. The two are one morph, not a cut: the radii are shader
+uniforms and the ribbon ends are uniforms, so nothing is rebuilt on the way.
+Today's sky (a `role="switch"`, Orbital only) lays a ghost on each orbit where
+the body stands now, with the arc it has travelled since birth.
+
+**"Logos" was read as the glyphs**, the sign and body symbols, and that is the
+choice to revisit if the owner meant the inCommon mark. Each glyph is set on
+its optical centre: astrological symbols sit at different heights in every font
+that carries them, so `medallion()` measures `actualBoundingBox` and places
+the ink, not the text box, in the middle of a roundel ringed in the 2D wheel's
+colour for it. Glyphs are drawn at a pixel size that follows the stage
+(`ui`, from its shorter side), so a phone's chart is not wearing a desktop's
+roundels, and the minor points of the Expanded Chart get a plain small roundel
+with their degree left to the tooltip and the panel, or eighty of them bury the
+ten that matter.
+
+**Choosing is two presses, as on the Numbers stage.** A tap or a click on a body
+brings it forward (the camera turns it to the front) and names it in the panel
+under the stage; a second press on it, or Open the reading, opens its placement
+page. The panel's ‹ and › and the arrow keys on the focused stage step through
+the bodies, and the keyboard step is spoken (`speak()`, never through state).
+A ribbon selects its aspect (`aspSel`), the house band opens a house (`dpSel`),
+and the zoom cluster drives whichever view is showing (`zoomDir` lays it as a
+row in the deep views, where a column would sit on the chart). Picking is done
+on the screen, by projecting each body and sampling each ribbon, which is why
+a ribbon a few pixels wide can still be hit.
+
+**The stage is `[data-chart]`**, so its canvas is judged as chart; the switch,
+the Today's sky control, the zoom cluster and the panel are outside it and were
+measured with the harness's own `contrastFails()` and `tapTargets()` over the
+astrology screen, since the theme phase sees Today only: 3D and Orbital, four
+identities, hardened and not, at 1440 and 375. All 32 cases clean, 179 to 183
+elements each. **G11 now chooses 2D before it reads the SVG**, because that is
+the view it describes; G11c holds the stage to the same role description and
+summary, and passes on a build without WebGL 2 because the 2D wheel is then all
+there is. Driven in Chromium on SwiftShader: the stage paints, hover names a
+body, the two presses focus and open it, Next and the arrow keys step, a ribbon
+selects its aspect, the morph runs both ways, Today's sky lays ten ghosts, a
+theme change re-reads the palette, and with WebGL off or three.js blocked the 2D
+wheel comes back with no switch.
+
+## The chart's lists are dropdowns, and its points and houses are flash cards
+Asked for by the owner on 20 October 2026: "Compact the lists of planets comets
+asteroids centaurs houses etc into dropdown menus. Create flash cards for them
+as well, centered around the impact they are having on the reader. This will be
+mutable, consistently updating as time goes on and the effects evolve over time
+for the reader." Every list under the Birth Chart, in both shells, is one
+dropdown (`chartGroupVals()`, sorted into the bands `chBands` on the phone and
+`chBandL` and `chBandR` either side of the desktop's wheel; see "Bedrock,
+Weather, Horizon"): the points one per category (Astral Bodies,
+Nodes & Lunar Points, Angles, and in the Expanded Chart the asteroids, centaurs,
+TNOs, comets, hypotheticals and derived points), then the houses, the aspects
+and the two transit lists. They open closed (`chgOpen`), and a header carries
+the count, a peek of the glyphs and how many of its points are lit now.
+
+**The point and house groups have a List and Flash cards switch** (`chgMode`).
+A card's front is the point, where it sits, a five bar meter of how hard the
+sky is pressing on it and one line saying by what; turned (`fcFlip`, `fcFlip()`)
+it is the impact: each contact the sky is making to it now, building, exact or
+easing, with the window it runs in (opened, exact, closes) as a bar, the Timing
+Lexicon's reading of the heaviest contact, where the same body stands in its own
+round since birth, what came before and what is next, and the question. A house
+card is the bodies crossing it, how far through it each has come, who left last
+and who arrives next. Cards are sorted by impact, so the most active is first.
+
+**It is mutable because nothing is stored.** `impactSky()` reads the sky at the
+minute (the clock tick re-renders), and `impactDays()` holds the sky at local
+noon 120 days either side of today, rebuilt once a day, which is what gives a
+contact its window and the card its before and after. A card read next week has
+moved on by itself, and a contact that closes leaves the card. `impactWindows()`
+memoises per longitude per day: 88 points cost about 20ms the first time a
+cards view opens, and nothing while every group is a list.
+
+**Three things are easy to undo.** The South Node is not a mover: it is always
+opposite the North Node, so its contacts would be a second card for every fact.
+The lexicon is used only where it has the natal point (the ten bodies, both
+nodes, the four angles); every other point is read through what the mover does
+at that angle (`TimingLexicon.MOVE`), what the point carries, and a question per
+category (`IMPACT_ASK`), and the twelve house questions are `HOUSE_ASK`. Nothing
+on a card explains how it was worked out, by "No disclaimers". And the hidden
+face is `visibility: hidden` on a delay that lands mid turn, so it takes no focus
+and is not read out; `fcFlip()` moves focus to the face now showing, retrying
+until its visibility lands, or a keyboard turn drops focus to the page.
+
+**The violet borders and fills here are `--ac2-hi`, not `--ac2`.**
+`check-purple-text` resolves a value to the loop that renders it only for a top
+level list, and these sit in `g.cards` and `c.bars`, so `--ac2` reads as
+unresolved there. Measured with the harness's own `contrastFails()` and
+`tapTargets()`, one group or one card at a time because the gate stops at 420
+elements: every group open in the Expanded Chart, points and houses on cards and
+a card turned, four identities, hardened and not, at 1440 and 390, 695 elements
+a case, no pair under 4.5:1 and no control under 44px. Driven in Chromium, both
+shells: the dropdowns open and close, the switch, a keyboard turn and its focus,
+a touch swipe that moves the deck and leaves the screen where it is, a tap that
+turns a card, and an orb that moves when the clock does.
+
+## The wiring is drawn three ways: 3D, Wheel and 2D
+Asked for by the owner on 19 October 2026: "Redesign the human design page to
+make the ux like it was made by unreal engine. Completely interactive, high
+quality visuals, 3D options with 2D available. Compact, highly engaging, drive
+the experience to reflect the human design philosophy." The Wiring has a
+**Wiring view** radiogroup in both shells, 2D, Wheel and 3D, state `hdView`.
+**2D is where it opens, every time** (see "2D opens first"). The layer control
+(Personality, Design, Both, `bgMode`) drives every view.
+
+**2D is the SVG wiring, untouched**, and the fallback. 3D and Wheel are one
+scene, `app/hd-scene.js` (shell layer, global `HDScene`), built the way
+`chart-scene.js` is: the cover's vendored three.js on first use, the palette
+read off the page, bloom, a quality ladder (which here also drops a rung at once
+after three frames over 120ms), the loop only while the host is on screen, and
+nothing animated under reduced motion. Without WebGL 2, without three.js or on a
+lost context it says so (`hsFail`), `hdViewNow()` answers `2d`, and the switch is
+not drawn. `hdSceneSync()` runs from the one `componentDidUpdate`.
+
+**It draws the model, never its own chart.** `this._hsModel` is built in the
+wiring vals from the same `hdChart()` the SVG reads: the nine centres at the
+SVG's own `BG_POS` boxes, in the shapes the field draws them, coloured from the
+atlas as the SVG colours them; all thirty six channels; every activation with
+its gate and line. Centres keep the chart's own definition in every layer, as
+the SVG does; gates and channel halves follow the layer. The one thing the scene
+is handed besides the model is the sky now (`setSky`), the same minute's
+hd-transit reading the gates card on Today reads.
+
+**A channel is two halves and a half lights from its own gate**: Personality in
+`--tx`, Design in `--hd-des`, a gate held by both as a braid of the two, and the
+sky now in `--blue`, dashed. That is how a hanging gate reads, as half a channel
+reaching for somebody else, and it is why the scene draws all thirty six rather
+than only the defined ones. `--hd-des` (`#df9a5f`) is a fixed hue declared in all
+three roots beside the ledger hues: the tradition's design red sits on
+`--crisis`, which nothing but safety may go near. It is a fill and a stroke,
+never text. Gates sit on the edge of their centre facing the centre their first
+channel runs to, with the channels between one pair of centres kept parallel
+(`layoutGates`), and a channel whose straight path would cross a third centre
+bows toward the reader to pass in front of it.
+
+**Wheel is the same chart with the sky put back round it**: the sixty four gates
+as a ring at the body's waist in `HDWheel`'s order from gate 41, and each
+activation leaves its column for the place on the ring its astral body stood,
+with a thread down to the gate it lights. The activations peel away one at a
+time rather than as a block. It is one morph, not a cut. "Wheel" was chosen over
+the field's own name for this figure because that name belongs to somebody.
+
+**The philosophy is in the behaviour and never in a sentence**, by "Discovery
+belongs to the reader" and "No disclaimers". Defined centres hold their light;
+open centres are glass that takes on the colours of the defined centres their
+channels reach and never settles, and fill with them when named. Defined
+channels carry a flow that rises from the lower centre to the higher. A defined
+Solar Plexus breathes on a nine second wave, a defined Sacral hums, a defined
+Root builds. And the body wakes the way its type meets the world (`planWake`):
+a Manifestor's lights from the motor that reaches its Throat on its own; a
+Generator's waits, its Sacral asking, until the reader does anything at all,
+and that press is the response, so it wakes the body and names what was pressed
+in one; a Manifesting Generator's answers at twice the speed; a Projector's open
+centres see first and the defined follow from the G; a Reflector's comes up all
+at once, and for a Reflector the sky now is on until the reader turns it off
+(`hdSkyOn`), because that chart takes its shape from the sky. A waiting body
+wakes on its own after seven seconds, so nobody is left in front of a dark
+chart. The wake runs on the wall clock rather than scene time, so a slow machine
+shows fewer frames of it rather than a longer one.
+
+**Choosing is two presses, as on the chart and the Numbers stage.** A press
+names a centre, gate, channel or activation (`hsFocus`), dims what it does not
+touch and threads the activations it involves; a second press, Enter, or Open
+the reading opens the detail sheet the SVG already opens (`hdSelOf`). Picking is
+done on the screen, activation before gate before channel before centre. The
+arrow keys and the panel's arrows step through the nine centres and then the
+defined channels (`model.steps`), and a keyboard step is spoken. With nothing
+named the panel under the stage is the type, and Open your type opens it; Whole
+chart clears a focus.
+
+**The page was made compact around the stage.** Both shells open on the stage
+and its panel; the type card keeps its description and puts Strategy,
+Authority, Profile and Definition in a grid of four (`hdTiles`), which is where
+the Your Lines card went (the profile sheet carries both lines); and Activated
+Gates, Defined Channels and the centres share one control (`hdList`) instead of
+four stacked lists. The readings are unchanged.
+
+**The stage is `[data-chart]`** and carries `aria-roledescription="human design
+wiring"` and the same summary as the SVG, which moved up to the stage card so
+both views point at it. G11d holds both views to it. G14b checks every zoom
+cluster now, because on the phone every chart page is mounted at once and the
+first Zoom in on the page may be the wiring's. Measured with the harness's own
+`contrastFails()` and `tapTargets()` over the Human Design screen, since the
+theme phase sees Today only: 3D and Wheel, four identities, hardened and not, at
+1440 and 375, all 32 cases clean, 75 to 76 elements each. Driven in Chromium on
+SwiftShader: the stage paints, hover names a centre, the two presses focus and
+open it, a gate and an activation are picked over their centre, the arrow keys
+step and Enter opens, the layer and the sky now reach the scene, the morph runs,
+2D is the SVG with no stage, the view is kept, a Generator body waits for the
+press and wakes from its Sacral, a theme change repaints, and with WebGL off or
+three.js blocked the SVG comes back with no switch.
+
+## The Human Design readings are a deck, and the full text stays
+Asked for by the owner on 19 October 2026: "For the drop down menu with lots of
+text, make it scrollable, ux centered, fit it into the concept of the new page.
+Keep the long text option open as well. Make it fit and make it engaging,
+dynamic, fun." The reading under the choice of one (My Type, Chart, Mood and the
+rest, `hdTab`) is six paragraphs of fifty to a hundred and fifty words and four
+lists, which on a phone was most of a metre of scrolling.
+
+**The choice of one is still a dropdown**, by "A row of pills becomes a dropdown
+when it is a choice of one". Its menu contains its own scroll
+(`overscroll-behavior: contain`) and ticks the current choice; the Throughline
+filter shares that markup and got the tick with it. The reading's title and
+kicker moved out of the card to sit beside it.
+
+**Cards are the default; Full text is the old layout, one press away**, kept
+per device (`hdRead`, `incommon.hd.read`). `hdDeckCards()` makes a card of each
+paragraph with its first sentence set as the lead, splits a paragraph past
+ninety words at the sentence nearest its middle so the cards are of a size, and
+makes a card of each of the four lists. **The cards are the same sentences in
+the same order**: nothing is dropped or rewritten, and the drive asserts every
+sentence of the reading is on a card. The deck is a native sideways scroll
+with snap, the next card showing at the edge (which is the whole invitation to
+swipe, by "Discovery belongs to the reader"), a progress bar, a counter, the
+arrows either side, and the arrow keys, Home and End on the focused deck.
+A card is capped in height and scrolls inside itself past the cap.
+
+**The card in front is state (`hdCard`), written from the deck's scroll only
+when the index changes**, never per frame. A new reading starts at its first
+card. A card behind the one in front is set back by scale and a quieter border,
+never by opacity, because `contrastFails()` reads an element's own opacity and
+not its ancestors', so a dimmed card would fail its readers while passing the
+gate. The deck is `data-noswipe` and scrolls sideways, so the phone's section
+chain never takes a swipe that starts on it.
+
+Measured over the Human Design screen with the harness's own `contrastFails()`
+and `tapTargets()`, deck on screen: four identities, hardened and not, 1440 and
+375, all 32 cases clean, 103 to 104 elements each. Driven in both shells:
+next, a hand scroll and the keys each move the card in front, every sentence is
+on a card, the menu scrolls and ticks, a new reading starts at card one, and
+Full text is the long layout and is kept.
+
+## The scenes say Loading, open at rest, and give a finger Free look
+Asked for by the owner on 19 October 2026: on a phone, scrolling fought the
+3D charts for vertical drags; every chart (the astrology wheel, the wiring and
+the Cycle Audit) showed abstractions and moving blocks until it loaded, and
+"Loading..." was to stand in their place; and the Human Design type lost its
+"Full Type" label, left aligned in its box.
+
+**Free look is the reader handing the stage the vertical drag.** On a touch
+screen a vertical drag is the page scrolling, so by default only a sideways
+drag turns the astrology and Human Design scenes. A `role="switch"` on the
+stage, "Free look" (`csFree`, `hsFree`, top right where the bracket was),
+makes one finger orbit both ways and holds the page still (`setExplore()` sets
+the pad's `touch-action` to `none`); a pinch still zooms. It is offered only
+where a finger drives the stage (`touchUi()`: the phone shell or any coarse
+pointer), so a mouse desktop keeps its bracket. It turns itself off when the
+stage leaves the screen (`onExploreEnd`, from the scene's IntersectionObserver),
+so the page never comes back to a stage still holding the reader's finger, and
+the stage wears a violet outline while it is on. The Cycle Audit's full stage
+already took every drag (`touch-action: none` in full mode) and its widget
+only scrubs sideways, so it needed no switch. Two finger gestures were the
+alternative and were not chosen: they need a sentence to be found, and
+"Discovery belongs to the reader" bars the sentence.
+
+**Loading holds the place; nothing is drawn and then swapped.** Three causes,
+three fixes:
+- The scene scripts load async, and until they arrived the views fell back to
+  the flat chart and then swapped it out. `scenePending(name)` keeps a deep
+  view while its script may still come (`componentDidMount` waits up to eight
+  seconds, then `_scenesSettled` lets the fallback be the answer), so the
+  stage is the stage from the first paint. The streaming hints were flipped
+  with it (`cvDeep`, `hvDeep`, `cwSceneOn` hint true; the flat ones false).
+- Each stage, the cycle widget's band and the cycle sheet's stage carry a
+  `role="status"` "Loading..." over a plain `--bg` until the scene reports it
+  has drawn (`csLive`, `hsLive`, `cwSceneLive`, from `onReady`). The scenes'
+  own backdrop is plain `--bg` now, not a gradient, and **a scene reports
+  ready only once the faces have loaded** (`fontsOk`, with a three second
+  ceiling), because labels drawn in the fallback face and redrawn a moment
+  later were the blocks jumping.
+- The cycle widget's finding state was two pulsing grey blocks; it is
+  "Loading..." in a 520px slot, about the height of the finished widget, so
+  the page does not grow under the reader when the scan lands.
+
+**The scenes open where they rest.** All three used to fly in from a wider,
+turned camera. They now start at their resting framing and the only arrival is
+the canvas fading up. The wiring's wake (the body lighting by type) starts at
+that reveal rather than at build time, so it is not spent behind Loading; a
+Generator's seven second wait for a response is counted from the reveal too.
+
+**The Human Design type is the type alone**, left aligned in its button, which
+still opens the type's reading.
+
+Driven on a phone with real touch through the DevTools protocol: a vertical
+drag on the stage scrolls the page and leaves the tilt alone; with Free look on
+the same drag tilts the wiring and the page holds still; off gives the scroll
+back; scrolling the stage away ends it; the astrology stage carries it; a mouse
+desktop has none. Filmed on a throttled connection: the stage holds its place
+with Loading for about three seconds, then the finished scene, and the flat
+wiring is never visible.
+
+## The 3D scenes fade in from behind Loading, and nothing else on the stage arrives first
+Asked for by the owner on 19 October 2026: "The 3D objects should stay behind a
+loading screen until they fade in for effect. Never show the units before
+they're a utility." Loading was already in place, but it was an `sc-if` that
+vanished the frame the scene reported ready, and every control on the stage
+popped in with it at full strength while the canvas was still dark.
+
+**Loading is a veil now, not a removal.** Each stage's `role="status"` stays in
+the markup while the deep view is drawn and dissolves over 0.8s
+(`csVeilO`/`csVeilV`, and `hs`, `cw`, `cy` the same), ending at
+`visibility: hidden` so it leaves the accessibility tree and stops taking the
+pointer. Under it the canvas fades up over 1.2s (all three scene modules), so
+the scene comes through the veil rather than appearing after it.
+
+**The units wait for the scene** (`csUiO`/`csUiV`, `hsUiO`/`hsUiV`,
+`cyUiO`/`cyUiV`). On the astrology stage: the corner brackets, the stage
+outline, Free look, Today's sky, the zoom cluster, the body panel under the
+stage and the Chart view switch. On the wiring: the same, plus The sky now,
+the Personality and Design key, the panel and the Wiring layer control. On the
+Cycle Audit's sheet: zoom and Now (Close is never held back, because closing
+works from the first frame). While the scene loads they are `opacity: 0;
+visibility: hidden`, so they hold their place in the layout, take no focus and
+no press, and are not read out; once it is live they fade in over 0.6s after a
+0.6s delay, which lands them as the canvas finishes. In the 2D view they are a
+utility at once (`!deep || live`), so the flat wheel and wiring are unchanged,
+and without WebGL the switch is not drawn at all, as before. The cycle scene's
+own readout waits for the reveal too (`_readOn` in `showRead()`).
+
+**Hide by visibility, never by `sc-if`.** Removing a control while the scene
+loads would move the stage when it came back, and a view switch that appears
+above a stage pushes the stage down under the reader. Under reduced motion the
+global rule makes every one of these fades instant.
+
+Driven on SwiftShader, both shells: astrology on the desktop, the wiring on the
+desktop and the phone, the Cycle Audit widget on Today and its sheet opened
+before the scene was live. In every one the order was the veil alone, the
+canvas through the veil, then the units; with WebGL off the 2D wheel came up
+with its zoom cluster showing and no veil.
+
+## The stages are built before they are asked for
+Reported by the owner on 20 October 2026: 3D loaded slowly when opened, and at
+once after a trip through 2D, Orbital or Wheel and back. The trip was the clue:
+by then the scene object existed, compiled, and moving it between hosts costs
+nothing. The first visit was paying for three.js, the renderer, the content and
+every program while the reader watched Loading.
+
+**`scenePrewarm()` builds the wiring and then the chart while the reader is
+somewhere else**, one at a time, two seconds after the app is ready, in idle
+time. Since 2D opens first it builds every stage whatever view is showing, for
+3D or the depth view already chosen, and the Cycle Audit's first, because it is
+on Today. A scene with no stage on the page waits in **the lot** (`sceneLot()`): a
+box at `left:-10000px` inside `[data-vt]` or `[data-app-root]`, so it reads the
+shell's own tokens, `inert` and `aria-hidden`, where its IntersectionObserver
+reports it unseen and no loop runs. A scene whose stage is mounted but off
+screen, the phone's next chart page, is built where it stands. `prebuild()` in
+each scene module builds now rather than waiting on `buildNear()`'s observer,
+which would never fire in the lot, and disconnects that observer so a second
+build cannot start when the stage scrolls into view; `build()` refuses once
+ready for the same reason.
+
+**A scene is revealed where it is seen** (`shown` waits for `visible`, or for
+no IntersectionObserver at all). A stage built in the lot draws and compiles
+there, but its fade, its `onReady` and the wiring's wake belong to the moment
+the reader arrives, so `csLive` and `hsLive` mean on screen and drawn, as before.
+
+**Leaving a stage parks the scene in the lot instead of detaching it**
+(`scenePark()`), so it keeps a connected root, its palette and a theme change
+made while it waits. The two creation paths share `chartSceneMake()` and
+`hdSceneMake()`, so a prewarmed scene and one made on the stage carry the same
+callbacks.
+
+Measured on SwiftShader after twelve seconds on Today: the chart live 1.3s after
+the address changed on the desktop (4.3s before) and the wiring 0.5s; on the
+phone the wiring 1.2s after entering My Charts and the chart 1.1s after the
+swipe. Opening My Charts straight away on the phone, the chart is now built
+while the reader is on the wiring page and comes up 0.6s after the swipe.
+
+## 2D opens first, and the Cycle Audit has a 2D of its own
+Decided by the owner on 20 October 2026: "Flip the order of the charts from
+3D, wheel/orbital, 2D to 2D, wheel/orbital, 3D. Make a 2D audit cycle and load
+that first as well." The switches read 2D, Orbital, 3D and 2D, Wheel, 3D, and
+the Observatory's own pair reads Orbital, 3D. `chartView` and `hdView` start at
+`2d`, and so does `cyView`.
+
+**The choice is not kept** (the owner, 20 October 2026: "Start with the 2D
+option as the default"). It was stored per device for one release, and a reader
+who had once pressed 3D kept opening on 3D, which read as the default never
+having changed. A view picked now lasts the visit; the next load opens on 2D.
+`componentDidMount` removes `incommon.chart.view`, `incommon.hd.view` and
+`incommon.cycle.view` once, because nothing reads them, and no switch writes
+them. Do not store a view again without the owner.
+The streaming hints were flipped with them (`cvFlat`, `hvFlat`, `cwChartOn`
+hint true; the deep ones false), so nothing deep flashes while the page
+streams.
+
+**The Cycle Audit's 2D is the flat chart it already had**, the three lanes on
+one twelve year axis, now a choice rather than only the fallback. State
+`cyView`, `2d` first; the switch (`cwViews`,
+from `cycleViews()`) sits above the chart in the widget in both shells and at
+the top of the sheet. It reads 2D, Rings, Orbital, 3D where the scene can run
+and 2D, Rings where it cannot (see "The Cycle Audit is drawn four ways").
+In 2D the sheet has no
+stage: it opens on its plain header, the switch and the flat chart in a card
+above the reading (`cyFlatOn`), reading the same `cw*` values the widget draws,
+so the two cannot disagree. The widget's switch waits for the scene like every
+other stage unit (`cwUiO`/`cwUiV`).
+
+**3D stays one press from fast.** `scenePrewarm()` builds all three stages in
+the lot while 2D is showing (see "The stages are built before they are asked
+for"), and `cycleSceneMake()` is shared by the prewarm and the sync. Measured on
+SwiftShader with the stages built: Cycle Audit 0.3 to 0.5s from the press to
+live, the chart 0.2 to 0.6s, the wiring under 0.3s, both shells. The one slower
+reading, about 4s on the Cycle Audit, came when the press landed during another
+stage's first draw in the lot, which is SwiftShader building pipelines and is
+not a cost a real GPU pays.
+
+## The Cycle Audit is drawn four ways: 2D, Rings, Orbital and 3D
+Asked for by the owner on 20 October 2026, after asking whether the audit had a
+middle option like the chart's Orbital and the wiring's Wheel: "Both", meaning
+a Rings view and an Orbital view. The switch reads 2D, Rings, Orbital, 3D, and
+`cycleViewNow()` is the one answer to which is showing: Rings needs nothing but
+SVG, and Orbital and 3D fall back to 2D where the scene cannot run. 2D still
+opens first and nothing is kept.
+
+**Rings is the widget's twelve years wound into a spiral** (`cycleRings()`,
+`cwRing*`), one turn a year from the centre outward, January at the top, the
+months clockwise. A passage that crosses New Year carries on round the next
+turn instead of breaking off, which is the thing the flat chart cannot show.
+It reads the same packed rows (`starRows`, `designRows`) and the same numbers
+the flat chart draws, so the two cannot disagree: the passages ride a turn's
+outer half (`--ac2-hi` hard, `--atmc2` easy), the stays on a gate its inner
+half in `--blue`, dashed where the stay completes a channel, the exact dates
+are dots, now is a lit dot with a line in from the centre, and the centre names
+the month and the Personal Year. The spine at twelve o'clock names every other
+year and every year's Personal Year. It is drawn in the widget and in the
+sheet's card, where 2D's flat chart was (`cwRingsOn`, beside `cwChartOn`).
+
+**The turns alternate two tones and a master year is violet.** The first pass
+tinted each turn by its number, blue at 1 to the warm lobe at 9, and the blend
+went grey in the middle years. A Personal Year is a category, not an amount, so
+nothing grows with it now: alternating tones read as tree rings, and a master
+wears violet as it does on the Numbers page. Orbital's paths use the same rule.
+
+**Two template traps, both hit on the way in.** The runtime lowercases a
+camelCase SVG attribute it does not know, so `strokeWidth`, `strokeOpacity`
+and `textAnchor` were silently dropped and the bands drew as thin full strength
+lines: the stroke properties are in `style`, which it passes through. And a
+`{{ }}` hole is an HTML span, which an SVG `text` cannot render, so every
+dynamic label was invisible: the labels are an HTML layer over the drawing,
+placed in percent of it. **Put dynamic text over an SVG, never inside one.**
+
+**Orbital is the same scene as 3D, laid out as a sky** (`setLayout()` in
+`cycle-scene.js`, called from `cycleSceneSync()` before `attach()`). The
+landscape gives way to a polar chart on the same floor: the natal wheel in the
+middle with a spoke from each point out to the zodiac, one band per slow body
+(Saturn innermost, Pluto outermost), and in each band the body's path with time
+running outward across the band and longitude running round. A retrograde is
+the path doubling back, so a passage that is exact five times is the path
+crossing one bearing five times, each crossing a point. The zodiac and the
+sixty four gates, in `HDWheel`'s order from gate 41, ring the outside; a stay
+on a gate lights the gate and a sector of its body's band across the gate's arc
+for as long as it stays. The path alternates tone by year, the bodies stand
+where they are at the probed instant with a line to each natal point they
+touch, now and the probe are rings across every band, and the Personal Year of
+the instant sits in the middle.
+
+**It computes nothing either.** The paths arrive in the model (`paths`, a
+longitude every three days across the span) read off the cubic nodes the scan
+already walked (`_cyNodes`, kept by `cycleWindows()`), so no library position is
+asked for twice; the gate order is `HDWheel`'s, handed in as `gates`.
+
+**The two layouts are one stage and one morph.** The camera eases between the
+landscape's rig and the sky's; the landscape leaves by fog (`fogAdd()`: every
+landscape material is drawn through `fogK`, and the sky, the stars and the
+Orbital layout are not fogged), its labels and dust fade with it, and the sky's
+materials share one uniform, `uOrb`, that brings them up over the second half.
+The probe, the card, the readout and the keys carry across. Every pick carries
+`userData.orb` and `pickAt()` takes only the layout showing. Under reduced
+motion the morph cuts. The warm up shows both layouts for the compile call,
+because `compile()` walks only what is visible and a hidden layout's programs
+would otherwise be linked on the main thread the first time it is chosen.
+
+**The disc is fitted by projecting its rim** (`fitDisc()`), because at a low
+camera the near side is much the larger and a fit from the radius alone cut it
+off; it fits the rim's height and `viewShift()` takes out how far off centre that
+height sits, with a view offset that goes back to none in the landscape, in
+flight and on a resize. The widget's camera height follows the band's shape, low
+for a wide desktop band and higher for a phone's. A sideways drag runs time,
+since the sky has no floor to point at; in the sheet a vertical drag tilts and
+the wheel and the buttons zoom, as in 3D.
+
+**Measured.** With the harness's own `contrastFails()` and `tapTargets()` over
+the widget and the sheet, in Rings and in Orbital, four identities, hardened
+and not, at 1440 and 375: 64 cases, no pair under 4.5:1 and no control under
+44px, the ring labels counted. Driven in Chromium on SwiftShader, desktop and
+phone: the four views in order, Rings drawn with its bands, passages, dates and
+labels, Orbital live and its pixels read back, a drag running the probe, the
+morph to 3D and back, the sheet in Orbital with a tap on an exact date opening
+that passage's card, and Rings in the sheet.
+
+## The Observatory: the full screen chart, flown
+Asked for by the owner on 19 October 2026: "Make the full screen expansion an
+Observatory. People should feel like they're going in a certified space
+expedition facility. ... Free motion in every direction: up, down, left, right,
+diagonal, ascend, descend, strafe left, strafe right, dash up, and dash back,
+dash left, and dash right. Omni directional motion: on every chart, but
+especially in the full screen observatory in the astrology tab. Generate
+appropriate images for each astral body as they are encroached upon." The
+maximize button (the expand chart button) opens it; `chartExpandOpen` is still
+its state, so everything that already opened, closed, persisted or escaped the
+old overlay does the same to the Observatory.
+
+**It is the card's own scene, moved.** `chartSceneSync()` puts the one
+`chart-scene.js` scene into `[data-cs-scene="obs"]` while the Observatory is
+open and calls `setMode('obs')`, and back into the card's
+`[data-cs-scene="1"]` (and `setMode('stage')`) when it closes. While it is open
+the card's host behind it is never taken in its place, and the Observatory is
+deep even when the card shows 2D. Without WebGL 2 it shows the 2D wheel in the
+middle and the manifest round it, exactly as the overlay did.
+
+**Flight is one module for every chart.** `app/flight.js` (shell layer, global
+`Flight`) is a camera with a position, a yaw and a pitch, and no roll. W S
+forward and back, A D strafe, E or Space ascend, Q or C descend (the world's
+up, as an editor viewport flies), the arrows look, Shift boosts, a double tap
+of any move key or X dashes that way, and two keys at once is a diagonal,
+normalised. Keys are read by `code`, so the hand position is the same on every
+layout. Cruising speed is the distance to the nearest surface, so the open
+field crosses quickly and a body slows the reader as they close on it; a dash
+is a separate impulse that decays on its own. `travel()` is the autopilot
+along a curve, and any input takes the controls back. A standard gamepad flies
+too, and `mountPad()` builds the touch stick (flick it to dash) and the Ascend,
+Descend and Dash buttons, which are real named buttons a press can operate.
+`Flight.claimedElsewhere()` is what keeps flight off a field being typed into,
+off the arrows of a radio group, tab list or slider, and off Space and Enter on
+a button.
+
+**On the cards it is the same flight, taken off and landed.** On the astrology
+stage, the wiring and the Cycle Audit the move keys take off from wherever the
+camera is (Space only once flying, because Space opens on a card), a drag looks
+while flying, two fingers move in Free look (the pair sliding strafes and
+climbs, spreading goes forward), the wheel pushes along the view, and Escape, 0,
+Home or the reset control lands: the camera eases back onto the scene's own
+resting rig rather than jumping. hd-scene and cycle-scene take this glue from
+`Flight.mixin()`, installed on first use because flight.js may load after them;
+chart-scene carries its own, because the Observatory needs more of it. Under
+reduced motion a frame is drawn on change except while flying, the autopilot
+cuts instead of travelling, and a dash is a short step with no lens kick.
+
+**The bodies become worlds as the reader closes on them.** `app/body-globes.js`
+(shell layer, global `BodyGlobes`) generates each surface on the graphics card
+from noise, so it holds its detail however near the reader comes and downloads
+nothing. A globe is made when the camera is inside thirty of the body's radii,
+crossfades in over the orb from thirty to fourteen while the glyph gives way,
+and is disposed beyond forty six; at most sixteen exist at once. Each is drawn
+from what is known of it: the Sun's granulation, spots and corona; the Moon's
+maria and craters; Venus's cloud; Mars's rust and caps; Jupiter's belts and
+Great Red Spot; Saturn's rings with the Cassini Division and the planet's
+shadow on them; Uranus tipped on its side and ringed; Neptune's dark spot;
+Pluto's heart; Ceres's bright spot; Haumea stretched and ringed; Chariklo and
+Chiron ringed; Arrokoth as two lobes; the comets as a nucleus, a coma and two
+tails pointing from the Sun. Every globe is lit from where the chart's own Sun
+stands. **The colours are the bodies' own, not tokens**: a theme does not
+repaint a planet, which is the same reasoning the fixed category hues rest on,
+and none of these colours is text.
+
+**The points that are not bodies are not drawn as worlds.** The nodes, Lilith,
+Selena, the Vertex, the Parts, the Aries Point, the midpoint and the Hamburg
+hypotheticals are lattices of light, a node as two planes crossing and a
+hypothetical dashed, because their pages already say they are not bodies and
+the image has to agree. Lilith is a dark one, a rim round nothing. **None of
+them is solid**: the first build gave Lilith an opaque black core, and in a
+chart where she stands beside Saturn she hid the planet.
+
+**What moves every frame is the scene's; the station is the app's.** The scene
+draws the reticle, the target's bracket and the arrow to it when it is off
+screen, the telemetry strip (heading as a zodiac degree, altitude, speed, range
+to the target, the time in UTC), the approach banner, the motion streaks, the
+launch from further out down onto the station, the boot lines once per page,
+and the close-up: the target's world rendered into the same canvas under the
+target panel's transparent window (`[data-obs-pip]`), through a second camera
+that sees only layer 1 (the worlds, the stars and the sky). The app draws the
+header, the manifest (Bodies, Aspects, Houses), the target panel, the controls
+card and the touch pad's container, and writes the live range into
+`[data-obs-range]` by direct DOM write, never through state. The HUD is
+`aria-hidden`; the stage carries a role description and a described-by naming
+the keys, and `onArrive` speaks the arrival.
+
+**The lens is centred on the open sky, not the screen.** On a wide screen the
+rails cover the sides, so `--obs-l` and `--obs-r` on the dialog name their
+widths, the scene reads them (`readInset()`), shifts the camera's principal
+point with `setViewOffset` and frames the station on the free width. The
+telemetry, the banner and the boot lines centre on the same region, the
+off-screen arrow rides its edge, and the HUD is clipped to it, so nothing of it
+shows under a panel or through the close-up window.
+
+**One target, shared with the card**: `csFocus`. A first press on a body (in
+the scene, a manifest row or the target panel's arrows) targets it and flies
+there; a second press on the target opens its reading, the same two press rule
+as every stage, and the reading closes the Observatory. In the scene a second
+tap on the target flies instead, and the reading is the panel's button. Brackets
+step the target, Enter or T flies to it, O opens it, H or Home returns to the
+station, V switches 3D and Orbital, P shows or hides the panels. A contact
+(an aspect row, a contact chip, a ribbon in the scene) frames both its ends; a
+house looks down onto its sector. Hovering a row with a mouse lights the body.
+
+**Below 1100 wide the panels are a drawer.** A target pill under the
+telemetry opens it on the Target tab; the Manifest button opens it on the
+others. Closing the drawer, the controls card, or flying from the drawer hands
+focus back inside the dialog (`obsRefocus()`): the control that had it is gone,
+and focus left on the page is outside the trap, where neither Escape nor the
+flight keys reach. The drive that found this pressed Escape after closing the
+drawer and nothing happened.
+
+**The controls card opens on the first visit**, once per device
+(`incommon.obs.keys`), and is a button in the header after that. It names
+controls; it explains nothing about a reading, so "No disclaimers" is not
+touched by it.
+
+**Measured, not assumed.** With the harness's own `contrastFails()` and
+`tapTargets()` over the dialog: four identities, hardened and not, at 1440 (the
+plain station, the Aspects tab, the controls card) and 390 (the plain station,
+the drawer on Target, the drawer on Bodies, the controls card), 56 cases, no
+pair under 4.5:1 and no control under 44px. Driven in Chromium on SwiftShader,
+source and bundle: the launch, flying to Saturn and Jupiter with the globe
+filling the view and the close-up drawn, W held and a double tapped D, the
+drawer on a 390 touch screen with the stick, a manifest row targeting and
+flying, the houses tab, hover from a row, Escape from every state, and the 2D
+fallback with WebGL off. Flight was driven on the wiring and the Cycle Audit
+too: take off, dash, land. N40 and N40b find the dialog by its new name, The
+Observatory, and its close control, Close the Observatory.
+
+**What it replaced.** The overlay's grid (`.chartx-grid`, its named areas, the
+narrow tab bar) and the seven sub-tables below the points table are gone; every
+point is in the manifest once, grouped by category as the sub-tables were. The
+rules the overlay sections above record for its data still hold: the aspect id
+is an index into the one rich pass the wheel draws, the filter chips are built
+from what is present, and comets are off the wheel until the Comets box is
+ticked.
+
+## The 3D stages compile in parallel, build when near, and wait for their own faces
+Reported by the owner on 20 October 2026: "opening the app shows a bunch of
+black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
+which is near black under Deep Field, held up for seconds. A CPU profile of the
+astrology page found where the seconds went, and there were three causes:
+
+- **The first frame linked every shader on the main thread.** three.js compiles
+  a material's program on its first render, and its first `getUniforms` waits
+  for the link: 5.9 of the 6 seconds between three.js arriving and the stage
+  going live, with the page frozen. Each scene now calls `warmUp()` from
+  `render()` before its first frame: `compileAsync` over the scene and over the
+  post quad with each of its three materials, which uses
+  `KHR_parallel_shader_compile` where the browser has it, and the scene renders
+  nothing until that resolves. Measured with `renderer.info.programs`, all
+  thirteen of the chart's programs exist before the first frame and the frame
+  adds none.
+- **A phone built every stage at once.** The phone mounts every section, so the
+  Cycle Audit widget, the wiring and the wheel all built and compiled together.
+  `attach()` calls `buildNear()` now, an IntersectionObserver with a quarter of
+  a screen of margin vertically and one screen either side, so a stage builds
+  as it comes into view and the chart beside it in the pager follows. (The
+  pager clips its pages, so in practice the neighbour builds as the swipe
+  reveals it, behind its veil, without freezing anything.)
+- **The faces gate waited on every face the page was loading.** It used
+  `document.fonts.ready`, and Settings' theme previews ask for Petrona, which no
+  scene draws in: two seconds behind Loading for nothing. `waitFaces()` loads
+  the scene's own `--fu` (400, 600, 700) and `--fd` by name, with the same three
+  second ceiling.
+
+**The veil is sky, not a black box.** Every Loading veil (`cs`, `hs`, `cw`,
+`cy`, `obs`) paints the atmosphere the scene will come up in, two radial washes
+of `--atmc` and `--atmc2` over `--bg`, rather than `--bg` alone. Loading still
+holds the place and the scene still fades up through it, by "The 3D scenes fade
+in from behind Loading".
+
+Measured on SwiftShader, desktop astrology from the address to live: 10.8s
+before, 6.4s after, and the main thread's compile stall from 5.9s to 2.4s. What
+is left of that stall is the software rasterizer building its pipelines at the
+first draw, which a real GPU does not do once the programs are linked.
+
+**On iOS the scenes draw straight to the canvas** (`GFX` at the top of each of
+the three scene modules). The owner's iPhone (Chrome, which is WebKit, as every
+browser there is) showed the Cycle Audit's 3D with hard edged black rectangles
+stepped like the GPU's own tiles, filling in over about a minute (20 October
+2026): the offscreen chain, a multisampled half float target blurred and
+composited for the bloom, coming back with tiles missing. The direct path is the
+one the quality ladder already falls to, so it was drawn and tested; it keeps
+the canvas's own antialiasing and loses only the bloom's halo, since every glow
+in these scenes is additive in its own shader. `?gfx=` tries the others on any
+device without a build: `post` (the chain as it was), `nomsaa` (the chain
+without its multisampled target, the likeliest single culprit) and `direct`.
+**This container has no WebKit**, so the fault was diagnosed from the
+screenshot and the fix confirmed on the iPhone, never here; if `nomsaa` comes
+back whole on an iPhone, the bloom can return there without the multisampling.
+
+**The tiles went, and the owner asked for it faster still** (20 October 2026).
+Two changes, both measured in Chromium with an iPhone's screen and a CPU slowed
+four times, which is the nearest this container comes to the phone:
+
+- **Each stage built its whole content twice.** The faces were asked for only
+  after three.js arrived and the content was built, so the first build was
+  always in the fallback face and was thrown away when the faces landed. They
+  are asked for beside three.js now (`early` in `build()`), so when they are in
+  first, which is nearly always, the content is built once. The Cycle Audit's
+  build went from 3.1s to 0.5s, and all three stages were built in the lot in
+  7.1s instead of 9.4. A stage whose faces land after `init()` still rebuilds,
+  exactly as before.
+- **On iOS three.js does not read back each program's link status and logs**
+  (`checkShaderErrors` off when `GFX.ios`). Each read is a round trip that waits
+  for the compile, so on WebKit the programs queued behind one another. A shader
+  that failed to compile would fail silently there; desktop still reports it.
+
+## The world place list is fetched when a birth place is asked for
+Asked for by the owner on 20 October 2026, as the next load cost after the 3D
+stages above. `app.html` was 12.3 MB, 4.1 MB over the wire with brotli,
+and 7.7 MB of it was `gazetteer-world.js` inlined, which only a birth place
+reads. Every visit downloaded it before the first paint. The page is 4.8 MB
+now, about 1.3 MB gzipped, and the list sits beside it as a file.
+
+**`gazWant()` fetches it the first time a place surface is drawn**: the first
+run's place search (`birthPlaceInfo()`), the profile form, the synastry form,
+and at boot when a profile holds a place and no coordinates. The page keeps
+`gazetteer-us.js` inline, and the world file appends its rows into the same
+array, setting `Gazetteer.WORLD` when it has (`gazReady()`). `gazArrived()`
+runs everything that ran without it again: the place memos are dropped
+(`_placeHitsQ`, `_placeGeoQ`), `reresolveLocations()` places any profile saved
+while it was still on its way, and the page re-renders.
+
+**A submit that needs it waits for it rather than failing.** `birthSubmit()`
+and `synFormSave()` hand themselves to `gazWant(then)` when a typed place does
+not resolve on the US list alone, and run again when the list lands. While it
+is loading the place slot says "Loading places..." instead of nothing found. A
+fetch that fails lets the waiting submit go on with the US list and the online
+lookup, saying what it would have said, and the next press asks again; a
+render never retries on its own, so a dead connection is not a request per
+keystroke.
+
+**The bundle copies it rather than inlining it** (`PLACE_FILES` in
+`tools/build-bundle.js`), and refuses a bundle where the file is missing, the
+app no longer names `./gazetteer-world.js`, or the helmet loads it again. It is
+not precached, because a worker that installed it would charge every visit for
+it again; the bundle worker's runtime cache keeps it after the first use, and
+`build-native.js` carries it into the store apps with the rest of the folder.
+
+Driven in Chromium against the bundle: a returning reader on Today never
+requests it; the first run fetches it, finds Zürich, picks it and casts with
+47.37 N and Europe/Zurich at 1440 and 390; a cast pressed with the file held
+back four seconds waits and lands Kyoto; and a stored profile in Coimbra with
+no coordinates asks for the list at boot and is placed. Lisbon would not have
+tested it: the US list's fallback already knows the large world cities.
+
+**Puerto Rico is Atlantic time, and the US list had it as New York's** (found
+20 October 2026, adding Rio Piedras at the owner's request). `STATE_TZ` filed
+`PR` under `E`, so every Puerto Rico place in `gazetteer-us.js` carried
+`America/New_York` and a winter birth was drawn an hour late: 06:30 on 9
+January 1985 in San Juan came out at 11:30 UTC instead of 10:30. The world
+list's own Puerto Rico rows were right all along, but the US rows rank first.
+`PR` is code `R` now, `America/Puerto_Rico`, minus four, no daylight saving,
+and `reresolveLocations()` gives a stored profile whose coordinates sit on the
+island and whose zone is New York's the right zone once at boot. Rio Piedras
+is in the US list rather than left to the world list, which never carried it:
+a search for it found Rio Piedras in Salta, Argentina.
+
+## Where the Codex computed better, inCommon took its method
+The owner asked on 29 September 2026 for the same attention paid to where the
+Celestial Codex beat inCommon as had been paid to where inCommon beat it. Five
+things, each measured:
+
+- **The sidereal time and the obliquity.** The Codex took the apparent sidereal
+  time from astronomy-engine and an obliquity that moves with the date;
+  inCommon took the mean sidereal time and the J2000 obliquity, held fixed.
+  `skyFrame()` asks the library for the apparent sidereal time and the true
+  obliquity (the pair that belongs together) for the Ascendant, the Midheaven,
+  the Vertex and the East Point, with the old arithmetic as the fallback.
+  Over 20,000 random births the Ascendant moves 0.22 arcminutes on average and
+  2.5 at worst, at 60 degrees of latitude; no sign changes, and the whole
+  degree changes for 50 of them.
+- **Noon for a birth with no time is local noon.** `availability()` has always
+  said "12:00 noon local"; `instant()` drew noon at Greenwich. The Codex drew
+  local noon, which is the middle of the day the reader was born in, so no body
+  can be off by more than half a day of its motion. B13b.
+- **A half hour zone keeps its half hour.** Found while testing the one above,
+  and the Codex had it right: `Date.UTC(y, mo, d, hh - offset, mi)` truncates a
+  fractional hour, so every birth in India, Nepal, Iran, Afghanistan,
+  Newfoundland and central Australia was drawn 30 or 45 minutes early, seven to
+  eleven degrees of Ascendant. The offset is subtracted in milliseconds now, at
+  all eight sites that did it (`birth-time.js`, `people-library.js`, and the
+  app's fallback path and daylight saving probes). The thirty two zone rows checked the offset and never the
+  instant, which is how it survived; B13c checks the instant, and both rows go
+  red on the old code.
+- **Chiron is fetched from Horizons**, as the Codex asked Horizons for it: 51
+  epochs four years apart, 0.025 degrees at worst against 404 references,
+  where the fitted set in `minor-bodies-ephemeris.js` (still the fallback) is
+  0.92. See the corrected sections on the expanded chart's bodies and on
+  Chiron below.
+- **Ego authority is two authorities, and the definition is named.** The Codex
+  said Ego Manifested (the Heart reaches the Throat) or Ego Projected, where
+  inCommon said Ego; and it named the definition, Single, Split, Triple Split,
+  Quadruple Split or none, which inCommon did not show. `hdChart()` carries
+  both now, the wiring's card shows a Definition row in both shells, and the
+  Oracle's dossier reads them from the chart rather than working them out a
+  second time. The lookups that match an authority to its atlas entry match on
+  the first word, so "Ego manifested" still finds "Ego (Heart)".
+
+`people-library.js` `STATE_VERSION` went to 3 for the first three, which
+invalidates every stored pair.
+
+## The profile icon opens a menu, and Profile opens the card
+The owner asked on 29 September 2026 for Log Out and Delete in the profile
+icon's sheet, and on 30 September for the icon to open a list instead:
+**Profile, Settings, Get Help, Log Out, in that order**, with Support inCommon
+between Settings and Get Help in the store apps only (18 October 2026, see "The
+Cycle Audit"). `profileMenuVals()`
+holds all four, and the icon in both shells is `pmenuGo`, named "Profile menu"
+with `aria-haspopup` and `aria-expanded`. On the desktop the list drops from the
+icon; on the phone it is a bottom sheet, because `[data-vt-modals]` makes every
+vertical dialog one and a dropdown there would be the one dialog that is not.
+
+**Profile opens the card**, which is the old profile sheet headed by who the
+chart says the reader is: the big three, the Human Design type, the Life Path,
+and a motto. Under it sits what the sheet already held, the profiles on the
+device, Change your picture, Phone number and Delete this profile, less Log
+Out, which **moved** to the menu rather than being copied, so there is one way
+out of the account. `profileCardVals()` computes only while the card is open,
+from `chartAt()`, `ascendant()`, `hdChart()` and the core's `lifePath()`, the
+same methods the wheel, the wiring and the numbers page read, so the card cannot
+disagree with them. A Rising with no birth time says it needs one, and the
+sample chart says it is the sample, with Use mine beside it.
+
+**The motto is composed, never written by a model.** `mottoFor(lp, sun, type)`
+takes one clause from each system: the Life Path gives the aim
+(`MOTTO_LP`, all twelve numbers, masters included), the Sun the manner
+(`MOTTO_SUN`), and the type the way in, which is the strategy said as an action
+(`MOTTO_TYPE`). "Build what lasts. At an unhurried pace, answer what lights you
+up." Every clause is something to do and none says who the reader is, the same
+line the three part readings keep. V2 and V3 hold all 720 combinations
+distinct, two sentences each, dashless, and free of "you are". The Oracle stays
+the one screen that calls a model.
+
+**Settings is the tab**, `tab: 'settings'`, and on the phone
+`syncSectionToTab()` carries the reader there, which is why the menu does not
+scroll anything itself.
+
+**Get Help prompts a call, to the line for where the reader is.**
+`helpCountry()` reads the device's time zone first, because that follows the
+phone, and the language's region only when the zone says nothing (UTC). It knows
+the four countries `crisis-directory.js` covers, and `callVals()` takes that
+country's first crisis line with a phone: 988 (call or text) in the US and
+Canada, Samaritans 116 123 in the UK and Ireland, Lifeline 13 11 14 in Australia,
+each with the emergency number beside it. **Anywhere else it gives no number**,
+because a number that does not connect is worse than none at a moment like this;
+it says to call the local emergency number and offers findahelpline.com and the
+full list. It wears `--crisis`, never `--ac`, and opening it logs the same one
+anonymous timestamp the crisis sheet does (`crisisAudit()`). The call button is
+white on the crisis gradient, about 3.7:1, which is why it is 19px bold: that
+passes as large text, and the contrast sweep cannot read a gradient to catch it.
+V4 to V5b hold the country and the line.
+
+**Driven, and measured.** Both shells: the menu's four rows in order at 48px,
+Escape closes it, Profile opens the card with values equal to the app's own
+methods and no Log Out in it, Settings lands on Settings, Get Help opens the
+prompt with `tel:` and `sms:` links and logs one timestamp, More lines opens the
+crisis sheet, and Log Out signs out and reaches the cover. London, Sydney,
+Toronto and Tokyo each get their own answer. The menu, the card and both forms
+of the prompt measured clean in all 32 theme cases at 1440 and 375, and fit at
+320x568, 375x667, a phone on its side, 1024 and 1920, scrolling where they are
+taller than the screen.
+
+**Delete this profile opens the same dialog Settings opens**, typed name and
+all. ProfileManager refuses to delete the last profile on a device, so for that
+one the dialog says what happens instead: inCommon starts over with a fresh
+profile and the birth page opens, which is what deleting the only profile means
+to the person doing it. A fresh profile is made and made active BEFORE the old
+one is deleted, so the refusal never fires.
+
+**Log Out signs out and keeps everything on the device, and Back cannot undo
+it.** It marks the tab (`incommon.signin.out` in sessionStorage) and goes to
+the cover as a new history entry. A plain script at the top of the app sends
+any app page reached through history (`back_forward`, or a back-forward cache
+`pageshow`) in a marked tab to the cover, hidden until it goes, so Back after
+Log Out brings the home screen up rather than the app. It is a new entry and
+not a replacement, because a replacement left nothing of the site behind the
+cover and Back left the site. The cover reloads itself to its first screen when
+restored from that cache in a marked tab. Any other way into the app clears the
+mark. The other half is on the cover: a cover reached through history by a
+reader who is signed in and owes no code goes straight back into the app on
+Today (`backIn()`), so Back from Today after signing in reads as Today
+refreshing rather than as being signed out. A marked tab is never sent in. And
+`signOut()` in `incommon-cloud.js` falls back to a local sign out when the
+server cannot be told, because supabase-js keeps the stored session on a
+network failure and the cover would then offer the reader straight back in.
+**It signs out this device and no other** (`scope: 'local'`, K70). supabase-js
+defaults to a global sign out, which revokes every refresh token the account
+holds, so logging out on one phone signed the reader out everywhere and their
+next visit on the laptop asked them to sign in while it still looked signed in
+(Refresh Token Not Found in the auth log, reported 18 October 2026). `accountLogOut()`
+calls the cloud module's `signOut()` and goes to the cover, `coverHref()`, which
+is `./` in the bundle and `./cover.html` in the source shell, because the app
+is `app.html` in one and the long name in the other. The line beside it names
+the signed in address or number, or says "back to the cover" when there is
+none. The Settings button that used to say "Log out" cleared birth data, which
+is a different act wearing the same word, so it says "Clear birth data" now.
+
+**Signed out with a blank store lands on sign in, not the birth page** (owner,
+13 October 2026). Log Out, close the site, open the app again: the session is
+gone, the guest store is blank because the account took the profiles, and a
+blank store is first run, so the reader was asked for their birth moment when
+what they had to do was sign in. A session that ended with the browser (no
+Remember me) arrives the same way. `signedOutLanding()` is checked once in
+`boot()`, before `ensureProfiles()` writes anything: no `PM.owner()`, first run
+not done, not framed, and no `incommon.guest.chosen` in sessionStorage, and the
+page goes to `coverHref() + '?signin=1'`. The cover's Continue without an
+account sets that mark for the tab, or it would bring a guest straight back.
+Checked at boot only, so Clear birth data in Settings still opens the birth
+page. The harness is exempt by the frame check, because every phase starts from
+a clean origin and grades the first run.
+
+**The Cloud card is gone from both Settings screens**, replaced by a comment
+where it stood. Signing in happens on the cover now, and a second account door
+in Settings would be a second place for the two to disagree. The cloud
+vals are left in place, unrendered, so bringing the card back is a markup change
+only.
+
+## The newsletter is asked for at sign up, and can be refused there
+The owner asked on 29 September 2026 for a newsletter that signs readers up when
+their account is made, with an opt out box. The box sits under the password in
+the cover's Create New Account form, "Send me the inCommon newsletter", ticked.
+Its answer goes with the sign up request as user metadata (`newsletter`, `newsletter_source`,
+`newsletter_decided_at`), and Supabase writes metadata only when that request
+creates the account, so the answer is recorded once, at creation, and a
+returning reader who unticks it changes nothing. K24 and K25 hold the shape.
+
+Nothing is sent to any mailing service from the app. `docs/NEWSLETTER-SETUP.md`
+is the owner's half: the query that reads the list out of `auth.users` (only
+confirmed addresses), choosing a sender, and the rules the box lives under. **A
+box that starts ticked is not consent in the EU or the UK**, and that page says
+so, because it is the owner's decision whether to start it unticked or confirm
+by email there, and it should be made knowingly.
+
+**Since the password replaced the emailed link, the box sits in Create New
+Account and nowhere else**, so it is asked exactly when an account is made and
+a sign in carries no options at all (K24). The list reads only confirmed
+addresses, which holds only while Confirm email stays on in the project.
+
 ## Where things live in this repository
 Added when the files were migrated out of the design tool's flat export, where
 the app, the modules, the doc pages and the harness were all siblings. Every
@@ -2521,7 +6097,7 @@ that a later change is most likely to break:
   attribute, so a grep for script tags does not find it.
 
 - **The folder is named for the version, and the version moves once per
-  deployment.** `deploy/v6.3/` holds the bundle stamped `incommon-v6.3`, and
+  deployment.** `deploy/v6.4/` holds the bundle stamped `incommon-v6.4`, and
   those two numbers are the same number on purpose: a folder called `v1.7`
   holding a bundle stamped `v5.8` told a reader nothing. Rebuilding does not
   earn a bump. The stamp changes when a build has been deployed AND confirmed
@@ -2530,7 +6106,7 @@ that a later change is most likely to break:
   the failure `check-deployed.js` exists to catch.
 - **There are three ways this repo reaches a host and all three now work.**
   Git connected, where `netlify.toml` names the publish directory. Dragging
-  `deploy/v6.3/`, where that folder's own `_redirects` and `_headers` travel
+  `deploy/v6.4/`, where that folder's own `_redirects` and `_headers` travel
   with it. And dragging the REPOSITORY, which is the one a person actually
   does because the repo is the thing on their desktop, and which failed
   silently for as long as it was the only shape nothing covered: `publish` is
@@ -2592,7 +6168,7 @@ that a later change is most likely to break:
   On ENOSPC it now says how much room it needed and that the old bundle is
   untouched.
 - **`deploy/` is a shelf, not a site.** It holds one folder per shipped
-  bundle, so the thing you upload is `deploy/v6.3/`. A host pointed at
+  bundle, so the thing you upload is `deploy/v6.4/`. A host pointed at
   `deploy/` itself, or at the repo root, serves a directory with no page in
   it: the deploy succeeds and the link is broken, which is a failure with no
   error anywhere in it. **The folder is named ONCE, in `BUNDLE` at the top of
@@ -2625,30 +6201,36 @@ that a later change is most likely to break:
 The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 `app/sw.js` and the app helmet point at it by `../inCommon%20Logo/icons/`. The
 copies inside `deploy/` are build output, because a deploy directory is
-uploaded whole.
+uploaded whole. The bundle's `app.html` and `manifest.json` name those copies
+as `./icon-192.png` and so on: `build-bundle.js` rewrites the app's three
+`../inCommon%20Logo/icons/` addresses and refuses if the count is not three.
+Until 15 October 2026 they shipped unrewritten, and from a site root that
+address is answered by the catch all with the app, so a home screen icon was
+an HTML page.
 
-`tools/` holds twenty-eight scripts. Nineteen are gates and are worth running
+`tools/` holds thirty four scripts. Twenty one are gates and are worth running
 before you believe a change is done: `run-tests-node.js`, `run-fixtures.js`,
 `run-module-tests.js`, `check-purple-text.js`, `check-dead-controls.js`,
 `token-compare.js`, `check-competitor-surface.js`, `check-layer-boundary.js`,
 `check-aspect-text.js`, `check-chart-tone.js`, `check-prose-repeats.js`,
 `check-hd-atlas-map.js`, `check-point-registry.js`, `check-ephemeris-engine.js`,
 `check-harmonic.js`, `check-patterns.js`, `check-harmonic-patterns.js`,
-`check-registry-integration.js`, `check-minor-body-elements.js`.
-Six generate:
-`build-bundle.js`, `build-icons.js`,
+`check-registry-integration.js`, `check-minor-body-elements.js`,
+`check-astral-bodies.js`, `check-timing-lexicon.js`.
+Ten generate:
+`build-bundle.js`, `build-number-matrix.js` (`app/number-matrix.js`, from the owner's Book of Numbers CSV), `build-learn-pages.js` (`learn/` and `sitemap.xml`, run by `build-bundle.js`), `build-native.js` (`native/www/` for the store apps), `build-icons.js`,
 `build-ui-icons.js`, `build-gazetteer.js`, `fetch-minor-body-elements.js`
-(needs network: JPL Horizons), `build-extended-points-doc.js`
+and `fetch-astral-bodies.js` (both need network: JPL Horizons), `build-extended-points-doc.js`
 (`EXTENDED-POINTS-REFERENCE.md`, from `ephemeris/pointRegistry.ts`, so the
 doc's own counts can never drift from the registry's). `check-deployed.js` compares what
 is served with what was built. `bench-ephemeris.js` measures the position
 cache and asserts it did not change an answer.
 
 `drift-check.js` is none of the three above and does not run cold the way
-the other twenty-seven do. It is the only script in `tools/` that drives a
+the other thirty do. It is the only script in `tools/` that drives a
 real browser, because it exists to answer a different question:
 `check-deployed.js` asks whether the live site matches what was built, and
-this asks whether `deploy/v6.3/` itself still matches the bytes the seven
+this asks whether the current `deploy/<version>/` itself still matches the bytes the seven
 deterministic verification phases (M, E, F, G, T, R, N) last passed against,
 skipping the browser run entirely when a `sha256sum` says it does. It needs
 Playwright and a Chromium binary this repo installs for nobody, and says so
@@ -2713,3 +6295,62 @@ a pattern three exactly-conjunct points can never produce.
 
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.
+
+## Search engines are given the cover, the legal pages and the Learn pages
+Added 15 October 2026. The cover is a canvas, so what a crawler read of the
+home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST
+line. Its head now carries a title, a description, a canonical address, Open
+Graph and Twitter tags with `og-image.jpg` (cut from the horizontal lockup in
+`inCommon Logo/identity/`, 1200x630), icon links, and JSON-LD naming the
+WebSite and INCOMMON LLC. The SIGNAL LOST text is written by the 9 second
+timer rather than sitting in the markup.
+
+**The cover links them, once, under the legal links** (`.learn`, the owner,
+16 October 2026), so a reader can read before signing in and a crawler, which
+reads nothing on a canvas, has a link to follow. It shows at rest and with the
+form open, leaves with the way in on scroll (`wayEls`), and is not a way in.
+
+**`app.html` carries `noindex, follow`.** The catch all answers every unknown
+path with it, so indexing it puts one unfilled template under every address
+anybody links. The legal pages keep `index, follow`.
+
+**`/learn/` is the app's reference writing at plain addresses** (the owner,
+16 October 2026): the 64 gates, the 64 hexagrams, the written angel numbers,
+the dream registry and the animals, 355 pages. `tools/build-learn-pages.js`
+writes them into the bundle from the same modules the app reads, and
+`build-bundle.js` runs it before listing the folder for `_redirects`, so they
+are rebuilt with every bundle and cannot disagree with the app. They are not a
+fork: no script, no chart, no state, only text, styled like the legal pages.
+The modules' caution and method fields are not drawn, by "No disclaimers", and
+an angel number the module only composes gets no page. The build refuses a
+dash, a mark `check-competitor-surface.js` bars (it skips `deploy/`, so the
+marks are asserted over the output), bodygraph in a heading, and any `/learn/`
+link that was not built. **Change the writing in the module, never in a page.**
+
+**Every Learn page opens the same entry inside the app** (the owner, 17
+October 2026), because the app's screens live after the `#` and no search
+engine can index them, so a Learn page is the only way in from a search. The
+button is `/app.html?from=learn#<entry>`, the entry addresses are
+`/library/human-design-atlas/gate/<n>`, `/library/i-ching/hexagram/<n>`,
+`/library/dreams/<category>/<key>`, `/library/synchronicities/number/<n>` and
+`/library/synchronicities/animal/<slug>`, resolved in `openPath()`, and one it
+cannot find lands on its room. `learnGuest()` lets that visitor straight in for
+the tab: no sign in page, no birth page, the sample chart behind them and Use
+mine on the banner. It writes nothing else, so a later visit that did not come
+from a Learn page meets the first run as before. Every one of the 354 links was
+driven in a browser to its entry.
+
+**The site's address is written once in the generator and twice beside it**:
+`SITE` in `tools/build-learn-pages.js`, the head of `app/cover.html`, and
+`deploy/<version>/robots.txt`. The generator refuses to build when the cover's
+canonical or the robots `Sitemap:` line disagrees with `SITE`, and it writes
+`sitemap.xml` itself (the cover, the legal pages and every Learn page; never
+app.html). It is `https://incommonspace.com`, the apex, since the domain was
+connected on 16 October 2026; incommon.netlify.app answers with a 301 to it,
+path and query kept, by the first rule in `deploy/<version>/_redirects`
+(hand written, so it moves with the folder at a version bump): setting the
+apex as primary in Netlify forwards www but leaves the Netlify address
+serving the site, and that address cannot be removed. Deploy previews and
+branch deploys are other hosts and are not redirected. If the address moves, change
+the three together, then submit the sitemap again in Search Console.
+Description copy follows the voice rules: no method, no fate, no dash.

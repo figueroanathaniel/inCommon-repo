@@ -1,0 +1,11 @@
+# The link is public. The contents are not: everything a reader writes stays on
+# the device that wrote it, so there is nothing here for a crawler to reach
+# beyond the cover and the legal pages. The app itself carries noindex.
+#
+# The address below is the site's, written out in three places: here,
+# sitemap.xml and the head of the cover. Change all three together.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://incommonspace.com/sitemap.xml

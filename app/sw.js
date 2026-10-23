@@ -18,7 +18,7 @@
  * refuses to build when the two numbers disagree. This drifted to v2.4 against
  * a shipped v6.0 precisely because nothing was checking.
  */
-var CACHE = 'incommon-dev-v6.3';
+var CACHE = 'incommon-dev-v6.4';
 var PRECACHE = [
   /* `./inCommon (offline).html` was here and the file has not existed for a
      long time. It was the standalone offline build, and the thing that does
@@ -48,10 +48,10 @@ var PRECACHE = [
   './manifest.json', '../inCommon%20Logo/icons/icon-192.png', '../inCommon%20Logo/icons/icon-512.png', '../inCommon%20Logo/icons/splash.png',
   './incommon-core.js', './safety-router.js', './oki-prompt-builder.js',
   './oki-post-processor.js', './oki-api.js', './practice-library.js', './memory-store.js',
-  './profile-manager.js', './placement-content.js', './numerology-content.js', './angel-numbers.js', './animal-symbolism.js',
+  './profile-manager.js', './placement-content.js', './numerology-content.js', './number-matrix.js', './timing-lexicon.js', './angel-numbers.js', './animal-symbolism.js',
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js', './minor-body-elements.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
-  './birth-time.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js',
+  './birth-time.js', './astronomy-engine-2.1.19.min.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js', './flight.js', './body-globes.js', './cycle-scene.js', './chart-scene.js', './hd-scene.js',
   './people-library.js', './pair-cache.js', './analytics.js',
   './forecast/newsEngine.js', './forecast/news/synastryTemplates.js', './forecast/news/multiChart.js',
   './forecast/news/skyWire.js', './forecast/news/lint.js', './forecast/feedBuilder.js',

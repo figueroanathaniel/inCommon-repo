@@ -1,0 +1,381 @@
+diff -ruN "a/app/inCommonApp v2.dc.html" "b/app/inCommonApp v2.dc.html"
+--- "a/app/inCommonApp v2.dc.html"	2026-10-23 03:22:25.920545027 +0800
++++ "b/app/inCommonApp v2.dc.html"	2026-10-23 03:22:26.902385299 +0800
+@@ -4642,6 +4642,12 @@
+             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
+             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
+             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
++            <sc-if value="{{ orListenOn }}" hint-placeholder-val="{{ false }}">
++              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
++                <button data-lift onClick="{{ orListenGo }}" aria-pressed="{{ orListening }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orListenLabel }}</button>
++                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orListenNote }}</p>
++              </div>
++            </sc-if>
+           </header>
+           <div style="display:flex;flex-direction:column;gap:12px">
+             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+@@ -4751,7 +4757,7 @@
+            screen before anything is sent; the press of Consult the Oracle is the
+            permission. The web keeps the owner's no disclaimers rule. -->
+       <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
+-        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
++        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading. Listening sends the reading's words to be spoken aloud.</p>
+       </sc-if>
+     </div>
+   </div>
+@@ -11624,6 +11630,12 @@
+             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
+             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
+             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
++            <sc-if value="{{ orListenOn }}" hint-placeholder-val="{{ false }}">
++              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
++                <button data-lift onClick="{{ orListenGo }}" aria-pressed="{{ orListening }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orListenLabel }}</button>
++                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orListenNote }}</p>
++              </div>
++            </sc-if>
+           </header>
+           <div style="display:flex;flex-direction:column;gap:12px">
+             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
+@@ -11733,7 +11745,7 @@
+            screen before anything is sent; the press of Consult the Oracle is the
+            permission. The web keeps the owner's no disclaimers rule. -->
+       <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
+-        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
++        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading. Listening sends the reading's words to be spoken aloud.</p>
+       </sc-if>
+     </div>
+   </div>
+@@ -25234,7 +25246,8 @@
+     limit: silent, silent: silent, notSetUp: silent, off: silent,
+     busy: resting, pending: resting,
+     premium: 'This feature is part of Codex Luminary.',
+-    timeout: 'This reading took too long to write. Try again in a minute.'
++    timeout: 'This reading took too long to write. Try again in a minute.',
++    voice: 'The voice is silent for now. Your device will read aloud instead.'
+   }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
+   /* TWO ANSWERS ARE NOT FAILURES YET, and the page used to show the resting
+      line for both over a reading that was on its way. PENDING is the server
+@@ -25265,6 +25278,7 @@
+     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
+   }
+   oracleAsk(period, depth, again, quiet) {
++    this.orListenStop();
+     /* The Cycle Audit's slot is the passages it reads, so they are found
+        before the slot is named. */
+     if (period === 'cycle') this.cycleWindows();
+@@ -25349,6 +25363,135 @@
+     if (this.orNonQuietBusy().length) return false;
+     return !(st.orErr && st.orErr.slot === slot);
+   }
++  /* THE ORACLE SPEAKS. One reading at a time, section by section, with the
++     title spoken before each body. Stopping forgets the queue and releases
++     the audio context. A failed proxy falls back to the device's own voice.
++     Nothing is cached across readings: a replay of the same reading reuses
++     section hashes, so the cloud module may serve from its own cache. */
++  orListenNote() {
++    return this.cloud && this.state.cloudStatus && this.state.cloudStatus.mode === 'cloud'
++      ? 'Your reading is sent to be spoken aloud. Stop at any time.'
++      : 'Your device will read this aloud. Stop at any time.';
++  }
++  orVoiceSegments(r) {
++    const str = v => typeof v === 'string' ? v : '';
++    const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
++    const segs = [];
++    if (str(r.title)) segs.push({ title: 'The Oracle', body: str(r.title) + '. ' + str(r.epigraph) });
++    const ov = paras(r.overview);
++    if (ov.length) segs.push({ title: 'Overview', body: ov.join('\n\n') });
++    [['The Stars', r.stars], ['The Design', r.design], ['The Numbers', r.numbers]].forEach(([t, v]) => {
++      if (str(v)) segs.push({ title: t, body: str(v) });
++    });
++    (r.chapters || []).forEach(c => {
++      if (c && str(c.heading)) segs.push({ title: str(c.heading), body: paras(c.body).join('\n\n') });
++    });
++    [['Love & Kinship', r.love], ['Work & Purpose', r.work], ['Spirit & Body', r.spirit]].forEach(([t, v]) => {
++      if (str(v)) segs.push({ title: t, body: str(v) });
++    });
++    (r.keyTransits || []).forEach(t => {
++      if (t && str(t.transit)) segs.push({ title: 'Celestial Currents: ' + str(t.transit), body: str(t.meaning) });
++    });
++    if (str(r.shadowWork)) segs.push({ title: 'Shadow Work', body: str(r.shadowWork) });
++    (r.journalPrompts || []).forEach((q, i) => {
++      if (str(q)) segs.push({ title: 'For the Journal, question ' + (i + 1), body: str(q) });
++    });
++    (r.timing || []).forEach(t => {
++      if (t && str(t.when)) segs.push({ title: 'Windows of Time: ' + str(t.when), body: str(t.guidance) });
++    });
++    if (str(r.ritual)) segs.push({ title: 'A Small Ritual', body: str(r.ritual) });
++    if (str(r.mantra)) segs.push({ title: 'Mantra', body: str(r.mantra) });
++    return segs;
++  }
++  orListenStop() {
++    const v = this._orVoice;
++    if (!v) return;
++    v.on = false;
++    try { if (v.source) v.source.stop(); } catch (e) {}
++    try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
++    if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
++    this._orVoice = null;
++    this.setState({ orListening: false });
++  }
++  orListenGo() {
++    const v = this._orVoice;
++    if (v && v.on) { this.orListenStop(); return; }
++    const st = this.state, r = st.orHit && st.orHit.reading;
++    if (!r) return;
++    const segs = this.orVoiceSegments(r);
++    if (!segs.length) return;
++    const voice = { on: true, idx: 0, segs, ctx: null, source: null, _ttsU: false };
++    this._orVoice = voice;
++    this.setState({ orListening: true });
++    this._orPlayNext(voice);
++  }
++  _orPlayNext(voice) {
++    if (!voice || !voice.on || voice.idx >= voice.segs.length) { this.orListenStop(); return; }
++    const seg = voice.segs[voice.idx];
++    const cloud = this.cloud;
++    if (cloud && cloud.oracleVoice) {
++      cloud.oracleVoice({ text: seg.body, title: seg.title }).then(res => {
++        if (!voice.on) return;
++        if (res.ok && res.audio) {
++          this._orPlayAudio(voice, res.audio);
++        } else {
++          this._orPlayTTS(voice, seg.title + '. ' + seg.body);
++        }
++      }).catch(() => {
++        if (voice.on) this._orPlayTTS(voice, seg.title + '. ' + seg.body);
++      });
++    } else {
++      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
++    }
++  }
++  _orPlayAudio(voice, buf) {
++    if (!voice || !voice.on) return;
++    try {
++      const ctx = new (window.AudioContext || window.webkitAudioContext)();
++      voice.ctx = ctx;
++      ctx.decodeAudioData(buf, buffer => {
++        if (!voice.on) return;
++        const src = ctx.createBufferSource();
++        src.buffer = buffer;
++        src.connect(ctx.destination);
++        voice.source = src;
++        src.onended = () => {
++          if (!voice.on) return;
++          voice.idx++;
++          this._orPlayNext(voice);
++        };
++        src.start(0);
++      }, () => {
++        const seg = voice.segs[voice.idx];
++        this._orPlayTTS(voice, seg.title + '. ' + seg.body);
++      });
++    } catch (e) {
++      const seg = voice.segs[voice.idx];
++      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
++    }
++  }
++  _orPlayTTS(voice, text) {
++    if (!voice || !voice.on) return;
++    try {
++      const u = new SpeechSynthesisUtterance(text);
++      voice._ttsU = true;
++      u.onend = () => {
++        if (!voice.on) return;
++        voice._ttsU = false;
++        voice.idx++;
++        this._orPlayNext(voice);
++      };
++      u.onerror = () => {
++        if (!voice.on) return;
++        voice._ttsU = false;
++        this.orListenStop();
++      };
++      window.speechSynthesis.cancel();
++      window.speechSynthesis.speak(u);
++    } catch (e) {
++      this.orListenStop();
++    }
++  }
+   /* THE CODEX ASKED WHEN THE SCREEN OPENED, and so does this. Called from the
+      one componentDidUpdate. The phone draws every section at once and the tab
+      follows the section in view, so a reader scrolling past the Oracle would
+@@ -26705,17 +26848,17 @@
+       ...this.lumGateVals('deep'),
+       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
+         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
+-        c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
++        c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => { this.orListenStop(); this.setState({ orDepth: k }); } })),
+       orPeriods: this.ORACLE_PERIODS.map(([k, label]) => ({ label, on: period === k,
+         bd: pick(period === k, 'var(--ac2)', 'var(--bd)'), bg: pick(period === k, 'rgba(var(--atmc),.24)', 'transparent'),
+-        c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orPeriod: k }) })),
++        c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => { this.orListenStop(); this.setState({ orPeriod: k }); } })),
+       orSample: !r && sample,
+       orOff: !r && !sample && off,
+       orNeedSignIn: !blocked && !busy && !signedIn,
+       orConsent: !blocked && !busy && !err && signedIn && !consented,
+-      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
++      orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+       orDeepGate: deepGate,
+-      orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
++      orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
+       /* The Codex showed its loading panel from the moment it asked; the
+          600ms wait before asking shows the same panel. */
+       orBusy: !r && !locked && (busy || waiting || lumWait),
+@@ -26723,7 +26866,7 @@
+       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
+       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
+       orPrivacy: '',
+-      orAskGo: () => { if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
++      orAskGo: () => { this.orListenStop(); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
+       orUseMine: () => this.authGo('birth'),
+       orLoadingText: lumWait ? 'Checking your Codex Luminary…'
+@@ -26748,6 +26891,10 @@
+         : 'The chapters, timing windows, shadow work and journal prompts are still being written…',
+       orMoreRetry: !!partial && !busy && !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
+       orShowReading: !!r,
++      orListenOn: !!r,
++      orListening: !!(this._orVoice && this._orVoice.on),
++      orListenLabel: this._orVoice && this._orVoice.on ? 'Stop listening' : 'Listen to the reading',
++      orListenNote: this.orListenNote(),
+       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
+       orLabel: r ? str(hit.label) : '',
+       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
+diff -ruN a/app/incommon-cloud.js b/app/incommon-cloud.js
+--- a/app/incommon-cloud.js	2026-10-23 03:22:26.809569044 +0800
++++ b/app/incommon-cloud.js	2026-10-23 03:22:27.833004687 +0800
+@@ -1525,6 +1525,37 @@
+     return oracleCall({ kind: 'tarot', seed: req.seed, count: req.count, topic: req.topic });
+   }
+ 
++  /* ---------- Oracle Voice ---------- */
++
++  /* ElevenLabs text-to-speech, per-section, so stopping early never bills
++     for what was not heard. The key lives as a secret; the page never sees
++     it. Audio is returned as an ArrayBuffer on success, or a reason on
++     failure, matching the Oracle's own contract. */
++  function oracleVoice(req) {
++    if (!client) return Promise.resolve({ ok: false, reason: "off" });
++    if (!session) return Promise.resolve({ ok: false, reason: "signedOut" });
++    return Promise.resolve().then(function () {
++      return client.functions.invoke("oracle-voice", { body: req });
++    }).then(function (res) {
++      if (res && !res.error && res.data instanceof ArrayBuffer) {
++        return { ok: true, audio: res.data };
++      }
++      var e = res && res.error, st = e && e.context && e.context.status;
++      return oracleCode(e).then(function (code) {
++        if (st === 402 || code === "PREMIUM_REQUIRED") return { ok: false, reason: "premium" };
++        if (code === "RATE_LIMITED") return { ok: false, reason: "busy" };
++        if (code === "OUT_OF_CREDITS") return { ok: false, reason: "silent" };
++        if (code === "TIMEOUT" || st === 504) return { ok: false, reason: "timeout" };
++        if (st === 404 || code === "NOT_SET_UP") return { ok: false, reason: "notSetUp" };
++        if (st === 401 || code === "SIGNED_OUT" || code === "MFA_REQUIRED") return { ok: false, reason: "signedOut" };
++        if (st === 429 || code === "LIMIT") return { ok: false, reason: "limit" };
++        if (st === 503) return { ok: false, reason: "silent" };
++        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || "")) return { ok: false, reason: "offline" };
++        return { ok: false, reason: "error", error: (e && e.message) || "no audio returned" };
++      });
++    }).catch(function (e) { return { ok: false, reason: "offline", error: e && e.message }; });
++  }
++
+   /* ---------- Codex Luminary ---------- */
+ 
+   /* THE PAID TIER IS ASKED THROUGH THIS MODULE TOO, and for the same reason.
+@@ -1814,6 +1845,7 @@
+     normPhone: normPhone,
+     oracleRead: oracleRead,
+     tarotRead: tarotRead,
++    oracleVoice: oracleVoice,
+     supportSend: supportSend,
+     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
+     SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
+diff -ruN a/server/oracle-voice/index.ts b/server/oracle-voice/index.ts
+--- a/server/oracle-voice/index.ts	1970-01-01 08:00:00.000000000 +0800
++++ b/server/oracle-voice/index.ts	2026-10-23 03:22:27.932254344 +0800
+@@ -0,0 +1,85 @@
++// server/oracle-voice/index.ts
++// ElevenLabs text-to-speech proxy for The Oracle readings.
++// Per-section requests, so stopping early never bills for what was not heard.
++// The key lives as a Supabase secret; the page never sees it.
++
++import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
++
++const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
++const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
++const ELEVENLABS_KEY = Deno.env.get("ELEVENLABS_API_KEY") || "";
++const DEFAULT_VOICE = Deno.env.get("ORACLE_VOICE_ID") || "yDEpaEXmUSjci1pRBCJf";
++
++const CORS = {
++  "Access-Control-Allow-Origin": "*",
++  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
++  "Access-Control-Allow-Methods": "POST, OPTIONS",
++};
++
++function reply(status: number, body: unknown, type = "application/json"): Response {
++  return new Response(
++    type === "audio/mpeg" ? (body as ArrayBuffer) : JSON.stringify(body),
++    { status, headers: { ...CORS, "Content-Type": type } }
++  );
++}
++
++Deno.serve(async (req: Request) => {
++  if (req.method === "OPTIONS") return reply(204, {});
++  if (req.method !== "POST") return reply(405, { reason: "METHOD_NOT_ALLOWED" });
++
++  const auth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY).auth;
++  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
++  const { data: { user }, error: userErr } = await auth.getUser(token);
++  if (userErr || !user) return reply(401, { reason: "SIGNED_OUT" });
++
++  const body = await req.json().catch(() => ({}));
++  const text = typeof body.text === "string" ? body.text.trim() : "";
++  const title = typeof body.title === "string" ? body.title.trim() : "";
++  if (!text) return reply(400, { reason: "EMPTY" });
++
++  if (!ELEVENLABS_KEY) return reply(503, { reason: "NOT_SET_UP" });
++
++  const fullText = title ? title + ". " + text : text;
++  const voiceId = body.voiceId || DEFAULT_VOICE;
++  const model = body.model || "eleven_multilingual_v2";
++
++  try {
++    const elRes = await fetch(
++      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`,
++      {
++        method: "POST",
++        headers: {
++          "Accept": "audio/mpeg",
++          "Content-Type": "application/json",
++          "xi-api-key": ELEVENLABS_KEY,
++        },
++        body: JSON.stringify({
++          text: fullText,
++          model_id: model,
++          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
++        }),
++      }
++    );
++
++    if (elRes.status === 401) return reply(503, { reason: "NOT_SET_UP" });
++    if (elRes.status === 429) {
++      const data = await elRes.json().catch(() => ({}));
++      if (data && data.detail && data.detail.status === "quota_exceeded") {
++        return reply(429, { reason: "OUT_OF_CREDITS" });
++      }
++      return reply(429, { reason: "RATE_LIMITED" });
++    }
++    if (elRes.status === 422) {
++      const data = await elRes.json().catch(() => ({}));
++      return reply(422, { reason: "INVALID", detail: data.detail || "voice or model not found" });
++    }
++    if (!elRes.ok) {
++      return reply(503, { reason: "SILENT", status: elRes.status });
++    }
++
++    const buf = await elRes.arrayBuffer();
++    return reply(200, buf, "audio/mpeg");
++  } catch (e) {
++    return reply(503, { reason: "OFFLINE", error: (e as Error).message });
++  }
++});

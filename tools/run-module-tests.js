@@ -84,6 +84,25 @@ t('B13', 'an unknown time is drawn for noon and says so', (() => {
   const i = BT.instant({ birthDate: '1992-07-02', timeUnknown: true });
   return [i.assumed, i.assumedTime, i.date.toISOString()];
 })(), [true, '12:00', '1992-07-02T12:00:00.000Z']);
+t('B13b', 'the placeholder noon is noon where the reader was born, as the note says and the Codex drew it', [
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'Asia/Tokyo' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'Pacific/Honolulu' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timezone: 'America/Chicago' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-01-02', timeUnknown: true, timezone: 'America/Chicago' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', timeUnknown: true, timezone: 'manual', tzOffset: 5.5 }).date.toISOString()
+], ['1992-07-02T03:00:00.000Z', '1992-07-02T22:00:00.000Z', '1992-07-02T17:00:00.000Z', '1992-01-02T18:00:00.000Z', '1992-07-02T06:30:00.000Z']);
+/* The rows above check the offset. This one checks the instant it produces,
+   because a correct offset of 5.5 was subtracted as whole hours for as long as
+   only the offset was checked: every birth in India, Nepal, Iran,
+   Afghanistan, Newfoundland and central Australia was drawn 30 or 45 minutes
+   early, which is seven to eleven degrees of Ascendant. */
+t('B13c', 'a half and three quarter hour zone move the instant by the whole offset, minutes included', [
+  BT.instant({ birthDate: '1992-07-02', birthTime: '10:00', timezone: 'Asia/Kolkata' }).date.toISOString(),
+  BT.instant({ birthDate: '1990-06-15', birthTime: '12:00', timezone: 'Asia/Kathmandu' }).date.toISOString(),
+  BT.instant({ birthDate: '1998-07-15', birthTime: '12:00', timezone: 'America/St_Johns' }).date.toISOString(),
+  BT.instant({ birthDate: '2005-01-15', birthTime: '12:00', timezone: 'Pacific/Chatham' }).date.toISOString(),
+  BT.instant({ birthDate: '1992-07-02', birthTime: '10:00', timezone: 'manual', tzOffset: 9.5 }).date.toISOString()
+], ['1992-07-02T04:30:00.000Z', '1990-06-15T06:15:00.000Z', '1998-07-15T14:30:00.000Z', '2005-01-14T22:15:00.000Z', '1992-07-02T00:30:00.000Z']);
 t('B14', 'an unanswered time is not treated as a declared unknown', BT.availability({ birthDate: '1992-07-02' }).timeState, 'unanswered');
 t('B15', 'nothing time dependent is claimed without a time and a place', BT.availability({ birthDate: '1992-07-02', timeUnknown: true }).unavailable.length, BT.TIME_DEPENDENT.length);
 t('B16', 'a time with no coordinates is still not a timed chart', BT.availability({ birthDate: '1992-07-02', birthTime: '09:00' }).timed, false);
@@ -381,6 +400,299 @@ if (!hdLine) {
 
 /* ------------------------------------------------------- W: the wheel edges */
 
+/* ------------------------------------------------ U: master numbers kept
+   The owner asked on 29 September 2026 for 11, 22 and 33 to be kept wherever a
+   number is read, not only in the Life Path and the Personal Year. The methods
+   live in the app class, so they are lifted out of the app the way
+   check-astral-bodies lifts lonRaw(), and run against InCommonCore. */
+(() => {
+  const CORE = require(path.join(repo, 'app', 'incommon-core.js'));
+  const one = re => { const m = re.exec(appSrc); return m ? m[0] : ''; };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const src = 'class U {\n' + one(/  numReduce\(n\)[^\n]*/) + '\n' + one(/  NUM_MASTERS = [^\n]*/) + '\n' +
+    one(/  numKeep\(n\)[^\n]*/) + '\n' + method('numerology') + '\n' + method('personalDay') + '\n' +
+    one(/  personalWeek\([^\n]*/) + '\n' + one(/  weekNo\([^\n]*/) + '\n}';
+  let X = null;
+  try { X = vm.runInNewContext('(' + src + ')', { window: { InCommonCore: CORE }, Date: Date, Math: Math, String: String, isNaN: isNaN }); } catch (e) { X = null; }
+  tTrue('U1', 'the numerology methods lift out of the app and compile', typeof X === 'function');
+  if (typeof X !== 'function') return;
+  const x = new X();
+  t('U2', 'numKeep stops at 11, 22 and 33 and reduces everything else', [29, 22, 33, 44, 38, 99].map(v => x.numKeep(v)).join(','), '11,22,33,8,11,9');
+  x.dob = () => '1985-11-29';
+  const a = x.numerology();
+  t('U3', 'a birth month and day of 11 and 29 keep 11 as the cycles and the first pinnacle keeps 22', [a.rm, a.rd, a.pinnacles[0][0], a.pinnacles[2][0]].join(','), '11,11,22,11');
+  t('U4', 'challenges are differences of fully reduced parts, never of a kept master', [a.challenge].concat(a.subs).join(','), '3,0,3');
+  x.dob = () => '1978-02-22';
+  const b = x.numerology();
+  t('U5', 'a birth day of 22 keeps 22 as the Productive cycle', b.cycles[1][1], 22);
+  const seen = new Set();
+  for (let k = 0; k < 400; k++) {
+    const d = new Date(2026, 0, 1 + k), py = CORE.personalYear('1985-11-29', d.getFullYear()).value;
+    seen.add(x.personalDay(py, d));
+  }
+  tTrue('U6', 'the Personal Day reaches 11, 22 and 33 across a year and never another number over 9',
+    seen.has(11) && seen.has(22) && seen.has(33) && [...seen].every(v => v <= 9 || v === 11 || v === 22 || v === 33));
+  tTrue('U7', 'the Personal Week keeps a master', x.personalWeek(2, new Date(2026, 0, 28)) === x.numKeep(2 + 1 + x.weekNo(new Date(2026, 0, 28))));
+
+  /* The double digit decides (owner, 19 October 2026). A 6 reached from 33 is
+     Master Number 33: 1985-01-09 reduces by its parts to 1 + 9 + 5 = 15, and
+     every digit of it adds to 33, so its Life Path is 33 and not 6. */
+  const lp = CORE.lifePath('1985-01-09');
+  t('U8', 'a Life Path whose digits add to 33 is Master Number 33, though its parts give 15', [lp.sum, lp.all, lp.value, lp.root, lp.compound].join(','), '15,33,33,6,33');
+  let moved = 0, wrong = 0, total = 0;
+  for (let ms = Date.UTC(1940, 0, 1); ms < Date.UTC(2010, 0, 1); ms += 864e5) {
+    const iso = new Date(ms).toISOString().slice(0, 10), r = CORE.lifePath(iso), old = CORE.reduce(r.sum).value;
+    total++;
+    if (r.value !== old) { moved++; if (!r.master || CORE.reduce(r.value, { preserveMasters: false }).value !== CORE.reduce(old, { preserveMasters: false }).value) wrong++; }
+  }
+  tTrue('U9', 'a Life Path only ever moves to a master of its own root, and never without one (' + moved + ' of ' + total + ' moved)', moved > 0 && wrong === 0);
+  t('U10', 'compound() is the first double digit on the way down', [128, 199, 38, 7, 99].map(v => CORE.compound(v)).join(','), '11,19,38,,99');
+  global.window = { InCommonCore: CORE };
+  delete require.cache[require.resolve(path.join(repo, 'app', 'numerology-content.js'))];
+  require(path.join(repo, 'app', 'numerology-content.js'));
+  const nm = global.window.NumerologyContent.fromName('Ida Bell Wells');
+  delete global.window;
+  t('U11', 'a name number meets a master on the word by word route: IDA BELL WELLS has vowels 20, words 1 + 5 + 5 = 11', [nm.rawTotals.vowels, nm.soulUrge, nm.compounds.soulUrge].join(','), '20,11,11');
+  const MX = require(path.join(repo, 'app', 'number-matrix.js'));
+  const ks = Object.keys(MX.entries).map(Number);
+  tTrue('U12', 'the Book of Numbers holds every compound from 10 to 99 once, each on its own root',
+    ks.length === 90 && ks.every(k => k >= 10 && k <= 99 && MX.entries[k].root === CORE.reduce(k, { preserveMasters: false }).value));
+  t('U13', 'the matrix names the three masters and the four karmic debts', [ks.filter(k => MX.get(k).master).join(' '), ks.filter(k => MX.get(k).karmic).join(' ')].join(' | '), '11 22 33 | 13 14 16 19');
+  let Cm = null;
+  try { Cm = vm.runInNewContext('(class { ' + method('numCmp').replace(/^\n/, '') + ' })', { window: { NumberMatrix: MX }, String: String }); } catch (e) { Cm = null; }
+  const cm = Cm ? new Cm() : null;
+  t('U14', 'the label is 33/6 for a master, 24/6 or 38/11 otherwise, and a birth number owing 13 wears --warn',
+    cm ? [cm.numCmp(33, 33, []).cmp, cm.numCmp(24, 6).cmp, cm.numCmp(38, 11).cmp, cm.numCmp(13, 4, [13]).cmpC, cm.numCmp(null, 4).cmpOn].join(',') : 'did not lift',
+    '33/6,24/6,38/11,var(--warn),false');
+  /* Karmic debt on any route, read on the birth numbers only (owner, 19
+     October 2026). 1940-01-04 is 10 by its parts and 19 by its digits. */
+  const kd = CORE.lifePath('1940-01-04');
+  t('U16', 'a karmic debt on the second route is found though the compound shown is the first route\'s', [kd.compound, kd.value, kd.karmic.join(' ')].join(','), '10,1,19');
+  t('U17', 'karmicOf walks every route to its root: 49 passes 13, 28 passes nothing, 199 passes 19', CORE.karmicOf([49, 28, 199]).join(','), '13,19');
+  const owe = cm ? cm.numCmp(10, 1, kd.karmic) : null, cyc = cm ? cm.numCmp(16, 7) : null;
+  t('U18', 'a Life Path owing 19 on its other route carries a debt line; a cycle on 16 reads as The Tower Season, the ordinary colour and no debt label',
+    owe && cyc ? [owe.cmpC, owe.debtOn, owe.debtLine, cyc.cmpTitle, cyc.cmpC, cyc.cmpCat === '', cyc.debtOn].join('|') : 'did not lift',
+    'var(--ac2-hi)|true|Karmic Debt 19 \u00b7 The Debt of Selfishness|The Tower Season|var(--ac2-hi)|true|false');
+  const cycDebt = ks.filter(k => MX.get(k).karmic).map(k => MX.get(k, { cycle: true }));
+  tTrue('U19', 'every karmic compound has a cycle title and description of its own, and none of them says debt',
+    cycDebt.length === 4 && cycDebt.every(e => e.title && e.desc && e.category === '' && !/debt/i.test(e.title + e.desc) && e.title !== MX.get(e.n).title)
+    && MX.get(24, { cycle: true }).title === MX.get(24).title);
+  /* The Numbers stage turns its orbit, it does not jump (owner, 19 October
+     2026). numFocusTo() must bring the chosen number to the front (+90
+     degrees, the near side of the floor) and always take the short way. */
+  let Ns = null;
+  try { Ns = vm.runInNewContext('(class { ' + method('numSpinNow').replace(/^\n/, '') + method('numFocusTo') + method('numStep') + ' })', { Math: Math, isNaN: isNaN }); } catch (e) { Ns = null; }
+  const ns = Ns ? new Ns() : null;
+  if (ns) { ns.state = { numSpin: null, numFocus: 'lifePath' }; ns.setState = o => Object.assign(ns.state, o); }
+  const ringKeys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const front = k => { const i = ringKeys.indexOf(k); return (((i * 45 - 90 + ns.state.numSpin) % 360) + 360) % 360; };
+  const walk = [];
+  if (ns) {
+    walk.push(ns.numSpinNow());
+    ['c', 'h', 'a', 'e'].forEach(k => { const before = ns.state.numSpin == null ? 180 : ns.state.numSpin; ns.numFocusTo(k, ringKeys); walk.push(front(k), Math.abs(ns.state.numSpin - before) <= 180); });
+    const still = ns.state.numSpin; ns.numFocusTo('lifePath', ringKeys); walk.push(ns.state.numFocus, ns.state.numSpin === still);
+  }
+  t('U20', 'the orbit rests with its first number in front, brings each chosen number to the front by the short way, and leaves the orbit still for the Life Path',
+    walk.join(','), '180,90,true,90,true,90,true,90,true,lifePath,true');
+  x.dob = () => '1985-01-09';
+  const xa = x.numerology();
+  t('U15', 'the Numbers page reads the Life Path and its compound from the core', [xa.lp, xa.lpC, xa.rdC, xa.cycles[2][3]].join(','), '33,33,,23');
+})();
+
+/* ------------------------------------------------ Z: the Cycle Audit
+   The owner asked on 18 October 2026 for a reading of the long transits, sold
+   pay what you want on the website and free in the apps. The dates are found
+   on the device by cycleWindows(), lifted out of the app here and run on the
+   vendored astronomy-engine, and the case it was asked for is the fixture:
+   Pluto on a Mars at 15 Aquarius, then on a Sun at 28 Aquarius. Pluto crosses
+   315 degrees five times from April 2032 to December 2033 and 328 degrees five
+   times from April 2041 to December 2042, measured with the same library. */
+(() => {
+  const AE = require(path.join(repo, 'app', 'astronomy-engine-2.1.19.min.js'));
+  const field = name => { const m = new RegExp('\\n  ' + name + ' = [^\\n]*').exec(appSrc); return m ? m[0] : ''; };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
+  /* Today is pinned to the day this was written, so the fixture stays inside
+     the scan however long after that the suite is run. */
+  class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
+  let Zc = null;
+  try { Zc = vm.runInNewContext('(' + src + ')', { Date: Today, Math: Math, String: String, Object: Object, Intl: Intl }); } catch (e) { Zc = null; }
+  tTrue('Z1', 'the Cycle Audit methods lift out of the app and compile', typeof Zc === 'function');
+  if (typeof Zc !== 'function') return;
+  const z = new Zc();
+  const BODY = { Saturn: AE.Body.Saturn, Uranus: AE.Body.Uranus, Neptune: AE.Body.Neptune, Pluto: AE.Body.Pluto };
+  const SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  Object.assign(z, {
+    PLNS: ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].map(n => [n]),
+    activeProfile: () => ({ id: 'p', birthStamp: 'z', name: 'Rowan Vale' }),
+    natalDate: () => new Date(Date.UTC(1990, 0, 1)),
+    chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
+    anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    hdChart: () => ({ type: 'Projector', authority: 'Splenic: the body knows' }), numerology: () => ({ lp: 7 }),
+    ORACLE_STRATEGY: { Projector: 'Wait for the invitation' },
+    norm360: x => ((x % 360) + 360) % 360,
+    addDays: (d, n) => { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; },
+    t2000: d => d.getTime() / 86400000 + 2440587.5 - 2451545.0,
+    lonOf: (name, t) => AE.Ecliptic(AE.GeoVector(BODY[name], new Date((t + 2451545.0 - 2440587.5) * 86400000), true)).elon,
+    _fmt: (k, o) => new Intl.DateTimeFormat('en', o),
+    signOf: lon => ({ sign: SIGNS[Math.floor(z.norm360(lon) / 30)], deg: z.norm360(lon) % 30 }),
+    aspName: a => a
+  });
+  const ws = z.cycleWindows();
+  const near = (d, iso) => Math.abs(d - Date.parse(iso + 'T12:00:00Z')) <= 3 * 864e5;
+  const mars = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Mars');
+  const sun = ws.filter(w => w.mover === 'Pluto' && w.asp === 'conjunct' && w.natal === 'Sun');
+  const MARS = ['2032-04-15', '2032-06-17', '2033-02-11', '2033-09-04', '2033-12-19'];
+  const SUN = ['2041-04-08', '2041-07-22', '2042-02-15', '2042-10-01', '2042-12-21'];
+  t('Z2', 'Pluto on a Mars at 15 Aquarius is one passage with its five exact dates, each within three days of the measured crossing', {
+    passages: 1, passes: 5, onDates: true, label: 'Pluto conjunct your Mars'
+  }, { passages: mars.length, passes: mars[0] && mars[0].passes.length,
+    onDates: !!mars[0] && mars[0].passes.length === 5 && mars[0].passes.every((d, i) => near(d, MARS[i])), label: mars[0] && mars[0].label });
+  t('Z3', 'Pluto on a Sun at 28 Aquarius is the later passage, nine years after, with its own five', {
+    passages: 1, passes: 5, onDates: true, after: true
+  }, { passages: sun.length, passes: sun[0] && sun[0].passes.length,
+    onDates: !!sun[0] && sun[0].passes.length === 5 && sun[0].passes.every((d, i) => near(d, SUN[i])),
+    after: !!(sun[0] && mars[0]) && ws.indexOf(sun[0]) > ws.indexOf(mars[0]) });
+  tTrue('Z4', 'only the four slow astral bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
+  const dos = z.cycleDossier();
+  const dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  t('Z5', 'the dossier names the first name, the touched points, the design and the Life Path its questions are asked through, and the passages with their dates, and no birth date, no full name, no dash and no planet', {
+    name: true, points: true, design: true, lifePath: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
+  }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos),
+    design: /^HUMAN DESIGN: Projector; Strategy: Wait for the invitation; Authority: Splenic$/m.test(dos), lifePath: /^LIFE PATH: 7$/m.test(dos),
+    passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
+    noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noPlanet: !/planet/i.test(dos) });
+  const k1 = z.cycleKey(); z._cy = null; z._cyKey = null;
+  const pending = z.cycleKey(); z.cycleWindows();
+  t('Z6', 'the scan is anchored to the calendar year, so the key and the dossier come out the same when asked again, and no key is named before the scan has run', { key: true, dossier: true, pending: 'cypending' },
+    { key: z.cycleKey() === k1 && /^cy[0-9a-z]+$/.test(k1), dossier: z.cycleDossier() === dos, pending });
+  tTrue('Z7', 'the audit reads at most eight passages, in the order they arrive', (() => {
+    const p = z.cyclePassages();
+    return p.length <= 8 && p.every((w, i) => i === 0 || p[i - 1].from <= w.from) && p.every(w => !w.past);
+  })());
+  /* The ledger layout: what the dashboard says about a passage is the scan's,
+     never the model's, and a reading kept before the layout still draws. */
+  const dm = mars[0] ? z.cyDash({ contact: 'Pluto conjunct natal Mars', window: 'the model\'s words',
+    tax: ['Set down the blade.', 'Let the last word go.'], dividend: ['A voice that need not win.'],
+    prompts: [{ system: 'stars', question: 'What feels at stake?' }, { system: 'design', question: 'What waits?' }, { system: 'numbers', question: 'What does seven ask?' }] }, mars[0], 0) : {};
+  const old = mars[0] ? z.cyDash({ contact: 'x', window: 'w', tax: 'One sentence here. Another one there.', dividend: 'Just this.', prompts: ['A plain question?'] }, mars[0], 0) : {};
+  const anyDash = JSON.stringify(dm) + JSON.stringify(old);
+  t('Z8', 'a passage dashboard takes its title, coordinate, window, years and exact dates from the scan, its lists and questions from the reading, and reads an older paragraph reading too', {
+    title: 'Pluto Conjunct Natal Mars', coord: '15°00′ Aquarius', window: true, years: '2031 · 2032 · 2033 · 2034', nodes: 5, badge: true,
+    tax: 2, sys: 'The Stars|The Design|The Numbers', oldTax: 2, oldPrompt: true, noDash: true
+  }, { title: dm.title, coord: dm.coord, window: dm.window === mars[0].range, years: dm.years, nodes: (dm.nodes || []).length,
+    badge: /Outer Transit/.test(dm.badge || ''), tax: (dm.tax || []).length, sys: (dm.prompts || []).map(q => q.sys).join('|'),
+    oldTax: (old.tax || []).length, oldPrompt: !!old.prompts && old.prompts.length === 1 && old.prompts[0].sysOn === false, noDash: !dashRe.test(anyDash) });
+  /* A block replaced by slicing between two anchors once took the next
+     block's opening sc-if with it, and the page still drew: the runtime
+     forgave the stray closer. Counting is what catches it. */
+  const tags = n => [(appSrc.match(new RegExp('<' + n + '[\\s>]', 'g')) || []).length, (appSrc.match(new RegExp('</' + n + '>', 'g')) || []).length];
+  t('Z9', 'every sc-if and sc-for in the app opens and closes in equal number', { scIf: true, scFor: true },
+    { scIf: tags('sc-if')[0] === tags('sc-if')[1], scFor: tags('sc-for')[0] === tags('sc-for')[1] });
+})();
+
+/* ------------------------------------------------ J: Omni lives on the server
+   Omni became a paid add-on on 18 October 2026, written by the Oracle function
+   so the lock holds. Its composer must not come back into the app, the
+   function's copy of the deck must be the app's byte for byte, and the moved
+   composer must write a whole, steady reading from that copy. */
+(() => {
+  const appDeck = fs.readFileSync(path.join(repo, 'app', 'tarot.js'), 'utf8');
+  const srvDeckPath = path.join(repo, 'server', 'oracle', 'tarot.js');
+  const srvDeck = fs.existsSync(srvDeckPath) ? fs.readFileSync(srvDeckPath, 'utf8') : '';
+  const TA = require(path.join(repo, 'app', 'tarot.js'));
+  const OMNI = require(path.join(repo, 'server', 'oracle', 'tarot-omni.js'));
+  tTrue('J1', 'the app\'s tarot.js carries no Omni composer, and asked for Omni without one it answers null', !/function omni\(/.test(appDeck) && TA.read({ count: 9, topic: 'general', depth: 'omni', seed: 3 }) === null);
+  tTrue('J2', 'the Oracle function\'s copy of tarot.js is the app\'s, byte for byte (tools/build-bundle.js writes it)', srvDeck === appDeck);
+  const a = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  const b = TA.read({ count: 11, topic: 'love', depth: 'omni', seed: 1234, omni: OMNI });
+  t('J3', 'the server composer writes seven passages in the tradition\'s order, the same every time for one shuffle', {
+    passages: 7, tags: 'CALCULATED,TRADITIONAL,TRADITIONAL,TRADITIONAL,TRADITIONAL,SYNTHESIS,POSSIBILITY', steady: true, cards: 11
+  }, { passages: a && a.passages.length, tags: a && a.passages.map(x => x.tag).join(','), steady: JSON.stringify(a) === JSON.stringify(b), cards: a && a.count });
+  tTrue('J4', 'the bundle does not carry the composer', (() => {
+    const m = fs.readFileSync(path.join(repo, 'tools', 'build-bundle.js'), 'utf8').match(/const BUNDLE = path\.join\(repo, 'deploy', '([^']+)'\)/);
+    const app = m ? path.join(repo, 'deploy', m[1], 'app.html') : '';
+    return !!app && fs.existsSync(app) && fs.readFileSync(app, 'utf8').indexOf('Woven together, the reading turns on three of its cards') === -1;
+  })());
+})();
+
+/* ------------------------------------------------ V: the profile menu
+   The owner asked on 30 September 2026 for the profile icon to open a menu
+   (Profile, Settings, Get Help, Log Out), for the profile card to carry a
+   motto made for the reader, and for Get Help to prompt a call. The motto and
+   the line are chosen by methods in the app class, lifted out here the way the
+   U rows lift the numbers. */
+(() => {
+  const CD = require(path.join(repo, 'app', 'crisis-directory.js'));
+  const field = name => {
+    const i = appSrc.indexOf('\n  ' + name + ' = ');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('};\n', i);
+    return appSrc.slice(i, j + 2);
+  };
+  const method = name => {
+    const i = appSrc.indexOf('\n  ' + name + '(');
+    if (i === -1) return '';
+    const j = appSrc.indexOf('\n  }\n', i);
+    return appSrc.slice(i, j + 4);
+  };
+  const one = re => { const m = re.exec(appSrc); return m ? m[0] : ''; };
+  const src = 'class V {\n' + one(/  numReduce\(n\)[^\n]*/) + '\n' + field('MOTTO_LP') + '\n' + field('MOTTO_SUN') + '\n' +
+    field('MOTTO_TYPE') + '\n' + method('mottoFor') + '\n' + method('helpCountry') + '\n' + method('callVals') + '\n}';
+  let env = { tz: 'America/New_York', lang: 'en-US' };
+  const ctx = {
+    Intl: { DateTimeFormat: function () { return { resolvedOptions: () => ({ timeZone: env.tz }) }; } },
+    navigator: { get language() { return env.lang; } }, String: String, Math: Math
+  };
+  let X = null;
+  try { X = vm.runInNewContext('(' + src + ')', ctx); } catch (e) { X = null; }
+  tTrue('V1', 'the motto and the call line lift out of the app and compile', typeof X === 'function');
+  if (typeof X !== 'function') return;
+  const x = new X();
+  const LPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
+  const SUNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  const TYPES = ['Generator', 'Manifesting Generator', 'Manifestor', 'Projector', 'Reflector'];
+  const all = [];
+  LPS.forEach(lp => SUNS.forEach(sun => TYPES.forEach(ty => all.push(x.mottoFor(lp, sun, ty)))));
+  const DASH = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  t('V2', 'every Life Path, Sun and type makes a motto: 720 of them, all different, each two sentences ending in a full stop, none with a dash',
+    { count: 720, distinct: 720, shaped: 720, dashed: 0 },
+    { count: all.filter(Boolean).length, distinct: new Set(all).size, shaped: all.filter(m => /^[A-Z][^.]+\. [A-Z][^.]+\.$/.test(m)).length, dashed: all.filter(m => DASH.test(m)).length });
+  t('V3', 'the motto is something to do, never a statement about who the reader is, and the same chart always gets the same one',
+    { aboutReader: 0, stable: true, missingPart: '' },
+    { aboutReader: all.filter(m => /\byou are\b|\byou're\b|\byour nature\b/i.test(m)).length,
+      stable: x.mottoFor(4, 'Taurus', 'Generator') === x.mottoFor(4, 'Taurus', 'Generator') && x.mottoFor(4, 'Taurus', 'Generator') === 'Build what lasts. At an unhurried pace, answer what lights you up.',
+      missingPart: x.mottoFor(null, 'Leo', 'Projector') + x.mottoFor(5, '', 'Projector') + x.mottoFor(5, 'Leo', '') });
+  const where = [['Europe/London', 'en-US'], ['Europe/Dublin', 'en-IE'], ['Australia/Sydney', 'en-US'], ['America/Toronto', 'en-US'], ['America/New_York', 'es-US'],
+    ['Pacific/Honolulu', 'en-US'], ['America/Indiana/Indianapolis', 'en-US'], ['Asia/Tokyo', 'en-US'], ['America/Mexico_City', 'es-MX'], ['UTC', 'en-GB'], ['UTC', 'fr-FR'], ['', 'en_CA']]
+    .map(([tz, lang]) => { env = { tz, lang }; return (tz || '-') + ' ' + lang + ' ' + x.helpCountry(); });
+  t('V4', 'the line follows the time zone first and the language only when the zone says nothing, and a place the directory does not cover gets no country',
+    ['Europe/London en-US UK', 'Europe/Dublin en-IE UK', 'Australia/Sydney en-US AU', 'America/Toronto en-US CA', 'America/New_York es-US US',
+     'Pacific/Honolulu en-US US', 'America/Indiana/Indianapolis en-US US', 'Asia/Tokyo en-US null', 'America/Mexico_City es-MX null', 'UTC en-GB UK', 'UTC fr-FR null', '- en_CA CA'], where);
+  x.CD = () => CD;
+  x.openHelp = () => {};
+  x.setState = () => {};
+  const call = tz => { env = { tz, lang: 'en-US' }; x.state = { callOpen: true }; const v = x.callVals(); return [v.callKnown, v.callName, v.callHref, v.callTextHref, v.callEmHref].join(' | '); };
+  t('V5', 'Get Help prompts a call to the crisis line for where the reader is, with the emergency number beside it, and offers the way to find one where the directory has none',
+    ['true | 988 Suicide & Crisis Lifeline | tel:988 | sms:988 | tel:911', 'true | Samaritans | tel:116123 |  | tel:999', 'true | 988 Suicide Crisis Helpline | tel:988 | sms:988 | tel:911',
+     'true | Lifeline Australia | tel:131114 |  | tel:000', 'false |  |  |  | '],
+    ['America/Chicago', 'Europe/London', 'America/Vancouver', 'Australia/Perth', 'Asia/Tokyo'].map(call));
+  env = { tz: 'Asia/Tokyo', lang: 'en-US' }; x.state = { callOpen: true };
+  const far = x.callVals();
+  tTrue('V5b', 'where there is no line, the prompt says to find one and carries no number', far.callUnknown === true && !far.callHref && far.callFindHref === 'https://findahelpline.com');
+})();
+
 const WH = require(path.join(repo, 'app', 'hd-wheel.js'));
 
 /* The app keeps its own literal as a fallback. This sweeps both at every
@@ -567,33 +879,46 @@ const CHIRON_JPL = [
   tTrue("E9", "the stated accuracy is not better than the measured worst case",
     c.accuracyDeg >= worst);
   const appSrcE = fs.readFileSync(path.join(repo, "app", "inCommonApp v2.dc.html"), "utf8");
-  /* E10 USED TO ASSERT A COPY OF THE LIST and went red the day the list was
-     right, because Ceres, Pallas, Juno and Vesta came off it: they are fetched
-     now and measure under a tenth of a degree, so they earn the symbol the way
-     every other fetched body does. A test that names the members cannot tell a
-     correct change from a regression. What is asserted instead is the rule, and
-     it is derived from the data rather than typed: any body this module still
-     supplies whose measured accuracy is worse than the app's ceiling must be
-     barred under BOTH spellings, because the wheel asks by name and the
-     expanded table asks by registry id and one route would otherwise print it.
-     Adding a body here with a nine degree fit and forgetting the list turns
-     this red, which the literal version could never have done. */
-  const barred = (appSrcE.match(/DEGREE_SAFE_EXCEPT = \[([^\]]*)\]/) || [, ''])[1]
-    .split(',').map(x => x.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  /* E10 USED TO ASSERT A COPY OF THE LIST, and then a rule over the list, and
+     both went red on a correct change: first when the four asteroids came off
+     it, and then when Chiron was fetched and there was no list left. What is
+     asserted now is the behaviour, run on the app's own degreeSafe() lifted
+     out of it: with the fetched elements present, every body this fallback
+     module also supplies names a degree exactly when its fetched worst case is
+     inside the ceiling; with them missing, every one whose fitted accuracy is
+     worse than the ceiling withholds it, under both spellings, because the
+     wheel asks by name and the expanded table by registry id. A body added to
+     either module with a nine degree fit turns this red on the route that
+     would print it. */
   const ceiling = parseFloat((appSrcE.match(/DEGREE_SAFE_WORST = ([\d.]+)/) || [, '0'])[1]);
-  const MEids = (() => { try { return require(path.join(repo, 'app', 'minor-body-elements.js')).ids(); } catch (e) { return []; } })();
-  const mustBar = MBE.BODIES.filter(b => {
-    if (MEids.indexOf(b.toLowerCase()) !== -1) return false;     /* fetched, so measured elsewhere */
-    const a = MBE.elements[b].accuracyDeg;
-    return a == null || a > ceiling;
-  });
-  const missing = [];
-  mustBar.forEach(b => {
-    if (barred.indexOf(b) === -1) missing.push(b);
-    if (barred.indexOf(b.toLowerCase()) === -1) missing.push(b.toLowerCase());
-  });
-  tTrue("E10", "every body this module supplies that has not earned a degree is barred under both spellings",
-    ceiling > 0 && mustBar.length > 0 && missing.length === 0);
+  const MEmod = (() => { try { return require(path.join(repo, 'app', 'minor-body-elements.js')); } catch (e) { return null; } })();
+  const dsSrc = (() => {
+    const i = appSrcE.indexOf('\n  degreeSafe(name) {');
+    return i === -1 ? '' : appSrcE.slice(i, appSrcE.indexOf('\n  }\n', i) + 4);
+  })();
+  const liftDS = (win) => {
+    try {
+      const K = vm.runInNewContext('(class { COMET_IDS = ["halley", "halebopp", "hyakutake"]; DEGREE_SAFE_WORST = ' + ceiling + ';' + dsSrc + '})', { window: win, String: String, Object: Object });
+      return new K();
+    } catch (e) { return null; }
+  };
+  const withME = liftDS({ MinorBodyElements: MEmod, MinorBodiesEphemeris: MBE });
+  const withoutME = liftDS({ MinorBodiesEphemeris: MBE });
+  const wrongWith = [], wrongWithout = [];
+  let barredWithout = 0;
+  MBE.BODIES.forEach(b => [b, b.toLowerCase()].forEach(nm => {
+    const id = b.toLowerCase();
+    if (withME && MEmod && MEmod.has(id) && withME.degreeSafe(nm) !== (MEmod.worstDeg(id) <= ceiling)) wrongWith.push(nm);
+    const fit = MBE.elements[b].accuracyDeg, should = fit != null && fit <= ceiling;
+    if (withoutME && withoutME.degreeSafe(nm) !== should) wrongWithout.push(nm);
+    if (!should) barredWithout++;
+  }));
+  tTrue("E10", "a fallback body names a degree by its measurement, fetched or fitted, under both spellings" +
+    (wrongWith.length || wrongWithout.length ? ' (wrong with elements: ' + wrongWith.join(',') + '; without: ' + wrongWithout.join(',') + ')' : ''),
+    ceiling > 0 && !!withME && !!withoutME && barredWithout > 0 && wrongWith.length === 0 && wrongWithout.length === 0);
+  tTrue("E10c", "Chiron, now fetched, earns its degree, and on the fitted fallback it does not",
+    !!withME && !!withoutME && withME.degreeSafe('Chiron') === true && withME.degreeSafe('chiron') === true &&
+    withoutME.degreeSafe('Chiron') === false && withoutME.degreeSafe('chiron') === false && MEmod.worstDeg('chiron') < 0.1);
   tTrue("E10b", "and the decision is made by measurement, through the one gate the Sabian panel reads",
     /ME\.worstDeg\(key\) <= this\.DEGREE_SAFE_WORST/.test(appSrcE) &&
     appSrcE.indexOf('plHasSabian: !!sb && this.degreeSafe(rk)') > -1);
@@ -1284,7 +1609,7 @@ t('X18', 'the module names no storage API and never asks the clock for now',
    Consent gating and the deletion outbox, the two risks named by the
    integration-harness redesign (docs/integration-harness-design.md). Pure
    logic only: profile-manager.js is `window.ProfileManager = PM`, never a
-   UMD module, so it cannot be required here — a hand-built fixture carrying
+   UMD module, so it cannot be required here: a hand-built fixture carrying
    only the four methods incommon-cloud.js actually calls stands in for it.
    PIN recovery needs a real sessionStorage (the UMD wrapper resolves `root`
    to this module's own private exports object under Node, never globalThis)
@@ -1401,7 +1726,7 @@ async function runCloudTests() {
     outboxDrained: JSON.parse(storeE.getItem(OUTBOX_KEY) || '[]').length
   }, { pushOk: true, deleteIssued: true, outboxDrained: 0 });
 
-  /* ---- K11: the hash cache — a quiet week touches nothing ---- */
+  /* ---- K11: the hash cache: a quiet week touches nothing ---- */
   var storeF = clStore();
   var pmF = fakePM([{ id: 'p1', name: 'Subject', memories: [{ id: 'm1', memoryType: 'journal', content: { t: 'unchanged' }, consentRequired: 'journal', kept: false }] }], { p1: { journal: true } });
   var callsF1 = [];
@@ -1422,7 +1747,7 @@ async function runCloudTests() {
      globalThis, so lib() could never find a `self.supabase` there). That
      bypass proves the module's own logic but never actually called init().
      Before the root fix, init() would have thrown the instant it called
-     lib() — the "unsigned-in" branch of the module's own header claim
+     lib(), the "unsigned-in" branch of the module's own header claim
      ("if this module is absent, inert, or unsigned-in, the app is exactly
      the offline-first program it was yesterday") was UNREACHABLE through
      init() at all, so it had never been checked, only assumed. Now that
@@ -1433,13 +1758,17 @@ async function runCloudTests() {
      (lib()/init() now do something instead of throwing), and the point of
      these three rows is to confirm that something is the correct inert
      nothing, not to reassert "nothing changed." */
-  function loadIsolatedCloud(supabaseLib) {
+  function loadIsolatedCloud(supabaseLib, fetchFn, extra) {
     var src = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
     /* setTimeout/clearTimeout are host globals, not ECMAScript intrinsics:
        a vm context does not get them for free the way it gets JSON/Promise/
        Date, so schedule()'s real debounce needs them threaded through
        explicitly or K14 would be testing a ReferenceError, not the module. */
     var selfStub = { supabase: supabaseLib, setTimeout: setTimeout, clearTimeout: clearTimeout };
+    if (fetchFn) selfStub.fetch = fetchFn;
+    /* localStorage and document, for the rows that need a browser's storage
+       and cookie jar (K38 on); every row before them runs without either. */
+    if (extra) Object.keys(extra).forEach(function (k) { selfStub[k] = extra[k]; });
     selfStub.self = selfStub; // self === self, the way a real Window is
     var ctx = vm.createContext(selfStub);
     vm.runInContext(src, ctx, { filename: 'incommon-cloud.js (isolated K12-K14 instance)' });
@@ -1469,6 +1798,1176 @@ async function runCloudTests() {
   CL2.schedule();
   await new Promise(function (r) { setTimeout(r, 1500); });
   t('K14', 'a live debounce firing unsigned-in is exactly as inert as calling push() directly: still no client call', 0, initCalls.length);
+
+  /* ---- K15-K25, K35-K37: signing in on the cover, with a password.
+     The cover has no ProfileManager, so these run without init(). What they
+     must prove is the shape that lets every email the cover causes work in any
+     browser (one client on the implicit flow that does not read the url by
+     itself), that the emailed sign in link is gone since the owner replaced it
+     on 29 September 2026, as Google sign in went the same day, that every
+     refusal comes back as a reason rather than a throw, and that the app's own
+     client is left on the library defaults. K17 was Google's offline start and
+     went with it. */
+  function oauthHarness(opts) {
+    opts = opts || {};
+    var h = { created: [], oauth: [], exchanged: [], otp: [], pw: [], up: [], reset: [], set: [], upd: [], verify: [], resend: [] };
+    var answer = function (k, ok) { return Promise.resolve(opts[k] ? { data: {}, error: opts[k] } : ok); };
+    var fakeLib = { createClient: function (url, key, o) {
+      h.created.push({ url: url, opts: o || null });
+      return { auth: {
+        onAuthStateChange: function () {},
+        signInWithOtp: function (a) { h.otp.push(a); return answer('otpError', { data: {}, error: null }); },
+        verifyOtp: function (a) { h.verify.push(a); return answer('verifyError', { data: { session: { user: { phone: String(a.phone).replace(/^\+/, ''), email: opts.verifyEmail || '' } }, user: { phone: String(a.phone).replace(/^\+/, '') } }, error: null }); },
+        resend: function (a) { h.resend.push(a); return answer('resendError', { data: {}, error: null }); },
+        signInWithOAuth: function (a) { h.oauth.push(a); return Promise.resolve({ data: {}, error: null }); },
+        exchangeCodeForSession: function (c) { h.exchanged.push(c); return Promise.resolve({ data: { session: { user: { email: 'reader@k18.invalid' } } }, error: null }); },
+        signInWithPassword: function (a) { h.pw.push(a); return answer('pwError', { data: { session: { user: a.phone ? { phone: a.phone.slice(1) } : { email: a.email } } }, error: null }); },
+        signUp: function (a) {
+          h.up.push(a);
+          var d = opts.upData || { user: a.phone ? { phone: a.phone.slice(1), identities: [{ id: 'i1' }] } : { email: a.email, identities: [{ id: 'i1' }] }, session: null };
+          return answer('upError', { data: d, error: null });
+        },
+        resetPasswordForEmail: function (e, o) { h.reset.push({ email: e, opts: o }); return answer('resetError', { data: {}, error: null }); },
+        setSession: function (t) { h.set.push(t); return answer('setError', { data: { session: { user: { email: 'server@k36.invalid' } } }, error: null }); },
+        updateUser: function (u) { h.upd.push(u); return answer('updError', { data: { user: {} }, error: null }); }
+      }, from: function () { return fakeClient([]).from('x'); } };
+    } };
+    h.C = loadIsolatedCloud(fakeLib, function () { return Promise.reject(new Error('no network in the test')); }, opts.extra);
+    return h;
+  }
+  var gOn = oauthHarness();
+  var inOk = await gOn.C.passwordSignIn('  reader@k15.invalid ', 'correct horse');
+  var auth0 = gOn.created[0] && gOn.created[0].opts && gOn.created[0].opts.auth;
+  t('K15', 'the cover signs in on one client on the implicit flow that does not read the url and keeps the session, with the trimmed address and the password', {
+    ok: true, email: 'reader@k15.invalid', flowType: 'implicit', detectSessionInUrl: false, persistSession: true, sent: { email: 'reader@k15.invalid', password: 'correct horse' }
+  }, {
+    ok: inOk.ok, email: inOk.email, flowType: auth0 && auth0.flowType, detectSessionInUrl: auth0 && auth0.detectSessionInUrl,
+    persistSession: auth0 && auth0.persistSession, sent: gOn.pw[0] || null
+  });
+  t('K16', 'Google sign in is gone from the module: no provider start and no provider check, and nothing reaches signInWithOAuth', {
+    oauthStart: 'undefined', providerEnabled: 'undefined', oauthCalls: 0
+  }, { oauthStart: typeof gOn.C.oauthStart, providerEnabled: typeof gOn.C.providerEnabled, oauthCalls: gOn.oauth.length });
+  var finish = await gOn.C.oauthFinish('code-k18');
+  t('K18', 'oauthFinish still exchanges exactly the code it was handed, for a link sent before the password, on the same client, and names the account', {
+    ok: true, exchanged: ['code-k18'], email: 'reader@k18.invalid', clients: 1
+  }, { ok: finish.ok, exchanged: gOn.exchanged, email: finish.email, clients: gOn.created.length });
+  var CLnone = loadIsolatedCloud(null, function () { return Promise.reject(new Error('unused')); });
+  var none = await Promise.all([
+    CLnone.passwordSignIn('reader@k19.invalid', 'correct horse'), CLnone.passwordSignUp('reader@k19.invalid', 'correct horse', 'https://cover.k19.invalid/'),
+    CLnone.passwordResetStart('reader@k19.invalid', 'https://cover.k19.invalid/'), CLnone.adoptSession('at', 'rt'),
+    CLnone.passwordSet('correct horse'), CLnone.oauthFinish('code-k19')]);
+  t('K19', 'with the vendored client missing every cover call answers off rather than throwing', {
+    reasons: ['off', 'off', 'off', 'off', 'off', 'off']
+  }, { reasons: none.map(function (r) { return r.reason; }) });
+  var gApp = oauthHarness();
+  gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
+  t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
+    clients: 1, opts: null
+  }, { clients: gApp.created.length, opts: gApp.created[0] ? gApp.created[0].opts : 'none' });
+
+  var gUp = oauthHarness();
+  var upNew = await gUp.C.passwordSignUp(' reader@k21.invalid', 'correct horse', 'https://cover.k21.invalid/');
+  t('K21', 'the emailed sign in link is gone: making an account sends the address, the password and the page to confirm back to, and answers confirm when no session comes back', {
+    emailStart: 'undefined', otpCalls: 0, ok: true, confirm: true, email: 'reader@k21.invalid', password: 'correct horse', emailRedirectTo: 'https://cover.k21.invalid/'
+  }, {
+    emailStart: typeof gUp.C.emailStart, otpCalls: gUp.otp.length + gOn.otp.length, ok: upNew.ok, confirm: !!upNew.confirm,
+    email: gUp.up[0] && gUp.up[0].email, password: gUp.up[0] && gUp.up[0].password, emailRedirectTo: gUp.up[0] && gUp.up[0].options.emailRedirectTo
+  });
+  var refusals = {};
+  var cases = [
+    ['wrong', { status: 400, code: 'invalid_credentials', message: 'Invalid login credentials' }],
+    ['unconfirmed', { status: 400, code: 'email_not_confirmed', message: 'Email not confirmed' }],
+    ['rate', { status: 429, code: 'over_request_rate_limit', message: 'Request rate limit reached' }],
+    ['offline', { name: 'AuthRetryableFetchError', message: 'Failed to fetch' }],
+    ['oldWrong', { status: 400, message: 'Invalid login credentials' }]
+  ];
+  for (var ci = 0; ci < cases.length; ci++) {
+    var gc = oauthHarness({ pwError: cases[ci][1] });
+    refusals[cases[ci][0]] = (await gc.C.passwordSignIn('reader@k22.invalid', 'correct horse')).reason;
+  }
+  refusals.weak = (await oauthHarness({ upError: { status: 422, code: 'weak_password', message: 'Password should contain at least one character of each' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason;
+  refusals.closed = (await oauthHarness({ upError: { status: 422, code: 'signup_disabled', message: 'Signups not allowed for this instance' } }).C.passwordSignUp('reader@k22.invalid', 'correct horse', 'https://cover.k22.invalid/')).reason;
+  refusals.same = (await oauthHarness({ updError: { status: 422, code: 'same_password', message: 'New password should be different from the old password.' } }).C.passwordSet('correct horse')).reason;
+  refusals.mailRate = (await oauthHarness({ resetError: { status: 429, code: 'over_email_send_rate_limit', message: 'email rate limit exceeded' } }).C.passwordResetStart('reader@k22.invalid', 'https://cover.k22.invalid/')).reason;
+  var thrower = loadIsolatedCloud({ createClient: function () { return { auth: { signInWithPassword: function () { throw new Error('Failed to fetch'); } } }; } });
+  refusals.thrown = (await thrower.passwordSignIn('reader@k22.invalid', 'correct horse')).reason;
+  t('K22', 'every refusal comes back as a reason the cover can say, by the code where there is one and the message where there is not, and the same password is not read as a weak one', {
+    wrong: 'wrong', unconfirmed: 'unconfirmed', rate: 'rate', offline: 'offline', oldWrong: 'wrong', weak: 'weak', closed: 'closed', same: 'same', mailRate: 'rate', thrown: 'offline'
+  }, refusals);
+  var gBad = oauthHarness();
+  var bad = await Promise.all([
+    gBad.C.passwordSignIn('not an address', 'correct horse'), gBad.C.passwordSignUp('not an address', 'correct horse', 'x'),
+    gBad.C.passwordResetStart('not an address', 'x'), gBad.C.passwordSignIn('reader@k23.invalid', ''),
+    gBad.C.passwordSignUp('reader@k23.invalid', 'seven77', 'x'), gBad.C.passwordSet('seven77')]);
+  t('K23', 'an address that is not one, an empty password, and a new password under eight characters are refused before anything is sent', {
+    reasons: ['invalid', 'invalid', 'invalid', 'nopassword', 'short', 'short'], calls: 0
+  }, { reasons: bad.map(function (r) { return r.reason; }), calls: gBad.pw.length + gBad.up.length + gBad.reset.length + gBad.upd.length });
+
+  /* ---- K24-K25: the newsletter choice rides on the sign up as user metadata,
+     both ways, a sign in carries nothing, and a caller that does not ask
+     records nothing. */
+  var gNewsIn = oauthHarness(), gNewsOut = oauthHarness();
+  await gNewsIn.C.passwordSignUp('reader@k24.invalid', 'correct horse', 'https://cover.k24.invalid/', { newsletter: true });
+  await gNewsOut.C.passwordSignUp('reader@k24.invalid', 'correct horse', 'https://cover.k24.invalid/', { newsletter: false });
+  var dIn = gNewsIn.up[0] && gNewsIn.up[0].options.data, dOut = gNewsOut.up[0] && gNewsOut.up[0].options.data;
+  t('K24', 'the newsletter box is sent with the sign up as user metadata, ticked and unticked alike, with where and when it was decided, and a sign in carries no options at all', {
+    inChoice: true, outChoice: false, source: 'cover-signup', dated: true, redirectKept: 'https://cover.k24.invalid/', signInKeys: ['email', 'password']
+  }, {
+    inChoice: dIn ? dIn.newsletter : 'none', outChoice: dOut ? dOut.newsletter : 'none', source: dIn ? dIn.newsletter_source : 'none',
+    dated: !!(dIn && !isNaN(Date.parse(dIn.newsletter_decided_at))), redirectKept: gNewsIn.up[0] && gNewsIn.up[0].options.emailRedirectTo,
+    signInKeys: gOn.pw[0] ? Object.keys(gOn.pw[0]).sort() : 'none'
+  });
+  t('K25', 'a sign up that is not asked about the newsletter records nothing about it', {
+    data: 'none'
+  }, { data: gUp.up[0] && gUp.up[0].options.data ? 'present' : 'none' });
+  /* ---- K25b: where a sign up came from rides along as signup_from, cleaned
+     again in the module, on email and phone sign ups alike; with no tags it
+     records nothing. (owner, 14 October 2026) */
+  var gFrom = oauthHarness(), gFromPh = oauthHarness(), gFromBad = oauthHarness();
+  await gFrom.C.passwordSignUp('reader@k25b.invalid', 'correct horse', 'https://cover.k25b.invalid/', { newsletter: true, from: { source: 'meta', medium: 'paid', campaign: 'launch', content: 'Carousel' } });
+  await gFromPh.C.passwordSignUp('+15551234567', 'correct horse', 'https://cover.k25b.invalid/', { from: { source: 'meta', content: 'reel' } });
+  await gFromBad.C.passwordSignUp('reader@k25b.invalid', 'correct horse', 'https://cover.k25b.invalid/', { from: { source: '<script>', name: 'Jane Doe', content: 'x'.repeat(90) } });
+  var fE = gFrom.up[0] && gFrom.up[0].options && gFrom.up[0].options.data, fP = gFromPh.up[0] && gFromPh.up[0].options && gFromPh.up[0].options.data, fB = gFromBad.up[0] && gFromBad.up[0].options && gFromBad.up[0].options.data;
+  t('K25b', 'the ad a sign up came from is saved as signup_from beside the newsletter answer, on phone sign ups too, cleaned to four known keys of short plain words', {
+    email: { source: 'meta', medium: 'paid', campaign: 'launch', content: 'carousel' }, newsletterKept: true, phone: { source: 'meta', content: 'reel' },
+    cleaned: { source: 'script', content: 40, keys: ['content', 'source'] }
+  }, {
+    email: fE ? fE.signup_from : 'none', newsletterKept: !!(fE && fE.newsletter === true), phone: fP ? fP.signup_from : 'none',
+    cleaned: fB && fB.signup_from ? { source: fB.signup_from.source, content: (fB.signup_from.content || '').length, keys: Object.keys(fB.signup_from).sort() } : 'none'
+  });
+  var gHas = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [] }, session: null } });
+  var upHas = await gHas.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
+  var gAuto = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [{ id: 'i1' }] }, session: { user: { email: 'reader@k35.invalid' } } } });
+  var upAuto = await gAuto.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
+  t('K35', 'an address that already has an account (a user with no identities) is reported as exists rather than told to check an email that will not come, and a project with confirmation off signs in at once', {
+    exists: { ok: false, reason: 'exists' }, auto: { ok: true, signedIn: true, confirm: false }
+  }, {
+    exists: { ok: upHas.ok, reason: upHas.reason }, auto: { ok: upAuto.ok, signedIn: !!upAuto.signedIn, confirm: !!upAuto.confirm }
+  });
+  var gRec = oauthHarness();
+  var resetOk = await gRec.C.passwordResetStart(' reader@k36.invalid ', 'https://cover.k36.invalid/');
+  var adopted = await gRec.C.adoptSession('at-k36', 'rt-k36');
+  var saved = await gRec.C.passwordSet('a new one, long');
+  t('K36', 'a new password: the reset email returns to the page that asked, the tokens it brings are handed to the server to check, the address named is the server\'s, and the password is set on that session', {
+    reset: true, resetTo: { email: 'reader@k36.invalid', redirectTo: 'https://cover.k36.invalid/' },
+    adopted: { ok: true, email: 'server@k36.invalid' }, tokens: [{ access_token: 'at-k36', refresh_token: 'rt-k36' }],
+    saved: true, updates: [{ password: 'a new one, long' }], clients: 1
+  }, {
+    reset: resetOk.ok, resetTo: gRec.reset[0] && { email: gRec.reset[0].email, redirectTo: gRec.reset[0].opts.redirectTo },
+    adopted: { ok: adopted.ok, email: adopted.email }, tokens: gRec.set, saved: saved.ok, updates: gRec.upd, clients: gRec.created.length
+  });
+  var gHalf = oauthHarness(), gExp = oauthHarness({ setError: { status: 403, code: 'session_expired', message: 'Session from session_id claim in JWT does not exist' } });
+  var half = await gHalf.C.adoptSession('at-only', '');
+  var expired = await gExp.C.adoptSession('at-k37', 'rt-k37');
+  t('K37', 'a hash missing a token is refused without asking the server, and tokens the server refuses sign nobody in', {
+    half: 'error', halfCalls: 0, expired: { ok: false, reason: 'error' }
+  }, { half: half.reason, halfCalls: gHalf.set.length, expired: { ok: expired.ok, reason: expired.reason } });
+
+  /* ---- K38-K45: remember me and the phone, the owner's request of 30
+     September 2026. Remember me keeps the login and the session and never the
+     password; a phone signs in, signs up by a texted code, and recovers a
+     password by one, without ever telling anybody whether a number has an
+     account; and a signed in reader adds a phone in the app. */
+  function jarStore() {
+    var m = {};
+    return { m: m, getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } };
+  }
+  function cookieDoc(initial) {
+    var jar = {};
+    String(initial || '').split(/;\s*/).forEach(function (c) { var i = c.indexOf('='); if (i > 0) jar[c.slice(0, i)] = c.slice(i + 1); });
+    var d = {};
+    Object.defineProperty(d, 'cookie', {
+      get: function () { return Object.keys(jar).map(function (k) { return k + '=' + jar[k]; }).join('; '); },
+      set: function (v) { var nv = String(v).split(';')[0], i = nv.indexOf('='); jar[nv.slice(0, i).trim()] = nv.slice(i + 1); }
+    });
+    return d;
+  }
+  var cloudSrc = fs.readFileSync(path.join(repo, 'app', 'incommon-cloud.js'), 'utf8');
+  var coverSrc = fs.readFileSync(path.join(repo, 'app', 'cover.html'), 'utf8');
+  var projUrl = (cloudSrc.match(/PROJECT_URL = '([^']+)'/) || [])[1] || '';
+  var sessKey = 'sb-' + projUrl.replace(/^https?:\/\//, '').split('.')[0] + '-auth-token';
+  var cloudVer = (cloudSrc.match(/VERSION = '([^']+)'/) || [])[1];
+  t('K38', 'the cover reads remember me and the session by the same names the module writes them, the session key being the one supabase-js derives from the project, and it loads this VERSION of the module', {
+    remember: true, ephemeral: true, cookie: true, session: true, version: true
+  }, {
+    remember: /REMEMBER_KEY = 'incommon\.signin\.remember'/.test(cloudSrc) && coverSrc.indexOf("'incommon.signin.remember'") !== -1,
+    ephemeral: /EPHEMERAL_KEY = 'incommon\.signin\.ephemeral'/.test(cloudSrc) && coverSrc.indexOf("'incommon.signin.ephemeral'") !== -1,
+    cookie: /LIVE_COOKIE = 'incommon_signin_live'/.test(cloudSrc) && coverSrc.indexOf("'incommon_signin_live'") !== -1,
+    session: sessKey === 'sb-lkzcybzhjjxdqetwwdrx-auth-token' && coverSrc.indexOf("'" + sessKey + "'") !== -1,
+    version: coverSrc.indexOf("./incommon-cloud.js?v=" + cloudVer + "'") !== -1
+  });
+
+  var gPh = oauthHarness();
+  var norm = {};
+  ['(555) 123-4567', '555.123.4567', '+44 20 7946 0958', '0044 20 7946 0958', '1 555 123 4567', '12345', '555 1234', 'call me', 'reader@k39.invalid', '+0 555 123 4567']
+    .forEach(function (x) { norm[x] = gPh.C.normPhone(x); });
+  var phIn = await gPh.C.passwordSignIn(' (555) 123-4567 ', 'correct horse');
+  t('K39', 'a phone is a login: a US number written any usual way becomes E.164, any other needs its country code, a number that is not one is refused, and signing in by phone sends the number and never an address', {
+    norm: { '(555) 123-4567': '+15551234567', '555.123.4567': '+15551234567', '+44 20 7946 0958': '+442079460958', '0044 20 7946 0958': '+442079460958',
+      '1 555 123 4567': '+15551234567', '12345': null, '555 1234': null, 'call me': null, 'reader@k39.invalid': null, '+0 555 123 4567': null },
+    sent: { phone: '+15551234567', password: 'correct horse' }, ok: true, phone: '+15551234567', email: null
+  }, { norm: norm, sent: gPh.pw[0] || null, ok: phIn.ok, phone: phIn.phone, email: phIn.email });
+
+  var gPu = oauthHarness({ verifyEmail: '' });
+  var puStart = await gPu.C.passwordSignUp('+44 20 7946 0958', 'correct horse', 'https://cover.k40.invalid/', { newsletter: true });
+  var puBad = await gPu.C.phoneCodeCheck('+442079460958', 'abc');
+  var puDone = await gPu.C.phoneCodeCheck('+442079460958', ' 123 456 ');
+  t('K40', 'a sign up by phone sends the number and the password with no newsletter answer (the list is read by email), is told to wait for a code, and the code signs in; a code that is not digits is refused before anything is sent', {
+    sent: { phone: '+442079460958', password: 'correct horse' }, start: { ok: true, confirm: true, via: 'phone', phone: '+442079460958' },
+    bad: 'badCode', verified: [{ phone: '+442079460958', token: '123456', type: 'sms' }], done: { ok: true, phone: '+442079460958' }
+  }, {
+    sent: gPu.up[0] || null, start: { ok: puStart.ok, confirm: !!puStart.confirm, via: puStart.via, phone: puStart.phone },
+    bad: puBad.reason, verified: gPu.verify, done: { ok: puDone.ok, phone: puDone.phone }
+  });
+
+  var gPr = oauthHarness(), gPrNone = oauthHarness({ otpError: { status: 422, code: 'otp_disabled', message: 'Signups not allowed for otp' } });
+  var prHas = await gPr.C.passwordResetStart('555-123-4567', 'https://cover.k41.invalid/');
+  var prNone = await gPrNone.C.passwordResetStart('555-123-4567', 'https://cover.k41.invalid/');
+  var prAgain = await gPr.C.phoneCodeResend('+15551234567', 'recover');
+  var prUp = await gPr.C.phoneCodeResend('+15551234567', 'signup');
+  t('K41', 'a new password by phone is a code by text that never makes an account, a number with no account is answered exactly as one with an account, and another code is asked for the reason the first was', {
+    has: { ok: true, via: 'phone', phone: '+15551234567' }, none: { ok: true, via: 'phone', phone: '+15551234567' },
+    otp: [{ phone: '+15551234567', options: { shouldCreateUser: false } }, { phone: '+15551234567', options: { shouldCreateUser: false } }],
+    emails: 0, again: true, up: true, resent: [{ type: 'sms', phone: '+15551234567' }]
+  }, {
+    has: { ok: prHas.ok, via: prHas.via, phone: prHas.phone }, none: { ok: prNone.ok, via: prNone.via, phone: prNone.phone },
+    otp: gPr.otp, emails: gPr.reset.length + gPrNone.reset.length, again: prAgain.ok, up: prUp.ok, resent: gPr.resend
+  });
+
+  var phoneRefusals = {};
+  var phoneCases = [
+    ['phoneOff', 'pwError', { status: 400, code: 'phone_provider_disabled', message: 'Phone logins are disabled' }],
+    ['phoneUnconfirmed', 'pwError', { status: 400, code: 'phone_not_confirmed', message: 'Phone not confirmed' }],
+    ['smsFailed', 'upError', { status: 500, code: 'sms_send_failed', message: 'Error sending confirmation sms' }],
+    ['phoneTaken', 'upError', { status: 422, code: 'phone_exists', message: 'Phone number has already been registered' }],
+    ['badCode', 'verifyError', { status: 403, code: 'otp_expired', message: 'Token has expired or is invalid' }],
+    ['oldBadCode', 'verifyError', { status: 403, message: 'Token has expired or is invalid' }],
+    ['invalid', 'upError', { status: 400, code: 'validation_failed', message: 'Invalid phone number format (E.164 required)' }]
+  ];
+  for (var pci = 0; pci < phoneCases.length; pci++) {
+    var o = {}; o[phoneCases[pci][1]] = phoneCases[pci][2];
+    var gpc = oauthHarness(o), rr;
+    if (phoneCases[pci][1] === 'pwError') rr = await gpc.C.passwordSignIn('+15551234567', 'correct horse');
+    else if (phoneCases[pci][1] === 'upError') rr = await gpc.C.passwordSignUp('+15551234567', 'correct horse', 'x');
+    else rr = await gpc.C.phoneCodeCheck('+15551234567', '123456');
+    phoneRefusals[phoneCases[pci][0]] = rr.reason;
+  }
+  t('K42', 'every refusal a phone can meet comes back as a reason the cover can say', {
+    phoneOff: 'phoneOff', phoneUnconfirmed: 'phoneUnconfirmed', smsFailed: 'smsFailed', phoneTaken: 'phoneTaken', badCode: 'badCode', oldBadCode: 'badCode', invalid: 'invalid'
+  }, phoneRefusals);
+
+  var addCalls = [];
+  var addClient = { auth: {
+    updateUser: function (u) { addCalls.push({ update: u }); return Promise.resolve({ data: { user: {} }, error: null }); },
+    verifyOtp: function (a) { addCalls.push({ verify: a }); return Promise.resolve({ data: { user: { email: 'reader@k43.invalid', phone: a.phone.slice(1) } }, error: null }); }
+  } };
+  var CP = loadIsolatedCloud({ createClient: function () { return {}; } });
+  CP._setClientForTests(addClient, null);
+  var addOut = await CP.phoneAddStart('555 123 4567');
+  CP._setClientForTests(addClient, { user: { id: 'u43', email: 'reader@k43.invalid' } });
+  var addStart = await CP.phoneAddStart('(555) 123-4567');
+  var addBad = await CP.phoneAddVerify('+15551234567', '');
+  var addDone = await CP.phoneAddVerify('+15551234567', '654321');
+  t('K43', 'a phone is added only to an account that is signed in: the number is sent to the account, the code confirms it as a phone change, and the status names it at once', {
+    out: 'signedOut', start: { ok: true, phone: '+15551234567' }, bad: 'badCode', done: { ok: true, phone: '+15551234567' },
+    calls: [{ update: { phone: '+15551234567' } }, { verify: { phone: '+15551234567', token: '654321', type: 'phone_change' } }], status: '+15551234567'
+  }, {
+    out: addOut.reason, start: { ok: addStart.ok, phone: addStart.phone }, bad: addBad.reason, done: { ok: addDone.ok, phone: addDone.phone },
+    calls: addCalls, status: CP.status().phone
+  });
+
+  var remStore = jarStore(), remDoc = cookieDoc('');
+  var gRem = oauthHarness({ extra: { localStorage: remStore, document: remDoc } });
+  var remDefault = gRem.C.rememberGet();
+  await gRem.C.passwordSignIn('reader@k44.invalid', 'a secret, long');
+  gRem.C.rememberSet(true, ' reader@k44.invalid ');
+  var remOn = gRem.C.rememberGet(), markOn = remStore.getItem('incommon.signin.ephemeral');
+  gRem.C.rememberSet(false, 'reader@k44.invalid');
+  var remOff = gRem.C.rememberGet();
+  var anySecret = Object.keys(remStore.m).some(function (k) { return remStore.m[k].indexOf('a secret, long') !== -1; });
+  t('K44', 'remember me keeps the login when ticked and forgets it when not, starts ticked, marks an unremembered sign in with a browser session cookie, and never keeps the password', {
+    fresh: { on: true, login: null }, on: { on: true, login: 'reader@k44.invalid' }, markOn: null,
+    off: { on: false, login: null }, markOff: '1', cookie: true, secret: false
+  }, {
+    fresh: remDefault, on: remOn, markOn: markOn, off: remOff, markOff: remStore.getItem('incommon.signin.ephemeral'),
+    cookie: /(^|; )incommon_signin_live=1(;|$)/.test(remDoc.cookie), secret: anySecret
+  });
+
+  function sweepCase(mark, cookie) {
+    var st = jarStore();
+    st.setItem(sessKey, '{"refresh_token":"rt"}');
+    if (mark) st.setItem('incommon.signin.ephemeral', '1');
+    var seen = null;
+    var Cx = loadIsolatedCloud({ createClient: function () { seen = st.getItem(sessKey); return initClient; } }, null, { document: cookieDoc(cookie ? 'incommon_signin_live=1' : 'other=2') });
+    Cx.init({ url: projUrl, anonKey: 'k45-fake-anon', core: {}, pm: pmG, storage: st });
+    return { seenByClient: !!seen, mark: st.getItem('incommon.signin.ephemeral') };
+  }
+  t('K45', 'an unremembered session ends with the browser session: with the mark and no cookie init() clears it before the client reads it, and a live cookie or a remembered sign in keeps it', {
+    closed: { seenByClient: false, mark: null }, live: { seenByClient: true, mark: '1' }, remembered: { seenByClient: true, mark: null }
+  }, { closed: sweepCase(true, false), live: sweepCase(true, true), remembered: sweepCase(false, false) });
+
+  /* ---- K26-K29: the Oracle is asked through this module, with a session,
+     and every failure comes back as a reason rather than a throw. */
+  function oracleClient(respond) {
+    var calls = [];
+    return { calls: calls, client: { functions: { invoke: function (name, opts) {
+      calls.push({ name: name, body: opts && opts.body });
+      return Promise.resolve(respond(name, opts));
+    } } } };
+  }
+  function httpErr(status, code) {
+    return { name: 'FunctionsHttpError', message: 'Edge Function returned a non-2xx status code',
+      context: { status: status, json: function () { return Promise.resolve(code ? { code: code } : {}); } } };
+  }
+  var CO = loadIsolatedCloud({ createClient: function () { return {}; } });
+  var ocOut = oracleClient(function () { return { data: { reading: { title: 'x' } }, error: null }; });
+  CO._setClientForTests(ocOut.client, null);
+  var rOut = await CO.oracleRead({ period: 'daily' });
+  t('K26', 'the Oracle is not asked without a session, and says signed out rather than calling the function', {
+    ok: false, reason: 'signedOut', calls: 0
+  }, { ok: rOut.ok, reason: rOut.reason, calls: ocOut.calls.length });
+  var ocIn = oracleClient(function () { return { data: { reading: { title: 'The Tide Turns' }, cached: true, periodKey: '2026-09-29', label: 'Tuesday' }, error: null }; });
+  CO._setClientForTests(ocIn.client, { user: { id: 'u1' } });
+  var rIn = await CO.oracleRead({ period: 'daily', depth: 'standard', localDate: '2026-09-29', dossier: 'D' });
+  t('K27', 'with a session the oracle function is invoked with the request as its body, and the reading comes back', {
+    ok: true, fn: 'oracle', period: 'daily', title: 'The Tide Turns', cached: true, periodKey: '2026-09-29'
+  }, { ok: rIn.ok, fn: ocIn.calls[0] && ocIn.calls[0].name, period: ocIn.calls[0] && ocIn.calls[0].body.period,
+    title: rIn.reading && rIn.reading.title, cached: rIn.cached, periodKey: rIn.periodKey });
+  var reasons = {};
+  var cases = [['404', httpErr(404)], ['429', httpErr(429, 'LIMIT')], ['429r', httpErr(429, 'RATE_LIMITED')], ['503', httpErr(503, 'OUT_OF_CREDITS')], ['401', httpErr(401)], ['409', httpErr(409, 'PENDING')], ['500', httpErr(500, 'MODEL')], ['504', httpErr(504, 'TIMEOUT')]];
+  for (var ci = 0; ci < cases.length; ci++) {
+    var ec = cases[ci][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: ec }; }).client, { user: { id: 'u1' } });
+    reasons[cases[ci][0]] = (await CO.oracleRead({ period: 'weekly' })).reason;
+  }
+  t('K28', 'each way the function can fail is a reason the page can say in words', {
+    '404': 'notSetUp', '429': 'limit', '429r': 'busy', '503': 'silent', '401': 'signedOut', '409': 'pending', '500': 'error', '504': 'timeout'
+  }, reasons);
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var rPrem = await CO.oracleRead({ period: 'daily', depth: 'deep' });
+  t('K28b', 'an in-depth reading refused for want of Luminary comes back as premium, so the page can show the gate', {
+    ok: false, reason: 'premium'
+  }, { ok: rPrem.ok, reason: rPrem.reason });
+  var two = oracleClient(function (n, o) {
+    return o.body.part === 'b'
+      ? { data: { reading: { title: 'T', overview: 'O', chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+  });
+  CO._setClientForTests(two.client, { user: { id: 'u1' } });
+  var rTwo = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var firstSeen = [];
+  var twoCb = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: { reading: { title: 'T', chapters: [{ heading: 'h', body: 'b' }] } }, error: null } : { data: { reading: { title: 'T' } }, error: null }; });
+  CO._setClientForTests(twoCb.client, { user: { id: 'u1' } });
+  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D', onFirst: function (f) { firstSeen.push({ chapters: !!(f.reading && f.reading.chapters), callsSoFar: twoCb.calls.length }); } });
+  var cbBodyClean = twoCb.calls.every(function (c) { return !('onFirst' in c.body); });
+  var one = oracleClient(function () { return { data: { reading: { title: 'T', chapters: [] } }, error: null }; });
+  CO._setClientForTests(one.client, { user: { id: 'u1' } });
+  await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var halfFail = oracleClient(function (n, o) { return o.body.part === 'b' ? { data: null, error: httpErr(504, 'TIMEOUT') } : { data: { reading: { title: 'T' } }, error: null }; });
+  CO._setClientForTests(halfFail.client, { user: { id: 'u1' } });
+  var rHalf = await CO.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  t('K29c', 'the first half is handed to the page before the second is asked for, without the callback in the request body', {
+    seen: [{ chapters: false, callsSoFar: 1 }], bodyClean: true
+  }, { seen: firstSeen, bodyClean: cbBodyClean });
+  t('K29b', 'an in-depth reading is asked in two calls, a then b, and comes back joined; a server that already wrote the whole reading is asked once; a failed second half is a reason, not a partial reading', {
+    parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
+  }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
+    legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
+  CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
+  var rThrow = await CO.oracleRead({ period: 'monthly' });
+  t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {
+    ok: false, reason: 'offline'
+  }, { ok: rThrow.ok, reason: rThrow.reason });
+
+  /* ---- K30-K34: Codex Luminary is asked through this module as well, with a
+     session, and every failure is a reason. */
+  var bOut = oracleClient(function () { return { data: { status: { isPremium: true } }, error: null }; });
+  CO._setClientForTests(bOut.client, null);
+  var bNo = await CO.billingStatus();
+  t('K30', 'billing is not asked without a session', { ok: false, reason: 'signedOut', calls: 0 }, { ok: bNo.ok, reason: bNo.reason, calls: bOut.calls.length });
+  var bIn = oracleClient(function (name, opts) {
+    var a = opts.body.action;
+    if (a === 'status') return { data: { status: { isPremium: true, plan: 'annual', billingConfigured: true } }, error: null };
+    return { data: { url: 'https://stripe.k31.invalid/' + a }, error: null };
+  });
+  CO._setClientForTests(bIn.client, { user: { id: 'u1' } });
+  var st1 = await CO.billingStatus({ sync: true }), st2 = await CO.billingStatus();
+  t('K31', 'the status is asked of the billing function, with a sync only when one is asked for', {
+    fn: 'billing', action: 'status', sync1: true, sync2: false, premium: true, plan: 'annual'
+  }, { fn: bIn.calls[0].name, action: bIn.calls[0].body.action, sync1: bIn.calls[0].body.sync, sync2: bIn.calls[1].body.sync,
+    premium: st1.status && st1.status.isPremium, plan: st2.status && st2.status.plan });
+  /* The subscription checkout was retired on 18 October 2026: the module no
+     longer offers one, and Luminary is the one time unlock (K34d). */
+  var co1 = await CO.billingUnlock('https://app.k31.invalid/app.html?lumfrom=deep#/oracle');
+  var po1 = await CO.billingPortal('https://app.k31.invalid/app.html#/oracle');
+  t('K32', 'the unlock and the portal each come back as the address Stripe gave and send the return address, and there is no subscription checkout any more', {
+    unlock: 'https://stripe.k31.invalid/unlock', portal: 'https://stripe.k31.invalid/portal', returnTo: 'https://app.k31.invalid/app.html?lumfrom=deep#/oracle', noCheckout: true
+  }, { unlock: co1.url, portal: po1.url, returnTo: bIn.calls[2].body.returnTo, noCheckout: typeof CO.billingCheckout === 'undefined' });
+  var bReasons = {};
+  var bCases = [['404', httpErr(404)], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['already', httpErr(409, 'ALREADY')], ['noacct', httpErr(404, 'NO_ACCOUNT')], ['401', httpErr(401, 'SIGNED_OUT')], ['500', httpErr(502, 'STRIPE')]];
+  for (var bi = 0; bi < bCases.length; bi++) {
+    var be = bCases[bi][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: be }; }).client, { user: { id: 'u1' } });
+    bReasons[bCases[bi][0]] = (await CO.billingUnlock('https://x.invalid/')).reason;
+  }
+  t('K33', 'each way billing can fail is a reason, and a missing account is told apart from a missing function', {
+    '404': 'notSetUp', nc: 'notConfigured', already: 'already', noacct: 'noAccount', '401': 'signedOut', '500': 'error'
+  }, bReasons);
+  CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
+  var bThrow = await CO.billingPortal('https://x.invalid/');
+  t('K34', 'a thrown billing call comes back as offline', { ok: false, reason: 'offline' }, { ok: bThrow.ok, reason: bThrow.reason });
+
+  /* K56: deleting the account from inside the app (docs/ACCOUNT-DELETION.md).
+     The call is never made without a session, carries the typed word to the
+     account function, and on the server's yes forgets the account on this
+     device: the sync map, the outbox and the remembered login go, and the
+     session is signed out locally, because the map would otherwise mark rows
+     as uploaded to an account that no longer exists. Each refusal is a reason,
+     and a Stripe failure is told apart, because then nothing was deleted. */
+  var adMem = { incommon_cloud_map_v2: '{"hashes":{"profiles":{"p1":"h"}}}', incommon_cloud_outbox_v2: '[{"op":"x"}]',
+    'incommon.signin.remember': 'reader@k56.invalid', 'incommon.p.p1.birthName': 'Kept On Device' };
+  var adStore = { getItem: function (k) { return k in adMem ? adMem[k] : null; }, setItem: function (k, v) { adMem[k] = String(v); }, removeItem: function (k) { delete adMem[k]; } };
+  var AD = loadIsolatedCloud({ createClient: function () { return {}; } }, null, { localStorage: adStore });
+  var adCalls = [], adSignOut = [];
+  var adClient = function (answer) {
+    return { functions: { invoke: function (name, opts) { adCalls.push({ name: name, body: opts && opts.body }); return Promise.resolve(answer); } },
+      auth: { signOut: function (o) { adSignOut.push(o && o.scope); return Promise.resolve({ error: null }); } } };
+  };
+  AD._setClientForTests(adClient({ data: { deleted: true }, error: null }), null);
+  var adNo = await AD.accountDelete('delete');
+  var adCallsSignedOut = adCalls.length;
+  AD._setClientForTests(adClient({ data: { deleted: true }, error: null }), { user: { id: 'u1' } });
+  var adOk = await AD.accountDelete('delete');
+  var adReasons = {};
+  var adCases = [['stripe', httpErr(502, 'STRIPE')], ['404', httpErr(404)], ['mfa', httpErr(401, 'MFA_REQUIRED')], ['confirm', httpErr(400, 'BAD_REQUEST')], ['500', httpErr(500, 'STORE')]];
+  for (var ai = 0; ai < adCases.length; ai++) {
+    AD._setClientForTests(adClient({ data: null, error: adCases[ai][1] }), { user: { id: 'u1' } });
+    adReasons[adCases[ai][0]] = (await AD.accountDelete('delete')).reason;
+  }
+  t('K56', 'account deletion is not asked without a session, sends the typed word to the account function, forgets the account on this device on success and keeps what the device holds, and names each failure', {
+    signedOut: 'signedOut', callsSignedOut: 0, ok: true, fn: 'account', action: 'delete', confirm: 'delete',
+    mapGone: true, outboxGone: true, rememberGone: true, deviceKept: true, localSignOut: 'local',
+    reasons: { stripe: 'stripe', '404': 'notSetUp', mfa: 'signedOut', confirm: 'confirm', '500': 'error' }
+  }, {
+    signedOut: adNo.reason, callsSignedOut: adCallsSignedOut, ok: !!adOk.ok, fn: adCalls[0] && adCalls[0].name,
+    action: adCalls[0] && adCalls[0].body.action, confirm: adCalls[0] && adCalls[0].body.confirm,
+    mapGone: !('incommon_cloud_map_v2' in adMem), outboxGone: !('incommon_cloud_outbox_v2' in adMem),
+    rememberGone: !('incommon.signin.remember' in adMem), deviceKept: adMem['incommon.p.p1.birthName'] === 'Kept On Device',
+    localSignOut: adSignOut[0], reasons: adReasons
+  });
+
+  /* K70: Log Out ends this device's session and no other. supabase-js signs
+     out globally unless told otherwise, which revoked the account's sessions
+     on every device, so a Log Out on a phone signed the laptop out too. */
+  adSignOut.length = 0;
+  AD._setClientForTests(adClient({ data: null, error: null }), { user: { id: 'u1' } });
+  var soR = await AD.signOut();
+  t('K70', 'Log Out signs out with the local scope, so the account stays signed in on its other devices', { ok: true, scopes: 'local' },
+    { ok: !!(soR && soR.ok), scopes: adSignOut.join(',') });
+
+  /* K57: an account deletion that could not reach RevenueCat is told apart.
+     The app no longer sells anything through the stores (18 October 2026:
+     every add-on is free in the apps), so the store sync went with it; the
+     account function still closes a RevenueCat record when that service is
+     set up, and its failure must still read as its own reason. */
+  AD._setClientForTests(adClient({ data: null, error: httpErr(502, 'REVENUECAT') }), { user: { id: 'u1' } });
+  var stDel = (await AD.accountDelete('delete')).reason;
+  t('K57', 'a deletion that could not reach RevenueCat says so, and the module no longer carries a store sync', {
+    deleteReason: 'revenuecat', noStoreSync: true
+  }, { deleteReason: stDel, noStoreSync: typeof CO.storeSync === 'undefined' });
+
+  /* K34b: the EU and UK hold (docs/LUMINARY-EU-UK.md). The page's country guess
+     travels with the status and the checkout as two capital letters or not at
+     all, and the server's refusal of a country it does not sell to yet comes
+     back as its own reason, so the page can say so rather than "try again". */
+  var bCo = oracleClient(function (name, opts) {
+    return opts.body.action === 'status' ? { data: { status: { isPremium: false } }, error: null } : { data: { url: 'https://stripe.k34b.invalid/' }, error: null };
+  });
+  CO._setClientForTests(bCo.client, { user: { id: 'u1' } });
+  await CO.billingStatus({ country: 'FR' });
+  await CO.billingStatus({ country: 'france' });
+  await CO.billingUnlock('https://x.invalid/', 'GB');
+  await CO.billingUnlock('https://x.invalid/');
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'REGION') }; }).client, { user: { id: 'u1' } });
+  var bRegion = await CO.billingUnlock('https://x.invalid/', 'DE');
+  t('K34b', 'the country guess is sent with the status and the unlock only as two capital letters, and a country not sold to yet comes back as region', {
+    status: 'FR', badDropped: true, checkout: 'GB', noneDropped: true, region: 'region'
+  }, {
+    status: bCo.calls[0].body.country, badDropped: !('country' in bCo.calls[1].body) || bCo.calls[1].body.country === undefined,
+    checkout: bCo.calls[2].body.country, noneDropped: bCo.calls[3].body.country === undefined, region: bRegion.reason
+  });
+
+  /* K34c-K34e: the Cycle Audit, 18 October 2026. Its reading is asked of the
+     Oracle as one call, the period named and no part, and a website reader who
+     has not opened it is refused as premium, which the page reads as the gate.
+     Its unlock is a billing action of its own that carries no amount, because
+     the reader chooses the amount on Stripe's page. A gift needs no account,
+     so it is sent through the functions address with the public key and
+     carries only where to come back to. */
+  var cyOc = oracleClient(function () { return { data: { reading: { title: 'The Long Tide', passages: [] } }, error: null }; });
+  CO._setClientForTests(cyOc.client, { user: { id: 'u1' } });
+  var cyR = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var cyLocked = await CO.oracleRead({ period: 'cycle', depth: 'standard', localDate: '2026-10-18', dossier: 'D' });
+  t('K34c', 'a Cycle Audit is one call to the Oracle naming the period and no part, and a reader who has not opened it is refused as premium', {
+    calls: 1, period: 'cycle', part: false, title: 'The Long Tide', locked: 'premium'
+  }, { calls: cyOc.calls.length, period: cyOc.calls[0] && cyOc.calls[0].body.period, part: !!(cyOc.calls[0] && 'part' in cyOc.calls[0].body),
+    title: cyR.reading && cyR.reading.title, locked: cyLocked.reason });
+  var ulOut = oracleClient(function () { return { data: { url: 'https://stripe.k34d.invalid/unlock' }, error: null }; });
+  CO._setClientForTests(ulOut.client, null);
+  var ulNo = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  CO._setClientForTests(ulOut.client, { user: { id: 'u1' } });
+  var ulOk = await CO.billingUnlock('https://app.k34d.invalid/app.html#/oracle', 'US');
+  var ulBad = await CO.billingUnlock('https://app.k34d.invalid/', 'usa');
+  var ulReasons = {};
+  var ulCases = [['already', httpErr(409, 'ALREADY')], ['region', httpErr(403, 'REGION')], ['nc', httpErr(503, 'NOT_CONFIGURED')], ['404', httpErr(404)]];
+  for (var ui = 0; ui < ulCases.length; ui++) {
+    var ue = ulCases[ui][1];
+    CO._setClientForTests(oracleClient(function () { return { data: null, error: ue }; }).client, { user: { id: 'u1' } });
+    ulReasons[ulCases[ui][0]] = (await CO.billingUnlock('https://x.invalid/', 'FR')).reason;
+  }
+  t('K34d', 'the unlock is not asked without a session, sends the action, the return address and a two letter country and no amount, comes back as the Checkout address, and names already and region', {
+    signedOut: 'signedOut', calls: 2, url: 'https://stripe.k34d.invalid/unlock', keys: ['action', 'country', 'returnTo'], action: 'unlock', badCountryDropped: true,
+    reasons: { already: 'already', region: 'region', nc: 'notConfigured', '404': 'notSetUp' }
+  }, {
+    signedOut: ulNo.reason, calls: ulOut.calls.length, url: ulOk.url, keys: Object.keys(ulOut.calls[0].body).sort(), action: ulOut.calls[0].body.action,
+    badCountryDropped: ulOut.calls[1].body.country === undefined && !!ulBad.ok, reasons: ulReasons
+  });
+  var gSent = [];
+  var gFetch = function (status, b) { return function (url, init) { gSent.push({ url: url, init: init }); return Promise.resolve({ ok: status < 300, status: status, json: function () { return Promise.resolve(b); } }); }; };
+  CO._setClientForTests(null, null);
+  var gOk = await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(200, { url: 'https://stripe.k34e.invalid/gift' }) });
+  var gBody = gSent[0] ? JSON.parse(gSent[0].init.body) : {}, gHdr = gSent[0] ? gSent[0].init.headers : {};
+  var gReasons = {
+    nc: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(503, { code: 'NOT_CONFIGURED' }) })).reason,
+    '404': (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(404, null) })).reason,
+    older: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: gFetch(401, { code: 'SIGNED_OUT' }) })).reason,
+    offline: (await CO.billingSupport('https://incommonspace.com/thanks.html', { fetch: function () { return Promise.reject(new Error('net')); } })).reason
+  };
+  t('K34e', 'a gift is asked of the billing function with nobody signed in, with the public key, carrying only the action and where to come back to, and each failure is a reason', {
+    ok: true, url: 'https://stripe.k34e.invalid/gift', endpoint: true, anon: true, body: { action: 'support', returnTo: 'https://incommonspace.com/thanks.html' },
+    reasons: { nc: 'notConfigured', '404': 'notSetUp', older: 'notSetUp', offline: 'offline' }
+  }, {
+    ok: !!gOk.ok, url: gOk.url, endpoint: !!gSent[0] && /\/functions\/v1\/billing$/.test(gSent[0].url),
+    anon: !!gHdr && gHdr.Authorization === 'Bearer ' + gHdr.apikey && /^eyJ/.test(gHdr.apikey || ''), body: gBody, reasons: gReasons
+  });
+
+  /* K34f: Omni is asked of the Oracle function with the shuffle, the count
+     and the topic and nothing else, and is refused as premium like every
+     add-on. */
+  var omOc = oracleClient(function () { return { data: { reading: { title: 'General \u00b7 Omni \u00b7 9 cards', passages: [{ tag: 'CALCULATED', text: 'x' }] } }, error: null }; });
+  CO._setClientForTests(omOc.client, null);
+  var omNo = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  CO._setClientForTests(omOc.client, { user: { id: 'u1' } });
+  var omOk = await CO.tarotRead({ seed: 7, count: 9, topic: 'general', extra: 'no' });
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(402, 'PREMIUM_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var omLocked = await CO.tarotRead({ seed: 7, count: 9, topic: 'general' });
+  t('K34f', 'Omni is not asked without a session, goes to the oracle function as kind tarot with the seed, count and topic only, and a reader without Luminary is refused as premium', {
+    signedOut: 'signedOut', fn: 'oracle', body: { kind: 'tarot', seed: 7, count: 9, topic: 'general' }, ok: true, locked: 'premium'
+  }, { signedOut: omNo.reason, fn: omOc.calls[0] && omOc.calls[0].name, body: omOc.calls[0] && omOc.calls[0].body, ok: !!omOk.ok, locked: omLocked.reason });
+
+  /* ---- K46-K51: two-step sign in, optional, the owner's request of 11
+     October 2026. A password that passed on an account with an authenticator
+     makes a session at aal1 that still owes its code: the cover asks for it,
+     the app holds that session aside as signed out, and the code lifts it to
+     aal2. Turning it on proves the app holds the secret with a first code,
+     and turning it off asks for a current one. */
+  function jwtOf(claims) {
+    var b = function (o) { return Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+    return b({ alg: 'HS256', typ: 'JWT' }) + '.' + b(claims) + '.sig';
+  }
+  var VER = [{ id: 'f1', factor_type: 'totp', status: 'verified' }];
+  var UNV = [{ id: 'f0', factor_type: 'totp', status: 'unverified' }];
+  var sess = function (factors, aal, extra) {
+    return Object.assign({ access_token: aal === 'bad' ? 'not.a-token!' : aal === 'none' ? '' : jwtOf({ sub: 'u46', aal: aal }),
+      refresh_token: 'r', user: Object.assign({ id: 'u46', email: 'reader@k46.invalid', factors: factors }, extra || {}) });
+  };
+  var owesCases = {
+    nothing: null, noUser: { access_token: jwtOf({ aal: 'aal1' }) }, noFactors: sess(undefined, 'aal1'),
+    unverifiedOnly: sess(UNV, 'aal1'), verifiedAal1: sess(VER, 'aal1'), verifiedAal2: sess(VER, 'aal2'),
+    verifiedNoToken: sess(VER, 'none'), verifiedBadToken: sess(VER, 'bad')
+  };
+  var CM = loadIsolatedCloud({ createClient: function () { return {}; } });
+  var coverOwesSrc = (coverSrc.match(/function owesCode\(st\) \{[\s\S]*?\n  \}/) || [])[0];
+  var coverOwes = coverOwesSrc ? vm.runInNewContext('(' + coverOwesSrc + ')', { atob: function (s) { return Buffer.from(s, 'base64').toString('binary'); }, JSON: JSON, Array: Array, String: String }) : null;
+  /* The third copy: profile-manager.js reads the stored session to choose
+     whose profiles to open, before the cloud module has loaded. */
+  var pmSrcK46 = fs.readFileSync(path.join(repo, 'app', 'profile-manager.js'), 'utf8');
+  var pmOwesSrc = (pmSrcK46.match(/function owesCode\(st\) \{[\s\S]*?\n  \}/) || [])[0];
+  var pmOwes = pmOwesSrc ? vm.runInNewContext('(' + pmOwesSrc + ')', { atob: function (s) { return Buffer.from(s, 'base64').toString('binary'); }, JSON: JSON, Array: Array, String: String }) : null;
+  var modOwes = {}, covOwes = {}, pmOwesOut = {};
+  Object.keys(owesCases).forEach(function (k) { modOwes[k] = CM.owesCode(owesCases[k]); covOwes[k] = coverOwes ? coverOwes(owesCases[k]) : 'missing'; pmOwesOut[k] = pmOwes ? pmOwes(owesCases[k]) : 'missing'; });
+  t('K46', 'a session owes its two-step code exactly when the user has a verified authenticator and the token is not aal2, an unreadable token owes it, and the cover reads stored sessions by the same rule as the module', {
+    module: { nothing: false, noUser: false, noFactors: false, unverifiedOnly: false, verifiedAal1: true, verifiedAal2: false, verifiedNoToken: true, verifiedBadToken: true },
+    coverSame: true, profileManagerSame: true
+  }, { module: modOwes, coverSame: JSON.stringify(modOwes) === JSON.stringify(covOwes), profileManagerSame: JSON.stringify(modOwes) === JSON.stringify(pmOwesOut) });
+
+  /* ---- K58-K68: one account reads the same on every device. Two devices,
+     each the REAL profile-manager.js over its own storage and its own copy of
+     the cloud module, share one in memory database that answers the way
+     PostgREST does: upserts on the named conflict columns, an identity id for
+     the child tables, timestamps returned as +00:00, and pages by range. ---- */
+  function memDB() {
+    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [] },
+      seq: 1, failSelect: null, failDelete: false, maxRows: 1000 };
+    var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    var pgTime = function (r) {
+      ['ts', 'created_at', 'enabled_at'].forEach(function (k) { if (typeof r[k] === 'string') r[k] = r[k].replace(/Z$/, '+00:00'); });
+      return r;
+    };
+    db.client = { from: function (table) {
+      var q = { _f: [], _op: 'select' };
+      q.select = function () { q._op = 'select'; return q; };
+      q.insert = function (row) { q._op = 'insert'; q._row = row; return q; };
+      q.upsert = function (row, o) { q._op = 'upsert'; q._row = row; q._on = String((o && o.onConflict) || 'id').split(','); return q; };
+      q.delete = function () { q._op = 'delete'; return q; };
+      q.eq = function (c, v) { q._f.push(function (r) { return r[c] === v; }); return q; };
+      q.in = function (c, vs) { q._f.push(function (r) { return vs.indexOf(r[c]) !== -1; }); return q; };
+      q.order = function (c) { q._order = c; return q; };
+      q.range = function (a, b) { q._range = [a, b]; return q; };
+      q.then = function (res, rej) {
+        var rows = db.t[table], out = { data: null, error: null };
+        var match = function (x) { return q._f.every(function (f) { return f(x); }); };
+        if (q._op === 'select') {
+          if (db.failSelect === table) out.error = { message: 'fake read failure' };
+          else {
+            var r = rows.filter(match).map(function (x) { return pgTime(clone(x)); });
+            if (q._order) r.sort(function (a, b) { return a[q._order] < b[q._order] ? -1 : a[q._order] > b[q._order] ? 1 : 0; });
+            if (q._range) r = r.slice(q._range[0], q._range[1] + 1);
+            out.data = r.slice(0, db.maxRows);  // PostgREST's max-rows, whatever was asked for
+          }
+        } else if (q._op === 'insert') {
+          if (rows.some(function (x) { return x.id === q._row.id; })) out.error = { code: '23505', message: 'duplicate key value' };
+          else rows.push(clone(q._row));
+        } else if (q._op === 'upsert' && table === 'memories' && db.memoryTypes && db.memoryTypes.indexOf(q._row.memory_type) === -1) {
+          /* The live table's check constraint, as the server words it. */
+          out.error = { code: '23514', message: 'new row for relation "memories" violates check constraint "memories_memory_type_check"' };
+        } else if (q._op === 'upsert') {
+          var row = clone(q._row);
+          var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
+          if (hit) Object.assign(hit, row);
+          else { if (row.id === undefined) row.id = db.seq++; rows.push(row); }
+        } else if (q._op === 'delete') {
+          if (db.failDelete) out.error = { message: 'Failed to fetch' };
+          else db.t[table] = rows.filter(function (x) { return !match(x); });
+        }
+        return Promise.resolve(out).then(res, rej);
+      };
+      return q;
+    } };
+    return db;
+  }
+  /* These rows read expected first, then actual. */
+  var ts = function (id, desc, expected, actual) { t(id, desc, actual, expected); };
+  var SYNC_SB = 'sb-lkzcybzhjjxdqetwwdrx-auth-token', SU = 'cccccccc-0000-4000-8000-00000000000c';
+  function syncDevice(db, userId, opts) {
+    opts = opts || {};
+    var store = (function () {
+      var m = {};
+      return { _m: m, get length() { return Object.keys(m).length; }, key: function (i) { return Object.keys(m)[i] || null; },
+        getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } };
+    })();
+    store.setItem(SYNC_SB, JSON.stringify({ access_token: jwtOf({ sub: userId, aal: 'aal1' }), refresh_token: 'r', user: { id: userId } }));
+    var win = {};
+    vm.runInNewContext(pmSrcK46, { window: win, localStorage: store, document: { cookie: '' }, atob: function (x) { return Buffer.from(x, 'base64').toString('binary'); },
+      JSON: JSON, Math: Math, Date: Date, String: String, Array: Array, Object: Object, Error: Error, isNaN: isNaN, parseFloat: parseFloat });
+    var pm = win.ProfileManager;
+    var C = loadIsolatedCloud({ createClient: function () { return {}; } });
+    var dev = { store: store, pm: pm, C: C, pulled: [], placeholders: [] };
+    C._setConfigForTests({ storage: store, pm: pm, core: null,
+      placeholders: function () { return dev.placeholders; }, onPulled: function (r) { dev.pulled.push(r); } });
+    C._setClientForTests(db.client, { user: { id: userId } });
+    /* The module subscribes in init(); the test seam skips init(), so the
+       deletion events are routed into the outbox here the same way. */
+    pm.subscribe(function (name, d) {
+      var o = JSON.parse(store.getItem('incommon_cloud_outbox_v2') || '[]');
+      if (name === 'profile:deleted') o.push({ op: 'del-profile', pid: d.id });
+      else if (name === 'memory:deleted' && d.id) o.push({ op: 'del-memory', pid: d.profileId, id: String(d.id) });
+      else if (name === 'memory:deleted') o.push({ op: 'del-memories', pid: d.profileId, type: d.type || null });
+      else return;
+      store.setItem('incommon_cloud_outbox_v2', JSON.stringify(o));
+    });
+    return dev;
+  }
+  var tl = function (dev, pid) { return JSON.parse(dev.store.getItem('incommon.p.' + pid + '.throughline') || '[]'); };
+  var counts = function (db) { var o = {}; Object.keys(db.t).forEach(function (k) { o[k] = db.t[k].length; }); return o; };
+
+  var sdb = memDB();
+  var devA = syncDevice(sdb, SU);
+  var nate = devA.pm.createProfile({ name: 'Nate', birthDate: '1990-05-01', birthTime: '07:30', birthLocation: '38.9,-77.0' });
+  devA.pm.setConsent('journal', true, nate.id);
+  var j1 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'first entry' } }).id;
+  var j2 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'second entry' } }).id;
+  devA.store.setItem('incommon.p.' + nate.id + '.throughline', JSON.stringify([{ id: 'm1790000000000', date: '2026-09-01', type: 'event', title: 'Moved', manual: true }]));
+  var syncA1 = await devA.C.sync();
+
+  var devB = syncDevice(sdb, SU);
+  var sample = devB.pm.createProfile({ name: 'Default Profile', birthDate: '1992-07-02' });
+  devB.placeholders = [sample.id];
+  var syncB1 = await devB.C.sync();
+  var bProfiles = devB.pm.listProfiles();
+  var bMem = devB.pm.getMemory({ profileId: nate.id }).map(function (m) { return m.content.t; }).sort();
+  ts('K58', 'a second device signing in to the account takes its profiles, journal, consents and Throughline, opens on them, and drops the sample it invented rather than sending it up', {
+    aOk: true, bOk: true, adopted: true, names: ['Nate'], active: nate.id, birthTime: '07:30', lat: 38.9,
+    journal: ['first entry', 'second entry'], journalConsent: true, throughline: ['Moved'], sampleOnServer: false, tlOnServer: 1
+  }, {
+    aOk: syncA1.ok, bOk: syncB1.ok, adopted: syncB1.pull.adopted, names: bProfiles.map(function (p) { return p.name; }),
+    active: devB.pm.activeId(), birthTime: devB.pm.getProfile(nate.id).birthTime, lat: devB.pm._store().profiles[0].birth_lat,
+    journal: bMem, journalConsent: devB.pm.getConsents(nate.id).journal, throughline: tl(devB, nate.id).map(function (e) { return e.title; }),
+    sampleOnServer: sdb.t.profiles.some(function (r) { return r.id === sample.id; }), tlOnServer: sdb.t.throughline_entries.length
+  });
+
+  var before59 = counts(sdb);
+  var a2 = await devA.C.sync(), b2 = await devB.C.sync();
+  ts('K59', 'syncing again on both devices changes nothing anywhere: no duplicate rows reach the server and neither device reports a change', {
+    rows: before59, aChanged: false, bChanged: false, bTl: 1
+  }, { rows: counts(sdb), aChanged: a2.pull.changed, bChanged: b2.pull.changed, bTl: tl(devB, nate.id).length });
+
+  devB.pm.updateProfile(nate.id, { birthTime: '09:15' });
+  await devB.C.sync();
+  var a3 = await devA.C.sync();
+  ts('K60', 'a birth time corrected on one device reaches the other, which had not touched the profile, and its charts are marked for recalculation', {
+    changed: true, updated: 1, birthTime: '09:15'
+  }, { changed: a3.pull.changed, updated: a3.pull.profilesUpdated, birthTime: devA.pm.getProfile(nate.id).birthTime });
+
+  devB.pm.updateProfile(nate.id, { birthTime: '10:00' });
+  await devB.C.sync();
+  devA.pm.updateProfile(nate.id, { name: 'Nathaniel' });
+  await devA.C.sync();
+  var srv61 = sdb.t.profiles.filter(function (r) { return r.id === nate.id; })[0];
+  ts('K61', 'an edit made here that has not gone up yet is not overwritten by the pull; it goes up after it, so the last device to save the profile is what the server holds', {
+    aName: 'Nathaniel', aTime: '09:15', serverName: 'Nathaniel'
+  }, { aName: devA.pm.getProfile(nate.id).name, aTime: devA.pm.getProfile(nate.id).birthTime, serverName: srv61.name });
+
+  devA.pm.deleteMemory({ profileId: nate.id, id: j1 });
+  await devA.C.sync();
+  var serverMem62 = sdb.t.memories.map(function (r) { return r.local_id; });
+  var b62 = await devB.C.sync();
+  ts('K62', 'deleting one journal entry deletes that one row on the server, not the profile\'s whole history, and the other device removes the same entry and keeps the rest', {
+    server: [j2], bRemoved: 1, bLeft: ['second entry']
+  }, { server: serverMem62, bRemoved: b62.pull.memoriesRemoved, bLeft: devB.pm.getMemory({ profileId: nate.id }).map(function (m) { return m.content.t; }) });
+
+  var partner = devA.pm.createProfile({ name: 'Partner', birthDate: '1991-02-03' });
+  await devA.C.sync();
+  await devB.C.sync();
+  var bHadPartner = !!devB.pm.getProfile(partner.id);
+  devB.pm.deleteProfile(partner.id, 'Partner');
+  await devB.C.sync();
+  var a63 = await devA.C.sync();
+  ts('K63', 'a profile added on one device appears on the other, and deleted there it is deleted on the server and then here, with its keys', {
+    bHadPartner: true, onServer: false, aRemoved: 1, aHas: false, aKeysGone: true
+  }, { bHadPartner: bHadPartner, onServer: sdb.t.profiles.some(function (r) { return r.id === partner.id; }), aRemoved: a63.pull.profilesRemoved,
+    aHas: !!devA.pm.getProfile(partner.id), aKeysGone: devA.store.getItem('incommon.consent.' + partner.id) === null });
+
+  devB.pm.setConsent('journal', false, nate.id);
+  await devB.C.sync();
+  await devA.C.sync();
+  ts('K64', 'a consent revoked on one device is revoked on the other: the ledgers merge and the latest event decides', false, devA.pm.getConsents(nate.id).journal);
+
+  /* The reader's record, without the module's own bookkeeping (its cache
+     and outbox move on every pull, applied or not). */
+  var record = function (dev) { var o = {}; Object.keys(dev.store._m).forEach(function (k) { if (!/^incommon_cloud_/.test(k)) o[k] = dev.store._m[k]; }); return JSON.stringify(o); };
+  var snap65 = record(devA);
+  sdb.failSelect = 'memories';
+  var a65 = await devA.C.pull();
+  sdb.failSelect = null;
+  var emptyDb = memDB();
+  devA.C._setClientForTests(emptyDb.client, { user: { id: SU } });
+  var a65b = await devA.C.pull();
+  devA.C._setClientForTests(sdb.client, { user: { id: SU } });
+  ts('K65', 'a table that fails to read applies nothing, and a server holding no profiles deletes nothing: neither reads as a deletion', {
+    failOk: false, emptyOk: true, emptyChanged: false, untouched: true
+  }, { failOk: a65.ok, emptyOk: a65b.ok, emptyChanged: a65b.changed, untouched: record(devA) === snap65 });
+
+  /* The defect K62 fixes, as an older build left the server: one entry was
+     deleted and the whole history went with it, while the device's cache
+     still says every row was sent. The first pull after this version must
+     put them back rather than delete them here too. */
+  var olddb = memDB();
+  var devC = syncDevice(olddb, 'dddddddd-0000-4000-8000-00000000000d');
+  var cp = devC.pm.createProfile({ name: 'Old', birthDate: '1980-01-01' });
+  devC.pm.setConsent('journal', true, cp.id);
+  devC.pm.addMemory({ profileId: cp.id, type: 'journal', content: { t: 'kept one' } });
+  devC.pm.addMemory({ profileId: cp.id, type: 'journal', content: { t: 'kept two' } });
+  await devC.C.push();
+  olddb.t.memories = [];
+  var c66 = await devC.C.sync();
+  ts('K66', 'on a device\'s first pull, rows its cache says were sent and the server lacks are sent again, not deleted, so an older build\'s wiped history is restored', {
+    firstPull: true, removed: 0, local: 2, server: 2
+  }, { firstPull: c66.pull.firstPull, removed: c66.pull.memoriesRemoved, local: devC.pm.getMemory({ profileId: cp.id }).length, server: olddb.t.memories.length });
+
+  var j3 = devA.pm.addMemory({ profileId: nate.id, type: 'journal', content: { t: 'offline delete' } }).id;
+  devA.pm.setConsent('journal', true, nate.id);
+  await devA.C.sync();
+  devA.pm.deleteMemory({ profileId: nate.id, id: j3 });
+  /* As a device's first pull, where nothing but the outbox says the entry
+     was deleted here. */
+  var mapA = JSON.parse(devA.store.getItem('incommon_cloud_map_v2'));
+  delete mapA.pulled;
+  devA.store.setItem('incommon_cloud_map_v2', JSON.stringify(mapA));
+  sdb.failDelete = true;
+  var a67 = await devA.C.sync();
+  var stillQueued = JSON.parse(devA.store.getItem('incommon_cloud_outbox_v2') || '[]').length;
+  var resurrected = devA.pm.getMemory({ profileId: nate.id, respectConsent: false }).some(function (m) { return m.id === j3; });
+  sdb.failDelete = false;
+  await devA.C.sync();
+  ts('K67', 'a deletion made while the server cannot be told stays queued, the pull does not bring the entry back meanwhile, and the next sync carries it up', {
+    resurrected: false, queued: 1, serverAfter: false
+  }, { resurrected: resurrected,
+    queued: stillQueued, serverAfter: sdb.t.memories.some(function (r) { return r.local_id === j3; }) });
+
+  var big = memDB(), devD = syncDevice(big, 'eeeeeeee-0000-4000-8000-00000000000e');
+  var dp = devD.pm.createProfile({ name: 'Writer', birthDate: '1985-03-03' });
+  var dp2 = devD.pm.createProfile({ name: 'Second', birthDate: '1986-04-04' });
+  devD.pm.setConsent('journal', true, dp.id);
+  devD.pm.setConsent('journal', true, dp2.id);
+  for (var bi = 0; bi < 760; bi++) devD.pm.addMemory({ profileId: dp.id, type: 'journal', content: { n: bi }, createdAt: new Date(Date.UTC(2026, 0, 1) + bi * 60000).toISOString() });
+  for (bi = 0; bi < 400; bi++) devD.pm.addMemory({ profileId: dp2.id, type: 'journal', content: { n: bi } });
+  await devD.C.sync();
+  var devE = syncDevice(big, 'eeeeeeee-0000-4000-8000-00000000000e');
+  var e68 = await devE.C.sync();
+  ts('K68', 'an account larger than the server\'s row limit (1,160 memories against 1,000) comes down whole, newest first, and A and B hold the same entries', {
+    ok: true, count: 760, second: 400, newest: 759, same: true
+  }, { ok: e68.ok, count: devE.pm.getMemory({ profileId: dp.id }).length, second: devE.pm.getMemory({ profileId: dp2.id }).length, newest: devE.pm.getMemory({ profileId: dp.id })[0].content.n,
+    same: JSON.stringify(devE.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) === JSON.stringify(devD.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) });
+
+  /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
+     archive_deleted memory, a type the live table's check constraint
+     refuses, and one refused upsert ended the push before the Throughline
+     and the deletion outbox. The fake database enforces the same constraint,
+     read out of server/cloud-schema.sql rather than typed again here. ---- */
+  var schemaSql = fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8');
+  var checkM = /memory_type text not null check \(memory_type in\s*\(([^)]*)\)\)/.exec(schemaSql);
+  var serverTypes = checkM ? checkM[1].split(',').map(function (x) { return x.trim().replace(/^'|'$/g, ''); }) : null;
+  var cdb = memDB();
+  cdb.memoryTypes = serverTypes;
+  var devF = syncDevice(cdb, 'ffffffff-0000-4000-8000-00000000000f');
+  var fp = devF.pm.createProfile({ name: 'Keeper', birthDate: '1988-08-08' });
+  devF.pm.setConsent('journal', true, fp.id);
+  var keep1 = devF.pm.addMemory({ profileId: fp.id, type: 'journal', content: { t: 'stays' } }).id;
+  var gone1 = devF.pm.addMemory({ profileId: fp.id, type: 'journal', content: { t: 'deleted here' } }).id;
+  await devF.C.sync();
+  /* What memDeleteOne() does: an archive record first, then the delete. */
+  devF.pm.addMemory({ profileId: fp.id, type: 'archive_deleted', consentRequired: null, content: { origType: 'journal', deletedAt: new Date().toISOString() } });
+  devF.pm.deleteMemory({ profileId: fp.id, id: gone1 });
+  devF.store.setItem('incommon.p.' + fp.id + '.throughline', JSON.stringify([{ id: 'm1790000000001', date: '2026-10-14', type: 'event', title: 'After the archive', manual: true }]));
+  var f69 = await devF.C.sync();
+  ts('K69', 'an archived entry stays on its device and never reaches the server, so the push goes on: the deletion reaches the server, the Throughline goes up, and the sync module sends exactly the types the server schema accepts', {
+    schemaRead: true, sameTypes: true, ok: true, server: [keep1], archiveOnServer: false, throughline: 1, outbox: 0, archiveKeptLocally: true
+  }, {
+    schemaRead: !!serverTypes, sameTypes: JSON.stringify(serverTypes) === JSON.stringify(devF.C.SYNC_MEMORY_TYPES), ok: f69.ok,
+    server: cdb.t.memories.map(function (r) { return r.local_id; }),
+    archiveOnServer: cdb.t.memories.some(function (r) { return r.memory_type === 'archive_deleted'; }),
+    throughline: cdb.t.throughline_entries.length,
+    outbox: JSON.parse(devF.store.getItem('incommon_cloud_outbox_v2') || '[]').length,
+    archiveKeptLocally: devF.pm.getMemory({ profileId: fp.id, type: 'archive_deleted', respectConsent: false }).length === 1
+  });
+
+  /* ---- O1-O7: each account has its own profiles on a device, the owner's
+     request of 12 October 2026 after three accounts on one browser all opened
+     onto the same birth data. Each pmPage() is one page load: a fresh copy of
+     profile-manager.js over the same storage, which is what a browser does
+     between the cover and the app. */
+  function ownerStore() {
+    var m = {};
+    return {
+      _m: m,
+      get length() { return Object.keys(m).length; },
+      key: function (i) { return Object.keys(m)[i] || null; },
+      getItem: function (k) { return k in m ? m[k] : null; },
+      setItem: function (k, v) { m[k] = String(v); },
+      removeItem: function (k) { delete m[k]; }
+    };
+  }
+  var SB = 'sb-lkzcybzhjjxdqetwwdrx-auth-token';
+  function signIn(store, id, factors, aal) {
+    store.setItem(SB, JSON.stringify({ access_token: jwtOf({ sub: id, aal: aal || 'aal1' }), refresh_token: 'r', user: { id: id, factors: factors } }));
+  }
+  function pmPage(store, cookie) {
+    var win = {};
+    vm.runInNewContext(pmSrcK46, { window: win, localStorage: store, document: { cookie: cookie || '' }, atob: function (x) { return Buffer.from(x, 'base64').toString('binary'); },
+      JSON: JSON, Math: Math, Date: Date, String: String, Array: Array, Object: Object, Error: Error, isNaN: isNaN, parseFloat: parseFloat });
+    return win.ProfileManager;
+  }
+  var ROOTK = 'incommon.profiles.v1', UA = 'aaaaaaaa-0000-4000-8000-00000000000a', UB = 'bbbbbbbb-0000-4000-8000-00000000000b';
+  var dev = ownerStore();
+  var g0 = pmPage(dev);
+  var gp = g0.createProfile({ name: 'Nate', birthDate: '1990-05-01' });
+  dev.setItem('incommon.firstrun', 'true');
+  dev.setItem('incommon.friends', JSON.stringify([{ id: 'f1', name: 'Card' }]));
+  t('O1', 'signed out, the profiles are the guest store under the plain key, and the device wide keys stay plain', {
+    owner: null, inRoot: true, firstrunKey: 'incommon.firstrun'
+  }, { owner: g0.owner(), inRoot: (JSON.parse(dev.getItem(ROOTK) || '{}').profiles || []).some(function (p) { return p.id === gp.id; }), firstrunKey: g0.accountKey('incommon.firstrun') });
+
+  signIn(dev, UA);
+  var pa = pmPage(dev);
+  var aList = pa.listProfiles().map(function (p) { return p.name; });
+  t('O2', 'the first account to open the app on a device that holds profiles takes them, with its first run, sample, friends, adverse log and archive, and the guest store is left empty', {
+    owner: UA, profiles: ['Nate'], rootGone: true, firstrunMoved: true, friendsMoved: true, plainGone: true
+  }, { owner: pa.owner(), profiles: aList, rootGone: dev.getItem(ROOTK) === null, firstrunMoved: dev.getItem('incommon.firstrun.u.' + UA) === 'true',
+    friendsMoved: !!dev.getItem('incommon.friends.u.' + UA), plainGone: dev.getItem('incommon.firstrun') === null && dev.getItem('incommon.friends') === null });
+
+  dev.setItem('incommon.throughline.manual', JSON.stringify([{ t: 'before profiles' }]));
+  signIn(dev, UB);
+  var pb = pmPage(dev);
+  var bBefore = pb.count();
+  var mig = pb.migrateLegacyProfile({ name: 'Default Profile', birthDate: '1992-07-02' });
+  var bp = pb.getActiveProfile();
+  t('O3', 'a second account on the same device opens onto no profiles, makes its own under its own key, and inherits none of the device history from before profiles', {
+    before: 0, after: 1, ownKey: true, aUntouched: ['Nate'], legacyNotCopied: true, firstrunKey: 'incommon.firstrun.u.' + UB, firstrunUnset: true
+  }, { before: bBefore, after: pb.count(), ownKey: (JSON.parse(dev.getItem(ROOTK + '.u.' + UB) || '{}').profiles || []).some(function (p) { return p.id === bp.id; }),
+    aUntouched: (JSON.parse(dev.getItem(ROOTK + '.u.' + UA) || '{}').profiles || []).map(function (p) { return p.name; }),
+    legacyNotCopied: dev.getItem('incommon.p.' + bp.id + '.throughline') === null && (mig.moved || []).length === 0,
+    firstrunKey: pb.accountKey('incommon.firstrun'), firstrunUnset: dev.getItem(pb.accountKey('incommon.firstrun')) === null });
+
+  signIn(dev, UA);
+  var pa2 = pmPage(dev);
+  t('O4', 'signing back in as the first account opens its own profiles again, and not the second account\'s', {
+    owner: UA, profiles: ['Nate']
+  }, { owner: pa2.owner(), profiles: pa2.listProfiles().map(function (p) { return p.name; }) });
+
+  signIn(dev, UA, VER, 'aal1');
+  /* owner() is read straight after each load: the scope is settled at the
+     first read of the store, and a real page reads it before anything could
+     change the stored session under it. */
+  var owing = pmPage(dev).owner();
+  signIn(dev, UA);
+  dev.setItem('incommon.signin.ephemeral', '1');
+  var closed = pmPage(dev, '').owner(), open = pmPage(dev, 'incommon_signin_live=1').owner();
+  dev.removeItem('incommon.signin.ephemeral');
+  t('O5', 'a session that still owes its two-step code, and one the browser has closed, open the guest store rather than the account\'s', {
+    owesCode: null, browserClosed: null, browserOpen: UA
+  }, { owesCode: owing, browserClosed: closed, browserOpen: open });
+
+  var pa3 = pmPage(dev);
+  var aKeys = pa3.accountStorageKeys();
+  t('O6', 'erasing an account from the device names its store, its scoped keys and its profiles\' keys, and nothing of the other account\'s', {
+    hasStore: true, hasFirstrun: true, hasProfileKey: true, noneOfB: true
+  }, { hasStore: aKeys.indexOf(ROOTK + '.u.' + UA) !== -1, hasFirstrun: aKeys.indexOf('incommon.firstrun.u.' + UA) !== -1,
+    hasProfileKey: aKeys.some(function (k) { return k.indexOf(gp.id) !== -1 && k !== ROOTK + '.u.' + UA; }),
+    noneOfB: aKeys.every(function (k) { return k.indexOf(UB) === -1 && k.indexOf(bp.id) === -1; }) });
+
+  var released = pa3.releaseToGuest();
+  dev.removeItem(SB);
+  var guest = pmPage(dev);
+  t('O7', 'an account deleted without erasing hands its profiles and keys to the guest store, so the reader keeps them signed out, and the other account keeps its own', {
+    released: true, guestProfiles: ['Nate'], firstrunPlain: 'true', scopedGone: true, bKept: true
+  }, { released: released, guestProfiles: guest.listProfiles().map(function (p) { return p.name; }), firstrunPlain: dev.getItem('incommon.firstrun'),
+    scopedGone: dev.getItem(ROOTK + '.u.' + UA) === null && dev.getItem('incommon.firstrun.u.' + UA) === null, bKept: dev.getItem(ROOTK + '.u.' + UB) !== null });
+
+  /* A cover client whose sign ins come back owing a code or not, and whose
+     authenticator calls are recorded. */
+  function mfaHarness(o) {
+    o = o || {};
+    var h = { verify: [], challenge: [], listed: 0, unenroll: [], enroll: [], signOut: [] };
+    var s = o.session || sess(VER, 'aal1');
+    var mfa = {
+      listFactors: function () { h.listed++; var all = o.all || (o.factors || VER); return Promise.resolve({ data: { all: all, totp: all.filter(function (f) { return f.status === 'verified'; }) }, error: null }); },
+      challengeAndVerify: function (a) { h.verify.push(a); return Promise.resolve(o.verifyError ? { data: null, error: o.verifyError } : { data: { access_token: jwtOf({ aal: 'aal2' }) }, error: null }); },
+      unenroll: function (a) { h.unenroll.push(a); return Promise.resolve({ data: { id: a.factorId }, error: null }); },
+      enroll: function (a) { h.enroll.push(a); return Promise.resolve({ data: { id: 'fNew', type: 'totp', totp: { qr_code: 'data:image/svg+xml;utf-8,<svg/>', secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' } }, error: null }); }
+    };
+    var auth = {
+      onAuthStateChange: function (cb) { h.onAuth = cb; },
+      signInWithPassword: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      setSession: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      exchangeCodeForSession: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      verifyOtp: function () { return Promise.resolve({ data: { session: s }, error: null }); },
+      signOut: function (a) { h.signOut.push(a); return Promise.resolve({ error: null }); },
+      mfa: mfa
+    };
+    h.client = { auth: auth, from: function (table) { return fakeClient([]).from(table); } };
+    h.C = loadIsolatedCloud({ createClient: function () { return h.client; } });
+    return h;
+  }
+  var mOwe = mfaHarness(), mFree = mfaHarness({ session: sess(undefined, 'aal1') });
+  var siOwe = await mOwe.C.passwordSignIn('reader@k46.invalid', 'correct horse');
+  var siFree = await mFree.C.passwordSignIn('reader@k46.invalid', 'correct horse');
+  var adOwe = await mOwe.C.adoptSession('at', 'rt'), exOwe = await mOwe.C.oauthFinish('c'), phOwe = await mOwe.C.phoneCodeCheck('+15551234567', '123456');
+  t('K47', 'every way the cover makes a session says when it still owes its two-step code (password, emailed link, old sign in link, texted code), and an account without one is not asked', {
+    password: { ok: true, mfa: true }, free: { ok: true, mfa: false }, link: true, oldLink: true, text: true
+  }, { password: { ok: siOwe.ok, mfa: !!siOwe.mfa }, free: { ok: siFree.ok, mfa: !!siFree.mfa }, link: !!adOwe.mfa, oldLink: !!exOwe.mfa, text: !!phOwe.mfa });
+
+  var mV = mfaHarness();
+  var vShort = await mV.C.mfaVerify('12345'), vCalls = mV.verify.length;
+  var vOk = await mV.C.mfaVerify(' 123 456 ');
+  var mBad = mfaHarness({ verifyError: { code: 'mfa_verification_failed', message: 'Invalid TOTP code entered', status: 422 } });
+  var vBad = await mBad.C.mfaVerify('000000');
+  var mNone = mfaHarness({ factors: [] });
+  var vNone = await mNone.C.mfaVerify('123456');
+  var soOut = await mV.C.coverSignOut();
+  t('K48', 'the cover checks a two-step code against the account\'s verified authenticator: anything but six digits is refused without asking, spaces are allowed, a wrong code is badCode, no authenticator is an error, and leaving the step signs this browser out only', {
+    shortReason: 'badCode', shortCalls: 0, ok: true, sent: { factorId: 'f1', code: '123456' }, bad: 'badCode', none: 'error', signOut: { ok: true, scope: 'local' }
+  }, { shortReason: vShort.reason, shortCalls: vCalls, ok: vOk.ok, sent: mV.verify[0], bad: vBad.reason, none: vNone.reason,
+    signOut: { ok: soOut.ok, scope: mV.signOut[0] && mV.signOut[0].scope } });
+
+  var mG = mfaHarness();
+  mG.C.init({ url: 'https://k49-test.invalid', anonKey: 'k49-fake-anon', core: {}, pm: fakePM([{ id: 'p1', name: 'R' }], {}), storage: clStore() });
+  mG.onAuth('SIGNED_IN', sess(VER, 'aal1'));
+  var gHeld = mG.C.status();
+  var gOracle = await mG.C.oracleRead({ period: 'daily' }), gPush = await mG.C.push(), gMfa = await mG.C.mfaStatus();
+  mG.onAuth('MFA_CHALLENGE_VERIFIED', sess(VER, 'aal2'));
+  var gUp = mG.C.status();
+  mG.onAuth('SIGNED_IN', sess(undefined, 'aal1'));
+  var gPlain = mG.C.status();
+  t('K49', 'in the app a session that still owes its code is held aside: the app reads as signed out and says why, nothing is pushed and no function is asked, and the same account at aal2, or an account without two-step, is signed in', {
+    held: { mode: 'local', owesCode: true }, oracle: 'signedOut', push: 'no-session', status: 'signedOut',
+    lifted: { mode: 'cloud', owesCode: false }, plain: { mode: 'cloud', owesCode: false }
+  }, { held: { mode: gHeld.mode, owesCode: gHeld.owesCode }, oracle: gOracle.reason, push: gPush.reason, status: gMfa.reason,
+    lifted: { mode: gUp.mode, owesCode: gUp.owesCode }, plain: { mode: gPlain.mode, owesCode: gPlain.owesCode } });
+
+  var appSess = sess(undefined, 'aal1');
+  var eOut = mfaHarness({ all: UNV.concat([{ id: 'f9', factor_type: 'totp', status: 'unverified' }]) });
+  eOut.C._setClientForTests(eOut.client, null);
+  var enOut = await eOut.C.mfaEnrollStart();
+  eOut.C._setClientForTests(eOut.client, appSess);
+  var stOff = await eOut.C.mfaStatus();
+  var en = await eOut.C.mfaEnrollStart();
+  var enVerify = await eOut.C.mfaEnrollVerify(en.factorId, '654321');
+  var eOn = mfaHarness();
+  eOn.C._setClientForTests(eOn.client, sess(VER, 'aal2'));
+  var stOn = await eOn.C.mfaStatus(), enAgain = await eOn.C.mfaEnrollStart();
+  t('K50', 'turning two-step on needs a session, clears setups that were never confirmed, asks for an authenticator named inCommon, hands back the QR code and the setup key, and is confirmed only by a first code for that new authenticator; an account that has it on is told so', {
+    signedOut: 'signedOut', statusOff: { ok: true, on: false }, cleared: ['f0', 'f9'],
+    enroll: { factorType: 'totp', issuer: 'inCommon' }, got: { ok: true, factorId: 'fNew', qr: true, secret: 'JBSWY3DPEHPK3PXP' },
+    confirmed: { ok: true, sent: { factorId: 'fNew', code: '654321' } }, statusOn: { ok: true, on: true }, already: 'already'
+  }, { signedOut: enOut.reason, statusOff: stOff, cleared: eOut.unenroll.map(function (u) { return u.factorId; }),
+    enroll: { factorType: eOut.enroll[0] && eOut.enroll[0].factorType, issuer: eOut.enroll[0] && eOut.enroll[0].issuer },
+    got: { ok: en.ok, factorId: en.factorId, qr: /^data:image\/svg/.test(en.qr || ''), secret: en.secret },
+    confirmed: { ok: enVerify.ok, sent: eOut.verify[0] }, statusOn: stOn, already: enAgain.reason });
+
+  var dBad = mfaHarness({ verifyError: { code: 'mfa_verification_failed', message: 'Invalid TOTP code entered' } });
+  dBad.C._setClientForTests(dBad.client, sess(VER, 'aal2'));
+  var offBad = await dBad.C.mfaDisable('111111');
+  var dOk = mfaHarness();
+  dOk.C._setClientForTests(dOk.client, sess(VER, 'aal2'));
+  var offOk = await dOk.C.mfaDisable('222222');
+  CO._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(401, 'MFA_REQUIRED') }; }).client, { user: { id: 'u1' } });
+  var mfaOracle = await CO.oracleRead({ period: 'daily' }), mfaBill = await CO.billingStatus();
+  t('K51', 'turning two-step off asks for a current code first and removes nothing on a wrong one; and a server that refuses a session for its missing code reads to the page as signed out', {
+    wrong: { ok: false, reason: 'badCode', removed: 0 }, right: { ok: true, removed: ['f1'] }, oracle: 'signedOut', billing: 'signedOut'
+  }, { wrong: { ok: offBad.ok, reason: offBad.reason, removed: dBad.unenroll.length },
+    right: { ok: offOk.ok, removed: dOk.unenroll.map(function (u) { return u.factorId; }) }, oracle: mfaOracle.reason, billing: mfaBill.reason });
+
+  /* ---- K52-K53: Cloudflare Turnstile, 11 October 2026. With CAPTCHA
+     protection on, Supabase asks a token of the five calls that can be scripted
+     (password sign in, sign up, the reset email, a text code, a resend) and of
+     nothing else. The cover hands the token in; without one the calls go
+     exactly as before, which is what lets the page ship first. */
+  var tk = { captchaToken: 'tok-k52' };
+  var gT = oauthHarness();
+  await gT.C.passwordSignIn('reader@k52.invalid', 'correct horse', tk);
+  await gT.C.passwordSignIn('(555) 123-4567', 'correct horse', tk);
+  await gT.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: true, captchaToken: 'tok-k52' });
+  await gT.C.passwordSignUp('(555) 123-4567', 'correct horse', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/', tk);
+  await gT.C.passwordResetStart('(555) 123-4567', 'https://k52.invalid/', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'signup', tk);
+  await gT.C.phoneCodeResend('(555) 123-4567', 'recover', tk);
+  await gT.C.phoneCodeCheck('+15551234567', '123456');
+  var gN = oauthHarness();
+  await gN.C.passwordSignIn('reader@k52.invalid', 'correct horse');
+  await gN.C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', { newsletter: false });
+  await gN.C.passwordResetStart('reader@k52.invalid', 'https://k52.invalid/');
+  await gN.C.phoneCodeResend('(555) 123-4567', 'signup');
+  var tokOf = function (o) { return o && o.captchaToken; };
+  t('K52', 'a Turnstile token rides on every call the server asks one of (sign in by email and by phone, sign up by both, the reset email and the text, both resends), never on a code check, and with no token the calls are sent exactly as before', {
+    withToken: { pw: ['tok-k52', 'tok-k52'], up: ['tok-k52', 'tok-k52'], newsletterKept: true, reset: 'tok-k52', otp: ['tok-k52', 'tok-k52'], resend: 'tok-k52', verifyCarries: false },
+    without: { pwOptions: false, upToken: false, resetToken: false, resendOptions: false }
+  }, {
+    withToken: { pw: gT.pw.map(function (a) { return tokOf(a.options); }), up: gT.up.map(function (a) { return tokOf(a.options); }),
+      newsletterKept: !!(gT.up[0].options && gT.up[0].options.data && gT.up[0].options.data.newsletter === true),
+      reset: tokOf(gT.reset[0] && gT.reset[0].opts), otp: gT.otp.map(function (a) { return tokOf(a.options); }),
+      resend: tokOf(gT.resend[0] && gT.resend[0].options), verifyCarries: JSON.stringify(gT.verify).indexOf('tok-k52') !== -1 },
+    without: { pwOptions: 'options' in gN.pw[0], upToken: 'captchaToken' in (gN.up[0].options || {}), resetToken: 'captchaToken' in (gN.reset[0].opts || {}),
+      resendOptions: 'options' in gN.resend[0] }
+  });
+  var capReasons = {};
+  [['missing', { code: 'captcha_failed', message: 'captcha protection: request disallowed (no captcha_token found)', status: 400 }],
+   ['refused', { message: 'captcha protection: request disallowed (timeout-or-duplicate)', status: 400 }]].forEach(function (c) {
+    capReasons[c[0]] = null; capReasons['_' + c[0]] = c[1];
+  });
+  capReasons.missing = (await oauthHarness({ pwError: capReasons._missing }).C.passwordSignIn('reader@k52.invalid', 'x', tk)).reason;
+  capReasons.refused = (await oauthHarness({ upError: capReasons._refused }).C.passwordSignUp('reader@k52.invalid', 'correct horse', 'https://k52.invalid/', tk)).reason;
+  delete capReasons._missing; delete capReasons._refused;
+  var hdrSrc = fs.readFileSync(path.join(repo, 'deploy', 'v6.4', '_headers'), 'utf8');
+  var csp = (hdrSrc.match(/Content-Security-Policy: (.*)/) || [])[1] || '';
+  var dir = function (name) { return ((csp.match(new RegExp('(?:^|; )' + name + ' ([^;]*)')) || [])[1] || '').split(/\s+/); };
+  var tsSrc = (coverSrc.match(/var TS_SRC = '([^']+)'/) || [])[1] || '';
+  var tsOrigin = tsSrc ? new URL(tsSrc).origin : '';
+  t('K53', 'a refused or missing Turnstile token is a reason the cover can say, and the security headers let the cover reach the one Turnstile origin it loads, for its script and its frame, and nowhere else new', {
+    reasons: { missing: 'captcha', refused: 'captcha' }, origin: 'https://challenges.cloudflare.com', script: true, frame: true, connectUnchanged: true
+  }, { reasons: capReasons, origin: tsOrigin, script: dir('script-src').indexOf(tsOrigin) !== -1, frame: dir('frame-src').indexOf(tsOrigin) !== -1,
+    connectUnchanged: dir('connect-src').indexOf(tsOrigin) === -1 });
+
+  /* ---- K54-K55: Contact Support and the two legal pages, 11 October 2026.
+     The Terms and the Privacy Policy name Contact Support as the way to reach
+     the operator, cancel, and make a privacy or deletion request, so the call
+     has to work with nobody signed in, say what was wrong in words, and send
+     exactly three fields: topic, email and message. Nothing the reader types
+     may choose a user id or a status; the table refuses both as well
+     (server/support.sql). */
+  var sent = [];
+  var fakeFetch = function (answer) {
+    return function (url, init) { sent.push({ url: url, init: init }); return Promise.resolve(answer); };
+  };
+  var okAns = { ok: true, status: 201, text: function () { return Promise.resolve(''); } };
+  var rateAns = { ok: false, status: 400, text: function () { return Promise.resolve('{"code":"P0001","message":"support_rate"}'); } };
+  var goneAns = { ok: false, status: 404, text: function () { return Promise.resolve('{"code":"PGRST205","message":"Could not find the table"}'); } };
+  var sOk = await CL.supportSend({ topic: 'delete', email: ' reader@k54.invalid ', message: 'Please delete my account and data.', user_id: 'x', status: 'answered' }, { fetch: fakeFetch(okAns) });
+  var body = sent[0] ? JSON.parse(sent[0].init.body) : {};
+  var hdr = sent[0] ? sent[0].init.headers : {};
+  var sBadTopic = await CL.supportSend({ topic: 'spam', email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(okAns) });
+  var sentTopic = sent[1] ? JSON.parse(sent[1].init.body).topic : null;
+  var before = sent.length;
+  var reasons = {
+    email: (await CL.supportSend({ email: 'not an address', message: 'A message long enough.' }, { fetch: fakeFetch(okAns) })).reason,
+    short: (await CL.supportSend({ email: 'a@k54.invalid', message: 'hi' }, { fetch: fakeFetch(okAns) })).reason,
+    long: (await CL.supportSend({ email: 'a@k54.invalid', message: new Array(5002).join('x') }, { fetch: fakeFetch(okAns) })).reason
+  };
+  var sentForInvalid = sent.length - before;
+  reasons.rate = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(rateAns) })).reason;
+  reasons.notSetUp = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: fakeFetch(goneAns) })).reason;
+  reasons.offline = (await CL.supportSend({ email: 'a@k54.invalid', message: 'A message long enough.' }, { fetch: function () { return Promise.reject(new Error('net')); } })).reason;
+  t('K54', 'Contact Support sends topic, email and message and nothing else to support_requests, works signed out with the public key, refuses a bad address or an empty message before sending, and names a throttle, a missing table and no connection in words', {
+    ok: true, url: true, keys: ['email', 'message', 'topic'], trimmed: 'reader@k54.invalid', anon: true, badTopicFallsBack: 'general',
+    invalidSentNothing: 0, reasons: { email: 'email', short: 'short', long: 'long', rate: 'rate', notSetUp: 'notSetUp', offline: 'offline' }
+  }, {
+    ok: !!sOk.ok && !!sBadTopic.ok, url: !!sent[0] && /\/rest\/v1\/support_requests$/.test(sent[0].url),
+    keys: Object.keys(body).sort(), trimmed: body.email,
+    anon: !!hdr && hdr.Authorization === 'Bearer ' + hdr.apikey && /^eyJ/.test(hdr.apikey || ''),
+    badTopicFallsBack: sentTopic, invalidSentNothing: sentForInvalid, reasons: reasons
+  });
+
+  var termsSrc = fs.readFileSync(path.join(repo, 'app', 'terms.html'), 'utf8');
+  var privSrc = fs.readFileSync(path.join(repo, 'app', 'privacy.html'), 'utf8');
+  var appSrcK = fs.readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  var orderOk = function (src) {
+    var t1 = src.indexOf('./terms.html'), p1 = src.indexOf('./privacy.html');
+    return t1 !== -1 && p1 !== -1 && t1 < p1;
+  };
+  var dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']|&[mn]dash;');
+  var sqlSrc = fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8');
+  var mfaSrc = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
+  /* Eight links in the app, in each shell: Settings twice, the Luminary gate
+     in the Oracle, and the same gate in the tarot room for Omni. */
+  t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle, in the sheet of the Cycle Audit and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
+    cover: true, appLinks: 10, appOrderEachTime: true, operator: true, florida: true, age16: true,
+    oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
+  }, {
+    cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,
+    appOrderEachTime: appSrcK.split('href="./terms.html"').slice(1).every(function (chunk) { return chunk.indexOf('href="./privacy.html"') !== -1 && chunk.indexOf('href="./privacy.html"') < 900; }),
+    operator: /Nathaniel J\. Figueroa/.test(termsSrc) && /Nathaniel J\. Figueroa/.test(privSrc),
+    florida: /State of Florida/.test(termsSrc), age16: /at least <strong>16 years old<\/strong>/.test(termsSrc) && /under 16/.test(privSrc),
+    oracleSent: /first name on your profile/.test(privSrc) && /Moonshot AI/.test(privSrc),
+    oracleNotSent: /birth date, birth time and birth place are not sent/.test(privSrc),
+    moonshot: /Moonshot AI/.test(termsSrc),
+    supportRoute: /#\/support/.test(termsSrc) && /#\/support/.test(privSrc) && /seg\[0\] === 'support'/.test(appSrcK),
+    renewal: /one time payment/i.test(termsSrc) && /not a subscription/.test(termsSrc) && /One payment, not a subscription/.test(appSrcK) && !/Renews automatically each month or year/.test(appSrcK),
+    noDash: !dashRe.test(termsSrc) && !dashRe.test(privSrc),
+    mfaCovers: /'support_requests'/.test(mfaSrc),
+    sqlInsertOnly: /for insert to anon, authenticated/.test(sqlSrc) && !/for select|for update|for delete|for all/.test(sqlSrc)
+  });
 }
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
@@ -1497,7 +2996,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);

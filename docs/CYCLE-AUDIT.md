@@ -1,0 +1,226 @@
+# Codex Luminary, the Cycle Audit and Omni: what you need to do
+
+Built 18 October 2026. Three decisions in one change:
+
+- **The Cycle Audit** is a widget on Today (it was the Oracle's fourth period
+  until 19 October 2026): a small free chart of the long weather in three
+  lanes, The Stars (Saturn, Uranus, Neptune and Pluto across the chart), The
+  Design (the slow astral bodies on the reader's gates) and The Numbers (the
+  Personal Years and the Pinnacles), with a Now line through all three. Tapping
+  it opens a sheet with the full lists and the written reading, which is the
+  part Luminary opens.
+- **Codex Luminary is now one payment, of an amount the reader chooses** (at
+  least $3, with $12 filled in), and it opens every add-on for the account for
+  good: in-depth readings, **Omni tarot** and the Cycle Audit's readings, and
+  any add-on after them. The subscription is no longer sold. Anybody who holds
+  one keeps it until they cancel, and it opens the same add-ons while it lasts.
+- **In the iPhone and Android apps every add-on is free**, and the apps offer
+  **Support inCommon**, a gift, instead.
+
+Until the steps below are done, the website's gates say "Payments are being set
+up", the apps' gift says the same, and Omni cannot be read anywhere, because its
+writer now lives in the Oracle function.
+
+## 1. Run the SQL again
+
+In the Supabase dashboard, SQL Editor, paste and run each file. Both are safe to
+run again.
+
+1. `server/oracle/schema.sql`. It adds the `luminary_unlocks` table and widens
+   the `oracle_readings.period` check to allow `cycle`. **Without the second
+   part every Cycle Audit fails as a store error.**
+2. `server/mfa-policies.sql`. It adds `luminary_unlocks` to the two-step sign in
+   rule, like every other table.
+
+## 2. Redeploy three functions
+
+**Done on 19 October 2026** from this repository: oracle (with `tarot.js` and
+`tarot-omni.js` beside it), billing and account. The functions that were live
+before that still answered the Cycle Audit and Omni with a refusal, which is
+why the Cycle Audit loaded nothing. The SQL in step 1 was checked on the live
+database the same day and is in place. Redeploy again only if one of these
+files changes.
+
+Keep each function's existing setting for JWT verification (billing stays
+**off**).
+
+- **oracle**: `server/oracle/index.ts` (the Cycle Audit's shape changed on 18
+  October 2026 for the ledger layout: the Tax and the Dividend are short lists
+  and each question names its system, so redeploy it even if you already did
+  once today) **and the two files beside it,
+  `tarot.js` and `tarot-omni.js`**, which it imports. With the CLI, deploying
+  the folder carries all three. In the dashboard editor, add the two files to
+  the function beside `index.ts`. Without them Omni answers a store error.
+- **billing**: `server/billing/index.ts`. The one time unlock, the gift, the
+  retired subscription, **and the fix for incommonspace.com**: until this is
+  deployed, every checkout started on incommonspace.com is refused, because the
+  function only accepted incommon.netlify.app as an address to return to.
+- **account**: `server/account/index.ts`. Deleting an account also deletes its
+  unlock.
+
+No new secrets. The Stripe products and the two custom amount prices ("Codex
+Luminary" and "Support inCommon") are made by the function the first time each
+is used.
+
+## 3. Stripe
+
+- The webhook must send `checkout.session.completed`, which it already does for
+  Luminary. That is what records a payment. Keep `customer.subscription.*` and
+  `invoice.*` too, for the subscribers you still have.
+- Keep customer receipts on (Settings, Customer emails, Successful payments):
+  the Terms say the amount is confirmed by receipt.
+- **Existing subscribers.** They keep their subscription until they cancel, and
+  Manage billing still works for them. If you would rather end them, cancel them
+  in the Stripe dashboard; the Terms promise a refund of the unused part of the
+  period if you discontinue it. Either is consistent with the Terms as written.
+- The old Luminary products and prices can be archived in Stripe once nobody
+  holds a subscription on them. Nothing in the code creates them any more.
+
+## 4. Publish the site
+
+The bundle in `deploy/v6.4/` is rebuilt, including `thanks.html`, the page a
+gift returns to.
+
+## 5. The apps
+
+- **The RevenueCat plugin is already out of `native/`**, because nothing is
+  sold in the apps now and an in-app purchase plugin with no purchases is a
+  question at review. Run `npm install` in `native/` once so your copy of
+  `node_modules` matches, then build as usual. If you added the In-App Purchase
+  capability in Xcode, remove it. The App Store Connect and Play Console
+  subscription products can be removed too, once nobody holds one.
+- **Existing subscribers keep everything.** A Stripe subscription from before
+  keeps opening every add-on and Manage billing, as above. A store subscription,
+  if one was ever bought, is still read from `store_subscriptions`, so leave the
+  `store` function and its secrets in place until the last one has lapsed.
+- **The gift may be refused at review.** Apple allows payment links on the
+  United States storefront and treats a tip to a developer as an in-app
+  purchase elsewhere (guideline 3.1.1); Google allows outside payment for
+  donations only to registered charities. If either refuses the build, set
+  `GIFT_IN_APP = false` in `app/inCommonApp v2.dc.html`, rebuild the bundle and
+  the native app, and resubmit.
+- Every add-on in the apps is free and counts toward the Oracle's daily limit of
+  six readings, which is what bounds what the apps can cost you.
+
+## 6. Legal pages
+
+Changed and dated 18 October 2026: Terms section 7 (now "Payments: Codex
+Luminary and gifts": the one time payment, subscriptions from before, refunds,
+gifts) and section 22; Privacy Policy sections 6, 7, 11 and 15 (RevenueCat and
+Apple and Google as sellers are gone); and `delete-account.html`. Worth a
+lawyer's eye before launch: pay what you want pricing with a floor, changing
+from a subscription to a one time payment while subscribers remain, and
+accepting gifts as an individual in Florida.
+
+## Why it moved to Today, and seeing the gate yourself
+
+Reported 19 October 2026: it asked to sign in while signed in, Luminary and a
+standard account looked the same, the Cycle Audit loaded nothing, and it looked
+awkward in the Oracle.
+
+- **Signing in again.** Log Out signed the account out on every device, so
+  logging out on one phone ended the session on the laptop too. It signs out
+  only the device it is pressed on now. This reaches readers once the site is
+  published.
+- **No difference between Luminary and standard.** An address in
+  `LUMINARY_ADMIN_EMAILS` passes every gate without paying, which includes
+  yours. To see what a standard reader sees, sign in with an account whose
+  address is not on that list.
+- **Nothing loading.** The live functions were older than the page (step 2).
+- **The layout.** It is a widget on Today now, and a tap opens the rest.
+
+## The Cycle Audit in depth
+
+Added 19 October 2026 at your request ("make the audit cycle completely
+interactive like it was made on Unreal Engines"). The chart on Today is now a
+small lit landscape you can drag through: the passages are arches of light,
+your gates are glowing slabs, your Personal Years are tiles, and Now is a
+column of light through all three. Tapping it opens the full screen view, with
+a wheel of the sky that turns as you move through the years, a card for any
+passage you tap, and the reading and the lists beside it.
+
+Nothing for you to set up: it uses the copy of three.js the cover already
+carries, it sends nothing anywhere, and on a device that cannot draw it the
+flat chart from before is shown instead. It only appears once the site is
+published.
+
+## What the brief asked for, and what changed
+
+The brief asked for a `pwyw_unlocked` flag on `profiles`, row level security
+over "psychological content strings", and positions from the database. Built
+otherwise, for these reasons:
+
+- **A flag on `profiles` could be set by the reader.** Readers write their own
+  profile rows, and an account has several profiles. The unlock is its own
+  table, `luminary_unlocks`, that only the billing function writes.
+- **Row level security cannot hide text that ships in the app.** The reading is
+  written on the server and sent only to a reader the server lets through, which
+  is what makes the payment mean something.
+- **Positions never come from the database.** Every chart is computed on the
+  device, and no birth data lives on the server.
+- **The dates were wrong.** Pluto reaches 15 Aquarius in April 2032, not 2029,
+  and 28 Aquarius in April 2041. The app computes these; the copy never names a
+  year it did not compute.
+- **The copy could not diagnose the reader.** "Verbal aggression" and
+  "weaponizing logic" are claims about a person, which the app's writing rules
+  do not allow. The Oracle is told to write what a passage asks and offers, as a
+  possibility the reader can recognise or set aside.
+
+## Reference copy
+
+What is on the gate when it stands in front of the Cycle Audit (the same gate is
+worded for In-Depth and for Omni):
+
+> **Codex Luminary**
+>
+> **What the long passages ask, and what they build**
+>
+> The slowest astral bodies stay on a point of your chart for years, not days.
+> Each passage asks for something to be set down, and builds something in its
+> place. The audit reads every passage ahead of you in both directions: what it
+> asks you to surrender, what it gives back, and three questions to carry while
+> it lasts.
+>
+> *This is an exchange rather than a wall. Pay what it is worth to you, once,
+> and every add-on opens on this account: in-depth readings, Omni tarot, the
+> Cycle Audit, and whatever comes after them.*
+>
+> **Become a Luminary**
+>
+> One payment, not a subscription. You choose the amount, from $3, on Stripe's
+> secure checkout.
+
+The brief's case, written to the same rules as an example of the voice the
+Oracle is asked for. The Oracle writes its own for each reader; this is not
+shipped anywhere.
+
+> **Pluto conjunct natal Mars** (Mars at 15° Aquarius, 3rd house)
+> In orb from early 2031 to late 2034, exact on 14 April 2032, 16 June 2032,
+> 10 February 2033, 3 September 2033 and 18 December 2033.
+>
+> **Surrender · The Tax.** Pluto settling on Mars in the third house presses on
+> the way words are used to move things: the quick reply, the argument carried
+> to its end, the sense that the clearest mind in the room should prevail. A
+> passage like this traditionally asks for some of that to be set down. Not the
+> intelligence, but the habit of using it as a blade, and the need for the last
+> word that can come with it. It may show up in the daily round, with siblings,
+> neighbours and the people met every week, as conversations that stop yielding
+> to force.
+>
+> **Build · The Dividend.** What it builds in that place is a voice that does
+> not need to win to be heard. Mars in Aquarius thinks on behalf of the group;
+> under Pluto that can deepen into listening that reaches what sits under an
+> argument, and speech that carries weight because it is unhurried. By the last
+> pass in December 2033 the work of these years may read less as ground lost
+> than as finding where authority actually lives.
+>
+> **For the Journal**
+> - When a conversation turns into a contest, what feels at stake?
+> - Is there someone in your daily circle whose voice is hard to take in, and
+>   what happens in you when they speak?
+> - What would you say differently if being right were already settled?
+>
+> **The Long View.** This passage comes about eight years before Pluto reaches
+> your Sun at 28° Aquarius in the 4th house, from April 2041 to December 2042.
+> The work on the voice in the early 2030s prepares the ground for the larger
+> one later: what home is, and who lives there.
