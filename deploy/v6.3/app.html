@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice2  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice5  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32260,6 +32260,10 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
           </header>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Overview</span>
+            <sc-if value="{{ orOvHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orOvGo }}" aria-label="Listen to the overview" aria-pressed="{{ orOvOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orOvMark }}</button></sc-if>
+          </div>
           <div style="display:flex;flex-direction:column;gap:12px">
             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
             <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
@@ -32269,7 +32273,10 @@ input[type="date"]{color-scheme:dark}
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
             <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                  <sc-if value="{{ tp.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tp.oiGo }}" aria-label="Listen to this section" aria-pressed="{{ tp.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tp.oiMark }}</button></sc-if>
+                </div>
                 <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ tp.title }}</div>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ tp.body }}</p>
               </div>
@@ -32279,7 +32286,10 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:16px">
               <sc-for list="{{ orChapters }}" as="ch" hint-placeholder-count="4">
                 <section style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:14px">
-                  <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                    <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                    <sc-if value="{{ ch.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ ch.oiGo }}" aria-label="Listen to this chapter" aria-pressed="{{ ch.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ ch.oiMark }}</button></sc-if>
+                  </div>
                   <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ ch.heading }}</h3>
                   <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ ch.body }}</p>
                 </section>
@@ -32300,9 +32310,12 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">When to act, when to wait</div>
               <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
                 <sc-for list="{{ orTiming }}" as="tm" hint-placeholder-count="3">
-                  <li style="display:flex;flex-direction:column;gap:2px;border-left:2px solid var(--ac2);padding-left:11px">
-                    <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
-                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                  <li style="display:flex;align-items:flex-start;gap:10px;border-left:2px solid var(--ac2);padding-left:11px">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
+                      <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                    </span>
+                    <sc-if value="{{ tm.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tm.oiGo }}" aria-label="Listen to this window" aria-pressed="{{ tm.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tm.oiMark }}</button></sc-if>
                   </li>
                 </sc-for>
               </ol>
@@ -32311,7 +32324,10 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orHasShadow }}" hint-placeholder-val="{{ false }}">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                  <sc-if value="{{ orShHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orShGo }}" aria-label="Listen to shadow work" aria-pressed="{{ orShOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orShMark }}</button></sc-if>
+                </div>
                 <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">What asks to be met</div>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orShadow }}</p>
               </div>
@@ -32321,7 +32337,7 @@ input[type="date"]{color-scheme:dark}
                   <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Questions to sit with</div>
                   <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
                     <sc-for list="{{ orPrompts }}" as="q" hint-placeholder-count="3">
-                      <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ q.t }}</li>
+                      <li style="display:flex;align-items:flex-start;gap:10px;font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"><span style="flex:1;min-width:0">{{ q.t }}</span><sc-if value="{{ q.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ q.oiGo }}" aria-label="Listen to this question" aria-pressed="{{ q.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu);font-style:normal">{{ q.oiMark }}</button></sc-if></li>
                     </sc-for>
                   </ul>
                 </div>
@@ -32331,7 +32347,10 @@ input[type="date"]{color-scheme:dark}
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
             <sc-for list="{{ orRealms }}" as="rm" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                  <sc-if value="{{ rm.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ rm.oiGo }}" aria-label="Listen to this section" aria-pressed="{{ rm.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ rm.oiMark }}</button></sc-if>
+                </div>
                 <h4 style="margin:0;font:400 20px/1.25 var(--fd);color:var(--tx)">{{ rm.t }}</h4>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ rm.v }}</p>
               </div>
@@ -32343,9 +32362,12 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Key transits</div>
               <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
                 <sc-for list="{{ orTransits }}" as="tr" hint-placeholder-count="3">
-                  <li style="display:flex;flex-direction:column;gap:2px">
-                    <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
-                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                  <li style="display:flex;align-items:flex-start;gap:10px">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
+                      <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                    </span>
+                    <sc-if value="{{ tr.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tr.oiGo }}" aria-label="Listen to this transit" aria-pressed="{{ tr.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tr.oiMark }}</button></sc-if>
                   </li>
                 </sc-for>
               </ul>
@@ -32353,12 +32375,15 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+                <sc-if value="{{ orRiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orRiGo }}" aria-label="Listen to the ritual" aria-pressed="{{ orRiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orRiMark }}</button></sc-if>
+              </div>
               <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orRitual }}</p>
               <p style="margin:0;font:400 12.5px var(--fu);color:var(--mut)">Auspicious hue &#183; <em style="font:italic 400 14px var(--fb);color:var(--tx)">{{ orHue }}</em></p>
             </div>
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
-              <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+              <span style="display:flex;align-items:center;gap:10px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra<sc-if value="{{ orMaHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orMaGo }}" aria-label="Listen to the mantra" aria-pressed="{{ orMaOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu);letter-spacing:0">{{ orMaMark }}</button></sc-if></span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
           </div>
@@ -34545,6 +34570,17 @@ input[type="date"]{color-scheme:dark}
 
 
 </div>
+<sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock) + 16px);z-index:88;display:flex;justify-content:center;pointer-events:none;padding:0 20px">
+    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;align-items:center;gap:4px;max-width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid var(--bd);border-radius:999px;background:var(--bg)">
+      <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
+      <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
+      <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
+      <span style="font:600 11px var(--fu);color:var(--mut);max-width:32vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
+      <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock) + 16px);z-index:90;display:flex;justify-content:center;pointer-events:none;padding:0 20px">
     <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:12px 22px;font:600 13px var(--fu);color:var(--tx);box-shadow:0 8px 28px rgba(0,0,0,.55)">{{ toast }}</div>
@@ -39248,6 +39284,10 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
           </header>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Overview</span>
+            <sc-if value="{{ orOvHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orOvGo }}" aria-label="Listen to the overview" aria-pressed="{{ orOvOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orOvMark }}</button></sc-if>
+          </div>
           <div style="display:flex;flex-direction:column;gap:12px">
             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
             <sc-for list="{{ orOvRest }}" as="op" hint-placeholder-count="1">
@@ -39257,7 +39297,10 @@ input[type="date"]{color-scheme:dark}
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
             <sc-for list="{{ orTriple }}" as="tp" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">{{ tp.eyebrow }}</div>
+                  <sc-if value="{{ tp.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tp.oiGo }}" aria-label="Listen to this section" aria-pressed="{{ tp.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tp.oiMark }}</button></sc-if>
+                </div>
                 <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">{{ tp.title }}</div>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ tp.body }}</p>
               </div>
@@ -39267,7 +39310,10 @@ input[type="date"]{color-scheme:dark}
             <div style="display:flex;flex-direction:column;gap:16px">
               <sc-for list="{{ orChapters }}" as="ch" hint-placeholder-count="4">
                 <section style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:14px">
-                  <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                    <span style="font:400 13px var(--fd);letter-spacing:.14em;color:var(--ac2-hi)">{{ ch.num }}</span>
+                    <sc-if value="{{ ch.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ ch.oiGo }}" aria-label="Listen to this chapter" aria-pressed="{{ ch.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ ch.oiMark }}</button></sc-if>
+                  </div>
                   <h3 style="margin:0;font:400 22px/1.2 var(--fd);color:var(--tx)">{{ ch.heading }}</h3>
                   <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ ch.body }}</p>
                 </section>
@@ -39288,9 +39334,12 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">When to act, when to wait</div>
               <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
                 <sc-for list="{{ orTiming }}" as="tm" hint-placeholder-count="3">
-                  <li style="display:flex;flex-direction:column;gap:2px;border-left:2px solid var(--ac2);padding-left:11px">
-                    <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
-                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                  <li style="display:flex;align-items:flex-start;gap:10px;border-left:2px solid var(--ac2);padding-left:11px">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:600 11.5px var(--fu);color:var(--ac2-hi)">{{ tm.when }}</span>
+                      <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tm.guidance }}</span>
+                    </span>
+                    <sc-if value="{{ tm.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tm.oiGo }}" aria-label="Listen to this window" aria-pressed="{{ tm.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tm.oiMark }}</button></sc-if>
                   </li>
                 </sc-for>
               </ol>
@@ -39299,7 +39348,10 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ orHasShadow }}" hint-placeholder-val="{{ false }}">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9912; Shadow Work</div>
+                  <sc-if value="{{ orShHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orShGo }}" aria-label="Listen to shadow work" aria-pressed="{{ orShOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orShMark }}</button></sc-if>
+                </div>
                 <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">What asks to be met</div>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orShadow }}</p>
               </div>
@@ -39309,7 +39361,7 @@ input[type="date"]{color-scheme:dark}
                   <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Questions to sit with</div>
                   <ul style="margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px">
                     <sc-for list="{{ orPrompts }}" as="q" hint-placeholder-count="3">
-                      <li style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ q.t }}</li>
+                      <li style="display:flex;align-items:flex-start;gap:10px;font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"><span style="flex:1;min-width:0">{{ q.t }}</span><sc-if value="{{ q.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ q.oiGo }}" aria-label="Listen to this question" aria-pressed="{{ q.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu);font-style:normal">{{ q.oiMark }}</button></sc-if></li>
                     </sc-for>
                   </ul>
                 </div>
@@ -39319,7 +39371,10 @@ input[type="date"]{color-scheme:dark}
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
             <sc-for list="{{ orRealms }}" as="rm" hint-placeholder-count="3">
               <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-                <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span aria-hidden="true" style="font:400 20px var(--fb);color:var(--ac2-hi)">{{ rm.g }}</span>
+                  <sc-if value="{{ rm.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ rm.oiGo }}" aria-label="Listen to this section" aria-pressed="{{ rm.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ rm.oiMark }}</button></sc-if>
+                </div>
                 <h4 style="margin:0;font:400 20px/1.25 var(--fd);color:var(--tx)">{{ rm.t }}</h4>
                 <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ rm.v }}</p>
               </div>
@@ -39331,9 +39386,12 @@ input[type="date"]{color-scheme:dark}
               <div style="font:400 20px/1.25 var(--fd);color:var(--tx)">Key transits</div>
               <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
                 <sc-for list="{{ orTransits }}" as="tr" hint-placeholder-count="3">
-                  <li style="display:flex;flex-direction:column;gap:2px">
-                    <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
-                    <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                  <li style="display:flex;align-items:flex-start;gap:10px">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                      <span style="font:600 12px var(--fu);color:var(--blue)">{{ tr.transit }}</span>
+                      <span style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ tr.meaning }}</span>
+                    </span>
+                    <sc-if value="{{ tr.oiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ tr.oiGo }}" aria-label="Listen to this transit" aria-pressed="{{ tr.oiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ tr.oiMark }}</button></sc-if>
                   </li>
                 </sc-for>
               </ul>
@@ -39341,12 +39399,15 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px">
-              <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">A Small Ritual</div>
+                <sc-if value="{{ orRiHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orRiGo }}" aria-label="Listen to the ritual" aria-pressed="{{ orRiOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">{{ orRiMark }}</button></sc-if>
+              </div>
               <p style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);white-space:pre-line;text-wrap:pretty">{{ orRitual }}</p>
               <p style="margin:0;font:400 12.5px var(--fu);color:var(--mut)">Auspicious hue &#183; <em style="font:italic 400 14px var(--fb);color:var(--tx)">{{ orHue }}</em></p>
             </div>
             <div style="display:flex;flex-direction:column;gap:9px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:center;justify-content:center;text-align:center">
-              <span style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra</span>
+              <span style="display:flex;align-items:center;gap:10px;font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Mantra<sc-if value="{{ orMaHas }}" hint-placeholder-val="{{ false }}"><button data-lift onClick="{{ orMaGo }}" aria-label="Listen to the mantra" aria-pressed="{{ orMaOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu);letter-spacing:0">{{ orMaMark }}</button></sc-if></span>
               <p style="margin:0;font:italic 400 19px/1.45 var(--fd);color:var(--tx);text-wrap:balance">&#8220;{{ orMantra }}&#8221;</p>
             </div>
           </div>
@@ -41239,6 +41300,17 @@ input[type="date"]{color-scheme:dark}
 
 
 </div>
+<sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:center;z-index:88;pointer-events:none">
+    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;align-items:center;gap:4px;max-width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid var(--bd);border-radius:999px;background:var(--bg)">
+      <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
+      <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
+      <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
+      <span style="font:600 11px var(--fu);color:var(--mut);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
+      <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;left:0;right:0;bottom:28px;display:flex;justify-content:center;z-index:90;pointer-events:none">
     <div style="max-width:60%;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:11px 20px;font:600 12px var(--fu);color:var(--tx);box-shadow:0 8px 28px rgba(0,0,0,.5);animation:dtIn .2s ease">{{ toast }}</div>
@@ -52970,31 +53042,35 @@ class Component extends DCLogic {
   orVoiceSegments(r) {
     const str = v => typeof v === 'string' ? v : '';
     const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+    /* Every segment carries a key naming the section it reads, so the page can
+       offer a play button per section and the transport can say what is
+       playing. Lists are filtered before they are indexed, so the keys line
+       up with the rows oracleVals renders. */
     const segs = [];
-    if (str(r.title)) segs.push({ title: 'The Oracle', body: str(r.title) + '. ' + str(r.epigraph) });
+    if (str(r.title)) segs.push({ key: 'title', title: 'The Oracle', body: str(r.title) + '. ' + str(r.epigraph) });
     const ov = paras(r.overview);
-    if (ov.length) segs.push({ title: 'Overview', body: ov.join('\n\n') });
-    [['The Stars', r.stars], ['The Design', r.design], ['The Numbers', r.numbers]].forEach(([t, v]) => {
-      if (str(v)) segs.push({ title: t, body: str(v) });
+    if (ov.length) segs.push({ key: 'overview', title: 'Overview', body: ov.join('\n\n') });
+    [['stars', 'The Stars', r.stars], ['design', 'The Design', r.design], ['numbers', 'The Numbers', r.numbers]].forEach(([k, t, v]) => {
+      if (str(v)) segs.push({ key: k, title: t, body: str(v) });
     });
-    (r.chapters || []).forEach(c => {
-      if (c && str(c.heading)) segs.push({ title: str(c.heading), body: paras(c.body).join('\n\n') });
+    (r.chapters || []).filter(c => c && str(c.heading)).forEach((c, i) => {
+      segs.push({ key: 'chapter' + i, title: str(c.heading), body: paras(c.body).join('\n\n') });
     });
-    [['Love & Kinship', r.love], ['Work & Purpose', r.work], ['Spirit & Body', r.spirit]].forEach(([t, v]) => {
-      if (str(v)) segs.push({ title: t, body: str(v) });
+    [['love', 'Love & Kinship', r.love], ['work', 'Work & Purpose', r.work], ['spirit', 'Spirit & Body', r.spirit]].forEach(([k, t, v]) => {
+      if (str(v)) segs.push({ key: k, title: t, body: str(v) });
     });
-    (r.keyTransits || []).forEach(t => {
-      if (t && str(t.transit)) segs.push({ title: 'Celestial Currents: ' + str(t.transit), body: str(t.meaning) });
+    (r.keyTransits || []).filter(t => t && str(t.transit)).forEach((t, i) => {
+      segs.push({ key: 'transit' + i, title: 'Celestial Currents: ' + str(t.transit), body: str(t.meaning) });
     });
-    if (str(r.shadowWork)) segs.push({ title: 'Shadow Work', body: str(r.shadowWork) });
-    (r.journalPrompts || []).forEach((q, i) => {
-      if (str(q)) segs.push({ title: 'For the Journal, question ' + (i + 1), body: str(q) });
+    if (str(r.shadowWork)) segs.push({ key: 'shadow', title: 'Shadow Work', body: str(r.shadowWork) });
+    (r.journalPrompts || []).filter(q => str(q)).forEach((q, i) => {
+      segs.push({ key: 'prompt' + i, title: 'For the Journal, question ' + (i + 1), body: str(q) });
     });
-    (r.timing || []).forEach(t => {
-      if (t && str(t.when)) segs.push({ title: 'Windows of Time: ' + str(t.when), body: str(t.guidance) });
+    (r.timing || []).filter(t => t && str(t.when)).forEach((t, i) => {
+      segs.push({ key: 'timing' + i, title: 'Windows of Time: ' + str(t.when), body: str(t.guidance) });
     });
-    if (str(r.ritual)) segs.push({ title: 'A Small Ritual', body: str(r.ritual) });
-    if (str(r.mantra)) segs.push({ title: 'Mantra', body: str(r.mantra) });
+    if (str(r.ritual)) segs.push({ key: 'ritual', title: 'A Small Ritual', body: str(r.ritual) });
+    if (str(r.mantra)) segs.push({ key: 'mantra', title: 'Mantra', body: str(r.mantra) });
     return segs;
   }
   orListenStop() {
@@ -53003,6 +53079,7 @@ class Component extends DCLogic {
     v.on = false;
     try { if (v.source) v.source.stop(); } catch (e) {}
     try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
+    if (v._ttsK) { try { clearInterval(v._ttsK); } catch (e) {} }
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     this._orVoice = null;
     this.setState({ orListening: false });
@@ -53010,65 +53087,161 @@ class Component extends DCLogic {
   orListenGo(reading) {
     const v = this._orVoice;
     if (v && v.on) { this.orListenStop(); return; }
-    /* The reading on the screen comes from the kept cache (or a partial first
-       half), not from state.orHit, which is empty for anything served from
-       either. oracleVals hands over the very reading it drew. */
+    this.orListenAt(reading, 0);
+  }
+  /* PLAYING FROM A SECTION. The reading on the screen comes from the kept
+     cache (or a partial first half), not from state.orHit, which is empty for
+     anything served from either, so oracleVals hands over the very reading it
+     drew, and the index of the section within it. Pressing the section that
+     is already playing pauses it instead of starting it over. */
+  orListenAt(reading, idx) {
+    const v = this._orVoice;
+    idx = idx | 0;
+    if (v && v.on && v.idx === idx) { this.orTransportPause(); return; }
+    this.orListenStop();
     const r = reading || (this.state.orHit && this.state.orHit.reading);
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
-    const voice = { on: true, idx: 0, segs, ctx: null, source: null, _ttsU: false };
+    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, source: null, _ttsU: false, _ttsK: null, pre: null, gen: 0, paused: false };
+    /* iOS lets an audio context sound only when it was made or woken inside
+       the press, and the first section arrives after the proxy answers, which
+       is no longer the press. The context is made and resumed here and reused
+       by every section that follows. */
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) {
+      try {
+        voice.ctx = new AC();
+        if (voice.ctx.state === 'suspended') voice.ctx.resume();
+      } catch (e) { voice.ctx = null; }
+    }
     this._orVoice = voice;
     this.setState({ orListening: true });
     this._orPlayNext(voice);
   }
+  /* THE TRANSPORT. Pause holds the section where it is: the audio context
+     suspends (a buffer source cannot pause, its context can) and the device's
+     voice pauses. Back and forward leave the current section wherever it
+     stands and play the one before or after it. */
+  orTransportPause() {
+    const v = this._orVoice;
+    if (!v || !v.on) return;
+    v.paused = !v.paused;
+    try {
+      if (v.paused) {
+        if (v.ctx && v.ctx.state === 'running') v.ctx.suspend();
+        if (v._ttsU) window.speechSynthesis.pause();
+      } else {
+        if (v.ctx && v.ctx.state === 'suspended') v.ctx.resume();
+        if (v._ttsU) window.speechSynthesis.resume();
+      }
+    } catch (e) {}
+    this.setState({ orListening: true });
+  }
+  orTransportPrev() {
+    const v = this._orVoice;
+    if (!v || !v.on) return;
+    v.idx = Math.max(0, v.idx - 1);
+    this._orRestart(v);
+  }
+  orTransportNext() {
+    const v = this._orVoice;
+    if (!v || !v.on) return;
+    v.idx = Math.min(v.segs.length - 1, v.idx + 1);
+    this._orRestart(v);
+  }
+  _orRestart(voice) {
+    /* A sound in flight is stopped; every callback it might still fire is
+       made stale by the generation bump inside _orPlayNext. A prefetch is
+       kept only when it happens to be for the section being jumped to. */
+    try { if (voice.source) voice.source.stop(); } catch (e) {}
+    voice.source = null;
+    if (voice._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    voice._ttsU = false;
+    if (voice.paused) {
+      voice.paused = false;
+      try { if (voice.ctx && voice.ctx.state === 'suspended') voice.ctx.resume(); } catch (e) {}
+    }
+    if (voice.pre && voice.pre.idx !== voice.idx) voice.pre = null;
+    this._orPlayNext(voice);
+  }
   _orPlayNext(voice) {
     if (!voice || !voice.on || voice.idx >= voice.segs.length) { this.orListenStop(); return; }
+    /* A generation per section played: callbacks from a section left behind
+       (a stopped sound, a cancelled utterance, a slow fetch) find their
+       number no longer current and do nothing. */
+    const g = voice.gen = (voice.gen || 0) + 1;
     const seg = voice.segs[voice.idx];
+    /* The transport's title and the section buttons' playing marks follow the
+       section, so the page is told each time it moves. */
+    this.setState({ orListening: true });
     const cloud = this.cloud;
     if (cloud && cloud.oracleVoice) {
-      cloud.oracleVoice({ text: seg.body, title: seg.title }).then(res => {
-        if (!voice.on) return;
+      /* The section after this one is asked for while this one plays
+         (_orPrefetch), so the proxy's wait — a cold function, the voice
+         being made, the download — passes under the current audio instead of
+         as a silence between sections. */
+      const req = voice.pre && voice.pre.idx === voice.idx
+        ? voice.pre.res
+        : cloud.oracleVoice({ text: seg.body, title: seg.title });
+      voice.pre = null;
+      Promise.resolve(req).then(res => {
+        if (!voice.on || g !== voice.gen) return;
         if (res.ok && res.audio) {
           this._orPlayAudio(voice, res.audio);
         } else {
           this._orPlayTTS(voice, seg.title + '. ' + seg.body);
         }
       }).catch(() => {
-        if (voice.on) this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+        if (voice.on && g === voice.gen) this._orPlayTTS(voice, seg.title + '. ' + seg.body);
       });
     } else {
       this._orPlayTTS(voice, seg.title + '. ' + seg.body);
     }
   }
+  _orPrefetch(voice) {
+    const next = voice.idx + 1, cloud = this.cloud;
+    if (!voice.on || !cloud || !cloud.oracleVoice || next >= voice.segs.length) return;
+    const seg = voice.segs[next];
+    /* A section asked for ahead is paid for even if the reader stops before
+       it plays — one section at most. A rejected prefetch is swallowed here;
+       the section that consumes it falls back on its own. */
+    const res = cloud.oracleVoice({ text: seg.body, title: seg.title });
+    res.catch(() => {});
+    voice.pre = { idx: next, res };
+  }
   _orPlayAudio(voice, buf) {
     if (!voice || !voice.on) return;
+    const g = voice.gen || 0;
     try {
       /* One context for the whole reading. A browser allows only a handful of
          open contexts, so one per section ran out mid-reading; and a context
          the OS suspended (iOS does, between sections) is resumed, not
-         replaced. */
+         replaced — unless the reader paused it themselves. */
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) throw new Error('no audio');
       const ctx = voice.ctx && voice.ctx.state !== 'closed' ? voice.ctx : (voice.ctx = new AC());
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended' && !voice.paused) ctx.resume();
       ctx.decodeAudioData(buf, buffer => {
-        if (!voice.on) return;
+        if (!voice.on || g !== voice.gen) return;
         const src = ctx.createBufferSource();
         src.buffer = buffer;
         src.connect(ctx.destination);
         voice.source = src;
         src.onended = () => {
-          if (!voice.on) return;
+          if (!voice.on || g !== voice.gen) return;
           voice.idx++;
           this._orPlayNext(voice);
         };
         src.start(0);
+        this._orPrefetch(voice);
       }, () => {
+        if (!voice.on || g !== voice.gen) return;
         const seg = voice.segs[voice.idx];
         this._orPlayTTS(voice, seg.title + '. ' + seg.body);
       });
     } catch (e) {
+      if (!voice.on || g !== voice.gen) return;
       const seg = voice.segs[voice.idx];
       this._orPlayTTS(voice, seg.title + '. ' + seg.body);
     }
@@ -53076,29 +53249,42 @@ class Component extends DCLogic {
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
     /* The device's own voice is the fallback, and it is not everywhere:
-       Android's WebView has no speechSynthesis at all. Without this guard the
-       speak call throws, the catch stops the voice, and the press looked like
-       it did nothing. */
+       Android's WebView has no speechSynthesis at all. A section with no voice
+       to read it is skipped, not stopped, so the reading plays on. */
     if (!window.speechSynthesis || typeof SpeechSynthesisUtterance !== 'function') {
-      this.orListenStop();
+      voice.idx++;
+      this._orPlayNext(voice);
       return;
     }
+    const g = voice.gen || 0;
     try {
       const u = new SpeechSynthesisUtterance(text);
       voice._ttsU = true;
       u.onend = () => {
-        if (!voice.on) return;
+        if (!voice.on || g !== voice.gen) return;
         voice._ttsU = false;
         voice.idx++;
         this._orPlayNext(voice);
       };
       u.onerror = () => {
-        if (!voice.on) return;
+        if (!voice.on || g !== voice.gen) return;
         voice._ttsU = false;
-        this.orListenStop();
+        /* A section the device refuses (too long, an odd character) is
+           skipped rather than ending the reading. */
+        voice.idx++;
+        this._orPlayNext(voice);
       };
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
+      const synth = window.speechSynthesis;
+      /* cancel() followed at once by speak() drops the new utterance in
+         Chrome, so cancel only when something is actually speaking. */
+      if (synth.speaking || synth.pending) synth.cancel();
+      synth.speak(u);
+      if (voice.paused) synth.pause(); else synth.resume();
+      /* Chrome pauses a long utterance after about fifteen seconds and never
+         resumes it; a nudge every few seconds keeps long sections talking.
+         It never undoes a pause the reader asked for. */
+      if (!voice._ttsK) voice._ttsK = setInterval(() => { try { if (!voice.paused) synth.resume(); } catch (e) {} }, 5000);
+      this._orPrefetch(voice);
     } catch (e) {
       this.orListenStop();
     }
@@ -54462,6 +54648,23 @@ class Component extends DCLogic {
     const prompts = r ? list(r.journalPrompts).filter(q => str(q)) : [];
     const transits = r ? list(r.keyTransits).filter(t => t && str(t.transit)) : [];
     const ov = r ? paras(r.overview) : [];
+    /* A play button per section. The segments are rebuilt from the very
+       reading on the screen so each button's index is the one orListenAt
+       expects; a section the reading does not have has no button. */
+    const segs = r ? this.orVoiceSegments(r) : [];
+    const segAt = {}; segs.forEach((s, i) => { segAt[s.key] = i; });
+    const vp = this._orVoice;
+    const segBtn = k => {
+      const i = segAt[k];
+      if (i === undefined) return { oiHas: false, oiOn: false, oiMark: '▶', oiGo: null };
+      const on = !!(vp && vp.on && vp.idx === i);
+      return { oiHas: true, oiOn: on, oiMark: on && !vp.paused ? '❚❚' : '▶', oiGo: () => this.orListenAt(r, i) };
+    };
+    /* Sections outside a repeated list get flat keys of their own, since
+       dotted paths are only resolved inside an sc-for scope. They are written
+       out in full in the return below: the dead-control check reads the logic
+       class statically, and a computed key is invisible to it. */
+    const bOv = segBtn('overview'), bSh = segBtn('shadow'), bRi = segBtn('ritual'), bMa = segBtn('mantra');
     const blocked = sample || off || !!r || locked || lumWait || deepGate;
     const waiting = !blocked && !err && signedIn && consented;
     /* A subscription from before the one time payment, still running: the
@@ -54525,23 +54728,38 @@ class Component extends DCLogic {
       orListening: !!(this._orVoice && this._orVoice.on),
       orListenLabel: this._orVoice && this._orVoice.on ? 'Stop listening' : 'Listen to the reading',
       orListenNote: this.orListenNote(),
+      /* The transport bar at the foot of the page: shown while a reading is
+         playing or paused, naming the section it is on. */
+      orTpOn: !!this._orVoice,
+      orTpTitle: this._orVoice && this._orVoice.segs[this._orVoice.idx] ? this._orVoice.segs[this._orVoice.idx].title : '',
+      orTpPaused: !!(this._orVoice && this._orVoice.paused),
+      orTpMark: this._orVoice && this._orVoice.paused ? '▶' : '❚❚',
+      orTpPauseLabel: this._orVoice && this._orVoice.paused ? 'Play' : 'Pause',
+      orTpPauseGo: () => this.orTransportPause(),
+      orTpPrevGo: () => this.orTransportPrev(),
+      orTpNextGo: () => this.orTransportNext(),
+      orTpStopGo: () => this.orListenStop(),
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
       orOvFirst: ov[0] || '', orOvRest: ov.slice(1).map(t => ({ t })),
-      orTriple: r ? [['☉ The Stars', 'Astrological weather', r.stars], ['◈ The Design', 'Your energetic current', r.design], ['∞ The Numbers', 'The cycle’s cadence', r.numbers]]
-        .map(([eyebrow, title, body]) => ({ eyebrow, title, body: str(body) })) : [],
+      orOvHas: bOv.oiHas, orOvOn: bOv.oiOn, orOvMark: bOv.oiMark, orOvGo: bOv.oiGo,
+      orTriple: r ? [['stars', '☉ The Stars', 'Astrological weather', r.stars], ['design', '◈ The Design', 'Your energetic current', r.design], ['numbers', '∞ The Numbers', 'The cycle’s cadence', r.numbers]]
+        .map(([k, eyebrow, title, body]) => ({ eyebrow, title, body: str(body), ...segBtn(k) })) : [],
       orHasChapters: chapters.length > 0,
-      orChapters: chapters.map((c, i) => ({ num: ROMAN[i] || String(i + 1), heading: str(c.heading), body: paras(c.body).join('\n\n') })),
+      orChapters: chapters.map((c, i) => ({ num: ROMAN[i] || String(i + 1), heading: str(c.heading), body: paras(c.body).join('\n\n'), ...segBtn('chapter' + i) })),
       orHasTiming: timing.length > 0,
-      orTiming: timing.map(t => ({ when: str(t.when), guidance: str(t.guidance) })),
+      orTiming: timing.map((t, i) => ({ when: str(t.when), guidance: str(t.guidance), ...segBtn('timing' + i) })),
       orHasShadow: !!(r && str(r.shadowWork)), orShadow: r ? str(r.shadowWork) : '',
-      orHasPrompts: prompts.length > 0, orPrompts: prompts.map(q => ({ t: q })),
-      orRealms: r ? [['♀︎', 'Love & Kinship', r.love], ['♄', 'Work & Purpose', r.work], ['☽', 'Spirit & Body', r.spirit]]
-        .map(([g, t, v]) => ({ g, t, v: str(v) })) : [],
+      orShHas: bSh.oiHas, orShOn: bSh.oiOn, orShMark: bSh.oiMark, orShGo: bSh.oiGo,
+      orHasPrompts: prompts.length > 0, orPrompts: prompts.map((q, i) => ({ t: q, ...segBtn('prompt' + i) })),
+      orRealms: r ? [['love', '♀︎', 'Love & Kinship', r.love], ['work', '♄', 'Work & Purpose', r.work], ['spirit', '☽', 'Spirit & Body', r.spirit]]
+        .map(([k, g, t, v]) => ({ g, t, v: str(v), ...segBtn(k) })) : [],
       orHasTransits: transits.length > 0,
-      orTransits: transits.map(t => ({ transit: str(t.transit), meaning: str(t.meaning) })),
-      orRitual: r ? str(r.ritual) : '', orHue: r ? str(r.auspiciousColor) : '', orMantra: r ? str(r.mantra) : ''
+      orTransits: transits.map((t, i) => ({ transit: str(t.transit), meaning: str(t.meaning), ...segBtn('transit' + i) })),
+      orRitual: r ? str(r.ritual) : '', orHue: r ? str(r.auspiciousColor) : '', orMantra: r ? str(r.mantra) : '',
+      orRiHas: bRi.oiHas, orRiOn: bRi.oiOn, orRiMark: bRi.oiMark, orRiGo: bRi.oiGo,
+      orMaHas: bMa.oiHas, orMaOn: bMa.oiOn, orMaMark: bMa.oiMark, orMaGo: bMa.oiGo
     };
   }
   /* ========================= THE DREAM JOURNAL =========================

@@ -215,9 +215,13 @@ voice reads instead.
 
 Open a reading and press Listen to the reading. The button becomes Stop
 listening while the voice is going, and the reading plays section by section.
-If the voice is silent, open the function's Logs: no function named
-`oracle-voice` means step 2 did not finish, a 401 from ElevenLabs means the
-key is wrong, and `quota_exceeded` means the plan's characters are spent.
+If the device's own voice reads instead of the ElevenLabs one, open the
+function's Logs: a line naming `ELEVENLABS_API_KEY` means the secret was never
+set or was misspelled, "ElevenLabs refused the key" means the key is wrong,
+`quota_exceeded` means the plan's characters are spent, and no function named
+`oracle-voice` at all means step 2 did not finish. On an iPhone, the Ring /
+Silent switch mutes the speaker for this as for any media; headphones or
+flipping the switch brings the voice back.
 
 ## What is sent, and what is kept
 
