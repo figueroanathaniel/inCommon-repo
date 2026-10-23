@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice2  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice3  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53018,6 +53018,17 @@ class Component extends DCLogic {
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
     const voice = { on: true, idx: 0, segs, ctx: null, source: null, _ttsU: false };
+    /* iOS lets an audio context sound only when it was made or woken inside
+       the press, and the first section arrives after the proxy answers, which
+       is no longer the press. The context is made and resumed here and reused
+       by every section that follows. */
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) {
+      try {
+        voice.ctx = new AC();
+        if (voice.ctx.state === 'suspended') voice.ctx.resume();
+      } catch (e) { voice.ctx = null; }
+    }
     this._orVoice = voice;
     this.setState({ orListening: true });
     this._orPlayNext(voice);

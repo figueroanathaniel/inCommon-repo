@@ -37,7 +37,10 @@ Deno.serve(async (req: Request) => {
   const title = typeof body.title === "string" ? body.title.trim() : "";
   if (!text) return reply(400, { reason: "EMPTY" });
 
-  if (!ELEVENLABS_KEY) return reply(503, { reason: "NOT_SET_UP" });
+  if (!ELEVENLABS_KEY) {
+    console.error("oracle-voice: ELEVENLABS_API_KEY is not set on this function");
+    return reply(503, { reason: "NOT_SET_UP" });
+  }
 
   const fullText = title ? title + ". " + text : text;
   const voiceId = body.voiceId || DEFAULT_VOICE;
@@ -61,25 +64,34 @@ Deno.serve(async (req: Request) => {
       }
     );
 
-    if (elRes.status === 401) return reply(503, { reason: "NOT_SET_UP" });
+    if (elRes.status === 401) {
+      console.error("oracle-voice: ElevenLabs refused the key (401) — check ELEVENLABS_API_KEY");
+      return reply(503, { reason: "NOT_SET_UP" });
+    }
     if (elRes.status === 429) {
       const data = await elRes.json().catch(() => ({}));
       if (data && data.detail && data.detail.status === "quota_exceeded") {
+        console.error("oracle-voice: ElevenLabs quota exceeded");
         return reply(429, { reason: "OUT_OF_CREDITS" });
       }
+      console.error("oracle-voice: ElevenLabs rate limited");
       return reply(429, { reason: "RATE_LIMITED" });
     }
     if (elRes.status === 422) {
       const data = await elRes.json().catch(() => ({}));
+      console.error("oracle-voice: ElevenLabs 422", JSON.stringify(data && data.detail || {}));
       return reply(422, { reason: "INVALID", detail: data.detail || "voice or model not found" });
     }
     if (!elRes.ok) {
+      const detail = await elRes.text().catch(() => "");
+      console.error("oracle-voice: ElevenLabs answered " + elRes.status, detail.slice(0, 500));
       return reply(503, { reason: "SILENT", status: elRes.status });
     }
 
     const buf = await elRes.arrayBuffer();
     return reply(200, buf, "audio/mpeg");
   } catch (e) {
+    console.error("oracle-voice: fetch to ElevenLabs failed", (e as Error).message);
     return reply(503, { reason: "OFFLINE", error: (e as Error).message });
   }
 });
