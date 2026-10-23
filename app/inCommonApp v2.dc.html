@@ -25396,10 +25396,13 @@ class Component extends DCLogic {
     this._orVoice = null;
     this.setState({ orListening: false });
   }
-  orListenGo() {
+  orListenGo(reading) {
     const v = this._orVoice;
     if (v && v.on) { this.orListenStop(); return; }
-    const st = this.state, r = st.orHit && st.orHit.reading;
+    /* The reading on the screen comes from the kept cache (or a partial first
+       half), not from state.orHit, which is empty for anything served from
+       either. oracleVals hands over the very reading it drew. */
+    const r = reading || (this.state.orHit && this.state.orHit.reading);
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
@@ -25430,8 +25433,14 @@ class Component extends DCLogic {
   _orPlayAudio(voice, buf) {
     if (!voice || !voice.on) return;
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      voice.ctx = ctx;
+      /* One context for the whole reading. A browser allows only a handful of
+         open contexts, so one per section ran out mid-reading; and a context
+         the OS suspended (iOS does, between sections) is resumed, not
+         replaced. */
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw new Error('no audio');
+      const ctx = voice.ctx && voice.ctx.state !== 'closed' ? voice.ctx : (voice.ctx = new AC());
+      if (ctx.state === 'suspended') ctx.resume();
       ctx.decodeAudioData(buf, buffer => {
         if (!voice.on) return;
         const src = ctx.createBufferSource();
@@ -25455,6 +25464,14 @@ class Component extends DCLogic {
   }
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
+    /* The device's own voice is the fallback, and it is not everywhere:
+       Android's WebView has no speechSynthesis at all. Without this guard the
+       speak call throws, the catch stops the voice, and the press looked like
+       it did nothing. */
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance !== 'function') {
+      this.orListenStop();
+      return;
+    }
     try {
       const u = new SpeechSynthesisUtterance(text);
       voice._ttsU = true;
@@ -26860,7 +26877,7 @@ class Component extends DCLogic {
       orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orDeepGate: deepGate,
       orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
-      orListenGo: () => this.orListenGo(),
+      orListenGo: () => this.orListenGo(r),
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
       orBusy: !r && !locked && (busy || waiting || lumWait),

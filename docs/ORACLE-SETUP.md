@@ -179,6 +179,46 @@ at `ORACLE_TIME_LIMIT` seconds, a little under the plan's limit, so the reader
 is told rather than left waiting on a stopped function. On a paid plan, raise
 `ORACLE_TIME_LIMIT` to `390` before trying `kimi-k3` or thinking.
 
+## The Oracle speaks
+
+The Listen button on a reading reads it aloud, section by section. The voice
+is ElevenLabs, reached the same way the writing is reached: the app asks a
+second Edge Function, `oracle-voice`, which holds the key. It is asked once
+per section, so a reader who stops early is never billed for what was not
+heard. If the function is not set up, the button still works: the device's own
+voice reads instead.
+
+### 1. An ElevenLabs key and voice
+
+1. Sign in at elevenlabs.io and create an API key under your profile.
+2. Choose the voice in the Voice Library and copy its voice ID. The app's
+   default is `yDEpaEXmUSjci1pRBCJf`; set `ORACLE_VOICE_ID` to use another.
+3. Text to speech is billed per character from the plan's quota. A whole
+   reading is a few thousand characters; check current pricing on
+   elevenlabs.io. When the quota runs out the app falls back to the device's
+   own voice, and nothing else is affected.
+
+### 2. The function
+
+1. In the Supabase dashboard, open Edge Functions and deploy a new function
+   using the editor.
+2. Name it exactly `oracle-voice`. The app calls it by that name.
+3. Replace the example code with all of `server/oracle-voice/index.ts`, then
+   deploy.
+4. Under Edge Functions, Secrets, add `ELEVENLABS_API_KEY` with the key from
+   step 1, and `ORACLE_VOICE_ID` with the voice ID if it differs from the
+   default.
+5. Leave JWT verification on, as for `oracle`: only a signed-in reader is
+   answered.
+
+### 3. Try it
+
+Open a reading and press Listen to the reading. The button becomes Stop
+listening while the voice is going, and the reading plays section by section.
+If the voice is silent, open the function's Logs: no function named
+`oracle-voice` means step 2 did not finish, a 401 from ElevenLabs means the
+key is wrong, and `quota_exceeded` means the plan's characters are spent.
+
 ## What is sent, and what is kept
 
 **Sent to the function, and from there to Moonshot AI,** is the Codex's dossier:
