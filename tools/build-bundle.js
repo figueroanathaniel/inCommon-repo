@@ -96,9 +96,6 @@ const MODULES = [
   'hd-life.js',
   'hd-teachings.js',
   'gazetteer-us.js',
-  /* Appends into the array gazetteer-us.js exports, so it must stay after it. */
-  'gazetteer-world.js',
-  /* Reads both of the above to derive a time zone, so it comes after both. */
   'geocode-online.js',
   /* The connection pass. birth-time.js depends on nothing. hd-composite.js
      reads the channel table out of hd-atlas.js above, so it has to follow it.
