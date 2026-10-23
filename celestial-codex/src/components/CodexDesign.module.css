@@ -1,0 +1,178 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.stageRow {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 110px;
+  gap: var(--spacing-4);
+  align-items: center;
+}
+
+.graph {
+  min-width: 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.colTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.colSub {
+  margin: 0 0 var(--spacing-2);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.colDesign .colTitle,
+.colDesign .actGate {
+  color: #f07a8a;
+}
+
+.colPers .colTitle,
+.colPers .actGate {
+  color: #f1ead8;
+}
+
+.act {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px;
+  border-bottom: 1px solid rgba(217, 185, 106, 0.08);
+}
+
+.actGlyph {
+  font-family: var(--font-family-display);
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.actGate {
+  font-family: var(--font-family-monospace);
+  font-size: 0.78rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-6);
+}
+
+.typeCard {
+  grid-row: span 2;
+}
+
+.em {
+  font-style: italic;
+  color: var(--primary);
+}
+
+.prose {
+  line-height: 1.75;
+  margin: 0 0 var(--spacing-3);
+  opacity: 0.92;
+}
+
+.prose b {
+  color: var(--primary);
+  font-family: var(--font-family-monospace);
+  font-weight: 500;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.mono {
+  font-family: var(--font-family-monospace);
+  font-size: 0.74rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin: var(--spacing-4) 0 0;
+}
+
+.facts dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.facts dd {
+  margin: 4px 0 0;
+  font-family: var(--font-family-display);
+  font-size: 1.25rem;
+  color: var(--foreground);
+}
+
+.gates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.gateChip {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted-foreground);
+}
+
+.gateChip b {
+  font-family: var(--font-family-monospace);
+  margin-right: 4px;
+}
+
+.gateOn {
+  color: var(--foreground);
+  border-color: var(--primary);
+  background: var(--gold-soft);
+}
+
+.gateOn b {
+  color: var(--primary);
+}
+
+@media (max-width: 900px) {
+  .stageRow {
+    grid-template-columns: 1fr 1fr;
+  }
+  .graph {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .typeCard {
+    grid-row: auto;
+  }
+}

@@ -1,0 +1,147 @@
+@layer base {
+  .selectTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.5rem;
+    padding: var(--spacing-2) var(--spacing-3);
+    cursor: pointer;
+    overflow: hidden;
+
+    & > *:not(svg) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .selectTrigger[data-placeholder] {
+    color: var(--muted-foreground);
+  }
+
+  .selectIcon {
+    height: 1rem;
+    width: 1rem;
+    color: var(--muted-foreground);
+    margin-left: var(--spacing-2);
+    transition: transform var(--animation-duration-normal) ease;
+  }
+
+  .selectTrigger[data-state="open"] .selectIcon {
+    transform: rotate(180deg);
+  }
+
+  .selectContent {
+    z-index: var(--z-overlay);
+    max-height: var(--radix-select-content-available-height);
+    min-width: 12rem;
+    max-width: 24rem;
+    overflow: hidden;
+    background-color: var(--popup);
+    color: var(--popup-foreground);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    animation: scaleIn var(--animation-duration-normal) ease;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .selectViewport {
+    padding: var(--spacing-2);
+  }
+
+  .scrollButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--spacing-6);
+    background-color: var(--popup);
+    color: var(--popup-foreground);
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
+
+  .scrollButton:hover .scrollIcon {
+    color: var(--primary);
+  }
+
+  .scrollIcon {
+    height: 1rem;
+    width: 1rem;
+    color: var(--muted-foreground);
+    transition: color var(--animation-duration-fast) ease;
+  }
+
+  .selectLabel {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .selectItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    padding-right: var(--spacing-8);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    border-radius: var(--radius-sm);
+    color: var(--popup-foreground);
+    user-select: none;
+    outline: none;
+    cursor: pointer;
+    transition:
+      background-color var(--animation-duration-fast) ease,
+      color var(--animation-duration-fast) ease;
+  }
+
+  .selectItem:hover {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .selectItem:focus-visible {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .selectItem[data-disabled] {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .selectItemIndicator {
+    position: absolute;
+    right: var(--spacing-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .checkIcon {
+    height: 1rem;
+    width: 1rem;
+    color: currentColor;
+  }
+
+  .selectSeparator {
+    height: 1px;
+    background-color: var(--border);
+    margin: var(--spacing-2) var(--spacing-1);
+  }
+
+}

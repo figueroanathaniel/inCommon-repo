@@ -1,0 +1,179 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.medallions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-6);
+  align-items: center;
+}
+
+.medallion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: 1;
+  max-width: 260px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: radial-gradient(circle at 50% 35%, rgba(59, 42, 134, 0.55), rgba(7, 7, 26, 0.9) 70%);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: transform var(--animation-duration-slow) ease-out, box-shadow var(--animation-duration-slow);
+  padding: var(--spacing-6);
+  text-align: center;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.medallion:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 50px rgba(217, 185, 106, 0.25);
+}
+
+.medCenter {
+  max-width: 300px;
+  box-shadow: 0 0 60px rgba(139, 111, 224, 0.25);
+}
+
+.ring {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px dashed rgba(217, 185, 106, 0.35);
+  animation: spin 60s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.medGlyph {
+  font-family: var(--font-family-display);
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  line-height: 1;
+  color: var(--primary);
+  text-shadow: 0 0 24px rgba(217, 185, 106, 0.6);
+}
+
+.medLabel {
+  font-family: var(--font-family-display);
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  line-height: 1.1;
+  max-width: 80%;
+  overflow-wrap: break-word;
+}
+
+.medSub {
+  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  max-width: 80%;
+}
+
+.signature {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: var(--spacing-8);
+}
+
+.em {
+  font-style: italic;
+  color: var(--primary);
+}
+
+.prose {
+  font-size: 1.06rem;
+  line-height: 1.85;
+  margin: 0 0 var(--spacing-4);
+  opacity: 0.93;
+}
+
+.prose b {
+  font-family: var(--font-family-display);
+  font-size: 1.12em;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.coda {
+  font-family: var(--font-family-display);
+  font-style: italic;
+  font-size: 1.35rem;
+  text-align: center;
+  color: var(--primary);
+  margin: var(--spacing-6) 0 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-6);
+}
+
+.oracleCta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-8);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(217, 185, 106, 0.12), rgba(139, 111, 224, 0.12));
+  color: var(--foreground);
+  cursor: pointer;
+  transition: box-shadow var(--animation-duration-normal);
+}
+
+.oracleCta:hover {
+  box-shadow: 0 0 40px rgba(217, 185, 106, 0.3);
+}
+
+.oracleCta span {
+  font-family: var(--font-family-display);
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.oracleCta small {
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .medallions {
+    gap: var(--spacing-2);
+  }
+  .medallion {
+    padding: 12%;
+    gap: 2px;
+  }
+  .medGlyph {
+    font-size: clamp(1.5rem, 8vw, 2.6rem);
+  }
+  .medLabel {
+    font-size: clamp(0.72rem, 3.3vw, 1rem);
+    max-width: 88%;
+  }
+  .medSub {
+    font-size: clamp(0.46rem, 2vw, 0.6rem);
+    letter-spacing: 0.04em;
+    max-width: 86%;
+    line-height: 1.25;
+  }
+  .signature {
+    padding: var(--spacing-6);
+  }
+}

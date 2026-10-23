@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Overlay layers */
+  --z-overlay: 400;
+
+  --z-spotlight: 1000; /* Tutorial spotlights/guided help */
+
+  /* System layers */
+  --z-critical: 2000; /* Critical system notifications */
+
+  /* spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+}
+
+:root {
+  --background: #07071a;
+  --foreground: #ece6d6;
+
+  --surface: rgba(22, 20, 52, 0.62);
+  --surface-foreground: #ece6d6;
+  --sidebar: #0c0b24;
+  --sidebar-foreground: #ece6d6;
+  --card: rgba(18, 17, 44, 0.72);
+  --card-foreground: #ece6d6;
+  --popup: #14123a;
+  --popup-foreground: #ece6d6;
+
+  --primary: #d9b96a;
+  --primary-foreground: #120f24;
+  --secondary: #1f1c4a;
+  --secondary-foreground: #e8dfc4;
+  --accent: #2a2560;
+  --accent-foreground: #f3e7c0;
+  --muted: #17153a;
+  --muted-foreground: #a39db8;
+
+  --success: #7fc8a9;
+  --success-foreground: #07171a;
+  --error: #e07a7a;
+  --error-foreground: #1a0707;
+  --warning: #e6b35c;
+  --warning-foreground: #1a1207;
+  --info: #8fa8e8;
+  --info-foreground: #070b1a;
+  --info-hover: #a3b8ef;
+  --info-active: #7a93d9;
+
+  --border: rgba(217, 185, 106, 0.22);
+
+  --gold-soft: rgba(217, 185, 106, 0.12);
+  --gold-glow: 0 0 24px rgba(217, 185, 106, 0.25);
+  --nebula: #8b6fe0;
+  --nebula-deep: #3b2a86;
+
+  --font-family-base: 'Inter Tight', system-ui, sans-serif;
+  --font-family-display: 'Cormorant Garamond', Georgia, serif;
+  --font-family-monospace: 'JetBrains Mono', ui-monospace, monospace;
+  --font-family-cursive: 'Cormorant Garamond', Georgia, serif;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(3, 2, 15, 0.55);
+  --shadow-lg: 0 20px 60px rgba(3, 2, 15, 0.7), 0 0 40px rgba(139, 111, 224, 0.08);
+  --shadow-focus: 0 0 0 2px rgba(217, 185, 106, 0.55);
+
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --animation-duration-fast: 150ms;
+  --animation-duration-normal: 320ms;
+  --animation-duration-slow: 700ms;
+
+  --chart-color-1: #d9b96a;
+  --chart-color-2: #8b6fe0;
+  --chart-color-3: #7fc8a9;
+  --chart-color-4: #e07a7a;
+  --chart-color-5: #8fa8e8;
+}
+
+.dark {
+}

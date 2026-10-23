@@ -1,0 +1,87 @@
+.stage {
+  position: relative;
+  width: 100%;
+  height: clamp(420px, 68vh, 700px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(217, 185, 106, 0.12), transparent 55%),
+    radial-gradient(ellipse at 30% 80%, rgba(91, 62, 190, 0.3), transparent 60%),
+    #05051a;
+  box-shadow: var(--shadow-lg);
+  touch-action: none;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  user-select: none;
+  text-shadow: 0 0 10px currentColor;
+  transition: transform var(--animation-duration-normal) ease-out;
+  white-space: nowrap;
+}
+
+.labelSel {
+  transform: scale(1.2);
+}
+
+.num {
+  font-family: var(--font-family-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.labelCenter .num {
+  font-size: 2.2rem;
+}
+
+.name {
+  font-family: var(--font-family-base);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  text-shadow: none;
+  margin-top: 3px;
+}
+
+.fallback {
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+}
+
+.fallbackItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 96px;
+  height: 96px;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.fallbackSel {
+  border-color: var(--primary);
+  box-shadow: var(--gold-glow);
+}
+
+.stage2d {
+  touch-action: auto;
+  height: auto;
+  aspect-ratio: 1;
+  max-height: 78vh;
+  padding: var(--spacing-8) var(--spacing-2) var(--spacing-2);
+}

@@ -1,0 +1,178 @@
+.shell {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family-base);
+  isolation: isolate;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nebula {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 50% 40% at 18% 20%, rgba(91, 62, 190, 0.28), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 85% 30%, rgba(40, 60, 160, 0.25), transparent 70%),
+    radial-gradient(ellipse 60% 45% at 60% 90%, rgba(139, 60, 150, 0.18), transparent 70%),
+    radial-gradient(ellipse 30% 25% at 50% 45%, rgba(217, 185, 106, 0.06), transparent 70%);
+  animation: drift 90s ease-in-out infinite alternate;
+}
+
+.starsFar,
+.starsNear {
+  position: absolute;
+  inset: -50%;
+  background-repeat: repeat;
+}
+
+.starsFar {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 120px 80px, rgba(255, 240, 210, 0.6), transparent),
+    radial-gradient(1px 1px at 200px 150px, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 60px 190px, rgba(200, 210, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 170px 20px, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 240px 220px;
+  opacity: 0.7;
+  animation: twinkle 7s ease-in-out infinite alternate, spin 600s linear infinite;
+}
+
+.starsNear {
+  background-image:
+    radial-gradient(1.5px 1.5px at 80px 120px, rgba(255, 236, 190, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 310px 40px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 230px 290px, rgba(217, 185, 106, 0.9), transparent);
+  background-size: 420px 380px;
+  animation: twinkle 4.5s ease-in-out infinite alternate-reverse, spin 900s linear infinite reverse;
+}
+
+@keyframes twinkle {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) clamp(var(--spacing-4), 4vw, var(--spacing-12));
+  background: linear-gradient(to bottom, rgba(7, 7, 26, 0.92), rgba(7, 7, 26, 0.55));
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(217, 185, 106, 0.12);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  text-decoration: none;
+  color: var(--foreground);
+}
+
+.brandMark {
+  color: var(--primary);
+  font-size: 1.4rem;
+  text-shadow: 0 0 14px rgba(217, 185, 106, 0.7);
+  animation: breathe 5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; text-shadow: 0 0 22px rgba(217, 185, 106, 0.95); }
+}
+
+.brandName {
+  font-family: var(--font-family-display);
+  font-size: 1.45rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.brandName em {
+  color: var(--primary);
+  font-style: italic;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.navLink {
+  color: var(--foreground);
+}
+
+.avatarBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+}
+
+.avatar {
+  border: 1px solid var(--primary);
+  box-shadow: var(--gold-glow);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.footer {
+  padding: var(--spacing-12) var(--spacing-4) var(--spacing-8);
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+
+.footer em {
+  font-family: var(--font-family-display);
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.footerRule {
+  display: block;
+  width: 120px;
+  height: 1px;
+  margin: 0 auto var(--spacing-4);
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+@media (max-width: 640px) {
+  .brandName {
+    font-size: 1.2rem;
+  }
+}
