@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice2  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25979,18 +25979,37 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   /* ElevenLabs text-to-speech, per-section, so stopping early never bills
      for what was not heard. The key lives as a secret; the page never sees
      it. Audio is returned as an ArrayBuffer on success, or a reason on
-     failure, matching the Oracle's own contract. */
+     failure, matching the Oracle's own contract.
+
+     The function is asked straight through its address, the way a gift asks
+     billing, rather than through client.functions.invoke: this version of the
+     client reads any content type it does not know as TEXT, and audio/mpeg is
+     one it does not know, so a good answer arrived as a corrupted string and
+     every listen fell back to the device's own voice. The bearer is the
+     reader's session; the function's errors come back as { reason }. */
   function oracleVoice(req) {
     if (!client) return Promise.resolve({ ok: false, reason: "off" });
-    if (!session) return Promise.resolve({ ok: false, reason: "signedOut" });
+    if (!session || !session.access_token) return Promise.resolve({ ok: false, reason: "signedOut" });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
     return Promise.resolve().then(function () {
-      return client.functions.invoke("oracle-voice", { body: req });
+      return fetch(url + "/functions/v1/oracle-voice", {
+        method: "POST",
+        headers: {
+          apikey: key,
+          Authorization: "Bearer " + session.access_token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(req || {})
+      });
     }).then(function (res) {
-      if (res && !res.error && res.data instanceof ArrayBuffer) {
-        return { ok: true, audio: res.data };
+      if (res && res.ok && ((res.headers.get("Content-Type") || "").indexOf("audio/") === 0)) {
+        return res.arrayBuffer().then(function (buf) {
+          return buf && buf.byteLength ? { ok: true, audio: buf } : { ok: false, reason: "silent" };
+        });
       }
-      var e = res && res.error, st = e && e.context && e.context.status;
-      return oracleCode(e).then(function (code) {
+      var st = res ? res.status : 0;
+      return Promise.resolve().then(function () { return res.json(); }).then(function (b) {
+        var code = (b && (b.code || b.reason)) || null;
         if (st === 402 || code === "PREMIUM_REQUIRED") return { ok: false, reason: "premium" };
         if (code === "RATE_LIMITED") return { ok: false, reason: "busy" };
         if (code === "OUT_OF_CREDITS") return { ok: false, reason: "silent" };
@@ -25998,10 +26017,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         if (st === 404 || code === "NOT_SET_UP") return { ok: false, reason: "notSetUp" };
         if (st === 401 || code === "SIGNED_OUT" || code === "MFA_REQUIRED") return { ok: false, reason: "signedOut" };
         if (st === 429 || code === "LIMIT") return { ok: false, reason: "limit" };
-        if (st === 503) return { ok: false, reason: "silent" };
-        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || "")) return { ok: false, reason: "offline" };
-        return { ok: false, reason: "error", error: (e && e.message) || "no audio returned" };
-      });
+        if (st === 503 || code === "SILENT") return { ok: false, reason: "silent" };
+        return { ok: false, reason: "error", error: String(code || st) };
+      }, function () { return { ok: false, reason: "error", error: "status " + st }; });
     }).catch(function (e) { return { ok: false, reason: "offline", error: e && e.message }; });
   }
 
@@ -52989,10 +53007,13 @@ class Component extends DCLogic {
     this._orVoice = null;
     this.setState({ orListening: false });
   }
-  orListenGo() {
+  orListenGo(reading) {
     const v = this._orVoice;
     if (v && v.on) { this.orListenStop(); return; }
-    const st = this.state, r = st.orHit && st.orHit.reading;
+    /* The reading on the screen comes from the kept cache (or a partial first
+       half), not from state.orHit, which is empty for anything served from
+       either. oracleVals hands over the very reading it drew. */
+    const r = reading || (this.state.orHit && this.state.orHit.reading);
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
@@ -53023,8 +53044,14 @@ class Component extends DCLogic {
   _orPlayAudio(voice, buf) {
     if (!voice || !voice.on) return;
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      voice.ctx = ctx;
+      /* One context for the whole reading. A browser allows only a handful of
+         open contexts, so one per section ran out mid-reading; and a context
+         the OS suspended (iOS does, between sections) is resumed, not
+         replaced. */
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw new Error('no audio');
+      const ctx = voice.ctx && voice.ctx.state !== 'closed' ? voice.ctx : (voice.ctx = new AC());
+      if (ctx.state === 'suspended') ctx.resume();
       ctx.decodeAudioData(buf, buffer => {
         if (!voice.on) return;
         const src = ctx.createBufferSource();
@@ -53048,6 +53075,14 @@ class Component extends DCLogic {
   }
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
+    /* The device's own voice is the fallback, and it is not everywhere:
+       Android's WebView has no speechSynthesis at all. Without this guard the
+       speak call throws, the catch stops the voice, and the press looked like
+       it did nothing. */
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance !== 'function') {
+      this.orListenStop();
+      return;
+    }
     try {
       const u = new SpeechSynthesisUtterance(text);
       voice._ttsU = true;
@@ -54453,7 +54488,7 @@ class Component extends DCLogic {
       orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orDeepGate: deepGate,
       orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
-      orListenGo: () => this.orListenGo(),
+      orListenGo: () => this.orListenGo(r),
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
       orBusy: !r && !locked && (busy || waiting || lumWait),
