@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice5  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice6  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34576,7 +34576,8 @@ input[type="date"]{color-scheme:dark}
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
-      <span style="font:600 11px var(--fu);color:var(--mut);max-width:32vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
+      <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
+      <span style="font:600 11px var(--fu);color:var(--mut);max-width:24vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
       <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
     </div>
   </div>
@@ -41306,6 +41307,7 @@ input[type="date"]{color-scheme:dark}
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
+      <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
       <span style="font:600 11px var(--fu);color:var(--mut);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
       <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
     </div>
@@ -53077,7 +53079,10 @@ class Component extends DCLogic {
     const v = this._orVoice;
     if (!v) return;
     v.on = false;
-    try { if (v.source) v.source.stop(); } catch (e) {}
+    /* Several pieces of the reading can be scheduled ahead of the one
+       sounding; every one of them has to be stopped. */
+    (v.sources || []).forEach(s => { try { s.stop(); } catch (e) {} });
+    if (v.source) { try { v.source.stop(); } catch (e) {} }
     try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
     if (v._ttsK) { try { clearInterval(v._ttsK); } catch (e) {} }
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
@@ -53103,7 +53108,7 @@ class Component extends DCLogic {
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
-    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, source: null, _ttsU: false, _ttsK: null, pre: null, gen: 0, paused: false };
+    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, comp: null, source: null, sources: [], rate: this._orVoiceRate(), chunkBag: null, preChunks: null, nextStart: 0, _ttsU: false, _ttsK: null, pre: null, gen: 0, paused: false };
     /* iOS lets an audio context sound only when it was made or woken inside
        the press, and the first section arrives after the proxy answers, which
        is no longer the press. The context is made and resumed here and reused
@@ -53138,6 +53143,32 @@ class Component extends DCLogic {
     } catch (e) {}
     this.setState({ orListening: true });
   }
+  /* READING SPEED. 1x to 4x, kept on the device so the next reading opens at
+     the pace the reader chose. Web Audio speeds a buffer by resampling it, so
+     the pitch climbs with the pace; the deliberate pauses between pieces
+     shrink to match, and the pieces already queued are retimed where they
+     stand. */
+  orTransportRate() {
+    const RATES = [1, 1.5, 2, 3, 4];
+    const v = this._orVoice;
+    const cur = v && v.rate || this._orVoiceRate();
+    const next = RATES[(RATES.indexOf(cur) + 1) % RATES.length] || 1;
+    this.writeLS('incommon.voice.rate', next);
+    if (v) {
+      const old = v.rate || 1;
+      v.rate = next;
+      try {
+        if (v.ctx && v.nextStart && v.nextStart > v.ctx.currentTime)
+          v.nextStart = v.ctx.currentTime + (v.nextStart - v.ctx.currentTime) * (old / next);
+        (v.sources || []).forEach(s => { try { s.playbackRate.value = next; } catch (e) {} });
+      } catch (e) {}
+    }
+    this.setState({ orListening: !!(v && v.on) });
+  }
+  _orVoiceRate() {
+    const r = parseFloat(this.readLS('incommon.voice.rate', 1));
+    return [1, 1.5, 2, 3, 4].indexOf(r) !== -1 ? r : 1;
+  }
   orTransportPrev() {
     const v = this._orVoice;
     if (!v || !v.on) return;
@@ -53154,6 +53185,8 @@ class Component extends DCLogic {
     /* A sound in flight is stopped; every callback it might still fire is
        made stale by the generation bump inside _orPlayNext. A prefetch is
        kept only when it happens to be for the section being jumped to. */
+    (voice.sources || []).forEach(s => { try { s.stop(); } catch (e) {} });
+    voice.sources = [];
     try { if (voice.source) voice.source.stop(); } catch (e) {}
     voice.source = null;
     if (voice._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
@@ -53177,24 +53210,19 @@ class Component extends DCLogic {
     this.setState({ orListening: true });
     const cloud = this.cloud;
     if (cloud && cloud.oracleVoice) {
-      /* The section after this one is asked for while this one plays
-         (_orPrefetch), so the proxy's wait — a cold function, the voice
-         being made, the download — passes under the current audio instead of
-         as a silence between sections. */
-      const req = voice.pre && voice.pre.idx === voice.idx
-        ? voice.pre.res
-        : cloud.oracleVoice({ text: seg.body, title: seg.title });
+      /* A section is read in pieces: the title first, so the wait for the
+         first sound is a short piece's worth, then a paragraph at a time.
+         Each piece is a fresh request because a long one flattens the
+         voice's prosody toward its end, and the beat of silence between
+         pieces is ours to choose. */
+      voice.chunks = [{ text: seg.title + '.', gap: 750 }].concat(this._orVoiceChunks(seg.body));
+      voice.chunkIdx = 0;
+      voice.chunkBag = null;
+      voice.nextStart = 0;
+      /* A section asked for ahead carries its first pieces with it. */
+      voice.preChunks = voice.pre && voice.pre.idx === voice.idx ? voice.pre.chunks : null;
       voice.pre = null;
-      Promise.resolve(req).then(res => {
-        if (!voice.on || g !== voice.gen) return;
-        if (res.ok && res.audio) {
-          this._orPlayAudio(voice, res.audio);
-        } else {
-          this._orPlayTTS(voice, seg.title + '. ' + seg.body);
-        }
-      }).catch(() => {
-        if (voice.on && g === voice.gen) this._orPlayTTS(voice, seg.title + '. ' + seg.body);
-      });
+      this._orPump(voice, g);
     } else {
       this._orPlayTTS(voice, seg.title + '. ' + seg.body);
     }
@@ -53202,49 +53230,153 @@ class Component extends DCLogic {
   _orPrefetch(voice) {
     const next = voice.idx + 1, cloud = this.cloud;
     if (!voice.on || !cloud || !cloud.oracleVoice || next >= voice.segs.length) return;
+    if (voice.pre && voice.pre.idx === next) return;
+    /* The section after this one has its first two pieces asked for while
+       this one plays, so the proxy's wait passes under the current audio
+       instead of as a silence between sections. Pieces asked for ahead are
+       paid for even if the reader stops early — two short ones at most,
+       where this used to be the whole next section. A rejected prefetch is
+       swallowed here; the section that consumes it falls back on its own. */
     const seg = voice.segs[next];
-    /* A section asked for ahead is paid for even if the reader stops before
-       it plays — one section at most. A rejected prefetch is swallowed here;
-       the section that consumes it falls back on its own. */
-    const res = cloud.oracleVoice({ text: seg.body, title: seg.title });
-    res.catch(() => {});
-    voice.pre = { idx: next, res };
+    const chunks = [{ text: seg.title + '.', gap: 750 }].concat(this._orVoiceChunks(seg.body));
+    const bag = {};
+    [0, 1].forEach(ci => {
+      if (!chunks[ci]) return;
+      const res = cloud.oracleVoice({ text: chunks[ci].text });
+      res.catch(() => {});
+      bag[ci] = res;
+    });
+    voice.pre = { idx: next, chunks: bag };
   }
-  _orPlayAudio(voice, buf) {
-    if (!voice || !voice.on) return;
-    const g = voice.gen || 0;
+  /* The pieces of a section: paragraph-sized, a long paragraph broken on
+     sentence ends so no piece runs past ~700 characters. gap is the beat of
+     silence after the piece — longer at a paragraph's end — divided by the
+     reading speed when the piece is scheduled. */
+  _orVoiceChunks(text) {
+    const paras = String(text || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    const chunks = [];
+    paras.forEach(p => {
+      if (p.length <= 700) { chunks.push({ text: p, gap: 650 }); return; }
+      const sentences = p.match(/[^.!?…]+[.!?…]+["'”’)\]]*\s*/g) || [p];
+      let cur = '';
+      sentences.forEach(s => {
+        if (cur && (cur + s).length > 700) { chunks.push({ text: cur.trim(), gap: 280 }); cur = s; }
+        else cur += s;
+      });
+      if (cur.trim()) chunks.push({ text: cur.trim(), gap: 650 });
+    });
+    return chunks;
+  }
+  _orChunkFetch(voice, ci) {
+    /* One fetch per piece, started while the piece before it plays; a piece
+       carried by the section prefetch is taken from there. */
+    if (voice.preChunks && voice.preChunks[ci]) {
+      const r = voice.preChunks[ci];
+      delete voice.preChunks[ci];
+      return r;
+    }
+    voice.chunkBag = voice.chunkBag || {};
+    if (!voice.chunkBag[ci]) {
+      const res = this.cloud.oracleVoice({ text: voice.chunks[ci].text });
+      res.catch(() => {});
+      voice.chunkBag[ci] = res;
+    }
+    return voice.chunkBag[ci];
+  }
+  _orPump(voice, g) {
+    if (!voice.on || g !== voice.gen) return;
+    const ci = voice.chunkIdx;
+    if (!voice.chunks || ci >= voice.chunks.length) return;
+    /* The piece after this one is already being fetched, so its wait
+       overlaps this piece's sound. */
+    if (ci + 1 < voice.chunks.length) this._orChunkFetch(voice, ci + 1);
+    Promise.resolve(this._orChunkFetch(voice, ci)).then(res => {
+      if (!voice.on || g !== voice.gen) return;
+      if (res.ok && res.audio) this._orScheduleAudio(voice, res.audio, g);
+      else this._orPlayTTSRest(voice, g);
+    }).catch(() => {
+      if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
+    });
+  }
+  _orVoiceOut(voice) {
+    /* The voice holds one volume through a compressor: the quiet end of a
+       phrase is lifted back up and an excited peak is tucked in. */
+    if (!voice.comp) {
+      const comp = voice.ctx.createDynamicsCompressor();
+      comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4;
+      comp.attack.value = 0.003; comp.release.value = 0.3;
+      comp.connect(voice.ctx.destination);
+      voice.comp = comp;
+    }
+    return voice.comp;
+  }
+  _orScheduleAudio(voice, buf, g) {
+    if (!voice.on || g !== voice.gen) return;
     try {
       /* One context for the whole reading. A browser allows only a handful of
-         open contexts, so one per section ran out mid-reading; and a context
-         the OS suspended (iOS does, between sections) is resumed, not
-         replaced — unless the reader paused it themselves. */
+         open contexts, so one per piece ran out mid-reading; and a context
+         the OS suspended (iOS does, between pieces) is resumed, not replaced
+         — unless the reader paused it themselves. */
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) throw new Error('no audio');
       const ctx = voice.ctx && voice.ctx.state !== 'closed' ? voice.ctx : (voice.ctx = new AC());
       if (ctx.state === 'suspended' && !voice.paused) ctx.resume();
       ctx.decodeAudioData(buf, buffer => {
         if (!voice.on || g !== voice.gen) return;
+        const ci = voice.chunkIdx;
+        const chunk = voice.chunks[ci];
+        const rate = voice.rate || 1;
         const src = ctx.createBufferSource();
         src.buffer = buffer;
-        src.connect(ctx.destination);
-        voice.source = src;
+        src.playbackRate.value = rate;
+        src.connect(this._orVoiceOut(voice));
+        src._ci = ci;
+        /* Pieces are scheduled back to back with their beat of silence, not
+           chained on each other's end, so a slow fetch of a later piece is
+           the only wait the reader hears. A suspended context keeps its
+           clock, so a paused schedule holds where it stands. */
+        const at = Math.max(ctx.currentTime + 0.03, voice.nextStart || 0);
+        voice.nextStart = at + buffer.duration / rate + (chunk.gap || 350) / 1000 / rate;
+        voice.sources.push(src);
         src.onended = () => {
+          const k = voice.sources.indexOf(src);
+          if (k !== -1) voice.sources.splice(k, 1);
           if (!voice.on || g !== voice.gen) return;
-          voice.idx++;
-          this._orPlayNext(voice);
+          if (ci === voice.chunks.length - 1) { voice.idx++; this._orPlayNext(voice); }
         };
-        src.start(0);
-        this._orPrefetch(voice);
+        src.start(at);
+        voice.chunkIdx++;
+        if (ci === voice.chunks.length - 1) this._orPrefetch(voice);
+        else this._orPump(voice, g);
       }, () => {
-        if (!voice.on || g !== voice.gen) return;
-        const seg = voice.segs[voice.idx];
-        this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+        if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
       });
     } catch (e) {
-      if (!voice.on || g !== voice.gen) return;
-      const seg = voice.segs[voice.idx];
-      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+      if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
     }
+  }
+  /* A piece that would not come (the voice is spent, the proxy is down)
+     hands the rest of the section to the device's own voice, from the piece
+     after the one sounding. Pieces scheduled but not yet playing are
+     stopped, and the generation bump stills their callbacks. */
+  _orPlayTTSRest(voice, g) {
+    if (!voice.on || g !== voice.gen) return;
+    const first = voice.sources && voice.sources.length ? voice.sources[0] : null;
+    const fromCi = first && first._ci !== undefined ? first._ci + 1 : voice.chunkIdx;
+    (voice.sources || []).slice(1).forEach(s => { try { s.stop(); } catch (e) {} });
+    voice.sources = first ? [first] : [];
+    voice.gen = (voice.gen || 0) + 1;
+    const g2 = voice.gen;
+    const rest = (voice.chunks || []).slice(fromCi).map(c => c.text).join(' ');
+    const begin = () => {
+      if (!voice.on || g2 !== voice.gen) return;
+      if (!rest.trim()) { voice.idx++; this._orPlayNext(voice); return; }
+      this._orPlayTTS(voice, rest);
+    };
+    /* The piece sounding now plays out before the device's voice picks the
+       section up. */
+    if (first) first.onended = () => { voice.sources = []; begin(); };
+    else begin();
   }
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
@@ -53259,6 +53391,7 @@ class Component extends DCLogic {
     const g = voice.gen || 0;
     try {
       const u = new SpeechSynthesisUtterance(text);
+      u.rate = voice.rate || 1;
       voice._ttsU = true;
       u.onend = () => {
         if (!voice.on || g !== voice.gen) return;
@@ -54738,6 +54871,8 @@ class Component extends DCLogic {
       orTpPauseGo: () => this.orTransportPause(),
       orTpPrevGo: () => this.orTransportPrev(),
       orTpNextGo: () => this.orTransportNext(),
+      orTpRateLabel: ((this._orVoice && this._orVoice.rate) || this._orVoiceRate()) + '×',
+      orTpRateGo: () => this.orTransportRate(),
       orTpStopGo: () => this.orListenStop(),
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',

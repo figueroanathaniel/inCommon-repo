@@ -1,6 +1,8 @@
 // server/oracle-voice/index.ts
 // ElevenLabs text-to-speech proxy for The Oracle readings.
-// Per-section requests, so stopping early never bills for what was not heard.
+// Per-piece requests (the app sends a paragraph at a time), so stopping
+// early never bills for what was not heard, and every piece is generated
+// fresh: one long input flattens the voice toward its end.
 // The key lives as a Supabase secret; the page never sees it.
 // Plain JavaScript on purpose: the dashboard editor's parser has refused
 // TypeScript annotations, and Deno runs this file exactly the same without
@@ -62,7 +64,17 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           text: fullText,
           model_id: model,
-          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+          /* The app sends the reading a paragraph at a time, so prosody
+             never flattens the way it does on one long input. Stability a
+             touch under half keeps the voice expressive without wavering,
+             style asks it to lean into the words, and speaker boost keeps
+             the level from falling away at the ends of phrases. */
+          voice_settings: {
+            stability: 0.45,
+            similarity_boost: 0.75,
+            style: 0.4,
+            use_speaker_boost: true,
+          },
         }),
       }
     );
