@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice3  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice4  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53003,6 +53003,7 @@ class Component extends DCLogic {
     v.on = false;
     try { if (v.source) v.source.stop(); } catch (e) {}
     try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
+    if (v._ttsK) { try { clearInterval(v._ttsK); } catch (e) {} }
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     this._orVoice = null;
     this.setState({ orListening: false });
@@ -53038,7 +53039,15 @@ class Component extends DCLogic {
     const seg = voice.segs[voice.idx];
     const cloud = this.cloud;
     if (cloud && cloud.oracleVoice) {
-      cloud.oracleVoice({ text: seg.body, title: seg.title }).then(res => {
+      /* The section after this one is asked for while this one plays
+         (_orPrefetch), so the proxy's wait — a cold function, the voice
+         being made, the download — passes under the current audio instead of
+         as a silence between sections. */
+      const req = voice.pre && voice.pre.idx === voice.idx
+        ? voice.pre.res
+        : cloud.oracleVoice({ text: seg.body, title: seg.title });
+      voice.pre = null;
+      Promise.resolve(req).then(res => {
         if (!voice.on) return;
         if (res.ok && res.audio) {
           this._orPlayAudio(voice, res.audio);
@@ -53051,6 +53060,17 @@ class Component extends DCLogic {
     } else {
       this._orPlayTTS(voice, seg.title + '. ' + seg.body);
     }
+  }
+  _orPrefetch(voice) {
+    const next = voice.idx + 1, cloud = this.cloud;
+    if (!voice.on || !cloud || !cloud.oracleVoice || next >= voice.segs.length) return;
+    const seg = voice.segs[next];
+    /* A section asked for ahead is paid for even if the reader stops before
+       it plays — one section at most. A rejected prefetch is swallowed here;
+       the section that consumes it falls back on its own. */
+    const res = cloud.oracleVoice({ text: seg.body, title: seg.title });
+    res.catch(() => {});
+    voice.pre = { idx: next, res };
   }
   _orPlayAudio(voice, buf) {
     if (!voice || !voice.on) return;
@@ -53075,6 +53095,7 @@ class Component extends DCLogic {
           this._orPlayNext(voice);
         };
         src.start(0);
+        this._orPrefetch(voice);
       }, () => {
         const seg = voice.segs[voice.idx];
         this._orPlayTTS(voice, seg.title + '. ' + seg.body);
@@ -53087,11 +53108,11 @@ class Component extends DCLogic {
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
     /* The device's own voice is the fallback, and it is not everywhere:
-       Android's WebView has no speechSynthesis at all. Without this guard the
-       speak call throws, the catch stops the voice, and the press looked like
-       it did nothing. */
+       Android's WebView has no speechSynthesis at all. A section with no voice
+       to read it is skipped, not stopped, so the reading plays on. */
     if (!window.speechSynthesis || typeof SpeechSynthesisUtterance !== 'function') {
-      this.orListenStop();
+      voice.idx++;
+      this._orPlayNext(voice);
       return;
     }
     try {
@@ -53106,10 +53127,21 @@ class Component extends DCLogic {
       u.onerror = () => {
         if (!voice.on) return;
         voice._ttsU = false;
-        this.orListenStop();
+        /* A section the device refuses (too long, an odd character) is
+           skipped rather than ending the reading. */
+        voice.idx++;
+        this._orPlayNext(voice);
       };
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
+      const synth = window.speechSynthesis;
+      /* cancel() followed at once by speak() drops the new utterance in
+         Chrome, so cancel only when something is actually speaking. */
+      if (synth.speaking || synth.pending) synth.cancel();
+      synth.speak(u);
+      /* Chrome pauses a long utterance after about fifteen seconds and never
+         resumes it; a nudge every few seconds keeps long sections talking.
+         resume() is a no-op where nothing is paused. */
+      if (!voice._ttsK) voice._ttsK = setInterval(() => { try { synth.resume(); } catch (e) {} }, 5000);
+      this._orPrefetch(voice);
     } catch (e) {
       this.orListenStop();
     }

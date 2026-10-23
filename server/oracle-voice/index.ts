@@ -91,8 +91,9 @@ Deno.serve(async (req) => {
       return reply(503, { reason: "SILENT", status: elRes.status });
     }
 
-    const buf = await elRes.arrayBuffer();
-    return reply(200, buf, "audio/mpeg");
+    /* Streamed straight through, so the reader's download overlaps
+       ElevenLabs' generation instead of starting after it. */
+    return reply(200, elRes.body, "audio/mpeg");
   } catch (e) {
     console.error("oracle-voice: fetch to ElevenLabs failed", e && e.message);
     return reply(503, { reason: "OFFLINE", error: e && e.message });
