@@ -9,7 +9,7 @@
  * separate requests and a cover without them is the SIGNAL LOST message on a
  * machine that could have drawn the render.
  */
-var CACHE = 'incommon-v6.3';
+var CACHE = 'incommon-v6.3-voice';
 var PRECACHE = [
   './', './index.html', './app.html', './manifest.json',
   './three.module.js', './three.core.js',
