@@ -79,6 +79,8 @@ const MODULES = [
   'minor-body-elements.js',
   'placement-content.js',
   'numerology-content.js',
+  'number-matrix.js',
+  'timing-lexicon.js',
   'today-integration.js',
   'angel-numbers.js',
   /* The other half of Synchronicities. Reads nothing from the modules above,
@@ -102,6 +104,7 @@ const MODULES = [
      reads the channel table out of hd-atlas.js above, so it has to follow it.
      analytics.js touches storage and nothing else. */
   'birth-time.js',
+  'astronomy-engine-2.1.19.min.js',
   /* Solves the design moment, so it has to be present before the first chart
      is drawn. Knows nothing about ephemerides: the app hands it a longitude
      function. */
@@ -113,6 +116,11 @@ const MODULES = [
      name, so it has to follow it. */
   'hd-transit.js',
   'hd-circle.js',
+  'flight.js',
+  'body-globes.js',
+  'cycle-scene.js',
+  'chart-scene.js',
+  'hd-scene.js',
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',
   'pair-cache.js',

@@ -265,6 +265,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-life.js"></script>
 <script src="./hd-teachings.js"></script>
 <script src="./gazetteer-us.js"></script>
+<script src="./gazetteer-world.js"></script>
 <script src="./geocode-online.js"></script>
 <!-- The connection pass. birth-time.js owns every decision about what a chart is drawn
      from, hd-composite.js overlays two bodygraphs, and analytics.js counts
@@ -4642,6 +4643,12 @@ input[type="date"]{color-scheme:dark}
             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+            <sc-if value="{{ orListenOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <button data-lift onClick="{{ orListenGo }}" aria-pressed="{{ orListening }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orListenLabel }}</button>
+                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orListenNote }}</p>
+              </div>
+            </sc-if>
           </header>
           <div style="display:flex;flex-direction:column;gap:12px">
             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
@@ -4751,7 +4758,7 @@ input[type="date"]{color-scheme:dark}
            screen before anything is sent; the press of Consult the Oracle is the
            permission. The web keeps the owner's no disclaimers rule. -->
       <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
+        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading. Listening sends the reading's words to be spoken aloud.</p>
       </sc-if>
     </div>
   </div>
@@ -11624,6 +11631,12 @@ input[type="date"]{color-scheme:dark}
             <h2 style="margin:0;font:400 30px/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ orTitle }}</h2>
             <p style="margin:0;max-width:52ch;font:italic 400 15.5px/1.6 var(--fb);color:var(--mut)">{{ orEpigraph }}</p>
             <div aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#10038;</div>
+            <sc-if value="{{ orListenOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <button data-lift onClick="{{ orListenGo }}" aria-pressed="{{ orListening }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">{{ orListenLabel }}</button>
+                <p style="margin:0;font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ orListenNote }}</p>
+              </div>
+            </sc-if>
           </header>
           <div style="display:flex;flex-direction:column;gap:12px">
             <p data-dropcap="1" style="margin:0;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);text-wrap:pretty">{{ orOvFirst }}</p>
@@ -11733,7 +11746,7 @@ input[type="date"]{color-scheme:dark}
            screen before anything is sent; the press of Consult the Oracle is the
            permission. The web keeps the owner's no disclaimers rule. -->
       <sc-if value="{{ orAiNoteOn }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading.</p>
+        <p style="margin:6px 0 0;text-align:center;font:400 10.5px/1.5 var(--fu);color:var(--mut)">Your first name and a chart summary are sent to Moonshot AI to write each reading. Listening sends the reading's words to be spoken aloud.</p>
       </sc-if>
     </div>
   </div>
@@ -25234,7 +25247,8 @@ class Component extends DCLogic {
     limit: silent, silent: silent, notSetUp: silent, off: silent,
     busy: resting, pending: resting,
     premium: 'This feature is part of Codex Luminary.',
-    timeout: 'This reading took too long to write. Try again in a minute.'
+    timeout: 'This reading took too long to write. Try again in a minute.',
+    voice: 'The voice is silent for now. Your device will read aloud instead.'
   }))('The Oracle is silent for now. Please return a little later.', 'The oracle is resting. Try again in a minute.');
   /* TWO ANSWERS ARE NOT FAILURES YET, and the page used to show the resting
      line for both over a reading that was on its way. PENDING is the server
@@ -25265,6 +25279,7 @@ class Component extends DCLogic {
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
+    this.orListenStop();
     /* The Cycle Audit's slot is the passages it reads, so they are found
        before the slot is named. */
     if (period === 'cycle') this.cycleWindows();
@@ -25332,6 +25347,136 @@ class Component extends DCLogic {
       this.speak(this.ORACLE_ERR[reason] || 'The stars clouded over. Please try again.', 'polite');
     });
   }
+  /* THE ORACLE SPEAKS. One reading at a time, section by section, with the
+     title spoken before each body. Stopping forgets the queue and releases
+     the audio context. A failed proxy falls back to the device's own voice.
+     Nothing is cached across readings: a replay of the same reading reuses
+     section hashes, so the cloud module may serve from its own cache. */
+  orListenNote() {
+    return this.cloud && this.state.cloudStatus && this.state.cloudStatus.mode === 'cloud'
+      ? 'Your reading is sent to be spoken aloud. Stop at any time.'
+      : 'Your device will read this aloud. Stop at any time.';
+  }
+  orVoiceSegments(r) {
+    const str = v => typeof v === 'string' ? v : '';
+    const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+    const segs = [];
+    if (str(r.title)) segs.push({ title: 'The Oracle', body: str(r.title) + '. ' + str(r.epigraph) });
+    const ov = paras(r.overview);
+    if (ov.length) segs.push({ title: 'Overview', body: ov.join('\n\n') });
+    [['The Stars', r.stars], ['The Design', r.design], ['The Numbers', r.numbers]].forEach(([t, v]) => {
+      if (str(v)) segs.push({ title: t, body: str(v) });
+    });
+    (r.chapters || []).forEach(c => {
+      if (c && str(c.heading)) segs.push({ title: str(c.heading), body: paras(c.body).join('\n\n') });
+    });
+    [['Love & Kinship', r.love], ['Work & Purpose', r.work], ['Spirit & Body', r.spirit]].forEach(([t, v]) => {
+      if (str(v)) segs.push({ title: t, body: str(v) });
+    });
+    (r.keyTransits || []).forEach(t => {
+      if (t && str(t.transit)) segs.push({ title: 'Celestial Currents: ' + str(t.transit), body: str(t.meaning) });
+    });
+    if (str(r.shadowWork)) segs.push({ title: 'Shadow Work', body: str(r.shadowWork) });
+    (r.journalPrompts || []).forEach((q, i) => {
+      if (str(q)) segs.push({ title: 'For the Journal, question ' + (i + 1), body: str(q) });
+    });
+    (r.timing || []).forEach(t => {
+      if (t && str(t.when)) segs.push({ title: 'Windows of Time: ' + str(t.when), body: str(t.guidance) });
+    });
+    if (str(r.ritual)) segs.push({ title: 'A Small Ritual', body: str(r.ritual) });
+    if (str(r.mantra)) segs.push({ title: 'Mantra', body: str(r.mantra) });
+    return segs;
+  }
+  orListenStop() {
+    const v = this._orVoice;
+    if (!v) return;
+    v.on = false;
+    try { if (v.source) v.source.stop(); } catch (e) {}
+    try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
+    if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    this._orVoice = null;
+    this.setState({ orListening: false });
+  }
+  orListenGo() {
+    const v = this._orVoice;
+    if (v && v.on) { this.orListenStop(); return; }
+    const st = this.state, r = st.orHit && st.orHit.reading;
+    if (!r) return;
+    const segs = this.orVoiceSegments(r);
+    if (!segs.length) return;
+    const voice = { on: true, idx: 0, segs, ctx: null, source: null, _ttsU: false };
+    this._orVoice = voice;
+    this.setState({ orListening: true });
+    this._orPlayNext(voice);
+  }
+  _orPlayNext(voice) {
+    if (!voice || !voice.on || voice.idx >= voice.segs.length) { this.orListenStop(); return; }
+    const seg = voice.segs[voice.idx];
+    const cloud = this.cloud;
+    if (cloud && cloud.oracleVoice) {
+      cloud.oracleVoice({ text: seg.body, title: seg.title }).then(res => {
+        if (!voice.on) return;
+        if (res.ok && res.audio) {
+          this._orPlayAudio(voice, res.audio);
+        } else {
+          this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+        }
+      }).catch(() => {
+        if (voice.on) this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+      });
+    } else {
+      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+    }
+  }
+  _orPlayAudio(voice, buf) {
+    if (!voice || !voice.on) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      voice.ctx = ctx;
+      ctx.decodeAudioData(buf, buffer => {
+        if (!voice.on) return;
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        src.connect(ctx.destination);
+        voice.source = src;
+        src.onended = () => {
+          if (!voice.on) return;
+          voice.idx++;
+          this._orPlayNext(voice);
+        };
+        src.start(0);
+      }, () => {
+        const seg = voice.segs[voice.idx];
+        this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+      });
+    } catch (e) {
+      const seg = voice.segs[voice.idx];
+      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+    }
+  }
+  _orPlayTTS(voice, text) {
+    if (!voice || !voice.on) return;
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      voice._ttsU = true;
+      u.onend = () => {
+        if (!voice.on) return;
+        voice._ttsU = false;
+        voice.idx++;
+        this._orPlayNext(voice);
+      };
+      u.onerror = () => {
+        if (!voice.on) return;
+        voice._ttsU = false;
+        this.orListenStop();
+      };
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch (e) {
+      this.orListenStop();
+    }
+  }
+
   /* Whether the page may ask for this slot now without a press: the reader is
      signed in, the chart is theirs, they have consented once, nothing is kept
      or failed for it, and no reading is in flight or waiting on this page. */
@@ -26705,17 +26850,17 @@ class Component extends DCLogic {
       ...this.lumGateVals('deep'),
       orDepths: [['standard', 'Standard'], ['deep', '✦ In-Depth' + (canDeep ? '' : ' · Luminary')]].map(([k, label]) => ({ label, on: depth === k,
         bd: pick(depth === k, 'var(--ac2)', 'var(--bd)'), bg: pick(depth === k, 'rgba(var(--atmc),.24)', 'transparent'),
-        c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orDepth: k }) })),
+        c: pick(depth === k, 'var(--tx)', 'var(--mut)'), go: () => { this.orListenStop(); this.setState({ orDepth: k }); } })),
       orPeriods: this.ORACLE_PERIODS.map(([k, label]) => ({ label, on: period === k,
         bd: pick(period === k, 'var(--ac2)', 'var(--bd)'), bg: pick(period === k, 'rgba(var(--atmc),.24)', 'transparent'),
-        c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => this.setState({ orPeriod: k }) })),
+        c: pick(period === k, 'var(--tx)', 'var(--mut)'), go: () => { this.orListenStop(); this.setState({ orPeriod: k }); } })),
       orSample: !r && sample,
       orOff: !r && !sample && off,
       orNeedSignIn: !blocked && !busy && !signedIn,
       orConsent: !blocked && !busy && !err && signedIn && !consented,
-      orConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+      orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orDeepGate: deepGate,
-      orDeepGo: () => { this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
+      orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
       orBusy: !r && !locked && (busy || waiting || lumWait),
@@ -26723,7 +26868,7 @@ class Component extends DCLogic {
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
       orPrivacy: '',
-      orAskGo: () => { if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+      orAskGo: () => { this.orListenStop(); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.authGo('birth'),
       orLoadingText: lumWait ? 'Checking your Codex Luminary…'
@@ -26748,6 +26893,10 @@ class Component extends DCLogic {
         : 'The chapters, timing windows, shadow work and journal prompts are still being written…',
       orMoreRetry: !!partial && !busy && !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
       orShowReading: !!r,
+      orListenOn: !!r,
+      orListening: !!(this._orVoice && this._orVoice.on),
+      orListenLabel: this._orVoice && this._orVoice.on ? 'Stop listening' : 'Listen to the reading',
+      orListenNote: this.orListenNote(),
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
