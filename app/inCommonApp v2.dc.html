@@ -265,7 +265,6 @@ input[type="date"]{color-scheme:dark}
 <script src="./hd-life.js"></script>
 <script src="./hd-teachings.js"></script>
 <script src="./gazetteer-us.js"></script>
-<script src="./gazetteer-world.js"></script>
 <script src="./geocode-online.js"></script>
 <!-- The connection pass. birth-time.js owns every decision about what a chart is drawn
      from, hd-composite.js overlays two bodygraphs, and analytics.js counts
@@ -26861,6 +26860,7 @@ class Component extends DCLogic {
       orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orDeepGate: deepGate,
       orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
+      orListenGo: () => this.orListenGo(),
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
       orBusy: !r && !locked && (busy || waiting || lumWait),
