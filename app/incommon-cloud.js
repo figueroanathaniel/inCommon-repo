@@ -1525,37 +1525,6 @@
     return oracleCall({ kind: 'tarot', seed: req.seed, count: req.count, topic: req.topic });
   }
 
-  /* ---------- Oracle Voice ---------- */
-
-  /* ElevenLabs text-to-speech, per-section, so stopping early never bills
-     for what was not heard. The key lives as a secret; the page never sees
-     it. Audio is returned as an ArrayBuffer on success, or a reason on
-     failure, matching the Oracle's own contract. */
-  function oracleVoice(req) {
-    if (!client) return Promise.resolve({ ok: false, reason: "off" });
-    if (!session) return Promise.resolve({ ok: false, reason: "signedOut" });
-    return Promise.resolve().then(function () {
-      return client.functions.invoke("oracle-voice", { body: req });
-    }).then(function (res) {
-      if (res && !res.error && res.data instanceof ArrayBuffer) {
-        return { ok: true, audio: res.data };
-      }
-      var e = res && res.error, st = e && e.context && e.context.status;
-      return oracleCode(e).then(function (code) {
-        if (st === 402 || code === "PREMIUM_REQUIRED") return { ok: false, reason: "premium" };
-        if (code === "RATE_LIMITED") return { ok: false, reason: "busy" };
-        if (code === "OUT_OF_CREDITS") return { ok: false, reason: "silent" };
-        if (code === "TIMEOUT" || st === 504) return { ok: false, reason: "timeout" };
-        if (st === 404 || code === "NOT_SET_UP") return { ok: false, reason: "notSetUp" };
-        if (st === 401 || code === "SIGNED_OUT" || code === "MFA_REQUIRED") return { ok: false, reason: "signedOut" };
-        if (st === 429 || code === "LIMIT") return { ok: false, reason: "limit" };
-        if (st === 503) return { ok: false, reason: "silent" };
-        if (e && /FunctionsFetchError|FunctionsRelayError/.test(e.name || "")) return { ok: false, reason: "offline" };
-        return { ok: false, reason: "error", error: (e && e.message) || "no audio returned" };
-      });
-    }).catch(function (e) { return { ok: false, reason: "offline", error: e && e.message }; });
-  }
-
   /* ---------- Codex Luminary ---------- */
 
   /* THE PAID TIER IS ASKED THROUGH THIS MODULE TOO, and for the same reason.
@@ -1845,7 +1814,6 @@
     normPhone: normPhone,
     oracleRead: oracleRead,
     tarotRead: tarotRead,
-    oracleVoice: oracleVoice,
     supportSend: supportSend,
     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
