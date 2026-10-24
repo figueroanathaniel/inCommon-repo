@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice6  |  built 2026-10-23  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-voice7  |  built 2026-10-24  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27735,6 +27735,15 @@ button{font-family:inherit;transition:background-color .2s ease,border-color .3s
 input,textarea{transition:border-color .2s ease}
 input:focus-visible,textarea:focus-visible{outline:2px solid #2fff8f;outline-offset:-2px}
 input[type="date"]{color-scheme:dark}
+/* The Oracle's scry bar: a thin line the reader drags along to move through
+   the section that is playing. The filled part is painted from --fill, set
+   inline, since a pseudo-element cannot read the template. */
+.orscry{-webkit-appearance:none;appearance:none;height:24px;background:transparent;cursor:pointer}
+.orscry::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--ac) 0,var(--ac) var(--fill,0%),rgba(238,240,248,.16) var(--fill,0%))}
+.orscry::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--tx);margin-top:-5px;box-shadow:0 0 8px rgba(242,214,158,.55)}
+.orscry::-moz-range-track{height:3px;border-radius:2px;background:rgba(238,240,248,.16)}
+.orscry::-moz-range-progress{height:3px;border-radius:2px;background:var(--ac)}
+.orscry::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:var(--tx)}
 *::-webkit-scrollbar{width:10px;height:10px}
 *::-webkit-scrollbar-thumb{background:rgba(47,255,143,.24);border-radius:8px}
 *::-webkit-scrollbar-thumb:hover{background:rgba(47,255,143,.42)}
@@ -34572,13 +34581,20 @@ input[type="date"]{color-scheme:dark}
 </div>
 <sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock) + 16px);z-index:88;display:flex;justify-content:center;pointer-events:none;padding:0 20px">
-    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;align-items:center;gap:4px;max-width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid var(--bd);border-radius:999px;background:var(--bg)">
+    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;flex-direction:column;gap:3px;max-width:100%;box-sizing:border-box;padding:8px 12px 7px;border:1px solid var(--bd);border-radius:20px;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px;text-align:right">{{ orTpPosLabel }}</span>
+        <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onChange="{{ orTpSeekIn }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;width:min(180px,34vw)">
+        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px">{{ orTpTotalLabel }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
       <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
       <span style="font:600 11px var(--fu);color:var(--mut);max-width:24vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
       <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -41303,13 +41319,20 @@ input[type="date"]{color-scheme:dark}
 </div>
 <sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
   <div style="position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:center;z-index:88;pointer-events:none">
-    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;align-items:center;gap:4px;max-width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid var(--bd);border-radius:999px;background:var(--bg)">
+    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;flex-direction:column;gap:3px;max-width:100%;box-sizing:border-box;padding:8px 12px 7px;border:1px solid var(--bd);border-radius:20px;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px;text-align:right">{{ orTpPosLabel }}</span>
+        <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onChange="{{ orTpSeekIn }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;width:min(180px,34vw)">
+        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px">{{ orTpTotalLabel }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
       <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
       <span style="font:600 11px var(--fu);color:var(--mut);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
       <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
+      </div>
     </div>
   </div>
 </sc-if>
@@ -53085,6 +53108,7 @@ class Component extends DCLogic {
     if (v.source) { try { v.source.stop(); } catch (e) {} }
     try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
     if (v._ttsK) { try { clearInterval(v._ttsK); } catch (e) {} }
+    if (v._tick) { try { clearInterval(v._tick); } catch (e) {} }
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     this._orVoice = null;
     this.setState({ orListening: false });
@@ -53108,7 +53132,7 @@ class Component extends DCLogic {
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
-    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, comp: null, source: null, sources: [], rate: this._orVoiceRate(), chunkBag: null, preChunks: null, nextStart: 0, _ttsU: false, _ttsK: null, pre: null, gen: 0, paused: false };
+    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, comp: null, source: null, sources: [], rate: this._orVoiceRate(), chunkBag: null, preChunks: null, nextStart: 0, sectionT0: null, _ttsU: false, _ttsK: null, _tick: null, pre: null, gen: 0, paused: false };
     /* iOS lets an audio context sound only when it was made or woken inside
        the press, and the first section arrives after the proxy answers, which
        is no longer the press. The context is made and resumed here and reused
@@ -53122,6 +53146,8 @@ class Component extends DCLogic {
     }
     this._orVoice = voice;
     this.setState({ orListening: true });
+    /* The scry bar and the sections' playing marks follow the sound. */
+    voice._tick = setInterval(() => { try { if (voice.on) this.setState({ orListening: true }); } catch (e) {} }, 600);
     this._orPlayNext(voice);
   }
   /* THE TRANSPORT. Pause holds the section where it is: the audio context
@@ -53132,6 +53158,10 @@ class Component extends DCLogic {
     const v = this._orVoice;
     if (!v || !v.on) return;
     v.paused = !v.paused;
+    /* The device's voice keeps no clock the page can read; the bar's place
+       in it is kept by hand, and a paused span is not counted. */
+    if (v.paused) { if (v._ttsT0) { v._ttsAcc = (v._ttsAcc || 0) + (Date.now() - v._ttsT0) / 1000; v._ttsT0 = null; } }
+    else if (v._ttsU) v._ttsT0 = Date.now();
     try {
       if (v.paused) {
         if (v.ctx && v.ctx.state === 'running') v.ctx.suspend();
@@ -53168,6 +53198,66 @@ class Component extends DCLogic {
   _orVoiceRate() {
     const r = parseFloat(this.readLS('incommon.voice.rate', 1));
     return [1, 1.5, 2, 3, 4].indexOf(r) !== -1 ? r : 1;
+  }
+  /* THE SCRY BAR. The bar measures the section that is playing: each piece's
+     length is its true audio length once decoded, and a guess of about
+     fourteen letters a second until then, plus its beat of silence, all at
+     the current reading speed. A drag lands on the piece under the finger
+     and the schedule rebuilds from there — pieces already fetched are
+     reused, so a jump back is instant and a jump ahead waits only for what
+     has not been fetched yet. */
+  _orChunkDur(voice, ci) {
+    const c = voice.chunks[ci], rate = voice.rate || 1;
+    return ((c.dur || c.text.length / 14) + (c.gap || 350) / 1000) / rate;
+  }
+  _orSectionTotal(voice) {
+    if (!voice || !voice.chunks) return 0;
+    let t = 0;
+    for (let i = 0; i < voice.chunks.length; i++) t += this._orChunkDur(voice, i);
+    return t;
+  }
+  _orSectionPos(voice) {
+    if (!voice || !voice.chunks) return 0;
+    const total = this._orSectionTotal(voice);
+    /* The device's own voice keeps no clock we can read; its place is kept
+       by hand from when it started, paused spans not counted. */
+    if (voice._ttsU || voice._ttsT0 || voice._ttsAcc) {
+      const acc = voice._ttsAcc || 0;
+      return Math.min(total, voice.paused ? acc : acc + (voice._ttsT0 ? (Date.now() - voice._ttsT0) / 1000 : 0));
+    }
+    const src = voice.sources && voice.sources[0];
+    if (src && src._off !== undefined && voice.ctx)
+      return Math.min(total, src._off + Math.max(0, voice.ctx.currentTime - src._at));
+    return 0;
+  }
+  orTransportSeek(frac) {
+    const v = this._orVoice;
+    if (!v || !v.on || !v.chunks || !v.chunks.length) return;
+    const target = Math.max(0, Math.min(1, frac || 0)) * this._orSectionTotal(v);
+    let acc = 0, ci = 0;
+    while (ci < v.chunks.length - 1 && acc + this._orChunkDur(v, ci) < target) { acc += this._orChunkDur(v, ci); ci++; }
+    if (v._ttsU || !this.cloud || !this.cloud.oracleVoice) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      v._ttsU = false;
+      v.gen++;
+      v.chunkIdx = ci;
+      this._orPlayTTS(v, v.chunks.slice(ci).map(c => c.text).join(' '));
+      return;
+    }
+    v.gen++;
+    const g = v.gen;
+    (v.sources || []).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
+    v.sources = [];
+    v.chunkIdx = ci;
+    v.nextStart = 0;
+    v.sectionT0 = null;
+    if (v.ctx && v.ctx.state === 'suspended' && !v.paused) { try { v.ctx.resume(); } catch (e) {} }
+    this._orPump(v, g);
+    this.setState({ orListening: true });
+  }
+  _orFmtTime(s) {
+    s = Math.max(0, Math.round(s || 0));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
   }
   orTransportPrev() {
     const v = this._orVoice;
@@ -53219,12 +53309,23 @@ class Component extends DCLogic {
       voice.chunkIdx = 0;
       voice.chunkBag = null;
       voice.nextStart = 0;
+      voice.sectionT0 = null;
+      /* A stretch read by the device's own voice is over; its hand-kept
+         clock must not speak for the audio that follows. */
+      voice._ttsT0 = null;
+      voice._ttsAcc = 0;
       /* A section asked for ahead carries its first pieces with it. */
       voice.preChunks = voice.pre && voice.pre.idx === voice.idx ? voice.pre.chunks : null;
       voice.pre = null;
       this._orPump(voice, g);
     } else {
-      this._orPlayTTS(voice, seg.title + '. ' + seg.body);
+      /* The pieces are built here too, so the scry bar can measure the
+         section and a drag can start the device's voice again mid-way. */
+      voice.chunks = [{ text: seg.title + '.', gap: 750 }].concat(this._orVoiceChunks(seg.body));
+      voice.chunkIdx = 0;
+      voice.nextStart = 0;
+      voice.sectionT0 = null;
+      this._orPlayTTS(voice, voice.chunks.map(c => c.text).join(' '));
     }
   }
   _orPrefetch(voice) {
@@ -53331,12 +53432,19 @@ class Component extends DCLogic {
         src.playbackRate.value = rate;
         src.connect(this._orVoiceOut(voice));
         src._ci = ci;
+        /* The piece's true length, known now, replaces the guess the scry
+           bar was drawn from. */
+        chunk.dur = buffer.duration;
         /* Pieces are scheduled back to back with their beat of silence, not
            chained on each other's end, so a slow fetch of a later piece is
            the only wait the reader hears. A suspended context keeps its
            clock, so a paused schedule holds where it stands. */
         const at = Math.max(ctx.currentTime + 0.03, voice.nextStart || 0);
         voice.nextStart = at + buffer.duration / rate + (chunk.gap || 350) / 1000 / rate;
+        /* The scry bar reads each piece's place in the section from these. */
+        if (voice.sectionT0 === null || voice.sectionT0 === undefined) voice.sectionT0 = at;
+        src._at = at;
+        src._off = at - voice.sectionT0;
         voice.sources.push(src);
         src.onended = () => {
           const k = voice.sources.indexOf(src);
@@ -53396,12 +53504,16 @@ class Component extends DCLogic {
       u.onend = () => {
         if (!voice.on || g !== voice.gen) return;
         voice._ttsU = false;
+        voice._ttsT0 = null;
+        voice._ttsAcc = 0;
         voice.idx++;
         this._orPlayNext(voice);
       };
       u.onerror = () => {
         if (!voice.on || g !== voice.gen) return;
         voice._ttsU = false;
+        voice._ttsT0 = null;
+        voice._ttsAcc = 0;
         /* A section the device refuses (too long, an odd character) is
            skipped rather than ending the reading. */
         voice.idx++;
@@ -53413,6 +53525,8 @@ class Component extends DCLogic {
       if (synth.speaking || synth.pending) synth.cancel();
       synth.speak(u);
       if (voice.paused) synth.pause(); else synth.resume();
+      voice._ttsAcc = 0;
+      voice._ttsT0 = voice.paused ? null : Date.now();
       /* Chrome pauses a long utterance after about fifteen seconds and never
          resumes it; a nudge every few seconds keeps long sections talking.
          It never undoes a pause the reader asked for. */
@@ -54787,6 +54901,10 @@ class Component extends DCLogic {
     const segs = r ? this.orVoiceSegments(r) : [];
     const segAt = {}; segs.forEach((s, i) => { segAt[s.key] = i; });
     const vp = this._orVoice;
+    /* Where the bar sits in the section that is playing. */
+    const tpTotal = vp ? this._orSectionTotal(vp) : 0;
+    const tpPos = vp ? this._orSectionPos(vp) : 0;
+    const tpFrac = tpTotal > 0 ? Math.max(0, Math.min(1, tpPos / tpTotal)) : 0;
     const segBtn = k => {
       const i = segAt[k];
       if (i === undefined) return { oiHas: false, oiOn: false, oiMark: '▶', oiGo: null };
@@ -54873,6 +54991,11 @@ class Component extends DCLogic {
       orTpNextGo: () => this.orTransportNext(),
       orTpRateLabel: ((this._orVoice && this._orVoice.rate) || this._orVoiceRate()) + '×',
       orTpRateGo: () => this.orTransportRate(),
+      orTpPermille: Math.round(tpFrac * 1000),
+      orTpFill: (tpFrac * 100).toFixed(1),
+      orTpPosLabel: this._orFmtTime(tpPos),
+      orTpTotalLabel: this._orFmtTime(tpTotal),
+      orTpSeekIn: e => this.orTransportSeek((parseFloat(e && e.target && e.target.value) || 0) / 1000),
       orTpStopGo: () => this.orListenStop(),
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
