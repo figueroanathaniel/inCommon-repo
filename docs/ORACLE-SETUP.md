@@ -183,7 +183,8 @@ is told rather than left waiting on a stopped function. On a paid plan, raise
 
 The Listen button on a reading reads it aloud, and each section has a play
 button of its own for starting anywhere in the reading. While the voice is
-going, a transport bar at the foot of the screen offers previous section,
+going, a transport bar at the foot of the screen offers a scry bar for
+dragging to any piece of the section that is playing, previous section,
 pause, next section, a reading speed (1× to 4×, kept on the device), and
 stop. The voice is ElevenLabs, reached the same way the writing is reached:
 the app asks a second Edge Function, `oracle-voice`, which holds the key. It
