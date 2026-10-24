@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-voice7  |  built 2026-10-24  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-today1  |  built 2026-10-24  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28239,186 +28239,37 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 26px/1.25 var(--fd)">{{ greetWord }}, {{ actName }}.</div>
       <div style="font:italic 400 12.5px/1.55 var(--fb);color:var(--dim)">{{ todaySubtitle }}</div>
     </div>
-    <!-- THE LONG WEATHER (owner, 18 October 2026): the Cycle Audit on Today,
-         read like a weather widget. The conditions now, three readings, and the
-         three studies drawn as one chart over twelve years, every mark placed
-         as a share of that span (cycleWidgetVals). All of it is computed here
-         and free; the sheet it opens carries the full lists and the reading. -->
-    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-      <section data-lift="box" aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:16px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
-        <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
-        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-          <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
-        </sc-if>
-        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;align-items:center;gap:14px">
-            <span aria-hidden="true" style="flex:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 28px/1 var(--fd);color:var(--tx);background:radial-gradient(circle at 35% 30%,rgba(var(--atmc2),.5),rgba(var(--atmc),.5) 55%,rgba(var(--atmc),.12) 100%);border:1px solid var(--ac2);box-shadow:0 0 28px rgba(var(--atmc),.45)">{{ cwGlyph }}</span>
-            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
-              <h2 style="margin:0;font:400 20px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cwHead }}</h2>
-              <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-            <sc-for list="{{ cwStat }}" as="k" hint-placeholder-count="3">
-              <div style="display:flex;flex-direction:column;gap:3px;min-width:0;padding:10px 11px;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.08)">
-                <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ k.k }}</span>
-                <span style="font:600 14px/1.2 var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ k.v }}</span>
-                <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ k.sub }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <!-- THE LONG WEATHER, FLAT OR IN DEPTH (owner, 19 and 20 October 2026):
-               the flat chart is 2D and is drawn first; cycle-scene.js draws 3D, a
-               lit landscape the reader can move through. The flat chart is also the
-               fallback when 3D cannot run, and then the switch is not offered. -->
-          <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
-            <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ cwUiO }};visibility:{{ cwUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-              <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
-                <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
-            <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:236px;margin:0 -16px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
-          </sc-if>
-          <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
-            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-              <div aria-hidden="true" style="display:grid;grid-template-columns:52px minmax(0,1fr);row-gap:12px;align-items:center">
-                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-                <div style="position:relative;height:{{ cwStarsH }}">
-                  <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                      <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                        <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                      </sc-for>
-                    </span>
-                  </sc-for>
-                </div>
-                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-                <div style="position:relative;height:{{ cwDesignH }}">
-                  <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                    <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                  </sc-if>
-                  <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                    <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                  </sc-for>
-                </div>
-                <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-                <div style="display:flex;flex-direction:column;gap:5px">
-                  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                    <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                      <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 11.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                    </sc-for>
-                  </div>
-                  <div style="position:relative;height:16px">
-                    <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                      <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                        <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
-                      </span>
-                    </sc-for>
-                  </div>
-                </div>
-                <span></span>
-                <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                  <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                    <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
-                  </sc-for>
-                </div>
-              </div>
-              <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:52px;right:0;pointer-events:none">
-                <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-                <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-              </div>
-            </div>
-          </sc-if>
-          <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
-            <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
-              <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
-                <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
-                  <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
-                </sc-for>
-                <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
-                  <g><title>{{ b.title }}</title>
-                    <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
-                  </g>
-                </sc-for>
-                <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
-                  <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
-                </sc-for>
-                <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
-                  <g><title>{{ r.title }}</title>
-                    <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
-                    <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
-                      <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
-                    </sc-for>
-                  </g>
-                </sc-for>
-                <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
-                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
-                <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
-              </svg>
-              <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
-                <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
-                  <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
-                </sc-for>
-                <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
-                  <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
-                    <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
-                    <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
-                  </span>
-                </sc-for>
-                <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
-                  <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-                  <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
-                  <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
-                </div>
-              </div>
-            </div>
-          </sc-if>
-          <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
-            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
-            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
-            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:var(--blue)"></span>On your gate</span>
-            <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;box-sizing:border-box;border-radius:3px;border:1.5px solid var(--blue)"></span>Completes a channel</span>
-          </div>
-          <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.14);font:600 13px var(--fu);color:var(--tx)">Open the Cycle Audit <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#8594;</span></button>
-        </sc-if>
-      </section>
-    </sc-if>
-    <div data-lift="card" style="display:flex;flex-direction:column;gap:13px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
-      <button onClick="{{ dropToggle }}" aria-expanded="{{ dropOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px">
-        <div style="display:flex;align-items:center;gap:9px">
-          <span style="font:400 12px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ dropRot }});transition:transform .3s ease">▶</span>
-          <span style="font:400 20px var(--fd);color:var(--tx)">Today’s Alignment</span>
-        </div>
-        <span style="flex:none;font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
-      </button>
-      <div data-lift="box" role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:7px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:8px 9px">
-        <div style="display:flex;align-items:stretch;gap:6px">
-          <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
-          <div data-lift="card" style="position:relative;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:44px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);padding:5px 8px">
-            <span style="font:600 12px var(--fu);color:var(--tx);text-align:center">{{ horoDateShort }}</span>
+    <div style="display:flex;flex-direction:column;gap:15px">
+      <div role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:2px 0 4px">
+        <div style="display:flex;align-items:center;gap:2px">
+          <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 17px var(--fb);color:var(--ac)">‹</button>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:0 8px">
+            <span style="font:600 13px var(--fu);color:var(--tx);text-align:center">{{ horoDateShort }}</span>
             <span style="font:400 9.5px var(--fu);letter-spacing:.04em;color:var(--mut);text-align:center">{{ horoDateMeta }}</span>
             <input type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
           </div>
-          <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">›</button>
+          <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 17px var(--fb);color:var(--ac)">›</button>
         </div>
         <sc-if value="{{ horoNotToday }}" hint-placeholder-val="{{ false }}">
           <button data-lift onClick="{{ horoGoToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border:1px solid rgba(47,255,143,.34);border-radius:10px;background:rgba(47,255,143,.08);font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Back to today</button>
         </sc-if>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
+          <span style="font:600 8.5px var(--fu);letter-spacing:.08em;color:var(--dim)">{{ alignStamp }}</span>
+        </div>
       </div>
-      <sc-if value="{{ dropClosed }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:11px">
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:11px">
-              <div data-lift="box" style="display:flex;flex-direction:column;gap:11px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:12px 13px 13px">
-                <div style="display:flex;align-items:center;gap:7px">
-                  <button data-lift onClick="{{ hpPrev }}" aria-label="{{ hpPrevLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
-                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center">
-                    <span style="font:400 19px/1.2 var(--fd);color:var(--tx)">{{ hpTitle }}</span>
-                    <span style="font:600 8.5px var(--fu);letter-spacing:.15em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
-                  </div>
-                  <button data-lift onClick="{{ hpNext }}" aria-label="{{ hpNextLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">›</button>
+              <div style="display:flex;flex-direction:column;gap:13px;border-top:3px solid {{ hpEdge }};padding-top:15px">
+                <div style="display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
+                  <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
+                  <span style="font:400 26px/1.25 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
+                </div>
+                <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Readings" style="display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;border-bottom:1px solid var(--bd)">
+                  <sc-for list="{{ hpDots }}" as="p" hint-placeholder-count="4">
+                    <button onClick="{{ p.go }}" role="tab" aria-selected="{{ p.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 11px;border-bottom:2px solid {{ p.bd }};font:600 10px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:{{ p.c }}">{{ p.label }}</button>
+                  </sc-for>
                 </div>
                 <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
                   <div style="display:flex;flex-direction:column;gap:9px;animation:fadeUp .22s ease">
@@ -28577,13 +28428,6 @@ input[type="date"]{color-scheme:dark}
                     </sc-if>
                   </div>
                 </sc-if>
-                <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Readings" style="display:flex;align-items:center;justify-content:center;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
-                  <sc-for list="{{ hpDots }}" as="p" hint-placeholder-count="4">
-                    <button onClick="{{ p.go }}" aria-label="{{ p.label }}" role="tab" aria-selected="{{ p.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center">
-                      <span aria-hidden="true" style="display:block;width:{{ p.w }};height:8px;border-radius:999px;border:1px solid {{ p.bd }};background:{{ p.bg }};transition:width .25s ease"></span>
-                    </button>
-                  </sc-for>
-                </div>
               </div>
               <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Show your working</span>
               <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
@@ -28632,33 +28476,50 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ noAlignBrief }}" hint-placeholder-val="{{ false }}">
             <span style="font:italic 400 12.5px/1.6 var(--fb);color:var(--dim)">{{ dropTeaser }}</span>
           </sc-if>
-          <button onClick="{{ dropToggle }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;font:600 10.5px var(--fu);letter-spacing:.09em;text-transform:uppercase;color:var(--ac)">Open the full alignment <span style="font:400 13px var(--fb);text-transform:none;letter-spacing:0">→</span></button>
         </div>
-      </sc-if>
-      <sc-if value="{{ dropOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:14px;animation:slideDown .3s ease">
-          <div style="font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--dim)">{{ alignStamp }}</div>
-          <sc-for list="{{ todaySections }}" as="s" hint-placeholder-count="3">
-            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
-              <button onClick="{{ s.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;min-height:44px">
-                <span aria-hidden="true" style="flex:none;display:block;width:17px;height:17px;background-color:{{ s.glyphC }};-webkit-mask:{{ s.icon }} center/contain no-repeat;mask:{{ s.icon }} center/contain no-repeat"></span>
-                <span style="flex:1;min-width:0;font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ s.name }}</span>
-                <span style="flex:none;font:600 10.5px var(--fu);color:var(--ac)">{{ s.btn }}</span>
-                <span style="flex:none;font:400 13px var(--fb);color:var(--ac)">→</span>
-              </button>
-              <div style="font:400 13px/1.6 var(--fb);color:var(--tx)">{{ s.text }}</div>
-              <sc-if value="{{ s.hasSrc }}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{ s.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--ac)">{{ s.srcLabel }}</button>
-              </sc-if>
-            </div>
-          </sc-for>
-          <div style="display:flex;flex-direction:column;gap:7px;border-left:3px solid var(--ac);background:rgba(47,255,143,.08);border-radius:0 12px 12px 0;padding:12px 14px">
-            <div style="font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--ac)">Integration</div>
-            <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ todayIntText }}</div>
-            <div style="font:italic 400 12px/1.6 var(--fb);color:var(--dim)">{{ todayIntPoss }}</div>
+    </div>
+    <!-- THE LONG WEATHER, DEMOTED (owner, 24 October 2026): Today opens straight
+         into the reading now; the audit keeps one quiet line at the foot of the
+         page. The sheet it opens still carries the scene, the charts and the
+         full lists. -->
+    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
+        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="font:italic 400 13px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
+        </sc-if>
+        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+            <span style="font:400 16px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+            <span style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
           </div>
-        </div>
-      </sc-if>
+          <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;font:600 11px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+
+  </div>
+</section>
+<section data-vt-sec="Spirit" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Spirit" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
+<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
+  <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
+    <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">My Charts</h1>
+  </div>
+  <div data-vt-page="1" style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Spirit views" style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px">
+  <sc-for list="{{ vtSpiritTabs }}" as="t" hint-placeholder-count="4">
+    <button data-lift onClick="{{ t.go }}" role="tab" id="{{ t.id }}" aria-controls="{{ t.panelId }}" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 13px var(--fu);color:{{ t.c }}">{{ t.label }}</button>
+  </sc-for>
+</div>
+<div data-vt-pager="1" onScroll="{{ onPagerScroll }}" style="flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth">
+  <div data-vt-page="1" role="tabpanel" id="incommon-panel-humanDesign" aria-labelledby="incommon-tab-humanDesign" tabindex="0" style="flex:none;width:100%;height:100%;overflow-y:auto;scroll-snap-align:start;display:flex;flex-direction:column;padding-bottom:24px">
+<sc-if value="{{ spiritHd }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Spirit / Human Design" style="flex:1;overflow-y:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:400 24px/1.25 var(--fd)">Your Human Design</div>
     </div>
     <sc-if value="{{ gnowHas }}" hint-placeholder-val="{{ false }}">
       <div role="region" aria-label="Gates in the sky now" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:16px">
@@ -28692,30 +28553,6 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
       </div>
     </sc-if>
-  </div>
-</sc-if>
-
-
-  </div>
-</section>
-<section data-vt-sec="Spirit" tabindex="0" onFocus="{{ secFocus }}" data-screen-label="Spirit" style="position:relative;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;box-sizing:border-box;padding-top:var(--hdr);padding-bottom:calc(var(--nav) + var(--dock))">
-<sc-if value="{{ sampleOn }}" hint-placeholder-val="{{ false }}"><div data-sample-spacer="1" aria-hidden="true" style="flex:none;visibility:hidden;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid transparent"><span style="flex:1;font:400 10.5px/1.45 var(--fu)">{{ sampleText }}</span><span style="flex:none;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid transparent;border-radius:999px;font:600 10.5px var(--fu)">Use mine</span></div></sc-if>
-  <div style="flex:none;display:flex;flex-direction:column;gap:3px;padding:14px 20px 10px">
-    <h1 style="margin:0;font:400 36px/1.1 var(--fd);color:var(--tx)">My Charts</h1>
-  </div>
-  <div data-vt-page="1" style="flex:1;min-height:0;display:flex;flex-direction:column">
-<div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Spirit views" style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px">
-  <sc-for list="{{ vtSpiritTabs }}" as="t" hint-placeholder-count="4">
-    <button data-lift onClick="{{ t.go }}" role="tab" id="{{ t.id }}" aria-controls="{{ t.panelId }}" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};font:600 13px var(--fu);color:{{ t.c }}">{{ t.label }}</button>
-  </sc-for>
-</div>
-<div data-vt-pager="1" onScroll="{{ onPagerScroll }}" style="flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth">
-  <div data-vt-page="1" role="tabpanel" id="incommon-panel-humanDesign" aria-labelledby="incommon-tab-humanDesign" tabindex="0" style="flex:none;width:100%;height:100%;overflow-y:auto;scroll-snap-align:start;display:flex;flex-direction:column;padding-bottom:24px">
-<sc-if value="{{ spiritHd }}" hint-placeholder-val="{{ false }}">
-  <div data-screen-label="Spirit / Human Design" style="flex:1;overflow-y:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp .25s ease">
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="font:400 24px/1.25 var(--fd)">Your Human Design</div>
-    </div>
     <sc-if value="{{ hdFocusToday }}" hint-placeholder-val="{{ false }}">
       <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.42);border-left:3px solid var(--ac);border-radius:var(--rad);padding:15px 16px;animation:fadeUp .25s ease">
         <div style="display:flex;align-items:baseline;gap:9px">
@@ -34766,184 +34603,39 @@ input[type="date"]{color-scheme:dark}
         </div>
       </div>
       <div style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:22px">
-        <!-- THE LONG WEATHER (owner, 18 October 2026): the Cycle Audit on Today,
-             read like a weather widget. The conditions now, three readings, and the
-             three studies drawn as one chart over twelve years, every mark placed
-             as a share of that span (cycleWidgetVals). All of it is computed here
-             and free; the sheet it opens carries the full lists and the reading. -->
-        <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-          <section data-lift="box" aria-label="The Cycle Audit" style="position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px;background:radial-gradient(120% 90% at 0% 0%,rgba(var(--atmc),.30),transparent 60%),radial-gradient(90% 80% at 100% 100%,rgba(var(--atmc2),.14),transparent 65%),linear-gradient(160deg,var(--sf),var(--sf-g))">
-            <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</div>
-            <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-              <div role="status" style="min-height:520px;display:flex;align-items:center;justify-content:center;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut)">Loading&#8230;</div>
-            </sc-if>
-            <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:14px">
-                <span aria-hidden="true" style="flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 32px/1 var(--fd);color:var(--tx);background:radial-gradient(circle at 35% 30%,rgba(var(--atmc2),.5),rgba(var(--atmc),.5) 55%,rgba(var(--atmc),.12) 100%);border:1px solid var(--ac2);box-shadow:0 0 28px rgba(var(--atmc),.45)">{{ cwGlyph }}</span>
-                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
-                  <h2 style="margin:0;font:400 23px/1.2 var(--fd);color:var(--tx);text-wrap:balance">{{ cwHead }}</h2>
-                  <span style="font:400 12.5px/1.45 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-                </div>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <div role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:2px 0 6px">
+            <div style="display:flex;align-items:center;gap:4px">
+              <button data-lift onClick="{{ horoPrevWk }}" aria-label="Back one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--mut)">‹‹</button>
+              <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--ac)">‹</button>
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:44px;padding:0 14px">
+                <span style="font:600 14px var(--fu);color:var(--tx);text-align:center;white-space:nowrap">{{ horoDateLabel }}</span>
+                <span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--mut);text-align:center;white-space:nowrap">{{ horoDateMeta }}</span>
+                <input type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
               </div>
-              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-                <sc-for list="{{ cwStat }}" as="k" hint-placeholder-count="3">
-                  <div style="display:flex;flex-direction:column;gap:3px;min-width:0;padding:10px 11px;border:1px solid var(--bd);border-radius:12px;background:rgba(var(--atmc),.08)">
-                    <span style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ k.k }}</span>
-                    <span style="font:600 15.5px/1.2 var(--fu);color:var(--tx);overflow-wrap:anywhere">{{ k.v }}</span>
-                    <span style="font:400 11px/1.35 var(--fu);color:var(--mut)">{{ k.sub }}</span>
-                  </div>
-                </sc-for>
-              </div>
-              <!-- THE LONG WEATHER, FLAT OR IN DEPTH (owner, 19 and 20 October 2026):
-                   the flat chart is 2D and is drawn first; cycle-scene.js draws 3D, a
-                   lit landscape the reader can move through. The flat chart is also the
-                   fallback when 3D cannot run, and then the switch is not offered. -->
-              <sc-if value="{{ cwViewsOn }}" hint-placeholder-val="{{ false }}">
-                <div data-lift="card" onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Cycle Audit view" style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;opacity:{{ cwUiO }};visibility:{{ cwUiV }};transition:opacity .6s ease .6s,visibility 0s linear .6s">
-                  <sc-for list="{{ cwViews }}" as="v" hint-placeholder-count="2">
-                    <button data-lift onClick="{{ v.go }}" role="radio" aria-checked="{{ v.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ v.bd }};background:{{ v.bg }};font:600 11.5px var(--fu);letter-spacing:.08em;color:{{ v.c }};transition:background .3s ease,border-color .3s ease">{{ v.label }}</button>
-                  </sc-for>
-                </div>
-              </sc-if>
-              <sc-if value="{{ cwSceneOn }}" hint-placeholder-val="{{ false }}">
-                <div data-cy-scene="mini" data-noswipe="1" style="position:relative;height:272px;margin:0 -22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden"><div role="status" style="position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 12%,rgba(var(--atmc),.24),transparent 64%),radial-gradient(90% 60% at 50% 108%,rgba(var(--atmc2),.10),transparent 70%),var(--bg);border-radius:inherit;font:italic 400 16px var(--fd);letter-spacing:.02em;color:var(--mut);opacity:{{ cwVeilO }};visibility:{{ cwVeilV }};transition:opacity .8s ease,visibility 0s linear .8s">Loading&#8230;</div></div>
-              </sc-if>
-              <sc-if value="{{ cwChartOn }}" hint-placeholder-val="{{ true }}">
-                <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;padding-top:18px">
-                  <div aria-hidden="true" style="display:grid;grid-template-columns:64px minmax(0,1fr);row-gap:12px;align-items:center">
-                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Stars</span>
-                    <div style="position:relative;height:{{ cwStarsH }}">
-                      <sc-for list="{{ cwStars }}" as="b" hint-placeholder-count="3">
-                        <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;border-radius:4px;background:{{ b.bg }};box-shadow:0 0 6px rgba(var(--atmc),.3)">
-                          <sc-for list="{{ b.ticks }}" as="tk" hint-placeholder-count="2">
-                            <span style="position:absolute;left:{{ tk.at }};top:-1px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:var(--tx);opacity:.9"></span>
-                          </sc-for>
-                        </span>
-                      </sc-for>
-                    </div>
-                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Design</span>
-                    <div style="position:relative;height:{{ cwDesignH }}">
-                      <sc-if value="{{ cwDesignNone }}" hint-placeholder-val="{{ false }}">
-                        <span style="position:absolute;left:0;right:0;top:3px;border-top:1px dashed var(--bd)"></span>
-                      </sc-if>
-                      <sc-for list="{{ cwDesign }}" as="b" hint-placeholder-count="2">
-                        <span title="{{ b.title }}" style="position:absolute;left:{{ b.left }};width:{{ b.w }};top:{{ b.top }};height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid {{ b.bd }};background:{{ b.bg }}"></span>
-                      </sc-for>
-                    </div>
-                    <span style="font:600 9.5px var(--fu);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Numbers</span>
-                    <div style="display:flex;flex-direction:column;gap:5px">
-                      <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                        <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                          <span title="{{ y.y }}" style="margin:0 1px;height:24px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border-radius:6px;border:1px solid {{ y.bd }};background:{{ y.bg }};font:600 12.5px var(--fu);color:{{ y.c }};font-variant-numeric:tabular-nums">{{ y.v }}</span>
-                        </sc-for>
-                      </div>
-                      <div style="position:relative;height:16px">
-                        <sc-for list="{{ cwPins }}" as="pn" hint-placeholder-count="2">
-                          <span title="{{ pn.title }}" style="position:absolute;left:{{ pn.left }};width:{{ pn.w }};top:0;height:16px;box-sizing:border-box;border-radius:5px;background:{{ pn.bg }};display:flex;align-items:center;padding-left:6px;overflow:hidden">
-                            <sc-if value="{{ pn.show }}" hint-placeholder-val="{{ false }}"><span style="font:600 9.5px var(--fu);letter-spacing:.04em;color:var(--tx);white-space:nowrap">{{ pn.label }}</span></sc-if>
-                          </span>
-                        </sc-for>
-                      </div>
-                    </div>
-                    <span></span>
-                    <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
-                      <sc-for list="{{ cwYears }}" as="y" hint-placeholder-count="12">
-                        <span style="text-align:center;font:500 10px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap">{{ y.label }}</span>
-                      </sc-for>
-                    </div>
-                  </div>
-                  <div aria-hidden="true" style="position:absolute;top:0;bottom:16px;left:64px;right:0;pointer-events:none">
-                    <span style="position:absolute;top:14px;bottom:0;left:{{ cwNowAt }};width:1.5px;margin-left:-.75px;background:var(--ac2-hi);box-shadow:0 0 8px rgba(var(--atmc),.8)"></span>
-                    <span style="position:absolute;top:0;left:{{ cwNowAt }};transform:translateX(-50%);padding:1px 6px;border-radius:999px;background:var(--sf2);border:1px solid var(--ac2);font:600 9px var(--fu);letter-spacing:.08em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-                  </div>
-                </div>
-              </sc-if>
-              <sc-if value="{{ cwRingsOn }}" hint-placeholder-val="{{ false }}">
-                <div role="img" aria-label="{{ cwChartAria }}" style="position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1 / 1">
-                  <svg viewBox="0 0 400 400" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block">
-                    <sc-for list="{{ cwRingSpokes }}" as="k" hint-placeholder-count="12">
-                      <line x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}" stroke="var(--bd)" style="stroke-width:.8px"></line>
-                    </sc-for>
-                    <sc-for list="{{ cwRingBands }}" as="b" hint-placeholder-count="12">
-                      <g><title>{{ b.title }}</title>
-                        <path d="{{ b.d }}" fill="none" stroke="{{ b.c }}" style="stroke-width:10px;stroke-opacity:{{ b.o }}"></path>
-                      </g>
-                    </sc-for>
-                    <sc-for list="{{ cwRingDesign }}" as="d" hint-placeholder-count="2">
-                      <path d="{{ d.d }}" fill="none" stroke="var(--blue)" style="stroke-width:1.3px;stroke-linecap:round;stroke-opacity:.85;stroke-dasharray:{{ d.dash }}"><title>{{ d.title }}</title></path>
-                    </sc-for>
-                    <sc-for list="{{ cwRingStars }}" as="r" hint-placeholder-count="3">
-                      <g><title>{{ r.title }}</title>
-                        <path d="{{ r.d }}" fill="none" stroke="{{ r.c }}" style="stroke-width:1.7px;stroke-linecap:round;stroke-opacity:.85"></path>
-                        <sc-for list="{{ r.ticks }}" as="tk" hint-placeholder-count="2">
-                          <circle cx="{{ tk.x }}" cy="{{ tk.y }}" r="2.6" fill="var(--tx)"></circle>
-                        </sc-for>
-                      </g>
-                    </sc-for>
-                    <line x1="{{ cwRingLx1 }}" y1="{{ cwRingLy1 }}" x2="{{ cwRingLx2 }}" y2="{{ cwRingLy2 }}" stroke="var(--ac2-hi)" opacity=".7" style="stroke-width:.9px;stroke-dasharray:2 3"></line>
-                    <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="9" fill="rgb(var(--atmc))" opacity=".45"></circle>
-                    <circle cx="{{ cwRingNowX }}" cy="{{ cwRingNowY }}" r="4.6" fill="var(--ac2-hi)"></circle>
-                  </svg>
-                  <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
-                    <sc-for list="{{ cwRingMonths }}" as="m" hint-placeholder-count="12">
-                      <span style="position:absolute;left:{{ m.x }};top:{{ m.y }};transform:translate(-50%,-50%);font:600 10px var(--fu);color:var(--mut)">{{ m.t }}</span>
-                    </sc-for>
-                    <sc-for list="{{ cwRingYrs }}" as="y" hint-placeholder-count="12">
-                      <span style="position:absolute;left:50%;top:{{ y.top }};transform:translate(-50%,-50%);display:grid;grid-template-columns:34px 34px;column-gap:8px;align-items:center;font-variant-numeric:tabular-nums;text-shadow:0 0 3px var(--bg),0 0 3px var(--bg),0 0 6px var(--bg)">
-                        <span style="text-align:right;font:500 9.5px var(--fu);color:var(--mut)">{{ y.y }}</span>
-                        <span style="text-align:left;font:700 10px var(--fu);color:{{ y.c }}">{{ y.v }}</span>
-                      </span>
-                    </sc-for>
-                    <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;white-space:nowrap">
-                      <span style="font:700 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">Now</span>
-                      <span style="font:400 15px/1.1 var(--fd);color:var(--tx)">{{ cwRingDate }}</span>
-                      <span style="font:500 10px var(--fu);color:var(--mut)">{{ cwRingYear }}</span>
-                    </div>
-                  </div>
-                </div>
-              </sc-if>
-              <div aria-hidden="true" style="display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--fu);color:var(--mut)">
-                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--ac2),var(--ac2-hi))"></span>A passage</span>
-                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:2px;height:11px;border-radius:1px;background:var(--tx)"></span>Exact</span>
-                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;border-radius:3px;background:var(--blue)"></span>On your gate</span>
-                <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:18px;height:6px;box-sizing:border-box;border-radius:3px;border:1.5px solid var(--blue)"></span>Completes a channel</span>
-              </div>
-              <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:1px solid var(--ac2);border-radius:999px;background:rgba(var(--atmc),.14);font:600 13px var(--fu);color:var(--tx)">Open the Cycle Audit <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac2-hi)">&#8594;</span></button>
-            </sc-if>
-          </section>
-        </sc-if>
-        <div data-lift="card" style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Today’s Alignment</span>
-            <span style="flex:none;font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
-          </div>
-          <div data-lift="box" role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;gap:8px;border:1px solid var(--bd);border-radius:12px;background:rgba(0,0,0,.24);padding:9px 11px">
-            <div style="display:flex;align-items:center;gap:8px">
-            <button data-lift onClick="{{ horoPrevWk }}" aria-label="Back one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 14px var(--fb);color:var(--ac)">‹‹</button>
-            <button data-lift onClick="{{ horoPrev }}" aria-label="Previous day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">‹</button>
-            <div data-lift="card" style="position:relative;flex:1 1 130px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:44px;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);padding:5px 13px">
-              <span style="font:600 13px var(--fu);color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ horoDateLabel }}</span>
-              <span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ horoDateMeta }}</span>
-              <input type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
-            </div>
-            <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 15px var(--fb);color:var(--ac)">›</button>
-            <button data-lift onClick="{{ horoNextWk }}" aria-label="Forward one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 14px var(--fb);color:var(--ac)">››</button>
+              <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--ac)">›</button>
+              <button data-lift onClick="{{ horoNextWk }}" aria-label="Forward one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--mut)">››</button>
             </div>
             <sc-if value="{{ horoNotToday }}" hint-placeholder-val="{{ false }}">
               <button data-lift onClick="{{ horoGoToday }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border:1px solid rgba(47,255,143,.34);border-radius:10px;background:rgba(47,255,143,.08);font:600 10px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--ac)">Back to today</button>
             </sc-if>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font:700 8px var(--fu);letter-spacing:.11em;padding:4px 8px;border-radius:6px;color:{{ horoBadgeC }};background:{{ horoBadgeBg }}">{{ horoBadge }}</span>
+              <span style="font:600 8.5px var(--fu);letter-spacing:.08em;color:var(--dim)">{{ alignStamp }}</span>
+            </div>
           </div>
           <sc-if value="{{ hasAlignBrief }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:14px">
               <div style="display:flex;flex-direction:column;gap:12px">
-                <div data-lift="box" style="display:flex;flex-direction:column;gap:13px;border:1px solid var(--bd);border-top:3px solid {{ hpEdge }};border-radius:3px 3px 14px 14px;background:rgba(0,0,0,.26);padding:15px 17px 16px">
-                  <div style="display:flex;align-items:center;gap:10px">
-                    <button data-lift onClick="{{ hpPrev }}" aria-label="{{ hpPrevLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 16px var(--fb);color:var(--ac)">‹</button>
-                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center">
-                      <span style="font:400 23px/1.2 var(--fd);color:var(--tx)">{{ hpTitle }}</span>
-                      <span style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
-                    </div>
-                    <button data-lift onClick="{{ hpNext }}" aria-label="{{ hpNextLabel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);font:400 16px var(--fb);color:var(--ac)">›</button>
+                <div style="display:flex;flex-direction:column;gap:16px;border-top:3px solid {{ hpEdge }};padding-top:18px">
+                  <div style="display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center">
+                    <span style="font:600 9.5px var(--fu);letter-spacing:.17em;text-transform:uppercase;color:var(--mut)">{{ hpKicker }} · {{ hpCount }}</span>
+                    <span style="font:400 clamp(30px,2.6vw,40px)/1.15 var(--fd);color:var(--tx);text-wrap:balance">{{ hpTitle }}</span>
+                  </div>
+                  <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Readings" style="display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;border-bottom:1px solid var(--bd)">
+                    <sc-for list="{{ hpDots }}" as="p" hint-placeholder-count="4">
+                      <button onClick="{{ p.go }}" role="tab" aria-selected="{{ p.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:2px solid {{ p.bd }};font:600 11px var(--fu);letter-spacing:.09em;text-transform:uppercase;color:{{ p.c }}">{{ p.label }}</button>
+                    </sc-for>
                   </div>
                   <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
                     <div style="display:flex;flex-direction:column;gap:10px;animation:dtIn .22s ease">
@@ -35110,13 +34802,6 @@ input[type="date"]{color-scheme:dark}
                       </sc-if>
                     </div>
                   </sc-if>
-                  <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Readings" style="display:flex;align-items:center;justify-content:center;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
-                    <sc-for list="{{ hpDots }}" as="p" hint-placeholder-count="4">
-                      <button onClick="{{ p.go }}" aria-label="{{ p.label }}" role="tab" aria-selected="{{ p.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center">
-                        <span aria-hidden="true" style="display:block;width:{{ p.w }};height:8px;border-radius:999px;border:1px solid {{ p.bd }};background:{{ p.bg }};transition:width .25s ease"></span>
-                      </button>
-                    </sc-for>
-                  </div>
                 </div>
                 <span style="font:600 9px var(--fu);letter-spacing:.15em;text-transform:uppercase;color:var(--dim)">Show your working</span>
                 <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
@@ -35167,35 +34852,22 @@ input[type="date"]{color-scheme:dark}
             <div style="font:italic 400 13.5px/1.7 var(--fb);color:var(--dim)">{{ dropTeaser }}</div>
           </sc-if>
         </div>
-        <sc-if value="{{ gnowHas }}" hint-placeholder-val="{{ false }}">
-          <div role="region" aria-label="Gates in the sky now" style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
-            <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px">
-              <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Gates in the sky now</span>
-              <span style="flex:none;font:600 11px var(--fu);letter-spacing:.04em;color:var(--mut)">{{ gnowStamp }}</span>
-            </div>
-            <sc-if value="{{ gnowSplit }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
-                <sc-if value="{{ gnowInsideAny }}" hint-placeholder-val="{{ false }}">
-                  <div role="list" aria-label="Gates in the sky now that are in your chart" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowInside }}" as="c" hint-placeholder-count="3"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--ac2);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--tx)">{{ c.label }}</span><span aria-hidden="true" style="font:700 13px var(--fu);color:var(--ac2-hi);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-                </sc-if>
-                <sc-if value="{{ gnowInsideEmpty }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-                </sc-if>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:9px">
-                <div style="font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">Not in your chart</div>
-                <sc-if value="{{ gnowOutsideAny }}" hint-placeholder-val="{{ false }}">
-                  <div role="list" aria-label="Gates in the sky now that are not in your chart" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowOutside }}" as="c" hint-placeholder-count="8"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-                </sc-if>
-                <sc-if value="{{ gnowOutsideEmpty }}" hint-placeholder-val="{{ false }}">
-                  <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
-                </sc-if>
-              </div>
+        <!-- THE LONG WEATHER, DEMOTED (owner, 24 October 2026): Today opens straight
+             into the reading now; the audit keeps one quiet line at the foot of the
+             page. The sheet it opens still carries the scene, the charts and the
+             full lists. -->
+        <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:16px">
+            <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="font:italic 400 14px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
             </sc-if>
-            <sc-if value="{{ gnowNoChart }}" hint-placeholder-val="{{ false }}">
-              <div role="list" aria-label="Gates in the sky now" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowAll }}" as="c" hint-placeholder-count="13"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fu);color:var(--tx);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
-              <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">Enter your birth moment to see which of these your chart holds.</div>
+            <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+                <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+                <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+              </div>
+              <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
             </sc-if>
           </div>
         </sc-if>
@@ -36056,6 +35728,38 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ spiritBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back</button>
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Human Design</div>
       </div>
+      <sc-if value="{{ gnowHas }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Gates in the sky now" style="display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
+          <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px">
+            <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Gates in the sky now</span>
+            <span style="flex:none;font:600 11px var(--fu);letter-spacing:.04em;color:var(--mut)">{{ gnowStamp }}</span>
+          </div>
+          <sc-if value="{{ gnowSplit }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
+              <sc-if value="{{ gnowInsideAny }}" hint-placeholder-val="{{ false }}">
+                <div role="list" aria-label="Gates in the sky now that are in your chart" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowInside }}" as="c" hint-placeholder-count="3"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--ac2);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--tx)">{{ c.label }}</span><span aria-hidden="true" style="font:700 13px var(--fu);color:var(--ac2-hi);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
+              </sc-if>
+              <sc-if value="{{ gnowInsideEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="font:600 10px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">Not in your chart</div>
+              <sc-if value="{{ gnowOutsideAny }}" hint-placeholder-val="{{ false }}">
+                <div role="list" aria-label="Gates in the sky now that are not in your chart" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowOutside }}" as="c" hint-placeholder-count="8"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fu);color:var(--mut);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
+              </sc-if>
+              <sc-if value="{{ gnowOutsideEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">None at this minute.</div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ gnowNoChart }}" hint-placeholder-val="{{ false }}">
+            <div role="list" aria-label="Gates in the sky now" style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ gnowAll }}" as="c" hint-placeholder-count="13"><div role="listitem" style="position:relative;display:inline-flex;align-items:baseline;gap:7px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px"><span aria-hidden="true" style="font:500 12px var(--fu);color:var(--mut)">{{ c.label }}</span><span aria-hidden="true" style="font:600 13px var(--fu);color:var(--tx);font-variant-numeric:tabular-nums">{{ c.gl }}</span><span style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">{{ c.aria }}</span></div></sc-for></div>
+            <div style="font:400 13px/1.6 var(--fb);color:var(--mut)">Enter your birth moment to see which of these your chart holds.</div>
+          </sc-if>
+        </div>
+      </sc-if>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
         <div style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;flex-direction:column;gap:10px">
@@ -46456,7 +46160,7 @@ class Component extends DCLogic {
       hpIsHoro: i === 0, hpIsHd: i === 1, hpIsNum: i === 2, hpIsTog: i === 3,
       hpDots: this.HORO_PAGES.map((p, k) => ({ label: p[1], on: k === i,
         bg: k === i ? p[3] : 'transparent', bd: k === i ? p[3] : 'var(--bd)',
-        w: k === i ? '22px' : '8px', go: go(k) })) };
+        w: k === i ? '22px' : '8px', c: k === i ? 'var(--tx)' : 'var(--mut)', go: go(k) })) };
   }
   FCKEY = 'incommon.forecast.open';
   fcIsOpen() { const v = this.state.fcOpen; return (v === null || v === undefined) ? this.readLS(this.FCKEY, false) : !!v; }
