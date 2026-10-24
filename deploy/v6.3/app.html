@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-today1  |  built 2026-10-24  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-oravoice1  |  built 2026-10-24  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27744,6 +27744,12 @@ input[type="date"]{color-scheme:dark}
 .orscry::-moz-range-track{height:3px;border-radius:2px;background:rgba(238,240,248,.16)}
 .orscry::-moz-range-progress{height:3px;border-radius:2px;background:var(--ac)}
 .orscry::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:var(--tx)}
+.orvol{-webkit-appearance:none;appearance:none;writing-mode:vertical-lr;direction:rtl;width:24px;height:112px;background:transparent;cursor:pointer}
+.orvol::-webkit-slider-runnable-track{width:3px;border-radius:2px;background:linear-gradient(to top,var(--ac) 0,var(--ac) var(--fill,0%),rgba(238,240,248,.16) var(--fill,0%))}
+.orvol::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--tx);margin-left:-5px;box-shadow:0 0 8px rgba(242,214,158,.55)}
+.orvol::-moz-range-track{width:3px;border-radius:2px;background:rgba(238,240,248,.16)}
+.orvol::-moz-range-progress{width:3px;border-radius:2px;background:var(--ac)}
+.orvol::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:var(--tx)}
 *::-webkit-scrollbar{width:10px;height:10px}
 *::-webkit-scrollbar-thumb{background:rgba(47,255,143,.24);border-radius:8px}
 *::-webkit-scrollbar-thumb:hover{background:rgba(47,255,143,.42)}
@@ -28361,7 +28367,6 @@ input[type="date"]{color-scheme:dark}
                 <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
                   <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:10px">
                     <button onClick="{{ fcToggle }}" aria-expanded="{{ fcOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
-                      <span aria-hidden="true" style="flex:none;font:400 11px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ fcRot }});transition:transform .3s ease">▶</span>
                       <span style="flex:1;min-width:0;text-align:left;font:400 16px var(--fd);color:var(--tx)">Today’s Forecast</span>
                       <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--ac)">{{ fcSign }}</span>
                     </button>
@@ -34417,21 +34422,39 @@ input[type="date"]{color-scheme:dark}
 
 </div>
 <sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
-  <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock) + 16px);z-index:88;display:flex;justify-content:center;pointer-events:none;padding:0 20px">
-    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;flex-direction:column;gap:3px;max-width:100%;box-sizing:border-box;padding:8px 12px 7px;border:1px solid var(--bd);border-radius:20px;background:var(--bg)">
-      <div style="display:flex;align-items:center;gap:7px">
-        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px;text-align:right">{{ orTpPosLabel }}</span>
-        <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onChange="{{ orTpSeekIn }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;width:min(180px,34vw)">
-        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px">{{ orTpTotalLabel }}</span>
+  <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock));z-index:88;background:var(--sf);border-top:1px solid var(--bd)">
+    <sc-if value="{{ orRateOpen }}" hint-placeholder-val="{{ false }}">
+      <div role="menu" aria-label="Reading speed" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="4">
+          <button data-lift onClick="{{ rt.go }}" role="menuitemradio" aria-checked="{{ rt.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 18px;border-radius:10px;background:{{ rt.bg }};color:{{ rt.c }};font:600 12.5px var(--fu)">{{ rt.label }}</button>
+        </sc-for>
       </div>
-      <div style="display:flex;align-items:center;gap:4px">
+    </sc-if>
+    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
+      <div role="menu" aria-label="Sections of this reading" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;max-width:min(300px,82vw);max-height:46vh;overflow-y:auto;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="5">
+          <button data-lift onClick="{{ q.go }}" role="menuitemradio" aria-checked="{{ q.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:{{ q.bg }};color:{{ q.c }};font:600 12px var(--fu);text-align:left">{{ q.title }}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orVolOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <span style="font:600 9px var(--fu);color:var(--dim)">{{ orVolPct }}%</span>
+        <input type="range" class="orvol" min="0" max="100" value="{{ orVolPct }}" onInput="{{ orVolIn }}" aria-label="Volume" style="--fill:{{ orVolFill }}%">
+      </div>
+    </sc-if>
+    <div role="group" aria-label="Listening controls" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;box-sizing:border-box;padding:8px 10px">
+      <span style="flex:1 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12px var(--fu);color:var(--mut)">{{ orTpTitle }}</span>
+      <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;flex:2 1 130px;min-width:110px">
+      <span style="flex:none;font:600 9.5px var(--fu);color:var(--dim);white-space:nowrap">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</span>
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
-      <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
-      <span style="font:600 11px var(--fu);color:var(--mut);max-width:24vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
-      <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
-      </div>
+      <button data-lift onClick="{{ orRateGo }}" aria-label="Reading speed" aria-expanded="{{ orRateOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
+      <button data-lift onClick="{{ orTpShuffleGo }}" aria-label="Shuffle sections" aria-pressed="{{ orTpShuffleOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpShuffleBd }};border-radius:999px;color:{{ orTpShuffleC }};font:400 15px var(--fu)">&#8644;</button>
+      <button data-lift onClick="{{ orTpLoopGo }}" aria-label="{{ orTpLoopLabel }}" aria-pressed="{{ orTpLoopOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpLoopBd }};border-radius:999px;color:{{ orTpLoopC }};font:400 15px var(--fu)">&#8635;<sup style="font-size:8px;line-height:1">{{ orTpLoopOne }}</sup></button>
+      <button data-lift onClick="{{ orQueueGo }}" aria-label="Queue of sections" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><span style="display:flex;flex-direction:column;align-items:center;gap:2.5px"><span style="display:block;width:15px;height:5px;border-radius:999px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span></span></button>
+      <button data-lift onClick="{{ orVolGo }}" aria-label="Volume" aria-expanded="{{ orVolOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M18.5 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
     </div>
   </div>
 </sc-if>
@@ -34735,7 +34758,6 @@ input[type="date"]{color-scheme:dark}
                   <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
                     <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:11px">
                       <button onClick="{{ fcToggle }}" aria-expanded="{{ fcOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
-                        <span aria-hidden="true" style="flex:none;font:400 12px var(--fu);color:var(--ac);display:inline-block;transform:rotate({{ fcRot }});transition:transform .3s ease">▶</span>
                         <span style="flex:1;min-width:0;text-align:left;font:400 18px var(--fd);color:var(--tx)">Today’s Forecast</span>
                         <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ fcSign }}</span>
                       </button>
@@ -41022,21 +41044,39 @@ input[type="date"]{color-scheme:dark}
 
 </div>
 <sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
-  <div style="position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:center;z-index:88;pointer-events:none">
-    <div data-lift="box" role="group" aria-label="Listening controls" style="pointer-events:auto;display:flex;flex-direction:column;gap:3px;max-width:100%;box-sizing:border-box;padding:8px 12px 7px;border:1px solid var(--bd);border-radius:20px;background:var(--bg)">
-      <div style="display:flex;align-items:center;gap:7px">
-        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px;text-align:right">{{ orTpPosLabel }}</span>
-        <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onChange="{{ orTpSeekIn }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;width:min(180px,34vw)">
-        <span style="font:600 9.5px var(--fu);color:var(--dim);min-width:25px">{{ orTpTotalLabel }}</span>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:88;background:var(--sf);border-top:1px solid var(--bd)">
+    <sc-if value="{{ orRateOpen }}" hint-placeholder-val="{{ false }}">
+      <div role="menu" aria-label="Reading speed" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="4">
+          <button data-lift onClick="{{ rt.go }}" role="menuitemradio" aria-checked="{{ rt.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 18px;border-radius:10px;background:{{ rt.bg }};color:{{ rt.c }};font:600 12.5px var(--fu)">{{ rt.label }}</button>
+        </sc-for>
       </div>
-      <div style="display:flex;align-items:center;gap:4px">
+    </sc-if>
+    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
+      <div role="menu" aria-label="Sections of this reading" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;max-width:min(300px,82vw);max-height:46vh;overflow-y:auto;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="5">
+          <button data-lift onClick="{{ q.go }}" role="menuitemradio" aria-checked="{{ q.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:{{ q.bg }};color:{{ q.c }};font:600 12px var(--fu);text-align:left">{{ q.title }}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orVolOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
+        <span style="font:600 9px var(--fu);color:var(--dim)">{{ orVolPct }}%</span>
+        <input type="range" class="orvol" min="0" max="100" value="{{ orVolPct }}" onInput="{{ orVolIn }}" aria-label="Volume" style="--fill:{{ orVolFill }}%">
+      </div>
+    </sc-if>
+    <div role="group" aria-label="Listening controls" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;box-sizing:border-box;padding:8px 10px">
+      <span style="flex:1 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12px var(--fu);color:var(--mut)">{{ orTpTitle }}</span>
+      <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;flex:2 1 130px;min-width:110px">
+      <span style="flex:none;font:600 9.5px var(--fu);color:var(--dim);white-space:nowrap">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</span>
       <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
       <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
       <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
-      <button data-lift onClick="{{ orTpRateGo }}" aria-label="Change reading speed" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
-      <span style="font:600 11px var(--fu);color:var(--mut);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">{{ orTpTitle }}</span>
-      <button data-lift onClick="{{ orTpStopGo }}" aria-label="Stop listening" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#10005;</button>
-      </div>
+      <button data-lift onClick="{{ orRateGo }}" aria-label="Reading speed" aria-expanded="{{ orRateOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
+      <button data-lift onClick="{{ orTpShuffleGo }}" aria-label="Shuffle sections" aria-pressed="{{ orTpShuffleOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpShuffleBd }};border-radius:999px;color:{{ orTpShuffleC }};font:400 15px var(--fu)">&#8644;</button>
+      <button data-lift onClick="{{ orTpLoopGo }}" aria-label="{{ orTpLoopLabel }}" aria-pressed="{{ orTpLoopOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpLoopBd }};border-radius:999px;color:{{ orTpLoopC }};font:400 15px var(--fu)">&#8635;<sup style="font-size:8px;line-height:1">{{ orTpLoopOne }}</sup></button>
+      <button data-lift onClick="{{ orQueueGo }}" aria-label="Queue of sections" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><span style="display:flex;flex-direction:column;align-items:center;gap:2.5px"><span style="display:block;width:15px;height:5px;border-radius:999px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span></span></button>
+      <button data-lift onClick="{{ orVolGo }}" aria-label="Volume" aria-expanded="{{ orVolOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M18.5 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
     </div>
   </div>
 </sc-if>
@@ -52806,14 +52846,15 @@ class Component extends DCLogic {
     const v = this._orVoice;
     if (!v) return;
     v.on = false;
-    /* Several pieces of the reading can be scheduled ahead of the one
-       sounding; every one of them has to be stopped. */
-    (v.sources || []).forEach(s => { try { s.stop(); } catch (e) {} });
-    if (v.source) { try { v.source.stop(); } catch (e) {} }
-    try { if (v.ctx && v.ctx.state !== 'closed') v.ctx.close(); } catch (e) {}
+    /* The sound rides one media element; pausing it and taking back the
+       piece's address stills whatever was sounding. */
+    try { if (v.el) v.el.pause(); } catch (e) {}
+    if (v.blobUrl) { try { URL.revokeObjectURL(v.blobUrl); } catch (e) {} }
+    if (v._gapT) { try { clearTimeout(v._gapT); } catch (e) {} }
     if (v._ttsK) { try { clearInterval(v._ttsK); } catch (e) {} }
     if (v._tick) { try { clearInterval(v._tick); } catch (e) {} }
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    this._orMediaState('none');
     this._orVoice = null;
     this.setState({ orListening: false });
   }
@@ -52836,28 +52877,51 @@ class Component extends DCLogic {
     if (!r) return;
     const segs = this.orVoiceSegments(r);
     if (!segs.length) return;
-    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs, ctx: null, comp: null, source: null, sources: [], rate: this._orVoiceRate(), chunkBag: null, preChunks: null, nextStart: 0, sectionT0: null, _ttsU: false, _ttsK: null, _tick: null, pre: null, gen: 0, paused: false };
-    /* iOS lets an audio context sound only when it was made or woken inside
-       the press, and the first section arrives after the proxy answers, which
-       is no longer the press. The context is made and resumed here and reused
-       by every section that follows. */
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) {
-      try {
-        voice.ctx = new AC();
-        if (voice.ctx.state === 'suspended') voice.ctx.resume();
-      } catch (e) { voice.ctx = null; }
-    }
+    const voice = { on: true, idx: Math.max(0, Math.min(idx, segs.length - 1)), segs,
+      el: null, blobUrl: null, elGen: 0, playCi: 0,
+      rate: this._orVoiceRate(), chunkBag: null, preChunks: null,
+      seekOff: 0, holdPos: null, gapPending: false, _gapT: null,
+      _ttsU: false, _ttsK: null, _tick: null, _ttsT0: null, _ttsAcc: 0, _ttsBase: 0,
+      pre: null, gen: 0, paused: false,
+      scry: null, rateOpen: false, queueOpen: false, volOpen: false };
+    /* THE SOUND RIDES ONE MEDIA ELEMENT, made inside the press (asked for by
+       the owner on 24 October 2026, so a reading keeps sounding with the
+       screen off or the phone in a pocket: an audio context is suspended by
+       the OS the moment the page leaves view, a media element is not). The
+       lock screen's own controls steer it through the media session. A phone
+       lets an element sound only once it has played inside a press, so a
+       breath of silence is played here; every piece of the reading then
+       plays on the same element. */
+    try {
+      const el = new Audio();
+      el.preload = 'auto';
+      el.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
+      const un = el.play();
+      if (un && un.catch) un.catch(() => {});
+      el.addEventListener('ended', () => this._orElEnded());
+      voice.el = el;
+    } catch (e) { voice.el = null; }
+    try {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', () => { const w = this._orVoice; if (w && w.paused) this.orTransportPause(); });
+        navigator.mediaSession.setActionHandler('pause', () => { const w = this._orVoice; if (w && !w.paused) this.orTransportPause(); });
+        navigator.mediaSession.setActionHandler('previoustrack', () => this.orTransportPrev());
+        navigator.mediaSession.setActionHandler('nexttrack', () => this.orTransportNext());
+      }
+    } catch (e) {}
     this._orVoice = voice;
     this.setState({ orListening: true });
     /* The scry bar and the sections' playing marks follow the sound. */
     voice._tick = setInterval(() => { try { if (voice.on) this.setState({ orListening: true }); } catch (e) {} }, 600);
     this._orPlayNext(voice);
   }
-  /* THE TRANSPORT. Pause holds the section where it is: the audio context
-     suspends (a buffer source cannot pause, its context can) and the device's
-     voice pauses. Back and forward leave the current section wherever it
-     stands and play the one before or after it. */
+  _orMediaState(s) {
+    /* The lock screen's play/pause mark follows the transport's. */
+    try { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = s; } catch (e) {}
+  }
+  /* THE TRANSPORT. Pause holds the section where it is: the media element
+     pauses and the device's voice pauses. Back and forward leave the current
+     section wherever it stands and play the one before or after it. */
   orTransportPause() {
     const v = this._orVoice;
     if (!v || !v.on) return;
@@ -52868,48 +52932,109 @@ class Component extends DCLogic {
     else if (v._ttsU) v._ttsT0 = Date.now();
     try {
       if (v.paused) {
-        if (v.ctx && v.ctx.state === 'running') v.ctx.suspend();
+        if (v.el) v.el.pause();
+        /* A pause inside the beat of silence between two pieces holds the
+           next piece back until the resume. */
+        if (v._gapT) { clearTimeout(v._gapT); v._gapT = null; v.gapPending = true; }
         if (v._ttsU) window.speechSynthesis.pause();
       } else {
-        if (v.ctx && v.ctx.state === 'suspended') v.ctx.resume();
+        /* An element left at a piece's end is not replayed: the piece after
+           it was held back and is pumped now. */
+        if (v.gapPending) { v.gapPending = false; this._orPump(v, v.gen); }
+        else if (v.el && v.el.src && v.gen === v.elGen && !v.el.ended) { const p = v.el.play(); if (p && p.catch) p.catch(() => {}); }
         if (v._ttsU) window.speechSynthesis.resume();
       }
     } catch (e) {}
+    this._orMediaState(v.paused ? 'paused' : 'playing');
     this.setState({ orListening: true });
   }
-  /* READING SPEED. 1x to 4x, kept on the device so the next reading opens at
-     the pace the reader chose. Web Audio speeds a buffer by resampling it, so
-     the pitch climbs with the pace; the deliberate pauses between pieces
-     shrink to match, and the pieces already queued are retimed where they
-     stand. */
-  orTransportRate() {
-    const RATES = [1, 1.5, 2, 3, 4];
+  /* READING SPEED. 0.5x, 0.75x, 1x and 1.5x from the transport's list (the
+     owner asked for slow-downs and dropped 2x and up on 24 October 2026),
+     kept on the device so the next reading opens at the pace the reader
+     chose. A media element keeps the voice's pitch at any pace — the old
+     audio context resampled, so a faster voice also climbed — and the
+     deliberate beats of silence between pieces shrink or stretch to match. */
+  orTransportRate(rate) {
+    rate = parseFloat(rate);
+    if ([0.5, 0.75, 1, 1.5].indexOf(rate) === -1) rate = 1;
+    this.writeLS('incommon.voice.rate', rate);
     const v = this._orVoice;
-    const cur = v && v.rate || this._orVoiceRate();
-    const next = RATES[(RATES.indexOf(cur) + 1) % RATES.length] || 1;
-    this.writeLS('incommon.voice.rate', next);
     if (v) {
-      const old = v.rate || 1;
-      v.rate = next;
-      try {
-        if (v.ctx && v.nextStart && v.nextStart > v.ctx.currentTime)
-          v.nextStart = v.ctx.currentTime + (v.nextStart - v.ctx.currentTime) * (old / next);
-        (v.sources || []).forEach(s => { try { s.playbackRate.value = next; } catch (e) {} });
-      } catch (e) {}
+      v.rate = rate;
+      try { if (v.el) v.el.playbackRate = rate; } catch (e) {}
+      /* An utterance of the device's voice already speaking keeps its pace;
+         the next one takes the new one. */
     }
     this.setState({ orListening: !!(v && v.on) });
   }
   _orVoiceRate() {
     const r = parseFloat(this.readLS('incommon.voice.rate', 1));
-    return [1, 1.5, 2, 3, 4].indexOf(r) !== -1 ? r : 1;
+    return [0.5, 0.75, 1, 1.5].indexOf(r) !== -1 ? r : 1;
+  }
+  /* THE VOLUME, kept on the device like the pace. It steers the media
+     element live; the device's own voice takes it per utterance. */
+  _orVoiceVol() {
+    const n = parseFloat(this.readLS('incommon.voice.vol', 1));
+    return isNaN(n) ? 1 : Math.max(0, Math.min(1, n));
+  }
+  orTransportVol(x) {
+    const n = Math.max(0, Math.min(1, parseFloat(x) || 0));
+    this.writeLS('incommon.voice.vol', n);
+    const v = this._orVoice;
+    try { if (v && v.el) v.el.volume = n; } catch (e) {}
+    this.setState({ orListening: !!(v && v.on) });
+  }
+  /* SHUFFLE AND LOOP, read live at every section's end so a toggle mid-
+     reading already steers the next one. The loop press cycles: once loops
+     the section, twice loops the whole reading, three times turns it off. */
+  orTransportShuffle() {
+    this.writeLS('incommon.voice.shuffle', !this.readLS('incommon.voice.shuffle', false));
+    this.setState({ orListening: !!(this._orVoice && this._orVoice.on) });
+  }
+  orTransportLoop() {
+    this.writeLS('incommon.voice.loop', (this._orVoiceLoop() + 1) % 3);
+    this.setState({ orListening: !!(this._orVoice && this._orVoice.on) });
+  }
+  _orVoiceLoop() {
+    const l = parseInt(this.readLS('incommon.voice.loop', 0), 10);
+    return l === 1 || l === 2 ? l : 0;
+  }
+  /* A section picked from the queue list. */
+  orTransportQueueGo(i) {
+    const v = this._orVoice;
+    if (!v || !v.on) return;
+    v.queueOpen = false;
+    i = i | 0;
+    if (i === v.idx || i < 0 || i >= v.segs.length) { this.setState({ orListening: true }); return; }
+    v.idx = i;
+    this._orRestart(v);
+  }
+  /* WHERE A SECTION'S END GOES. The loop and shuffle the reader set are read
+     live. A section refused by the device's voice (the plain idx++ paths)
+     never loops, so a section that cannot sound cannot spin forever. */
+  _orAdvance(voice) {
+    if (!voice || !voice.on) return;
+    if (this._orVoiceLoop() === 1) { this._orRestart(voice); return; }
+    let idx = voice.idx + 1;
+    if (this.readLS('incommon.voice.shuffle', false) && voice.segs.length > 1) {
+      idx = voice.idx;
+      while (idx === voice.idx) idx = Math.floor(Math.random() * voice.segs.length);
+    }
+    if (idx >= voice.segs.length) {
+      if (this._orVoiceLoop() === 2) idx = 0;
+      else { this.orListenStop(); return; }
+    }
+    voice.idx = idx;
+    this._orRestart(voice);
   }
   /* THE SCRY BAR. The bar measures the section that is playing: each piece's
-     length is its true audio length once decoded, and a guess of about
-     fourteen letters a second until then, plus its beat of silence, all at
-     the current reading speed. A drag lands on the piece under the finger
-     and the schedule rebuilds from there — pieces already fetched are
-     reused, so a jump back is instant and a jump ahead waits only for what
-     has not been fetched yet. */
+     length is its true audio length once the element has read it, and a
+     guess of about fourteen letters a second until then, plus its beat of
+     silence, all at the current reading speed. A drag only previews — the
+     knob and the clock follow the finger while it moves — and the seek lands
+     where the finger lifts, on the piece under it and the breath within that
+     piece. Pieces already fetched are reused, so a jump back is instant and
+     a jump ahead waits only for what has not been fetched yet. */
   _orChunkDur(voice, ci) {
     const c = voice.chunks[ci], rate = voice.rate || 1;
     return ((c.dur || c.text.length / 14) + (c.gap || 350) / 1000) / rate;
@@ -52923,15 +53048,20 @@ class Component extends DCLogic {
   _orSectionPos(voice) {
     if (!voice || !voice.chunks) return 0;
     const total = this._orSectionTotal(voice);
+    /* A drop while paused is held until the piece it landed on has loaded
+       and taken the position over. */
+    if (voice.holdPos != null) return Math.min(total, voice.holdPos);
     /* The device's own voice keeps no clock we can read; its place is kept
        by hand from when it started, paused spans not counted. */
     if (voice._ttsU || voice._ttsT0 || voice._ttsAcc) {
-      const acc = voice._ttsAcc || 0;
+      const acc = (voice._ttsBase || 0) + (voice._ttsAcc || 0);
       return Math.min(total, voice.paused ? acc : acc + (voice._ttsT0 ? (Date.now() - voice._ttsT0) / 1000 : 0));
     }
-    const src = voice.sources && voice.sources[0];
-    if (src && src._off !== undefined && voice.ctx)
-      return Math.min(total, src._off + Math.max(0, voice.ctx.currentTime - src._at));
+    if (voice.el && voice.gen === voice.elGen && voice.chunks[voice.playCi]) {
+      let base = 0;
+      for (let i = 0; i < voice.playCi; i++) base += this._orChunkDur(voice, i);
+      return Math.min(total, base + (voice.el.currentTime || 0) / (voice.rate || 1));
+    }
     return 0;
   }
   orTransportSeek(frac) {
@@ -52940,22 +53070,27 @@ class Component extends DCLogic {
     const target = Math.max(0, Math.min(1, frac || 0)) * this._orSectionTotal(v);
     let acc = 0, ci = 0;
     while (ci < v.chunks.length - 1 && acc + this._orChunkDur(v, ci) < target) { acc += this._orChunkDur(v, ci); ci++; }
-    if (v._ttsU || !this.cloud || !this.cloud.oracleVoice) {
+    if (v._ttsU || !this.cloud || !this.cloud.oracleVoice || !v.el) {
       try { window.speechSynthesis.cancel(); } catch (e) {}
       v._ttsU = false;
       v.gen++;
       v.chunkIdx = ci;
+      v._ttsBase = acc;
       this._orPlayTTS(v, v.chunks.slice(ci).map(c => c.text).join(' '));
       return;
     }
     v.gen++;
     const g = v.gen;
-    (v.sources || []).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
-    v.sources = [];
+    if (v._gapT) { clearTimeout(v._gapT); v._gapT = null; }
+    v.gapPending = false;
+    try { v.el.pause(); } catch (e) {}
     v.chunkIdx = ci;
-    v.nextStart = 0;
-    v.sectionT0 = null;
-    if (v.ctx && v.ctx.state === 'suspended' && !v.paused) { try { v.ctx.resume(); } catch (e) {} }
+    /* The bar's seconds run at reading speed; the piece's own audio seconds
+       are the element's. The beat of silence after a piece is not a place
+       the bar can land. */
+    const c = v.chunks[ci];
+    v.seekOff = Math.max(0, Math.min((target - acc) * (v.rate || 1), (c.dur || c.text.length / 14) - 0.05));
+    if (v.paused) v.holdPos = target;
     this._orPump(v, g);
     this.setState({ orListening: true });
   }
@@ -52979,28 +53114,37 @@ class Component extends DCLogic {
     /* A sound in flight is stopped; every callback it might still fire is
        made stale by the generation bump inside _orPlayNext. A prefetch is
        kept only when it happens to be for the section being jumped to. */
-    (voice.sources || []).forEach(s => { try { s.stop(); } catch (e) {} });
-    voice.sources = [];
-    try { if (voice.source) voice.source.stop(); } catch (e) {}
-    voice.source = null;
+    try { if (voice.el) voice.el.pause(); } catch (e) {}
+    if (voice._gapT) { clearTimeout(voice._gapT); voice._gapT = null; }
+    voice.gapPending = false;
+    voice.seekOff = 0;
+    voice.holdPos = null;
     if (voice._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     voice._ttsU = false;
-    if (voice.paused) {
-      voice.paused = false;
-      try { if (voice.ctx && voice.ctx.state === 'suspended') voice.ctx.resume(); } catch (e) {}
-    }
+    voice._ttsT0 = null;
+    voice._ttsAcc = 0;
+    voice._ttsBase = 0;
+    if (voice.paused) voice.paused = false;
+    this._orMediaState('playing');
     if (voice.pre && voice.pre.idx !== voice.idx) voice.pre = null;
     this._orPlayNext(voice);
   }
   _orPlayNext(voice) {
     if (!voice || !voice.on || voice.idx >= voice.segs.length) { this.orListenStop(); return; }
     /* A generation per section played: callbacks from a section left behind
-       (a stopped sound, a cancelled utterance, a slow fetch) find their
+       (a paused element, a cancelled utterance, a slow fetch) find their
        number no longer current and do nothing. */
     const g = voice.gen = (voice.gen || 0) + 1;
     const seg = voice.segs[voice.idx];
-    /* The transport's title and the section buttons' playing marks follow the
-       section, so the page is told each time it moves. */
+    /* The transport's title, the lock screen's and the sections' playing
+       marks follow the section, so the page is told each time it moves. */
+    try {
+      if ('mediaSession' in navigator && typeof MediaMetadata === 'function') {
+        const rt = this.state.orHit && this.state.orHit.reading && this.state.orHit.reading.title;
+        navigator.mediaSession.metadata = new MediaMetadata({ title: seg.title || 'The Oracle', artist: 'inCommon · The Oracle', album: rt || 'A reading' });
+      }
+    } catch (e) {}
+    this._orMediaState(voice.paused ? 'paused' : 'playing');
     this.setState({ orListening: true });
     const cloud = this.cloud;
     if (cloud && cloud.oracleVoice) {
@@ -53012,12 +53156,13 @@ class Component extends DCLogic {
       voice.chunks = [{ text: seg.title + '.', gap: 750 }].concat(this._orVoiceChunks(seg.body));
       voice.chunkIdx = 0;
       voice.chunkBag = null;
-      voice.nextStart = 0;
-      voice.sectionT0 = null;
+      voice.seekOff = 0;
+      voice.holdPos = null;
       /* A stretch read by the device's own voice is over; its hand-kept
          clock must not speak for the audio that follows. */
       voice._ttsT0 = null;
       voice._ttsAcc = 0;
+      voice._ttsBase = 0;
       /* A section asked for ahead carries its first pieces with it. */
       voice.preChunks = voice.pre && voice.pre.idx === voice.idx ? voice.pre.chunks : null;
       voice.pre = null;
@@ -53027,8 +53172,7 @@ class Component extends DCLogic {
          section and a drag can start the device's voice again mid-way. */
       voice.chunks = [{ text: seg.title + '.', gap: 750 }].concat(this._orVoiceChunks(seg.body));
       voice.chunkIdx = 0;
-      voice.nextStart = 0;
-      voice.sectionT0 = null;
+      voice._ttsBase = 0;
       this._orPlayTTS(voice, voice.chunks.map(c => c.text).join(' '));
     }
   }
@@ -53055,8 +53199,8 @@ class Component extends DCLogic {
   }
   /* The pieces of a section: paragraph-sized, a long paragraph broken on
      sentence ends so no piece runs past ~700 characters. gap is the beat of
-     silence after the piece — longer at a paragraph's end — divided by the
-     reading speed when the piece is scheduled. */
+     silence after the piece — longer at a paragraph's end — played at the
+     current reading speed. */
   _orVoiceChunks(text) {
     const paras = String(text || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
     const chunks = [];
@@ -53097,98 +53241,98 @@ class Component extends DCLogic {
     if (ci + 1 < voice.chunks.length) this._orChunkFetch(voice, ci + 1);
     Promise.resolve(this._orChunkFetch(voice, ci)).then(res => {
       if (!voice.on || g !== voice.gen) return;
-      if (res.ok && res.audio) this._orScheduleAudio(voice, res.audio, g);
+      if (res.ok && res.audio) this._orPlayChunk(voice, res.audio, g);
       else this._orPlayTTSRest(voice, g);
     }).catch(() => {
       if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
     });
   }
-  _orVoiceOut(voice) {
-    /* The voice holds one volume through a compressor: the quiet end of a
-       phrase is lifted back up and an excited peak is tucked in. */
-    if (!voice.comp) {
-      const comp = voice.ctx.createDynamicsCompressor();
-      comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4;
-      comp.attack.value = 0.003; comp.release.value = 0.3;
-      comp.connect(voice.ctx.destination);
-      voice.comp = comp;
-    }
-    return voice.comp;
-  }
-  _orScheduleAudio(voice, buf, g) {
+  /* ONE PIECE ON THE ONE ELEMENT. Each piece arrives as its own file and
+     sounds through the element made in the press; the next piece is chained
+     by the element's own end, after the beat of silence the piece asked for,
+     so a slow fetch of a later piece is the only wait the reader hears. */
+  _orPlayChunk(voice, bytes, g) {
     if (!voice.on || g !== voice.gen) return;
+    const el = voice.el, ci = voice.chunkIdx;
+    const chunk = voice.chunks && voice.chunks[ci];
+    if (!el || !chunk) { this._orPlayTTSRest(voice, g); return; }
     try {
-      /* One context for the whole reading. A browser allows only a handful of
-         open contexts, so one per piece ran out mid-reading; and a context
-         the OS suspended (iOS does, between pieces) is resumed, not replaced
-         — unless the reader paused it themselves. */
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) throw new Error('no audio');
-      const ctx = voice.ctx && voice.ctx.state !== 'closed' ? voice.ctx : (voice.ctx = new AC());
-      if (ctx.state === 'suspended' && !voice.paused) ctx.resume();
-      ctx.decodeAudioData(buf, buffer => {
+      if (voice.blobUrl) { try { URL.revokeObjectURL(voice.blobUrl); } catch (e) {} }
+      voice.blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+      voice.elGen = g;
+      voice.playCi = ci;
+      /* A seek carries the breath within the piece it landed on; the piece
+         starts there once its length is known. */
+      const off = voice.seekOff || 0;
+      voice.seekOff = 0;
+      el.addEventListener('loadedmetadata', () => {
         if (!voice.on || g !== voice.gen) return;
-        const ci = voice.chunkIdx;
-        const chunk = voice.chunks[ci];
-        const rate = voice.rate || 1;
-        const src = ctx.createBufferSource();
-        src.buffer = buffer;
-        src.playbackRate.value = rate;
-        src.connect(this._orVoiceOut(voice));
-        src._ci = ci;
         /* The piece's true length, known now, replaces the guess the scry
            bar was drawn from. */
-        chunk.dur = buffer.duration;
-        /* Pieces are scheduled back to back with their beat of silence, not
-           chained on each other's end, so a slow fetch of a later piece is
-           the only wait the reader hears. A suspended context keeps its
-           clock, so a paused schedule holds where it stands. */
-        const at = Math.max(ctx.currentTime + 0.03, voice.nextStart || 0);
-        voice.nextStart = at + buffer.duration / rate + (chunk.gap || 350) / 1000 / rate;
-        /* The scry bar reads each piece's place in the section from these. */
-        if (voice.sectionT0 === null || voice.sectionT0 === undefined) voice.sectionT0 = at;
-        src._at = at;
-        src._off = at - voice.sectionT0;
-        voice.sources.push(src);
-        src.onended = () => {
-          const k = voice.sources.indexOf(src);
-          if (k !== -1) voice.sources.splice(k, 1);
-          if (!voice.on || g !== voice.gen) return;
-          if (ci === voice.chunks.length - 1) { voice.idx++; this._orPlayNext(voice); }
-        };
-        src.start(at);
-        voice.chunkIdx++;
-        if (ci === voice.chunks.length - 1) this._orPrefetch(voice);
-        else this._orPump(voice, g);
-      }, () => {
-        if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
-      });
+        if (el.duration && isFinite(el.duration)) chunk.dur = el.duration;
+        if (off > 0) { try { el.currentTime = Math.min(off, Math.max(0, (el.duration || off) - 0.05)); } catch (e) {} }
+        voice.holdPos = null;
+      }, { once: true });
+      el.playbackRate = voice.rate || 1;
+      try { el.volume = this._orVoiceVol(); } catch (e) {}
+      el.src = voice.blobUrl;
+      /* A piece loaded while paused waits for the resume to sound. */
+      if (!voice.paused) {
+        const p = el.play();
+        if (p && p.catch) p.catch(() => { if (voice.on && g === voice.gen && !voice.paused) this._orPlayTTSRest(voice, g); });
+      }
+      if (ci === voice.chunks.length - 1) this._orPrefetch(voice);
     } catch (e) {
       if (voice.on && g === voice.gen) this._orPlayTTSRest(voice, g);
     }
   }
+  _orElEnded() {
+    const voice = this._orVoice;
+    if (!voice || !voice.on || !voice.el) return;
+    /* An end from a section left behind is stale. */
+    if (voice.gen !== voice.elGen) return;
+    const ci = voice.playCi;
+    if (!voice.chunks || ci >= voice.chunks.length - 1) { this._orAdvance(voice); return; }
+    voice.chunkIdx = ci + 1;
+    /* The beat of silence between pieces is the piece's own, at the current
+       reading speed. */
+    const gap = ((voice.chunks[ci] && voice.chunks[ci].gap) || 350) / (voice.rate || 1);
+    voice._gapT = setTimeout(() => {
+      voice._gapT = null;
+      if (!voice.on || voice.gen !== voice.elGen) return;
+      if (voice.paused) { voice.gapPending = true; return; }
+      this._orPump(voice, voice.gen);
+    }, gap);
+  }
   /* A piece that would not come (the voice is spent, the proxy is down)
      hands the rest of the section to the device's own voice, from the piece
-     after the one sounding. Pieces scheduled but not yet playing are
-     stopped, and the generation bump stills their callbacks. */
+     after the one sounding. The generation bump stills the callbacks of
+     anything still in flight — the sounding piece's own end included, which
+     is why the handover hangs on a listener of its own. */
   _orPlayTTSRest(voice, g) {
     if (!voice.on || g !== voice.gen) return;
-    const first = voice.sources && voice.sources.length ? voice.sources[0] : null;
-    const fromCi = first && first._ci !== undefined ? first._ci + 1 : voice.chunkIdx;
-    (voice.sources || []).slice(1).forEach(s => { try { s.stop(); } catch (e) {} });
-    voice.sources = first ? [first] : [];
+    /* The piece sounding now plays out before the device's voice picks the
+       section up. */
+    const playing = !!(voice.el && voice.gen === voice.elGen && !voice.el.paused && !voice.el.ended);
+    const fromCi = playing ? voice.playCi + 1 : voice.chunkIdx;
+    voice._ttsBase = 0;
+    for (let i = 0; voice.chunks && i < fromCi && i < voice.chunks.length; i++) voice._ttsBase += this._orChunkDur(voice, i);
     voice.gen = (voice.gen || 0) + 1;
     const g2 = voice.gen;
     const rest = (voice.chunks || []).slice(fromCi).map(c => c.text).join(' ');
     const begin = () => {
       if (!voice.on || g2 !== voice.gen) return;
-      if (!rest.trim()) { voice.idx++; this._orPlayNext(voice); return; }
+      if (!rest.trim()) { this._orAdvance(voice); return; }
       this._orPlayTTS(voice, rest);
     };
-    /* The piece sounding now plays out before the device's voice picks the
-       section up. */
-    if (first) first.onended = () => { voice.sources = []; begin(); };
-    else begin();
+    if (playing) {
+      const el = voice.el;
+      const h = () => { el.removeEventListener('ended', h); begin(); };
+      el.addEventListener('ended', h);
+    } else {
+      try { if (voice.el) voice.el.pause(); } catch (e) {}
+      begin();
+    }
   }
   _orPlayTTS(voice, text) {
     if (!voice || !voice.on) return;
@@ -53204,14 +53348,14 @@ class Component extends DCLogic {
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = voice.rate || 1;
+      u.volume = this._orVoiceVol();
       voice._ttsU = true;
       u.onend = () => {
         if (!voice.on || g !== voice.gen) return;
         voice._ttsU = false;
         voice._ttsT0 = null;
         voice._ttsAcc = 0;
-        voice.idx++;
-        this._orPlayNext(voice);
+        this._orAdvance(voice);
       };
       u.onerror = () => {
         if (!voice.on || g !== voice.gen) return;
@@ -54605,10 +54749,15 @@ class Component extends DCLogic {
     const segs = r ? this.orVoiceSegments(r) : [];
     const segAt = {}; segs.forEach((s, i) => { segAt[s.key] = i; });
     const vp = this._orVoice;
-    /* Where the bar sits in the section that is playing. */
+    /* Where the bar sits in the section that is playing. A finger on the
+       scry bar previews its own spot (vp.scry) until it lifts. */
     const tpTotal = vp ? this._orSectionTotal(vp) : 0;
     const tpPos = vp ? this._orSectionPos(vp) : 0;
     const tpFrac = tpTotal > 0 ? Math.max(0, Math.min(1, tpPos / tpTotal)) : 0;
+    const scry = vp && vp.scry != null ? vp.scry : null;
+    const tpRate = (vp && vp.rate) || this._orVoiceRate();
+    const tpShuf = this.readLS('incommon.voice.shuffle', false);
+    const tpLoop = this._orVoiceLoop();
     const segBtn = k => {
       const i = segAt[k];
       if (i === undefined) return { oiHas: false, oiOn: false, oiMark: '▶', oiGo: null };
@@ -54683,24 +54832,53 @@ class Component extends DCLogic {
       orListening: !!(this._orVoice && this._orVoice.on),
       orListenLabel: this._orVoice && this._orVoice.on ? 'Stop listening' : 'Listen to the reading',
       orListenNote: this.orListenNote(),
-      /* The transport bar at the foot of the page: shown while a reading is
-         playing or paused, naming the section it is on. */
-      orTpOn: !!this._orVoice,
-      orTpTitle: this._orVoice && this._orVoice.segs[this._orVoice.idx] ? this._orVoice.segs[this._orVoice.idx].title : '',
-      orTpPaused: !!(this._orVoice && this._orVoice.paused),
-      orTpMark: this._orVoice && this._orVoice.paused ? '▶' : '❚❚',
-      orTpPauseLabel: this._orVoice && this._orVoice.paused ? 'Play' : 'Pause',
+      /* The transport banner docked at the foot of the page: shown while a
+         reading is playing or paused, naming the section it is on. The scry
+         bar previews the finger (vp.scry) and seeks only when it lifts;
+         speed, queue and volume open small popups above the banner, one at
+         a time. */
+      orTpOn: !!vp,
+      orTpTitle: vp && vp.segs[vp.idx] ? vp.segs[vp.idx].title : '',
+      orTpPaused: !!(vp && vp.paused),
+      orTpMark: vp && vp.paused ? '▶' : '❚❚',
+      orTpPauseLabel: vp && vp.paused ? 'Play' : 'Pause',
       orTpPauseGo: () => this.orTransportPause(),
       orTpPrevGo: () => this.orTransportPrev(),
       orTpNextGo: () => this.orTransportNext(),
-      orTpRateLabel: ((this._orVoice && this._orVoice.rate) || this._orVoiceRate()) + '×',
-      orTpRateGo: () => this.orTransportRate(),
-      orTpPermille: Math.round(tpFrac * 1000),
-      orTpFill: (tpFrac * 100).toFixed(1),
-      orTpPosLabel: this._orFmtTime(tpPos),
+      orTpRateLabel: tpRate + '×',
+      orRateOpen: !!(vp && vp.rateOpen),
+      orRateGo: () => { if (!vp) return; vp.rateOpen = !vp.rateOpen; vp.queueOpen = false; vp.volOpen = false; this.setState({ orListening: true }); },
+      orRateOpts: [0.5, 0.75, 1, 1.5].map(rt => ({ label: rt + '×', on: tpRate === rt,
+        bg: tpRate === rt ? 'rgba(var(--atmc),.24)' : 'transparent', c: tpRate === rt ? 'var(--tx)' : 'var(--mut)',
+        go: () => { this.orTransportRate(rt); if (vp) vp.rateOpen = false; } })),
+      orTpShuffleOn: tpShuf,
+      orTpShuffleBd: tpShuf ? 'var(--ac)' : 'var(--bd)',
+      orTpShuffleC: tpShuf ? 'var(--ac)' : 'var(--mut)',
+      orTpShuffleGo: () => this.orTransportShuffle(),
+      orTpLoopOn: tpLoop !== 0,
+      orTpLoopBd: tpLoop !== 0 ? 'var(--ac)' : 'var(--bd)',
+      orTpLoopC: tpLoop !== 0 ? 'var(--ac)' : 'var(--mut)',
+      /* Loop the section on one press; a second loops the whole reading and
+         the button wears a superscript 1; a third turns it off. */
+      orTpLoopOne: tpLoop === 2 ? '1' : '',
+      orTpLoopLabel: tpLoop === 1 ? 'Loop this section' : tpLoop === 2 ? 'Loop the whole reading' : 'Loop off',
+      orTpLoopGo: () => this.orTransportLoop(),
+      orQueueOpen: !!(vp && vp.queueOpen),
+      orQueueGo: () => { if (!vp) return; vp.queueOpen = !vp.queueOpen; vp.rateOpen = false; vp.volOpen = false; this.setState({ orListening: true }); },
+      orQueueRows: vp ? vp.segs.map((s, i) => ({ title: s.title, on: i === vp.idx,
+        bg: i === vp.idx ? 'rgba(var(--atmc),.24)' : 'transparent', c: i === vp.idx ? 'var(--ac)' : 'var(--tx)',
+        go: () => this.orTransportQueueGo(i) })) : [],
+      orVolOpen: !!(vp && vp.volOpen),
+      orVolGo: () => { if (!vp) return; vp.volOpen = !vp.volOpen; vp.rateOpen = false; vp.queueOpen = false; this.setState({ orListening: true }); },
+      orVolPct: Math.round(this._orVoiceVol() * 100),
+      orVolFill: (this._orVoiceVol() * 100).toFixed(0),
+      orVolIn: e => this.orTransportVol((parseFloat(e && e.target && e.target.value) || 0) / 100),
+      orTpPermille: Math.round((scry != null ? scry : tpFrac) * 1000),
+      orTpFill: ((scry != null ? scry : tpFrac) * 100).toFixed(1),
+      orTpPosLabel: this._orFmtTime(scry != null ? scry * tpTotal : tpPos),
       orTpTotalLabel: this._orFmtTime(tpTotal),
-      orTpSeekIn: e => this.orTransportSeek((parseFloat(e && e.target && e.target.value) || 0) / 1000),
-      orTpStopGo: () => this.orListenStop(),
+      orScryIn: e => { const w = this._orVoice; if (!w) return; w.scry = Math.max(0, Math.min(1, (parseFloat(e && e.target && e.target.value) || 0) / 1000)); this.setState({ orListening: true }); },
+      orScryDrop: () => { const w = this._orVoice; if (!w || w.scry == null) return; const f = w.scry; w.scry = null; this.orTransportSeek(f); },
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
