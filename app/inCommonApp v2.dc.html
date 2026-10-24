@@ -127,18 +127,6 @@ input[type="date"]{color-scheme:dark}
 /* The Oracle's scry bar: a thin line the reader drags along to move through
    the section that is playing. The filled part is painted from --fill, set
    inline, since a pseudo-element cannot read the template. */
-.orscry{-webkit-appearance:none;appearance:none;height:24px;background:transparent;cursor:pointer}
-.orscry::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--ac) 0,var(--ac) var(--fill,0%),rgba(238,240,248,.16) var(--fill,0%))}
-.orscry::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--tx);margin-top:-5px;box-shadow:0 0 8px rgba(242,214,158,.55)}
-.orscry::-moz-range-track{height:3px;border-radius:2px;background:rgba(238,240,248,.16)}
-.orscry::-moz-range-progress{height:3px;border-radius:2px;background:var(--ac)}
-.orscry::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:var(--tx)}
-.orvol{-webkit-appearance:none;appearance:none;writing-mode:vertical-lr;direction:rtl;width:24px;height:112px;background:transparent;cursor:pointer}
-.orvol::-webkit-slider-runnable-track{width:3px;border-radius:2px;background:linear-gradient(to top,var(--ac) 0,var(--ac) var(--fill,0%),rgba(238,240,248,.16) var(--fill,0%))}
-.orvol::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--tx);margin-left:-5px;box-shadow:0 0 8px rgba(242,214,158,.55)}
-.orvol::-moz-range-track{width:3px;border-radius:2px;background:rgba(238,240,248,.16)}
-.orvol::-moz-range-progress{width:3px;border-radius:2px;background:var(--ac)}
-.orvol::-moz-range-thumb{width:13px;height:13px;border:none;border-radius:50%;background:var(--tx)}
 *::-webkit-scrollbar{width:10px;height:10px}
 *::-webkit-scrollbar-thumb{background:rgba(47,255,143,.24);border-radius:8px}
 *::-webkit-scrollbar-thumb:hover{background:rgba(47,255,143,.42)}
@@ -6810,41 +6798,120 @@ input[type="date"]{color-scheme:dark}
 
 
 </div>
-<sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
-  <div style="position:absolute;left:0;right:0;bottom:calc(var(--nav) + var(--dock));z-index:88;background:var(--sf);border-top:1px solid var(--bd)">
-    <sc-if value="{{ orRateOpen }}" hint-placeholder-val="{{ false }}">
-      <div role="menu" aria-label="Reading speed" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="4">
-          <button data-lift onClick="{{ rt.go }}" role="menuitemradio" aria-checked="{{ rt.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 18px;border-radius:10px;background:{{ rt.bg }};color:{{ rt.c }};font:600 12.5px var(--fu)">{{ rt.label }}</button>
-        </sc-for>
-      </div>
+<sc-if value="{{ orTpCompact }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:10px;right:10px;bottom:calc(var(--nav) + var(--dock) + 10px);z-index:88;box-sizing:border-box;display:flex;align-items:center;gap:9px;padding:6px 8px 6px 6px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);box-shadow:0 10px 30px rgba(0,0,0,.55)">
+    <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;position:relative;width:42px;height:42px;border-radius:50%;overflow:hidden;border:1px solid var(--bd)">
+      <span style="position:absolute;inset:0;background:url('/icon-192.png') center/cover"></span>
+      <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,6,10,.44);color:#fff"><span style="display:{{ orDPlay }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M7 4.6l12.8 7.4L7 19.4z"/></svg></span><span style="display:{{ orDPause }}"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg></span></span>
+    </button>
+    <button data-lift onClick="{{ orExpandGo }}" aria-label="Open the player" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden;padding:4px 0">
+      <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTpTitle }}</span>
+      <span style="font:500 10px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTitle }}</span>
+    </button>
+    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
+    <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+  </div>
+</sc-if>
+<sc-if value="{{ orExpandOn }}" hint-placeholder-val="{{ false }}">
+  <div role="dialog" aria-modal="true" aria-label="Now playing" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;background:var(--bg);padding-top:calc(env(safe-area-inset-top) + 4px);padding-bottom:calc(env(safe-area-inset-bottom) + 10px)">
+    <sc-if value="{{ orLoopMenuOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orLoopMenuGo }}" aria-hidden="true" style="position:absolute;inset:0;z-index:2"></div>
     </sc-if>
-    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
-      <div role="menu" aria-label="Sections of this reading" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;max-width:min(300px,82vw);max-height:46vh;overflow-y:auto;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="5">
-          <button data-lift onClick="{{ q.go }}" role="menuitemradio" aria-checked="{{ q.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:{{ q.bg }};color:{{ q.c }};font:600 12px var(--fu);text-align:left">{{ q.title }}</button>
-        </sc-for>
-      </div>
-    </sc-if>
-    <sc-if value="{{ orVolOpen }}" hint-placeholder-val="{{ false }}">
-      <div style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <span style="font:600 9px var(--fu);color:var(--dim)">{{ orVolPct }}%</span>
-        <input type="range" class="orvol" min="0" max="100" value="{{ orVolPct }}" onInput="{{ orVolIn }}" aria-label="Volume" style="--fill:{{ orVolFill }}%">
-      </div>
-    </sc-if>
-    <div role="group" aria-label="Listening controls" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;box-sizing:border-box;padding:8px 10px">
-      <span style="flex:1 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12px var(--fu);color:var(--mut)">{{ orTpTitle }}</span>
-      <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;flex:2 1 130px;min-width:110px">
-      <span style="flex:none;font:600 9.5px var(--fu);color:var(--dim);white-space:nowrap">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</span>
-      <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
-      <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
-      <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
-      <button data-lift onClick="{{ orRateGo }}" aria-label="Reading speed" aria-expanded="{{ orRateOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
-      <button data-lift onClick="{{ orTpShuffleGo }}" aria-label="Shuffle sections" aria-pressed="{{ orTpShuffleOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpShuffleBd }};border-radius:999px;color:{{ orTpShuffleC }};font:400 15px var(--fu)">&#8644;</button>
-      <button data-lift onClick="{{ orTpLoopGo }}" aria-label="{{ orTpLoopLabel }}" aria-pressed="{{ orTpLoopOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpLoopBd }};border-radius:999px;color:{{ orTpLoopC }};font:400 15px var(--fu)">&#8635;<sup style="font-size:8px;line-height:1">{{ orTpLoopOne }}</sup></button>
-      <button data-lift onClick="{{ orQueueGo }}" aria-label="Queue of sections" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><span style="display:flex;flex-direction:column;align-items:center;gap:2.5px"><span style="display:block;width:15px;height:5px;border-radius:999px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span></span></button>
-      <button data-lift onClick="{{ orVolGo }}" aria-label="Volume" aria-expanded="{{ orVolOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M18.5 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+    <div style="flex:none;display:flex;align-items:center;padding:2px 10px">
+      <button data-lift onClick="{{ orExpandOff }}" aria-label="Close the player" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <span style="flex:1"></span>
     </div>
+    <div style="flex:none;text-align:center;padding:0 26px 10px;box-sizing:border-box">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ orTpTitle }}</div>
+      <div style="font:500 11.5px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:2px">{{ orTitle }}</div>
+    </div>
+    <div style="flex:1;min-height:0;position:relative">
+      <div style="position:absolute;inset:0;overflow-y:auto;padding:46px 26px;font:400 16.5px/1.85 var(--fb);color:var(--tx);white-space:pre-wrap">{{ orBodyText }}</div>
+      <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,var(--bg),transparent)"></div>
+      <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:52px;background:linear-gradient(0deg,var(--bg),transparent)"></div>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
+    <div style="flex:none;text-align:center;font:600 11px var(--fu);color:var(--dim);padding-top:7px">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</div>
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px">
+      <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--tx)"><svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><rect x="4.5" y="4" width="2.6" height="16" rx="1.2"/><path d="M20 4.8v14.4L9.8 12z"/></svg></button>
+        <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ac);color:var(--onac)"><span style="display:{{ orDPlay }}"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M7 4.6l12.8 7.4L7 19.4z"/></svg></span><span style="display:{{ orDPause }}"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg></span></button>
+        <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--tx)"><svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><rect x="16.9" y="4" width="2.6" height="16" rx="1.2"/><path d="M4 4.8v14.4L14.2 12z"/></svg></button>
+      </div>
+      <div style="position:relative;z-index:3">
+        <sc-if value="{{ orLoopMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div role="menu" aria-label="Playback modes" style="position:absolute;bottom:calc(100% + 10px);right:0;z-index:4;display:flex;flex-direction:column;gap:2px;min-width:196px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.6)">
+            <sc-for list="{{ orModeRows }}" as="m" hint-placeholder-count="3">
+              <button data-lift onClick="{{ m.go }}" role="menuitemradio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:42px;display:flex;align-items:center;gap:11px;padding:0 13px;border-radius:10px;color:{{ m.c }};font:600 12.5px var(--fu)"><span style="display:{{ m.dAll }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span style="display:{{ m.dOne }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></svg></span><span style="display:{{ m.dShuf }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span><span>{{ m.label }}</span></button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <button data-lift onClick="{{ orLoopMenuGo }}" aria-label="Playback modes" aria-expanded="{{ orLoopMenuOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ orLoopC }}"><span style="display:{{ orDLoopX }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span><span style="display:{{ orDLoopAll }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span style="display:{{ orDLoopOne }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></svg></span><span style="display:{{ orDLoopShuf }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span><span style="display:{{ orDLoopOff }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span></button>
+      </div>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 16px 2px">
+      <div style="display:flex;align-items:center;gap:2px;border:1px solid var(--bd);border-radius:999px;background:var(--sf);padding:3px">
+        <button data-lift onClick="{{ orQueueGo }}" aria-label="The reading, in order" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
+        <button data-lift onClick="{{ orNoteOpenGo }}" aria-label="A note on this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>
+        <button data-lift onClick="{{ orCmtOpenGo }}" aria-label="Mark this moment" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="3">
+          <button data-lift onClick="{{ rt.go }}" aria-pressed="{{ rt.on }}" aria-label="Reading speed {{ rt.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 11px;border-radius:999px;border:1px solid {{ rt.bd }};background:{{ rt.bg }};color:{{ rt.c }};font:600 11.5px var(--fu)">{{ rt.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orQueueGo }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="The reading, in order" style="width:100%;box-sizing:border-box;max-height:62%;display:flex;flex-direction:column;gap:4px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 12px calc(12px + env(safe-area-inset-bottom))">
+          <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:0 6px 6px">The reading, in order</div>
+          <div style="overflow-y:auto;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="6">
+              <button data-lift onClick="{{ q.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:12px;background:{{ q.bg }};color:{{ q.c }};font:600 13px var(--fu);text-align:left">{{ q.title }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orNoteOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orNoteOff }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="A note on this reading" style="width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
+          <div style="font:400 18px var(--fd);color:var(--tx)">A note on this reading</div>
+          <div style="font:500 11px var(--fu);color:var(--mut)">Kept in your journal, under &lsquo;{{ orTpTitle }}&rsquo;.</div>
+          <textarea value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <div style="display:flex;gap:8px">
+            <button data-lift onClick="{{ orNoteSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orNoteBg }};color:{{ orNoteC }};font:700 12.5px var(--fu)">Save to journal</button>
+            <button data-lift onClick="{{ orNoteOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep listening</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orCmtOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orCmtOff }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="Mark this moment" style="width:100%;box-sizing:border-box;max-height:72%;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
+          <div style="font:400 18px var(--fd);color:var(--tx)">Mark this moment</div>
+          <div style="font:500 11px var(--fu);color:var(--mut)">{{ orCmtAtLine }}. Tapping a mark later returns the voice to its spot.</div>
+          <textarea value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <div style="display:flex;gap:8px">
+            <button data-lift onClick="{{ orCmtSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orCmtBg }};color:{{ orCmtC }};font:700 12.5px var(--fu)">Save mark</button>
+            <button data-lift onClick="{{ orCmtOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Close</button>
+          </div>
+          <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding-top:4px">Your marks on this reading</div>
+          <sc-if value="{{ orCmtEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="font:italic 400 12px/1.6 var(--fb);color:var(--dim)">None yet. The first one is a sentence away.</div>
+          </sc-if>
+          <div style="overflow-y:auto;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ orCmtMarks }}" as="mk" hint-placeholder-count="2">
+              <button data-lift onClick="{{ mk.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:12px;border:1px solid var(--bd);color:var(--tx);text-align:left">
+                <span style="flex:1;min-width:0;font:400 12.5px var(--fb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ mk.text }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--dim)">{{ mk.line }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
   </div>
 </sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
@@ -13432,41 +13499,120 @@ input[type="date"]{color-scheme:dark}
 
 
 </div>
-<sc-if value="{{ orTpOn }}" hint-placeholder-val="{{ false }}">
-  <div style="position:absolute;left:0;right:0;bottom:0;z-index:88;background:var(--sf);border-top:1px solid var(--bd)">
-    <sc-if value="{{ orRateOpen }}" hint-placeholder-val="{{ false }}">
-      <div role="menu" aria-label="Reading speed" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="4">
-          <button data-lift onClick="{{ rt.go }}" role="menuitemradio" aria-checked="{{ rt.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 18px;border-radius:10px;background:{{ rt.bg }};color:{{ rt.c }};font:600 12.5px var(--fu)">{{ rt.label }}</button>
-        </sc-for>
-      </div>
+<sc-if value="{{ orTpCompact }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:50%;right:auto;transform:translateX(-50%);width:min(680px,calc(100% - 32px));bottom:14px;z-index:88;box-sizing:border-box;display:flex;align-items:center;gap:9px;padding:6px 8px 6px 6px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);box-shadow:0 10px 30px rgba(0,0,0,.55)">
+    <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;position:relative;width:42px;height:42px;border-radius:50%;overflow:hidden;border:1px solid var(--bd)">
+      <span style="position:absolute;inset:0;background:url('/icon-192.png') center/cover"></span>
+      <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,6,10,.44);color:#fff"><span style="display:{{ orDPlay }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M7 4.6l12.8 7.4L7 19.4z"/></svg></span><span style="display:{{ orDPause }}"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg></span></span>
+    </button>
+    <button data-lift onClick="{{ orExpandGo }}" aria-label="Open the player" style="all:unset;cursor:pointer;box-sizing:border-box;flex:0 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden;padding:4px 0">
+      <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTpTitle }}</span>
+      <span style="font:500 10px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTitle }}</span>
+    </button>
+    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
+    <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+  </div>
+</sc-if>
+<sc-if value="{{ orExpandOn }}" hint-placeholder-val="{{ false }}">
+  <div role="dialog" aria-modal="true" aria-label="Now playing" style="position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;background:var(--bg);padding-top:calc(env(safe-area-inset-top) + 4px);padding-bottom:calc(env(safe-area-inset-bottom) + 10px)">
+    <sc-if value="{{ orLoopMenuOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orLoopMenuGo }}" aria-hidden="true" style="position:absolute;inset:0;z-index:2"></div>
     </sc-if>
-    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
-      <div role="menu" aria-label="Sections of this reading" style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;gap:2px;max-width:min(300px,82vw);max-height:46vh;overflow-y:auto;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="5">
-          <button data-lift onClick="{{ q.go }}" role="menuitemradio" aria-checked="{{ q.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:40px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:{{ q.bg }};color:{{ q.c }};font:600 12px var(--fu);text-align:left">{{ q.title }}</button>
-        </sc-for>
-      </div>
-    </sc-if>
-    <sc-if value="{{ orVolOpen }}" hint-placeholder-val="{{ false }}">
-      <div style="position:absolute;right:10px;bottom:calc(100% + 8px);z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;box-shadow:0 8px 28px rgba(0,0,0,.55)">
-        <span style="font:600 9px var(--fu);color:var(--dim)">{{ orVolPct }}%</span>
-        <input type="range" class="orvol" min="0" max="100" value="{{ orVolPct }}" onInput="{{ orVolIn }}" aria-label="Volume" style="--fill:{{ orVolFill }}%">
-      </div>
-    </sc-if>
-    <div role="group" aria-label="Listening controls" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;box-sizing:border-box;padding:8px 10px">
-      <span style="flex:1 1 auto;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12px var(--fu);color:var(--mut)">{{ orTpTitle }}</span>
-      <input type="range" class="orscry" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="--fill:{{ orTpFill }}%;flex:2 1 130px;min-width:110px">
-      <span style="flex:none;font:600 9.5px var(--fu);color:var(--dim);white-space:nowrap">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</span>
-      <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9666;&#9666;</button>
-      <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--ac);border-radius:999px;background:var(--ac);color:var(--onac);font:400 13px var(--fu)">{{ orTpMark }}</button>
-      <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)">&#9656;&#9656;</button>
-      <button data-lift onClick="{{ orRateGo }}" aria-label="Reading speed" aria-expanded="{{ orRateOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:600 11px var(--fu)">{{ orTpRateLabel }}</button>
-      <button data-lift onClick="{{ orTpShuffleGo }}" aria-label="Shuffle sections" aria-pressed="{{ orTpShuffleOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpShuffleBd }};border-radius:999px;color:{{ orTpShuffleC }};font:400 15px var(--fu)">&#8644;</button>
-      <button data-lift onClick="{{ orTpLoopGo }}" aria-label="{{ orTpLoopLabel }}" aria-pressed="{{ orTpLoopOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ orTpLoopBd }};border-radius:999px;color:{{ orTpLoopC }};font:400 15px var(--fu)">&#8635;<sup style="font-size:8px;line-height:1">{{ orTpLoopOne }}</sup></button>
-      <button data-lift onClick="{{ orQueueGo }}" aria-label="Queue of sections" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><span style="display:flex;flex-direction:column;align-items:center;gap:2.5px"><span style="display:block;width:15px;height:5px;border-radius:999px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span><span style="display:block;width:12px;height:2px;border-radius:1px;background:currentColor"></span></span></button>
-      <button data-lift onClick="{{ orVolGo }}" aria-label="Volume" aria-expanded="{{ orVolOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;color:var(--ac);font:400 13px var(--fu)"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M18.5 6a9 9 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+    <div style="flex:none;display:flex;align-items:center;padding:2px 10px">
+      <button data-lift onClick="{{ orExpandOff }}" aria-label="Close the player" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <span style="flex:1"></span>
     </div>
+    <div style="flex:none;text-align:center;padding:0 26px 10px;box-sizing:border-box">
+      <div style="font:400 21px/1.25 var(--fd);color:var(--tx)">{{ orTpTitle }}</div>
+      <div style="font:500 11.5px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:2px">{{ orTitle }}</div>
+    </div>
+    <div style="flex:1;min-height:0;position:relative">
+      <div style="position:absolute;inset:0;overflow-y:auto;padding:46px max(26px, calc(50% - 340px));font:400 16.5px/1.85 var(--fb);color:var(--tx);white-space:pre-wrap">{{ orBodyText }}</div>
+      <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,var(--bg),transparent)"></div>
+      <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:52px;background:linear-gradient(0deg,var(--bg),transparent)"></div>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
+    <div style="flex:none;text-align:center;font:600 11px var(--fu);color:var(--dim);padding-top:7px">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</div>
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px">
+      <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button data-lift onClick="{{ orTpPrevGo }}" aria-label="Previous section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--tx)"><svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><rect x="4.5" y="4" width="2.6" height="16" rx="1.2"/><path d="M20 4.8v14.4L9.8 12z"/></svg></button>
+        <button data-lift onClick="{{ orTpPauseGo }}" aria-label="{{ orTpPauseLabel }}" aria-pressed="{{ orTpPaused }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ac);color:var(--onac)"><span style="display:{{ orDPlay }}"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M7 4.6l12.8 7.4L7 19.4z"/></svg></span><span style="display:{{ orDPause }}"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg></span></button>
+        <button data-lift onClick="{{ orTpNextGo }}" aria-label="Next section" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:48px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--tx)"><svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true"><rect x="16.9" y="4" width="2.6" height="16" rx="1.2"/><path d="M4 4.8v14.4L14.2 12z"/></svg></button>
+      </div>
+      <div style="position:relative;z-index:3">
+        <sc-if value="{{ orLoopMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div role="menu" aria-label="Playback modes" style="position:absolute;bottom:calc(100% + 10px);right:0;z-index:4;display:flex;flex-direction:column;gap:2px;min-width:196px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.6)">
+            <sc-for list="{{ orModeRows }}" as="m" hint-placeholder-count="3">
+              <button data-lift onClick="{{ m.go }}" role="menuitemradio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:42px;display:flex;align-items:center;gap:11px;padding:0 13px;border-radius:10px;color:{{ m.c }};font:600 12.5px var(--fu)"><span style="display:{{ m.dAll }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span style="display:{{ m.dOne }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></svg></span><span style="display:{{ m.dShuf }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span><span>{{ m.label }}</span></button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <button data-lift onClick="{{ orLoopMenuGo }}" aria-label="Playback modes" aria-expanded="{{ orLoopMenuOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:{{ orLoopC }}"><span style="display:{{ orDLoopX }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span><span style="display:{{ orDLoopAll }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span style="display:{{ orDLoopOne }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></svg></span><span style="display:{{ orDLoopShuf }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span><span style="display:{{ orDLoopOff }}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span></button>
+      </div>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 16px 2px">
+      <div style="display:flex;align-items:center;gap:2px;border:1px solid var(--bd);border-radius:999px;background:var(--sf);padding:3px">
+        <button data-lift onClick="{{ orQueueGo }}" aria-label="The reading, in order" aria-expanded="{{ orQueueOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></button>
+        <button data-lift onClick="{{ orNoteOpenGo }}" aria-label="A note on this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>
+        <button data-lift onClick="{{ orCmtOpenGo }}" aria-label="Mark this moment" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <sc-for list="{{ orRateOpts }}" as="rt" hint-placeholder-count="3">
+          <button data-lift onClick="{{ rt.go }}" aria-pressed="{{ rt.on }}" aria-label="Reading speed {{ rt.label }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;display:flex;align-items:center;padding:0 11px;border-radius:999px;border:1px solid {{ rt.bd }};background:{{ rt.bg }};color:{{ rt.c }};font:600 11.5px var(--fu)">{{ rt.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <sc-if value="{{ orQueueOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orQueueGo }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="The reading, in order" style="width:100%;box-sizing:border-box;max-height:62%;display:flex;flex-direction:column;gap:4px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 12px calc(12px + env(safe-area-inset-bottom))">
+          <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:0 6px 6px">The reading, in order</div>
+          <div style="overflow-y:auto;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ orQueueRows }}" as="q" hint-placeholder-count="6">
+              <button data-lift onClick="{{ q.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 14px;border-radius:12px;background:{{ q.bg }};color:{{ q.c }};font:600 13px var(--fu);text-align:left">{{ q.title }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orNoteOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orNoteOff }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="A note on this reading" style="width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
+          <div style="font:400 18px var(--fd);color:var(--tx)">A note on this reading</div>
+          <div style="font:500 11px var(--fu);color:var(--mut)">Kept in your journal, under &lsquo;{{ orTpTitle }}&rsquo;.</div>
+          <textarea value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <div style="display:flex;gap:8px">
+            <button data-lift onClick="{{ orNoteSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orNoteBg }};color:{{ orNoteC }};font:700 12.5px var(--fu)">Save to journal</button>
+            <button data-lift onClick="{{ orNoteOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep listening</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ orCmtOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ orCmtOff }}" style="position:absolute;inset:0;z-index:96;background:rgba(4,5,9,.6);display:flex;align-items:flex-end">
+        <div onClick="{{ swallow }}" role="dialog" aria-label="Mark this moment" style="width:100%;box-sizing:border-box;max-height:72%;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
+          <div style="font:400 18px var(--fd);color:var(--tx)">Mark this moment</div>
+          <div style="font:500 11px var(--fu);color:var(--mut)">{{ orCmtAtLine }}. Tapping a mark later returns the voice to its spot.</div>
+          <textarea value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <div style="display:flex;gap:8px">
+            <button data-lift onClick="{{ orCmtSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orCmtBg }};color:{{ orCmtC }};font:700 12.5px var(--fu)">Save mark</button>
+            <button data-lift onClick="{{ orCmtOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Close</button>
+          </div>
+          <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding-top:4px">Your marks on this reading</div>
+          <sc-if value="{{ orCmtEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="font:italic 400 12px/1.6 var(--fb);color:var(--dim)">None yet. The first one is a sentence away.</div>
+          </sc-if>
+          <div style="overflow-y:auto;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ orCmtMarks }}" as="mk" hint-placeholder-count="2">
+              <button data-lift onClick="{{ mk.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:12px;border:1px solid var(--bd);color:var(--tx);text-align:left">
+                <span style="flex:1;min-width:0;font:400 12.5px var(--fb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ mk.text }}</span>
+                <span style="flex:none;font:600 10px var(--fu);color:var(--dim)">{{ mk.line }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
   </div>
 </sc-if>
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
@@ -13544,6 +13690,7 @@ class Component extends DCLogic {
     icQuestion: '', icMethod: 'coins', icSeed: null, icSaved: false, icOpenLine: null,
     icSec: null, icHex: null, icQuery: '', draft: { title: '', note: '', date: Component.localDay() },
     voiceOpen: false, voiceTarget: 'journal', recOn: false, recSecs: 0, recText: '', recInterim: '', recErr: '', recSup: null,
+    orExpand: false, orNoteOpen: false, orNoteText: '', orCmtOpen: false, orCmtText: '',
     consentTick: 0, helpOpen: false, toast: '',
     spiritView: null, focusToday: false, dailyNumOpen: false, reflOpen: false, convOpen: false, pracOpen: false,
     memTick: 0, dropOpen: false, trOpen: null, hdSel: null, hdTab: 'type', bgMode: 'both', atlasSec: null, atlasItem: null, apSec: null, featOpen: null,
@@ -25245,7 +25392,7 @@ class Component extends DCLogic {
     if (v._ttsU) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     this._orMediaState('none');
     this._orVoice = null;
-    this.setState({ orListening: false });
+    this.setState({ orListening: false, orExpand: false, orNoteOpen: false, orCmtOpen: false });
   }
   orListenGo(reading) {
     const v = this._orVoice;
@@ -25272,7 +25419,7 @@ class Component extends DCLogic {
       seekOff: 0, holdPos: null, gapPending: false, _gapT: null,
       _ttsU: false, _ttsK: null, _tick: null, _ttsT0: null, _ttsAcc: 0, _ttsBase: 0,
       pre: null, gen: 0, paused: false,
-      scry: null, rateOpen: false, queueOpen: false, volOpen: false };
+      scry: null, queueOpen: false, loopMenu: false, readingTitle: String(r.title || '') };
     /* THE SOUND RIDES ONE MEDIA ELEMENT, made inside the press (asked for by
        the owner on 24 October 2026, so a reading keeps sounding with the
        screen off or the phone in a pocket: an audio context is suspended by
@@ -25337,15 +25484,16 @@ class Component extends DCLogic {
     this._orMediaState(v.paused ? 'paused' : 'playing');
     this.setState({ orListening: true });
   }
-  /* READING SPEED. 0.5x, 0.75x, 1x and 1.5x from the transport's list (the
-     owner asked for slow-downs and dropped 2x and up on 24 October 2026),
-     kept on the device so the next reading opens at the pace the reader
-     chose. A media element keeps the voice's pitch at any pace — the old
-     audio context resampled, so a faster voice also climbed — and the
-     deliberate beats of silence between pieces shrink or stretch to match. */
+  /* READING SPEED. The three chips are named for the reader — 0.5×, 1×, 2× —
+     and are gentler under the words: 0.75, 1 and 1.5 (the owner asked for the
+     softer true paces on 24 October 2026). The choice is kept on the device,
+     so the next reading opens at the pace the reader chose. A media element
+     keeps the voice's pitch at any pace — the old audio context resampled, so
+     a faster voice also climbed — and the beats of silence between pieces
+     shrink or stretch to match. */
   orTransportRate(rate) {
     rate = parseFloat(rate);
-    if ([0.5, 0.75, 1, 1.5].indexOf(rate) === -1) rate = 1;
+    if ([0.75, 1, 1.5].indexOf(rate) === -1) rate = 1;
     this.writeLS('incommon.voice.rate', rate);
     const v = this._orVoice;
     if (v) {
@@ -25358,35 +25506,26 @@ class Component extends DCLogic {
   }
   _orVoiceRate() {
     const r = parseFloat(this.readLS('incommon.voice.rate', 1));
-    return [0.5, 0.75, 1, 1.5].indexOf(r) !== -1 ? r : 1;
+    return [0.75, 1, 1.5].indexOf(r) !== -1 ? r : 1;
   }
-  /* THE VOLUME, kept on the device like the pace. It steers the media
-     element live; the device's own voice takes it per utterance. */
-  _orVoiceVol() {
-    const n = parseFloat(this.readLS('incommon.voice.vol', 1));
-    return isNaN(n) ? 1 : Math.max(0, Math.min(1, n));
-  }
-  orTransportVol(x) {
-    const n = Math.max(0, Math.min(1, parseFloat(x) || 0));
-    this.writeLS('incommon.voice.vol', n);
+  /* THE PLAYBACK MODE — off, repeat the reading, repeat the section, or
+     shuffle — chosen from the loop button's menu and read live at every
+     section's end, so a change mid-reading already steers the next one. The
+     first docked transport kept shuffle and loop as two keys; a setting left
+     from it folds into the mode. */
+  orTransportMode(m) {
+    if (['off', 'all', 'one', 'shuffle'].indexOf(m) === -1) m = 'off';
+    this.writeLS('incommon.voice.mode', m);
     const v = this._orVoice;
-    try { if (v && v.el) v.el.volume = n; } catch (e) {}
+    if (v) v.loopMenu = false;
     this.setState({ orListening: !!(v && v.on) });
   }
-  /* SHUFFLE AND LOOP, read live at every section's end so a toggle mid-
-     reading already steers the next one. The loop press cycles: once loops
-     the section, twice loops the whole reading, three times turns it off. */
-  orTransportShuffle() {
-    this.writeLS('incommon.voice.shuffle', !this.readLS('incommon.voice.shuffle', false));
-    this.setState({ orListening: !!(this._orVoice && this._orVoice.on) });
-  }
-  orTransportLoop() {
-    this.writeLS('incommon.voice.loop', (this._orVoiceLoop() + 1) % 3);
-    this.setState({ orListening: !!(this._orVoice && this._orVoice.on) });
-  }
-  _orVoiceLoop() {
+  _orVoiceMode() {
+    const m = this.readLS('incommon.voice.mode', null);
+    if (m === 'off' || m === 'all' || m === 'one' || m === 'shuffle') return m;
+    if (this.readLS('incommon.voice.shuffle', false)) return 'shuffle';
     const l = parseInt(this.readLS('incommon.voice.loop', 0), 10);
-    return l === 1 || l === 2 ? l : 0;
+    return l === 1 ? 'one' : l === 2 ? 'all' : 'off';
   }
   /* A section picked from the queue list. */
   orTransportQueueGo(i) {
@@ -25398,19 +25537,80 @@ class Component extends DCLogic {
     v.idx = i;
     this._orRestart(v);
   }
-  /* WHERE A SECTION'S END GOES. The loop and shuffle the reader set are read
-     live. A section refused by the device's voice (the plain idx++ paths)
-     never loops, so a section that cannot sound cannot spin forever. */
+  /* SHARING WHAT IS SOUNDING. The phone's own sheet when it offers one; the
+     page's address copied when it does not. */
+  orShareGo() {
+    const v = this._orVoice;
+    if (!v) return;
+    const seg = v.segs[v.idx];
+    const text = (v.readingTitle || 'A reading') + (seg ? ' — ' + seg.title : '');
+    if (navigator.share) { navigator.share({ title: text, text: text, url: location.href }).catch(() => {}); return; }
+    try { navigator.clipboard.writeText(location.href); this.toastMsg('Link copied.'); }
+    catch (e) { this.toastMsg('Copy this page\u2019s address to share it.'); }
+  }
+  /* A NOTE ON THE READING is a journal entry like any other, saved through
+     the same remember() the journal itself uses, with the reading and the
+     section it was heard in folded into the body. */
+  orNoteSaveGo() {
+    const v = this._orVoice, st = this.state;
+    const body = String(st.orNoteText || '').trim();
+    if (!body || !v) return;
+    const day = Component.localDay();
+    const seg = v.segs[v.idx];
+    const entry = { date: day, ts: day, at: Date.now(), type: 'event', tag: 'oracle',
+      title: this.voiceTitle(body), preview: body.slice(0, 90),
+      body: body + '\n\n— a note on \u201c' + (v.readingTitle || 'a reading') + '\u201d' + (seg ? ', ' + seg.title : '') + ', heard in the Oracle.' };
+    const res = this.remember('journal', entry);
+    if (!res.ok) {
+      const manual = [{ id: 'm' + Date.now(), date: day, type: 'event', tag: 'oracle', title: entry.title, preview: entry.preview, body: entry.body, manual: true }, ...this.readLS(this.mkey(), [])];
+      this.writeLS(this.mkey(), manual);
+    }
+    this.setState({ orNoteOpen: false, orNoteText: '' });
+    this.toastMsg('Saved to your journal.');
+  }
+  /* A MARK is a comment pinned to the breath it was left at: the section and
+     how far into it, kept on the device, so tapping it later returns the
+     voice to that very spot. */
+  _orMarks() {
+    const m = this.readLS('incommon.voice.marks', []);
+    return Array.isArray(m) ? m : [];
+  }
+  orCmtSaveGo() {
+    const v = this._orVoice, st = this.state;
+    const text = String(st.orCmtText || '').trim();
+    if (!text || !v) return;
+    const seg = v.segs[v.idx];
+    const pos = this._orSectionPos(v), total = this._orSectionTotal(v);
+    const mark = { id: 'om' + Date.now(), at: Date.now(), reading: v.readingTitle || '',
+      idx: v.idx, section: seg ? seg.title : '',
+      frac: total > 0 ? Math.max(0, Math.min(1, pos / total)) : 0,
+      posLabel: this._orFmtTime(pos), text };
+    this.writeLS('incommon.voice.marks', [mark].concat(this._orMarks()).slice(0, 60));
+    this.setState({ orCmtText: '' });
+    this.toastMsg('Marked at ' + mark.posLabel + '.');
+  }
+  orMarkGo(mark) {
+    const v = this._orVoice;
+    if (!v || !mark) return;
+    this.setState({ orCmtOpen: false });
+    const idx = Math.max(0, Math.min(v.segs.length - 1, mark.idx | 0));
+    if (idx !== v.idx) { v.idx = idx; this._orRestart(v); }
+    if (mark.frac > 0) this.orTransportSeek(mark.frac);
+  }
+  /* WHERE A SECTION'S END GOES. The playback mode is read live. A section
+     refused by the device's voice (the plain idx++ paths) never repeats, so
+     a section that cannot sound cannot spin forever. */
   _orAdvance(voice) {
     if (!voice || !voice.on) return;
-    if (this._orVoiceLoop() === 1) { this._orRestart(voice); return; }
+    const mode = this._orVoiceMode();
+    if (mode === 'one') { this._orRestart(voice); return; }
     let idx = voice.idx + 1;
-    if (this.readLS('incommon.voice.shuffle', false) && voice.segs.length > 1) {
+    if (mode === 'shuffle' && voice.segs.length > 1) {
       idx = voice.idx;
       while (idx === voice.idx) idx = Math.floor(Math.random() * voice.segs.length);
     }
     if (idx >= voice.segs.length) {
-      if (this._orVoiceLoop() === 2) idx = 0;
+      if (mode === 'all') idx = 0;
       else { this.orListenStop(); return; }
     }
     voice.idx = idx;
@@ -25530,7 +25730,7 @@ class Component extends DCLogic {
     try {
       if ('mediaSession' in navigator && typeof MediaMetadata === 'function') {
         const rt = this.state.orHit && this.state.orHit.reading && this.state.orHit.reading.title;
-        navigator.mediaSession.metadata = new MediaMetadata({ title: seg.title || 'The Oracle', artist: 'inCommon · The Oracle', album: rt || 'A reading' });
+        navigator.mediaSession.metadata = new MediaMetadata({ title: seg.title || 'The Oracle', artist: 'inCommon · The Oracle', album: rt || 'A reading', artwork: [{ src: '/icon-512.png', sizes: '512x512', type: 'image/png' }] });
       }
     } catch (e) {}
     this._orMediaState(voice.paused ? 'paused' : 'playing');
@@ -25663,7 +25863,6 @@ class Component extends DCLogic {
         voice.holdPos = null;
       }, { once: true });
       el.playbackRate = voice.rate || 1;
-      try { el.volume = this._orVoiceVol(); } catch (e) {}
       el.src = voice.blobUrl;
       /* A piece loaded while paused waits for the resume to sound. */
       if (!voice.paused) {
@@ -25737,7 +25936,6 @@ class Component extends DCLogic {
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = voice.rate || 1;
-      u.volume = this._orVoiceVol();
       voice._ttsU = true;
       u.onend = () => {
         if (!voice.on || g !== voice.gen) return;
@@ -27145,8 +27343,19 @@ class Component extends DCLogic {
     const tpFrac = tpTotal > 0 ? Math.max(0, Math.min(1, tpPos / tpTotal)) : 0;
     const scry = vp && vp.scry != null ? vp.scry : null;
     const tpRate = (vp && vp.rate) || this._orVoiceRate();
-    const tpShuf = this.readLS('incommon.voice.shuffle', false);
-    const tpLoop = this._orVoiceLoop();
+    const tpMode = this._orVoiceMode();
+    /* The waveform's bars are drawn from the section's own name, so the same
+       section always wears the same wave; the played bars burn brighter. */
+    const waveFrac = scry != null ? scry : tpFrac;
+    let wh = 0;
+    const wseed = (vp && vp.segs[vp.idx] ? vp.segs[vp.idx].title : 'oracle') + '|' + (vp ? vp.idx : 0);
+    for (let wi = 0; wi < wseed.length; wi++) wh = ((wh << 5) - wh + wseed.charCodeAt(wi)) | 0;
+    let wx = (wh >>> 0) || 7;
+    const waveBars = [];
+    for (let wi2 = 0; wi2 < 48; wi2++) {
+      wx = (wx * 1103515245 + 12345) >>> 0;
+      waveBars.push({ h: String(18 + ((wx % 100) * 0.72 | 0)), c: (wi2 + 0.5) / 48 <= waveFrac ? 'var(--tx)' : 'rgba(238,240,248,.22)' });
+    }
     const segBtn = k => {
       const i = segAt[k];
       if (i === undefined) return { oiHas: false, oiOn: false, oiMark: '▶', oiGo: null };
@@ -27221,53 +27430,77 @@ class Component extends DCLogic {
       orListening: !!(this._orVoice && this._orVoice.on),
       orListenLabel: this._orVoice && this._orVoice.on ? 'Stop listening' : 'Listen to the reading',
       orListenNote: this.orListenNote(),
-      /* The transport banner docked at the foot of the page: shown while a
-         reading is playing or paused, naming the section it is on. The scry
-         bar previews the finger (vp.scry) and seeks only when it lifts;
-         speed, queue and volume open small popups above the banner, one at
-         a time. */
+      /* THE LISTENING TRANSPORT, in two shapes that share one state: a
+         floating pill near the foot of the page, and the full player it
+         opens into (both asked for by the owner on 24 October 2026). The
+         scry wave previews the finger (vp.scry) and seeks where it lifts. */
       orTpOn: !!vp,
+      orTpCompact: !!vp && !st.orExpand,
+      orExpandOn: !!vp && !!st.orExpand,
       orTpTitle: vp && vp.segs[vp.idx] ? vp.segs[vp.idx].title : '',
+      orBodyText: vp && vp.segs[vp.idx] ? vp.segs[vp.idx].body : '',
       orTpPaused: !!(vp && vp.paused),
-      orTpMark: vp && vp.paused ? '▶' : '❚❚',
+      orTpPlaying: !!(vp && !vp.paused),
+      orDPlay: vp && vp.paused ? 'inline-flex' : 'none',
+      orDPause: vp && !vp.paused ? 'inline-flex' : 'none',
       orTpPauseLabel: vp && vp.paused ? 'Play' : 'Pause',
       orTpPauseGo: () => this.orTransportPause(),
       orTpPrevGo: () => this.orTransportPrev(),
       orTpNextGo: () => this.orTransportNext(),
-      orTpRateLabel: tpRate + '×',
-      orRateOpen: !!(vp && vp.rateOpen),
-      orRateGo: () => { if (!vp) return; vp.rateOpen = !vp.rateOpen; vp.queueOpen = false; vp.volOpen = false; this.setState({ orListening: true }); },
-      orRateOpts: [0.5, 0.75, 1, 1.5].map(rt => ({ label: rt + '×', on: tpRate === rt,
-        bg: tpRate === rt ? 'rgba(var(--atmc),.24)' : 'transparent', c: tpRate === rt ? 'var(--tx)' : 'var(--mut)',
-        go: () => { this.orTransportRate(rt); if (vp) vp.rateOpen = false; } })),
-      orTpShuffleOn: tpShuf,
-      orTpShuffleBd: tpShuf ? 'var(--ac)' : 'var(--bd)',
-      orTpShuffleC: tpShuf ? 'var(--ac)' : 'var(--mut)',
-      orTpShuffleGo: () => this.orTransportShuffle(),
-      orTpLoopOn: tpLoop !== 0,
-      orTpLoopBd: tpLoop !== 0 ? 'var(--ac)' : 'var(--bd)',
-      orTpLoopC: tpLoop !== 0 ? 'var(--ac)' : 'var(--mut)',
-      /* Loop the section on one press; a second loops the whole reading and
-         the button wears a superscript 1; a third turns it off. */
-      orTpLoopOne: tpLoop === 2 ? '1' : '',
-      orTpLoopLabel: tpLoop === 1 ? 'Loop this section' : tpLoop === 2 ? 'Loop the whole reading' : 'Loop off',
-      orTpLoopGo: () => this.orTransportLoop(),
-      orQueueOpen: !!(vp && vp.queueOpen),
-      orQueueGo: () => { if (!vp) return; vp.queueOpen = !vp.queueOpen; vp.rateOpen = false; vp.volOpen = false; this.setState({ orListening: true }); },
-      orQueueRows: vp ? vp.segs.map((s, i) => ({ title: s.title, on: i === vp.idx,
-        bg: i === vp.idx ? 'rgba(var(--atmc),.24)' : 'transparent', c: i === vp.idx ? 'var(--ac)' : 'var(--tx)',
-        go: () => this.orTransportQueueGo(i) })) : [],
-      orVolOpen: !!(vp && vp.volOpen),
-      orVolGo: () => { if (!vp) return; vp.volOpen = !vp.volOpen; vp.rateOpen = false; vp.queueOpen = false; this.setState({ orListening: true }); },
-      orVolPct: Math.round(this._orVoiceVol() * 100),
-      orVolFill: (this._orVoiceVol() * 100).toFixed(0),
-      orVolIn: e => this.orTransportVol((parseFloat(e && e.target && e.target.value) || 0) / 100),
+      orExpandGo: () => { if (vp) this.setState({ orExpand: true }); },
+      orExpandOff: () => this.setState({ orExpand: false }),
+      orShareGo: () => this.orShareGo(),
+      orWaveBars: waveBars,
       orTpPermille: Math.round((scry != null ? scry : tpFrac) * 1000),
       orTpFill: ((scry != null ? scry : tpFrac) * 100).toFixed(1),
       orTpPosLabel: this._orFmtTime(scry != null ? scry * tpTotal : tpPos),
       orTpTotalLabel: this._orFmtTime(tpTotal),
       orScryIn: e => { const w = this._orVoice; if (!w) return; w.scry = Math.max(0, Math.min(1, (parseFloat(e && e.target && e.target.value) || 0) / 1000)); this.setState({ orListening: true }); },
       orScryDrop: () => { const w = this._orVoice; if (!w || w.scry == null) return; const f = w.scry; w.scry = null; this.orTransportSeek(f); },
+      /* The pace chips are named for the reader and gentler under the words
+         (0.5× is truly 0.75, 2× truly 1.5), as the owner asked. */
+      orRateOpts: [[0.75, '0.5×'], [1, '1×'], [1.5, '2×']].map(([rt, label]) => ({ label, on: tpRate === rt,
+        bd: tpRate === rt ? 'var(--ac)' : 'var(--bd)', bg: tpRate === rt ? 'rgba(var(--atmc),.24)' : 'transparent',
+        c: tpRate === rt ? 'var(--tx)' : 'var(--mut)', go: () => this.orTransportRate(rt) })),
+      /* The loop button's menu: repeat the reading, repeat the section,
+         shuffle. While it is open the button wears a gray X. */
+      orLoopMenuOpen: !!(vp && vp.loopMenu),
+      orLoopMenuGo: () => { const w = this._orVoice; if (!w) return; w.loopMenu = !w.loopMenu; this.setState({ orListening: true }); },
+      orLoopC: vp && vp.loopMenu ? 'var(--dim)' : tpMode === 'off' ? 'var(--mut)' : 'var(--ac)',
+      orDLoopX: vp && vp.loopMenu ? 'inline-flex' : 'none',
+      orDLoopAll: !(vp && vp.loopMenu) && tpMode === 'all' ? 'inline-flex' : 'none',
+      orDLoopOne: !(vp && vp.loopMenu) && tpMode === 'one' ? 'inline-flex' : 'none',
+      orDLoopShuf: !(vp && vp.loopMenu) && tpMode === 'shuffle' ? 'inline-flex' : 'none',
+      orDLoopOff: !(vp && vp.loopMenu) && tpMode === 'off' ? 'inline-flex' : 'none',
+      orModeRows: [['all', 'Repeat reading'], ['one', 'Repeat section'], ['shuffle', 'Shuffle']].map(([k, label]) => ({
+        label, on: tpMode === k, c: tpMode === k ? 'var(--ac)' : 'var(--tx)',
+        dAll: k === 'all' ? 'inline-flex' : 'none', dOne: k === 'one' ? 'inline-flex' : 'none', dShuf: k === 'shuffle' ? 'inline-flex' : 'none',
+        go: () => this.orTransportMode(k) })),
+      orQueueOpen: !!(vp && vp.queueOpen),
+      orQueueGo: () => { const w = this._orVoice; if (!w) return; w.queueOpen = !w.queueOpen; this.setState({ orListening: true }); },
+      orQueueRows: vp ? vp.segs.map((s, i) => ({ title: s.title, on: i === vp.idx,
+        bg: i === vp.idx ? 'rgba(var(--atmc),.24)' : 'transparent', c: i === vp.idx ? 'var(--ac)' : 'var(--tx)',
+        go: () => this.orTransportQueueGo(i) })) : [],
+      orNoteOpen: !!st.orNoteOpen,
+      orNoteOpenGo: () => this.setState({ orNoteOpen: true }),
+      orNoteOff: () => this.setState({ orNoteOpen: false, orNoteText: '' }),
+      orNoteText: st.orNoteText || '',
+      orNoteIn: e => this.setState({ orNoteText: (e && e.target && e.target.value) || '' }),
+      orNoteSaveGo: () => this.orNoteSaveGo(),
+      orNoteBg: (st.orNoteText || '').trim() ? 'var(--ac)' : 'var(--sf2)',
+      orNoteC: (st.orNoteText || '').trim() ? 'var(--onac)' : 'var(--dim)',
+      orCmtOpen: !!st.orCmtOpen,
+      orCmtOpenGo: () => this.setState({ orCmtOpen: true }),
+      orCmtOff: () => this.setState({ orCmtOpen: false, orCmtText: '' }),
+      orCmtText: st.orCmtText || '',
+      orCmtIn: e => this.setState({ orCmtText: (e && e.target && e.target.value) || '' }),
+      orCmtSaveGo: () => this.orCmtSaveGo(),
+      orCmtBg: (st.orCmtText || '').trim() ? 'var(--ac)' : 'var(--sf2)',
+      orCmtC: (st.orCmtText || '').trim() ? 'var(--onac)' : 'var(--dim)',
+      orCmtAtLine: vp ? 'At ' + this._orFmtTime(tpPos) + ' in \u2018' + (vp.segs[vp.idx] ? vp.segs[vp.idx].title : '') + '\u2019' : '',
+      orCmtMarks: vp ? this._orMarks().filter(m => m.reading === (vp.readingTitle || '')).map(m => ({
+        text: m.text, line: m.section + ' \u00b7 ' + m.posLabel, go: () => this.orMarkGo(m) })) : [],
+      orCmtEmpty: !vp || !this._orMarks().some(m => m.reading === (vp.readingTitle || '')),
       orAria: r ? 'The Oracle, ' + (str(hit.label) || this.ORACLE_PERIODS.find(x => x[0] === period)[1]) + ': ' + str(r.title) : '',
       orLabel: r ? str(hit.label) : '',
       orTitle: r ? str(r.title) : '', orEpigraph: r ? str(r.epigraph) : '',
