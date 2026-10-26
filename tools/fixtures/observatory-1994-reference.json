@@ -1,0 +1,301 @@
+{
+  "epoch_utc": "1994-02-17T05:37:00Z",
+  "observer": "Earth geocenter 500@399; Horizons quantity 31 apparent IAU76/80 ecliptic of date; tropical",
+  "birthplace_for_angles": {
+    "latitude_deg": 40.51872,
+    "longitude_deg": -74.4121
+  },
+  "houses": "Equal House from Swiss Ascendant 232.66274023598433 degrees",
+  "jpl_longitude_deg": {
+    "Albion": 1.0399874,
+    "Amor": 327.5788816,
+    "Amycus": 135.6123881,
+    "Apollo": 138.5853332,
+    "Arachne": 55.6649684,
+    "Arrokoth": 256.0825665,
+    "Asbolus": 184.1978412,
+    "Astraea": 358.7529156,
+    "Atlantis": 170.3012168,
+    "Bacchus": 266.8363393,
+    "Ceres": 34.3283325,
+    "Chariklo": 105.7836248,
+    "Chiron": 156.7426874,
+    "Crantor": 150.5537016,
+    "Cupido (Asteroid)": 341.8828431,
+    "Cyllarus": 18.8479651,
+    "Damocles": 303.7213963,
+    "Dejanira": 288.4317226,
+    "Diana": 70.7058748,
+    "Echeclus": 139.7767932,
+    "Elatus": 297.3308706,
+    "Eris": 17.3560439,
+    "Eros": 7.7559561,
+    "Flora": 321.1809027,
+    "Fortuna": 355.0771109,
+    "Hale-Bopp": 285.6652083,
+    "Halley's Comet": 140.0110307,
+    "Haumea": 181.4105845,
+    "Hebe": 236.2356485,
+    "Hyakutake": 213.6183769,
+    "Hygiea": 202.5138591,
+    "Hylonome": 179.894573,
+    "Iris": 256.6496532,
+    "Ixion": 238.8806461,
+    "Juno": 212.8403622,
+    "Jupiter": 224.4555798,
+    "Karma": 298.3780599,
+    "Makemake": 159.3251791,
+    "Mars": 315.6793259,
+    "Mercury": 334.6729955,
+    "Metis": 24.4306634,
+    "Moon": 41.9351288,
+    "Nemesis": 268.8281415,
+    "Neptune": 292.1787779,
+    "Nessus": 227.8432744,
+    "Okyrhoe": 318.2103817,
+    "Orcus": 134.5050014,
+    "Pallas Athene": 348.4577682,
+    "Pandora": 215.0329933,
+    "Pelion": 289.5443271,
+    "Pholus": 151.8433146,
+    "Pluto": 238.0292065,
+    "Proserpina": 33.4971574,
+    "Psyche": 288.7025499,
+    "Pythia": 222.8949155,
+    "Quaoar": 241.0580091,
+    "Sappho": 359.2949971,
+    "Saturn": 332.2980013,
+    "Sedna": 42.1653998,
+    "Sun": 328.3292472,
+    "Thereus": 224.22257,
+    "Tyche": 44.6528221,
+    "Uranus": 294.2848411,
+    "Varuna": 90.2376849,
+    "Venus": 335.8205547,
+    "Vesta": 6.3421971
+  },
+  "swiss_fictitious_longitude_deg": {
+    "Cupido (Uranian TNP)": 236.3065409100389,
+    "Hades": 71.59120728642722,
+    "Zeus": 180.2437103837241,
+    "Kronos": 83.0784611288662,
+    "Apollon": 197.47427605223248,
+    "Admetos": 45.53839132786633,
+    "Vulkanus": 106.63608935316583,
+    "Poseidon": 211.71854636273986
+  },
+  "swiss_angle_longitude_deg": {
+    "Ascendant (AC)": 232.66274023598433,
+    "Descendant (DC)": 52.66274023598433,
+    "Midheaven (MC)": 154.97373754273585,
+    "Imum Coeli (IC)": 334.9737375427359
+  },
+  "note": "JPL small-body queries use the designation/solution recorded in the source audit. Swiss fictitious positions are definitional, not observed physical bodies. No source elevation for unverified entries.",
+  "derived_longitude_deg": {
+    "Aries Point": 0.0,
+    "Sun/Moon Midpoint": 5.132187999999985,
+    "Vertex": 96.46527115132643,
+    "Antivertex": 276.4652711513264,
+    "Part of Fortune": 159.05685863598433,
+    "Part of Spirit": 306.26862183598433
+  },
+  "swiss_lunar_point_longitude_deg": {
+    "Lilith (Mean)": 24.586286629450083,
+    "Selena": 204.5862866294501
+  },
+  "derived_definitions": "Midpoint uses shorter zodiacal arc; Vertex from Swiss houses_ex ascmc[3]; Antivertex opposite Vertex; night Fortune=Asc+Sun\u2212Moon and Spirit=Asc+Moon\u2212Sun. Selena is defined here as opposite Swiss mean lunar apogee; other traditions differ.",
+  "jpl_small_body_identifiers": {
+    "Albion": {
+      "number": 15760
+    },
+    "Amor": {
+      "number": 1221
+    },
+    "Amycus": {
+      "number": 55576
+    },
+    "Apollo": {
+      "number": 1862
+    },
+    "Arachne": {
+      "number": 407
+    },
+    "Arrokoth": {
+      "number": 486958
+    },
+    "Asbolus": {
+      "number": 8405
+    },
+    "Astraea": {
+      "number": 5
+    },
+    "Atlantis": {
+      "number": 1198
+    },
+    "Bacchus": {
+      "number": 2063
+    },
+    "Ceres": {
+      "number": 1
+    },
+    "Chariklo": {
+      "number": 10199
+    },
+    "Chiron": {
+      "number": 2060
+    },
+    "Crantor": {
+      "number": 83982
+    },
+    "Cupido (Asteroid)": {
+      "number": 763
+    },
+    "Cyllarus": {
+      "number": 52975
+    },
+    "Damocles": {
+      "number": 5335
+    },
+    "Dejanira": {
+      "number": 157
+    },
+    "Diana": {
+      "number": 78
+    },
+    "Echeclus": {
+      "number": 60558
+    },
+    "Elatus": {
+      "number": 31824
+    },
+    "Eris": {
+      "number": 136199
+    },
+    "Eros": {
+      "number": 433
+    },
+    "Flora": {
+      "number": 8
+    },
+    "Fortuna": {
+      "number": 19
+    },
+    "Hale-Bopp": {
+      "designation": "C/1995 O1",
+      "horizons_command": "DES=1995 O1;CAP <1997;NOFRAG",
+      "solution": "JPL#226"
+    },
+    "Halley's Comet": {
+      "designation": "1P",
+      "horizons_command": "DES=1P;CAP <1994;NOFRAG",
+      "solution": "JPL#75"
+    },
+    "Haumea": {
+      "number": 136108
+    },
+    "Hebe": {
+      "number": 6
+    },
+    "Hyakutake": {
+      "designation": "C/1996 B2",
+      "horizons_command": "DES=1996 B2;CAP <1997;NOFRAG",
+      "solution": "JPL#73"
+    },
+    "Hygiea": {
+      "number": 10
+    },
+    "Hylonome": {
+      "number": 10370
+    },
+    "Iris": {
+      "number": 7
+    },
+    "Ixion": {
+      "number": 28978
+    },
+    "Juno": {
+      "number": 3
+    },
+    "Karma": {
+      "number": 3811
+    },
+    "Makemake": {
+      "number": 136472
+    },
+    "Metis": {
+      "number": 9
+    },
+    "Nemesis": {
+      "number": 128
+    },
+    "Nessus": {
+      "number": 7066
+    },
+    "Okyrhoe": {
+      "number": 52872
+    },
+    "Orcus": {
+      "number": 90482
+    },
+    "Pallas Athene": {
+      "number": 2
+    },
+    "Pandora": {
+      "number": 55
+    },
+    "Pelion": {
+      "number": 49036
+    },
+    "Pholus": {
+      "number": 5145
+    },
+    "Proserpina": {
+      "number": 26
+    },
+    "Psyche": {
+      "number": 16
+    },
+    "Pythia": {
+      "number": 432
+    },
+    "Quaoar": {
+      "number": 50000
+    },
+    "Sappho": {
+      "number": 80
+    },
+    "Sedna": {
+      "number": 90377
+    },
+    "Thereus": {
+      "number": 32532
+    },
+    "Tyche": {
+      "number": 258
+    },
+    "Varuna": {
+      "number": 20000
+    },
+    "Vesta": {
+      "number": 4
+    }
+  },
+  "swiss_heliocentric_osculating_planetary_node_deg": {
+    "Mercury Node": 48.26545156871251,
+    "Mars Node": 49.517490355257394,
+    "Uranus Node": 74.0245082925827,
+    "Venus Node": 76.62996124314193,
+    "Jupiter Node": 100.42415568504015,
+    "Pluto Node": 110.26067345784895,
+    "Saturn Node": 113.60133088691096,
+    "Neptune Node": 131.6969467816046
+  },
+  "swiss_mean_lunar_node_deg": {
+    "North Node": 238.59591666712848,
+    "South Node": 58.59591666712845
+  },
+  "swiss_osculating_lunar_apogee_deg": {
+    "Lilith (Osculating)": 27.728383148055713
+  },
+  "node_definitions": "Planetary nodes: Swiss swe.nod_aps_ut(jd_ut, planet, NODBIT_OSCU, FLG_SWIEPH | FLG_HELCTR), heliocentric osculating ascending nodes, tropical ecliptic of date. Lunar North/South: Swiss MEAN_NODE and opposition. Lilith (Osculating): Swiss OSCU_APOG. These conventions differ from the app\u2019s approximate J2000 planetary nodal coefficients."
+}

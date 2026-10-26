@@ -1,0 +1,98 @@
+category	name	longitude	house
+Primary	Moon	11°56'06" Taurus	6
+Primary	Jupiter	14°27'58" Scorpio	12
+Primary	Pluto	28°01'47" Scorpio	1
+Primary	Neptune	22°18'46" Capricorn	2
+Primary	Uranus	24°16'58" Capricorn	3
+Primary	Mars	15°40'46" Aquarius	3
+Primary	Sun	28°19'46" Aquarius	4
+Primary	Saturn	2°17'51" Pisces	4
+Primary	Mercury	4°40'21" Pisces	4
+Primary	Venus	5°49'15" Pisces	4
+Angle	Descendant (DC)	22°39'46" Taurus	n/a
+Angle	Midheaven (MC)	4°58'25" Virgo	n/a
+Angle	Ascendant (AC)	22°39'46" Scorpio	n/a
+Angle	Imum Coeli (IC)	4°58'25" Pisces	n/a
+Asteroid	Vesta	6°20'33" Aries	5
+Asteroid	Eros	7°45'22" Aries	5
+Asteroid	Metis	24°25'52" Aries	6
+Asteroid	Proserpina	3°29'51" Taurus	6
+Asteroid	Ceres	4°19'44" Taurus	6
+Asteroid	Tyche	14°39'13" Taurus	7
+Asteroid	Arachne	25°39'57" Taurus	7
+Asteroid	Diana	10°42'25" Gemini	7
+Asteroid	Apollo	18°35'09" Leo	9
+Asteroid	Atlantis	20°18'02" Virgo	10
+Asteroid	Hygiea	22°38'46" Libra	11
+Asteroid	Juno	2°58'21" Scorpio	12
+Asteroid	Pandora	5°01'54" Scorpio	12
+Asteroid	Pythia	12°53'36" Scorpio	12
+Asteroid	Hebe	26°14'06" Scorpio	1
+Asteroid	Iris	16°38'57" Sagittarius	1
+Asteroid	Bacchus	26°50'05" Sagittarius	2
+Asteroid	Nemesis	28°49'40" Sagittarius	2
+Asteroid	Dejanira	10°25'53" Capricorn	2
+Asteroid	Psyche	18°42'07" Capricorn	2
+Asteroid	Karma	20°22'39" Capricorn	3
+Asteroid	Flora	21°10'50" Aquarius	3
+Asteroid	Amor	27°34'43" Aquarius	4
+Asteroid	Cupido (Asteroid)	11°52'57" Pisces	4
+Asteroid	Pallas Athene	18°27'28" Pisces	4
+Asteroid	Fortuna	25°04'38" Pisces	5
+Asteroid	Astraea	28°45'11" Pisces	5
+Asteroid	Sappho	29°17'42" Pisces	5
+Centaur	Cyllarus	18°52'27" Aries	5
+Centaur	Chariklo	15°47'57" Cancer	8
+Centaur	Amycus	15°36'42" Leo	9
+Centaur	Echeclus	19°47'05" Leo	9
+Centaur	Crantor	0°32'34" Virgo	10
+Centaur	Pholus	1°51'27" Virgo	10
+Centaur	Chiron	6°45'25" Virgo	10
+Centaur	Hylonome	29°54'56" Virgo	11
+Centaur	Asbolus	4°12'21" Libra	11
+Centaur	Thereus	14°13'21" Scorpio	12
+Centaur	Nessus	17°47'46" Scorpio	12
+Centaur	Pelion	19°31'35" Capricorn	2
+Centaur	Elatus	27°19'51" Capricorn	3
+Centaur	Damocles	5°43'17" Aquarius	3
+Centaur	Okyrhoe	18°11'53" Aquarius	3
+TNO	Albion	1°01'56" Aries	5
+TNO	Eris	17°20'56" Aries	5
+TNO	Sedna	12°09'35" Taurus	6
+TNO	Varuna	0°12'46" Cancer	8
+TNO	Orcus	14°29'54" Leo	9
+TNO	Makemake	9°19'29" Virgo	10
+TNO	Haumea	1°25'11" Libra	11
+TNO	Ixion	28°54'24" Scorpio	1
+TNO	Quaoar	1°55'09" Sagittarius	1
+TNO	Arrokoth	16°06'33" Sagittarius	1
+Lunar point	Lilith (Mean)	24°28'28" Aries	6
+Node	Mercury Node	18°20'20" Taurus	6
+Node	Mars Node	19°35'43" Taurus	7
+Node	South Node	28°35'09" Taurus	7
+Node	Uranus Node	14°15'26" Gemini	7
+Node	Venus Node	16°32'41" Cancer	8
+Node	Jupiter Node	10°33'11" Cancer	8
+Node	Pluto Node	20°18'15" Cancer	8
+Node	Saturn Node	23°44'28" Cancer	9
+Node	Neptune Node	11°43'27" Leo	9
+Lunar point	Selena	24°28'28" Libra	12
+Node	North Node	28°35'09" Scorpio	1
+Lunar point	Lilith (Osculating)	n/a	n/a
+Hypothetical	Admetos	15°32'10" Taurus	6
+Hypothetical	Hades	11°35'28" Gemini	7
+Hypothetical	Kronos	23°04'57" Gemini	8
+Hypothetical	Vulkanus	16°38'10" Cancer	8
+Hypothetical	Zeus	8°14'37" Libra	11
+Hypothetical	Apollon	17°28'27" Libra	11
+Hypothetical	Poseidon	1°43'07" Scorpio	12
+Hypothetical	Cupido (Uranian TNP)	26°18'23" Scorpio	1
+Comet	Halley's Comet	20°11'37" Leo	9
+Comet	Hale-Bopp	15°51'47" Capricorn	2
+Comet	Hyakutake	10°24'27" Pisces	4
+Derived	Aries Point	0°00'00" Aries	5
+Derived	Sun/Moon Midpoint	5°07'56" Aries	5
+Derived	Vertex	6°27'55" Cancer	8
+Derived	Part of Fortune	9°03'26" Virgo	10
+Derived	Antivertex	6°27'55" Capricorn	2
+Derived	Part of Spirit	6°16'06" Aquarius	3

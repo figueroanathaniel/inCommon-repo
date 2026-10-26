@@ -251,6 +251,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./sabian-symbols-data.js"></script>
 <script src="./minor-bodies-ephemeris.js"></script>
 <script src="./minor-body-elements.js"></script>
+<script src="./comet-hyakutake-jpl.js"></script>
 <script src="./placement-content.js"></script>
 <script src="./numerology-content.js"></script>
 <script src="./number-matrix.js"></script>
@@ -16126,6 +16127,10 @@ class Component extends DCLogic {
     if (!ME || !ME.has(key)) return '';
     const w = ME.worstDeg(key), fig = w < 0.01 ? 'under a hundredth' : 'about ' + w.toFixed(2);
     if (ME.source(key) === 'JPL Horizons') {
+      if (key === 'quaoar') return name + ' is computed from NASA JPL Horizons orbital elements for minor planet 50000. ' +
+        'A dated element row holds the 17 February 1994 reference within one arcsecond; ' +
+        'across the full 1900–2100 fit the worst sampled difference is about ' + w.toFixed(2) + ' of a degree. ' +
+        'The exact arcminute and arcsecond are not guaranteed for every date.';
       return name + ' is computed from NASA JPL Horizons orbital elements for minor planet ' + ME.designation(key) +
         ', checked against Horizons’ own positions every six months from 1900 to 2100. Its worst case is ' + fig + ' of a degree.';
     }
@@ -16135,6 +16140,11 @@ class Component extends DCLogic {
     if (this.degreeSafe(key)) return '';
     const name = label || key;
     if (this.COMET_IDS.indexOf(key) !== -1) {
+      if (key === 'hyakutake' && window.HyakutakeJPL) {
+        return 'Hyakutake uses a dated JPL Horizons position table, checked at independent times. ' +
+          'Its historical orbit has its own uncertainty, so this reading does not claim the exact degree. ' +
+          'No degree symbol is shown for it.';
+      }
       return 'A comet’s orbit is changed by every pass near an astral body, and this position comes from a single set of elements, so the sign is worth reading and the exact degree is not. No degree symbol is shown for it.';
     }
     const MBE = window.MinorBodiesEphemeris;
@@ -16255,7 +16265,7 @@ class Component extends DCLogic {
      fallback for a build where the library did not load, which is the same
      order lonRaw() keeps. Returns the RAMC in degrees for a longitude, and
      the obliquity in radians. */
-  skyFrame(t, lonDeg) {
+  chartSkyFrame(t, lonDeg) {
     const A = window.Astronomy;
     if (A && isFinite(t) && typeof A.SiderealTime === 'function' && typeof A.e_tilt === 'function') {
       try {
@@ -16271,12 +16281,19 @@ class Component extends DCLogic {
     const p = this.activeProfile();
     if (!p || !p.timedChart) return null;
     const R = this.RAD, t = this.t2000(this.natalDate());
-    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const fr = this.chartSkyFrame(t, p.birthLon), lst = fr.ramc;
     const eps = fr.eps, phi = p.birthLat * R, ramc = lst * R;
-    const asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
+    let asc = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
+    // A horizon cuts the ecliptic at two antipodal points. Beyond the polar
+    // circle the closed form can pick the western crossing. Select the east
+    // half explicitly: east has hour angle 180..360 degrees. Swiss section
+    // 6.4 uses this same geometrical convention for the polar Ascendant.
+    const ra = this.norm360(Math.atan2(Math.sin(asc * R) * Math.cos(eps), Math.cos(asc * R)) / R);
+    if (this.norm360(lst - ra) < 180) asc = this.norm360(asc + 180);
     const mc = this.norm360(Math.atan2(Math.sin(ramc), Math.cos(ramc) * Math.cos(eps)) / R);
     const s = this.signOf(asc);
-    return { asc: asc, mc: mc, sign: s.sign, deg: s.deg, idx: s.idx };
+    return { asc: asc, mc: mc, sign: s.sign, deg: s.deg, idx: s.idx,
+      ramc: ramc, obliquity: eps, latitude: phi };
   }
   // ==========================================================================
   // EXPANDED CHART COMPUTATION. Plain-JS port of app/ephemeris/engine.ts and
@@ -16317,7 +16334,7 @@ class Component extends DCLogic {
     if (!p || !p.timedChart) return null;
     const R = this.RAD;
     if (t == null) t = this.t2000(this.natalDate());
-    const fr = this.skyFrame(t, p.birthLon), lst = fr.ramc;
+    const fr = this.chartSkyFrame(t, p.birthLon), lst = fr.ramc;
     const eps = fr.eps;
     const ramc = (lst + 180) * R, phi = (90 - p.birthLat) * R;
     const v = this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / R);
@@ -16337,19 +16354,23 @@ class Component extends DCLogic {
     const ra = this.norm360(Math.atan2(Math.sin(lam) * Math.cos(eps), Math.cos(lam)) / R);
     return this.norm360(lst - ra) > 180 ? this.norm360(v + 180) : v;
   }
-  // Sect: whether the Sun was above the horizon at birth. The lots reverse on
-  // it, so it is a fact about the chart rather than about an instant, and the
-  // expanded context carries it once for that reason: computed per half-day
-  // offset instead, a birth within half a degree of sunrise would flip sect
-  // across the speed sample and report the lots moving 180 degrees a day. In
-  // the equal house frame the test is exact rather than approximate, since the
-  // Descendant is the Ascendant plus 180 by construction.
+  // Sect uses the geometric solar altitude (ecliptic latitude zero), without
+  // refraction. The ecliptic's above-horizon semicircle reverses orientation
+  // in some polar charts, so longitude relative to the eastern Ascendant
+  // alone cannot decide day/night there. Preserve it in the natal context
+  // rather than re-selecting sect at the finite-difference speed samples.
   sectOf(sun, asc) {
     if (asc == null || sun == null) return null;
+    if ([asc.ramc, asc.obliquity, asc.latitude].every(Number.isFinite)) {
+      const lam = sun * this.RAD, eps = asc.obliquity, phi = asc.latitude, theta = asc.ramc;
+      return Math.sin(phi) * Math.sin(eps) * Math.sin(lam) + Math.cos(phi) *
+        (Math.cos(theta) * Math.cos(lam) + Math.sin(theta) * Math.cos(eps) * Math.sin(lam)) >= 0;
+    }
     return this.norm360(sun - asc.asc) >= 180;
   }
-  // J2000.0 mean ascending node + centennial rate, Standish/JPL "Keplerian
-  // elements for approximate positions of the major astral bodies".
+  // Ascending-node coefficients of approximate J2000 Keplerian orbit fits.
+  // These are model parameters, not independently integrated geocentric
+  // planetary-node longitudes; do not label their printed seconds verified.
   PLANET_NODE = {
     Mercury: [48.33167, -446.30 / 3600], Venus: [76.68069, -996.89 / 3600], Mars: [49.57854, -1020.19 / 3600],
     Jupiter: [100.55615, 1217.17 / 3600], Saturn: [113.71504, -1591.05 / 3600], Uranus: [74.22988, -1681.40 / 3600],
@@ -16401,7 +16422,6 @@ class Component extends DCLogic {
   COMET_ELEMENTS = {
     halley: { perihelionT: 2446470.12 - 2451545.0, a: 17.94, e: .9671, i: 162.2421, om: 58.42, w: 111.33 },
     halebopp: { perihelionT: 2450540.5 - 2451545.0, a: 186.5, e: .9951, i: 89.43, om: 282.47, w: 130.73 },
-    hyakutake: { perihelionT: 2450214.5 - 2451545.0, a: 175.0, e: .999633, i: 124.4, om: 188.6, w: 20.5 }
   };
   // Gaussian gravitational constant, radians/day at a=1 AU: same constant
   // family as meanMotionOf(), kept separate because the comet solver works
@@ -16457,7 +16477,12 @@ class Component extends DCLogic {
       case 'lilithMean': return { lon: this.lilithMeanOf(t), status: 'ok' };
       case 'selena': return { lon: this.norm360(this.lilithMeanOf(t) + 180), status: 'fixed' };
       case 'ariesPoint': return { lon: 0, status: 'fixed' };
-      case 'halley': case 'halebopp': case 'hyakutake':
+      case 'hyakutake': {
+        const H = window.HyakutakeJPL;
+        const lon = H && H.lon(t);
+        return lon == null ? { lon: null, status: 'unavailable', note: 'dated JPL Hyakutake ephemeris unavailable for this moment' } : { lon, status: 'ok' };
+      }
+      case 'halley': case 'halebopp':
         return { lon: this.cometLonOf(reg.id, t), status: 'ok' };
       case 'vertex': {
         const v = this.vertexOf(t);
@@ -25197,7 +25222,7 @@ class Component extends DCLogic {
       [['chiron', 'Chiron'], ['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta'], ['eris', 'Eris']].forEach(([id, name]) => add(id, id, name, 'asteroid'));
       if (asc && p) {
         add('vertex', 'vertex', 'Vertex', 'point');
-        const fr = this.skyFrame(this.t2000(nd), p.birthLon), ramc = fr.ramc * this.RAD, eps = fr.eps;
+        const fr = this.chartSkyFrame(this.t2000(nd), p.birthLon), ramc = fr.ramc * this.RAD, eps = fr.eps;
         extras.push({ key: 'eastPoint', name: 'East Point', lon: this.norm360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps))) / this.RAD), kind: 'point', retro: false });
         add('partOfFortune', 'fortune', 'Part of Fortune', 'point');
       }
