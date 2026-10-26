@@ -32,11 +32,14 @@ function element() {
 function load(name) {
   const win = Object.assign(events(), { matchMedia: () => ({ matches: false }) });
   const doc = Object.assign(events(), { createElement: element });
-  const canceled = [];
+  const canceled = [], timers = new Map();
+  let tid = 0;
   const context = { window: win, document: doc, console, Set, Math,
-    cancelAnimationFrame(id) { canceled.push(id); } };
+    cancelAnimationFrame(id) { canceled.push(id); },
+    setTimeout(fn) { timers.set(++tid, fn); return tid; },
+    clearTimeout(id) { timers.delete(id); } };
   vm.runInNewContext(fs.readFileSync(path.join(app, name + '.js'), 'utf8'), context, { filename: name + '.js' });
-  return { win, doc, canceled };
+  return { win, doc, canceled, timers, context };
 }
 function graph(nodes) { return { traverse(fn) { nodes.forEach(fn); } }; }
 
@@ -124,6 +127,70 @@ for (const [file, exported, extra] of [
     check(material.calls === 1 && geometry.calls === 1 && pendingRenderer.calls === 1,
       file + ' frees every GPU asset once after shader compile (' + outcome + ')');
   }
+}
+
+/* An unseen stage gives back its bloom targets after a delay, makes nothing
+   while asleep, makes them again when seen, and a pending release dies with
+   the scene. A run of very late frames drops a rung at once. */
+for (const [file, exported] of [['chart-scene', 'ChartScene'], ['hd-scene', 'HDScene'], ['cycle-scene', 'CycleScene']]) {
+  const { win, timers } = load(file);
+  const s = win[exported].create({});
+  s.ready = true; s.bloom = true; s.warm = false;
+  const targets = ['scene', 'a', 'b', 'c', 'd'].map(asset);
+  s.post = Object.fromEntries(['scene', 'a', 'b', 'c', 'd'].map((k, i) => [k, targets[i]]));
+  s.postSleep(false);
+  check(timers.size === 1 && s.post, file + ' waits before releasing an unseen stage');
+  s.postSleep(true);
+  check(timers.size === 0 && s.post && targets.every(a => a.calls === 0), file + ' a quick return keeps the bloom targets');
+  s.postSleep(false);
+  const fire = () => { const q = [...timers.values()]; timers.clear(); q.forEach(fn => fn()); };
+  fire();
+  check(s.post && targets.every(a => a.calls === 0) && timers.size === 1, file + ' keeps the bloom targets until the warm-up has run');
+  s.warm = true;
+  fire();
+  check(s.post === null && s._postOff === true && targets.every(a => a.calls === 1), file + ' releases bloom targets while unseen');
+  s.setupPost();
+  check(s.post === null, file + ' makes no targets while asleep');
+  let made = 0;
+  s.setupPost = function () { made++; };
+  s.postSleep(true);
+  check(made === 1 && s._postOff === false, file + ' makes the targets again when seen');
+  s.post = { scene: asset(), a: asset(), b: asset(), c: asset(), d: asset() };
+  s.postSleep(false);
+  check(timers.size === 1, file + ' schedules a second release');
+  s.destroy();
+  check(timers.size === 0, file + ' destroy cancels a pending release');
+  const q = win[exported].create({});
+  let rungs = 0;
+  q.level = 0; q.frames = []; q.resize = function () { rungs++; };
+  q.measure(150, true); q.measure(150, true);
+  const before = q.level;
+  q.measure(150, true);
+  check(before === 0 && q.level === 1 && rungs === 1, file + ' three very late frames drop a rung at once');
+}
+
+/* The ladder is fed frames, never the time a stage spent off screen. */
+for (const [file, exported] of [['chart-scene', 'ChartScene'], ['hd-scene', 'HDScene'], ['cycle-scene', 'CycleScene']]) {
+  const { win, context } = load(file);
+  let raf = 0, queue = new Map();
+  context.requestAnimationFrame = fn => { queue.set(++raf, fn); return raf; };
+  context.cancelAnimationFrame = id => { queue.delete(id); };
+  const run = ts => { const q = [...queue.values()]; queue.clear(); q.forEach(fn => fn(ts)); };
+  const s = win[exported].create({});
+  const seen = [];
+  s.ready = true; s.host = element(); s.el.root.isConnected = true; s.visible = true;
+  s.measure = function (ms) { seen.push(ms); };
+  s.frame = s.step = s.render = s.postSleep = function () {};
+  s.updateRun();
+  for (let t = 1000; t <= 1400; t += 40) run(t);
+  s.visible = false; s.updateRun();
+  s.visible = true; s.updateRun();
+  for (let t = 9000; t <= 9400; t += 40) run(t);
+  check(seen.length > 10 && seen.every(ms => ms < 100), file + ' does not time the gap a stage was away');
+  seen.length = 0;
+  s.visible = false; s.updateRun(); s.visible = true; s.updateRun();
+  [20000, 21500, 21540, 21580, 21620, 21660].forEach(run);
+  check(seen.length === 2 && seen.every(ms => ms === 40), file + ' does not judge the first frames after a start');
 }
 
 const { win } = load('body-globes');

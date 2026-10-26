@@ -5965,6 +5965,23 @@ destroy calls are inert. `node tools/check-three-lifecycle.js` exercises these
 paths with tracked disposable objects and no GPU; it is a lifecycle check,
 not evidence of browser rendering or frame rate.
 
+**An unseen stage gives back its bloom targets, and the ladder judges frames,
+not absences** (26 October 2026). The phone holds all three stages at once, in
+the lot or mounted off screen, and each kept a multisampled half float target
+at its full pixel size plus four smaller ones. `postSleep()` releases them four
+seconds after a stage stops being seen (a quick scroll past keeps them), never
+before its warm-up has run, because the warm-up compiles the bloom programs
+only while the targets exist; `setupPost()` makes nothing while asleep, and the
+targets are made again before the next frame once the stage is seen. Three
+faults in the quality ladder went with it: a loop restart left `lastDraw` at
+the stage's last frame, so the whole time it was away was measured as one
+frame and every return to a stage dropped a rung, down to the bottom on a fast
+machine; the first three frames after a start (the page settling, uploads) are
+drawn but not judged; and chart and cycle take the rule hd-scene already had,
+three frames over 120ms in a row drop a rung at once. All of it is in
+`check-three-lifecycle.js`, and each rule was removed once to see the gate go
+red.
+
 Reported by the owner on 20 October 2026: "opening the app shows a bunch of
 black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
 which is near black under Deep Field, held up for seconds. A CPU profile of the
