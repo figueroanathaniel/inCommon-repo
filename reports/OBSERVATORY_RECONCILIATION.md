@@ -1,3 +1,8 @@
+> Runtime update, October 26, 2026: lunar points, geometric planetary nodes and
+> the remaining integrated comets are now implemented and validated over their
+> supported date range. This file retains the original dated reconciliation
+> and its reference conventions. See PRECISION_POINT_MATH.md for current methods.
+
 # Observatory placement reconciliation
 
 Reference instant: **1994-02-17 05:37:00 UTC**. Edison angles use approximately
@@ -82,8 +87,9 @@ worst-case bound. Dejanira, Karma, and Damocles were already within 3″ at
 this instant. The app's primary astronomy-engine values differ by a few
 arcseconds from the direct JPL observer output. Neither this report nor its
 fixture silently substitutes personal birth coordinates into other charts.
-The app still uses its older approximate planetary-node formula for live
-charts and does not render osculating Lilith; this dated reconciliation is
+At the original audit the app still used approximate planetary nodes and
+did not render osculating Lilith. Those live calculations have since been
+replaced; this dated reconciliation is
 the source of the eleven newly defined birth-snapshot values. A general
 runtime replacement needs an ephemeris with the same selected conventions
 over its supported date range.
@@ -96,10 +102,10 @@ are documented in `reports/CLIENT_CALCULATOR_ACCURACY.md`.
 `node tools/check-client-lilith.js` checks eight independent UTC instants from
 1975 through 2026 against Swiss Ephemeris 2.10.03 reference values for mean
 and osculating lunar apogee. It deliberately exits nonzero while the live
-calculator cannot justify a seconds-precise Black Moon Lilith placement. On
-the current code, mean Lilith misses the Swiss reference by 197.6–411.6
+calculator cannot justify a seconds-precise Black Moon Lilith placement. In
+the pre-repair code, mean Lilith missed the Swiss reference by 197.6–411.6
 arcseconds (3.3–6.9 arcminutes); the live app labels it `ok`. Osculating
-Lilith has no live longitude. At those same instants the two mathematically
+Lilith had no live longitude. Both variants now have independently checked live implementations. At those same instants the two mathematically
 distinct Lilith variants differ by 1.736–26.451 degrees. These are different
 charts' UTC instants, not a general error bound over all dates or locations.
 The checks must pass against the actual runtime calculator before calling
