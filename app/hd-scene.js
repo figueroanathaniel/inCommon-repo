@@ -799,13 +799,21 @@
     var c = cssColor(this._pr, css, 'rgb(47,255,143)');
     return { v: toVec(c), c: c };
   };
+  /* Materials wait for a warm-up still in flight: compileAsync() polls each
+     one's program until it reports ready, and a material disposed under that
+     poll makes three.js throw an uncaught TypeError ("reading 'isReady'").
+     A rebuild of the content while the stage is still warming is one way in,
+     a shell swap destroying the stage is the other (see destroy). Geometry
+     is not polled, so it goes at once. */
   P.dispose = function (obj) {
-    var labels = this.labels;
+    var labels = this.labels, mats = [];
     obj.traverse(function (o) {
       if (o.geometry && !o.userData.sharedGeo) o.geometry.dispose();
-      if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+      if (o.material) mats.push(o.material);
       if (o.isSprite) { var i = labels.indexOf(o); if (i !== -1) labels.splice(i, 1); }
     });
+    var free = function () { mats.forEach(function (m) { if (m.map) m.map.dispose(); m.dispose(); }); };
+    if (this._warming && this._warmJobs) this._warmJobs.then(free, free); else free();
   };
   P.ribMat = function (c, i, w) {
     return new T.ShaderMaterial({ vertexShader: V_RIB, fragmentShader: F_RIB, transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide,
