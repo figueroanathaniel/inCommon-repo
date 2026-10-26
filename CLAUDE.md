@@ -2288,7 +2288,9 @@ exactly like a stuck handler; it waits on the scroll event now, and `scrollFade`
 is registered first so it has already run by the time that fires. H15 sampled
 once at 700ms and reported the exit as not running when it was; it polls for the
 drop now. A test that fails on a slow machine and passes on a fast one is worse
-than no test.
+than no test. (`coverScrollTo` went with the scroll on 26 October 2026; H15
+still polls, now for the ring's classes rather than an opacity, and H11
+reads its two angles two frames apart for the same reason.)
 
 **The phase unregisters service workers at both ends.** H16 navigates its frame
 to the app, and the app registers one; on the next run the cover is served
@@ -3314,11 +3316,31 @@ email on, the reader is told to check their email and the link returns to
 the cover, which signs them in; with it off, the app reloads to take the
 session. "Not now" leaves the default profile and skips the card for the tab.
 
-**What still has to be updated.** The browser harness rows that drive the
-cover's old shape (H5 counts one `a[href]` and looks for the words "enter
-here"; H15, P13 and P15 drive the old link and the phone form) were not
-rerun and will need rewriting for the pill and the question. K55 now counts
-11 Terms links in the app, the card's agreement line being the eleventh.
+**The rows that hold it.** Group H keeps its 17 rows; H5 and H9 to H16 were
+rewritten for this cover. H5 is the Continue pill as the one link in. H9 is
+the page holding still. H10 is one ring at rest with a thin line, `aria-hidden`.
+H11 measures the turn rather than reading the animation's name: two readings
+of each computed angle, two frames apart, clockwise for the ring and
+counterclockwise for the line. H12 is the pill centred on the screen and on
+the ring with "Create an account" under it. H13 is the wordmark and the
+initial gone with the hidden `h1` still naming the page. H14 is the question:
+a dialog that takes focus, passes 44px and 4.5:1, and gives focus back to the
+pill on Escape. H15 is Yes running the sequence in place and setting the two
+tab flags, and H16 is landing on the app at `#/today`. The phase puts aside
+any stored session for H14 and gives it back, and removes the tab flags it
+set. Run under SwiftShader on 26 October 2026, H14 found a real fault: a
+press that had not focused the pill first (a script's click) handed focus to
+the page on close, so the question now always returns it to the pill.
+
+P13 and P15 of the password drive were never in the repository, so they were
+rewritten as `tools/drive-cover.js`, which serves the repository itself and
+drives the cover with WebGL off. P13 presses Continue twice and three times
+and expects one question and no departure, and expects a kept session to go
+in on one press with no question. P15 expects a phone at 390 with touch, and
+a tablet, to meet the ring and the pill rather than the form, with nothing
+focused on arrival and the question on a press. Against the old cover both go
+red; against this one, 3 of 3. K55 now counts 11 Terms links in the app, the
+card's agreement line being the eleventh.
 
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the

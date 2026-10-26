@@ -1128,17 +1128,17 @@
      profile: Yes goes to the registration card over Today, No goes in on the
      default profile, the cross closes it. A dialog with its own focus: it
      takes focus when it opens, Tab stays inside it, Escape is the cross, and
-     focus goes back to the pill when it closes. */
-  var modalFrom = null;
+     focus goes back to the pill when it closes, always: the pill is what
+     opened it, and a press that did not focus it first (a script's click, a
+     screen reader's activation) would otherwise hand focus to the page. */
   function openModal() {
-    modalFrom = document.activeElement;
     modal.hidden = false;
     yesBtn.focus();
   }
   function closeModal(refocus) {
     if (modal.hidden) return;
     modal.hidden = true;
-    if (refocus !== false) (modalFrom && modalFrom.focus ? modalFrom : enter).focus();
+    if (refocus !== false) enter.focus();
   }
   modal.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
