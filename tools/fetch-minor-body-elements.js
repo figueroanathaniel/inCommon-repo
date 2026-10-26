@@ -181,6 +181,16 @@ const HYPOTHETICALS = {
 };
 const T_J1900 = 2415020.0 - 2451545.0;
 
+/* Horizons ELEMENTS for 50000 Quaoar at 1994-02-17 05:37 UTC,
+ * heliocentric ecliptic J2000, AU-D. Its otherwise nearest 20-year row
+ * misses the verified observer longitude by about 96 arcseconds here.
+ * JDTDB, EC, IN, OM, W, MA, A from the Horizons CSV response. */
+const VERIFIED_EXTRA_EPOCHS = {
+  quaoar: [[-2144.265972222, 43.60972783658086, 0.03537981555778606,
+    7.979165506406746, 188.821680284121, 148.0340769215217,
+    267.2904397797584]]
+};
+
 const sig = (x, n) => +(+x).toPrecision(n);
 const fix = (x, n) => +(+x).toFixed(n);
 function worstOf(ME, b, refs) {
@@ -224,7 +234,8 @@ async function build() {
     const all = got.epochs.map(e => [fix(e.jd - 2451545, 1), sig(e.a, 8), fix(e.e, 7), fix(e.i, 5), fix(e.om, 5), fix(e.w, 5), fix(e.M, 5)]);
     let chosen = null, best = null;
     for (const step of STEPS) {
-      const rows = all.filter((r, i) => i % (step / RAW_STEP_YEARS) === 0);
+      const rows = all.filter((r, i) => i % (step / RAW_STEP_YEARS) === 0)
+        .concat(VERIFIED_EXTRA_EPOCHS[id] || []).sort((a, b) => a[0] - b[0]);
       const cand = { n: expect, num: String(num), src: 'JPL Horizons', eq: 'J2000', step: step, w: 0,
         span: [fix(all[0][0] - 366, 1), fix(all[all.length - 1][0] + 366, 1)], rows: rows };
       cand.w = worstOf(ME, cand, got.refs);
