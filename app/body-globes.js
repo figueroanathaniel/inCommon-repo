@@ -410,6 +410,16 @@
       if (o.material) { if (o.material.map && o.material.map !== this.coronaTex && o.material.map !== this.glowTex) o.material.map.dispose(); o.material.dispose(); }
     }.bind(this));
   };
+  /* The meshes above share these geometries and textures. Releasing a single
+     globe must not break its neighbours; releasing the scene must free them. */
+  G.destroy = function () {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    [this.geo, this.shellGeo, this.tailGeo, this.coronaTex, this.glowTex].forEach(function (asset) {
+      if (asset) asset.dispose();
+    });
+    this.geo = this.shellGeo = this.tailGeo = this.coronaTex = this.glowTex = null;
+  };
   G.kindOf = function (b) { var s = specOf(b); return s.kind === SIGIL ? 'point' : s.kind === STAR ? 'star' : s.kind === GAS ? 'giant' : s.kind === COMET ? 'comet' : s.kind === ICE ? 'ice' : s.kind === CLOUD ? 'clouded' : 'rock'; };
 
   root.BodyGlobes = {

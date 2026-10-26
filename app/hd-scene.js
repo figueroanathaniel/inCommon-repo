@@ -533,8 +533,10 @@
   P.fail = function (why) {
     if (this.failed) return;
     this.failed = true;
-    this.stop();
-    try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
+    try { this.destroy(); } catch (e) {
+      this.stop();
+      if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root);
+    }
     if (this.o.onFail) this.o.onFail(why || 'failed');
   };
   /* A stage is built when it is about to be seen, not when it is mounted: the
@@ -1675,13 +1677,32 @@
   };
 
   P.destroy = function () {
+    if (this.destroyed) return;
+    this.destroyed = true;
     if (this.nio) { this.nio.disconnect(); this.nio = null; }
     this.stop();
+    if (this._kick) { cancelAnimationFrame(this._kick); this._kick = 0; }
     if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
+    if (this.host && this._onKeyUp) this.host.removeEventListener('keyup', this._onKeyUp);
+    if (this._onBlur) window.removeEventListener('blur', this._onBlur);
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
-    if (this.content) this.dispose(this.content);
+    var freed = new Set();
+    var release = function (asset) {
+      if (!asset || freed.has(asset)) return;
+      freed.add(asset);
+      if (asset.map) release(asset.map);
+      if (typeof asset.dispose === 'function') asset.dispose();
+    };
+    [this.scene, this.postScene].forEach(function (graph) {
+      if (!graph) return;
+      graph.traverse(function (node) {
+        release(node.geometry);
+        (Array.isArray(node.material) ? node.material : [node.material]).forEach(release);
+      });
+    });
+    [this.orbGeo, this.ribGeo, this.mBright, this.mBlur, this.mComp].forEach(release);
     if (this.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { this.post[k].dispose(); }, this); }
     if (this.cellTex) this.cellTex.dispose();
     if (this.r) this.r.dispose();
