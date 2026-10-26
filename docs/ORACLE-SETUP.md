@@ -188,8 +188,8 @@ dragging to any piece of the section that is playing, previous section,
 pause, next section, a reading speed (1× to 4×, kept on the device), and
 stop. The voice is ElevenLabs, reached the same way the writing is reached:
 the app asks a second Edge Function, `oracle-voice`, which holds the key. It
-is asked once per piece of a section — the title, then a paragraph at a
-time — so a reader who stops early is never billed for what was not heard,
+is asked once per piece of a section (the title, then a paragraph at a
+time), so a reader who stops early is never billed for what was not heard,
 the first sound waits only for the shortest piece, and every piece is
 generated fresh (one long input flattens the voice's prosody toward its
 end). The app leaves a deliberate beat between pieces and runs the audio

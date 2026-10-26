@@ -16129,7 +16129,7 @@ class Component extends DCLogic {
     if (ME.source(key) === 'JPL Horizons') {
       if (key === 'quaoar') return name + ' is computed from NASA JPL Horizons orbital elements for minor planet 50000. ' +
         'A dated element row holds the 17 February 1994 reference within one arcsecond; ' +
-        'across the full 1900–2100 fit the worst sampled difference is about ' + w.toFixed(2) + ' of a degree. ' +
+        'across the full 1900 to 2100 fit the worst sampled difference is about ' + w.toFixed(2) + ' of a degree. ' +
         'The exact arcminute and arcsecond are not guaranteed for every date.';
       return name + ' is computed from NASA JPL Horizons orbital elements for minor planet ' + ME.designation(key) +
         ', checked against Horizons’ own positions every six months from 1900 to 2100. Its worst case is ' + fig + ' of a degree.';
@@ -25509,12 +25509,12 @@ class Component extends DCLogic {
     this._orMediaState(v.paused ? 'paused' : 'playing');
     this.setState({ orListening: true });
   }
-  /* READING SPEED. The three chips are named for the reader — 0.5×, 1×, 2× —
+  /* READING SPEED. The three chips are named for the reader (0.5×, 1×, 2×)
      and are gentler under the words: 0.75, 1 and 1.5 (the owner asked for the
      softer true paces on 24 October 2026). The choice is kept on the device,
      so the next reading opens at the pace the reader chose. A media element
-     keeps the voice's pitch at any pace — the old audio context resampled, so
-     a faster voice also climbed — and the beats of silence between pieces
+     keeps the voice's pitch at any pace (the old audio context resampled, so
+     a faster voice also climbed) and the beats of silence between pieces
      shrink or stretch to match. */
   orTransportRate(rate) {
     rate = parseFloat(rate);
@@ -25533,8 +25533,8 @@ class Component extends DCLogic {
     const r = parseFloat(this.readLS('incommon.voice.rate', 1));
     return [0.75, 1, 1.5].indexOf(r) !== -1 ? r : 1;
   }
-  /* THE PLAYBACK MODE — off, repeat the reading, repeat the section, or
-     shuffle — chosen from the loop button's menu and read live at every
+  /* THE PLAYBACK MODE: off, repeat the reading, repeat the section, or
+     shuffle, chosen from the loop button's menu and read live at every
      section's end, so a change mid-reading already steers the next one. The
      first docked transport kept shuffle and loop as two keys; a setting left
      from it folds into the mode. */
@@ -25568,7 +25568,7 @@ class Component extends DCLogic {
     const v = this._orVoice;
     if (!v) return;
     const seg = v.segs[v.idx];
-    const text = (v.readingTitle || 'A reading') + (seg ? ' — ' + seg.title : '');
+    const text = (v.readingTitle || 'A reading') + (seg ? ': ' + seg.title : '');
     if (navigator.share) { navigator.share({ title: text, text: text, url: location.href }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(location.href); this.toastMsg('Link copied.'); }
     catch (e) { this.toastMsg('Copy this page\u2019s address to share it.'); }
@@ -25584,7 +25584,7 @@ class Component extends DCLogic {
     const seg = v.segs[v.idx];
     const entry = { date: day, ts: day, at: Date.now(), type: 'event', tag: 'oracle',
       title: this.voiceTitle(body), preview: body.slice(0, 90),
-      body: body + '\n\n— a note on \u201c' + (v.readingTitle || 'a reading') + '\u201d' + (seg ? ', ' + seg.title : '') + ', heard in the Oracle.' };
+      body: body + '\n\nA note on \u201c' + (v.readingTitle || 'a reading') + '\u201d' + (seg ? ', ' + seg.title : '') + ', heard in the Oracle.' };
     const res = this.remember('journal', entry);
     if (!res.ok) {
       const manual = [{ id: 'm' + Date.now(), date: day, type: 'event', tag: 'oracle', title: entry.title, preview: entry.preview, body: entry.body, manual: true }, ...this.readLS(this.mkey(), [])];
@@ -25644,8 +25644,8 @@ class Component extends DCLogic {
   /* THE SCRY BAR. The bar measures the section that is playing: each piece's
      length is its true audio length once the element has read it, and a
      guess of about fourteen letters a second until then, plus its beat of
-     silence, all at the current reading speed. A drag only previews — the
-     knob and the clock follow the finger while it moves — and the seek lands
+     silence, all at the current reading speed. A drag only previews: the
+     knob and the clock follow the finger while it moves, and the seek lands
      where the finger lifts, on the piece under it and the breath within that
      piece. Pieces already fetched are reused, so a jump back is instant and
      a jump ahead waits only for what has not been fetched yet. */
@@ -25797,7 +25797,7 @@ class Component extends DCLogic {
     /* The section after this one has its first two pieces asked for while
        this one plays, so the proxy's wait passes under the current audio
        instead of as a silence between sections. Pieces asked for ahead are
-       paid for even if the reader stops early — two short ones at most,
+       paid for even if the reader stops early, two short ones at most,
        where this used to be the whole next section. A rejected prefetch is
        swallowed here; the section that consumes it falls back on its own. */
     const seg = voice.segs[next];
@@ -25813,7 +25813,7 @@ class Component extends DCLogic {
   }
   /* The pieces of a section: paragraph-sized, a long paragraph broken on
      sentence ends so no piece runs past ~700 characters. gap is the beat of
-     silence after the piece — longer at a paragraph's end — played at the
+     silence after the piece (longer at a paragraph's end) played at the
      current reading speed. */
   _orVoiceChunks(text) {
     const paras = String(text || '').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
@@ -25920,7 +25920,7 @@ class Component extends DCLogic {
   /* A piece that would not come (the voice is spent, the proxy is down)
      hands the rest of the section to the device's own voice, from the piece
      after the one sounding. The generation bump stills the callbacks of
-     anything still in flight — the sounding piece's own end included, which
+     anything still in flight, the sounding piece's own end included, which
      is why the handover hangs on a listener of its own. */
   _orPlayTTSRest(voice, g) {
     if (!voice.on || g !== voice.gen) return;

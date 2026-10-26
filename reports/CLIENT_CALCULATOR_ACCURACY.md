@@ -21,7 +21,7 @@ interpretive claims.
 |---|---|---|
 | Eight planetary ascending nodes | Sampled maximum differences from the selected Swiss heliocentric osculating convention: Mercury 21.2′, Venus 18.9′, Mars 16.6′, Jupiter 16.4′, Saturn 20.9′, Uranus 25.8′, Neptune 24.2′, Pluto 24.1′ | The live formulas are approximate J2000 orbital parameters, so this includes a definition/frame mismatch. Explicit acceptance failure until the runtime implements the selected date-general convention. |
 | Mean lunar North and South Nodes | Up to 18.1″ from Swiss mean node in eight sampled dates | Small compared with the planetary-node gaps, but can change a partition arbitrarily close to its edge. Both live formulas are checked. |
-| Mean Black Moon Lilith | 197.6–411.6″ (3.3–6.9′) from Swiss in eight dates | Live dispatcher is tested; its `ok` label does not justify seconds precision. Acceptance fails. |
+| Mean Black Moon Lilith | 197.6 to 411.6″ (3.3 to 6.9′) from Swiss in eight dates | Live dispatcher is tested; its `ok` label does not justify seconds precision. Acceptance fails. |
 | Selena | Inherits mean Lilith's error under this app's opposite-apogee convention | Same eight-date reference check. This convention is explicit; it is not a universal definition of Selena. |
 | Osculating Black Moon Lilith | Unavailable at all eight reference dates | Actual dispatcher is exercised. Mean Lilith cannot substitute for it. Acceptance fails. |
 | Halley | Static two-body solver misses the 1994 JPL reference by 0.1826° (11.0′) | Acceptance fails; additional independent comet epochs and an integrated runtime replacement are still needed. |
@@ -67,7 +67,7 @@ propagation and suppression of ambiguous interpretations are still pending.
 - Hyakutake: dated integrated JPL interpolation, four independent epoch checks,
   and rejection outside the supported table span. Orbital uncertainty and
   interpolation error remain separate quantities.
-- ASC, MC and Vertex: eight instants from 1975–2026 at nine places, including
+- ASC, MC and Vertex: eight instants from 1975 to 2026 at nine places, including
   Ecuador, Kenya, Nepal, Australia and both polar regions. Observed maxima are
   0.4502″ ASC, 0.1305″ MC and 0.3298″ Vertex. These are sample results, not a
   global guarantee at a geometric singularity or every historical birth.
