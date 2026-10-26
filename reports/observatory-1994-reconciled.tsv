@@ -1,0 +1,98 @@
+category	name	submitted_longitude	reference_longitude	reference_decimal_deg	submitted_house	house_from_submitted_longitude	equal_house_from_reference	provenance	manifest_minus_reference_arcsec	label_vs_reference	label_vs_submitted
+Primary	Moon	11°56'06" Taurus	11°56'06" Taurus	41.9351288	6	6	6	JPL Horizons	-0.46	matches	matches
+Primary	Jupiter	14°27'58" Scorpio	14°27'20" Scorpio	224.4555798	12	12	12	JPL Horizons	37.91	matches	matches
+Primary	Pluto	28°01'47" Scorpio	28°01'45" Scorpio	238.0292065	1	1	1	JPL Horizons	1.86	matches	matches
+Primary	Neptune	22°18'46" Capricorn	22°10'44" Capricorn	292.1787779	2	2	2	JPL Horizons	482.40	matches	matches
+Primary	Uranus	24°16'58" Capricorn	24°17'05" Capricorn	294.2848411	3	3	3	JPL Horizons	-7.43	matches	matches
+Primary	Mars	15°40'46" Aquarius	15°40'46" Aquarius	315.6793259	3	3	3	JPL Horizons	0.43	matches	matches
+Primary	Sun	28°19'46" Aquarius	28°19'45" Aquarius	328.3292472	4	4	4	JPL Horizons	0.71	matches	matches
+Primary	Saturn	2°17'51" Pisces	2°17'53" Pisces	332.2980013	4	4	4	JPL Horizons	-1.80	matches	matches
+Primary	Mercury	4°40'21" Pisces	4°40'23" Pisces	334.6729955	4	4	4	JPL Horizons	-1.78	matches	matches
+Primary	Venus	5°49'15" Pisces	5°49'14" Pisces	335.8205547	4	4	4	JPL Horizons	1.00	matches	matches
+Angle	Descendant (DC)	22°39'46" Taurus	22°39'46" Taurus	52.6627402	n/a			Swiss angle geometry	0.14	unverified	matches
+Angle	Midheaven (MC)	4°58'25" Virgo	4°58'25" Virgo	154.9737375	n/a			Swiss angle geometry	-0.46	unverified	matches
+Angle	Ascendant (AC)	22°39'46" Scorpio	22°39'46" Scorpio	232.6627402	n/a			Swiss angle geometry	0.14	unverified	matches
+Angle	Imum Coeli (IC)	4°58'25" Pisces	4°58'25" Pisces	334.9737375	n/a			Swiss angle geometry	-0.46	unverified	matches
+Asteroid	Vesta	6°20'33" Aries	6°20'32" Aries	6.3421971	5	5	5	JPL Horizons	1.09	matches	matches
+Asteroid	Eros	7°45'22" Aries	7°45'21" Aries	7.7559561	5	5	5	JPL Horizons	0.56	matches	matches
+Asteroid	Metis	24°25'52" Aries	24°25'50" Aries	24.4306634	6	6	6	JPL Horizons	1.61	matches	matches
+Asteroid	Proserpina	3°29'51" Taurus	3°29'50" Taurus	33.4971574	6	6	6	JPL Horizons	1.23	matches	matches
+Asteroid	Ceres	4°19'44" Taurus	4°19'42" Taurus	34.3283325	6	6	6	JPL Horizons	2.00	matches	matches
+Asteroid	Tyche	14°39'13" Taurus	14°39'10" Taurus	44.6528221	7	6	6	JPL Horizons	2.84	corrected	inconsistent
+Asteroid	Arachne	25°39'57" Taurus	25°39'54" Taurus	55.6649684	7	7	7	JPL Horizons	3.11	matches	matches
+Asteroid	Diana	10°42'25" Gemini	10°42'21" Gemini	70.7058748	7	7	7	JPL Horizons	3.85	matches	matches
+Asteroid	Apollo	18°35'09" Leo	18°35'07" Leo	138.5853332	9	9	9	JPL Horizons	1.80	matches	matches
+Asteroid	Atlantis	20°18'02" Virgo	20°18'04" Virgo	170.3012168	10	10	10	JPL Horizons	-2.38	matches	matches
+Asteroid	Hygiea	22°38'46" Libra	22°30'50" Libra	202.5138591	11	11	11	JPL Horizons	476.11	matches	matches
+Asteroid	Juno	2°58'21" Scorpio	2°50'25" Scorpio	212.8403622	12	12	12	JPL Horizons	475.70	matches	matches
+Asteroid	Pandora	5°01'54" Scorpio	5°01'59" Scorpio	215.0329933	12	12	12	JPL Horizons	-4.78	matches	matches
+Asteroid	Pythia	12°53'36" Scorpio	12°53'42" Scorpio	222.8949155	12	12	12	JPL Horizons	-5.70	matches	matches
+Asteroid	Hebe	26°14'06" Scorpio	26°14'08" Scorpio	236.2356485	1	1	1	JPL Horizons	-2.33	matches	matches
+Asteroid	Iris	16°38'57" Sagittarius	16°38'59" Sagittarius	256.6496532	1	1	1	JPL Horizons	-1.75	matches	matches
+Asteroid	Bacchus	26°50'05" Sagittarius	26°50'11" Sagittarius	266.8363393	2	2	2	JPL Horizons	-5.82	matches	matches
+Asteroid	Nemesis	28°49'40" Sagittarius	28°49'41" Sagittarius	268.8281415	2	2	2	JPL Horizons	-1.31	matches	matches
+Asteroid	Dejanira	10°25'53" Capricorn	18°25'54" Capricorn	288.4317226	2	2	2	JPL Horizons	-28801.20	matches	matches
+Asteroid	Psyche	18°42'07" Capricorn	18°42'09" Capricorn	288.7025499	2	2	2	JPL Horizons	-2.18	matches	matches
+Asteroid	Karma	20°22'39" Capricorn	28°22'41" Capricorn	298.3780599	3	2	3	JPL Horizons	-28802.02	matches	inconsistent
+Asteroid	Flora	21°10'50" Aquarius	21°10'51" Aquarius	321.1809027	3	3	3	JPL Horizons	-1.25	matches	matches
+Asteroid	Amor	27°34'43" Aquarius	27°34'44" Aquarius	327.5788816	4	4	4	JPL Horizons	-0.97	matches	matches
+Asteroid	Cupido (Asteroid)	11°52'57" Pisces	11°52'58" Pisces	341.8828431	4	4	4	JPL Horizons	-1.24	matches	matches
+Asteroid	Pallas Athene	18°27'28" Pisces	18°27'28" Pisces	348.4577682	4	4	4	JPL Horizons	0.03	matches	matches
+Asteroid	Fortuna	25°04'38" Pisces	25°04'38" Pisces	355.0771109	5	5	5	JPL Horizons	0.40	matches	matches
+Asteroid	Astraea	28°45'11" Pisces	28°45'10" Pisces	358.7529156	5	5	5	JPL Horizons	0.50	matches	matches
+Asteroid	Sappho	29°17'42" Pisces	29°17'42" Pisces	359.2949971	5	5	5	JPL Horizons	0.01	matches	matches
+Centaur	Cyllarus	18°52'27" Aries	18°50'53" Aries	18.8479651	5	5	5	JPL Horizons	94.33	matches	matches
+Centaur	Chariklo	15°47'57" Cancer	15°47'01" Cancer	105.7836248	8	8	8	JPL Horizons	55.95	matches	matches
+Centaur	Amycus	15°36'42" Leo	15°36'45" Leo	135.6123881	9	9	9	JPL Horizons	-2.60	matches	matches
+Centaur	Echeclus	19°47'05" Leo	19°46'36" Leo	139.7767932	9	9	9	JPL Horizons	28.54	matches	matches
+Centaur	Crantor	0°32'34" Virgo	0°33'13" Virgo	150.5537016	10	10	10	JPL Horizons	-39.33	matches	matches
+Centaur	Pholus	1°51'27" Virgo	1°50'36" Virgo	151.8433146	10	10	10	JPL Horizons	51.07	matches	matches
+Centaur	Chiron	6°45'25" Virgo	6°44'34" Virgo	156.7426874	10	10	10	JPL Horizons	51.33	matches	matches
+Centaur	Hylonome	29°54'56" Virgo	29°53'40" Virgo	179.8945730	11	11	11	JPL Horizons	75.54	matches	matches
+Centaur	Asbolus	4°12'21" Libra	4°11'52" Libra	184.1978412	11	11	11	JPL Horizons	28.77	matches	matches
+Centaur	Thereus	14°13'21" Scorpio	14°13'21" Scorpio	224.2225700	12	12	12	JPL Horizons	-0.25	matches	matches
+Centaur	Nessus	17°47'46" Scorpio	17°50'36" Scorpio	227.8432744	12	12	12	JPL Horizons	-169.79	matches	matches
+Centaur	Pelion	19°31'35" Capricorn	19°32'40" Capricorn	289.5443271	2	2	2	JPL Horizons	-64.58	matches	matches
+Centaur	Elatus	27°19'51" Capricorn	27°19'51" Capricorn	297.3308706	3	3	3	JPL Horizons	-0.13	matches	matches
+Centaur	Damocles	5°43'17" Aquarius	3°43'17" Aquarius	303.7213963	3	3	3	JPL Horizons	7199.97	matches	matches
+Centaur	Okyrhoe	18°11'53" Aquarius	18°12'37" Aquarius	318.2103817	3	3	3	JPL Horizons	-44.37	matches	matches
+TNO	Albion	1°01'56" Aries	1°02'24" Aries	1.0399874	5	5	5	JPL Horizons	-27.95	matches	matches
+TNO	Eris	17°20'56" Aries	17°21'22" Aries	17.3560439	5	5	5	JPL Horizons	-25.76	matches	matches
+TNO	Sedna	12°09'35" Taurus	12°09'55" Taurus	42.1653998	6	6	6	JPL Horizons	-20.44	matches	matches
+TNO	Varuna	0°12'46" Cancer	0°14'16" Cancer	90.2376849	8	8	8	JPL Horizons	-89.67	matches	matches
+TNO	Orcus	14°29'54" Leo	14°30'18" Leo	134.5050014	9	9	9	JPL Horizons	-24.01	matches	matches
+TNO	Makemake	9°19'29" Virgo	9°19'31" Virgo	159.3251791	10	10	10	JPL Horizons	-1.64	matches	matches
+TNO	Haumea	1°25'11" Libra	1°24'38" Libra	181.4105845	11	11	11	JPL Horizons	32.90	matches	matches
+TNO	Ixion	28°54'24" Scorpio	28°52'50" Scorpio	238.8806461	1	1	1	JPL Horizons	93.67	matches	matches
+TNO	Quaoar	1°55'09" Sagittarius	1°03'29" Sagittarius	241.0580091	1	1	1	JPL Horizons	3100.17	matches	matches
+TNO	Arrokoth	16°06'33" Sagittarius	16°04'57" Sagittarius	256.0825665	1	1	1	JPL Horizons	95.76	matches	matches
+Lunar point	Lilith (Mean)	24°28'28" Aries	24°35'11" Aries	24.5862866	6	6	6	Swiss mean lunar apogee convention	-402.63	matches	matches
+Node	Mercury Node	18°20'20" Taurus	18°15'56" Taurus	48.2654516	6	6	6	Swiss heliocentric osculating ascending node	264.37	matches	matches
+Node	Mars Node	19°35'43" Taurus	19°31'03" Taurus	49.5174904	7	6	6	Swiss heliocentric osculating ascending node	280.03	corrected	inconsistent
+Node	South Node	28°35'09" Taurus	28°35'45" Taurus	58.5959167	7	7	7	Swiss mean lunar node	-36.30	matches	matches
+Node	Uranus Node	14°15'26" Gemini	14°01'28" Gemini	74.0245083	7	7	7	Swiss heliocentric osculating ascending node	837.77	matches	matches
+Node	Venus Node	16°32'41" Cancer	16°37'48" Gemini	76.6299612	8	8	7	Swiss heliocentric osculating ascending node	107693.14	corrected	matches
+Node	Jupiter Node	10°33'11" Cancer	10°25'27" Cancer	100.4241557	8	8	8	Swiss heliocentric osculating ascending node	464.04	matches	matches
+Node	Pluto Node	20°18'15" Cancer	20°15'38" Cancer	110.2606735	8	8	8	Swiss heliocentric osculating ascending node	156.58	matches	matches
+Node	Saturn Node	23°44'28" Cancer	23°36'05" Cancer	113.6013309	9	9	9	Swiss heliocentric osculating ascending node	503.21	matches	matches
+Node	Neptune Node	11°43'27" Leo	11°41'49" Leo	131.6969468	9	9	9	Swiss heliocentric osculating ascending node	97.99	matches	matches
+Lunar point	Selena	24°28'28" Libra	24°35'11" Libra	204.5862866	12	12	12	Swiss mean lunar apogee convention	-402.63	matches	matches
+Node	North Node	28°35'09" Scorpio	28°35'45" Scorpio	238.5959167	1	1	1	Swiss mean lunar node	-36.30	matches	matches
+Lunar point	Lilith (Osculating)	n/a	27°43'42" Aries	27.7283831	n/a		6	Swiss osculating lunar apogee		corrected	matches
+Hypothetical	Admetos	15°32'10" Taurus	15°32'18" Taurus	45.5383913	6	6	6	Swiss hypothetical definition	-8.21	matches	matches
+Hypothetical	Hades	11°35'28" Gemini	11°35'28" Gemini	71.5912073	7	7	7	Swiss hypothetical definition	-0.35	matches	matches
+Hypothetical	Kronos	23°04'57" Gemini	23°04'42" Gemini	83.0784611	8	8	8	Swiss hypothetical definition	14.54	matches	matches
+Hypothetical	Vulkanus	16°38'10" Cancer	16°38'10" Cancer	106.6360894	8	8	8	Swiss hypothetical definition	0.08	matches	matches
+Hypothetical	Zeus	8°14'37" Libra	0°14'37" Libra	180.2437104	11	11	11	Swiss hypothetical definition	28799.64	matches	matches
+Hypothetical	Apollon	17°28'27" Libra	17°28'27" Libra	197.4742761	11	11	11	Swiss hypothetical definition	-0.39	matches	matches
+Hypothetical	Poseidon	1°43'07" Scorpio	1°43'07" Scorpio	211.7185464	12	12	12	Swiss hypothetical definition	0.23	matches	matches
+Hypothetical	Cupido (Uranian TNP)	26°18'23" Scorpio	26°18'24" Scorpio	236.3065409	1	1	1	Swiss hypothetical definition	-0.55	matches	matches
+Comet	Halley's Comet	20°11'37" Leo	20°00'40" Leo	140.0110307	9	9	9	JPL Horizons	657.29	matches	matches
+Comet	Hale-Bopp	15°51'47" Capricorn	15°39'55" Capricorn	285.6652083	2	2	2	JPL Horizons	712.25	matches	matches
+Comet	Hyakutake	10°24'27" Pisces	3°37'06" Scorpio	213.6183769	4	4	12	JPL Horizons	456440.84	corrected	matches
+Derived	Aries Point	0°00'00" Aries	0°00'00" Aries	0.0000000	5	5	5	defined mathematical point	0.00	matches	matches
+Derived	Sun/Moon Midpoint	5°07'56" Aries	5°07'56" Aries	5.1321880	5	5	5	defined mathematical point	0.12	matches	matches
+Derived	Vertex	6°27'55" Cancer	6°27'55" Cancer	96.4652712	8	8	8	defined mathematical point	0.02	matches	matches
+Derived	Part of Fortune	9°03'26" Virgo	9°03'25" Virgo	159.0568586	10	10	10	defined mathematical point	1.31	matches	matches
+Derived	Antivertex	6°27'55" Capricorn	6°27'55" Capricorn	276.4652712	2	2	2	defined mathematical point	0.02	matches	matches
+Derived	Part of Spirit	6°16'06" Aquarius	6°16'07" Aquarius	306.2686218	3	3	3	defined mathematical point	-1.04	matches	matches
