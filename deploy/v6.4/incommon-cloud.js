@@ -1525,6 +1525,55 @@
     return oracleCall({ kind: 'tarot', seed: req.seed, count: req.count, topic: req.topic });
   }
 
+  /* ---------- Oracle Voice ---------- */
+
+  /* ElevenLabs text-to-speech, per-section, so stopping early never bills
+     for what was not heard. The key lives as a secret; the page never sees
+     it. Audio is returned as an ArrayBuffer on success, or a reason on
+     failure, matching the Oracle's own contract.
+
+     The function is asked straight through its address, the way a gift asks
+     billing, rather than through client.functions.invoke: this version of the
+     client reads any content type it does not know as TEXT, and audio/mpeg is
+     one it does not know, so a good answer arrived as a corrupted string and
+     every listen fell back to the device's own voice. The bearer is the
+     reader's session; the function's errors come back as { reason }. */
+  function oracleVoice(req) {
+    if (!client) return Promise.resolve({ ok: false, reason: "off" });
+    if (!session || !session.access_token) return Promise.resolve({ ok: false, reason: "signedOut" });
+    var url = (cfg && cfg.url) || PROJECT_URL, key = (cfg && cfg.anonKey) || PROJECT_ANON_KEY;
+    return Promise.resolve().then(function () {
+      return fetch(url + "/functions/v1/oracle-voice", {
+        method: "POST",
+        headers: {
+          apikey: key,
+          Authorization: "Bearer " + session.access_token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(req || {})
+      });
+    }).then(function (res) {
+      if (res && res.ok && ((res.headers.get("Content-Type") || "").indexOf("audio/") === 0)) {
+        return res.arrayBuffer().then(function (buf) {
+          return buf && buf.byteLength ? { ok: true, audio: buf } : { ok: false, reason: "silent" };
+        });
+      }
+      var st = res ? res.status : 0;
+      return Promise.resolve().then(function () { return res.json(); }).then(function (b) {
+        var code = (b && (b.code || b.reason)) || null;
+        if (st === 402 || code === "PREMIUM_REQUIRED") return { ok: false, reason: "premium" };
+        if (code === "RATE_LIMITED") return { ok: false, reason: "busy" };
+        if (code === "OUT_OF_CREDITS") return { ok: false, reason: "silent" };
+        if (code === "TIMEOUT" || st === 504) return { ok: false, reason: "timeout" };
+        if (st === 404 || code === "NOT_SET_UP") return { ok: false, reason: "notSetUp" };
+        if (st === 401 || code === "SIGNED_OUT" || code === "MFA_REQUIRED") return { ok: false, reason: "signedOut" };
+        if (st === 429 || code === "LIMIT") return { ok: false, reason: "limit" };
+        if (st === 503 || code === "SILENT") return { ok: false, reason: "silent" };
+        return { ok: false, reason: "error", error: String(code || st) };
+      }, function () { return { ok: false, reason: "error", error: "status " + st }; });
+    }).catch(function (e) { return { ok: false, reason: "offline", error: e && e.message }; });
+  }
+
   /* ---------- Codex Luminary ---------- */
 
   /* THE PAID TIER IS ASKED THROUGH THIS MODULE TOO, and for the same reason.
@@ -1814,6 +1863,7 @@
     normPhone: normPhone,
     oracleRead: oracleRead,
     tarotRead: tarotRead,
+    oracleVoice: oracleVoice,
     supportSend: supportSend,
     SUPPORT_TOPICS: SUPPORT_TOPICS.slice(),
     SYNC_MEMORY_TYPES: SYNC_MEMORY_TYPES.slice(),
