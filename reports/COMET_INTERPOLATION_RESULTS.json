@@ -1,0 +1,12 @@
+{
+  "halley": {
+    "comparisons": 39387,
+    "worstArcsec": 0.8492399999227018,
+    "worstT": 23102.0
+  },
+  "halebopp": {
+    "comparisons": 22283,
+    "worstArcsec": 0.4860224999674756,
+    "worstT": 2788.0
+  }
+}

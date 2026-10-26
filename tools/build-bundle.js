@@ -133,7 +133,7 @@ const MODULES = [
   'minor-bodies-ephemeris.js',
   /* The expanded chart's fetched elements. Reads nothing above it. */
   'minor-body-elements.js',
-  'comet-hyakutake-jpl.js',
+  'comet-hyakutake-jpl.js', 'comet-integrated-jpl.js',
   'placement-content.js',
   'numerology-content.js',
   /* The Book of Numbers: the compounds 10 to 99. Generated, reads nothing. */
@@ -165,6 +165,9 @@ const MODULES = [
      reads the channel table out of hd-atlas.js above, so it has to follow it.
      analytics.js touches storage and nothing else. */
   'birth-time.js',
+  /* The lunar points and the derived points, read by lonRaw() and the expanded
+     chart. Both read nothing above them. */
+  'lunar-mean-points.js', 'jpl-derived-points.js',
   /* Solves the design moment, so it has to be present before the first chart
      is drawn. Knows nothing about ephemerides: the app hands it a longitude
      function. */

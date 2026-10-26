@@ -39,5 +39,5 @@ if (jsonIndex !== -1) {
 }
 const failed = results.filter(x => !x.pass).length;
 const gates = results.filter(x => !x.informational);
-console.log(`${gates.filter(x => x.pass).length}/${gates.length} regression gates pass; boundary audit retained separately. ${failed ? 'Regression checks failed.' : 'Mergeable regression subset passes. Full client precision acceptance remains blocked by Lilith, nodes and static comets; see draft PR #86.'}`);
+console.log(`${gates.filter(x => x.pass).length}/${gates.length} regression gates pass; boundary audit retained separately. ${failed ? 'Regression checks failed.' : 'Regression subset passes. Run tools/check-client-accuracy.js for the complete point and comet acceptance suite.'}`);
 if (failed) process.exitCode = 1;

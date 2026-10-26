@@ -44,14 +44,14 @@ const CEILING_DEG = 0.2;
  * The app still falls back to window.MinorBodies for all five when this
  * module is missing, which the accounting deliberately cannot see: what it
  * checks is who supplies a body when everything is present. */
-const APP_COMPUTED = ['lilithMean', 'selena',
+const APP_COMPUTED = ['lilithMean', 'lilithOsc', 'selena',
   'mercuryNode', 'venusNode', 'marsNode', 'jupiterNode', 'saturnNode', 'uranusNode', 'neptuneNode', 'plutoNode',
   'ariesPoint', 'halley', 'halebopp', 'hyakutake', 'vertex', 'antivertex',
   'partOfFortune', 'partOfSpirit', 'sunmoonMidpoint'];
 /* Declared absent, each with the reason the page gives. */
-const UNAVAILABLE = {
-  lilithOsc: 'the osculating apogee moves up to thirty degrees either side of the mean within a month, and needs a lunar theory this build does not carry'
-};
+const UNAVAILABLE = {};
+/* Mean and osculating lunar points are checked through the live dispatcher
+ * in check-client-lilith.js and check-client-derived-points.js. */
 
 const ME = require(path.join(repo, 'app', 'minor-body-elements.js'));
 const { BODIES, HYPOTHETICALS } = require('./fetch-minor-body-elements.js');

@@ -5968,9 +5968,11 @@ things, each measured:
   `skyFrame()`. The client accuracy audit also selects the eastern horizon
   crossing explicitly at polar latitudes and computes sect from geometric
   solar altitude. Run `node tools/check-calculator-regressions.js` after calculator
-  changes. This checks the six passing regression groups. The complete client
-  precision suite remains in draft PR #86 with unresolved live Lilith, node
-  and static-comet approximations; do not describe those as verified. See `reports/CLIENT_CALCULATOR_ACCURACY.md`.
+  changes. The complete suite is `node tools/check-client-accuracy.js`.
+  Lunar points, geometric nodes and integrated comets now pass their independent
+  checks within the supported 1900 to 2100 span. The node convention explicitly
+  uses TRUEPOS and a full-JPL Swiss reference; previous compressed/apparent
+  comparisons remain diagnostics. See `reports/PRECISION_POINT_MATH.md`. See `reports/CLIENT_CALCULATOR_ACCURACY.md`.
 - **Noon for a birth with no time is local noon.** `availability()` has always
   said "12:00 noon local"; `instant()` drew noon at Greenwich. The Codex drew
   local noon, which is the middle of the day the reader was born in, so no body
