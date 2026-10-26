@@ -5906,12 +5906,19 @@ things, each measured:
 - **The sidereal time and the obliquity.** The Codex took the apparent sidereal
   time from astronomy-engine and an obliquity that moves with the date;
   inCommon took the mean sidereal time and the J2000 obliquity, held fixed.
-  `skyFrame()` asks the library for the apparent sidereal time and the true
+  `chartSkyFrame()` asks the library for the apparent sidereal time and the true
   obliquity (the pair that belongs together) for the Ascendant, the Midheaven,
   the Vertex and the East Point, with the old arithmetic as the fallback.
   Over 20,000 random births the Ascendant moves 0.22 arcminutes on average and
   2.5 at worst, at 60 degrees of latitude; no sign changes, and the whole
   degree changes for 50 of them.
+  The astronomy helper was renamed to avoid overriding the canvas animation's
+  `skyFrame()`. The client accuracy audit also selects the eastern horizon
+  crossing explicitly at polar latitudes and computes sect from geometric
+  solar altitude. Run `node tools/check-calculator-regressions.js` after calculator
+  changes. This checks the six passing regression groups. The complete client
+  precision suite remains in draft PR #86 with unresolved live Lilith, node
+  and static-comet approximations; do not describe those as verified. See `reports/CLIENT_CALCULATOR_ACCURACY.md`.
 - **Noon for a birth with no time is local noon.** `availability()` has always
   said "12:00 noon local"; `instant()` drew noon at Greenwich. The Codex drew
   local noon, which is the middle of the day the reader was born in, so no body
