@@ -85,22 +85,24 @@ export const HALE_BOPP: CometElements = {
  * - Perihelion: 1996-05-01
  * - Long-period comet; discovered 1996, passed within 0.15 AU of Earth
  *
- * Elements from JPL at perihelion (1996-05-01, JD 2450214.5)
- * Valid primarily 1996; significant perturbation effects 1800s-2000s.
+ * JPL Horizons C/1996 B2 solution #73, osculating elements at its
+ * 1996-03-15 epoch. q = 0.230223531 AU, e = 0.999891647.
+ * This static Kepler solver remains approximate. The live JavaScript chart
+ * uses the separately validated, dated Horizons longitude table instead.
  */
 export const HYAKUTAKE: CometElements = {
   name: 'Hyakutake',
-  perihelionJD: 2450214.5,   // 1996-05-01 12:00 TT
+  perihelionJD: 2450204.8941449965,
   perihelionLon: 131.0,      // Leo region
   perihelionLat: +61.4,      // Far north of ecliptic
-  semiMajorAxis: 175.0,      // AU (approximate; highly eccentric)
-  eccentricity: 0.999633,    // Extremely eccentric
-  inclination: 124.4,        // Retrograde
-  longAscNode: 188.6,        // degrees
-  argPerihelion: 20.5,       // degrees
+  semiMajorAxis: 2124.755444396066,
+  eccentricity: 0.9998916470450124,
+  inclination: 124.9220493922234,
+  longAscNode: 188.045131992156,
+  argPerihelion: 130.1751209780967,
   magnitude: 0.5,            // Moderately bright
-  epoch: 2450214.5,
-  source: 'JPL Horizons, perihelion 1996-05-01'
+  epoch: 2450157.5,
+  source: 'JPL Horizons C/1996 B2 solution #73, osculating epoch 1996-03-15'
 };
 
 /**
