@@ -1,0 +1,30 @@
+name: Calculator accuracy
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * *'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'tools/**'
+      - '.github/workflows/calculator-accuracy.yml'
+permissions:
+  contents: read
+jobs:
+  sampled-reference-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Compare calculator with stored astronomical references
+        run: node tools/check-client-accuracy.js --json reports/client-accuracy-results.json
+      - name: Preserve all check outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-accuracy-results
+          path: reports/client-accuracy-results.json
+          if-no-files-found: error
