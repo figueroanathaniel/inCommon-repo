@@ -84,7 +84,10 @@ const PHASES = [
   { tag: 'M', file: 'Verification M - acceptance matrix.dc.html', expect: 90 },
   { tag: 'E', file: 'Verification E - breakpoint crossing.dc.html', expect: 5 },
   { tag: 'F', file: 'Verification F - functional sweep.dc.html', expect: 16 },
-  { tag: 'G', file: 'Verification G - ada phase.dc.html', expect: 33 },
+  /* 35, not 33: the bundle on main already reported 35 of 35 on 26 October
+     2026, the same 35 row ids as the ring cover branch, so the count here had
+     fallen behind the phase rather than the phase gaining rows. */
+  { tag: 'G', file: 'Verification G - ada phase.dc.html', expect: 35 },
   { tag: 'T', file: 'Verification T - theme phase.dc.html', expect: 64 },
   { tag: 'R', file: 'Verification R - removal phase.dc.html', expect: 14 },
   { tag: 'N', file: 'Verification N - new surfaces.dc.html', expect: 58 }

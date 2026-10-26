@@ -442,7 +442,8 @@
       if (this.post && this.quad) [this.mBright, this.mBlur, this.mComp].forEach(function (m) { self.quad.material = m; jobs.push(r.compileAsync(self.postScene, self.postCam)); });
     } catch (e) { hid.forEach(function (x) { x.visible = false; }); done(); return; }
     hid.forEach(function (x) { x.visible = false; });
-    Promise.all(jobs).then(done, done);
+    this._warmJobs = Promise.all(jobs);
+    this._warmJobs.then(done, done);
   };
   /* Built now, wherever it is: the app builds the stage in its offscreen lot
      before the reader asks for 3D, which buildNear() would wait on forever. */
@@ -627,13 +628,21 @@
   /* ---- The landscape, rebuilt when the model or the palette changes ------- */
   P.x = function (t) { return (t - this.model.now) / YEAR * U; };
   P.t = function (x) { return this.model.now + x / U * YEAR; };
+  /* Materials wait for a warm-up still in flight: compileAsync() polls each
+     one's program until it reports ready, and a material disposed under that
+     poll makes three.js throw an uncaught TypeError ("reading 'isReady'").
+     A rebuild of the content while the stage is still warming is one way in,
+     a shell swap destroying the stage is the other (see destroy). Geometry
+     is not polled, so it goes at once. */
   P.dispose = function (obj) {
-    var labels = this.labels;
+    var labels = this.labels, mats = [];
     obj.traverse(function (o) {
       if (o.geometry && !o.userData.sharedGeo) o.geometry.dispose();
-      if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+      if (o.material) mats.push(o.material);
       if (o.isSprite) { var i = labels.indexOf(o); if (i !== -1) labels.splice(i, 1); }
     });
+    var free = function () { mats.forEach(function (m) { if (m.map) m.map.dispose(); m.dispose(); }); };
+    if (this._warming && this._warmJobs) this._warmJobs.then(free, free); else free();
   };
   function pack(items, max) {
     var ends = [], rows = {};
@@ -1953,9 +1962,23 @@
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
-    if (this.content) this.dispose(this.content);
-    if (this.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { this.post[k].dispose(); }, this); }
-    if (this.r) { this.r.dispose(); }
+    /* THE GPU IS LET GO ONLY ONCE THE WARM-UP HAS SETTLED (26 October 2026).
+       compileAsync() polls each material's program on a timer until it
+       reports ready. Disposing the materials while that poll is still running
+       leaves it reading a program that is gone, and it throws an uncaught
+       TypeError ("reading 'isReady'") from inside three.js. A shell swap on a
+       resize destroys a stage that is still warming, which is how E5 of the
+       harness kept catching it. So everything that is not the GPU goes now,
+       and the materials, the render targets and the renderer go when the
+       compile jobs settle. A context lost mid-compile never settles, and then
+       a dead context is left for the collector rather than thrown over. */
+    var self = this;
+    var release = function () {
+      if (self.content) self.dispose(self.content);
+      if (self.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { self.post[k].dispose(); }, self); }
+      if (self.r) { self.r.dispose(); }
+    };
+    if (this._warmJobs) this._warmJobs.then(release, release); else release();
     try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
     this.failed = true;
   };

@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.1';
+  var VERSION = '2.9.2';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1041,9 +1041,21 @@
     var options = { emailRedirectTo: redirectTo };
     if (cap(opts)) options.captchaToken = cap(opts);
     if (opts && typeof opts.newsletter === 'boolean') {
-      options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
+      options.data = { newsletter: opts.newsletter, newsletter_source: opts.source === 'app-register' ? 'app-register' : 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
     if (fromOf(opts)) { options.data = options.data || {}; options.data.signup_from = fromOf(opts); }
+    /* The registration card in the app (26 October 2026) asks for a phone
+       number as well, marked optional. It is not a login: it rides with the
+       account as metadata, in E.164 and only when it reads as a number, and
+       signing in by phone still needs the number confirmed by text from the
+       profile card. A number that does not read as one is refused before
+       anything is sent. */
+    if (opts && opts.phone != null && String(opts.phone).trim()) {
+      var contact = normPhone(opts.phone);
+      if (!contact) return Promise.resolve({ ok: false, reason: 'badPhone' });
+      options.data = options.data || {};
+      options.data.contact_phone = contact;
+    }
     return authCall(function () {
       return c.auth.signUp({ email: addr, password: String(password), options: options });
     }).then(function (res) {
