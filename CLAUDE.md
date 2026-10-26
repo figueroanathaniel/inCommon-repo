@@ -406,9 +406,9 @@ tiles by time, under three headed bands that read the same on all three charts:
 
 | Band | What it holds |
 |---|---|
-| Bedrock | what the birth fixed. Astrology: Stellium, the placements, Houses, Aspects. Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
-| Weather | what the sky is doing to it now. Astrology: Important Today, Current Retrogrades, the two transit lists. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
-| Horizon | what is coming. Astrology: Eclipses and Windows Opening. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
+| Bedrock | what the birth fixed. Astrology: the placements, Houses, Aspects (the placements are the Ledger's rows, see below). Human Design: the type card, the centres, channels and gates (the wiring above it is bedrock too). Numbers: Life Path, Birthday, the challenge and both sub-challenges, the name numbers. |
+| Weather | what the sky is doing to it now. Astrology: the two transit lists, and the Ledger's Weather column. Human Design: the gates the sky holds this minute. Numbers: Personal Year, Month and Day, this pinnacle, this cycle. |
+| Horizon | what is coming. Astrology: Windows Opening, and the Ledger's Horizon column. Numbers: the life ribbon and the next pinnacle and cycle. Human Design has no Horizon: nothing in it is dated ahead, and a band with nothing true to hold is not drawn. |
 
 **The bands are headings and nothing more.** A glyph (strata, a body on its
 orbit, a sun on the horizon line), the name in the display face and a rule. No
@@ -416,13 +416,10 @@ line under them says what a band means, by "Discovery belongs to the reader":
 the contents say it. The glyphs live in `BAND_SVG` on the logic class rather
 than `UI_ICONS`, because nothing asks `uiIcon()` for them.
 
-**A card can change band on its own.** An eclipse inside its five-day window is
-Weather and further off it is Horizon (`when` on each `chartFeatures` row), so
-the page reorganises itself as the sky moves and nobody moves the card. The
-desktop puts Bedrock left of the wheel, Weather right of it and Horizon under it,
-so what is fixed, what is now and what is coming sit round the chart they are
-about; the phone stacks all three. Aspects moved out from under the wheel into
-Bedrock for this.
+**On the astrology page the bands became the Ledger's columns**, and the cards
+(Important Today, the retrogrades, the eclipses, the stellium) left them: see
+"The astrology page is a Ledger beside the chart". The `when` each
+`chartFeatures` row still carries is no longer read there.
 
 **Closeness: no list may become the only thing on the screen** (the owner, 21
 October 2026: "Fill out the page ... no list scrolls so far down that it's the
@@ -432,10 +429,10 @@ reader"). Every open list in a chart group (`data-ch-list`) stops at
 both `min(36vh, 340px)` on the phone, where a card's own header already takes a
 fifth of the screen, and each scrolls inside itself with its scroll contained. From 1180px up each
 desktop column (`data-ch-col`) is held to `100dvh - 210px`, the screen less the
-header and the sample banner, so a short page scroll puts all three columns on
-the screen at once and each scrolls on its own. The wheel's column is the one
-that never scrolls: the wheel keeps its place and only the Horizon under it
-(`data-ch-mid`) scrolls, so nothing opened there can carry the wheel away.
+header and the sample banner, so a short page scroll puts both columns on the
+screen at once and the Ledger's column scrolls on its own. The wheel's column
+never scrolls, and every column's children are `flex-shrink: 0`, because a held
+flex column otherwise squeezes a card with `overflow: hidden` to nothing.
 **Not sticky:** the first pass made the columns `position: sticky`, and a column
 as tall as its row has nowhere to stick to, so they slid under the banner.
 Below 1180px the columns wrap and nothing is held, because a held column in a
@@ -5185,16 +5182,71 @@ selects its aspect, the morph runs both ways, Today's sky lays ten ghosts, a
 theme change re-reads the palette, and with WebGL off or three.js blocked the 2D
 wheel comes back with no switch.
 
+## The astrology page is a Ledger beside the chart
+Asked for by the owner on 21 October 2026: "Make the chart larger in astrology
+and have it aligned right. Take the stellium tab and glamorize it less.
+Categorize it with something else that makes sense in reference to the nature of
+what it is. Make all of the tabs that are now next to each other a dashboard, or
+a table ... I need the chart to make sharper sense on the page." Of three
+layouts put to them the owner chose the Ledger.
+
+**One table, a row per placement, and the columns are time.** The astral
+bodies, the nodes and the angles (`CORE` in `chartGroupVals()`) are the rows;
+Bedrock is where the point sits (degree and minute, the sign's glyph, the
+house) and its three closest natal aspects as symbol and partner glyph; Weather
+is the heaviest contact the sky is making to it this minute, from the same
+`impactContacts()` the flash cards read, with its phase (building, exact,
+easing); Horizon is the soonest window `transitWindows()` opens on it after
+today. An empty cell is a quiet dot, never a sentence. The row is a button that
+opens the placement, and its accessible name reads all four cells. The shorthand
+lives in `ASP_SYM` and `SIGN_GLYPHS`, with U+FE0E so no symbol is drawn as an
+emoji.
+
+**The row lights its body on the chart beside it.** Hover or keyboard focus
+calls `ledgerHot(key)`, which writes `data-hot` on the 2D wheel's body group
+and its two labels (`data-wb`, the point key; every other label carries `-`)
+and `data-ledger-hot` on the wheel, which dims every other body; in 3D and
+Orbital it calls the scene's own `setHoverKey()`. DOM, never state, for the
+reason live regions are written directly. The dim needs `!important` because a
+label's inline `all:unset` sets its opacity.
+
+**The stellium is a gathering, not a card.** It is a tag on the rows that share
+a sign or a house ("♑ H1 gathering"), and one quiet line under the table naming
+each gathering, which opens the same reading the card held. With no gathering
+there is no line: absence is not news. The other cards (Important Today, the
+retrogrades, the eclipses) are a strip of three tiles over the table, opened one
+at a time, and the open one reads under the strip.
+
+**Flash cards are the Ledger's other face** (`ledgerMode`), not a second list:
+the table switches to the deck of the same points, most active first, drawn by
+the group markup at the head of Bedrock. Houses, Aspects, the transit lists,
+Windows Opening and the Expanded Chart's minor points stay dropdowns in the
+bands under the Ledger.
+
+**The chart is the larger column, and on the right.** The desktop row is
+`row-reverse` with the wheel first in the markup, so the wheel sits right while
+both fit and comes first when they wrap (below about 1200px). From 1200px the
+wheel is held to `100dvh - 260px` wide, so the whole wheel is on the screen, and
+the Ledger takes what is left (`flex: 3` to `flex: 1`). The Ledger's list stops
+at `min(62vh, 620px)` and scrolls inside itself.
+
+Measured with the harness's own `contrastFails()` and `tapTargets()` over the
+strip, the open panel, the Ledger and the bands, in the table and on the cards:
+four identities, hardened and not, at 1440 and 375, 32 cases, clean. Driven in
+both shells: a row lights its body on the 2D wheel and in 3D, focus and Tab move
+the light, Enter opens the placement, the strip opens its card, and the switch
+swaps the table for the deck.
+
 ## The chart's lists are dropdowns, and its points and houses are flash cards
 Asked for by the owner on 20 October 2026: "Compact the lists of planets comets
 asteroids centaurs houses etc into dropdown menus. Create flash cards for them
 as well, centered around the impact they are having on the reader. This will be
 mutable, consistently updating as time goes on and the effects evolve over time
 for the reader." Every list under the Birth Chart, in both shells, is one
-dropdown (`chartGroupVals()`, sorted into the bands `chBands` on the phone and
-`chBandL` and `chBandR` either side of the desktop's wheel; see "Bedrock,
-Weather, Horizon"): the points one per category (Astral Bodies,
-Nodes & Lunar Points, Angles, and in the Expanded Chart the asteroids, centaurs,
+dropdown (`chartGroupVals()`, sorted into the bands `chBands`, under the
+Ledger in both shells; see "Bedrock, Weather, Horizon"): the points one per
+category (the Astral Bodies, Nodes & Lunar Points and Angles are the Ledger's
+rows now, and its Flash cards face is their deck; the Expanded Chart's asteroids, centaurs,
 TNOs, comets, hypotheticals and derived points), then the houses, the aspects
 and the two transit lists. They open closed (`chgOpen`), and a header carries
 the count, a peek of the glyphs and how many of its points are lit now.
