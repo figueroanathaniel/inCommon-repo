@@ -1025,14 +1025,35 @@
           rewritten: win.location.hash });
 
       /* ---- R6: the account is gone from Settings too ---- */
+      /* With one exception, asked for on 26 October 2026: the "Account & sign
+         in" group, which holds the two settings that keep an account's
+         details (remember the sign in on this device, save the profile to the
+         account) and that the registration card switches on. It is
+         preferences, not account controls: signing in still lives on the
+         cover and signing out in the profile menu. So the row reads Settings
+         with that group taken out and holds it to the old rule, and holds the
+         group to exactly its two switches, so it cannot grow into the account
+         surface the rule removed. */
       onStep('removal: Settings');
       await go('#/settings', 700);
-      var setTxt = txt(doc.querySelector('[data-screen-label="Settings"]')) ||
+      var setRoot = doc.querySelector('[data-screen-label="Settings"]');
+      var setTxt = txt(setRoot) ||
         [].slice.call(doc.querySelectorAll('[data-screen-label]')).map(txt).join(' ');
-      t('R6', 'Settings carries no account, sign-out or mailing controls',
-        { account: false, signOut: false, skyLetter: false, chatgptLink: false },
-        { account: /\bAccount\b/.test(setTxt), signOut: /sign out/i.test(setTxt),
-          skyLetter: /sky letter/i.test(setTxt), chatgptLink: /chatgpt/i.test(setTxt) });
+      var acctGroup = setRoot ? setRoot.querySelector('[role="group"][aria-label="Account and sign in"]') : null;
+      var restTxt = setTxt;
+      if (setRoot && acctGroup) {
+        var setClone = setRoot.cloneNode(true);
+        var cloneGroup = setClone.querySelector('[role="group"][aria-label="Account and sign in"]');
+        if (cloneGroup) cloneGroup.parentNode.removeChild(cloneGroup);
+        restTxt = txt(setClone);
+      }
+      var acctSwitches = acctGroup ? [].slice.call(acctGroup.querySelectorAll('[role="switch"]')).map(function (b) { return b.getAttribute('aria-label'); }) : [];
+      t('R6', 'Settings carries no account, sign-out or mailing controls, beyond the two switches that keep an account\u2019s details',
+        { account: false, signOut: false, skyLetter: false, chatgptLink: false,
+          groupSwitches: ['Remember my sign in on this device', 'Save my profile to my account'], groupFields: 0 },
+        { account: /\bAccount\b/.test(restTxt), signOut: /sign out/i.test(setTxt),
+          skyLetter: /sky letter/i.test(setTxt), chatgptLink: /chatgpt/i.test(setTxt),
+          groupSwitches: acctSwitches, groupFields: acctGroup ? acctGroup.querySelectorAll('input, textarea, select, a[href]').length : 0 });
       /* The safety controls are NOT what was removed, and a sweep that only
          asserts absence would happily pass a build that took them out too. */
       t('R6b', 'The crisis controls survived the removal',
