@@ -5952,6 +5952,19 @@ from what is present, and comets are off the wheel until the Comets box is
 ticked.
 
 ## The 3D stages compile in parallel, build when near, and wait for their own faces
+**Scene teardown is a complete graphics release.** The three scene modules
+(`chart-scene.js`, `hd-scene.js`, `cycle-scene.js`) dispose every geometry,
+material and label texture in their permanent and replaceable scene graphs,
+including all three postprocessing materials and orphaned shared geometry.
+Shared objects are released only once. ChartScene asks BodyGlobes to release
+the sphere, atmosphere and tail geometries and the corona/glow textures after
+its last globe is removed. Pending frames, window blur handlers and keyboard
+handlers are canceled or detached. WebGL context loss takes the same teardown
+path before notifying the app to show its existing 2D fallback. Repeated
+destroy calls are inert. `node tools/check-three-lifecycle.js` exercises these
+paths with tracked disposable objects and no GPU; it is a lifecycle check,
+not evidence of browser rendering or frame rate.
+
 Reported by the owner on 20 October 2026: "opening the app shows a bunch of
 black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
 which is near black under Deep Field, held up for seconds. A CPU profile of the

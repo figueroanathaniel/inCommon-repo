@@ -346,7 +346,8 @@
     s.addEventListener('wheel', this._on.wheel, { passive: false });
     s.addEventListener('keydown', this._on.key);
     s.addEventListener('keyup', function (e) { if (self.flyOk()) self.flyKeyUp(e); });
-    window.addEventListener('blur', function () { if (self.fly) self.fly.blur(); });
+    this._onBlur = function () { if (self.fly) self.fly.blur(); };
+    window.addEventListener('blur', this._onBlur);
     s.addEventListener('focus', this._on.focus);
     s.addEventListener('blur', this._on.blur);
     document.addEventListener('visibilitychange', this._on.vis);
@@ -401,8 +402,10 @@
   P.fail = function (why) {
     if (this.failed) return;
     this.failed = true;
-    this.stop();
-    try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
+    try { this.destroy(); } catch (e) {
+      this.stop();
+      if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root);
+    }
     if (this.o.onFail) this.o.onFail(why || 'failed');
   };
   /* A stage is built when it is about to be seen, not when it is mounted: the
@@ -1957,28 +1960,39 @@
   };
 
   P.destroy = function () {
+    if (this.destroyed) return;
+    this.destroyed = true;
     if (this.nio) { this.nio.disconnect(); this.nio = null; }
     this.stop();
+    if (this._kick) { cancelAnimationFrame(this._kick); this._kick = 0; }
+    if (this._onBlur) window.removeEventListener('blur', this._onBlur);
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
-    /* THE GPU IS LET GO ONLY ONCE THE WARM-UP HAS SETTLED (26 October 2026).
-       compileAsync() polls each material's program on a timer until it
-       reports ready. Disposing the materials while that poll is still running
-       leaves it reading a program that is gone, and it throws an uncaught
-       TypeError ("reading 'isReady'") from inside three.js. A shell swap on a
-       resize destroys a stage that is still warming, which is how E5 of the
-       harness kept catching it. So everything that is not the GPU goes now,
-       and the materials, the render targets and the renderer go when the
-       compile jobs settle. A context lost mid-compile never settles, and then
-       a dead context is left for the collector rather than thrown over. */
+    /* compileAsync polls shader programs until warm-up settles. Keep every
+       GPU object alive for that poll, while listeners and frames stop now.
+       A lost context with an unresolved poll is left to the collector. */
     var self = this;
-    var release = function () {
-      if (self.content) self.dispose(self.content);
-      if (self.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { self.post[k].dispose(); }, self); }
-      if (self.r) { self.r.dispose(); }
+    var freeGpu = function () {
+      var freed = new Set();
+      var release = function (asset) {
+        if (!asset || freed.has(asset)) return;
+        freed.add(asset);
+        if (asset.map) release(asset.map);
+        if (typeof asset.dispose === 'function') asset.dispose();
+      };
+      [self.scene, self.postScene].forEach(function (graph) {
+        if (!graph) return;
+        graph.traverse(function (node) {
+          release(node.geometry);
+          (Array.isArray(node.material) ? node.material : [node.material]).forEach(release);
+        });
+      });
+      [self.pillarGeo, self.mBright, self.mBlur, self.mComp].forEach(release);
+      if (self.post) ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { release(self.post[k]); });
+      release(self.r);
     };
-    if (this._warmJobs) this._warmJobs.then(release, release); else release();
+    if (this._warmJobs) this._warmJobs.then(freeGpu, freeGpu); else freeGpu();
     try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
     this.failed = true;
   };
