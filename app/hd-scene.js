@@ -1409,9 +1409,43 @@
   /* ---- The loop --------------------------------------------------------------- */
   P.updateRun = function () {
     var want = this.ready && !this.failed && !!this.host && this.el.root.isConnected && this.visible && !document.hidden;
+    if (this.ready && !this.failed) this.postSleep(want);
     if (want && this.reduced && !this.isFlying()) { this.stop(); this.kick(); return; }
-    if (want && !this.running) { this.running = true; this.last = 0; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
+    /* a stage coming back is timed from its first new frame: the gap it was
+       away for is not a frame, and counted as one it dropped a rung on every
+       return to a stage, until even a fast machine drew at the bottom. Its
+       first frames carry the page settling and the GPU uploading, so they are
+       drawn but not judged either */
+    if (want && !this.running) { this.running = true; this.last = 0; this.lastDraw = 0; this.skipFrames = 3; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
+  };
+  /* An unseen stage gives back its bloom targets. The phone keeps every stage
+     built at once, parked in the lot or mounted off screen, and the post chain
+     is the largest thing a scene holds besides its canvas: a multisampled half
+     float target at the stage's full pixel size and four smaller ones. They
+     are released a few seconds after the stage stops being seen, so a quick
+     scroll past does not churn them, and made again before the next frame
+     draws, so the bloom is there the moment the stage is. */
+  P.postSleep = function (want) {
+    var self = this;
+    this._postWant = want;
+    if (want) {
+      if (this._postT) { clearTimeout(this._postT); this._postT = 0; }
+      if (this._postOff) { this._postOff = false; this.setupPost(); }
+      return;
+    }
+    if (this._postOff || this._postT || !this.post) return;
+    /* never before the warm-up has run: it compiles the bloom programs only
+       while the targets exist, and a stage released first would link them on
+       the main thread the first time it is seen */
+    var rest = function () {
+      self._postT = 0;
+      if (self.destroyed || self._postWant) return;
+      if (!self.warm) { self._postT = setTimeout(rest, 4000); return; }
+      self._postOff = true;
+      self.setupPost();
+    };
+    this._postT = setTimeout(rest, 4000);
   };
   P.stop = function () { this.running = false; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; };
   P.kick = function () {
@@ -1435,7 +1469,7 @@
     /* the flow and the breathing never stop, so the rest rate is only a rate */
     if (!busy && ts - this.lastDraw < 31) return;
     this.last = ts;
-    if (this.lastDraw) this.measure(ts - this.lastDraw, busy);
+    if (this.lastDraw) { if (this.skipFrames > 0) this.skipFrames--; else this.measure(ts - this.lastDraw, busy); }
     this.lastDraw = ts;
     this.frame(dt, false);
     this.render();
@@ -1637,7 +1671,7 @@
   P.setupPost = function () {
     if (this.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { this.post[k].dispose(); }, this); }
     this.post = null;
-    if (!this.bloom) return;
+    if (!this.bloom || this._postOff) return;
     var w = Math.round(this.W * this.pr), h = Math.round(this.H * this.pr), type = this.half ? T.HalfFloatType : T.UnsignedByteType;
     var rt = function (ww, hh, s, d) { return new T.WebGLRenderTarget(Math.max(2, ww), Math.max(2, hh), { type: type, samples: s || 0, depthBuffer: !!(s || d) }); };
     this.post = { scene: rt(w, h, GFX.nomsaa ? 0 : 4, true), a: rt(w / 4, h / 4), b: rt(w / 4, h / 4), c: rt(w / 8, h / 8), d: rt(w / 8, h / 8) };
@@ -1691,6 +1725,7 @@
     if (this.nio) { this.nio.disconnect(); this.nio = null; }
     this.stop();
     if (this._kick) { cancelAnimationFrame(this._kick); this._kick = 0; }
+    if (this._postT) { clearTimeout(this._postT); this._postT = 0; }
     if (this.host && this._onKey) this.host.removeEventListener('keydown', this._onKey);
     if (this.host && this._onKeyUp) this.host.removeEventListener('keyup', this._onKeyUp);
     if (this._onBlur) window.removeEventListener('blur', this._onBlur);
