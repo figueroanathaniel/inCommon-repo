@@ -77,6 +77,7 @@ const MODULES = [
   'minor-bodies-ephemeris.js',
   /* The expanded chart's fetched elements. Reads nothing above it. */
   'minor-body-elements.js',
+  'comet-hyakutake-jpl.js',
   'placement-content.js',
   'numerology-content.js',
   'number-matrix.js',
