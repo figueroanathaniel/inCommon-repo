@@ -40,6 +40,7 @@ function load(name) {
 }
 function graph(nodes) { return { traverse(fn) { nodes.forEach(fn); } }; }
 
+async function main() {
 for (const [file, exported, extra] of [
   ['chart-scene', 'ChartScene', ['wallGeo', 'pillarGeo', 'orbGeo', 'ribGeo']],
   ['hd-scene', 'HDScene', ['orbGeo', 'ribGeo']],
@@ -97,6 +98,32 @@ for (const [file, exported, extra] of [
   const failedRenderer = failed.r = asset('failed renderer');
   failed.fail('lost'); failed.fail('lost');
   check(reason === 'lost' && failedRenderer.calls === 1, file + ' WebGL loss frees resources and notifies once');
+
+  for (const outcome of ['resolve', 'reject']) {
+    const pending = win[exported].create({});
+    const material = asset('pending shader material');
+    const geometry = asset('pending geometry');
+    const pendingRenderer = asset('pending renderer');
+    pending.scene = graph([{ geometry, material }]);
+    pending.r = pendingRenderer;
+    let settle;
+    pending._warmJobs = new Promise((yes, no) => { settle = outcome === 'resolve' ? yes : no; });
+    const pendingHost = pending.host = element();
+    pending._onKeyUp = () => {};
+    pendingHost.addEventListener('keyup', pending._onKeyUp);
+    const beforeBlur = win.count('blur');
+    pending.destroy();
+    pending.destroy();
+    check(material.calls === 0 && geometry.calls === 0 && pendingRenderer.calls === 0,
+      file + ' retains GPU assets while shader compile is pending (' + outcome + ')');
+    check(file === 'cycle-scene' ? win.count('blur') === beforeBlur - 1 : pendingHost.count('keyup') === 0,
+      file + ' detaches listeners before shader compile settles (' + outcome + ')');
+    settle(outcome === 'resolve' ? undefined : new Error('shader compile failed'));
+    await pending._warmJobs.catch(() => {});
+    await new Promise(resolve => setImmediate(resolve));
+    check(material.calls === 1 && geometry.calls === 1 && pendingRenderer.calls === 1,
+      file + ' frees every GPU asset once after shader compile (' + outcome + ')');
+  }
 }
 
 const { win } = load('body-globes');
@@ -108,3 +135,5 @@ objects.push(globe.coronaTex, globe.glowTex);
 globe.destroy(); globe.destroy();
 check(objects.every(a => a.calls === 1), 'body-globes frees each shared asset once');
 console.log('Three.js lifecycle: ' + checks + ' checks passed');
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });

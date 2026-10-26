@@ -571,7 +571,8 @@
       jobs.push(r.compileAsync(this.scene, this.cam));
       if (this.post && this.quad) [this.mBright, this.mBlur, this.mComp].forEach(function (m) { self.quad.material = m; jobs.push(r.compileAsync(self.postScene, self.postCam)); });
     } catch (e) { done(); return; }
-    Promise.all(jobs).then(done, done);
+    this._warmJobs = Promise.all(jobs);
+    this._warmJobs.then(done, done);
   };
   /* Built now, wherever it is: the app builds a stage in its offscreen lot
      before the reader asks for it, which buildNear() would wait on forever. */
@@ -800,13 +801,21 @@
     var c = cssColor(this._pr, css, 'rgb(47,255,143)');
     return { v: toVec(c), c: c };
   };
+  /* Materials wait for a warm-up still in flight: compileAsync() polls each
+     one's program until it reports ready, and a material disposed under that
+     poll makes three.js throw an uncaught TypeError ("reading 'isReady'").
+     A rebuild of the content while the stage is still warming is one way in,
+     a shell swap destroying the stage is the other (see destroy). Geometry
+     is not polled, so it goes at once. */
   P.dispose = function (obj) {
-    var labels = this.labels;
+    var labels = this.labels, mats = [];
     obj.traverse(function (o) {
       if (o.geometry && !o.userData.sharedGeo) o.geometry.dispose();
-      if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); }
+      if (o.material) mats.push(o.material);
       if (o.isSprite) { var i = labels.indexOf(o); if (i !== -1) labels.splice(i, 1); }
     });
+    var free = function () { mats.forEach(function (m) { if (m.map) m.map.dispose(); m.dispose(); }); };
+    if (this._warming && this._warmJobs) this._warmJobs.then(free, free); else free();
   };
   P.ribMat = function (c, i, w) {
     return new T.ShaderMaterial({ vertexShader: V_RIB, fragmentShader: F_RIB, transparent: true, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide,
@@ -1688,24 +1697,31 @@
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
-    var freed = new Set();
-    var release = function (asset) {
-      if (!asset || freed.has(asset)) return;
-      freed.add(asset);
-      if (asset.map) release(asset.map);
-      if (typeof asset.dispose === 'function') asset.dispose();
-    };
-    [this.scene, this.postScene].forEach(function (graph) {
-      if (!graph) return;
-      graph.traverse(function (node) {
-        release(node.geometry);
-        (Array.isArray(node.material) ? node.material : [node.material]).forEach(release);
+    /* compileAsync polls shader programs until warm-up settles. Keep every
+       GPU object alive for that poll, while listeners and frames stop now.
+       A lost context with an unresolved poll is left to the collector. */
+    var self = this;
+    var freeGpu = function () {
+      var freed = new Set();
+      var release = function (asset) {
+        if (!asset || freed.has(asset)) return;
+        freed.add(asset);
+        if (asset.map) release(asset.map);
+        if (typeof asset.dispose === 'function') asset.dispose();
+      };
+      [self.scene, self.postScene].forEach(function (graph) {
+        if (!graph) return;
+        graph.traverse(function (node) {
+          release(node.geometry);
+          (Array.isArray(node.material) ? node.material : [node.material]).forEach(release);
+        });
       });
-    });
-    [this.orbGeo, this.ribGeo, this.mBright, this.mBlur, this.mComp].forEach(release);
-    if (this.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { this.post[k].dispose(); }, this); }
-    if (this.cellTex) this.cellTex.dispose();
-    if (this.r) this.r.dispose();
+      [self.orbGeo, self.ribGeo, self.mBright, self.mBlur, self.mComp].forEach(release);
+      release(self.cellTex);
+      if (self.post) ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { release(self.post[k]); });
+      release(self.r);
+    };
+    if (this._warmJobs) this._warmJobs.then(freeGpu, freeGpu); else freeGpu();
     try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
     this.failed = true;
   };

@@ -1935,6 +1935,20 @@ async function runCloudTests() {
     email: fE ? fE.signup_from : 'none', newsletterKept: !!(fE && fE.newsletter === true), phone: fP ? fP.signup_from : 'none',
     cleaned: fB && fB.signup_from ? { source: fB.signup_from.source, content: (fB.signup_from.content || '').length, keys: Object.keys(fB.signup_from).sort() } : 'none'
   });
+  /* ---- K25c: the registration card in the app (26 October 2026) sends the
+     optional phone number as contact_phone in E.164, refuses one that does not
+     read as a number before anything is sent, and marks its newsletter answer
+     as the app's rather than the cover's. */
+  var gReg = oauthHarness(), gRegBad = oauthHarness();
+  await gReg.C.passwordSignUp('reader@k25c.invalid', 'correct horse', 'https://cover.k25c.invalid/', { newsletter: true, source: 'app-register', phone: '(555) 123-4567' });
+  var regBad = await gRegBad.C.passwordSignUp('reader@k25c.invalid', 'correct horse', 'https://cover.k25c.invalid/', { newsletter: true, phone: '12' });
+  var dReg = gReg.up[0] && gReg.up[0].options.data;
+  t('K25c', 'the registration card sends its optional phone as contact_phone in E.164 and its newsletter answer as the app\'s, and a number that does not read as one is refused before the call', {
+    phone: '+15551234567', source: 'app-register', badReason: 'badPhone', badCalls: 0
+  }, {
+    phone: dReg ? dReg.contact_phone : 'none', source: dReg ? dReg.newsletter_source : 'none',
+    badReason: regBad && regBad.reason, badCalls: gRegBad.up.length
+  });
   var gHas = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [] }, session: null } });
   var upHas = await gHas.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
   var gAuto = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [{ id: 'i1' }] }, session: { user: { email: 'reader@k35.invalid' } } } });
@@ -2952,7 +2966,8 @@ async function runCloudTests() {
   /* Eight links in the app, in each shell: Settings twice, the Luminary gate
      in the Oracle, and the same gate in the tarot room for Omni. */
   t('K55', 'the Terms sit directly above the Privacy Policy on the cover, in Settings, and at the Luminary gate in the Oracle, in the sheet of the Cycle Audit and in the tarot room; both pages name the operator, Florida law, the age of 16, the support route and the Oracle disclosure, carry no dash, and the support table is covered by the two-step rule', {
-    cover: true, appLinks: 10, appOrderEachTime: true, operator: true, florida: true, age16: true,
+    /* 11 since 26 October 2026: the registration card's agreement line. */
+    cover: true, appLinks: 11, appOrderEachTime: true, operator: true, florida: true, age16: true,
     oracleSent: true, oracleNotSent: true, moonshot: true, supportRoute: true, renewal: true, noDash: true, mfaCovers: true, sqlInsertOnly: true
   }, {
     cover: orderOk(coverSrc), appLinks: appSrcK.split('href="./terms.html"').length - 1,

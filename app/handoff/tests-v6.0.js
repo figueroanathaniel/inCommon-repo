@@ -1025,14 +1025,35 @@
           rewritten: win.location.hash });
 
       /* ---- R6: the account is gone from Settings too ---- */
+      /* With one exception, asked for on 26 October 2026: the "Account & sign
+         in" group, which holds the two settings that keep an account's
+         details (remember the sign in on this device, save the profile to the
+         account) and that the registration card switches on. It is
+         preferences, not account controls: signing in still lives on the
+         cover and signing out in the profile menu. So the row reads Settings
+         with that group taken out and holds it to the old rule, and holds the
+         group to exactly its two switches, so it cannot grow into the account
+         surface the rule removed. */
       onStep('removal: Settings');
       await go('#/settings', 700);
-      var setTxt = txt(doc.querySelector('[data-screen-label="Settings"]')) ||
+      var setRoot = doc.querySelector('[data-screen-label="Settings"]');
+      var setTxt = txt(setRoot) ||
         [].slice.call(doc.querySelectorAll('[data-screen-label]')).map(txt).join(' ');
-      t('R6', 'Settings carries no account, sign-out or mailing controls',
-        { account: false, signOut: false, skyLetter: false, chatgptLink: false },
-        { account: /\bAccount\b/.test(setTxt), signOut: /sign out/i.test(setTxt),
-          skyLetter: /sky letter/i.test(setTxt), chatgptLink: /chatgpt/i.test(setTxt) });
+      var acctGroup = setRoot ? setRoot.querySelector('[role="group"][aria-label="Account and sign in"]') : null;
+      var restTxt = setTxt;
+      if (setRoot && acctGroup) {
+        var setClone = setRoot.cloneNode(true);
+        var cloneGroup = setClone.querySelector('[role="group"][aria-label="Account and sign in"]');
+        if (cloneGroup) cloneGroup.parentNode.removeChild(cloneGroup);
+        restTxt = txt(setClone);
+      }
+      var acctSwitches = acctGroup ? [].slice.call(acctGroup.querySelectorAll('[role="switch"]')).map(function (b) { return b.getAttribute('aria-label'); }) : [];
+      t('R6', 'Settings carries no account, sign-out or mailing controls, beyond the two switches that keep an account\u2019s details',
+        { account: false, signOut: false, skyLetter: false, chatgptLink: false,
+          groupSwitches: ['Remember my sign in on this device', 'Save my profile to my account'], groupFields: 0 },
+        { account: /\bAccount\b/.test(restTxt), signOut: /sign out/i.test(setTxt),
+          skyLetter: /sky letter/i.test(setTxt), chatgptLink: /chatgpt/i.test(setTxt),
+          groupSwitches: acctSwitches, groupFields: acctGroup ? acctGroup.querySelectorAll('input, textarea, select, a[href]').length : 0 });
       /* The safety controls are NOT what was removed, and a sweep that only
          asserts absence would happily pass a build that took them out too. */
       t('R6b', 'The crisis controls survived the removal',
@@ -2700,33 +2721,9 @@
     } catch (e) { return 0; }
   }
 
-  function coverScrollTo(win, t) {
-    var doc = win.document.documentElement;
-    var target = Math.round((doc.scrollHeight - win.innerHeight) * t);
-    if (Math.round(win.scrollY) === target) return sleep(80);
-    return new Promise(function (res) {
-      var done = false;
-      function finish() {
-        if (done) return;
-        done = true;
-        win.removeEventListener("scroll", onScroll);
-        sleep(90).then(res);
-      }
-      function onScroll() { if (Math.abs(win.scrollY - target) <= 1) finish(); }
-      win.addEventListener("scroll", onScroll, { passive: true });
-      win.scrollTo(0, target);
-      sleep(4000).then(finish);
-    });
-  }
-  function op(win, sel) {
-    var el = win.document.querySelector(sel);
-    if (!el) return null;
-    var v = parseFloat(el.style.opacity);
-    return isNaN(v) ? parseFloat(win.getComputedStyle(el).opacity) : v;
-  }
-
   async function runCover(src, onStep, sink) {
     var A = sink || [], t = mkPush(A), frames = [];
+    var SESSION_KEY = 'sb-lkzcybzhjjxdqetwwdrx-auth-token', heldSession = null;
     onStep = onStep || function () {};
     /* The cover sits beside the app, so it is derived from the app's own src
        rather than passed separately: one path to keep in step, not two. */
@@ -2783,14 +2780,15 @@
       /* The Terms and Privacy links under the sign in form are not ways in, so
          they are not counted: the row is about the one way into the app. The
          Learn link goes to the reference pages, not the app, and is left out
-         for the same reason. */
+         for the same reason. The question's buttons and "Create an account"
+         are buttons, not anchors, so the pill is still the only link in. */
       var links = [].slice.call(d.querySelectorAll('a[href]')).filter(function (x) { return !x.closest('.legal, .learn'); });
       var box = a ? a.getBoundingClientRect() : { width: 0, height: 0 };
-      /* The way in is named by its own text now, so the accessible name and
-         what a sighted reader sees are the same words and cannot drift. An svg
-         inside it would be the old arrow coming back beside the words. */
-      t('H5', 'One way in, named by its own text, and it points at the app',
-        { links: 1, name: 'enter here', target: true, noArrow: true },
+      /* The way in is the Continue pill since 26 October 2026, named by its own
+         text, so the accessible name and what a sighted reader sees are the
+         same word and cannot drift. */
+      t('H5', 'One way in, the Continue pill, named by its own text, and it points at the app',
+        { links: 1, name: 'continue', target: true, noArrow: true },
         { links: links.length,
           name: a ? a.textContent.trim().toLowerCase() : 'no link',
           target: !!(a && /inCommonApp|app\.html/.test(a.getAttribute('href') || '')),
@@ -2801,98 +2799,148 @@
       t('H7', 'No control on the cover is under 44px', [], tapTargets(w, d));
       t('H8', 'Cover text passes 4.5:1 against what is painted behind it', [], contrastFails(w, d, 4.5).fails);
 
-      onStep('cover: the scroll');
+      onStep('cover: the page holds still');
+      /* The 300vh scroll existed to fade the wordmark out and the rim in.
+         Both are gone, so a scroll range now would be a gesture that does
+         nothing. */
       var span = d.documentElement.scrollHeight - w.innerHeight;
-      /* Without a scroll range there is nothing for the fade to attach to, and
-         the wordmark would simply sit there. */
-      t('H9', 'The page has a scroll range for the fade to run on', true, span > 200);
+      t('H9', 'The page holds still: there is no scroll range',
+        true, span <= 1);
 
-      await coverScrollTo(w, 0);
-      var top = { mark: op(w, '.mark'), glyph: op(w, '.glyph') };
-      t('H10', 'At rest the wordmark is present and the initial has not arrived',
-        { markShown: true, glyphHidden: true },
-        { markShown: top.mark > 0.5, glyphHidden: top.glyph < 0.02 });
+      onStep('cover: the ring at rest');
+      var ring = d.querySelector('.ring-container');
+      var pr = ring && ring.querySelector('.ring-slot.l .purple-ring');
+      var gl = ring && ring.querySelector('.green-line');
+      var twin = ring && ring.querySelector('.ring-slot.r');
+      /* At rest it is ONE violet ring: the twin that parts from it on the way
+         in is not drawn yet, and the green is the thin line, not a dot or a
+         fill. */
+      t('H10', 'At rest the centre is one violet ring with a thin green line inside it, and it is decoration',
+        { ring: true, hidden: 'true', oneRing: true, thinLine: true, atRest: true },
+        { ring: !!(pr && gl), hidden: ring ? ring.getAttribute('aria-hidden') : 'missing',
+          oneRing: !!(twin && parseFloat(w.getComputedStyle(twin).opacity) < 0.02),
+          thinLine: !!(gl && parseFloat(w.getComputedStyle(gl).borderTopWidth) <= 2.5),
+          atRest: !!(ring && !/is-split|g-dot|g-fill/.test(ring.className)) });
 
-      await coverScrollTo(w, 0.55);
-      var mid = { mark: op(w, '.mark'), glyph: op(w, '.glyph') };
-      /* The order is the design: the wordmark is gone and the rims are up
-         before the initial starts, or it reads as three things fading at once
-         rather than a sequence. */
-      t('H11', 'The wordmark has gone before the initial begins',
-        { markGone: true, glyphNotYet: true },
-        { markGone: mid.mark < 0.02, glyphNotYet: mid.glyph < 0.02 });
+      /* THE TURN IS MEASURED, NOT READ OFF THE ANIMATION NAME. A rotation that
+         is declared and paused, or overridden by another transform, reads the
+         same by name and does not move. Two readings of the computed angle
+         give the direction each one actually turns, and they are taken two
+         frames apart rather than after a fixed wait: under SwiftShader a
+         600ms wait came back as 160 degrees of turn, and past half a turn the
+         shorter way round is the wrong way round. Two frames is under 90
+         degrees even at one frame a second. */
+      function angleOf(el) {
+        var m = /matrix\(([^,]+),\s*([^,]+)/.exec(w.getComputedStyle(el).transform || '');
+        return m ? Math.atan2(parseFloat(m[2]), parseFloat(m[1])) * 180 / Math.PI : null;
+      }
+      function turned(a0, a1) { var dlt = a1 - a0; if (dlt > 180) dlt -= 360; if (dlt < -180) dlt += 360; return dlt; }
+      var p0 = pr ? angleOf(pr) : null, g0 = gl ? angleOf(gl) : null;
+      await new Promise(function (r) { w.requestAnimationFrame(function () { w.requestAnimationFrame(function () { r(); }); }); });
+      var dp = (p0 === null || !pr) ? 0 : turned(p0, angleOf(pr));
+      var dg = (g0 === null || !gl) ? 0 : turned(g0, angleOf(gl));
+      t('H11', 'The ring turns clockwise and the line inside it counterclockwise (saw ' + dp.toFixed(1) + ' and ' + dg.toFixed(1) + ' degrees)',
+        { ringClockwise: true, lineCounter: true },
+        { ringClockwise: dp > 0.05, lineCounter: dg < -0.05 });
 
-      await coverScrollTo(w, 1);
-      var end = { mark: op(w, '.mark'), glyph: op(w, '.glyph') };
-      t('H12', 'At the end the initial is fully present and the wordmark is not',
-        { glyphShown: true, markGone: true },
-        { glyphShown: end.glyph > 0.9, markGone: end.mark < 0.02 });
+      /* The pill floats, three pixels either way, so the centre is held to
+         six. "Create an account" sits under it, centred, and is a button. */
+      var vw = w.innerWidth, vh = w.innerHeight;
+      var rb = ring ? ring.getBoundingClientRect() : null;
+      var cb = d.querySelector('button.create');
+      var cbb = cb ? cb.getBoundingClientRect() : null;
+      t('H12', 'The pill is centred on the screen and on the ring, with "Create an account" right under it',
+        { pillCentred: true, ringCentred: true, createUnder: true, createName: 'create an account' },
+        { pillCentred: Math.abs(box.left + box.width / 2 - vw / 2) <= 6 && Math.abs(box.top + box.height / 2 - vh / 2) <= 6,
+          ringCentred: !!(rb && Math.abs(rb.left + rb.width / 2 - vw / 2) <= 1 && Math.abs(rb.top + rb.height / 2 - vh / 2) <= 1),
+          createUnder: !!(cbb && cbb.top >= box.bottom - 4 && cbb.top - box.bottom < 24 && Math.abs(cbb.left + cbb.width / 2 - vw / 2) <= 2),
+          createName: cb ? cb.textContent.trim().toLowerCase() : 'missing' });
 
-      var g = d.querySelector('.glyph');
-      t('H13', 'The initial is decorative and not announced',
-        'true', g ? g.getAttribute('aria-hidden') : 'missing');
-      /* Placed from the render rather than the viewport: a transform with a
-         scale in it means it read uHoleS and uHoleR. */
-      t('H14', 'The initial is placed and scaled from the render',
-        true, !!(g && /scale\(/.test(g.style.transform || '')));
+      /* The wordmark, "enter here" and the decorated I are gone from the
+         screen, and the page is still named inCommon for a screen reader and
+         a crawler, by an h1 that takes no room. */
+      var h1 = d.querySelector('h1');
+      var h1b = h1 ? h1.getBoundingClientRect() : { width: 99, height: 99 };
+      t('H13', 'The wordmark and the decorated initial are gone, and the page is still named by a hidden h1',
+        { mark: false, glyph: false, enterHere: false, h1: 'inCommon', h1Hidden: true },
+        { mark: !!d.querySelector('.mark'), glyph: !!d.querySelector('.glyph'),
+          enterHere: /enter here/i.test(d.body.innerText || ''),
+          h1: h1 ? h1.textContent.trim() : 'missing', h1Hidden: h1b.width <= 1 && h1b.height <= 1 });
 
-      onStep('cover: the way out');
+      onStep('cover: the question');
+      /* Continue with no session kept asks the question. A session left in
+         this origin by an earlier phase would send the press straight in, so
+         it is put aside for these rows and given back in finally. */
+      try { heldSession = w.localStorage.getItem(SESSION_KEY); if (heldSession !== null) w.localStorage.removeItem(SESSION_KEY); } catch (e) {}
       var pathBefore = w.location.pathname;
-      /* TWO STEPS NOW. "enter here" opens the email sign in first, in place,
-         with "Continue without an account" under it, and it is that control
-         which runs the exit. So the first press is asserted to open the field
-         and to leave nobody anywhere, and the opened state is measured for
-         targets and contrast the way H7 and H8 measure the cover at rest:
-         with the page scrolled back to the top, because at the end of the
-         scroll the way in is hidden and neither sweep can see it. */
-      await coverScrollTo(w, 0);
+      var modal = d.querySelector('.modal-overlay');
       a.click();
       await sleep(400);
-      var mf = d.getElementById('mailform'), skipBtn = d.querySelector('button.skip');
-      var firstPress = !!(mf && !mf.hidden && skipBtn && !skipBtn.hidden) &&
-        a.getAttribute('aria-expanded') === 'true' && w.location.pathname === pathBefore &&
-        /* Pressed once, the link leaves the page: the form is the way on. */
-        w.getComputedStyle(a).display === 'none' &&
-        (op(w, '.markwrap') === null || op(w, '.markwrap') >= 0.95);
-      var openedTargets = tapTargets(w, d);
-      var openedContrast = contrastFails(w, d, 4.5).fails;
-      if (skipBtn) skipBtn.click();
-      /* POLL, DO NOT SAMPLE ONCE. A single read at a fixed offset was 700ms and
-         it flaked for the same reason the scroll did: at this frame size one
-         rAF step can cost 400ms, so the read can land after the exit has
-         started but before its first step has written anything, and the row
-         then says the transition is not running when it is. Waiting for the
-         drop instead is the same assertion without the race. */
-      var stillHere = true, fading = false, waited = 0;
+      var box2 = modal && modal.querySelector('.modal-box');
+      var asked = {
+        open: !!(modal && !modal.hidden),
+        dialog: !!(box2 && box2.getAttribute('role') === 'dialog' && box2.getAttribute('aria-modal') === 'true'),
+        focusYes: !!(d.activeElement && d.activeElement.classList.contains('btn-yes')),
+        stayed: w.location.pathname === pathBefore,
+        noForm: d.getElementById('mailform').hidden === true
+      };
+      /* Measured while the question is up, so its own controls are swept. */
+      var askedTargets = tapTargets(w, d);
+      var askedContrast = contrastFails(w, d, 4.5).fails;
+      d.activeElement.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await sleep(150);
+      var letGo = !!(modal && modal.hidden) && d.activeElement === a;
+      t('H14', 'Continue with no saved session asks the question in a dialog that takes focus, passes 44px and 4.5:1, and lets go on Escape',
+        { open: true, dialog: true, focusYes: true, stayed: true, noForm: true, targets: [], contrast: [], letGo: true },
+        { open: asked.open, dialog: asked.dialog, focusYes: asked.focusYes, stayed: asked.stayed, noForm: asked.noForm,
+          targets: askedTargets, contrast: askedContrast, letGo: letGo });
+
+      onStep('cover: the way out');
+      /* Yes runs the ring's sequence rather than navigating at once: the
+         rings part and the line draws in, the page stays put while it does,
+         and the app is told to open the registration card. POLL, DO NOT
+         SAMPLE ONCE: at this frame size one rAF step can cost 400ms, so a
+         single read at a fixed offset can land before the first class is
+         written. */
+      a.click();
+      await sleep(300);
+      var yes = d.querySelector('.btn-yes');
+      if (yes) yes.click();
+      var stillHere = true, running = false, waited = 0;
       while (waited < 1800) {
         await sleep(150); waited += 150;
         try {
           if (w.location.pathname !== pathBefore) { stillHere = false; break; }
         } catch (e) { stillHere = false; break; }
-        var o = op(w, '.markwrap');
-        if (o !== null && o < 0.95) { fading = true; break; }
+        if (ring && /is-split/.test(ring.className) && /g-dot|g-fill/.test(ring.className) && d.body.classList.contains('leaving')) { running = true; break; }
       }
-      /* preventDefault ran and the transition is running: an anchor left alone
-         would already have left. */
-      t('H15', 'The link opens the email sign in and then leaves the page, and continuing runs the exit instead of navigating at once',
-        { emailFirst: true, openedTargets: [], openedContrast: [], stillOnTheCover: true, transitionRunning: true },
-        { emailFirst: firstPress, openedTargets: openedTargets, openedContrast: openedContrast,
-          stillOnTheCover: stillHere, transitionRunning: fading });
+      var flags = {};
+      try { flags = { register: w.sessionStorage.getItem('incommon.register'), guest: w.sessionStorage.getItem('incommon.guest.chosen') }; } catch (e) {}
+      t('H15', 'Yes runs the ring’s sequence instead of navigating at once, and asks the app for the registration card',
+        { stillOnTheCover: true, sequenceRunning: true, register: '1', guest: '1' },
+        { stillOnTheCover: stillHere, sequenceRunning: running, register: flags.register, guest: flags.guest });
 
-      var landed = '';
+      var landed = '', hash = '';
       for (var i = 0; i < 45; i++) {
         await sleep(200);
-        try { landed = w.location.pathname; } catch (e) { landed = 'cross-origin'; }
+        try { landed = w.location.pathname; hash = w.location.hash; } catch (e) { landed = 'cross-origin'; }
         if (landed !== pathBefore) break;
       }
-      t('H16', 'The exit lands on the app (saw ' + landed + ')',
-        true, /inCommonApp|app\.html/.test(decodeURIComponent(landed)));
+      t('H16', 'The exit lands on the app, on Today (saw ' + landed + hash + ')',
+        { app: true, today: true },
+        { app: /inCommonApp|app\.html/.test(decodeURIComponent(landed)), today: hash === '#/today' });
     } catch (e) {
       t('H-ERR', 'Cover harness failure: ' + (e && e.message), 'no error', String(e && e.message));
     } finally {
-      /* This phase writes no storage of its own; the cover has none. What it
-         does leave is a service worker, registered by the app it navigates to
-         in H16, so that goes back too. */
+      /* What this phase writes it takes back: the tab's flags the question
+         sets on the way in, the ring handoff if the app did not read it, and
+         any session that was put aside for H14. The service worker the app
+         registers in H16 goes back too. */
+      try {
+        ['incommon.register', 'incommon.guest.chosen', 'incommon.guest.default', 'incommon.ring.handoff']
+          .forEach(function (k) { window.sessionStorage.removeItem(k); });
+        if (heldSession !== null) window.localStorage.setItem(SESSION_KEY, heldSession);
+      } catch (e) {}
       await coverKillSW();
       frames.forEach(function (f) { if (f.parentNode) f.parentNode.removeChild(f); });
     }
