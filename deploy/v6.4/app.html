@@ -24645,7 +24645,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.1';
+  var VERSION = '2.9.2';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -25630,9 +25630,21 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var options = { emailRedirectTo: redirectTo };
     if (cap(opts)) options.captchaToken = cap(opts);
     if (opts && typeof opts.newsletter === 'boolean') {
-      options.data = { newsletter: opts.newsletter, newsletter_source: 'cover-signup', newsletter_decided_at: new Date().toISOString() };
+      options.data = { newsletter: opts.newsletter, newsletter_source: opts.source === 'app-register' ? 'app-register' : 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
     if (fromOf(opts)) { options.data = options.data || {}; options.data.signup_from = fromOf(opts); }
+    /* The registration card in the app (26 October 2026) asks for a phone
+       number as well, marked optional. It is not a login: it rides with the
+       account as metadata, in E.164 and only when it reads as a number, and
+       signing in by phone still needs the number confirmed by text from the
+       profile card. A number that does not read as one is refused before
+       anything is sent. */
+    if (opts && opts.phone != null && String(opts.phone).trim()) {
+      var contact = normPhone(opts.phone);
+      if (!contact) return Promise.resolve({ ok: false, reason: 'badPhone' });
+      options.data = options.data || {};
+      options.data.contact_phone = contact;
+    }
     return authCall(function () {
       return c.auth.signUp({ email: addr, password: String(password), options: options });
     }).then(function (res) {
@@ -27961,9 +27973,115 @@ input[type="date"]{color-scheme:dark}
    :focus, not :focus-visible, because a skip link has to appear for
    programmatic focus as well as keyboard focus. */
 [data-skip]:focus{position:absolute!important;top:12px!important;left:12px!important;z-index:400!important;width:auto!important;height:auto!important;margin:0!important;padding:0 18px!important;min-height:44px!important;clip:auto!important;overflow:visible!important;white-space:nowrap!important;display:flex!important;align-items:center!important;background:var(--sf2)!important;color:var(--tx)!important;border:1px solid var(--bd)!important;border-radius:999px!important;outline:2px solid var(--ac)!important;outline-offset:2px!important;font:600 12px var(--fu)!important;letter-spacing:.03em!important;cursor:pointer!important}
+/* THE RING HANDOFF (26 October 2026). The cover's way in ends on the mark,
+   two violet rings and a green lens; this overlay starts there while the app
+   loads, and once the screen is up it plays the sequence back: the rings close
+   to one and the green thins from the centre to the line inside it, both still
+   turning the way they turned on the cover. The parts and their single jobs
+   are the cover's, described above its .ring-container. */
+.ring-handoff{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:#05060a;transition:opacity 650ms ease;--ring-d:min(300px,58vw,46vh);--incommon-purple:#9d4edd;--glow-neon-green:#00f5d4}
+.ring-handoff[hidden]{display:none}
+.ring-handoff.out{opacity:0;pointer-events:none}
+.ring-handoff .ring-container{position:relative;width:var(--ring-d);height:var(--ring-d);display:flex;justify-content:center;align-items:center}
+.ring-handoff .ring-slot,.ring-handoff .lens-a,.ring-handoff .lens-b,.ring-handoff .lens-c{position:absolute;inset:0;transition:transform 1100ms cubic-bezier(.25,1,.5,1),opacity 320ms ease}
+.ring-handoff .lens-a,.ring-handoff .lens-b{clip-path:circle(calc(50% - 4px) at 50% 50%)}
+.ring-handoff .ring-slot.r{opacity:0}
+.ring-handoff .purple-ring{position:absolute;inset:0;border:4px solid var(--incommon-purple);border-radius:50%;box-shadow:0 0 15px var(--incommon-purple),inset 0 0 15px var(--incommon-purple);animation:rotateClockwise 8s linear infinite}
+.ring-handoff .purple-ring::before{content:"";position:absolute;top:-7px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#f3e8ff;box-shadow:0 0 8px 2px #e0c3ff,0 0 22px 6px var(--incommon-purple)}
+.ring-handoff .green-line{position:absolute;inset:5px;border:2px solid var(--glow-neon-green);border-radius:50%;box-shadow:0 0 10px var(--glow-neon-green),inset 0 0 10px var(--glow-neon-green);animation:rotateCounterClockwise 6s linear infinite;transition:inset 1000ms cubic-bezier(.45,0,.2,1),border-width 1000ms cubic-bezier(.45,0,.2,1),box-shadow 500ms ease}
+.ring-handoff .green-line::after{content:"";position:absolute;bottom:-4px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#eafffb;box-shadow:0 0 6px 2px #b8fff0,0 0 14px 4px var(--glow-neon-green);transition:opacity 400ms ease 600ms}
+.ring-handoff .is-split .ring-slot.l{transform:translateX(calc(var(--ring-d) * -.25))}
+.ring-handoff .is-split .ring-slot.r{transform:translateX(calc(var(--ring-d) * .25));opacity:1}
+.ring-handoff .is-split .lens-a{transform:translateX(calc(var(--ring-d) * .25))}
+.ring-handoff .is-split .lens-b{transform:translateX(calc(var(--ring-d) * -.5))}
+.ring-handoff .is-split .lens-c{transform:translateX(calc(var(--ring-d) * .25))}
+.ring-handoff .g-fill .green-line{inset:2%;border-width:calc(var(--ring-d) * .48);box-shadow:0 0 18px var(--glow-neon-green),inset 0 0 26px rgba(255,255,255,.45)}
+.ring-handoff .g-fill .green-line::after{opacity:0;transition-delay:0ms}
+.ring-handoff .is-static,.ring-handoff .is-static *,.ring-handoff .is-static *::after{transition:none!important}
+@keyframes rotateClockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes rotateCounterClockwise{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+/* THE REGISTRATION CARD. Held to the viewport so it never scrolls: the card
+   is at most 90% of the screen's height, nothing inside it overflows, and the
+   spacing pulls in on short screens rather than anything moving off them.
+   Today shows through the scrim at full strength. */
+.reg-scrim{position:absolute;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));overflow:hidden;background:transparent}
+.welcome-registration-card{display:flex;flex-direction:column;justify-content:space-between;gap:.9rem;width:100%;max-width:420px;height:auto;max-height:90vh;max-height:90dvh;padding:1.5rem;box-sizing:border-box;overflow:hidden;border:1px solid var(--bd);border-radius:20px;background:var(--sf);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 50px rgba(var(--atmc),.12);color:var(--tx);animation:panelIn .5s ease-out both}
+.reg-head{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.app-logo-small{display:block;height:clamp(30px,6vh,50px);width:auto;object-fit:contain;margin-bottom:.15rem}
+.reg-title{margin:0;font:400 clamp(18px,2.8vh,22px)/1.2 var(--fd);letter-spacing:.01em;color:var(--tx)}
+.registration-form-grid{display:grid;gap:.75rem;flex-grow:1;min-height:0}
+.reg-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem}
+.input-group{display:flex;flex-direction:column;min-width:0}
+.input-group label{display:block;font:600 .75rem/1.2 var(--fu);letter-spacing:.02em;margin-bottom:.25rem;color:var(--ac2-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reg-opt{font-weight:400;color:var(--mut)}
+.input-group input{box-sizing:border-box;width:100%;min-height:44px;padding:.5rem .7rem;font:400 .9rem var(--fu);color:var(--tx);background:var(--sf2);border:1px solid var(--bd);border-radius:10px;color-scheme:dark}
+.input-group input::placeholder{color:var(--mut)}
+.input-group input[aria-invalid="true"]{border-color:var(--warn)}
+.reg-hits{position:absolute;left:0;right:0;top:100%;z-index:5;margin:4px 0 0;padding:4px;list-style:none;border:1px solid var(--bd);border-radius:10px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));max-height:min(220px,38vh);overflow-y:auto;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.reg-hit{all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:4px 10px;border-radius:6px}
+.reg-hit:hover,.reg-hit:focus-visible{background:rgba(var(--atmc),.18)}
+.reg-check{all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;font:400 13px/1.3 var(--fu);color:var(--tx)}
+.reg-foot{display:flex;flex-direction:column;align-items:stretch;gap:.4rem}
+.reg-msg{margin:0;min-height:1.3em;font:400 12px/1.4 var(--fu);color:var(--warn);text-align:center}
+.reg-go{all:unset;cursor:pointer;box-sizing:border-box;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 15px var(--fu);letter-spacing:.03em;box-shadow:0 10px 30px rgba(47,255,143,.18)}
+.reg-go[aria-busy="true"]{opacity:.7;cursor:progress}
+.reg-agree{margin:0;font:400 11px/1.45 var(--fu);color:var(--mut);text-align:center}
+.reg-agree a{color:var(--tx);text-decoration:underline;text-underline-offset:2px}
+.reg-later{all:unset;cursor:pointer;box-sizing:border-box;align-self:center;min-height:44px;padding:0 14px;display:flex;align-items:center;font:400 12.5px var(--fu);color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+@media (pointer:coarse){.input-group input{font-size:16px}}
+@media (max-height:740px){.welcome-registration-card{padding:1rem 1.1rem;gap:.6rem}.registration-form-grid{gap:.5rem}.app-logo-small{margin-bottom:0}.reg-head{gap:.2rem}}
+/* A phone on its side: too short for one column, wide enough for two. */
+@media (max-height:500px) and (min-width:600px){.welcome-registration-card{max-width:780px;padding:.7rem 1rem;gap:.4rem}.reg-head{flex-direction:row;justify-content:center;gap:.9rem}.app-logo-small{height:26px}.reg-title{font-size:17px}.registration-form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.4rem .8rem}.reg-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.15rem .6rem}.reg-msg,.reg-agree{grid-column:1 / -1}.reg-later{grid-row:2;grid-column:2}}
+@media (max-height:640px){.reg-head{flex-direction:row;justify-content:center;gap:.6rem}.app-logo-small{height:26px}.reg-title{font-size:16.5px;white-space:nowrap}.input-group label{font-size:.7rem;margin-bottom:.15rem}.reg-foot{gap:.2rem}.reg-check,.reg-later{min-height:40px}.reg-agree{font-size:10.5px}}
+@media (max-height:600px){.welcome-registration-card{padding-top:.7rem;padding-bottom:.6rem;gap:.35rem}.registration-form-grid{gap:.3rem}.input-group label{margin-bottom:.1rem}.reg-foot{gap:.1rem}}
+@media (max-width:360px){.welcome-registration-card{padding-left:.9rem;padding-right:.9rem}.reg-row{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:.45rem}.input-group input{padding-left:.45rem;padding-right:.45rem}}
 </style>
 </head>
 <body>
+<!-- THE RING HANDOFF. Drawn at the end of the cover's way in, two rings and a
+     filled lens, before anything else in the body paints, and only when the
+     cover has just handed over (incommon.ring.handoff, a few seconds old at
+     most, read once and removed, so a reload never replays it). The rings
+     take up their turn exactly where the cover left it. When the app says its
+     screen is up (incommon:ready, from boot()), the sequence plays back and
+     the overlay fades off the screen it was covering. A 15 second ceiling
+     settles it regardless. -->
+<div id="ring-handoff" class="ring-handoff" aria-hidden="true" hidden>
+  <div class="ring-container is-static is-split g-fill">
+    <div class="ring-slot l"><div class="purple-ring"></div></div>
+    <div class="ring-slot r"><div class="purple-ring"></div></div>
+    <div class="lens-a"><div class="lens-b"><div class="lens-c"><div class="green-line"></div></div></div></div>
+  </div>
+</div>
+<script>
+(function () {
+  var el = document.getElementById('ring-handoff'), h = null;
+  try { h = JSON.parse(sessionStorage.getItem('incommon.ring.handoff') || 'null'); sessionStorage.removeItem('incommon.ring.handoff'); } catch (e) {}
+  if (!el) return;
+  if (!h || !(Date.now() - h.at < 20000)) { el.parentNode.removeChild(el); return; }
+  var gap = Math.max(0, Date.now() - h.at), rs = el.querySelectorAll('.purple-ring'), i;
+  for (i = 0; i < rs.length; i++) rs[i].style.animationDelay = -((+h.cw || 0) + gap) % 8000 + 'ms';
+  el.querySelector('.green-line').style.animationDelay = -((+h.ccw || 0) + gap) % 6000 + 'ms';
+  el.hidden = false;
+  var ring = el.querySelector('.ring-container'), done = false;
+  function settle() {
+    if (done) return;
+    done = true;
+    ring.classList.remove('is-static');
+    ring.classList.add('is-settling');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        ring.classList.remove('is-split');
+        setTimeout(function () { ring.classList.remove('g-fill'); }, 550);
+        setTimeout(function () { el.classList.add('out'); }, 1850);
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 2600);
+      });
+    });
+  }
+  addEventListener('incommon:ready', function () { setTimeout(settle, 120); });
+  setTimeout(settle, 15000);
+})();
+</script>
 <template id="__bundler_thumbnail" data-bg-color="#05060a">
 <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
 <rect width="1200" height="800" fill="#05060a"/>
@@ -28305,6 +28423,73 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
     </div>
     </sc-if>
+  </div>
+</sc-if>
+<!-- THE REGISTRATION CARD (owner, 26 October 2026). A card floating over
+     Today, which shows behind it at full strength so the reader can see they
+     are inside the app already. Sized to the screen, never scrolled: the
+     classes in the head sheet hold it to the viewport and pull the spacing in
+     on short screens. The fields are regVals(); the place search is the first
+     run's own. -->
+<sc-if value="{{ regGate }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Create your profile" role="dialog" aria-modal="true" aria-labelledby="reg-title" class="reg-scrim">
+    <div class="welcome-registration-card">
+      <div class="reg-head">
+        <svg class="app-logo-small" viewBox="0 0 176 40" role="img" aria-label="inCommon">
+          <path d="M20 9.8A13 13 0 0 1 20 30.2A13 13 0 0 1 20 9.8Z" fill="#2fff8f"></path>
+          <g fill="none" stroke="#8b5cf6" stroke-width="2.3"><circle cx="13.5" cy="20" r="13"></circle><circle cx="26.5" cy="20" r="13"></circle></g>
+          <text x="48" y="27.5" fill="#f4f2fa" style="font:500 22px var(--fu);letter-spacing:.01em">inCommon</text>
+        </svg>
+        <h1 id="reg-title" class="reg-title">Create your profile</h1>
+      </div>
+      <div class="registration-form-grid">
+        <div class="reg-row">
+          <div class="input-group">
+            <label for="reg-date">Date of birth</label>
+            <input id="reg-date" data-lift="in" type="date" min="1900-01-01" value="{{ regDate }}" onChange="{{ regTypeDate }}" aria-invalid="{{ regDateBad }}" aria-describedby="reg-msg" required>
+          </div>
+          <div class="input-group">
+            <label for="reg-time">Time of birth <span class="reg-opt">if known</span></label>
+            <input id="reg-time" data-lift="in" type="time" value="{{ regTime }}" onChange="{{ regTypeTime }}" aria-invalid="{{ regTimeBad }}" aria-describedby="reg-msg">
+          </div>
+        </div>
+        <div class="input-group" style="position:relative">
+          <label for="reg-place">Place of birth</label>
+          <input id="reg-place" data-lift="in" value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="City of birth" autoComplete="off" aria-invalid="{{ regPlaceBad }}" aria-describedby="reg-msg reg-place-list">
+          <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
+            <ul id="reg-place-list" aria-label="Places that match" class="reg-hits">
+              <sc-for list="{{ cxPlaceHits }}" as="p" hint-placeholder-count="3">
+                <li><button type="button" onClick="{{ p.go }}" class="reg-hit"><span style="font:400 14px/1.3 var(--fu);color:var(--tx)">{{ p.label }}</span><span style="font:400 11px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mut)">{{ p.sub }}</span></button></li>
+              </sc-for>
+            </ul>
+          </sc-if>
+        </div>
+        <div class="reg-row">
+          <div class="input-group">
+            <label for="reg-email">Email address</label>
+            <input id="reg-email" data-lift="in" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" value="{{ regEmail }}" onChange="{{ regTypeEmail }}" aria-invalid="{{ regEmailBad }}" aria-describedby="reg-msg" required>
+          </div>
+          <div class="input-group">
+            <label for="reg-phone">Phone number <span class="reg-opt">optional</span></label>
+            <input id="reg-phone" data-lift="in" type="tel" inputmode="tel" autocomplete="tel" placeholder="Optional" value="{{ regPhone }}" onChange="{{ regTypePhone }}" aria-invalid="{{ regPhoneBad }}" aria-describedby="reg-msg">
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="reg-pass">Choose a password <span class="reg-opt">8 or more characters</span></label>
+          <input id="reg-pass" data-lift="in" type="password" autocomplete="new-password" value="{{ regPass }}" onChange="{{ regTypePass }}" aria-invalid="{{ regPassBad }}" aria-describedby="reg-msg" required>
+        </div>
+        <button type="button" onClick="{{ regNewsGo }}" role="checkbox" aria-checked="{{ regNewsOn }}" class="reg-check">
+          <span aria-hidden="true" style="flex:none;box-sizing:border-box;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ regNewsBd }};background:{{ regNewsBg }};display:flex;align-items:center;justify-content:center;font:700 12px/1 var(--fu);color:var(--onac)">{{ regNewsMark }}</span>
+          <span>Send me the inCommon newsletter</span>
+        </button>
+      </div>
+      <div class="reg-foot">
+        <p id="reg-msg" class="reg-msg" role="status" aria-live="polite">{{ regMsg }}</p>
+        <button type="button" onClick="{{ regGo }}" aria-busy="{{ regBusy }}" class="reg-go">{{ regGoLabel }}</button>
+        <p class="reg-agree">By creating an account you agree to the <a href="./terms.html">Terms &amp; Conditions</a> and the <a href="./privacy.html">Privacy Policy</a>.</p>
+        <button type="button" onClick="{{ regLater }}" class="reg-later">Not now</button>
+      </div>
+    </div>
   </div>
 </sc-if>
 <sc-if value="{{ shellVertical }}" hint-placeholder-val="{{ false }}">
@@ -32627,6 +32812,26 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ delMemsEmpty }}" hint-placeholder-val="{{ true }}">
         <div style="border:1.5px dashed var(--bd);border-radius:12px;padding:16px;font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);text-align:center">No deleted memories.</div>
       </sc-if>
+    </div>
+    <!-- ACCOUNT AND SIGN IN (26 October 2026). The two settings that keep an
+         account's details: the sign in this browser remembers, and the profile
+         saved to the account (the Birth Data consent, under its account name).
+         Creating an account on the registration card turns both on. -->
+    <div style="display:flex;flex-direction:column;gap:8px" role="group" aria-label="Account and sign in">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Account &amp; sign in</div>
+      <sc-for list="{{ acctSaves }}" as="a" hint-placeholder-count="2">
+        <div data-lift="card" style="display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:10px 14px">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+            <div style="font:600 13px var(--fu)">{{ a.t }}</div>
+            <div style="font:400 10.5px var(--fu);color:{{ a.stC }}">{{ a.status }}</div>
+          </div>
+          <button onClick="{{ a.toggle }}" role="switch" aria-checked="{{ a.on }}" aria-label="{{ a.t }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center">
+            <span style="width:48px;height:28px;border-radius:999px;background:{{ a.swBg }};border:1px solid {{ a.swBd }};display:flex;align-items:center;transition:background-color .2s">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ a.knobX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+            </span>
+          </button>
+        </div>
+      </sc-for>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:400 21px/1.3 var(--fd)">inCommon cannot remember anything without your explicit consent.</div>
@@ -39333,6 +39538,26 @@ input[type="date"]{color-scheme:dark}
         <div style="border:1.5px dashed var(--bd);border-radius:12px;padding:16px;font:italic 400 12.5px/1.6 var(--fb);color:var(--dim);text-align:center">No deleted memories.</div>
       </sc-if>
     </div>
+    <!-- ACCOUNT AND SIGN IN (26 October 2026). The two settings that keep an
+         account's details: the sign in this browser remembers, and the profile
+         saved to the account (the Birth Data consent, under its account name).
+         Creating an account on the registration card turns both on. -->
+    <div style="display:flex;flex-direction:column;gap:8px" role="group" aria-label="Account and sign in">
+      <div style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Account &amp; sign in</div>
+      <sc-for list="{{ acctSaves }}" as="a" hint-placeholder-count="2">
+        <div data-lift="card" style="display:flex;align-items:center;gap:12px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:10px 14px">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px">
+            <div style="font:600 13px var(--fu)">{{ a.t }}</div>
+            <div style="font:400 10.5px var(--fu);color:{{ a.stC }}">{{ a.status }}</div>
+          </div>
+          <button onClick="{{ a.toggle }}" role="switch" aria-checked="{{ a.on }}" aria-label="{{ a.t }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center">
+            <span style="width:48px;height:28px;border-radius:999px;background:{{ a.swBg }};border:1px solid {{ a.swBd }};display:flex;align-items:center;transition:background-color .2s">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ a.knobX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
+            </span>
+          </button>
+        </div>
+      </sc-for>
+    </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:400 21px/1.3 var(--fd)">inCommon cannot remember anything without your explicit consent.</div>
     </div>
@@ -42051,18 +42276,28 @@ class Component extends DCLogic {
       this.ensureProfiles();
       this.setState({ ready: true, msgs: this.state.msgs || [this.greetMsg()] });
       if (this._startPath) setTimeout(() => { const p = this._startPath; this._startPath = null; if (p) this.openPath(p); }, 0);
+      this.announceReady();
       setTimeout(() => this.sweepDeleted(), 400);
       if (this._migrated) { this._migrated = false; setTimeout(() => this.toastMsg('Your data moved to \u201cDefault Profile\u201d. Rename it in Settings.'), 900); }
       return;
     }
     if (this.state.bootTries > 50) {
       this.setState({ errBanner: 'Some modules failed to load. Check that the .js files sit next to this component.', ready: true, msgs: this.state.msgs || [this.greetMsg()] });
+      this.announceReady();
       if (this._startPath) setTimeout(() => { const p = this._startPath; this._startPath = null; if (p) this.openPath(p); }, 0);
       return;
     }
     this._bt = setTimeout(() => { this.setState({ bootTries: this.state.bootTries + 1 }); this.boot(); }, 150);
   }
 
+  /* The screen is up: the ring handoff at the top of the body plays the
+     cover's sequence backwards when it hears this. Two frames later, so the
+     screen it uncovers has painted. */
+  announceReady() {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      try { window.dispatchEvent(new Event('incommon:ready')); } catch (e) {}
+    }));
+  }
   readLS(k, fb) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } }
   writeLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   // The Add-to-Home-Screen nudge. iOS Safari has no install prompt of its own, so
@@ -51586,8 +51821,21 @@ class Component extends DCLogic {
   authStep() {
     const st = this.state;
     if (st.auth !== undefined) return st.auth;
+    /* From the cover (26 October 2026): Yes, or "Create an account", asks for
+       the registration card over Today; No goes in on the default profile
+       and is asked nothing. Both are for the tab, in sessionStorage, and a
+       reader already signed in is never shown the card. */
+    if (this.regAsked()) return 'register';
     if (this.learnGuest()) return null;
+    if (this.tabFlag('incommon.guest.default')) return null;
     return this.readLS(this.FIRSTRUN_KEY, false) ? null : 'birth';
+  }
+  tabFlag(k) { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } }
+  regAsked() {
+    if (!this.tabFlag('incommon.register')) return false;
+    const PM = this.PM();
+    if (PM && typeof PM.owner === 'function' && PM.owner()) { try { sessionStorage.removeItem('incommon.register'); } catch (e) {} return false; }
+    return true;
   }
   /* A VISITOR FROM A LEARN PAGE GOES STRAIGHT IN (owner, 17 October 2026). The
      Learn pages are what a search engine can show, and each one links to the
@@ -52345,15 +52593,16 @@ class Component extends DCLogic {
       piLabel: this.state.revealPI ? 'Hide' : 'Reveal',
       piReveal: () => this.setState({ revealPI: !this.state.revealPI })
     };
-    if (!step) return { ...base, authGate: false, authBirth: false, authCodex: false, authHasErr: false, authErr: '' };
-    const classic = !!this.FIRSTRUN_CLASSIC;
+    if (!step) return { ...base, authGate: false, regGate: false, authBirth: false, authCodex: false, authHasErr: false, authErr: '' };
+    const classic = !!this.FIRSTRUN_CLASSIC && step !== 'register';
     /* Only the page on screen pays for its own lines: the classic confirm
        panel reads geocode, and so does the Codex place search. */
     const confirm = classic ? this.birthConfirmLines() : [];
     const pl = classic ? null : this.birthPlaceInfo();
     const unk = !!this.state.afTimeUnknown;
     return { ...base,
-      authGate: true, authBirth: step === 'birth' && classic, authCodex: step === 'birth' && !classic,
+      authGate: step === 'birth', regGate: step === 'register',
+      authBirth: step === 'birth' && classic, authCodex: step === 'birth' && !classic,
       /* The Codex page. */
       cxTypePlace: e => this.typeBirthPlace(e),
       cxPlaceHits: pl ? pl.hits : [], cxPlaceHasHits: !!(pl && pl.hits.length),
@@ -52429,6 +52678,153 @@ class Component extends DCLogic {
       birthGo: () => this.birthSubmit(),
       birthSkip: () => this.firstRunDone()
     };
+  }
+
+  /* ---- The registration card (owner, 26 October 2026) ---------------------
+   *
+   * Reached from the cover's Yes, or its "Create an account". A card floating
+   * over Today, which stays in full view behind it so the reader can see they
+   * are already inside the app, sized to the screen so nothing on it ever
+   * scrolls. It asks for the birth moment (date, time, place), an email and a
+   * password for the account, a phone number marked optional, and whether to
+   * send the newsletter.
+   *
+   * The moment it is sent, the birth moment replaces the default profile's,
+   * before the network is asked anything, so the screen behind the card is
+   * already the reader's own when the card goes. Then the account is made,
+   * and both settings that keep it (the sign in this browser remembers, and
+   * the profile saved to the account) are switched on.
+   *
+   * The time is a native time field here, empty until it is filled: blank is
+   * a time never given, the third state birth-time.js keeps, never noon. The
+   * place is the first run's own search, with the same rule that a typed
+   * place has to resolve before anything is saved. */
+  regVals() {
+    const st = this.state, CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    const consent = this.consentMap();
+    const rem = CL && CL.rememberGet ? CL.rememberGet() : { on: false };
+    const sw = on => ({ on, status: on ? 'On · kept for you' : 'Off', stC: on ? 'var(--ok)' : 'var(--dim)',
+      swBg: on ? 'var(--ok)' : 'var(--sf2)', swBd: on ? 'var(--ok)' : 'var(--bd)', knobX: on ? '20px' : '0px' });
+    const acctSaves = [
+      { t: 'Remember my sign in on this device', ...sw(!!rem.on),
+        toggle: () => { if (CL && CL.rememberSet) CL.rememberSet(!rem.on, rem.login || ''); this.setState({ consentTick: (st.consentTick || 0) + 1 }); } },
+      { t: 'Save my profile to my account', ...sw(!!consent.birthData),
+        toggle: () => this.setConsent('birthData', !consent.birthData) }
+    ];
+    if (this.authStep() !== 'register') return { acctSaves };
+    const err = st.regErr || {};
+    const news = st.regNews !== false;
+    const busy = !!st.regBusy;
+    const typeOf = k => e => this.setState({ [k]: e.target.value, regErr: {}, regMsg: '' });
+    return {
+      acctSaves,
+      regDate: this.af('bdate'), regTypeDate: e => { this.afSet('bdate', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
+      regTime: st.regTime || '', regTypeTime: typeOf('regTime'),
+      regEmail: st.regEmail || '', regTypeEmail: typeOf('regEmail'),
+      regPhone: st.regPhone || '', regTypePhone: typeOf('regPhone'),
+      regPass: st.regPass || '', regTypePass: typeOf('regPass'),
+      regDateBad: err.date ? 'true' : 'false', regPlaceBad: err.place ? 'true' : 'false',
+      regEmailBad: err.email ? 'true' : 'false', regPassBad: err.pass ? 'true' : 'false',
+      regPhoneBad: err.phone ? 'true' : 'false', regTimeBad: err.time ? 'true' : 'false',
+      regMsg: st.regMsg || Object.values(err)[0] || '', regHasMsg: !!(st.regMsg || Object.keys(err).length),
+      regNewsOn: news ? 'true' : 'false', regNewsMark: news ? '✓' : '',
+      regNewsBg: news ? 'var(--ac)' : 'transparent', regNewsBd: news ? 'var(--ac)' : 'var(--bd)',
+      regNewsGo: () => this.setState({ regNews: !news }),
+      regBusy: busy ? 'true' : 'false',
+      regGoLabel: busy ? 'Creating your account…' : 'Create my account',
+      regGo: () => this.regSubmit(),
+      regLater: () => this.regLeave(false)
+    };
+  }
+  /* The card goes and the tab forgets it asked. Not now leaves the default
+     profile as it was; a finished card has already replaced it. */
+  regLeave(done) {
+    try { sessionStorage.removeItem('incommon.register'); } catch (e) {}
+    if (!done) { try { sessionStorage.setItem('incommon.guest.default', '1'); } catch (e) {} }
+    this.firstRunDone({ regBusy: false, regErr: {}, regMsg: '', regPass: '', afPlaceQ: '' });
+  }
+  regSubmit() {
+    const st = this.state, PM = this.PM();
+    const CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    if (st.regBusy) return;
+    const date = this.af('bdate'), place = this.af('bplace').trim();
+    const time = String(st.regTime || '').trim().slice(0, 5);
+    const email = String(st.regEmail || '').trim(), pass = String(st.regPass || '');
+    const phone = String(st.regPhone || '').trim();
+    const errs = {};
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    const d = m ? new Date(date + 'T00:00:00') : null;
+    if (!date) errs.date = 'Choose your date of birth.';
+    else if (!m || !d || isNaN(d.getTime()) || +m[1] < 1900 || d.getTime() > Date.now()) errs.date = 'A birth date reads as a real date in the past, from 1900 onwards.';
+    if (time && !/^\d{2}:\d{2}$/.test(time)) errs.time = 'A birth time reads as hours and minutes.';
+    if (place) {
+      const g = PM ? PM.geocode(place) : null;
+      if ((!g || !g.resolved) && !this.gazWant(() => this.regSubmit())) return;
+      if (!g || !g.resolved) errs.place = 'Search for and select your place of birth, or type its coordinates as latitude, longitude.';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter the email address the account will use.';
+    if (pass.length < 8) errs.pass = 'Choose a password of 8 or more characters.';
+    if (phone && CL && CL.normPhone && !CL.normPhone(phone)) errs.phone = 'That phone number does not read as one. Outside the US and Canada, start it with + and the country code.';
+    if (Object.keys(errs).length) {
+      this.setState({ regErr: errs, regMsg: '' });
+      this.speak('That form needs a correction.', 'assertive');
+      return;
+    }
+    /* THE CUTOVER. The default profile takes the reader's birth moment now,
+       before the account is asked for, and stops being the sample. */
+    if (PM && PM.activeId()) {
+      try {
+        PM.updateProfile(PM.activeId(), { birthDate: date, ...(time ? { birthTime: time } : {}), ...(place ? { birthLocation: place } : {}) });
+        this.track('birth_data_confirmed');
+      } catch (e) {}
+      try { localStorage.removeItem(this.SAMPLE_KEY); } catch (e) {}
+    }
+    this.setState({ regBusy: true, regErr: {}, regMsg: '', memTick: (st.memTick || 0) + 1, afPlaceQ: '' });
+    if (!CL || !CL.passwordSignUp) {
+      this.setState({ regBusy: false, regMsg: 'Your birth details are saved on this device. The account could not be made here; try again from the start screen.' });
+      return;
+    }
+    /* The emailed confirmation comes back to the cover, which takes its
+       session and brings the reader in signed in, as it does for any sign
+       up. */
+    const back = new URL(this.coverHref(), location.href).href;
+    CL.passwordSignUp(email, pass, back, { newsletter: st.regNews !== false, source: 'app-register', ...(phone ? { phone } : {}) }).then(r => {
+      if (!r || !r.ok) {
+        const WHY = {
+          exists: 'That email already has an account. Sign in from the start screen with its password. Your birth details are saved on this device.',
+          weak: 'That password is too easy to guess. Choose a longer one.', short: 'Choose a password of 8 or more characters.',
+          invalid: 'Enter the email address the account will use.',
+          badPhone: 'That phone number does not read as one. Outside the US and Canada, start it with + and the country code.',
+          closed: 'New accounts are not being made right now. Your birth details are saved on this device.',
+          rate: 'Too many tries in a short time. Wait a few minutes and try again.',
+          offline: 'There is no connection. Your birth details are saved on this device; try again when you are online.'
+        };
+        const field = { exists: 'email', invalid: 'email', weak: 'pass', short: 'pass', badPhone: 'phone' }[r && r.reason];
+        this.setState({ regBusy: false, regErr: field ? { [field]: WHY[r.reason] } : {}, regMsg: field ? '' : (WHY[r && r.reason] || 'The account could not be made. Your birth details are saved on this device; try again in a moment.') });
+        return;
+      }
+      /* THE SETTINGS THAT KEEP AN ACCOUNT, switched on: the sign in this
+         browser remembers, the profile saved to the account, and the
+         password offered to the browser's own password manager. */
+      if (CL.rememberSet) CL.rememberSet(true, email);
+      this.setConsent('birthData', true);
+      try {
+        if (window.PasswordCredential && navigator.credentials && navigator.credentials.store) {
+          navigator.credentials.store(new PasswordCredential({ id: email, password: pass, name: email })).catch(() => {});
+        }
+      } catch (e) {}
+      this.regLeave(true);
+      if (r.signedIn) {
+        this.toastMsg('Your account is ready.');
+        /* The session was made on the sign up client; a reload hands it to
+           the app's own, which then syncs the profile up. */
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        this.toastMsg('Check ' + email + ' for a link to confirm your account.');
+      }
+    }, () => {
+      this.setState({ regBusy: false, regMsg: 'The account could not be made. Your birth details are saved on this device; try again in a moment.' });
+    });
   }
 
   IC() { return window.IChing; }
@@ -57209,6 +57605,7 @@ class Component extends DCLogic {
         };
       })() : {}),
       ...this.authVals(),
+      ...this.regVals(),
       ...this.a11yVals(),
             libStudy: !sel && !st.libView && this.libSubOf() === 'study', libJournal: !sel && !st.libView && this.libSubOf() === 'journal',
       libReadings: !sel && !st.libView && this.libSubOf() === 'readings', libBanner: !sel && !st.libView, libDetail: !!sel && !st.libView,

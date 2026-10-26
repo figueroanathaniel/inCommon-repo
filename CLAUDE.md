@@ -3218,6 +3218,108 @@ C5, C6, and D5/D6/S5/S6 at the wider sizes) were the only thing saying so.
 `build-bundle.js` refuses to ship a bundle whose head has no sheet, or whose
 helmet has one again.
 
+## The ring, Continue and the registration card (26 October 2026)
+The owner asked for the cover to be simplified and for a new way in. This
+section supersedes, where they disagree, four rules further down: the
+wordmark and "enter here" in "The cover, and the two pages the site has now";
+the scroll that faded between them; "On a phone there is no enter here at
+all" (the phone no longer opens the form at once); and "enter here is the way
+to signing in, and only that". The shader half is untouched.
+
+**The cover is a ring and a pill.** The wordmark, "enter here", the decorated
+I and the 300vh scroll are gone. The middle of the screen is a DOM ring:
+`.purple-ring` in `#9d4edd` turning clockwise in 8s, `.green-line` in
+`#00f5d4` along its inside edge turning the other way in 6s, both glowing,
+each with a spark so the turning can be seen (a uniform circle that rotates
+looks exactly like one that does not). Those three colours are the owner's
+spec values for this ring and live only on the ring; the logo on the
+registration card keeps the identity's `#8b5cf6` and `#2fff8f`. A "Continue"
+pill sits at the exact centre of the screen, which is the centre of the ring,
+with "Create an account" under it in a small system face. The `h1` is still
+there for screen readers and crawlers, visually hidden. The render behind is
+scenery: `uRim` and `uExit` are held at 0, so `markLight()` adds nothing, and
+the Learn link sits at the foot of the screen.
+
+**The pill is still `a.enter` with the real href**, so `build-bundle.js` and
+its two copies of the app address are unchanged, and with every script dead
+it navigates as it always did.
+
+**Continue is gated on the session this browser kept.** `signedInAs()` reads
+the stored session at load (never the network). Held and owing nothing, the
+press goes straight in. Owing its two-step code, it opens the form in `mfa`.
+Otherwise it opens the question: the spec's sentence, "Would you like to
+create your profile?", Yes, No, a cross, and "Already have an account? Sign
+in", which opens the password form exactly as before. The question is a
+dialog: focus goes to Yes, Tab stays inside it, Escape and a press on the dim
+are the cross, and focus goes back to the pill.
+
+**Yes and "Create an account" set `incommon.register` for the tab; No sets
+`incommon.guest.default`.** Both set `incommon.guest.chosen` too, so
+`signedOutLanding()` does not send a reader with nothing on the device back
+to the cover. `authStep()` reads them: `register` shows the registration
+card, `guest.default` skips the first run and the default profile stays. A
+reader already signed in (`PM.owner()`) is never shown the card.
+
+**The way in is one sequence, run by the plain script, not the module.** So
+a device with no WebGL gets it too. `runExit()` adds `is-split` (the slots
+translate the rings a quarter of the diameter apart), `g-dot` (the line's
+inset and border draw it to a 14px dot), `is-flash` at 950ms, then `g-fill`
+at 1150ms (inset 2% and a border of 0.48 of the diameter, a solid disc), and
+goes at 2350ms. The green sits inside `.lens-a` and `.lens-b`, each clipped to
+one ring's inner edge and travelling with it, and `.lens-c` travels back, so
+the disc stays centred while its clip becomes the lens. Every part has one
+job: rotation is the animation on the ring and the line and never changes,
+the split is a translate on a wrapper, the shrink and growth are inset and
+border width. That separation is what keeps the turning continuous through
+every phase; the spec's own CSS put the split and the rotation on the same
+`transform` in one animation list, where the later one wins.
+
+**The app plays it back.** Before navigating, the cover writes
+`incommon.ring.handoff`: the moment it went and each ring's `currentTime`
+read off `getAnimations()`. The top of the app's body draws the mark (split,
+filled, transitions off) when that key is under 20 seconds old, reads it once
+and removes it, so a reload never replays it, and sets negative animation
+delays so the rings carry on turning from where the cover left them.
+`boot()` calls `announceReady()`, which fires `incommon:ready` two frames after
+the ready render; the overlay then removes `is-split` (the rings close, and
+the lens clip grows back into the whole disc) and, 550ms later, `g-fill`, so
+the green thins from the centre back to the line. It fades at 1850ms and is
+removed. A 15 second ceiling settles it regardless.
+
+**The registration card is `regGate`, a sibling of `authGate`.** A card over
+Today with a transparent scrim, so Today shows around it at full strength.
+It is held to the screen and never scrolls: `max-height: 90vh`, `overflow:
+hidden`, and the spacing pulls in at 740, 640 and 600 pixels tall, with two
+columns for a phone on its side. Measured at 320x568, 360x640, 375x600,
+375x667, 390x844, 667x375, 844x390, 932x430, 768x1024 and 1440x900: no
+overflow, no row overlapping the next, every control at least 40px. The logo
+is the identity's horizontal lockup, drawn inline, `clamp(30px, 6vh, 50px)`
+tall. The fields: date (required), time (a native time field, empty until
+filled, so blank is a time never given and never noon), place (the first
+run's own search, and a typed place has to resolve), email, a password (an
+account cannot be made without one), phone (optional) and the newsletter box,
+ticked to start.
+
+**Sent, the birth moment replaces the default profile's before the network
+is asked.** `regSubmit()` writes the date, time and place to the active
+profile and removes `SAMPLE_KEY`, so the sample banner goes and Today is the
+reader's own when the card leaves. Then `passwordSignUp()` makes the account,
+with `source: 'app-register'` on the newsletter answer and the phone as
+`contact_phone` in E.164 (K25c). On success it switches on both settings that
+keep an account, which have a group of their own in Settings, "Account & sign
+in", in both shells: "Remember my sign in on this device" (`rememberSet(true,
+email)`) and "Save my profile to my account" (the `birthData` consent). It
+also offers the password to the browser's password manager. With confirm
+email on, the reader is told to check their email and the link returns to
+the cover, which signs them in; with it off, the app reloads to take the
+session. "Not now" leaves the default profile and skips the card for the tab.
+
+**What still has to be updated.** The browser harness rows that drive the
+cover's old shape (H5 counts one `a[href]` and looks for the words "enter
+here"; H15, P13 and P15 drive the old link and the phone form) were not
+rerun and will need rewriting for the pill and the question. K55 now counts
+11 Terms links in the app, the card's agreement line being the eleventh.
+
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the
 wordmark, and "enter here" under it. It is the first thing a visitor meets, and it is the
