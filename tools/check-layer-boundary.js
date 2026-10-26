@@ -66,7 +66,8 @@ const LAYERS = {
     'incommon-core.js',            /* the shared core both the app and the Node suites execute */
     'minor-bodies-ephemeris.js',   /* the ephemeris itself */
     'minor-body-elements.js',      /* JPL Horizons elements for the expanded chart, each with its measured worst case */
-    'comet-hyakutake-jpl.js',       /* Dated Horizons longitude for C/1996 B2 */
+    'comet-hyakutake-jpl.js', 'comet-integrated-jpl.js',
+    'lunar-mean-points.js', 'jpl-derived-points.js',       /* Dated Horizons longitude for C/1996 B2 */
     'ephemeris-cache.js',      /* in memory memo, positions only, never persisted */
     'arc-solver.js',               /* bisects a longitude function the caller supplies */
     'birth-time.js',               /* known / unknown / unanswered, and the offset for the birth date */

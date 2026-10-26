@@ -252,6 +252,7 @@ input[type="date"]{color-scheme:dark}
 <script src="./minor-bodies-ephemeris.js"></script>
 <script src="./minor-body-elements.js"></script>
 <script src="./comet-hyakutake-jpl.js"></script>
+<script src="./comet-integrated-jpl.js"></script>
 <script src="./placement-content.js"></script>
 <script src="./numerology-content.js"></script>
 <script src="./number-matrix.js"></script>
@@ -284,6 +285,8 @@ input[type="date"]{color-scheme:dark}
      hoisted as async tags, so without the wait a chart drawn first would be
      memoised from the old series for the rest of the session. -->
 <script src="./astronomy-engine-2.1.19.min.js"></script>
+<script src="./lunar-mean-points.js"></script>
+<script src="./jpl-derived-points.js"></script>
 <script src="./arc-solver.js"></script>
 <script src="./ephemeris-cache.js"></script>
 <script src="./hd-wheel.js"></script>
@@ -13809,7 +13812,7 @@ class Component extends DCLogic {
   /* window.Astronomy is here because a chart drawn before it arrives is drawn
      from the fallback series and memoised that way. It cannot hold the splash
      forever: boot() gives up after 50 tries and lonRaw() still answers. */
-  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols && window.Astronomy); }
+  modulesReady() { return !!(window.InCommonCore && window.PracticeLibrary && window.ProfileManager && window.SabianSymbols && window.Astronomy && window.LunarMeanPoints); }
   PM() { return window.ProfileManager; }
   /* A device wide key holding one reader's data, made one per signed in
      account by ProfileManager (its ACCOUNT_KEYS, which these five are: first
@@ -15488,7 +15491,7 @@ class Component extends DCLogic {
     // ---- LUNAR NODES & POINTS ----
     { id: 'lilithMean', name: 'Lilith (Mean)', glyph: '⚸', category: 'node', tooltip: 'black moon, repressed rage, raw feminine power', reference: 'shadow, taboo, exile, wildness' },
     { id: 'lilithOsc', name: 'Lilith (Osculating)', glyph: '⚸✦', category: 'node', tooltip: 'black moon, repressed rage (osculating)', reference: 'shadow, current cycle (osculating)' },
-    { id: 'selena', name: 'Selena', glyph: 'Sel', category: 'node', tooltip: 'white moon, purity, spiritual protection', reference: 'guardian force, pure intent, grace' },
+    { id: 'selena', name: 'Selena (Opposite Apogee)', glyph: 'Sel', category: 'node', tooltip: 'opposite the mean lunar apogee; this chart’s Selena convention', reference: 'guardian force, pure intent, grace' },
     { id: 'mercuryNode', name: 'Mercury Node', glyph: '☿N', category: 'node', tooltip: 'mercury collective karma, communication evolution', reference: 'shared speech, thought-form destiny' },
     { id: 'venusNode', name: 'Venus Node', glyph: '♀N', category: 'node', tooltip: 'venus collective karma, relationship evolution', reference: 'shared love, value-form destiny' },
     { id: 'marsNode', name: 'Mars Node', glyph: '♂N', category: 'node', tooltip: 'mars collective karma, action evolution', reference: 'shared drive, will-form destiny' },
@@ -15553,7 +15556,7 @@ class Component extends DCLogic {
      asserted word for word by tools/check-minor-body-elements.js. */
   ELEMENTS_MISSING_WHY = 'minor-body-elements.js did not load, so the orbital elements for this body are not available';
   OUT_OF_SPAN_WHY = 'this birth date is outside 1900 to 2100, the span its orbital elements were measured over';
-  LILITH_OSC_WHY = 'the osculating apogee moves up to thirty degrees either side of the mean within a month, and needs a lunar theory this build does not carry';
+  LILITH_OSC_WHY = 'the dated JPL lunar state is unavailable for this moment';
   PL_LONG = {
     Sun: 'Your core identity, vitality, and conscious will: the part of you that wants to be someone in particular.',
     Moon: 'Feeling, memory, and what actually soothes you. The private weather underneath the public day.',
@@ -16037,8 +16040,8 @@ class Component extends DCLogic {
     }
     if (name === 'Sun') { const M = this.norm360(357.5291 + .98560028 * t), L = this.norm360(280.459 + .98564736 * t); return this.norm360(L + 1.915 * Math.sin(M * R) + .02 * Math.sin(2 * M * R)); }
     if (name === 'Moon') { const Mp = this.norm360(134.963 + 13.064993 * t), D = this.norm360(297.85 + 12.190749 * t); return this.norm360(218.316 + 13.176396 * t + 6.289 * Math.sin(Mp * R) + 1.274 * Math.sin((2 * D - Mp) * R)); }
-    if (name === 'North Node') return this.norm360(125.0445 - .0529539 * t);
-    if (name === 'South Node') return this.norm360(125.0445 - .0529539 * t + 180);
+    if (name === 'North Node') return this.meanLunarNodeOf(t);
+    if (name === 'South Node') { const n = this.meanLunarNodeOf(t); return n == null ? null : this.norm360(n + 180); }
     /* Chiron and the four asteroids. Chiron is fetched from JPL Horizons now,
        as the Celestial Codex asked Horizons for it, and measures 0.025 degrees
        at worst against 404 of Horizons' own positions, so it names a degree:
@@ -16145,7 +16148,7 @@ class Component extends DCLogic {
           'Its historical orbit has its own uncertainty, so this reading does not claim the exact degree. ' +
           'No degree symbol is shown for it.';
       }
-      return 'A comet’s orbit is changed by every pass near an astral body, and this position comes from a single set of elements, so the sign is worth reading and the exact degree is not. No degree symbol is shown for it.';
+      return 'This comet follows a dated JPL Horizons position table. Its historical orbit has its own uncertainty, so this reading does not claim the exact degree. No degree symbol is shown for it.';
     }
     const MBE = window.MinorBodiesEphemeris;
     const mbeName = { chiron: 'Chiron', ceres: 'Ceres', pallas: 'Pallas', juno: 'Juno', vesta: 'Vesta' }[key] || key;
@@ -16368,18 +16371,17 @@ class Component extends DCLogic {
     }
     return this.norm360(sun - asc.asc) >= 180;
   }
-  // Ascending-node coefficients of approximate J2000 Keplerian orbit fits.
-  // These are model parameters, not independently integrated geocentric
-  // planetary-node longitudes; do not label their printed seconds verified.
-  PLANET_NODE = {
-    Mercury: [48.33167, -446.30 / 3600], Venus: [76.68069, -996.89 / 3600], Mars: [49.57854, -1020.19 / 3600],
-    Jupiter: [100.55615, 1217.17 / 3600], Saturn: [113.71504, -1591.05 / 3600], Uranus: [74.22988, -1681.40 / 3600],
-    Neptune: [131.72169, -151.25 / 3600], Pluto: [110.30347, -37.33 / 3600]
-  };
+  // Geometric heliocentric osculating nodes, with the declared constructed-
+  // point frame convention. The module rejects unsupported dates.
   planetaryNodeOf(name, t) {
-    const el = this.PLANET_NODE[name]; if (!el) return null;
-    return this.norm360(el[0] + el[1] * (t / 36525));
+    const J = window.JPLDerivedPoints;
+    return J ? J.node(name, t) : null;
   }
+  meanLunarNodeOf(t) {
+    const L = window.LunarMeanPoints;
+    return L ? L.meanNode(t) : null;
+  }
+
   // Eris and Sedna: full 3D Keplerian elements (Omega and omega split apart,
   // unlike the coplanar model the eight astral bodies use). Source: JPL Small-Body
   // Database / Horizons, cross-checked against two independent citations
@@ -16415,36 +16417,19 @@ class Component extends DCLogic {
     const r = el[4] * (1 - el[2] * el[2]) / (1 + el[2] * Math.cos(nu)), lon = el[3] * R + nu;
     return [r * Math.cos(lon), r * Math.sin(lon)];
   }
-  // Halley, Hale-Bopp, Hyakutake: osculating elements, JPL Horizons/MPC (see
-  // app/ephemeris/cometElements.ts). Mundane astrology only: nothing in this
-  // codebase treats a comet's position as a personal placement, and the UI
-  // must keep saying so (every tooltip/reference above ends "mundane").
-  COMET_ELEMENTS = {
-    halley: { perihelionT: 2446470.12 - 2451545.0, a: 17.94, e: .9671, i: 162.2421, om: 58.42, w: 111.33 },
-    halebopp: { perihelionT: 2450540.5 - 2451545.0, a: 186.5, e: .9951, i: 89.43, om: 282.47, w: 130.73 },
-  };
-  // Gaussian gravitational constant, radians/day at a=1 AU: same constant
-  // family as meanMotionOf(), kept separate because the comet solver works
-  // in radians throughout (cometSolver.ts's own GAUSS_K).
+  // Integrated JPL observer longitudes. Comets remain mundane overlays;
+  // interpolation agreement and orbital uncertainty are separate quantities.
   cometLonOf(id, t) {
-    const el = this.COMET_ELEMENTS[id]; if (!el) return null;
-    const R = this.RAD, GAUSS_K = .01720209895;
-    const n = GAUSS_K / Math.pow(el.a, 1.5);
-    const M = n * (t - el.perihelionT);
-    const E = this.solveKeplerE(M, el.e), v = this.trueAnomalyOf(E, el.e);
-    const r = el.a * (1 - el.e * Math.cos(E));
-    const xOrb = r * Math.cos(v), yOrb = r * Math.sin(v);
-    const i = el.i * R, Om = el.om * R, w = el.w * R;
-    const cosO = Math.cos(Om), sinO = Math.sin(Om), cosW = Math.cos(w), sinW = Math.sin(w), cosI = Math.cos(i), sinI = Math.sin(i);
-    const x = (cosO * cosW - sinO * sinW * cosI) * xOrb + (-cosO * sinW - sinO * cosW * cosI) * yOrb;
-    const y = (sinO * cosW + cosO * sinW * cosI) * xOrb + (-sinO * sinW + cosO * cosW * cosI) * yOrb;
-    const earth = this.helioOf(this.EARTH_EL, t);
-    return this.norm360(Math.atan2(y - earth[1], x - earth[0]) / R);
+    const C = window.CometIntegratedJPL;
+    return C ? C.lon(id, t) : null;
   }
-  // Mean lunar apogee (Meeus, mean longitude of lunar perigee series);
-  // Selena is the same longitude +180. A secular mean, not osculating: see
-  // engine.ts's lilithMeanLon for the honesty note on that gap.
-  lilithMeanOf(t) { return this.norm360(83.3532465 + 4069.0137287 * (t / 36525) + 180); }
+  // Mean lunar apogee: secular elements, inclined-plane projection, TT
+  // and nutation. Selena uses its explicitly labelled opposite-apogee
+  // convention. Osculating Lilith has its own JPL state-vector provider.
+  lilithMeanOf(t) {
+    const L = window.LunarMeanPoints;
+    return L ? L.meanApogee(t) : null;
+  }
   // The core computation dispatcher: one registry entry + t (+ profile
   // context for the angle-dependent derived points) in, {lon, status, note}
   // out. Mirrors engine.ts's computeAll() switch, minus the points nobody
@@ -16465,25 +16450,30 @@ class Component extends DCLogic {
         const ME = window.MinorBodyElements, lon = ME && ME.has(reg.id) ? ME.lon(reg.id, t) : null;
         return { lon: lon != null ? lon : this.tno3DLonOf(reg.id, t), status: 'ok' };
       }
-      case 'lilithOsc': return { lon: null, status: 'unavailable', note: this.LILITH_OSC_WHY };
-      case 'mercuryNode': return { lon: this.planetaryNodeOf('Mercury', t), status: 'fixed' };
-      case 'venusNode': return { lon: this.planetaryNodeOf('Venus', t), status: 'fixed' };
-      case 'marsNode': return { lon: this.planetaryNodeOf('Mars', t), status: 'fixed' };
-      case 'jupiterNode': return { lon: this.planetaryNodeOf('Jupiter', t), status: 'fixed' };
-      case 'saturnNode': return { lon: this.planetaryNodeOf('Saturn', t), status: 'fixed' };
-      case 'uranusNode': return { lon: this.planetaryNodeOf('Uranus', t), status: 'fixed' };
-      case 'neptuneNode': return { lon: this.planetaryNodeOf('Neptune', t), status: 'fixed' };
-      case 'plutoNode': return { lon: this.planetaryNodeOf('Pluto', t), status: 'fixed' };
-      case 'lilithMean': return { lon: this.lilithMeanOf(t), status: 'ok' };
-      case 'selena': return { lon: this.norm360(this.lilithMeanOf(t) + 180), status: 'fixed' };
+      case 'lilithOsc': {
+        const J = window.JPLDerivedPoints, lon = J ? J.apogee(t) : null;
+        return lon == null ? { lon: null, status: 'unavailable', note: 'dated lunar state unavailable for this moment' } : { lon, status: 'ok' };
+      }
+      case 'mercuryNode': { const lon = this.planetaryNodeOf('Mercury', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'venusNode': { const lon = this.planetaryNodeOf('Venus', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'marsNode': { const lon = this.planetaryNodeOf('Mars', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'jupiterNode': { const lon = this.planetaryNodeOf('Jupiter', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'saturnNode': { const lon = this.planetaryNodeOf('Saturn', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'uranusNode': { const lon = this.planetaryNodeOf('Uranus', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'neptuneNode': { const lon = this.planetaryNodeOf('Neptune', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'plutoNode': { const lon = this.planetaryNodeOf('Pluto', t); return lon == null ? { lon: null, status: 'unavailable', note: 'dated planetary node unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'lilithMean': { const lon = this.lilithMeanOf(t); return lon == null ? { lon: null, status: 'unavailable', note: 'mean lunar elements unavailable for this moment' } : { lon, status: 'ok' }; }
+      case 'selena': { const m = this.lilithMeanOf(t); return m == null ? { lon: null, status: 'unavailable', note: 'mean lunar elements unavailable for this moment' } : { lon: this.norm360(m + 180), status: 'fixed' }; }
       case 'ariesPoint': return { lon: 0, status: 'fixed' };
       case 'hyakutake': {
         const H = window.HyakutakeJPL;
         const lon = H && H.lon(t);
         return lon == null ? { lon: null, status: 'unavailable', note: 'dated JPL Hyakutake ephemeris unavailable for this moment' } : { lon, status: 'ok' };
       }
-      case 'halley': case 'halebopp':
-        return { lon: this.cometLonOf(reg.id, t), status: 'ok' };
+      case 'halley': case 'halebopp': {
+        const lon = this.cometLonOf(reg.id, t);
+        return lon == null ? { lon: null, status: 'unavailable', note: 'dated JPL comet ephemeris unavailable for this moment' } : { lon, status: 'ok' };
+      }
       case 'vertex': {
         const v = this.vertexOf(t);
         return v == null ? { lon: null, status: 'unavailable', note: 'needs a birth time and place' } : { lon: v, status: 'ok' };

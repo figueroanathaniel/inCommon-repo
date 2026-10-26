@@ -1,0 +1,47 @@
+{
+  "apogee": {
+    "midpoints": 292196,
+    "worstArcsec": 0.2866280034822921,
+    "worstT": 33249.625
+  },
+  "Mercury": {
+    "midpoints": 18262,
+    "worstArcsec": 0.09415956311613627,
+    "worstT": -31918.0
+  },
+  "Venus": {
+    "midpoints": 18262,
+    "worstArcsec": 0.09439280931928806,
+    "worstT": 29638.0
+  },
+  "Mars": {
+    "midpoints": 18262,
+    "worstArcsec": 0.0939559472271867,
+    "worstT": 22418.0
+  },
+  "Jupiter": {
+    "midpoints": 18262,
+    "worstArcsec": 0.09397101275681052,
+    "worstT": 22418.0
+  },
+  "Saturn": {
+    "midpoints": 18262,
+    "worstArcsec": 0.09399004966326174,
+    "worstT": 22418.0
+  },
+  "Uranus": {
+    "midpoints": 18262,
+    "worstArcsec": 0.0947929244603074,
+    "worstT": 29610.0
+  },
+  "Neptune": {
+    "midpoints": 18262,
+    "worstArcsec": 0.094136521170185,
+    "worstT": -17922.0
+  },
+  "Pluto": {
+    "midpoints": 18262,
+    "worstArcsec": 0.09398616648468305,
+    "worstT": 22418.0
+  }
+}

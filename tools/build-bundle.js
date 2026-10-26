@@ -77,7 +77,7 @@ const MODULES = [
   'minor-bodies-ephemeris.js',
   /* The expanded chart's fetched elements. Reads nothing above it. */
   'minor-body-elements.js',
-  'comet-hyakutake-jpl.js',
+  'comet-hyakutake-jpl.js', 'comet-integrated-jpl.js',
   'placement-content.js',
   'numerology-content.js',
   'number-matrix.js',
@@ -103,6 +103,7 @@ const MODULES = [
      analytics.js touches storage and nothing else. */
   'birth-time.js',
   'astronomy-engine-2.1.19.min.js',
+    'lunar-mean-points.js', 'jpl-derived-points.js',
   /* Solves the design moment, so it has to be present before the first chart
      is drawn. Knows nothing about ephemerides: the app hands it a longitude
      function. */
