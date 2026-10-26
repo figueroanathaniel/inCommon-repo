@@ -569,7 +569,8 @@
       jobs.push(r.compileAsync(this.scene, this.cam));
       if (this.post && this.quad) [this.mBright, this.mBlur, this.mComp].forEach(function (m) { self.quad.material = m; jobs.push(r.compileAsync(self.postScene, self.postCam)); });
     } catch (e) { done(); return; }
-    Promise.all(jobs).then(done, done);
+    this._warmJobs = Promise.all(jobs);
+    this._warmJobs.then(done, done);
   };
   /* Built now, wherever it is: the app builds a stage in its offscreen lot
      before the reader asks for it, which buildNear() would wait on forever. */
@@ -1681,10 +1682,24 @@
     document.removeEventListener('visibilitychange', this._on.vis);
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
-    if (this.content) this.dispose(this.content);
-    if (this.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { this.post[k].dispose(); }, this); }
-    if (this.cellTex) this.cellTex.dispose();
-    if (this.r) this.r.dispose();
+    /* THE GPU IS LET GO ONLY ONCE THE WARM-UP HAS SETTLED (26 October 2026).
+       compileAsync() polls each material's program on a timer until it
+       reports ready. Disposing the materials while that poll is still running
+       leaves it reading a program that is gone, and it throws an uncaught
+       TypeError ("reading 'isReady'") from inside three.js. A shell swap on a
+       resize destroys a stage that is still warming, which is how E5 of the
+       harness kept catching it. So everything that is not the GPU goes now,
+       and the materials, the render targets and the renderer go when the
+       compile jobs settle. A context lost mid-compile never settles, and then
+       a dead context is left for the collector rather than thrown over. */
+    var self = this;
+    var release = function () {
+      if (self.content) self.dispose(self.content);
+      if (self.post) { ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { self.post[k].dispose(); }, self); }
+      if (self.cellTex) self.cellTex.dispose();
+      if (self.r) self.r.dispose();
+    };
+    if (this._warmJobs) this._warmJobs.then(release, release); else release();
     try { if (this.el.root.parentNode) this.el.root.parentNode.removeChild(this.el.root); } catch (e) { /* gone already */ }
     this.failed = true;
   };
