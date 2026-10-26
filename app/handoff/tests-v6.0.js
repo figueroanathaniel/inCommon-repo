@@ -479,14 +479,20 @@
       /* ---- Fix 1: the alignment card lives in Today and nowhere else ---- */
       onStep('fix 1: alignment placement');
       await go('#/today', 700);
-      var todayHasAlign = /Today.s Alignment/.test(txt(doc.querySelector('[data-screen-label="Today"]')));
+      /* Found by its date stepper, not its title: the title went when the
+         horoscope became the page, and the stepper is the alignment's own. */
+      var ALIGN = '[aria-label="Date this alignment is drawn for"]';
+      var shownIn = function (root) {
+        return [].slice.call(root.querySelectorAll(ALIGN)).some(function (g) { return g.getBoundingClientRect().height > 0; });
+      };
+      var todayScr = doc.querySelector('[data-screen-label="Today"]');
+      var todayHasAlign = !!todayScr && shownIn(todayScr);
       var elsewhere = [];
       var others = ['#/spirit/astrology', '#/spirit/human-design', '#/spirit/numerology', '#/library/synchronicities', '#/library/journal', '#/library/throughline', '#/oracle'];
       for (var oi = 0; oi < others.length; oi++) {
         await go(others[oi], 520);
         var scr = qa('[data-screen-label]').filter(function (s) { return s.getBoundingClientRect().height > 0; });
-        var joined = scr.map(txt).join(' ');
-        if (/Today.s Alignment/.test(joined)) elsewhere.push(others[oi]);
+        if (scr.some(shownIn)) elsewhere.push(others[oi]);
       }
       t('F1', 'The alignment card appears in Today and on no other screen',
         { inToday: true, elsewhere: [] }, { inToday: todayHasAlign, elsewhere: elsewhere });
