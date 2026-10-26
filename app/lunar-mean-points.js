@@ -2,7 +2,7 @@
  * Mathematical secular elements: Meeus, Astronomical Algorithms, lunar
  * arguments and mean perigee. This module contains no Swiss source code.
  * Requires the app's Astronomy Engine for TT and nutation. The date span
- * is deliberately restricted to the independently checked 1900–2100 era.
+ * is deliberately restricted to the independently checked 1900 to 2100 era.
  */
 (function(root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./astronomy-engine-2.1.19.min.js'));

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download a 1900–2100 excerpt of NASA's original DE441 reference file.
+"""Download a 1900 to 2100 excerpt of NASA's original DE441 reference file.
 
 Only the coverage header is changed. The coefficient records are verbatim.
 This file is for independent Swiss JPLEPH reference generation, not app use.

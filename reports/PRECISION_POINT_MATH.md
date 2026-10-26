@@ -153,7 +153,7 @@ bodies and out-of-span dates; do not extrapolate or reinstate a coarse fallback.
 
 | Calculation | Independent verification | Largest measured longitude difference |
 |---|---|---:|
-| Mean Lilith | 2,050 Swiss dates, 1900–2100 | 0.700″ |
+| Mean Lilith | 2,050 Swiss dates, 1900 to 2100 | 0.700″ |
 | Mean lunar node | Same independent dates | 0.298″ |
 | Osculating Lilith | Same dates, Swiss direct-JPL mode | 0.554″ |
 | Eight geometric planetary nodes | Same dates, explicit TRUEPOS convention | 0.107″ |

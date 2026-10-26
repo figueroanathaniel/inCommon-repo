@@ -82,7 +82,7 @@ number for it.
 The app's generic offline minor-body model is still an approximation for
 dates other than this audit instant. Quaoar now includes a Horizons osculating
 elements row at this epoch: it is within 0.08″ of the direct natal Horizons
-longitude, while the full sampled 1900–2100 model still carries a 0.046°
+longitude, while the full sampled 1900 to 2100 model still carries a 0.046°
 worst-case bound. Dejanira, Karma, and Damocles were already within 3″ at
 this instant. The app's primary astronomy-engine values differ by a few
 arcseconds from the direct JPL observer output. Neither this report nor its
@@ -103,17 +103,17 @@ are documented in `reports/CLIENT_CALCULATOR_ACCURACY.md`.
 1975 through 2026 against Swiss Ephemeris 2.10.03 reference values for mean
 and osculating lunar apogee. It deliberately exits nonzero while the live
 calculator cannot justify a seconds-precise Black Moon Lilith placement. In
-the pre-repair code, mean Lilith missed the Swiss reference by 197.6–411.6
-arcseconds (3.3–6.9 arcminutes); the live app labels it `ok`. Osculating
+the pre-repair code, mean Lilith missed the Swiss reference by 197.6 to 411.6
+arcseconds (3.3 to 6.9 arcminutes); the live app labels it `ok`. Osculating
 Lilith had no live longitude. Both variants now have independently checked live implementations. At those same instants the two mathematically
-distinct Lilith variants differ by 1.736–26.451 degrees. These are different
+distinct Lilith variants differ by 1.736 to 26.451 degrees. These are different
 charts' UTC instants, not a general error bound over all dates or locations.
 The checks must pass against the actual runtime calculator before calling
 either variant verified for client readings. A natal Swiss value in this
 report is not an implementation for arbitrary births.
 
 Swiss definition reference: https://www.astro.com/swisseph/swisseph.htm,
-sections 2.2.1–2.2.5. NASA's fitted planetary-element tables explicitly
+sections 2.2.1 to 2.2.5. NASA's fitted planetary-element tables explicitly
 are not a mean theory: https://ssd.jpl.nasa.gov/planets/approx_pos.html.
 
 Run `node tools/check-observatory-reconciliation.js`,

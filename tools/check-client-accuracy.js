@@ -14,7 +14,7 @@ const checks = [
   ['Hyakutake integrated reference interpolation', 'check-hyakutake-jpl.js'],
   ['Angles, geographic coverage, sect and house edges', 'check-client-angles.js'],
   ['Black Moon Lilith variants', 'check-client-lilith.js'],
-  ['Independent geometric nodes and lunar points, 1900–2100', 'check-client-derived-points.js'],
+  ['Independent geometric nodes and lunar points, 1900 to 2100', 'check-client-derived-points.js'],
   ['Planetary/lunar nodes and original comet anchors', 'check-client-risk-points.js'],
   ['Halley and Hale-Bopp integrated interpolation', 'check-comet-integrations.js'],
   ['Timezone and shared-module regressions', 'run-module-tests.js', '--quiet'],

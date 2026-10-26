@@ -18,7 +18,7 @@ settings and measured limits.
 |---|---|
 | Mean Lilith and opposite-apogee Selena | Inclined-orbit projection, TT and nutation; 2,050 independent dates; maximum 0.700″. Selena's chosen definition is explicit in its UI name. |
 | Mean lunar North and South Nodes | TT-based secular elements plus nutation; maximum 0.298″ against independent references. |
-| Osculating Lilith | JPL lunar position/velocity geometry, dated interpolation; available within 1900–2100; maximum 0.554″ against Swiss direct-JPL references. |
+| Osculating Lilith | JPL lunar position/velocity geometry, dated interpolation; available within 1900 to 2100; maximum 0.554″ against Swiss direct-JPL references. |
 | Eight planetary ascending nodes | Geometric heliocentric osculating nodes in the declared Swiss constructed-point frame; maximum 0.107″ over independent full-kernel references. |
 | Halley and Hale-Bopp | Integrated Horizons observer tables replace the static solvers; 61,670 independent off-grid comparisons, maxima 0.850″ and 0.487″. Formal orbit uncertainty remains separate. |
 | Polar Ascendant and day/night sect | Earlier merged repair retained; 72 charts, 1,764 house-edge checks and 144 lot-formula checks pass. |

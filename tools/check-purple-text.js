@@ -136,13 +136,21 @@ for (const needle of NEEDLES) {
        to the nearest owner the template actually loops over. Without this,
        a real violation is reported as "unresolved" and reads like gate noise
        rather than the finding it is. */
-    const cands = [...logic.slice(0, i).matchAll(/\n\s{4,}([A-Za-z0-9_]+)\s*:\s*(?:\[|\(\(\)|\(function|\(\s*\()/g)]
-      .map(m => m[1]);
+    /* A local declared and handed to the template under its own name
+       (`const cwRingBands = years.map(...)`, then `return { cwRingBands }`)
+       is an owner too. Without it the walk passes the local by and lands on
+       whatever renderVals key opened an array before it, which once pinned a
+       Cycle Audit ring stroke on the birth form's clock buttons. */
+    const cands = [...logic.slice(0, i).matchAll(/\n\s{4,}(?:const\s+([A-Za-z0-9_]+)\s*=\s*(?:\[|[A-Za-z0-9_.]+\.map\()|([A-Za-z0-9_]+)\s*:\s*(?:\[|\(\(\)|\(function|\(\s*\())/g)]
+      .map(m => ({ name: m[1] || m[2], local: !!m[1] }));
     let array = null;
-    for (let k = cands.length - 1; k >= 0 && k >= cands.length - 8; k--) {
-      if (loopsFor(cands[k]).length) { array = cands[k]; break; }
+    for (let k = cands.length - 1, seen = 0; k >= 0 && seen < 8; k--) {
+      if (loopsFor(cands[k].name).length) { array = cands[k].name; break; }
+      if (!cands[k].local) seen++;
     }
-    if (!array) array = cands.length ? cands[cands.length - 1] : null;
+    /* A local nothing loops over is a helper, not an owner. */
+    const keys = cands.filter(c => !c.local);
+    if (!array) array = keys.length ? keys[keys.length - 1].name : null;
 
     const ctx = logic.slice(Math.max(0, i - 90), i + 40).replace(/\s+/g, ' ').trim();
 
