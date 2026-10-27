@@ -54,7 +54,7 @@ this block updates every brief.
 |---|---|
 | Base branch | main |
 | `<current>` deploy folder | deploy/v6.4/ (so `deploy/<current>/` is deploy/v6.4/) |
-| Last full gate run on main | 7324bae, 27 October 2026, every gate green |
+| Last full gate run on main | c259e80, 27 October 2026: every README gate green (drift-check M, E, F, G, T, R, N; drive-cover 3/3, drive-routes 2/2, drive-swipe 4/4; run-module-tests 435/435), plus the 23 other check-*.js gates. H not run. |
 | Workstream 4's merged work so far | PR #92, PR #93, PR #97 |
 | Merged fixes since the briefs were written | PR #94 (H11 untimed), PR #98 (Back after a routed arrival), PR #99 (swipes mid move) |
 
@@ -286,6 +286,8 @@ doc here rather than working around the difference.
 
 - 27 October 2026: written. Six workstreams, primaries, secondaries and
   tertiaries assigned by the owner.
+- 27 October 2026: round 1 assignments added under assignments/, with the
+  status board; main c259e80 recorded as the last green run.
 - 27 October 2026: committed to the repo under docs/outsourcing/. Model
   names gathered into the roster, facts that move gathered into "Current
   values", and "Changing these docs" added.
