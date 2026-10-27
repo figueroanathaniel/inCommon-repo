@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.2';
+  var VERSION = '2.9.3';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -162,11 +162,18 @@
      entering birth data is the consent, disclosed at creation, so profile
      rows always sync. Memories sync only when the consent they name is
      granted. The ledger and pairs always sync: they are governance records,
-     and every device must be able to agree what was permitted. */
+     and every device must be able to agree what was permitted.
+
+     A row that names no consent is held to its type's, the same fallback
+     getMemory() reads with. Restoring an entry from the Archive writes it back
+     with consent_required null, and before 27 October 2026 that row passed
+     this gate whatever its type's consent said: a restored journal entry went
+     up with journal off (K71). */
   function memoryAllowed(pm, pid, memoryType, consentRequired, kept) {
-    if (!consentRequired) return true;
+    var need = consentRequired || (typeof pm.consentFor === 'function' ? pm.consentFor(memoryType) : null);
+    if (!need) return true;
     var consents = pm.getConsents(pid);
-    if (consents[consentRequired]) return true;
+    if (consents[need]) return true;
     /* kept rows stay visible locally while consent is off. That is a promise
        about this device, not permission to move the row off it. */
     return false;

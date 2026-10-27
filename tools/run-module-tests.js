@@ -2456,6 +2456,18 @@ async function runCloudTests() {
         } else if (q._op === 'upsert' && table === 'memories' && db.memoryTypes && db.memoryTypes.indexOf(q._row.memory_type) === -1) {
           /* The live table's check constraint, as the server words it. */
           out.error = { code: '23514', message: 'new row for relation "memories" violates check constraint "memories_memory_type_check"' };
+        } else if (q._op === 'upsert' && table === 'profiles' && db.oneActive && q._row.is_active &&
+            rows.some(function (x) { return x.account_id === q._row.account_id && x.id !== q._row.id && x.is_active; })) {
+          /* profiles_one_active, the live partial unique index (server/
+             cloud-schema.sql). 'index' is the index alone and refuses the row
+             as Postgres does; 'follow' is the index with migration 0002's
+             trigger, which makes the account's other profiles inactive first. */
+          if (db.oneActive === 'index') out.error = { code: '23505', message: 'duplicate key value violates unique constraint "profiles_one_active"' };
+          else {
+            rows.forEach(function (x) { if (x.account_id === q._row.account_id && x.id !== q._row.id) x.is_active = false; });
+            var rowA = clone(q._row), hitA = rows.filter(function (x) { return x.id === rowA.id; })[0];
+            if (hitA) Object.assign(hitA, rowA); else rows.push(rowA);
+          }
         } else if (q._op === 'upsert') {
           var row = clone(q._row);
           var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
@@ -2676,6 +2688,97 @@ async function runCloudTests() {
     outbox: JSON.parse(devF.store.getItem('incommon_cloud_outbox_v2') || '[]').length,
     archiveKeptLocally: devF.pm.getMemory({ profileId: fp.id, type: 'archive_deleted', respectConsent: false }).length === 1
   });
+
+  /* ---- K71: a row that names no consent is held to its type's. Restoring an
+     entry from the Archive (restoreMemory) writes it back with
+     consentRequired null, and the push gate read null as "no consent
+     needed", so a restored journal entry went up with journal off. ---- */
+  var gdb = memDB();
+  var devG = syncDevice(gdb, '71717171-0000-4000-8000-000000000071');
+  var gp71 = devG.pm.createProfile({ name: 'Restorer', birthDate: '1985-03-03' });
+  var restored = devG.pm.addMemory({ profileId: gp71.id, type: 'journal', consentRequired: null, content: { t: 'restored' } }).id;
+  var g71off = await devG.C.sync();
+  var offServer = gdb.t.memories.map(function (r) { return r.local_id; });
+  devG.pm.setConsent('journal', true, gp71.id);
+  var g71on = await devG.C.sync();
+  ts('K71', 'an entry restored from the Archive, which names no consent, stays on the device while its type\'s consent is off and goes up once it is on', {
+    okOff: true, offServer: [], okOn: true, onServer: [restored]
+  }, { okOff: g71off.ok, offServer: offServer, okOn: g71on.ok, onServer: gdb.t.memories.map(function (r) { return r.local_id; }) });
+
+  /* ---- K72: which profile is active is kept beside the profiles, not in
+     them, so a switch sends nothing and the server keeps the old one active.
+     The next edit to the new one sends is_active true, profiles_one_active
+     refuses it, and the push ends there, every time, with the memories behind
+     it. Run against the index alone, then with migration 0002's trigger,
+     which is read out of the migration rather than assumed. ---- */
+  var mig0002 = '';
+  try { mig0002 = fs.readFileSync(path.join(repo, 'server', 'migrations', '0002-profiles-one-active-follows.sql'), 'utf8'); } catch (e) {}
+  var follows = /before insert or update of is_active on public\.profiles/.test(mig0002) && /set is_active = false/.test(mig0002);
+  async function switchThenEdit(mode) {
+    var db = memDB(); db.oneActive = mode;
+    var dev = syncDevice(db, '72727272-0000-4000-8000-000000000072');
+    var a = dev.pm.createProfile({ name: 'First', birthDate: '1980-01-01' });
+    await dev.C.sync();
+    var b = dev.pm.createProfile({ name: 'Second', birthDate: '1982-02-02' });
+    await dev.C.sync();
+    dev.pm.setActiveProfile(b.id);
+    await dev.C.sync();
+    dev.pm.updateProfile(b.id, { birthTime: '07:15' });
+    dev.pm.setConsent('journal', true, b.id);
+    var note = dev.pm.addMemory({ profileId: b.id, type: 'journal', content: { t: 'after the switch' } }).id;
+    var r = await dev.C.sync();
+    return { ok: r.ok, active: db.t.profiles.filter(function (x) { return x.is_active; }).map(function (x) { return x.name; }),
+      memoryUp: db.t.memories.some(function (x) { return x.local_id === note; }) };
+  }
+  var k72index = await switchThenEdit('index'), k72follow = await switchThenEdit(follows ? 'follow' : 'index');
+  ts('K72', 'switching profiles and then editing the new one no longer stops the push: the index alone refuses it, and with migration 0002 the new profile is the one active and the journal entry behind it goes up', {
+    migrationRead: true, indexAloneOk: false, indexAloneMemoryUp: false, withMigrationOk: true, activeOnServer: ['Second'], memoryUp: true
+  }, { migrationRead: follows, indexAloneOk: k72index.ok, indexAloneMemoryUp: k72index.memoryUp,
+    withMigrationOk: k72follow.ok, activeOnServer: k72follow.active, memoryUp: k72follow.memoryUp });
+
+  /* ---- K73: the migrations folder keeps its own rules. Each file is
+     numbered in order and listed in that order in the folder's README, can
+     be run twice (every create checks first, every trigger is dropped before
+     it is made), carries its down migration, puts no bare dollar sign where
+     the dashboard's SQL Editor would split on it, and makes any new table
+     with row level security on and no policy. And 0001 indexes the columns
+     pull() filters on. ---- */
+  var migDir = path.join(repo, 'server', 'migrations');
+  var migFiles = [];
+  try { migFiles = fs.readdirSync(migDir).filter(function (f) { return /\.sql$/.test(f); }).sort(); } catch (e) {}
+  var migReadme = '';
+  try { migReadme = fs.readFileSync(path.join(migDir, 'README.md'), 'utf8'); } catch (e) {}
+  var migBad = [];
+  migFiles.forEach(function (f, i) {
+    var src = fs.readFileSync(path.join(migDir, f), 'utf8');
+    var code = src.split('\n').filter(function (l) { return !/^\s*--/.test(l); }).join('\n');
+    var why = [];
+    if (f.indexOf(('000' + (i + 1)).slice(-4) + '-') !== 0 || !/^\d{4}-[a-z0-9-]+\.sql$/.test(f)) why.push('name');
+    if (!/^-- DOWN/m.test(src) || !/^-- DOWN[^\n]*\n--   \S/m.test(src)) why.push('down');
+    (code.match(/create (unique )?index [^;]*/gi) || []).forEach(function (s) { if (!/if not exists/i.test(s)) why.push('index'); });
+    (code.match(/create table [^(]*/gi) || []).forEach(function (s) {
+      var name = s.replace(/create table (if not exists )?/i, '').trim();
+      if (!/if not exists/i.test(s)) why.push('table');
+      if (code.indexOf('alter table ' + name + ' enable row level security') === -1) why.push('rls ' + name);
+      if (new RegExp('create policy [^;]* on ' + name.replace(/\./g, '\\.') + '\\b', 'i').test(code)) why.push('policy ' + name);
+    });
+    (code.match(/create trigger (\w+)/gi) || []).forEach(function (s) {
+      var name = s.split(/\s+/)[2];
+      if (code.indexOf('drop trigger if exists ' + name) === -1) why.push('trigger ' + name);
+    });
+    (code.match(/create (or replace )?function/gi) || []).forEach(function (s) { if (!/or replace/i.test(s)) why.push('function'); });
+    if (src.replace(/\$[a-z_]+\$/g, '').indexOf('$') !== -1) why.push('dollar');
+    if (/[–—]/.test(src)) why.push('dash');
+    if (why.length) migBad.push(f + ': ' + why.join(','));
+  });
+  var listed = migFiles.map(function (f) { return migReadme.indexOf(f); });
+  var mig0001 = migFiles[0] ? fs.readFileSync(path.join(migDir, migFiles[0]), 'utf8') : '';
+  var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
+    .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
+  ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
+    files: 3, bad: [], listedInOrder: true, uncovered: []
+  }, { files: migFiles.length, bad: migBad,
+    listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
   /* ---- O1-O7: each account has its own profiles on a device, the owner's
      request of 12 October 2026 after three accounts on one browser all opened
