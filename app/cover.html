@@ -602,6 +602,12 @@
   </div>
   <div class="sub">
     <form id="mailform" class="mailform" data-mode="in" hidden novalidate>
+      <!-- The full name at birth, middle name included, asked when an account
+           is made (owner, 27 October 2026). It rides with the account as
+           full_name, and the registration card in the app fills its own name
+           field from it. -->
+      <label class="sr" for="mailname" hidden>Full name, middle name included</label>
+      <input class="field" id="mailname" name="name" type="text" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="Full name, middle name included" hidden>
       <label class="sr" for="mailaddr">Email or phone number</label>
       <input class="field" id="mailaddr" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or phone" required>
       <label class="sr" for="mailcode" hidden>Code from the text</label>
@@ -716,6 +722,8 @@
   var sendBtn = form.querySelector('button[type="submit"]');
   var news = newsBox.parentNode, keepRow = keepBox.parentNode;
   var addrLabel = form.querySelector('label[for="mailaddr"]');
+  var nameIn = document.getElementById('mailname');
+  var nameLabel = form.querySelector('label[for="mailname"]');
   var passLabel = form.querySelector('label[for="mailpass"]');
   var codeLabel = form.querySelector('label[for="mailcode"]');
   var pw = form.querySelector('.pw');
@@ -762,6 +770,7 @@
     phoneOff: 'Signing in by phone is not switched on yet. Use your email address for now.' + ANYWAY,
     smsFailed: 'The text could not be sent. Check the number, or use your email address.',
     nocode: 'Enter the code from the text.',
+    noname: 'Enter your full name, middle name included.',
     badCode: 'That code is not right or has expired. Check the text, or choose “Text me a new code”.',
     phoneUnconfirmed: 'That number is not confirmed yet. Choose “Text me a new code”, then enter the code here.',
     phoneTaken: 'That number is already on an account.',
@@ -814,6 +823,7 @@
     mode = m;
     form.setAttribute('data-mode', m);
     addr.hidden = addrLabel.hidden = !!d.noAddr;
+    nameIn.hidden = nameLabel.hidden = m !== 'up';
     pw.hidden = passLabel.hidden = !d.pass;
     codeIn.hidden = codeLabel.hidden = !d.code;
     if (d.code) { codeIn.setAttribute('placeholder', d.codeHint); codeLabel.textContent = d.codeLabel; }
@@ -838,7 +848,7 @@
     if (m === 'mfa' && backAs && !msg.textContent) say('Signed in as ' + backAs + '. ' + WHY.mfaAsk);
     /* Focus goes to the first thing still to do: the code, the address, the
        password, the newsletter box nobody has seen yet, then the button. */
-    if (focus) (d.code ? codeIn : d.noAddr ? (d.pass ? pass : sendBtn) : !addr.value ? addr
+    if (focus) (d.code ? codeIn : m === 'up' && !nameIn.value.trim() ? nameIn : d.noAddr ? (d.pass ? pass : sendBtn) : !addr.value ? addr
       : d.pass && !pass.value ? pass : !news.hidden ? newsBox : sendBtn).focus();
   }
   /* What was typed stays typed: somebody who filled in both fields and then
@@ -1053,7 +1063,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.9.3'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.9.4'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);
@@ -1410,6 +1420,8 @@
     if (m === 'back') { goIn(); return; }
     if (m === 'code' && !codeIn.value.trim()) { say(WHY.nocode); codeIn.focus(); return; }
     if (m === 'mfa' && !codeIn.value.trim()) { say(WHY.nomfa); codeIn.focus(); return; }
+    var fullName = nameIn.value.trim().replace(/\s+/g, ' ');
+    if (m === 'up' && !fullName) { say(WHY.noname); nameIn.focus(); return; }
     var login = addr.value.trim(), ph = isPhone(login);
     reveal(false);
     hold();
@@ -1424,7 +1436,7 @@
       /* The newsletter answer goes with the sign up, and only there. Supabase
          keeps it only when this call creates the account, which is when the
          owner asked for it to be asked. A phone has no address to write to. */
-      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? { captchaToken: capt.captchaToken, from: fromTags } : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken, from: fromTags });
+      if (m === 'up') return C.passwordSignUp(login, pass.value, here, ph ? { captchaToken: capt.captchaToken, from: fromTags, fullName: fullName } : { newsletter: !!newsBox.checked, captchaToken: capt.captchaToken, from: fromTags, fullName: fullName });
       if (m === 'forgot') return C.passwordResetStart(login, here, capt);
       if (m === 'code') return C.phoneCodeCheck(codeFor.phone, codeIn.value);
       if (m === 'mfa') return C.mfaVerify(codeIn.value);

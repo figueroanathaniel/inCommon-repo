@@ -1949,6 +1949,23 @@ async function runCloudTests() {
     phone: dReg ? dReg.contact_phone : 'none', source: dReg ? dReg.newsletter_source : 'none',
     badReason: regBad && regBad.reason, badCalls: gRegBad.up.length
   });
+  /* ---- K25d: the full name at birth, middle name included, rides with the
+     account as full_name wherever one is made, the cover and the card alike,
+     on email and phone sign ups, trimmed, inner spaces collapsed and capped at
+     200; with no name nothing is recorded. (owner, 27 October 2026) */
+  var gNm = oauthHarness(), gNmPh = oauthHarness(), gNmLong = oauthHarness(), gNmNone = oauthHarness();
+  await gNm.C.passwordSignUp('reader@k25d.invalid', 'correct horse', 'https://cover.k25d.invalid/', { newsletter: true, fullName: '  Ana   Maria  Ruiz ' });
+  await gNmPh.C.passwordSignUp('+15551234567', 'correct horse', 'https://cover.k25d.invalid/', { fullName: 'Jordan Lee Okafor' });
+  await gNmLong.C.passwordSignUp('reader@k25d.invalid', 'correct horse', 'https://cover.k25d.invalid/', { fullName: 'x'.repeat(500) });
+  await gNmNone.C.passwordSignUp('reader@k25d.invalid', 'correct horse', 'https://cover.k25d.invalid/', { newsletter: false, fullName: '   ' });
+  var nE = gNm.up[0] && gNm.up[0].options && gNm.up[0].options.data, nP = gNmPh.up[0] && gNmPh.up[0].options && gNmPh.up[0].options.data;
+  var nL = gNmLong.up[0] && gNmLong.up[0].options && gNmLong.up[0].options.data, nN = gNmNone.up[0] && gNmNone.up[0].options && gNmNone.up[0].options.data;
+  t('K25d', 'the full name rides with a sign up as full_name, on email and phone alike, tidied and capped, and a blank name records nothing', {
+    email: 'Ana Maria Ruiz', newsletterKept: true, phone: 'Jordan Lee Okafor', capped: 200, blank: 'none'
+  }, {
+    email: nE ? nE.full_name : 'none', newsletterKept: !!(nE && nE.newsletter === true), phone: nP ? nP.full_name : 'none',
+    capped: nL && nL.full_name ? nL.full_name.length : 'none', blank: nN && 'full_name' in nN ? 'present' : 'none'
+  });
   var gHas = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [] }, session: null } });
   var upHas = await gHas.C.passwordSignUp('reader@k35.invalid', 'correct horse', 'https://cover.k35.invalid/');
   var gAuto = oauthHarness({ upData: { user: { email: 'reader@k35.invalid', identities: [{ id: 'i1' }] }, session: { user: { email: 'reader@k35.invalid' } } } });

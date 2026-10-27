@@ -3412,6 +3412,48 @@ birth moment, and the harness, whose R1, R1b, R1c, R2, G4, G7 and G7b grade
 that page in a frame. `tools/drive-register.js` holds every way in, J1 to J7;
 against the code before this, J2, J3, J5 and J6 went red.
 
+**The account is offered, not required, and the name comes first** (owner,
+27 October 2026: "if a user doesn't want to create a profile, let them enter
+their birth information without needing to add an email. just collapse the
+email phone and password options under a 'Create account?' text in small
+letters below the birth info entry section", and "they will need to enter
+their full name (middle name included) here as well"). The card opens with
+the full name at birth, then date, time and place, then a small "Create
+account?" (`regAcctOpen`, `aria-expanded`) that unfolds the email, phone,
+password and newsletter; the terms line shows only while it is open. Folded,
+the button is "Save my birth details" and nothing reaches the network; opened,
+it is "Create my account". The name is required and a middle name is not
+checked for, because not everybody has one. It is written where the Codex page
+wrote it, the profile's `birthName` (numerology reads every letter), and the
+profile is called by its first word.
+
+**The card's sections never shrink** (`.welcome-registration-card>*`
+`flex-shrink:0`). They did, and a card taller than the screen was squeezed
+rather than scrolled, so its sections were drawn over one another: on a phone
+browser with its toolbars showing, the logo and the title (the owner's "top two
+lines are overlapping"). The card scrolls inside itself now when it truly does
+not fit, which with the account opened is every phone; folded it fits without
+scrolling from 375x560 up. The logo is sized in both directions, with
+`width`/`height` attributes and an aspect ratio, because WebKit gives an inline
+SVG with only a CSS height a box that does not match its drawing. J8 to J11 in
+`tools/drive-register.js` hold the folding, the account free save, the required
+name and the layout; J10 measures in Chromium, since no WebKit is installed here.
+
+**The cover's sign up asks for the full name too** (owner, 27 October 2026:
+"They will need to enter their full name (middle name included) at the
+registry as well"). `#mailname` shows only in Create New Account, takes focus
+first there, and a sign up without it is refused with a sentence before the
+cloud module is even fetched. `passwordSignUp()` carries `opts.fullName` as
+`full_name` in the account's metadata, on email and phone sign ups alike,
+trimmed, inner spaces collapsed and capped at 200 (`nameOf()`, K25d); the
+card's own account path sends its name the same way, and `status()` reports it
+back as `fullName`. **The card starts from it**: `regFullName()` returns what was
+typed, or until something is, the name the account was made with, read from
+`status()` or, before the module has a session in hand, from the stored sign in
+the way profile-manager.js reads it (J12). The module is 2.9.4 and the cover's
+`?v=` follows it. P16 in `tools/drive-cover.js` holds the field, the focus and
+the refusal.
+
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the
 wordmark, and "enter here" under it. It is the first thing a visitor meets, and it is the

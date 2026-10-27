@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.3';
+  var VERSION = '2.9.4';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -1021,6 +1021,14 @@
     return any ? out : null;
   }
 
+  /* The full name at birth, middle name included, asked wherever an account
+     is made (owner, 27 October 2026): the cover's sign up and the app's
+     registration card. It rides with the account as full_name, trimmed, inner
+     spaces collapsed, and capped so a pasted page cannot fill the record. */
+  function nameOf(opts) {
+    var n = opts && typeof opts.fullName === 'string' ? opts.fullName.trim().replace(/\s+/g, ' ') : '';
+    return n ? n.slice(0, 200) : '';
+  }
   function passwordSignUp(login, password, redirectTo, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
@@ -1035,6 +1043,7 @@
         var up = { phone: id.phone, password: String(password) };
         if (cap(opts)) up.options = { captchaToken: cap(opts) };
         if (fromOf(opts)) { up.options = up.options || {}; up.options.data = { signup_from: fromOf(opts) }; }
+        if (nameOf(opts)) { up.options = up.options || {}; up.options.data = up.options.data || {}; up.options.data.full_name = nameOf(opts); }
         return c.auth.signUp(up);
       }).then(function (res) {
         if (res && res.error) return refused(res);
@@ -1051,6 +1060,7 @@
       options.data = { newsletter: opts.newsletter, newsletter_source: opts.source === 'app-register' ? 'app-register' : 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
     if (fromOf(opts)) { options.data = options.data || {}; options.data.signup_from = fromOf(opts); }
+    if (nameOf(opts)) { options.data = options.data || {}; options.data.full_name = nameOf(opts); }
     /* The registration card in the app (26 October 2026) asks for a phone
        number as well, marked optional. It is not a login: it rides with the
        account as metadata, in E.164 and only when it reads as a number, and
@@ -1776,6 +1786,9 @@
     return {
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
+      /* The name the account was made with, for the registration card to
+         start from. */
+      fullName: session && session.user && session.user.user_metadata && typeof session.user.user_metadata.full_name === 'string' ? session.user.user_metadata.full_name : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
       /* The store apps hand this to RevenueCat as the app user id, so a
          purchase is filed under the same reader the server knows. */
