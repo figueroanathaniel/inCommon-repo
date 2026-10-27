@@ -6666,6 +6666,19 @@ a pattern three exactly-conjunct points can never produce.
 Run `"../Migration 8-26/verify-migration.sh" .` from the repo root after moving
 any file. A broken script tag is invisible in a screenshot.
 
+## Outsourced workstreams are briefed in docs/outsourcing/
+Six workstreams are delegated to other agents (schema, security, features,
+visuals, performance, QA), and `docs/outsourcing/` holds the briefs: `00-README.md`
+is the index, the shared rules, the file ownership table and the merge order,
+and `01` to `06` are one brief per workstream. **The roster in `00-README.md`
+is the only place an agent is named**, and "Current values" there is the only
+place a moving fact (the deploy folder, the last green commit, merged pull
+requests) is written out; the briefs refer to both by name. So reassigning a
+seat or bumping the deploy folder is one edit in one file, and "Changing these
+docs" at the end of the README says how to make every other kind of change
+without spreading names and numbers back into the briefs. Where a brief and
+this file disagree, this file wins, and the brief is the one corrected.
+
 ## Search engines are given the cover, the legal pages and the Learn pages
 Added 15 October 2026. The cover is a canvas, so what a crawler read of the
 home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST

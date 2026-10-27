@@ -1,0 +1,79 @@
+ASSIGNMENT 3.1   Workstream 3: Refactoring & Feature Additions
+Status:          READY (the owner reports this workstream ready to start)
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 3 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 03-refactor-features.md, CLAUDE.md
+
+STAY CLEAR OF THE GRAPHICS UPDATE
+Workstream 4 is landing a large graphics update while you work. Until it
+merges, do not edit:
+  - app/cover.html, app/chart-scene.js, cycle-scene.js, hd-scene.js,
+    body-globes.js, flight.js, three.*.js, tools/check-three-lifecycle.js;
+  - anything in the app file that mounts, sizes, shows or tears down a 3D
+    stage. Search for "Scene", "stage", "GFX", "obs" and "globe" before
+    editing a method, and leave it alone if it is one of those.
+Also leave the phone's swipe chain (vtBindTouch, vtSwipeStep, vtSettle,
+vtResume, vtGoTab, vtGoSection) alone: PR #99 just fixed it and
+tools/drive-swipe.js holds it.
+Both tasks below avoid all of that by construction.
+
+TASK 1 (do first): REMOVE METHODS NOTHING CALLS
+Branch refactor/dead-methods. A scan of main found 21 methods on the logic
+class whose name appears nowhere else in the app file:
+
+  alignSegs  appAnswer  aspGroup  bodySourceNote  chatOut  chatterSegs
+  comfortSegs  contactRoom  dblockPerm  dhash  gatherConsented
+  lunationsAhead  maskTail  personalWeek  sabianAll  sabianToday
+  synCardMeta  synGatesOf  wantsAlignment  wantsComfort  wantsPractice
+
+The scan is a lead, not a verdict. For EACH name, before removing it:
+  1. grep the whole repo for the name: app/, tools/, verification/,
+     app/handoff/, deploy/ excluded. personalWeek is read by
+     tools/run-module-tests.js and stays unless that test is changed with
+     workstream 6's agreement.
+  2. Look for dynamic calls: this[...] lookups, names built from strings
+     ('wants' + kind), handlers named in templates as strings, and
+     Function.prototype calls through a table.
+  3. Check CLAUDE.md for the name. bodySourceNote is named there as one of
+     the sites that carry a formal astronomy term; if it is dead, the
+     CLAUDE.md sentence must change in the same commit, and say why.
+  4. A method that serves one of the dormant Oki modules (CLAUDE.md, "the
+     dormant Oki modules") stays: dormant is a decision, not dead code.
+     List those as kept, with the reason.
+Remove the ones that are truly unreachable. In the PR, give a table: name,
+line, verdict (removed or kept), and the evidence.
+Proof: every README gate before and after, all green, plus the counts in
+check-dead-controls.js unchanged.
+
+TASK 2 (after Task 1 merges AND the graphics update has merged): SPLIT renderVals
+Branch refactor/render-vals. renderVals() is 1,619 lines, the largest method
+in the file by four times. It is mostly one object literal with blocks of
+inline computation between spreads of named bags (todayVals(),
+synVals() and so on). Move inline blocks out into named bag methods, the
+same pattern as the existing ones, with ZERO change in behaviour.
+  - One block per commit. No more than about 400 lines of the app file per
+    pull request, so this is several PRs.
+  - Skip any block that touches a 3D stage, and say which you skipped.
+  - Proof of no change, for every PR: write a scratch script (not
+    committed) that loads the app in Playwright, sets a fixed list of states
+    (each tab, each Library room, a selected placement, the chart expanded,
+    signed in and guest), and dumps JSON.stringify of renderVals() with
+    functions replaced by their names. The dump must be byte identical
+    before and after. Put the state list and the hashes in the PR.
+  - The order of spreads in the literal decides which key wins. Keep every
+    extracted bag at the same position, or prove no key collides.
+
+HARD RULES (in addition to the README's)
+  - A refactor that changes behaviour is a feature. If the proof dump
+    differs, stop and find out why; do not adjust the dump.
+  - Both shells stay in step. Library markup in the two shells stays byte
+    identical (CLAUDE.md, "The shelf is written once and placed in both
+    shells").
+  - Count the tags after any template edit: div, section, sc-if, sc-for,
+    button and span open as often as they close.
+
+DONE MEANS
+  Task 1 merged with its evidence table. Task 2's first PR open with its
+  proof dump, and a plan in its description for the PRs after it. Every
+  README gate green on each PR. Report back with the PR links, the table,
+  and the hashes.
