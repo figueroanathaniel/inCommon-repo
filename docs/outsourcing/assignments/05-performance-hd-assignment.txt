@@ -1,7 +1,8 @@
 ASSIGNMENT 5.2   Workstream 5: Load Time & Performance Tuning
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          AWAITING OWNER APPROVAL. Queued: starts after the JPL
-                 deferral in assignment 5.1 has merged.
+Status:          READY (approved by the owner, 27 October 2026).
+                 Queued: starts after the JPL deferral in assignment 5.1
+                 has merged.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 5 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, 05-performance.md, CLAUDE.md,

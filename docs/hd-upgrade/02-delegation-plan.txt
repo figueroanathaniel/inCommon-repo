@@ -4,8 +4,8 @@ Who builds what, in what order, and what has to be decided first
 Written:   27 October 2026, against main 53d792a
 Reads:     01-competitive-study.txt (the why), docs/outsourcing/00-README.md
            (the rules every agent follows, the roster, the helpers)
-Status:    AWAITING OWNER APPROVAL. Nothing here is issued until the owner
-           approves it and hands each file to its agent.
+Status:    APPROVED by the owner, 27 October 2026. All six assignments are
+           READY; each becomes ISSUED when the owner hands it to its agent.
 
 
 1. HOW A TASK IS DELEGATED
@@ -77,7 +77,12 @@ DECISIONS SO FAR (the owner, 27 October 2026)
   D1  OPEN. The owner will find the reviewer. Until one is named, no content
       change merges as reviewed; it merges marked "needs Human Design
       review", or waits.
-  D2  OPEN. Not yet answered.
+  D2  DECIDED. inCommon follows the tradition. The four sleep passages are
+      corrected to it (a defined Sacral sleeps once its energy is spent; the
+      "lie down before you are tired" advice belongs to those without one).
+      A personal preference for early nights is a habit, not the mechanics,
+      and is not to be written in the tradition's voice. Ships with 3.2
+      Task 1, marked for the reviewer to confirm once appointed (D1).
   D3  DECIDED. inCommon makes names of its own for group and business
       features. No Jovian product name or mark on any reader surface.
   D4  DEFERRED. To be decided as the upgrades are implemented.

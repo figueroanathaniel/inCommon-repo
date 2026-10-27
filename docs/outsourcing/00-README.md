@@ -85,12 +85,12 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 
 | # | Assignment | Status | Can start |
 |---|---|---|---|
-| 3 | assignments/03-features-hd-assignment.txt (3.2) | AWAITING OWNER APPROVAL | now, beside 3.1 |
-| 6 | assignments/06-qa-hd-assignment.txt (6.2) | AWAITING OWNER APPROVAL | now, beside 6.1 |
-| 1 | assignments/01-schema-hd-assignment.txt (1.2) | AWAITING OWNER APPROVAL | now |
-| 2 | assignments/02-security-hd-assignment.txt (2.2) | AWAITING OWNER APPROVAL | after 1.2's model is agreed |
-| 4 | assignments/04-visuals-hd-assignment.txt (4.2) | AWAITING OWNER APPROVAL | after the graphics update (4.1) merges |
-| 5 | assignments/05-performance-hd-assignment.txt (5.2) | AWAITING OWNER APPROVAL | after the JPL deferral (5.1) merges |
+| 3 | assignments/03-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
+| 6 | assignments/06-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
+| 1 | assignments/01-schema-hd-assignment.txt (1.2) | READY | now |
+| 2 | assignments/02-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
+| 4 | assignments/04-visuals-hd-assignment.txt (4.2) | READY | after the graphics update (4.1) merges |
+| 5 | assignments/05-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
 
 Their secondaries and tertiaries work as each brief's "Secondary and
 tertiary" section says, with the additions written into each assignment.
@@ -335,6 +335,8 @@ doc here rather than working around the difference.
 
 - 27 October 2026: written. Six workstreams, primaries, secondaries and
   tertiaries assigned by the owner.
+- 27 October 2026: round 2 approved by the owner, all six READY; D2
+  decided, the tradition is followed.
 - 27 October 2026: round 2 drafted, the Human Design upgrade: the study and
   delegation plan in docs/hd-upgrade/, six assignments awaiting approval.
 - 27 October 2026: secondary and tertiary instructions approved by the

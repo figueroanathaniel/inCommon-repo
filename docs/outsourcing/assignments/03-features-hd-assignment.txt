@@ -1,6 +1,6 @@
 ASSIGNMENT 3.2   Workstream 3: Refactoring & Feature Additions
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          AWAITING OWNER APPROVAL
+Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 3 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, 03-refactor-features.md, CLAUDE.md,
@@ -24,8 +24,9 @@ TASK 1. FIX THE SLEEP TEACHING (branch feature/hd-sleep)
   its energy is used up. Rewrite all four in the file's own voice. The open
   Sacral passage (line 173, "lie down before they do") is right and stays.
   Read every other sleep passage in the file for the same fault, and list
-  each one you checked in the PR. No medical claim either way. Mark the PR "needs
-  Human Design review" (delegation plan, D1 and D2).
+  each one you checked in the PR. No medical claim either way. The owner has decided
+  inCommon follows the tradition here (D2). Mark the PR "needs Human
+  Design review" so the reviewer confirms it once appointed (D1).
 
 TASK 2. NO SILENT FALLBACKS (branch feature/hd-provisional)
   a. designT(): when the arc solver is missing or fails, the chart is drawn

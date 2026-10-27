@@ -1,6 +1,6 @@
 ASSIGNMENT 1.2   Workstream 1: Data Mapping & Schema Architecture
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          AWAITING OWNER APPROVAL
+Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026 (PR #96 merged)
 Who:             the workstream 1 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, 01-data-schema.md, CLAUDE.md,

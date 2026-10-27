@@ -1,6 +1,6 @@
 ASSIGNMENT 6.2   Workstream 6: QA, Unit Testing & Documentation
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          AWAITING OWNER APPROVAL
+Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, 06-qa-tests-docs.md, CLAUDE.md,

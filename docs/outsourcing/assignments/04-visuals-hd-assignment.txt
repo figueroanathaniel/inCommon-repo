@@ -1,7 +1,8 @@
 ASSIGNMENT 4.2   Workstream 4: Interactive Visuals (WebGL / three.js)
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          AWAITING OWNER APPROVAL. Queued: starts after the graphics
-                 update in assignment 4.1 has merged.
+Status:          READY (approved by the owner, 27 October 2026).
+                 Queued: starts after the graphics update in assignment
+                 4.1 has merged.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 4 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, 04-visuals-webgl.md, CLAUDE.md,
