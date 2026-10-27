@@ -3439,6 +3439,21 @@ SVG with only a CSS height a box that does not match its drawing. J8 to J11 in
 `tools/drive-register.js` hold the folding, the account free save, the required
 name and the layout; J10 measures in Chromium, since no WebKit is installed here.
 
+**The cover's sign up asks for the full name too** (owner, 27 October 2026:
+"They will need to enter their full name (middle name included) at the
+registry as well"). `#mailname` shows only in Create New Account, takes focus
+first there, and a sign up without it is refused with a sentence before the
+cloud module is even fetched. `passwordSignUp()` carries `opts.fullName` as
+`full_name` in the account's metadata, on email and phone sign ups alike,
+trimmed, inner spaces collapsed and capped at 200 (`nameOf()`, K25d); the
+card's own account path sends its name the same way, and `status()` reports it
+back as `fullName`. **The card starts from it**: `regFullName()` returns what was
+typed, or until something is, the name the account was made with, read from
+`status()` or, before the module has a session in hand, from the stored sign in
+the way profile-manager.js reads it (J12). The module is 2.9.4 and the cover's
+`?v=` follows it. P16 in `tools/drive-cover.js` holds the field, the focus and
+the refusal.
+
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the
 wordmark, and "enter here" under it. It is the first thing a visitor meets, and it is the

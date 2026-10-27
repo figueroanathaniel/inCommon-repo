@@ -24111,6 +24111,27 @@ class Component extends DCLogic {
   tabFlag(k) { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } }
   /* A sign in this browser holds (profile-manager.js decides, and one that
      still owes its two-step code reads as none). */
+  /* What the card's name field holds: what was typed, or, until something
+     is, the name the account was made with on the cover. */
+  regFullName() {
+    const af = this.state.af || {};
+    if (Object.prototype.hasOwnProperty.call(af, 'bname')) return String(af.bname || '');
+    const CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    const st = CL && CL.status ? CL.status() : null;
+    if (st && st.fullName) return st.fullName;
+    /* Before the cloud module has a session in hand, the stored sign in is
+       read the way profile-manager.js reads it, by its supabase-js key. */
+    if (!this.regSignedIn()) return '';
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!/^sb-[a-z0-9]+-auth-token$/.test(k || '')) continue;
+        const v = JSON.parse(localStorage.getItem(k) || 'null'), m = v && v.user && v.user.user_metadata;
+        if (m && typeof m.full_name === 'string') return m.full_name;
+      }
+    } catch (e) {}
+    return '';
+  }
   regSignedIn() { const PM = this.PM(); return !!(PM && typeof PM.owner === 'function' && PM.owner()); }
   /* Asked for by the cover. A signed in reader whose first run is already done
      on this device has nothing to give, so the ask is dropped; one whose first
@@ -25022,7 +25043,7 @@ class Component extends DCLogic {
       regAcctOpen: acctOpen, regAcctOpenAttr: acctOpen ? 'true' : 'false',
       regAcctToggleLabel: acctOpen ? 'Save without an account' : 'Create account?',
       regAcctToggle: () => this.setState({ regAcctOpen: !acctOpen, regErr: {}, regMsg: '' }),
-      regName: this.af('bname'), regTypeName: e => { this.afSet('bname', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
+      regName: this.regFullName(), regTypeName: e => { this.afSet('bname', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
       regNameBad: err.name ? 'true' : 'false',
       regDate: this.af('bdate'), regTypeDate: e => { this.afSet('bdate', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
       regTime: st.regTime || '', regTypeTime: typeOf('regTime'),
@@ -25059,7 +25080,7 @@ class Component extends DCLogic {
        Codex page kept it, the profile's birthName, and the profile is called
        by its first word. Required, but a middle name is not checked for:
        not everybody has one. */
-    const fullName = this.af('bname').trim().replace(/\s+/g, ' ');
+    const fullName = this.regFullName().trim().replace(/\s+/g, ' ');
     const time = String(st.regTime || '').trim().slice(0, 5);
     const email = String(st.regEmail || '').trim(), pass = String(st.regPass || '');
     const phone = String(st.regPhone || '').trim();
@@ -25117,7 +25138,7 @@ class Component extends DCLogic {
        session and brings the reader in signed in, as it does for any sign
        up. */
     const back = new URL(this.coverHref(), location.href).href;
-    CL.passwordSignUp(email, pass, back, { newsletter: st.regNews !== false, source: 'app-register', ...(phone ? { phone } : {}) }).then(r => {
+    CL.passwordSignUp(email, pass, back, { newsletter: st.regNews !== false, source: 'app-register', fullName, ...(phone ? { phone } : {}) }).then(r => {
       if (!r || !r.ok) {
         const WHY = {
           exists: 'That email already has an account. Sign in from the start screen with its password. Your birth details are saved on this device.',

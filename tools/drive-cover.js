@@ -14,6 +14,10 @@
  *        on a single press with no question at all.
  *   P15  A phone at 390 wide with touch meets the ring and the pill, not the
  *        form, and so does a tablet; the press asks the question on both.
+ *   P16  Making an account on the cover asks for the full name, middle name
+ *        included (owner, 27 October 2026): the field shows only in Create
+ *        New Account, takes focus there, and a sign up without it is refused
+ *        before anything is sent.
  *
  * HOW IT RUNS. It serves the repository itself on a free port, so it needs
  * nothing running beside it, and it drives app/cover.html with WebGL turned
@@ -156,6 +160,40 @@ function t(id, name, expected, actual) {
       { phone: { phoneClass: true, formHidden: true, formOpen: false, pillShown: true, pillTall: true, ringInside: true, focused: true, asks: true },
         tablet: { phoneClass: false, formHidden: true, formOpen: false, pillShown: true, pillTall: true, ringInside: true, focused: true, asks: true } },
       { phone, tablet });
+
+    /* ---- P16 ---- */
+    const q = await open(1280, 800);
+    await press(q, 'a.enter', 1);
+    await q.waitForTimeout(300);
+    await press(q, '.modal-signin', 1);
+    await q.waitForTimeout(300);
+    const nameState = () => q.evaluate(() => {
+      const n = document.getElementById('mailname');
+      return { shown: !!n && !n.hidden && n.getClientRects().length > 0, focused: document.activeElement === n, mode: document.getElementById('mailform').getAttribute('data-mode') };
+    });
+    const inMode = await nameState();
+    await press(q, 'button.signin.alt', 1);
+    await q.waitForTimeout(300);
+    const upMode = await nameState();
+    /* A blank name is refused before the module is even fetched: count the
+       requests for it from here on. */
+    let cloudAsked = 0;
+    q.on('request', r => { if (/incommon-cloud\.js/.test(r.url())) cloudAsked++; });
+    await q.evaluate(() => {
+      document.getElementById('mailaddr').value = 'reader@p16.invalid';
+      document.getElementById('mailpass').value = 'correct horse battery';
+      document.getElementById('mailform').requestSubmit();
+    });
+    await q.waitForTimeout(600);
+    const refused = await q.evaluate(() => ({
+      said: /full name/i.test(document.querySelector('.authmsg').textContent),
+      focused: document.activeElement === document.getElementById('mailname'),
+      stillUp: document.getElementById('mailform').getAttribute('data-mode') === 'up'
+    }));
+    await q.context().close();
+    t('P16', 'Create New Account asks for the full name, middle name included: shown only there, focused first, and a sign up without it is refused before anything is sent',
+      { signIn: { shown: false }, signUp: { shown: true, focused: true }, refused: { said: true, focused: true, stillUp: true, cloudAsked: 0 } },
+      { signIn: { shown: inMode.shown }, signUp: { shown: upMode.shown, focused: upMode.focused }, refused: { ...refused, cloudAsked } });
   } catch (e) {
     t('P-ERR', 'drive failure: ' + (e && e.message), 'no error', String(e && e.message));
   } finally {

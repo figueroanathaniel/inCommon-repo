@@ -34,6 +34,8 @@
  *       profile takes it, no account is asked for, first run is marked, and a
  *       reload stays on Today.
  *   J11 No full name, no save: the field is marked and the message names it.
+ *   J12 Signed in with an account made on the cover, the card's name field
+ *       starts from the name the account was made with.
  *   J10 The logo and the title never share a line box, and no section of the
  *       card is crushed under the next, folded and opened, at three phone
  *       heights. Measured in Chromium; the owner saw them overlap on an iPhone,
@@ -245,6 +247,18 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
     }));
     t('J11', 'The card will not save without the full name, and says so on the field',
       { invalid: 'true', msg: true, marked: null, card: true }, { ...noName, card: (await look(p)).card });
+    await ctx.close();
+
+    /* J12: the session under the key supabase-js reads, unexpired so nothing
+       tries to refresh it, carrying the name the cover sent. */
+    const exp = Math.floor(Date.now() / 1000) + 3600;
+    const named = JSON.stringify({ access_token: 'test.e30.test', refresh_token: 'test-refresh', expires_at: exp, expires_in: 3600, token_type: 'bearer',
+      user: { id: USER, factors: [], email: 'reader@j12.invalid', user_metadata: { full_name: 'Ana Maria Ruiz' } } });
+    ({ ctx, p } = await open({ local: { 'sb-lkzcybzhjjxdqetwwdrx-auth-token': named } }));
+    await p.waitForTimeout(800);
+    const pre = await p.evaluate(() => ({ value: (document.querySelector('#reg-name') || {}).value || '', account: !!document.querySelector('#reg-email') }));
+    t('J12', 'Signed in with an account made on the cover, the card starts from the name the account was made with',
+      { value: 'Ana Maria Ruiz', account: false }, pre);
     await ctx.close();
 
     /* J10 */

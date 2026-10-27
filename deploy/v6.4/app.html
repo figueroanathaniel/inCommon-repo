@@ -24890,7 +24890,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.3';
+  var VERSION = '2.9.4';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -25855,6 +25855,14 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return any ? out : null;
   }
 
+  /* The full name at birth, middle name included, asked wherever an account
+     is made (owner, 27 October 2026): the cover's sign up and the app's
+     registration card. It rides with the account as full_name, trimmed, inner
+     spaces collapsed, and capped so a pasted page cannot fill the record. */
+  function nameOf(opts) {
+    var n = opts && typeof opts.fullName === 'string' ? opts.fullName.trim().replace(/\s+/g, ' ') : '';
+    return n ? n.slice(0, 200) : '';
+  }
   function passwordSignUp(login, password, redirectTo, opts) {
     var id = idOf(login);
     if (!id) return Promise.resolve({ ok: false, reason: 'invalid' });
@@ -25869,6 +25877,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         var up = { phone: id.phone, password: String(password) };
         if (cap(opts)) up.options = { captchaToken: cap(opts) };
         if (fromOf(opts)) { up.options = up.options || {}; up.options.data = { signup_from: fromOf(opts) }; }
+        if (nameOf(opts)) { up.options = up.options || {}; up.options.data = up.options.data || {}; up.options.data.full_name = nameOf(opts); }
         return c.auth.signUp(up);
       }).then(function (res) {
         if (res && res.error) return refused(res);
@@ -25885,6 +25894,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       options.data = { newsletter: opts.newsletter, newsletter_source: opts.source === 'app-register' ? 'app-register' : 'cover-signup', newsletter_decided_at: new Date().toISOString() };
     }
     if (fromOf(opts)) { options.data = options.data || {}; options.data.signup_from = fromOf(opts); }
+    if (nameOf(opts)) { options.data = options.data || {}; options.data.full_name = nameOf(opts); }
     /* The registration card in the app (26 October 2026) asks for a phone
        number as well, marked optional. It is not a login: it rides with the
        account as metadata, in E.164 and only when it reads as a number, and
@@ -26610,6 +26620,9 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return {
       mode: session ? 'cloud' : 'local',
       email: session && session.user ? session.user.email : null,
+      /* The name the account was made with, for the registration card to
+         start from. */
+      fullName: session && session.user && session.user.user_metadata && typeof session.user.user_metadata.full_name === 'string' ? session.user.user_metadata.full_name : null,
       phone: session && session.user ? phoneOfUser(session.user) : null,
       /* The store apps hand this to RevenueCat as the app user id, so a
          purchase is filed under the same reader the server knows. */
@@ -52126,6 +52139,27 @@ class Component extends DCLogic {
   tabFlag(k) { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } }
   /* A sign in this browser holds (profile-manager.js decides, and one that
      still owes its two-step code reads as none). */
+  /* What the card's name field holds: what was typed, or, until something
+     is, the name the account was made with on the cover. */
+  regFullName() {
+    const af = this.state.af || {};
+    if (Object.prototype.hasOwnProperty.call(af, 'bname')) return String(af.bname || '');
+    const CL = typeof window !== 'undefined' ? window.InCommonCloud : null;
+    const st = CL && CL.status ? CL.status() : null;
+    if (st && st.fullName) return st.fullName;
+    /* Before the cloud module has a session in hand, the stored sign in is
+       read the way profile-manager.js reads it, by its supabase-js key. */
+    if (!this.regSignedIn()) return '';
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!/^sb-[a-z0-9]+-auth-token$/.test(k || '')) continue;
+        const v = JSON.parse(localStorage.getItem(k) || 'null'), m = v && v.user && v.user.user_metadata;
+        if (m && typeof m.full_name === 'string') return m.full_name;
+      }
+    } catch (e) {}
+    return '';
+  }
   regSignedIn() { const PM = this.PM(); return !!(PM && typeof PM.owner === 'function' && PM.owner()); }
   /* Asked for by the cover. A signed in reader whose first run is already done
      on this device has nothing to give, so the ask is dropped; one whose first
@@ -53037,7 +53071,7 @@ class Component extends DCLogic {
       regAcctOpen: acctOpen, regAcctOpenAttr: acctOpen ? 'true' : 'false',
       regAcctToggleLabel: acctOpen ? 'Save without an account' : 'Create account?',
       regAcctToggle: () => this.setState({ regAcctOpen: !acctOpen, regErr: {}, regMsg: '' }),
-      regName: this.af('bname'), regTypeName: e => { this.afSet('bname', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
+      regName: this.regFullName(), regTypeName: e => { this.afSet('bname', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
       regNameBad: err.name ? 'true' : 'false',
       regDate: this.af('bdate'), regTypeDate: e => { this.afSet('bdate', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
       regTime: st.regTime || '', regTypeTime: typeOf('regTime'),
@@ -53074,7 +53108,7 @@ class Component extends DCLogic {
        Codex page kept it, the profile's birthName, and the profile is called
        by its first word. Required, but a middle name is not checked for:
        not everybody has one. */
-    const fullName = this.af('bname').trim().replace(/\s+/g, ' ');
+    const fullName = this.regFullName().trim().replace(/\s+/g, ' ');
     const time = String(st.regTime || '').trim().slice(0, 5);
     const email = String(st.regEmail || '').trim(), pass = String(st.regPass || '');
     const phone = String(st.regPhone || '').trim();
@@ -53132,7 +53166,7 @@ class Component extends DCLogic {
        session and brings the reader in signed in, as it does for any sign
        up. */
     const back = new URL(this.coverHref(), location.href).href;
-    CL.passwordSignUp(email, pass, back, { newsletter: st.regNews !== false, source: 'app-register', ...(phone ? { phone } : {}) }).then(r => {
+    CL.passwordSignUp(email, pass, back, { newsletter: st.regNews !== false, source: 'app-register', fullName, ...(phone ? { phone } : {}) }).then(r => {
       if (!r || !r.ok) {
         const WHY = {
           exists: 'That email already has an account. Sign in from the start screen with its password. Your birth details are saved on this device.',
