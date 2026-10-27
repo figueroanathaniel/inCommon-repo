@@ -103,15 +103,30 @@ STEP 5: FINISH
      the final before and after table, every reverted attempt and why, and
      the full check results.
 
-SECONDARY (named in the roster). NO TERTIARY unless the roster assigns one.
-The secondary checks the primary's numbers rather than trusting them:
-  1. On the primary's branch, it runs tools/measure-load.js itself, on a
-     different machine or session, five times, and compares the medians
-     with the primary's table. A gap over 15% on any row is reported on the
-     pull request before merging.
-  2. It confirms every deferred module is still precached by sw.js, by
-     loading the app once online, then going offline and opening every
-     screen that needs a deferred module.
-  3. It reviews each loader for a missing failure path: what the screen
-     shows if the deferred file fails to load.
-It takes the branch over if the primary stalls.
+SECONDARY AND TERTIARY
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies:
+the browser runner, shared seats, and the helper log every pull request
+ends with. Who holds each seat is in the roster.
+
+SECONDARY (repo access, full context). It checks the primary's numbers
+rather than trusting them:
+  1. On the primary's branch, it runs tools/measure-load.js itself, in its
+     own session, five times, and compares the medians with the primary's
+     table. A gap over 15% on any row is reported on the pull request before
+     it merges. Baseline A is checked the same way, on main c259e80.
+  2. For each "safe now" PR, "git diff --name-only" shows none of workstream
+     4's files and no stage code in the app file.
+  3. It confirms every deferred module is still precached by sw.js: load the
+     app once online, go offline, and open every screen that needs a
+     deferred module.
+  4. It reviews each loader's failure path: what the screen shows if the
+     deferred file fails to load. Block the file and look.
+  5. For the JPL deferral (assignment 5.1, Task 2a), compare every planetary
+     node and the lunar apogee in the expanded chart with main, to the
+     arcsecond, for three fixed births. They must be identical.
+  6. Baseline B is measured only after the graphics update merges, and the
+     PR names the commit.
+  It takes the branch over if the primary stalls.
+
+TERTIARY: none, by the owner's decision. Browser runs come from the primary,
+the secondary, or the runner named in "Helpers".

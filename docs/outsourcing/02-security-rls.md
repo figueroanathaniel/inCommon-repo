@@ -75,21 +75,45 @@ Current state:
 
 ## Secondary and tertiary
 
-**Secondary.** Always a blind review. Independence is the point of this
-seat, and never more than while the roster gives it the same model as the
-primary, which brings no different perspective of its own:
-1. Start a fresh session with no access to the primary's notes, chat or pull
-   request description. Give it this brief and the branch name only.
-2. It audits the branch's policies and edge functions from scratch, writing
-   its own findings list before reading the primary's.
-3. Then it compares the two lists. Every finding on one list and not the
-   other gets resolved in the pull request: fixed, or explained.
-It also runs tools/check-rls.js itself against the throwaway test project.
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
+to every block below: the browser runner, shared seats, and the helper log
+every pull request ends with. Who holds each seat is in the roster.
 
-**Tertiary.** Assumed chat only, with no repo, unless the roster says
-otherwise. Use it only for general, public
-questions: how a CSP directive behaves in a given browser, what a Postgres
-policy keyword means, the published steps for a Supabase setting. Never give
-it a policy, a finding, a table name, the project URL, or anything that
-describes a weakness that is not fixed yet. Verify every answer against the
-official documentation before relying on it.
+**Secondary** (repo access, full context; while the roster gives this seat
+the same model as the primary, independence is its whole value). A blind
+review, and it does NOT receive the private addendum first:
+
+1. A fresh session with no access to the primary's notes, chat, PR
+   descriptions or the private addendum. Give it this brief, 00-README.md
+   and the branch names only.
+2. It audits from scratch and writes its findings to a private file, never
+   the PR, before reading anything else:
+   - every policy in server/*.sql;
+   - all five server/*/index.ts edge functions. For each: auth (getUser plus
+     the aal2 rule), entitlement, limits, input sizes, which values the
+     client controls, CORS, and every outside call it makes;
+   - deploy/<current>/_headers, and sw.js scope.
+3. Only then does the owner give it the addendum and the primary's PRs.
+   Every finding on one list and not the other is resolved on the PR: fixed,
+   or explained. Whether its blind list found the addendum's first finding
+   is reported to the owner. Either way, it is the measure of the blind
+   pass.
+4. For each fix PR, it confirms the test fails without the fix: check out
+   the parent commit, run the test, see red.
+5. After any policy change, it reruns server/mfa-policies.sql's own checks.
+
+Its private findings file goes to the owner, not into the repository. It
+never pushes to the primary's branch unless it has taken it over.
+
+**Tertiary** (chat only, no repo). General public questions only, and none
+that hints at an unfixed weakness. Allowed:
+
+- "In a Deno edge function, how do you answer CORS for a list of allowed
+  origins, given that Access-Control-Allow-Origin takes one value?"
+- "What search_path should a SECURITY DEFINER function set in Postgres, and
+  why?"
+
+Until a fix is deployed, never mention its subject: no named function, no
+outside service, nothing like "a function anyone can call". Every answer is
+checked against official documentation before use, and the check is
+recorded in the helper log.

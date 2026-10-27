@@ -82,23 +82,38 @@ The last full run on main is recorded under "Current values" in
 
 ## Secondary and tertiary
 
-**Secondary.** Reviews every new test and every rewritten document. While
-the seat is held by an agent with about 100k tokens of context (see the
-roster), its context cannot hold the app file (about 713k tokens),
-CLAUDE.md in full (about 106k), app/handoff/tests-v6.0.js (about 44k) together
-with tools/run-module-tests.js (about 54k), so it reviews one file per pass.
-For each new test it confirms:
-- the test fails against the fault it guards (the commit says how this was
-  proven; the reviewer repeats it for at least one test per pull request);
-- it fakes every outside service;
-- its name and expected values say what the behaviour is, in plain words.
-For documents it checks every command in them actually runs as written.
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
+to every block below: the browser runner, shared seats, and the helper log
+every pull request ends with. Who holds each seat is in the roster.
 
-**Tertiary.** Assumed chat only, with no repo, unless the roster says
-otherwise. Use it only to
-proofread prose: a README paragraph, a section of docs, the wording of a
-test name. Paste the paragraph, ask for plainer wording, and apply the result
-by hand. Its suggestions must still follow the repo's rules: no em or en
-dashes, no disclaimers, no explaining a screen before it is opened. Never
-paste code from server/, data-contracts/, security findings, or anything
-containing a key or an address that is not already public.
+**Secondary** (repo access). Reviews every new test and every rewritten
+document. If its context is under about 150k tokens it cannot hold the app
+file (about 713k tokens), CLAUDE.md in full (about 106k), or
+app/handoff/tests-v6.0.js (about 44k) together with tools/run-module-tests.js
+(about 54k), so it reviews one file per pass. For assignment 6.1:
+
+1. tools/run-gates.js
+   - runs every tools/check-*.js except check-deployed.js, and every drive:
+     compare its list with "ls tools/check-*.js tools/drive-*.js";
+   - exits non-zero when a gate fails: prove it with a throwaway gate that
+     exits 1;
+   - runs no browser under --fast.
+2. The CI workflow
+   - triggers on "pull_request", never "pull_request_target";
+   - has "permissions: contents: read" and no secrets;
+   - pins its actions to a version, and runs only --fast.
+3. For at least one new test per PR, put the fault back and see red.
+4. The edge function harness holds no real key. Grep the PR for "eyJ",
+   "sk_", "service_role" and "re_", and post the counts.
+5. Every command in README.md and docs/README-RUN-LOCALLY.md is run as
+   written, with the output attached.
+
+Each new test must also fake every outside service, and its name and
+expected values must say what the behaviour is, in plain words.
+
+**Tertiary** (chat only, no repo). Proofreading only. Paste one paragraph of
+a README or doc at a time, ask for plainer wording, and apply the result by
+hand. The result must still follow the repository's rules: no em or en
+dashes, no disclaimers, and nothing that explains a screen before it is
+opened. Never paste test code, server/ code, data-contracts/, anything about
+workstream 2's work, or any address or key.

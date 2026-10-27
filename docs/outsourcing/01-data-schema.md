@@ -73,20 +73,46 @@ localStorage, and a signed in reader with consent also syncs to Supabase.
 
 ## Secondary and tertiary
 
-**Secondary.** Reviews the pull request before it merges.
-Specifically:
-- Picks ten keys at random from the new data map and traces each through the
-  code itself (grep for the key, read where it is written and read), to prove
-  the map was built from the code and not from the old document.
-- Runs every migration's up and down against a local or throwaway Postgres
-  (never the production project) and confirms each is idempotent: running it
-  twice changes nothing the second time.
-- Confirms every new table ships with RLS enabled and no policies.
-Takes the branch over if the primary stalls.
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
+to every block below: the browser runner, shared seats, and the helper log
+every pull request ends with. Who holds each seat is in the roster.
 
-**Tertiary.** Assumed chat only, with no repo, unless the roster says
-otherwise. Use it for public
-documentation lookups: Postgres constraint and index syntax, Supabase
-migration conventions, how supabase-js handles a given column type. Never
-paste the schema, the data map or anything from server/ into it. Check every
-answer against the official documentation it cites before using it.
+**Secondary** (repo access, full context). Reviews PR #96 once the primary
+has rebased it (assignment 1.1, Task 1), then each follow-up PR. For PR #96:
+
+1. Rebase hygiene. deploy/ was rebuilt, not hand-merged: run
+   "node tools/build-bundle.js" and confirm git shows no diff afterwards.
+   CLAUDE.md lost no section from main: compare the output of
+   "grep -n '^## ' CLAUDE.md" with main's.
+2. The map is built from the code. Pick ten keys from DATA-MAP.md at random
+   and list them in the review. Trace each by grep to where it is written
+   and read, and confirm the map's writer, scope and consent gate.
+3. The migrations, on a local Postgres 16 with cloud-schema.sql and the
+   stubbed auth schema:
+   a. Reproduce G1 before 0002: switch the active profile, push, and see
+      "profiles_one_active" refuse it. Apply 0002 and see it pass.
+   b. Apply each of 0001 to 0003 twice, run its DOWN, apply it again. Every
+      run is clean, and the second apply changes nothing.
+   c. Confirm server/mfa-policies.sql still refuses an aal1 session with a
+      verified factor after all three.
+4. The client fix (G8). Put the old memoryAllowed() back and run K71: red.
+   Restore the fix: green.
+5. Nothing touches another workstream's files, apart from the CLAUDE.md
+   pointer and the rebuilt bundle.
+
+Verdict: "ready to merge" or "not ready", with findings ranked, each with a
+file and line. It takes the branch over only if the primary fails the same
+gate twice or goes silent for a working day.
+
+**Tertiary** (chat only, no repo). Public documentation lookups only.
+Allowed questions look like:
+
+- "In Postgres 16, can a BEFORE INSERT trigger update another row of the
+  same table without deadlocking under concurrent inserts?"
+- "How does supabase-js upsert behave when onConflict names a partial unique
+  index?"
+
+Never paste the schema, DATA-MAP.md, a migration, any table or column name
+from server/, or the project ref. Each answer must cite official Postgres or
+Supabase documentation. The primary checks the citation and records the
+check in the helper log.

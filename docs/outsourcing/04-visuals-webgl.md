@@ -67,26 +67,52 @@ is listed under "Current values" in 00-README.md; build on it.
 
 ## Secondary and tertiary
 
-**Secondary.** Reviews pull requests file by file. The rest of this
-paragraph applies while the seat is held by an agent with about 100k tokens
-of context (see the roster); with a full context it may review the whole
-diff at once. At 100k it fits each 3D stage (25k to 30k tokens),
-app/cover.html (about 31k) and tools/check-three-lifecycle.js on their own, but NOT the app file (about
-713k), NOT CLAUDE.md in full (about 106k), and NOT the vendored three.js.
-So:
-- Review one changed file per pass, using "git diff main -- <file>" plus the
-  surrounding functions, never the whole repository.
-- Read only these CLAUDE.md sections: "The cover, and the two pages the site
-  has now", "The ring, Continue and the registration card (26 October 2026)",
-  "The 3D scenes fade in from behind Loading, and nothing else on the stage
-  arrives first", "The 3D stages compile in
-  parallel, build when near, and wait for their own faces", "Colour rules
-  that are not negotiable" and "Zero em dash".
-- Check that every new GPU resource has a matching release and a
-  check-three-lifecycle.js row.
-If it takes the branch over, it keeps working one file at a time.
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
+to every block below: the browser runner, shared seats, and the helper log
+every pull request ends with. Who holds each seat is in the roster.
 
-**Tertiary.** Runs the gates, including
-"node tools/drift-check.js --force --with-h", and posts the results and any
-screenshots on the pull request, including one at the bottom rung of the
-quality ladder. It does not change rendering code.
+**Secondary** (repo access). Reviews each graphics PR. If its context is
+under about 150k tokens, it reviews one file per pass, using
+"git diff main -- <file>" plus the surrounding functions, and never loads the
+app file, CLAUDE.md in full or the vendored three.js. For assignment 4.1:
+
+1. Read the merge order note in the first PR (4.1, Task 1.2) and review the
+   pieces in that order.
+2. For each changed scene file, fill in a table: every GPU allocation
+   (geometry, material, texture, render target, program) and the line that
+   releases it. A row with no release is a finding.
+3. For every new check-three-lifecycle.js row, remove the release it guards,
+   run the gate, see red, and put the release back.
+4. Task 3a: production has checkShaderErrors off on every platform, and
+   something still catches a broken shader. Break one on purpose and
+   confirm H2 or a lifecycle row goes red.
+5. Task 3b: the ladder climbs back after recovery and does not flap. Ask for
+   the VM row's output and read it.
+6. Confirm the PR makes no change to the cover shader's constants, no edit
+   to three.*.js, and no change to vtBindTouch, vtHScrollableAt or
+   [data-chart].
+
+CLAUDE.md sections to read, and only these when context is short: "The
+cover, and the two pages the site has now"; "The ring, Continue and the
+registration card (26 October 2026)"; "The 3D scenes fade in from behind
+Loading, and nothing else on the stage arrives first"; "The 3D stages
+compile in parallel, build when near, and wait for their own faces"; "Colour
+rules that are not negotiable"; "Zero em dash"; and "Swiping on the phone is
+one chain, read left to right". If it takes the branch over, it keeps
+working one file at a time.
+
+**Tertiary** (repo access). The browser runner for this workstream when it
+has a working browser, otherwise the runner named in "Helpers":
+
+1. On every graphics PR, run "node tools/drift-check.js --force --with-h",
+   "node tools/drive-swipe.js", "node tools/drive-routes.js" and
+   "node tools/drive-cover.js", and post the full output.
+2. Post screenshots of each 3D stage at 390x844 and 1440x900, and of the
+   cover at the bottom ladder rung.
+3. Under SwiftShader the H phase takes about ten minutes (CLAUDE.md, group
+   H). Raise the budget rather than reading a timeout as a failure, and say
+   on the PR that it ran on SwiftShader, not a GPU.
+4. A browser row that flips between runs is reported on the graphics PR and
+   never "stabilised" (assignment 6.1 tells QA the same).
+
+It does not change rendering code.

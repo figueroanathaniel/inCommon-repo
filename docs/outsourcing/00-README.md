@@ -55,6 +55,7 @@ this block updates every brief.
 | Base branch | main |
 | `<current>` deploy folder | deploy/v6.4/ (so `deploy/<current>/` is deploy/v6.4/) |
 | Last full gate run on main | c259e80, 27 October 2026: every README gate green (drift-check M, E, F, G, T, R, N; drive-cover 3/3, drive-routes 2/2, drive-swipe 4/4; run-module-tests 435/435), plus the 23 other check-*.js gates. H not run. |
+| Browser gate runner (Helpers, item 1) | the owner's Claude Code cloud session, which has Chromium and Playwright; ask the owner to start one |
 | Workstream 4's merged work so far | PR #92, PR #93, PR #97 |
 | Merged fixes since the briefs were written | PR #94 (H11 untimed), PR #98 (Back after a routed arrival), PR #99 (swipes mid move) |
 
@@ -70,15 +71,16 @@ own status line, and this board mirrors it.
 
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
-| 1 | assignments/01-schema-first-assignment.txt (1.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | first round done, PR #96 open |
-| 2 | assignments/02-security-first-assignment.txt (2.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | not started |
-| 3 | assignments/03-refactor-first-assignment.txt (3.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | ready to work |
-| 4 | assignments/04-visuals-first-assignment.txt (4.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | large graphics update in flight |
-| 5 | assignments/05-performance-first-assignment.txt (5.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | reviewing |
-| 6 | assignments/06-qa-first-assignment.txt (6.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | running |
+| 1 | assignments/01-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 open |
+| 2 | assignments/02-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
+| 3 | assignments/03-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
+| 4 | assignments/04-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
+| 5 | assignments/05-performance-first-assignment.txt (5.1) | READY | in its brief, "Secondary and tertiary" | READY | reviewing |
+| 6 | assignments/06-qa-first-assignment.txt (6.1) | READY | in its brief, "Secondary and tertiary" | READY | running |
 
 The statuses are DRAFT, AWAITING OWNER APPROVAL, READY (approved and safe
-to hand over), ISSUED (handed to the agent) and DONE. **This branch does
+to hand over), ISSUED (handed to the agent) and DONE. The helper
+instructions were approved by the owner on 27 October 2026. **This branch does
 not merge until every cell in both status columns reads READY or later.**
 An assignment that depends on a private addendum (2.1) says so in its own
 text; the addendum itself never enters this public repository.
@@ -99,6 +101,35 @@ text; the addendum itself never enters this public repository.
 
 Each brief ends with a section saying exactly how its secondary and tertiary
 are used.
+
+## Helpers
+
+Decided by the owner on 27 October 2026. These apply to every workstream
+and every brief's "Secondary and tertiary" section.
+
+1. **Who runs the browser gates.** Every helper confirms on its first task
+   that "node tools/drive-swipe.js" runs on its machine. When none of a
+   workstream's agents can run the browser gates (drive-*.js, drift-check,
+   the H phase), the PR is labelled "needs browser gates" and goes to the
+   browser runner named under "Current values". A browser gate that did not
+   run is never reported as passed.
+2. **Agents that hold more than one seat.** An agent may hold seats in
+   several workstreams (the roster shows which). Its own workstream comes
+   first, and helper requests from the others are answered within the same
+   working session they arrive in. Holding two seats never means reviewing
+   your own work: an agent never reviews a PR it wrote.
+3. **A secondary that is the same model as its primary reviews blind.** It
+   starts from the brief and the branch only, writes its own findings before
+   seeing the primary's, and then compares. For workstream 2, it does not
+   receive the private addendum until its own list is written.
+4. **Workstream 5 has no tertiary.** Its secondary re-measures
+   independently, and the browser runner covers any gate its agents cannot
+   run.
+5. **Every PR ends with a "Helpers" section, the helper log.** It lists
+   each secondary review and each tertiary consult: who, when, the question
+   as asked (word for word for a chat only helper), the answer's source,
+   and how the answer was checked against the code. A chat only consult
+   with no recorded check counts as not having happened.
 
 ## What may be shared with whom
 
@@ -286,6 +317,9 @@ doc here rather than working around the difference.
 
 - 27 October 2026: written. Six workstreams, primaries, secondaries and
   tertiaries assigned by the owner.
+- 27 October 2026: secondary and tertiary instructions approved by the
+  owner and written into each brief; "Helpers" added; every cell on the
+  status board READY.
 - 27 October 2026: round 1 assignments added under assignments/, with the
   status board; main c259e80 recorded as the last green run.
 - 27 October 2026: committed to the repo under docs/outsourcing/. Model

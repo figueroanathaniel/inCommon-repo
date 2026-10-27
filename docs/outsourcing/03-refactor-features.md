@@ -73,19 +73,37 @@ Each assignment arrives as its own task; do one per branch and pull request.
 
 ## Secondary and tertiary
 
-**Secondary, used sparingly.** Not a routine reviewer: the seat is held by
-an agent the roster marks for sparing use. Bring it in only when one of these
-is true (if the roster ever gives this seat an agent with no limit on use,
-it reviews every pull request as the README describes instead):
-- the change is a cross-cutting refactor that touches both shells and more
-  than one value bag;
-- the primary has failed twice on the same problem;
-- a gate fails and the primary cannot find the cause in an hour.
-Give it the specific question, the files involved and the failing output, not
-the whole brief. One consult per pull request is the norm; more needs the
-owner's go-ahead. Record each consult and its outcome in the pull request.
+Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
+to every block below: the browser runner, shared seats, and the helper log
+every pull request ends with. Who holds each seat is in the roster.
 
-**Tertiary.** Writes the test rows and the CLAUDE.md
-section for each feature, once the code is done, following brief 6's rules
-(it owns the harness there, so it knows the structure). It does not change
-app code. It runs every gate and posts the results on the pull request.
+**Secondary** (repo access, full context, used sparingly). It does not review
+every PR: for this workstream the README's gates and the proof dump are the
+review. The budget for assignment 3.1:
+
+- Task 1 (dead methods): no consult, unless the primary fails the same gate
+  twice or cannot decide whether a method is called dynamically.
+- Task 2 (the renderVals split): ONE consult, before the first PR, on the
+  plan. Give it the list of blocks to extract, their line ranges, the order
+  of spreads, the proof script and the state list, and ask two questions:
+  "Does any extracted block read a variable defined later in renderVals, or
+  a key spread before it?" and "Is the state list enough to exercise every
+  block?" Its answer goes on the PR.
+- A second consult needs the owner's go-ahead. The helper log records each
+  one.
+
+If the roster ever gives this seat an agent with no limit on use, it reviews
+every pull request as the README describes.
+
+**Tertiary** (repo access). Once the code is done:
+
+- Task 1: run every README gate on the branch and post the output. Grep the
+  whole repository for each removed name and post the counts, all zero.
+- Task 2: run the primary's proof script independently on the base commit
+  and on the branch, and post both hashes. They must match. No test rows are
+  added: this refactor changes no behaviour, and the dump is the test.
+- For a feature (later assignments), write the test rows and the CLAUDE.md
+  section, following brief 6's rules.
+
+It writes the CLAUDE.md section only when the primary asks, and never
+changes app code.
