@@ -1,0 +1,51 @@
+ASSIGNMENT 1.2   Workstream 1: Data Mapping & Schema Architecture
+Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
+Status:          READY (approved by the owner, 27 October 2026)
+Issued against:  main 53d792a, 27 October 2026 (PR #96 merged)
+Who:             the workstream 1 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 01-data-schema.md, CLAUDE.md,
+                 data-contracts/DATA-MAP.md, docs/hd-upgrade/01 and 02
+
+THE OUTCOME
+A data model, agreed before any screen is built, for what a serious Human
+Design student and a practitioner keep: notes on parts of a chart, versions of
+a chart, charts of other people, and the files that move charts in and out.
+
+TASK 1. THE MODEL (branch schema/hd-study-model; documents first)
+  data-contracts/HD-STUDY-MODEL.md, covering:
+  a. Notes: a note attached to an address in a chart (a gate, a channel, a
+     centre, a line, an activation), with the chart's identity, the text,
+     dates, and the consent category it belongs to. What happens to notes
+     when the birth data changes and the address moves or disappears.
+  b. Chart versions: a corrected birth time is a new version, not an
+     overwrite; the old one stays readable with its notes.
+  c. Charts of other people: the existing saved people (people-library.js,
+     the twelve person cap) extended or joined, and how a practitioner's
+     client list would differ. Device only or synced is the owner's call
+     (as G10 was); present the options.
+  d. Import and export: the fields an import must carry (name, date, time
+     and its precision, place and its coordinates and zone), how a chart
+     with no time or a revised zone is marked, Maia Mechanics' .mmi and a
+     plain CSV as the first two formats (document their shapes from public
+     information only), and an export format inCommon controls.
+  e. Every new key under STORAGE-MIGRATION-POLICY.md, every new table with
+     RLS enabled and no policies (workstream 2 writes them, 2.2).
+
+TASK 2. AFTER THE OWNER AGREES THE MODEL
+  Migrations and the client side storage, in the order the model names,
+  one PR each, each tested on the local Postgres with the stubbed auth
+  schema as before.
+
+FILES THIS ASSIGNMENT OWNS
+  data-contracts/HD-STUDY-MODEL.md, server migrations it adds,
+  profile-manager.js and people-library.js storage changes.
+
+DONE MEANS
+  The model approved by the owner and reviewed by workstream 2 for privacy
+  before any migration; migrations idempotent with their DOWN; DATA-MAP.md
+  updated.
+
+SECONDARY AND TERTIARY
+  As the brief says. The secondary checks the model against DATA-MAP.md:
+  every new piece of data has a consent category, a deletion path and an
+  export path.

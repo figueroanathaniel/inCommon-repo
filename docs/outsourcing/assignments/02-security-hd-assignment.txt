@@ -1,0 +1,38 @@
+ASSIGNMENT 2.2   Workstream 2: Security Hardening & RLS Setup
+Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
+Status:          READY (approved by the owner, 27 October 2026).
+                 Starts after 1.2's model is agreed.
+Issued against:  main 53d792a, 27 October 2026
+Who:             the workstream 2 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 02-security-rls.md, CLAUDE.md,
+                 data-contracts/HD-STUDY-MODEL.md (from 1.2)
+
+THE OUTCOME
+Studying or reading other people's charts never leaks their birth data, and
+sharing a chart shares exactly what the reader chose.
+
+TASK 1. REVIEW 1.2'S MODEL FOR PRIVACY, BEFORE ANY MIGRATION
+  A birth date, time and place together identify a person. For each new
+  kind of data: who can read it, who can share it, what a client has
+  consented to, and how it is deleted. Written as comments on 1.2's PR.
+
+TASK 2. POLICIES FOR WHAT 1.2 ADDS
+  RLS for every new table, the aal2 rule kept, tested on the local Postgres
+  with the stubbed auth schema, as in 2.1.
+
+TASK 3. SHARING AND HANDOUTS
+  The rules for an exported chart and an anonymised client handout: what
+  leaves the device, that a handout carries no birth data unless the reader
+  turns it on, and that a share link (if the owner wants one) is revocable
+  and unguessable. The synastry card's rule ("carries no birth data") is the
+  precedent.
+
+FILES THIS ASSIGNMENT OWNS
+  The policies and any server function for sharing; docs/SECURITY.md.
+
+DONE MEANS
+  Task 1 comments resolved on 1.2's PR; Task 2 and 3 merged with tests that
+  failed first; docs/SECURITY.md updated.
+
+SECONDARY AND TERTIARY
+  As the brief says, blind review included.

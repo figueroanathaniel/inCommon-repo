@@ -1,0 +1,98 @@
+ASSIGNMENT 3.2   Workstream 3: Refactoring & Feature Additions
+Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
+Status:          READY (approved by the owner, 27 October 2026)
+Issued against:  main 53d792a, 27 October 2026
+Who:             the workstream 3 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 03-refactor-features.md, CLAUDE.md,
+                 docs/hd-upgrade/01-competitive-study.txt (sections 5 and 6)
+Runs beside:     assignment 3.1. Keep each task on its own branch. If 3.1's
+                 renderVals split is in flight, put new values in their own
+                 bag methods so the two never edit the same lines.
+
+THE OUTCOME
+Every Human Design chart inCommon draws says how it was made and never passes
+a guess off as a fact. Then the first layer below the line, Color, is
+computed with its confidence, and a reader with an uncertain birth time can
+see exactly what that uncertainty changes.
+
+TASK 1. FIX THE SLEEP TEACHING (branch feature/hd-sleep)
+  Four passages in app/hd-life.js give a defined Sacral the advice the
+  tradition gives to those WITHOUT one ("go to bed before you are tired, let
+  the energy burn off lying down"): line 163 (the defined Sacral), 238
+  (Generator), 244 (Manifesting Generator, "the same rule as the
+  Generator") and 303 (Sacral authority). A defined Sacral goes to bed once
+  its energy is used up. Rewrite all four in the file's own voice. The open
+  Sacral passage (line 173, "lie down before they do") is right and stays.
+  Read every other sleep passage in the file for the same fault, and list
+  each one you checked in the PR. No medical claim either way. The owner has decided
+  inCommon follows the tradition here (D2). Mark the PR "needs Human
+  Design review" so the reviewer confirms it once appointed (D1).
+
+TASK 2. NO SILENT FALLBACKS (branch feature/hd-provisional)
+  a. designT(): when the arc solver is missing or fails, the chart is drawn
+     from the flat 88.36 day offset. Keep the fallback, and carry a flag on
+     the chart (for example hd.provisional = ['design']) that the chart
+     screens show as one plain sentence near the chart: what was
+     approximated and why. No sentence when nothing was.
+  b. hdProfile(): a missing personality or design Sun currently becomes line
+     1 or line 3. Return the profile as unavailable instead, and the screens
+     say so where the profile would be.
+  c. HDAtlas.profileFor() (hd-atlas.js): an impossible pair (1/5, 6/1, 3/3)
+     is normalised into a real profile. Keep normalizeProfile for the
+     callers that need it, but make profileFor return the raw pair and
+     valid:false for an impossible one, and have the app show it as
+     unavailable. A real chart can never produce one, so seeing it means
+     the data is wrong, and hiding that is the fault.
+  Tests: a module row for (c) in tools/run-module-tests.js, and rows in the
+  harness (coordinate with workstream 6) for (a) and (b) with the solver
+  removed and a Sun missing. Each shown red against the current code.
+
+TASK 3. THE INSPECTION PANEL (branch feature/hd-inspect)
+  One panel, opened from the chart in both shells, that shows how this chart
+  was made: the birth date and time as given, the zone and its offset on
+  that date, UT, the personality instant, the design instant and the solar
+  arc it was solved to, the iterations, the ephemeris used, and any
+  provisional flags from Task 2. Numbers and labels only; no explanation of
+  what a reading means (CLAUDE.md, "Discovery belongs to the reader"). It is
+  a dialog, so it follows the focus trap and announcement rules.
+
+TASK 4. COLOR, WITH ITS CONFIDENCE (branch feature/hd-color, after Tasks 2
+and 3 merge and after workstream 6 has landed its reference cases)
+  A new mechanics module, app/hd-subline.js, classified in
+  check-layer-boundary.js as mechanics, computing color (and only color in
+  this task) from a longitude, the way hd-wheel.js computes gate and line,
+  with the same half open boundary rule. It also returns a confidence: the
+  distance to the nearest color boundary against the body's measured
+  ephemeris error and the angular change the birth time's stated precision
+  allows. A color within that margin is returned as uncertain, with both
+  candidates. Gate, line and color appear together in the inspection panel
+  and in the gate's detail. Tone and Base are NOT in this task.
+  Tests: a module test group for hd-subline.js, including boundary sweeps
+  like hd-wheel's twelve rows, and a row that moves the birth time by one
+  minute and checks the Moon's confidence drops.
+
+TASK 5. THE BIRTH TIME SCANNER (branch feature/hd-scanner, after Task 4)
+  For a chart, scan the hours either side of the given time (default 12,
+  as Maia does) and list every moment a major property changes: Type,
+  Authority, Profile, definition, any defined channel, and the Ascendant's
+  sign for the astrology side. Each change opens the alternative chart. With
+  no birth time, the scan covers the whole day and is the honest answer to
+  "what do I know without a time". The scan is a pure function of the
+  birth record; it may be slow, so agree a budget with workstream 5 (5.2)
+  and run it off the render path.
+
+FILES THIS ASSIGNMENT OWNS
+  app/hd-life.js (Task 1 passages only), app/hd-atlas.js (profileFor only),
+  app/hd-subline.js (new), the app file's hd chart values and the inspection
+  panel markup in both shells. Not the 3D scenes (workstream 4).
+
+DONE MEANS
+  Each task merged on its own PR, every README gate green, new rows shown red
+  first, both shells, CLAUDE.md sections for Tasks 2 to 5, and Task 1 marked
+  for the Human Design reviewer.
+
+SECONDARY AND TERTIARY
+  As the brief says, with one addition: Task 4 and Task 5 are precision work,
+  so the secondary's one consult for this assignment is spent on Task 4's
+  confidence model before the first PR. Any further consult, for Task 5 or
+  anything else, needs the owner's approval first (D6, decided). The tertiary runs the gates and posts them on every PR.

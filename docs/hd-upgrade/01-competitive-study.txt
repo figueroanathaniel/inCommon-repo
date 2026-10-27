@@ -1,0 +1,316 @@
+HUMAN DESIGN UPGRADE, DOCUMENT 1: COMPETITIVE STUDY
+Ra.TV and Maia Mechanics against inCommon, and what it takes to double them
+
+Written:   27 October 2026, against inCommon main 53d792a
+For:       the owner, and every workstream that takes an HD upgrade assignment
+Status:    research complete; assignments drafted separately for approval
+Companion: docs/outsourcing/assignments/*-hd-*.txt (the work this implies)
+
+
+1. WHAT THIS IS, AND HOW FAR TO TRUST IT
+-----------------------------------------------------------------------------
+The owner asked for a study of Ra.TV and maiamechanics.com: what they offer,
+how it compares with inCommon, the quality of each, and what it would take to
+double their quality and overall experience, with pros and cons drawn from
+customer reviews.
+
+Sources used:
+  - The official pages: ra.tv, maiamechanics.com, jovianarchive.com (the
+    desktop Maia Mechanics Imaging product page, the FAQ).
+  - One independent review: Vaness Henry's calculator round up. The author
+    is an affiliate of a competitor (Genetic Matrix) and wrote a rival
+    Variable calculator, so read it as informed but not neutral.
+  - An assessment the owner pasted in, written by another assistant from
+    Reddit threads and the official sites. Its code claims were re-checked
+    against the repository here (section 5).
+  - inCommon's own source and gates, run on main 53d792a.
+
+Limits, stated plainly:
+  - CUSTOMER REVIEW EVIDENCE IS THIN. No Trustpilot page exists for Jovian
+    Archive, Ra.TV or Maia Mechanics. Ra.TV's app store listings carry too
+    few ratings to score. Reddit, where most real user talk happens, is closed
+    to the tools this study could use, so the Reddit findings in the pasted
+    assessment are reported here as that assessment's, not re-verified.
+  - Neither paid product was used hands on. Everything about them is what
+    they publish.
+  - So the pros and cons below are weighted: published capability first,
+    the one independent review second, reported user comments third. Where a
+    claim rests on one person, it says so.
+
+
+2. WHAT EACH OFFERS
+-----------------------------------------------------------------------------
+RA.TV (Jovian Archive, the founder's estate)
+  What it is     A teaching library. No chart calculator of its own.
+  Content        300+ videos, 105+ hours, in a recommended learning order;
+                 all of Ra Uru Hu's video teachings; 21 topic lessons (Type,
+                 Strategy, Aura, Signature, Not-Self, Authority, Definition,
+                 Profile, Angle, Centers, Circuits, Streams, Cosmology,
+                 Evolution, Conditioning, Cycles including the 2027 change,
+                 Mechanics, Awareness, Variable, Left or Right); web shows
+                 with other analysts.
+  Live           Live sessions with professionals, live chat rooms.
+  Platforms      Web, iOS, Android. Streaming only, no downloads (FAQ).
+  Price          From $12 a month billed yearly ($144); the pasted assessment
+                 gives $22 month to month.
+  Coming         humandesign.io, a waitlist app promising charts, transits,
+                 an AI trained on Ra's teachings, education, community and an
+                 expert marketplace. Announced, not shipped.
+
+MAIA MECHANICS (Jovian Archive's chart software)
+  Online plans   Free chart; Basic $6/m (synced library, .mmi import, Rave
+                 I'Ching, export to image and PDF); Essential $10/m
+                 (connection, cycle and transit charts, Birth Time
+                 Reliability Score, sub line planetary data); Advanced $13/m
+                 (Color, Tone, Base, Magic Square, Primary Health System and
+                 Rave Psychology keynotes, Variable indicator); Penta $16/m
+                 (family groups of 3 to 5); BG5 yearly only (business). 14 day
+                 trial of Advanced. Yearly saves two months.
+  Chart tools    Unlimited personal charts; connection charts; transits 1800
+                 to 2100 and transit connections; cycle charts; Penta;
+                 BG5; Mandala view; planetless mode; dark and light;
+                 offline mode for saved charts; an embeddable web widget for
+                 practitioners' sites with email capture and CRM hooks.
+  Birth time     A reliability score plus a scanner that shows where in the
+                 hours around the given time the chart's major properties
+                 change. The independent reviewer's standout ("literally so
+                 cool").
+  Desktop        MMI 3.0, Windows only (Mac by virtualisation), one time
+                 $89 to $1,199, add on modules $199 to $299, four languages.
+                 The FAQ says the desktop app has had no major update since
+                 the focus moved online, while the product page calls 3.0 a
+                 2025 rebuild; the two pages disagree.
+  Support        Email addresses only; no published support commitment.
+
+
+3. WHAT THEIR CUSTOMERS SAY
+-----------------------------------------------------------------------------
+Ra.TV
+  For       Depth, and direct access to the founder's own teaching, at a
+            price well under the value of the archive. (Pasted assessment,
+            Reddit; consistent with the product's design.)
+  Against   One launch era user missed translations. A single, old report;
+            not a current pattern. No other criticism could be found, which
+            says as much about how little review data exists as about the
+            product.
+
+Maia Mechanics
+  For       Professional depth: gate, line, color, tone and base laid out
+            visually; the birth time reliability tool; dark mode; offline
+            library; the field's own terminology, which practitioners value
+            (independent review; pasted assessment).
+  Against   Not for beginners (independent review). Bulk migration from the
+            desktop library was hard for one paying user, who spent real
+            time on it; their follow up is the same incident, not a second
+            one. Printing and PDF export sit behind payment, which workshop
+            users found friction for quick sharing. Support reports were
+            mixed, and others disagreed with the complaint. One missing
+            symbol bug was reported fixed. (All from the pasted assessment.)
+
+What the reviews teach, as design rules:
+  1. Faithful terminology matters to practitioners. Plain language must
+     sharpen the field's meaning, never replace it.
+  2. Data has to move: import, export, migrate, without pain.
+  3. A readable, conventional chart has to exist beside any immersive one.
+     Some readers find unfamiliar colours and layouts hard to read.
+  4. Sharing a chart (a PDF, a handout) should be easy and not paywalled.
+  5. Beginners and professionals are both underserved: Ra.TV teaches but
+     does not compute; Maia computes but does not teach.
+
+
+4. QUALITY, SIDE BY SIDE
+-----------------------------------------------------------------------------
+Scored on what each publishes and what inCommon's code does today. A dash in
+a cell is avoided on purpose; "none" means the product does not offer it.
+
+Dimension                 Ra.TV            Maia Mechanics       inCommon today
+------------------------- ---------------- -------------------- -------------------------
+Chart calculation         none             gate to base, JPL    gate and line, measured
+                                                                to 0.03 deg vs Horizons
+Design moment             n/a              solved               solved to an arcsecond
+                                                                (arc solver), with a
+                                                                silent 88.36 day fallback
+Birth time uncertainty    n/a              reliability score    names what is lost with
+                                           and scanner          no time; no scanner
+Teaching depth            deepest (source  keynotes only        Atlas: 15 sections, 64
+                          video archive)                        gates, 36 channels, 9
+                                                                centres, 12 profiles, 6
+                                                                line archetypes; 384
+                                                                gate lines written, but
+                                                                only for transits
+Variables / color, tone   taught           computed (Advanced)  named, not computed
+Relationships             taught           connection charts    six channel states with
+                                                                direction and caution
+Groups (3 to 5)           taught           Penta, BG5           Circle (Ground), not a
+                                                                Penta equivalent
+Transits, cycles          taught           1800 to 2100,        today's gates, channel
+                                           cycles               completion; no history or
+                                                                forward study
+Interactive study         video player     static views         2D and 3D views linked to
+                                                                the Atlas, guided paths
+Export, print, share      none             paid PDF and image   shared card (synastry);
+                                                                no chart PDF
+Import                    n/a              .mmi only            none
+Platforms                 web, iOS,        web, desktop         web, installable PWA,
+                          Android          (Windows)            native shells; offline
+Languages                 not stated       4 (desktop)          interface English; i18n
+                                                                for the news engine
+Beginner friendliness     high             low                  high
+Price                     $12 to 22/m      $6 to 16/m           (owner's call)
+
+Where inCommon already leads: one place that both computes and teaches; the
+interactive 2D and 3D chart linked to the Atlas; the measured ephemeris and
+the solved design moment; honesty about missing birth times; beginner
+friendliness.
+
+Where it trails: computed depth below the line (Maia); teaching depth and
+authority (Ra.TV); birth time study (Maia); portability, PDF and import
+(Maia); group mechanics (Maia); time study across years (Maia).
+
+
+5. THE PASTED ASSESSMENT, CHECKED AGAINST THE CODE
+-----------------------------------------------------------------------------
+Confirmed:
+  - Atlas counts: 15 sections, 64 gates, 36 channels, 9 centres, 12
+    profiles, 6 line archetypes (hd-atlas.js, read directly).
+  - Color, Tone and Base are not computed. hd-atlas.js says so itself:
+    "This build reads to gate and line only."
+  - The design moment falls back to a flat 88.36 days when the solver is
+    missing (app, designT; arc-solver.js header). It is a fallback for a
+    missing module, which CLAUDE.md records as deliberate, but nothing on
+    the screen says a chart was drawn from it.
+  - A profile helper hides bad data. HDAtlas.profileFor() normalises an
+    impossible pair into a valid profile: 1/5 reads as 1/4, 6/1 as 6/2, 3/3
+    as 3/5. And hdProfile() in the app falls back to line 1 and line 3 when
+    either Sun is missing, so a missing activation becomes a 1/3.
+  - The sleep teaching is wrong, and in FOUR places, not one. hd-life.js
+    line 163 (the defined Sacral), 238 (Generator), 244 (Manifesting
+    Generator) and 303 (Sacral authority) all say, in effect, "go to bed
+    before you are tired". In the tradition that is the advice for those
+    without a defined Sacral (line 173, the open Sacral, gives it correctly);
+    a defined Sacral goes to bed once the energy is spent. This is a
+    teaching error, not a medical claim either way.
+  - 2 gate and 23 line changes across 19,750 reference positions
+    (check-astral-bodies.js). The check itself calls these reference
+    boundary crossings, not failures: positions inside 0.03 degrees of a
+    boundary, where the library and Horizons land on opposite sides.
+
+Corrected:
+  - "All 384 gate specific line interpretations remain to be written" is
+    wrong. timing-lexicon.js already holds all 384 (GATE_LINE, held to
+    originality by TL6b and TL15). They are written for transits on Today,
+    in the time neutral voice that layer needs; what is missing is a natal
+    reading of each line inside the Atlas and the chart, which may reuse,
+    adapt or stand beside them, and that is an editorial decision.
+
+Added by this study:
+  - Why the 0.03 degree ceiling matters for the next layer down. A line is
+    0.9375 deg; a color is a sixth of that, 0.156 deg; a tone 0.026 deg; a
+    base 0.0052 deg. Color is safely computable from today's positions.
+    Tone sits at the ephemeris's own error for the Moon. Base is below it,
+    and the Moon crosses a base in about 37 seconds of birth time. So Color
+    can be shown as a fact, Tone only with a stated confidence, and Base
+    only where the birth time is known to the second, which is almost never.
+    This is where inCommon can beat Maia honestly: show the reliability of
+    every sub line value rather than printing a base nobody can know.
+  - Trademarks. CLAUDE.md's competitor surface gate bars marks such as
+    bodygraph as a surface name, and Penta and BG5 are Jovian product names.
+    Any group or business feature needs inCommon's own names (Circle already
+    exists) and its own writing. Ra Uru Hu's teaching is copyrighted: it can
+    be pointed to, never hosted or paraphrased closely (the I Ching lesson in
+    CLAUDE.md applies).
+
+
+6. WHAT DOUBLING THEM TAKES
+-----------------------------------------------------------------------------
+"Twice the quality" needs a measure, or it is a slogan. Proposed, and none
+of these has been demonstrated yet:
+
+  Outcome                              Target
+  ------------------------------------ ---------------------------------------
+  Find the right explanation           half the competitor's time, same or
+                                       better correctness
+  Remember it a week later             half the conceptual errors at 7 days
+  Make a client handout                half the time, complete data
+  Explain chart relationships          twice as many correct, fixed session
+  Integrity                            every chart inspectable; every sub
+                                       line value carries its reliability;
+                                       every teaching passage has a source,
+                                       a reviewer and a correction history
+
+Measured with about 30 people across beginner, student and practitioner,
+counterbalanced, learning tasks against Ra.TV and chart tasks against Maia.
+
+The work, in four pillars:
+
+PILLAR A. A CHART YOU CAN INSPECT AND TRUST
+  - Show the conversion: local birth time, zone and offset, UT, the design
+    moment and its solved arc, and which convention each step used.
+  - Never let a fallback become a reading: the 88.36 day fallback, a
+    missing Sun and an impossible profile all surface as provisional or
+    unavailable, with the evidence kept.
+  - Birth time study that beats Maia's: scan the hours either side, show
+    which properties hold, which change and when, and let the reader open
+    the alternative chart at any change, all with the reliability of each
+    sub line value stated.
+  - Color, Tone and Base computed, each with its confidence; Variables from
+    them, shown only when the time supports them.
+  - Reference cases: a set of public, consented or historical charts
+    checked against independent calculators, with every disagreement
+    explained (zone revisions, missing places, boundary crossings).
+
+PILLAR B. A REVIEWED TEACHING SYSTEM
+  - Fix the four sleep passages first.
+  - Natal line readings for all 384 inside the Atlas and the chart, crosses
+    (192 Incarnation Crosses as named in the tradition, written fresh),
+    color, tone and base, and chart synthesis.
+  - Every substantive passage carries a source, a named human reviewer with
+    Human Design training, and a correction history. Software cannot judge
+    fidelity; a reviewer role is required, and the owner appoints it.
+  - Beginner, study and practitioner depth for the same entry.
+  - Original writing only; permissions for anything quoted.
+
+PILLAR C. THE CHART IS THE STUDY WORKSPACE
+  - Select a gate: its explanation opens beside the chart, the chart stays.
+  - Select a passage: the structure it describes lights up on the chart.
+  - The worked journey: a hanging gate, why it is active, its partner, the
+    channel it would complete, the line reading, a note saved to that gate.
+  - Notes, saved chart versions, searchable lessons, an accessible text
+    alternative for every graphic, and a conventional 2D chart always one
+    tap away beside the 3D.
+  - Oki answers from the chart's structured data and approved sources only,
+    and says when a question is outside them.
+
+PILLAR D. PROFESSIONAL RELIABILITY
+  - Import (including Maia's .mmi and common CSV shapes), export, a free
+    readable PDF and an anonymised client handout.
+  - Offline that holds, recovery from interruption, client data permissions
+    and sharing done by workstream 2's rules.
+  - Groups and time study as specialist modules, each with its own
+    calculation and editorial review, under inCommon's own names.
+
+Phases and estimate (planning figures, not commitments):
+  Phase 1, 4 to 6 weeks: Pillar A's inspection and honesty work, the sleep
+    fix, reference cases, the conventional 2D view beside 3D, free PDF.
+  Phase 2, 6 to 8 weeks: the study workspace (Pillar C) and natal line
+    readings; birth time scanner; Color with confidence.
+  Phase 3, 2 to 6 months: Tone, Base and Variables with reliability;
+    crosses; import; groups and time study; the 30 person benchmark.
+  A strong first release is 12 to 20 weeks with two experienced engineers,
+  design and QA support, an editor, and independent Human Design reviewers.
+  Broad specialist coverage is 6 to 12 months, and content review and
+  permissions are likely to set the pace rather than code.
+
+A claim to be the most comprehensive in the world also needs myBodyGraph,
+Genetic Matrix, Neutrino Design, Humdes, 64keys and Human.Design examined.
+This study sets priorities; it does not establish superiority.
+
+
+SOURCES
+  https://www.ra.tv/                      https://www.ra.tv/about
+  https://www.maiamechanics.com/
+  https://jovianarchive.com/products/maia-mechanics-imaging-mmi
+  https://jovianarchive.com/pages/faq     https://www.humandesign.io/
+  https://www.vanesshenry.com/blog/human-design-bodygraph-calculators
+  inCommon: app/hd-atlas.js, app/hd-life.js, app/timing-lexicon.js,
+  app/arc-solver.js, tools/check-astral-bodies.js (main 53d792a)
