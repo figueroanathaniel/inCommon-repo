@@ -1726,6 +1726,26 @@ says), released by `vtStopSettle('S')`, and honoured in `vtOnScroll` on the
 section write alone. `vtHide` and `vtSolid` are left to update during the
 travel: they are about the header, not about where the reader is.
 
+## A routed arrival that writes nothing still spends its replace (27 October 2026)
+Reported on an iPhone: from the Observatory, open an astral body's reading,
+swipe back, and land on Today instead of the chart. `componentDidUpdate`
+writes the address, and `_routeNav` (set by `openPath()`'s `go`) makes the next
+write a replace, because an arriving path may be normalised and that correction
+must not be a second history entry. The flag was consumed only by a write. An
+arrival whose address already matched (a Back, a deep link, an in-app route, or
+a hash typed into the bar) wrote nothing, so the flag outlived the arrival and
+the reader's NEXT move, opening a reading from the Observatory, replaced the
+chart's entry instead of pushing one. Back then skipped the chart.
+
+The fix is one branch: when the path already matches and the flag is still
+set, the arrival is over, so the flag is cleared. **`tools/drive-routes.js` (B1)
+is the check**, and it lives outside the harness on purpose. A row written for
+this in phase F passed on the broken build, because earlier F rows leave the
+router in a state a reader never reaches: a brief extra address write that
+spent the flag before the row began. B1 drives the app as the top level page,
+fresh, at an iPhone's size and a desktop's, and goes red on the old code with
+Back landing on the screen before the chart.
+
 ## The wheel boundary rule
 `hd-wheel.js` holds the gate order and the mapping, as data. A gate is 5.625
 degrees, a line is 0.9375, gate 41 opens the wheel at 302 degrees, and the tie

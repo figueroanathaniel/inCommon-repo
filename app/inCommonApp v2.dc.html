@@ -14335,6 +14335,17 @@ class Component extends DCLogic {
         // push, not replace, so the browser Back button walks the screens visited
         try { history[replace ? 'replaceState' : 'pushState'](null, '', '#' + p); } catch (e) { location.hash = p; }
       }
+    } else if (p && p === this._hash && this._routeNav) {
+      /* A ROUTED ARRIVAL THAT NEEDED NO WRITE STILL ENDS HERE (27 October
+         2026). _routeNav marks the next address write as the arrival's own
+         correction, a replace. It was consumed only by a write, and an
+         arrival whose address already matched (a Back, a deep link, an in-app
+         route) wrote nothing, so the flag outlived it and the reader's NEXT
+         move replaced the entry instead of pushing one. On an iPhone that read
+         as Back skipping a screen: open a body's reading from the Observatory
+         after arriving at the chart by a route, swipe back, and land on Today.
+         tools/drive-routes.js (B1) is the check that holds it. */
+      this._routeNav = false;
     }
   }
   componentWillUnmount() {
