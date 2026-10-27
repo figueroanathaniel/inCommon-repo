@@ -5983,12 +5983,19 @@ closures or three.js internal allocations. `check-three-lifecycle.js` has
 three.js math, ring normals, independent normalized tails, reuse and cleanup.
 No GPU resource is added. The existing GPU teardown tests still pass.
 
-Phone profile (390x844, 4x CPU): before and after frame time, settled rung
-and GPU memory remain unmeasured. Chromium is unavailable here and its
-installer returned invalid ZIP downloads. Browser gates and the bottom-rung
-screenshot remain blocked. Follow the supplied 00-README.md: no pull request
-until all required gates pass. This branch is separate from the quality
-history fixes on visuals/interactive-20261026.
+The initial browser acceptance was blocked by invalid Chromium downloads.
+The restart used a temporary packaged Chromium 153 with SwiftShader. All
+required browser phases passed, including H 17/17 and its pixel readback.
+The 390x844, DPR 2, 4x CPU stage samples measured median intervals of 78.4ms
+before and 68.4ms after, both at stage rung 4. These single software samples
+are too noisy to establish an FPS improvement. Renderer counts were 14/15
+geometries and 40/40 textures; the one-geometry difference makes the memory
+comparison inconclusive. Hardware GPU bytes and physical phone performance
+remain unmeasured. The cover's rung-8 screenshot and readback also passed.
+See docs/visuals/globe-frame-cost-20261026/README.md for the full measurements,
+limits, screenshots and gate output. Independent review remains outstanding.
+This branch is separate from the quality history fixes on
+visuals/interactive-20261026.
 
 **Scene teardown is a complete graphics release.** The three scene modules
 (`chart-scene.js`, `hd-scene.js`, `cycle-scene.js`) dispose every geometry,

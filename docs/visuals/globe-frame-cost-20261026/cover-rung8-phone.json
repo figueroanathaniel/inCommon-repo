@@ -1,0 +1,15 @@
+{
+  "quality": {
+    "rung": 8,
+    "scale": 0.28,
+    "steps": 62
+  },
+  "buffer": [
+    780,
+    1688
+  ],
+  "litPercent": 99.29654271478915,
+  "max": 238,
+  "glError": 0,
+  "errors": []
+}

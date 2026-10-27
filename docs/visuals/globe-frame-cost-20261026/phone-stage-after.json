@@ -1,0 +1,30 @@
+{
+  "frames": 60,
+  "medianMs": 68.40000000037253,
+  "p95Ms": 107.09999999962747,
+  "rung": 4,
+  "buffer": [
+    292,
+    633
+  ],
+  "globeCount": 7,
+  "rendererMemory": {
+    "geometries": 15,
+    "textures": 40
+  },
+  "rendererInfo": {
+    "frame": 323,
+    "calls": 44,
+    "triangles": 26470,
+    "points": 1100,
+    "lines": 260
+  },
+  "variant": "after",
+  "profile": {
+    "width": 390,
+    "height": 844,
+    "dpr": 2,
+    "cpuSlowdown": 4,
+    "rasterizer": "SwiftShader"
+  }
+}
