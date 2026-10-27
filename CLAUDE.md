@@ -3389,6 +3389,29 @@ focused on arrival and the question on a press. Against the old cover both go
 red; against this one, 3 of 3. K55 now counts 11 Terms links in the app, the
 card's agreement line being the eleventh.
 
+**The card is the only way a birth moment is given at the door, signed in or
+not** (owner, 27 October 2026: "the registration card is not pulling up, the
+birth entry page we got rid of still is"). Three routes still reached the old
+first run page. A browser holding a sign in threw the cover's flag away,
+because a signed in reader is never asked to make an account, and then fell
+through to it: each account keeps its own first run marker
+(`incommon.firstrun.u.<id>`), and one that never gave its birth moment on this
+device has none. Continue with a saved session goes straight in with no flag
+and met the same page. "Continue without an account" on the sign in form set
+only the guest mark and met it too. Now `authStep()` sends a held sign in with
+no first run here to the card, which `regSignedIn()` draws without the email,
+phone, password, newsletter and terms line (`regAcct` false), with "Save my
+birth details" in place of "Create my account"; saving writes the birth moment
+to the active profile, marks first run for that account, and asks the network
+nothing. The guest mark alone is No by another name: the default profile,
+asked nothing. "Use mine" (the sample banner, the Oracle, the Cycle Audit and
+the quick menu) opens the card through `birthEntryGo()`, not the old page.
+**What is left on `'birth'` is a clean device opened without the cover**,
+which `signedOutLanding()` sends to the cover, the log out that clears the
+birth moment, and the harness, whose R1, R1b, R1c, R2, G4, G7 and G7b grade
+that page in a frame. `tools/drive-register.js` holds every way in, J1 to J7;
+against the code before this, J2, J3, J5 and J6 went red.
+
 ## The cover, and the two pages the site has now
 `app/cover.html` is the Event Horizon screen: a Schwarzschild raytracer, the
 wordmark, and "enter here" under it. It is the first thing a visitor meets, and it is the

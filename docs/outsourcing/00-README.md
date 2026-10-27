@@ -213,6 +213,7 @@ output of "npm root -g".
     node tools/drive-cover.js
     node tools/drive-routes.js
     node tools/drive-swipe.js
+    node tools/drive-register.js
     node tools/drift-check.js --force
 
 Workstreams 4 and 5, and anyone touching app/cover.html, also run

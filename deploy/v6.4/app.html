@@ -28716,6 +28716,7 @@ input[type="date"]{color-scheme:dark}
             </ul>
           </sc-if>
         </div>
+        <sc-if value="{{ regAcct }}" hint-placeholder-val="{{ true }}">
         <div class="reg-row">
           <div class="input-group">
             <label for="reg-email">Email address</label>
@@ -28734,11 +28735,14 @@ input[type="date"]{color-scheme:dark}
           <span aria-hidden="true" style="flex:none;box-sizing:border-box;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ regNewsBd }};background:{{ regNewsBg }};display:flex;align-items:center;justify-content:center;font:700 12px/1 var(--fu);color:var(--onac)">{{ regNewsMark }}</span>
           <span>Send me the inCommon newsletter</span>
         </button>
+        </sc-if>
       </div>
       <div class="reg-foot">
         <p id="reg-msg" class="reg-msg" role="status" aria-live="polite">{{ regMsg }}</p>
         <button type="button" onClick="{{ regGo }}" aria-busy="{{ regBusy }}" class="reg-go">{{ regGoLabel }}</button>
-        <p class="reg-agree">By creating an account you agree to the <a href="./terms.html">Terms &amp; Conditions</a> and the <a href="./privacy.html">Privacy Policy</a>.</p>
+        <sc-if value="{{ regAcct }}" hint-placeholder-val="{{ true }}">
+          <p class="reg-agree">By creating an account you agree to the <a href="./terms.html">Terms &amp; Conditions</a> and the <a href="./privacy.html">Privacy Policy</a>.</p>
+        </sc-if>
         <button type="button" onClick="{{ regLater }}" class="reg-later">Not now</button>
       </div>
     </div>
@@ -52091,13 +52095,34 @@ class Component extends DCLogic {
     if (this.regAsked()) return 'register';
     if (this.learnGuest()) return null;
     if (this.tabFlag('incommon.guest.default')) return null;
-    return this.readLS(this.FIRSTRUN_KEY, false) ? null : 'birth';
+    if (this.readLS(this.FIRSTRUN_KEY, false)) return null;
+    /* THE OLD BIRTH PAGE IS NOT A WAY IN ANY MORE (owner, 27 October 2026:
+       "the registration card is not pulling up, the birth entry page we got
+       rid of still is"). Each account keeps its own first run marker, so a
+       reader whose sign in this browser holds, on a device where that account
+       never gave its birth moment, used to land here: from Yes, and from
+       Continue with a saved session, which goes straight in with no flag.
+       They get the card now, asking for the birth moment only, since the
+       account already exists. The guest mark alone is "Continue without an
+       account" on the sign in form, which is No by another name: the default
+       profile, asked nothing. What is left on 'birth' is a clean device
+       opened without the cover, which signedOutLanding() sends to the cover,
+       and the harness, which grades that page in a frame.
+       tools/drive-register.js holds every way in. */
+    if (this.regSignedIn()) return 'register';
+    if (this.tabFlag('incommon.guest.chosen')) return null;
+    return 'birth';
   }
   tabFlag(k) { try { return sessionStorage.getItem(k) === '1'; } catch (e) { return false; } }
+  /* A sign in this browser holds (profile-manager.js decides, and one that
+     still owes its two-step code reads as none). */
+  regSignedIn() { const PM = this.PM(); return !!(PM && typeof PM.owner === 'function' && PM.owner()); }
+  /* Asked for by the cover. A signed in reader whose first run is already done
+     on this device has nothing to give, so the ask is dropped; one whose first
+     run is not gets the card, birth moment only. */
   regAsked() {
     if (!this.tabFlag('incommon.register')) return false;
-    const PM = this.PM();
-    if (PM && typeof PM.owner === 'function' && PM.owner()) { try { sessionStorage.removeItem('incommon.register'); } catch (e) {} return false; }
+    if (this.regSignedIn() && this.readLS(this.FIRSTRUN_KEY, false)) { try { sessionStorage.removeItem('incommon.register'); } catch (e) {} return false; }
     return true;
   }
   /* A VISITOR FROM A LEARN PAGE GOES STRAIGHT IN (owner, 17 October 2026). The
@@ -52143,6 +52168,12 @@ class Component extends DCLogic {
   afSet(k, v) { this.setState(s => ({ af: { ...(s.af || {}), [k]: v }, authErr: '' })); }
   afType(k) { return e => { this.afSet(k, e.target.value); this.afClearErr(k); }; }
   authGo(step, patch) { this.setState({ auth: step, authErr: '', ...(patch || {}) }); }
+  /* "Use mine", from the sample banner, the Oracle, the Cycle Audit and the
+     quick menu, opens the registration card rather than the old birth page
+     (owner, 27 October 2026): the card is where a birth moment is given now.
+     Signed in, it asks for the birth moment only; signed out, it also offers
+     the account, and Not now leaves everything as it was. */
+  birthEntryGo() { this.authGo('register'); }
   /* LOG OUT CLEARS THE BIRTH MOMENT AND NOTHING ELSE.
 
      Not a session and not an account: there is neither. What a reader means by
@@ -52261,7 +52292,7 @@ class Component extends DCLogic {
         pcType: (hd && hd.type) || '', pcLp: lp == null ? '' : String(lp),
         pcMotto: motto, pcHasMotto: !!motto,
         pcSample: this.usingSampleBirth(),
-        pcSampleGo: () => { this.setState({ quickOpen: false }); this.authGo('birth'); this.speak('The birth moment form is open.', 'polite'); }
+        pcSampleGo: () => { this.setState({ quickOpen: false }); this.birthEntryGo(); this.speak('The birth moment form is open.', 'polite'); }
       };
     } catch (e) { return none; }
   }
@@ -52978,9 +53009,14 @@ class Component extends DCLogic {
     const err = st.regErr || {};
     const news = st.regNews !== false;
     const busy = !!st.regBusy;
+    /* Signed in already: the account exists, so the card asks only for the
+       birth moment, and the account fields, the newsletter and the terms line
+       are not drawn. */
+    const signed = this.regSignedIn();
     const typeOf = k => e => this.setState({ [k]: e.target.value, regErr: {}, regMsg: '' });
     return {
       acctSaves,
+      regAcct: !signed,
       regDate: this.af('bdate'), regTypeDate: e => { this.afSet('bdate', e.target.value); this.setState({ regErr: {}, regMsg: '' }); },
       regTime: st.regTime || '', regTypeTime: typeOf('regTime'),
       regEmail: st.regEmail || '', regTypeEmail: typeOf('regEmail'),
@@ -52994,7 +53030,7 @@ class Component extends DCLogic {
       regNewsBg: news ? 'var(--ac)' : 'transparent', regNewsBd: news ? 'var(--ac)' : 'var(--bd)',
       regNewsGo: () => this.setState({ regNews: !news }),
       regBusy: busy ? 'true' : 'false',
-      regGoLabel: busy ? 'Creating your account…' : 'Create my account',
+      regGoLabel: signed ? 'Save my birth details' : busy ? 'Creating your account…' : 'Create my account',
       regGo: () => this.regSubmit(),
       regLater: () => this.regLeave(false)
     };
@@ -53025,9 +53061,12 @@ class Component extends DCLogic {
       if ((!g || !g.resolved) && !this.gazWant(() => this.regSubmit())) return;
       if (!g || !g.resolved) errs.place = 'Search for and select your place of birth, or type its coordinates as latitude, longitude.';
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter the email address the account will use.';
-    if (pass.length < 8) errs.pass = 'Choose a password of 8 or more characters.';
-    if (phone && CL && CL.normPhone && !CL.normPhone(phone)) errs.phone = 'That phone number does not read as one. Outside the US and Canada, start it with + and the country code.';
+    const signed = this.regSignedIn();
+    if (!signed) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter the email address the account will use.';
+      if (pass.length < 8) errs.pass = 'Choose a password of 8 or more characters.';
+      if (phone && CL && CL.normPhone && !CL.normPhone(phone)) errs.phone = 'That phone number does not read as one. Outside the US and Canada, start it with + and the country code.';
+    }
     if (Object.keys(errs).length) {
       this.setState({ regErr: errs, regMsg: '' });
       this.speak('That form needs a correction.', 'assertive');
@@ -53041,6 +53080,14 @@ class Component extends DCLogic {
         this.track('birth_data_confirmed');
       } catch (e) {}
       try { localStorage.removeItem(this.SAMPLE_KEY); } catch (e) {}
+    }
+    /* Signed in: nothing to make. The birth moment is the profile's now, and
+       the account's own sync carries it as it carries every other edit. */
+    if (signed) {
+      this.setState({ memTick: (st.memTick || 0) + 1 });
+      this.regLeave(true);
+      this.toastMsg('Your birth details are saved.');
+      return;
     }
     this.setState({ regBusy: true, regErr: {}, regMsg: '', memTick: (st.memTick || 0) + 1, afPlaceQ: '' });
     if (!CL || !CL.passwordSignUp) {
@@ -55295,7 +55342,7 @@ class Component extends DCLogic {
       cyZoomIn: () => { if (this._cyS) this._cyS.zoom(-1); },
       cyZoomOut: () => { if (this._cyS) this._cyS.zoom(1); },
       cyClose: () => this.setState({ cyOpen: false }), cyMoreGo: () => this.setState({ cyAll: !st.cyAll }), cyDMoreGo: () => this.setState({ cyDAll: !st.cyDAll }),
-      cySignInGo: () => { location.href = this.coverHref() + '?signin=1'; }, cyUseMine: () => { this.setState({ cyOpen: false }); this.authGo('birth'); },
+      cySignInGo: () => { location.href = this.coverHref() + '?signin=1'; }, cyUseMine: () => { this.setState({ cyOpen: false }); this.birthEntryGo(); },
       cyConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk('cycle', 'standard'); },
       cyAskGo: () => this.oracleAsk('cycle', 'standard'), ...this.lumGateVals('cycle', 'cg') };
     if (!open) return { ...closed, ...base };
@@ -55705,7 +55752,7 @@ class Component extends DCLogic {
       orPrivacy: '',
       orAskGo: () => { this.orListenStop(); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
-      orUseMine: () => this.authGo('birth'),
+      orUseMine: () => this.birthEntryGo(),
       orLoadingText: lumWait ? 'Checking your Codex Luminary…'
         : waitWhy === 'pending' ? 'Your reading is still being written, from a moment ago or another tab. It will appear here as soon as it is ready…'
         : waitWhy === 'busy' ? 'The Oracle is busy with another reading. Yours is next, in a moment…'
@@ -56938,7 +56985,7 @@ class Component extends DCLogic {
          convincing on the screens that show the most detail. */
       sampleOn: ready && this.usingSampleBirth(),
       sampleText: 'This reading is a sample. Add your birth moment to make it yours.',
-      sampleGo: () => { this.authGo('birth'); this.speak('The birth moment form is open.', 'polite'); },
+      sampleGo: () => { this.birthEntryGo(); this.speak('The birth moment form is open.', 'polite'); },
 
       searchIcon: this.uiIcon('search'), helpIcon: this.uiIcon('help'),
       booting: !ready, ready,
