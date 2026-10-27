@@ -1,0 +1,83 @@
+[
+  {
+    "file": "chart-scene",
+    "kind": "resume",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: chart-scene starts with a fresh quality sample"
+    ]
+  },
+  {
+    "file": "chart-scene",
+    "kind": "idle",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: chart-scene an idle frame breaks a run of very late frames"
+    ]
+  },
+  {
+    "file": "hd-scene",
+    "kind": "resume",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: hd-scene starts with a fresh quality sample"
+    ]
+  },
+  {
+    "file": "hd-scene",
+    "kind": "idle",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: hd-scene an idle frame breaks a run of very late frames"
+    ]
+  },
+  {
+    "file": "cycle-scene",
+    "kind": "resume",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: cycle-scene starts with a fresh quality sample"
+    ]
+  },
+  {
+    "file": "cycle-scene",
+    "kind": "idle",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: cycle-scene an idle frame breaks a run of very late frames"
+    ]
+  },
+  {
+    "file": "cycle-scene",
+    "kind": "_slabGeo",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: cycle-scene frees orphaned shared geometry _slabGeo"
+    ]
+  },
+  {
+    "file": "cycle-scene",
+    "kind": "_curGeo",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: cycle-scene frees orphaned shared geometry _curGeo"
+    ]
+  },
+  {
+    "file": "cycle-scene",
+    "kind": "_tileGeo",
+    "exitCode": 1,
+    "caught": true,
+    "failure": [
+      "AssertionError [ERR_ASSERTION]: cycle-scene frees orphaned shared geometry _tileGeo"
+    ]
+  }
+]

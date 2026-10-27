@@ -1,0 +1,3 @@
+check-dead-controls: ok
+  1442 handler holes across 680 loops, every one of them wired
+  60 dialogs, level-matched across both shells, each reachable from every control that opens it

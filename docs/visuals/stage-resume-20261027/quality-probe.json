@@ -1,0 +1,38 @@
+[
+  {
+    "file": "chart-scene",
+    "version": "before",
+    "levelAfterSeparateVisit": 1,
+    "levelAfterIdleBreak": 1
+  },
+  {
+    "file": "chart-scene",
+    "version": "after",
+    "levelAfterSeparateVisit": 0,
+    "levelAfterIdleBreak": 0
+  },
+  {
+    "file": "hd-scene",
+    "version": "before",
+    "levelAfterSeparateVisit": 1,
+    "levelAfterIdleBreak": 1
+  },
+  {
+    "file": "hd-scene",
+    "version": "after",
+    "levelAfterSeparateVisit": 0,
+    "levelAfterIdleBreak": 0
+  },
+  {
+    "file": "cycle-scene",
+    "version": "before",
+    "levelAfterSeparateVisit": 1,
+    "levelAfterIdleBreak": 1
+  },
+  {
+    "file": "cycle-scene",
+    "version": "after",
+    "levelAfterSeparateVisit": 0,
+    "levelAfterIdleBreak": 0
+  }
+]

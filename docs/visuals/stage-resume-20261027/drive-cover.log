@@ -1,0 +1,4 @@
+PASS P13  Continue pressed twice and three times stays on the cover with one question; a kept session goes in on one press with no question
+PASS P15  A phone at 390 wide with touch, and a tablet, meet the ring and the Continue pill rather than the form, nothing takes focus on arrival, and a press asks the question
+PASS P-PAGE  No page error on the cover beyond the expected missing WebGL
+drive-cover: 3/3 passed

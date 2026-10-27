@@ -6067,6 +6067,64 @@ three frames over 120ms in a row drop a rung at once. All of it is in
 `check-three-lifecycle.js`, and each rule was removed once to see the gate go
 red.
 
+### Quality samples belong to one visit (27 October 2026)
+Follow-up to #92 and #93, carried from closed, unmerged #95 onto current main
+`c259e80708bc25fef46d7ce4fd064c67c9fcba75`. The merged globe frame-math
+reuse from #97 remains intact. Resetting `lastDraw` stopped an absence being
+counted as a frame, but left `frames` and `late` carrying the previous visit's
+samples. All three stages now clear both on loop start. An idle frame also
+breaks the consecutive late-frame streak. The 45 busy-frame average, the
+three-frame emergency drop, the three startup draws and every quality level
+remain in place.
+
+Cycle Audit's teardown also releases `_slabGeo`, `_curGeo` and `_tileGeo`
+explicitly through the existing deduplicated release after shader warm-up
+settles, on success or failure. Empty groups may have no mesh referring to
+these owned geometries. This corrects ownership; it is not a measured GPU
+memory saving. The patch allocates no new GPU resources.
+
+The lifecycle gate passes 103 checks, including quality history on start and
+restart, the idle break, owned geometries, deduplication and deferred cleanup.
+The controlled production-method comparison loads current main and this
+branch in a Node VM. Each result is identical for chart, wiring and Cycle
+Audit, starting at level 0:
+
+| Controlled input | Before | After |
+|---|---|---|
+| Two busy 150ms frames, a loop start, one busy 150ms frame | level 1 | level 0 |
+| Two busy 150ms frames, one idle 32ms frame, one busy 150ms frame | level 1 | level 0 |
+| Three consecutive busy 150ms frames, same visit | level 1 | level 1 |
+
+Removing each of the six quality fixes and each of the three Cycle Audit
+releases separately turns the lifecycle gate red: nine mutations caught.
+These are Node VM tests, not phone frame-rate measurements.
+
+Fresh browser observations use Chromium 153 with SwiftShader at 390x844,
+DPR 2 and 4x CPU slowdown. The source app opens Observatory, flies to Saturn,
+restarts its loop, waits 20 settling draws and samples 60 frame intervals.
+Current main supplies only the three scene modules in the before run; the
+after run uses this branch. Median intervals are 72.0ms before and 72.3ms
+after, with 95th percentiles 203.3ms and 217.0ms. Both settle at rung 4,
+292x633 drawing buffers, 14 geometries, 40 textures and 44 draw calls.
+This single software-rendered pair does not establish a frame-rate gain.
+HD and Cycle frame intervals, hardware GPU bytes and physical phone
+performance remain unmeasured. Renderer object counts are not GPU bytes.
+
+All required gates pass on this rebased branch. The fresh forced browser
+sweep reports M 90/90, E 5/5, F 16/16, G 35/35, T 64/64, R 14/14,
+N 58/58 and H 17/17. H reads a 900x640 drawing buffer, maximum channel
+223 and 97.8 percent lit. The separate phone-profile cover probe at rung 8
+reads 99.2952 percent lit, maximum 239 and GL error 0, with no page errors.
+The screenshot shows the sky, disk, ring and Continue pill. These are this
+branch's results, not inherited from #97. See
+`docs/visuals/stage-resume-20261027/README.md` for the full gate output,
+raw measurements, screenshots and reproducible probes. The supplied
+`00-README.md` was read from the owner's uploaded copy; it is absent from
+main. No repository runner, vendored library, cover shader constant or
+production service was changed. Haiku 5.5 and Nemotron 3.5 Lightening were
+unavailable in this session, so independent review remains outstanding;
+no review is attributed to them.
+
 Reported by the owner on 20 October 2026: "opening the app shows a bunch of
 black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
 which is near black under Deep Field, held up for seconds. A CPU profile of the

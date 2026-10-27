@@ -1,0 +1,79 @@
+{
+  "baseCommit": "c259e80708bc25fef46d7ce4fd064c67c9fcba75",
+  "sourceCommit": "937ab3e40cdf76eab5b6427b03918ebed53af82e",
+  "recordedAt": "2026-10-27T08:47:59.647110+00:00",
+  "nodeVersion": "v24.22.1",
+  "browser": "Chromium 153.0.8010.0 with ANGLE SwiftShader",
+  "phoneProfile": {
+    "width": 390,
+    "height": 844,
+    "dpr": 2,
+    "cpuSlowdown": 4
+  },
+  "files": [
+    {
+      "path": "app/chart-scene.js",
+      "bytes": 117384,
+      "gitBlob": "b853835c41d9d6e1b3430b8f4c638b87107e19b7",
+      "sha256": "8100454ca605acd88e21c43d657ab561ee0bb3e26212316ebf4ae5c928877e77"
+    },
+    {
+      "path": "app/hd-scene.js",
+      "bytes": 102022,
+      "gitBlob": "619b3aa090678bbacf454a219ba58bb83b700d64",
+      "sha256": "06331e4e8e7989dddb8cd3e9ae5281fbd846371c910cf52e2d141f6a513eaeb5"
+    },
+    {
+      "path": "app/cycle-scene.js",
+      "bytes": 122084,
+      "gitBlob": "2ea9a6c754e435d16efdffcb677da7ce4d22cff6",
+      "sha256": "0d388946808488b6a6566c8694a80fa8614c7ecd4b663674886a45c0640a43af"
+    },
+    {
+      "path": "tools/check-three-lifecycle.js",
+      "bytes": 13181,
+      "gitBlob": "be40079366ae8f3983d6e4c5eb3ae93c27191c22",
+      "sha256": "c511c5000f54683fb3b36690bbaba879954cca4a7abe594b2a3ecacace56bd78"
+    },
+    {
+      "path": "deploy/v6.4/app.html",
+      "bytes": 11841756,
+      "gitBlob": "e91633da78a9b11e939d5ea6377d9e1290b3bc20",
+      "sha256": "f2d26a2c1636b967ec30ff98b081b5f5ee8323a60799fe227f635aaae3085854"
+    },
+    {
+      "path": "deploy/v6.4/index.html",
+      "bytes": 125581,
+      "gitBlob": "4de48fc6c764fb530c5fb6ed98170d1b515f8501",
+      "sha256": "bd205199e5c5d25cf82acd0f097bf90fc4982746389b0672e207b72243256780"
+    },
+    {
+      "path": "app/cover.html",
+      "bytes": 125543,
+      "gitBlob": "992e992525a787466f57462a07609f11b300fd5c",
+      "sha256": "8d5cbe37704d81fc5d0da9adbba72960454486904b612e946cfb4e8c6a072905"
+    },
+    {
+      "path": "app/body-globes.js",
+      "bytes": 34761,
+      "gitBlob": "87d9cd6fbf60b63d7b11620ce004bf227b4b7030",
+      "sha256": "15b2b28cec958c5c1f055958be83144ddd055e684b07da90d4c247a415b7e06f"
+    },
+    {
+      "path": "app/three.module.js",
+      "bytes": 648961,
+      "gitBlob": "b1a0fdda8a14f71dd62d21325f3eb59afc45f1d0",
+      "sha256": "61134198639a10885daf893fb29669ca26386e2a4cde76e8399f51e329f741f2"
+    },
+    {
+      "path": "app/three.core.js",
+      "bytes": 1427497,
+      "gitBlob": "ef6859448e18389b1e478db64be78293d53058e4",
+      "sha256": "368dc78835287709a48939e8eb9a7a61d0732098bdf916e56840d458aae9ccf3"
+    }
+  ],
+  "reviewers": {
+    "Haiku 5.5": "unavailable",
+    "Nemotron 3.5 Lightening": "unavailable"
+  }
+}

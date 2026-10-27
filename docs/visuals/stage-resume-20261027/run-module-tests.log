@@ -1,0 +1,21 @@
+run-module-tests: 435/435 passed
+  B birth-time.js   66/66
+  C hd-composite.js 35/35
+  W hd-wheel.js     12/12
+  D arc-solver.js   10/10
+  E minor bodies    13/13
+  P people-library.js26/26
+  Q pair-cache.js   12/12
+  A analytics.js    17/17
+  I iching.js       12/12
+  G hd-circle.js    39/39
+  Y hd-topology.js  8/8
+  X hd-transit.js   18/18
+  K incommon-cloud.js80/80
+  O profile-manager.js7/7
+  U master numbers  20/20
+  Z cycle audit     9/9
+  J omni on the server4/4
+  M multiChart.test.js15/15
+  S skyWire.test.js 13/13
+  L i18n.test.js    13/13

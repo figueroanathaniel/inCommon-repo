@@ -1,0 +1,36 @@
+    0.0s checking repo state
+    4.6s fast-forwarded local main to 937ab3e
+    4.7s deploy/v6.4/app.html:
+    4.7s   baseline fdcedf4b4747c30d5dc48f18879afd7bed3fe45886cf4c365da59f8e3ffa9a2b
+    4.7s   current  f2d26a2c1636b967ec30ff98b081b5f5ee8323a60799fe227f635aaae3085854
+    4.7s deploy/v6.4/index.html:
+    4.7s   baseline 5f5d9be63a983e8299f8a9e951f73556c8101bd73115e6f7d41d660fc8c9b2a0
+    4.7s   current  bd205199e5c5d25cf82acd0f097bf90fc4982746389b0672e207b72243256780
+    4.7s *** DRIFT DETECTED *** bundle bytes changed since the recorded baseline.
+    5.0s running M ...
+   21.7s   M PASS 90/90
+   21.7s running E ...
+   30.5s   E PASS 5/5
+   30.5s running F ...
+   77.6s   F PASS 16/16
+   77.6s running G ...
+  115.5s   G PASS 35/35
+  115.5s running T ...
+  138.6s   T PASS 64/64
+  138.6s running R ...
+  152.0s   R PASS 14/14
+  152.0s running N ...
+  216.7s   N PASS 58/58
+  216.7s running H (this can take 8-16 minutes under a GPU-less container) ...
+  697.0s   H PASS 17/17 substantive; The pixel read actually happened (saw 900x640, max 223, 97.8% lit)
+
+=== SUMMARY ===
+  M  PASS  90/90
+  E  PASS  5/5
+  F  PASS  16/16
+  G  PASS  35/35
+  T  PASS  64/64
+  R  PASS  14/14
+  N  PASS  58/58
+  H  PASS  17/17 substantive; The pixel read actually happened (saw 900x640, max 223, 97.8% lit)
+ALL GREEN

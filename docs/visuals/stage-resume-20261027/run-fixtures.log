@@ -1,0 +1,136 @@
+{
+  "suite": "inCommon calculation gate (fixtures-driven runner, N1-N6 and A1-A3)",
+  "coverage": "Nine assertions from calculation-fixtures.json, executed against incommon-core.js. This is not the V1.2 43-assertion pure suite, which is not in the handover.",
+  "timestamp": "2026-10-27T08:26:22.473Z",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux"
+  },
+  "sourceHashes": {
+    "incommon-core.js": "a4e2f6d5bc7488f17e4d5bb15208402f7c473f6dba9f696dab7232aa3008388a",
+    "calculation-fixtures.json": "455c51471b4764583bd255aa5ccd68478db00555396bc25315af479db430a5c6"
+  },
+  "coreVersion": "1.2.0",
+  "persona": {
+    "nameAtBirth": "Maya Lin Chen",
+    "dob": "1992-07-02"
+  },
+  "shape": {
+    "numerology": 6,
+    "angelNumbers": 3,
+    "total": 9
+  },
+  "totals": {
+    "total": 9,
+    "pass": 9,
+    "fail": 0
+  },
+  "structuralProblems": [],
+  "notExecuted": [
+    {
+      "block": "timezone",
+      "reason": "declared in the fixtures as a reference target, not an executable vector"
+    },
+    {
+      "block": "lunar",
+      "reason": "declared in the fixtures as a reference target, not an executable vector"
+    },
+    {
+      "block": "astrology_referenceValues_DEMO_NOT_VERIFIED",
+      "reason": "declared in the fixtures as a reference target, not an executable vector"
+    }
+  ],
+  "exitCode": 0,
+  "assertions": [
+    {
+      "id": "N1",
+      "name": "Life Path",
+      "pass": true,
+      "expected": 3,
+      "actual": 3,
+      "work": "7 + 2 + (1+9+9+2=21→3) = 12 → 3"
+    },
+    {
+      "id": "N2",
+      "name": "Personal Year 2026",
+      "pass": true,
+      "expected": 1,
+      "actual": 1,
+      "work": "7 + 2 + (2+0+2+6=10→1) = 10 → 1"
+    },
+    {
+      "id": "N3",
+      "name": "Personal Month July 2026",
+      "pass": true,
+      "expected": 8,
+      "actual": 8,
+      "work": "1 + 7 = 8"
+    },
+    {
+      "id": "N4",
+      "name": "Expression (Pythagorean, name at birth)",
+      "pass": true,
+      "expected": 6,
+      "actual": 6,
+      "work": "MAYA 4+1+7+1=13→4 · LIN 3+9+5=17→8 · CHEN 3+8+5+5=21→3 · 4+8+3=15→6"
+    },
+    {
+      "id": "N5",
+      "name": "Soul Urge (vowels, Y-as-consonant policy)",
+      "pass": true,
+      "expected": 7,
+      "actual": 7,
+      "work": "A+A=2 · I=9 · E=5 → 16 → 7"
+    },
+    {
+      "id": "N6",
+      "name": "Master preservation",
+      "pass": true,
+      "expected": 11,
+      "actual": 11,
+      "work": "2+9 = 11, reduction stops"
+    },
+    {
+      "id": "A1",
+      "name": "A1",
+      "pass": true,
+      "expected": {
+        "root": 6,
+        "repeating": false
+      },
+      "actual": {
+        "root": 6,
+        "repeating": false
+      },
+      "work": "1+2+1+2 = 6"
+    },
+    {
+      "id": "A2",
+      "name": "A2",
+      "pass": true,
+      "expected": {
+        "root": 3,
+        "repeating": true
+      },
+      "actual": {
+        "root": 3,
+        "repeating": true
+      },
+      "work": "21 → 3"
+    },
+    {
+      "id": "A3",
+      "name": "A3",
+      "pass": true,
+      "expected": {
+        "root": 11,
+        "master": true
+      },
+      "actual": {
+        "root": 11,
+        "master": true
+      },
+      "work": "11 · master preserved"
+    }
+  ]
+}

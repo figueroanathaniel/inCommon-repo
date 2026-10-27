@@ -1,0 +1,5 @@
+check-purple-text: ok
+  246 violet occurrences examined, 24 of them in the logic class
+  26 chart regions resolved; 0 violet text sites inside them (allowed: chart glyphs)
+  0 violet text sites outside charts
+  #b79bff used 14 times
