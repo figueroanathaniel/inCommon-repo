@@ -2289,8 +2289,13 @@ is registered first so it has already run by the time that fires. H15 sampled
 once at 700ms and reported the exit as not running when it was; it polls for the
 drop now. A test that fails on a slow machine and passes on a fast one is worse
 than no test. (`coverScrollTo` went with the scroll on 26 October 2026; H15
-still polls, now for the ring's classes rather than an opacity, and H11
-reads its two angles two frames apart for the same reason.)
+still polls, now for the ring's classes rather than an opacity. H11 was
+timed too, two frames apart, and that was not enough: on 27 October 2026 two
+frames of the raytracer came back 3.3 seconds apart under SwiftShader, the
+line had turned past half a turn, and its direction read backwards. H11 now
+waits for nothing. It pauses each animation, seeks it to two moments 100ms
+apart, reads the angle at each and puts it back, so the frame rate cannot
+reach it.)
 
 **The phase unregisters service workers at both ends.** H16 navigates its frame
 to the app, and the app registers one; on the next run the cover is served
@@ -3319,9 +3324,11 @@ session. "Not now" leaves the default profile and skips the card for the tab.
 **The rows that hold it.** Group H keeps its 17 rows; H5 and H9 to H16 were
 rewritten for this cover. H5 is the Continue pill as the one link in. H9 is
 the page holding still. H10 is one ring at rest with a thin line, `aria-hidden`.
-H11 measures the turn rather than reading the animation's name: two readings
-of each computed angle, two frames apart, clockwise for the ring and
-counterclockwise for the line. H12 is the pill centred on the screen and on
+H11 measures the turn rather than reading the animation's name: it holds
+both animations to running, then pauses each, seeks it to two moments 100ms
+apart and reads the computed angle at each, clockwise for the ring (4.5
+degrees) and counterclockwise for the line (6 degrees), whatever the frame
+rate. H12 is the pill centred on the screen and on
 the ring with "Create an account" under it. H13 is the wordmark and the
 initial gone with the hidden `h1` still naming the page. H14 is the question:
 a dialog that takes focus, passes 44px and 4.5:1, and gives focus back to the

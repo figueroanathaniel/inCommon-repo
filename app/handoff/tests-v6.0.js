@@ -2822,26 +2822,41 @@
           thinLine: !!(gl && parseFloat(w.getComputedStyle(gl).borderTopWidth) <= 2.5),
           atRest: !!(ring && !/is-split|g-dot|g-fill/.test(ring.className)) });
 
-      /* THE TURN IS MEASURED, NOT READ OFF THE ANIMATION NAME. A rotation that
-         is declared and paused, or overridden by another transform, reads the
-         same by name and does not move. Two readings of the computed angle
-         give the direction each one actually turns, and they are taken two
-         frames apart rather than after a fixed wait: under SwiftShader a
-         600ms wait came back as 160 degrees of turn, and past half a turn the
-         shorter way round is the wrong way round. Two frames is under 90
-         degrees even at one frame a second. */
+      /* THE TURN IS MEASURED, NOT READ OFF THE ANIMATION NAME, AND NOT TIMED.
+         A rotation that is declared and paused, or overridden by another
+         transform, reads the same by name and does not move, so the angle is
+         read off the computed transform. It is not read across a wait: under
+         SwiftShader two frames of the raytracer came back 3.3 seconds apart
+         on 27 October 2026, the line had turned past half a turn, and the
+         shorter way round was the wrong way round. So each running animation
+         is paused, set to two known moments 100ms apart, read at each, and
+         put back exactly where it was. That reads the real keyframes as the
+         browser applies them, whatever the frame rate, and the row also
+         holds both animations to running, so a turn that was stopped still
+         fails. */
       function angleOf(el) {
         var m = /matrix\(([^,]+),\s*([^,]+)/.exec(w.getComputedStyle(el).transform || '');
         return m ? Math.atan2(parseFloat(m[2]), parseFloat(m[1])) * 180 / Math.PI : null;
       }
       function turned(a0, a1) { var dlt = a1 - a0; if (dlt > 180) dlt -= 360; if (dlt < -180) dlt += 360; return dlt; }
-      var p0 = pr ? angleOf(pr) : null, g0 = gl ? angleOf(gl) : null;
-      await new Promise(function (r) { w.requestAnimationFrame(function () { w.requestAnimationFrame(function () { r(); }); }); });
-      var dp = (p0 === null || !pr) ? 0 : turned(p0, angleOf(pr));
-      var dg = (g0 === null || !gl) ? 0 : turned(g0, angleOf(gl));
-      t('H11', 'The ring turns clockwise and the line inside it counterclockwise (saw ' + dp.toFixed(1) + ' and ' + dg.toFixed(1) + ' degrees)',
-        { ringClockwise: true, lineCounter: true },
-        { ringClockwise: dp > 0.05, lineCounter: dg < -0.05 });
+      function turnOf(el) {
+        var an = el && el.getAnimations ? el.getAnimations()[0] : null;
+        if (!an || typeof an.currentTime !== 'number') return { running: false, turn: 0 };
+        var running = an.playState === 'running', was = an.currentTime;
+        an.pause();
+        an.currentTime = 1000;
+        var a0 = angleOf(el);
+        an.currentTime = 1100;
+        var a1 = angleOf(el);
+        an.currentTime = was;
+        if (running) an.play();
+        return { running: running, turn: (a0 === null || a1 === null) ? 0 : turned(a0, a1) };
+      }
+      var tp = turnOf(pr), tg = turnOf(gl);
+      var dp = tp.turn, dg = tg.turn;
+      t('H11', 'The ring turns clockwise and the line inside it counterclockwise (saw ' + dp.toFixed(2) + ' and ' + dg.toFixed(2) + ' degrees over 100ms)',
+        { ringRunning: true, lineRunning: true, ringClockwise: true, lineCounter: true },
+        { ringRunning: tp.running, lineRunning: tg.running, ringClockwise: dp > 0.05, lineCounter: dg < -0.05 });
 
       /* The pill floats, three pixels either way, so the centre is held to
          six. "Create an account" sits under it, centred, and is a button. */
