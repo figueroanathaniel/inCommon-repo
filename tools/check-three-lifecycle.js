@@ -201,6 +201,30 @@ globe.coronaTex = asset('corona'); globe.glowTex = asset('glow');
 objects.push(globe.coronaTex, globe.glowTex);
 globe.destroy(); globe.destroy();
 check(objects.every(a => a.calls === 1), 'body-globes frees each shared asset once');
+/* Exercise globe update with the vendored CPU math, without a renderer. */
+const T = await import(require('url').pathToFileURL(path.join(app, 'three.core.js')).href);
+let allocations = 0;
+class Vec extends T.Vector3 { constructor(...args) { super(...args); allocations++; } }
+class Quat extends T.Quaternion { constructor(...args) { super(...args); allocations++; } }
+const cached = win.BodyGlobes.create({ SphereGeometry: makeGeo, PlaneGeometry: makeGeo, Vector3: Vec, Quaternion: Quat });
+const world = new T.Group(), ring = new T.Object3D(), tails = [new T.Object3D(), new T.Object3D()];
+world.position.set(2, 3, 4); ring.rotation.set(0.4, 0.2, 0.7); world.add(ring);
+ring.material = { uniforms: { uCen: { value: new T.Vector3() }, uR: { value: 0 }, uN: { value: new T.Vector3() } } };
+tails[1].userData.bend = 0.18;
+world.userData = { parts: [], ring, tails };
+const sun = new T.Vector3(-3, 1, 5), camera = new T.Vector3(10, 8, -4);
+cached.update(world, 0, 0.5, sun, camera, 2);
+const scratch = cached._frameMath;
+allocations = 0;
+for (let i = 0; i < 1000; i++) { camera.x = 10 + Math.sin(i); cached.update(world, 0, 0.5, sun, camera, 2); }
+check(allocations === 0, 'body-globes allocates no vectors or quaternions in warmed ring and comet updates');
+check(cached._frameMath === scratch, 'body-globes reuses math storage across frames');
+const normal = new T.Vector3(0, 0, 1).applyQuaternion(ring.getWorldQuaternion(new T.Quaternion()));
+check(normal.distanceTo(ring.material.uniforms.uN.value) < 1e-12, 'body-globes preserves ring world normal');
+check(tails.every(t => Math.abs(t.quaternion.length() - 1) < 1e-12) && tails[0].quaternion.angleTo(tails[1].quaternion) > 0.01,
+  'body-globes keeps independently oriented normalized comet tails');
+cached.destroy();
+check(cached._frameMath === null, 'body-globes releases CPU math storage on destroy');
 console.log('Three.js lifecycle: ' + checks + ' checks passed');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

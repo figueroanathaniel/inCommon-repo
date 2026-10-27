@@ -5959,6 +5959,44 @@ from what is present, and comets are off the wheel until the Comets box is
 ticked.
 
 ## The 3D stages compile in parallel, build when near, and wait for their own faces
+### Globe frame math reuses CPU storage (26 October 2026)
+Ring normals and comet tail orientation in `body-globes.js` reuse one lazy
+set of eight vectors and one quaternion per globe manager. The uniforms and
+tail quaternions copy the results; nothing keeps an alias to this workspace.
+Destroy clears it. These are CPU objects, not GPU resources. Shaders,
+geometry resolution, lighting, quality rungs and reduced-motion timing do
+not change.
+
+Controlled Node benchmark with the vendored revision 184 CPU math, one ring
+and two comet tails, 20,000 warmed updates per batch, median of seven batches:
+
+| Measurement | Before | After |
+|---|---|---|
+| Vector and quaternion allocations in batch | 420,000 | 0 |
+| CPU batch time | 36.31ms | 24.25ms |
+| Maximum orientation component difference over 240 changing inputs | reference | 0 |
+
+This is about 33 percent less CPU time in this isolated function on this
+machine, not a measured app frame-rate improvement. It does not measure
+closures or three.js internal allocations. `check-three-lifecycle.js` has
+87 checks on this branch, including warmed allocation counts using real
+three.js math, ring normals, independent normalized tails, reuse and cleanup.
+No GPU resource is added. The existing GPU teardown tests still pass.
+
+The initial browser acceptance was blocked by invalid Chromium downloads.
+The restart used a temporary packaged Chromium 153 with SwiftShader. All
+required browser phases passed, including H 17/17 and its pixel readback.
+The 390x844, DPR 2, 4x CPU stage samples measured median intervals of 78.4ms
+before and 68.4ms after, both at stage rung 4. These single software samples
+are too noisy to establish an FPS improvement. Renderer counts were 14/15
+geometries and 40/40 textures; the one-geometry difference makes the memory
+comparison inconclusive. Hardware GPU bytes and physical phone performance
+remain unmeasured. The cover's rung-8 screenshot and readback also passed.
+See docs/visuals/globe-frame-cost-20261026/README.md for the full measurements,
+limits, screenshots and gate output. Independent review remains outstanding.
+This branch is separate from the quality history fixes on
+visuals/interactive-20261026.
+
 **Scene teardown is a complete graphics release.** The three scene modules
 (`chart-scene.js`, `hd-scene.js`, `cycle-scene.js`) dispose every geometry,
 material and label texture in their permanent and replaceable scene graphs,
