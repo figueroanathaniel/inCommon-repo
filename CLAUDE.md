@@ -6702,6 +6702,32 @@ docs" at the end of the README says how to make every other kind of change
 without spreading names and numbers back into the briefs. Where a brief and
 this file disagree, this file wins, and the brief is the one corrected.
 
+## The image toolkit, and what it found
+Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
+owner's instruction in its own order: `tools/build-assets.js`,
+`tools/optimize-images.js`, `tools/patch-html.js`, `tools/self-host-fonts.js`,
+then `tools/build-bundle.js` and an offline check. The four scripts are kept as
+supplied. What each did on this repository, measured rather than assumed:
+
+| Step | Result |
+|---|---|
+| build-assets | 93 image paths under app/, preview/, inCommon Logo/ and native/; 70 unique, 23 duplicates. Copies the 70 into `app/assets/canonical/` (name plus a 12 character hash) and writes `app/assets/image-map.json`. Nothing is moved or deleted |
+| optimize-images | 280 AVIF and 280 WebP files at 480, 768, 1200 and 1920 wide (never enlarged), 5.3 MB with the 70 copies |
+| patch-html | **0 tags patched.** The app has no `<img>`: its pictures are inline SVG, CSS masks and WebGL. The app file is byte identical after it. It writes a `.bak` of the app on every run, which `.gitignore` now keeps out |
+| self-host-fonts | `app/fonts.css` from the 16 woff2 in `app/fonts/`. **Nothing loads it.** The served self-hosted type is `app/fonts/fonts.css`, written by hand with the real family names and weight ranges, and chosen by `build-bundle.js --fonts self` (docs/FONTS.md). The generated file names families by the first word of each filename in lowercase and gives every face weight 400 and a Latin-only range |
+| build-bundle | `deploy/v6.4/` unchanged |
+| offline | the service worker takes control, and the app and the cover both load with the network off |
+
+**sharp is not a dependency of the repository.** It is installed with
+`npm i --no-save --no-package-lock sharp`, so no package.json is written and
+`node_modules/` stays ignored; the app itself still has no npm dependency.
+
+**The native icons and splash screens are untouched and must stay PNG**: the
+stores and the home screen want them at fixed sizes in that format. The copies
+in `app/assets/canonical/` are copies, and no shipped page refers to them yet.
+If a page ever takes an `<img>`, `patch-html.js` will give it a `<picture>` with
+these sources.
+
 ## Search engines are given the cover, the legal pages and the Learn pages
 Added 15 October 2026. The cover is a canvas, so what a crawler read of the
 home page was the wordmark, "enter here" and, from the markup, the SIGNAL LOST

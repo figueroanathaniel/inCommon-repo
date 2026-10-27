@@ -1,0 +1,145 @@
+/* Self-hosted - replaces Google Fonts CDN */
+
+@font-face {
+  font-family: 'karla';
+  src: url('./fonts/karla-normal-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'karla';
+  src: url('./fonts/karla-normal-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'marcellus';
+  src: url('./fonts/marcellus-normal-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'marcellus';
+  src: url('./fonts/marcellus-normal-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-italic-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-italic-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-italic-vietnamese.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-normal-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-normal-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'newsreader';
+  src: url('./fonts/newsreader-normal-vietnamese.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-italic-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-italic-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-italic-vietnamese.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-normal-latin-ext.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-normal-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}
+
+@font-face {
+  font-family: 'petrona';
+  src: url('./fonts/petrona-normal-vietnamese.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-00FF;
+}

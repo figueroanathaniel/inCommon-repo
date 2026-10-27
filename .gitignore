@@ -17,3 +17,6 @@ package-lock.json
 # it pins what the shell was built with.
 native/www/
 !native/package-lock.json
+
+# tools/patch-html.js writes a backup of the app beside it on every run
+*.bak
