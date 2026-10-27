@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-10-26  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-10-27  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17824,21 +17824,29 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var T = this.T, ud = grp.userData;
     if (ud.spinG) ud.spinG.rotation.y += (ud.spin || 0) * dt;
     ud.parts.forEach(function (m) { if (m.uniforms && m.uniforms.uOp) m.uniforms.uOp.value = op; else if ('opacity' in m) m.opacity = op; });
+    /* Reuse CPU math objects across bodies and frames. Nothing here is sent
+       to the GPU or retained by a mesh; uniform and quaternion writes copy. */
+    var math = this._frameMath;
+    if (!math && (ud.ring || (ud.tails && sunPos))) math = this._frameMath = {
+      q: new T.Quaternion(), away: new T.Vector3(), dir: new T.Vector3(),
+      axis: new T.Vector3(0, 1, 0), toCam: new T.Vector3(), side: new T.Vector3(),
+      flat: new T.Vector3(), along: new T.Vector3(), normal: new T.Vector3()
+    };
     if (ud.ring) {
       var ru = ud.ring.material.uniforms; ru.uCen.value.copy(grp.position); ru.uR.value = radius;
-      var nrm = new T.Vector3(0, 0, 1).applyQuaternion(ud.ring.getWorldQuaternion(new T.Quaternion())); ru.uN.value.copy(nrm);
+      ru.uN.value.set(0, 0, 1).applyQuaternion(ud.ring.getWorldQuaternion(math.q));
     }
     if (ud.tails && sunPos) {
-      var away = new T.Vector3().subVectors(grp.position, sunPos); if (away.lengthSq() < 1e-6) away.set(1, 0, 0); away.normalize();
+      var away = math.away.subVectors(grp.position, sunPos); if (away.lengthSq() < 1e-6) away.set(1, 0, 0); away.normalize();
       ud.tails.forEach(function (t) {
-        var dir = away.clone(); if (t.userData.bend) { dir.x += t.userData.bend; dir.normalize(); }
-        var q = new T.Quaternion().setFromUnitVectors(new T.Vector3(0, 1, 0), dir);
+        var dir = math.dir.copy(away); if (t.userData.bend) { dir.x += t.userData.bend; dir.normalize(); }
+        var q = math.q.setFromUnitVectors(math.axis, dir);
         t.quaternion.copy(q);
         /* turn the tail about its own axis so its face meets the camera */
-        var toCam = new T.Vector3().subVectors(camPos, grp.position).normalize();
-        var side = new T.Vector3(1, 0, 0).applyQuaternion(q), up = dir;
-        var flat = toCam.clone().sub(up.clone().multiplyScalar(toCam.dot(up)));
-        if (flat.lengthSq() > 1e-6) { flat.normalize(); var normal = new T.Vector3(0, 0, 1).applyQuaternion(q); var ang = Math.atan2(side.dot(flat), normal.dot(flat)); t.rotateOnAxis(new T.Vector3(0, 1, 0), ang); }
+        var toCam = math.toCam.subVectors(camPos, grp.position).normalize();
+        var side = math.side.set(1, 0, 0).applyQuaternion(q), up = dir;
+        var flat = math.flat.copy(toCam).sub(math.along.copy(up).multiplyScalar(toCam.dot(up)));
+        if (flat.lengthSq() > 1e-6) { flat.normalize(); var normal = math.normal.set(0, 0, 1).applyQuaternion(q); var ang = Math.atan2(side.dot(flat), normal.dot(flat)); t.rotateOnAxis(math.axis, ang); }
       });
     }
   };
@@ -17857,6 +17865,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       if (asset) asset.dispose();
     });
     this.geo = this.shellGeo = this.tailGeo = this.coronaTex = this.glowTex = null;
+    this._frameMath = null;
   };
   G.kindOf = function (b) { var s = specOf(b); return s.kind === SIGIL ? 'point' : s.kind === STAR ? 'star' : s.kind === GAS ? 'giant' : s.kind === COMET ? 'comet' : s.kind === ICE ? 'ice' : s.kind === CLOUD ? 'clouded' : 'rock'; };
 

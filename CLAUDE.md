@@ -5959,6 +5959,37 @@ from what is present, and comets are off the wheel until the Comets box is
 ticked.
 
 ## The 3D stages compile in parallel, build when near, and wait for their own faces
+### Globe frame math reuses CPU storage (26 October 2026)
+Ring normals and comet tail orientation in `body-globes.js` reuse one lazy
+set of eight vectors and one quaternion per globe manager. The uniforms and
+tail quaternions copy the results; nothing keeps an alias to this workspace.
+Destroy clears it. These are CPU objects, not GPU resources. Shaders,
+geometry resolution, lighting, quality rungs and reduced-motion timing do
+not change.
+
+Controlled Node benchmark with the vendored revision 184 CPU math, one ring
+and two comet tails, 20,000 warmed updates per batch, median of seven batches:
+
+| Measurement | Before | After |
+|---|---|---|
+| Vector and quaternion allocations in batch | 420,000 | 0 |
+| CPU batch time | 36.31ms | 24.25ms |
+| Maximum orientation component difference over 240 changing inputs | reference | 0 |
+
+This is about 33 percent less CPU time in this isolated function on this
+machine, not a measured app frame-rate improvement. It does not measure
+closures or three.js internal allocations. `check-three-lifecycle.js` has
+87 checks on this branch, including warmed allocation counts using real
+three.js math, ring normals, independent normalized tails, reuse and cleanup.
+No GPU resource is added. The existing GPU teardown tests still pass.
+
+Phone profile (390x844, 4x CPU): before and after frame time, settled rung
+and GPU memory remain unmeasured. Chromium is unavailable here and its
+installer returned invalid ZIP downloads. Browser gates and the bottom-rung
+screenshot remain blocked. Follow the supplied 00-README.md: no pull request
+until all required gates pass. This branch is separate from the quality
+history fixes on visuals/interactive-20261026.
+
 **Scene teardown is a complete graphics release.** The three scene modules
 (`chart-scene.js`, `hd-scene.js`, `cycle-scene.js`) dispose every geometry,
 material and label texture in their permanent and replaceable scene graphs,
