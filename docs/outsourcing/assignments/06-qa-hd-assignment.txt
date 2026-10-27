@@ -1,0 +1,66 @@
+ASSIGNMENT 6.2   Workstream 6: QA, Unit Testing & Documentation
+Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
+Status:          AWAITING OWNER APPROVAL
+Issued against:  main 53d792a, 27 October 2026
+Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 06-qa-tests-docs.md, CLAUDE.md,
+                 docs/hd-upgrade/01-competitive-study.txt
+Runs beside:     assignment 6.1. Task 1 here goes before anything else in
+                 6.1 that is not already open.
+
+THE OUTCOME
+Every Human Design improvement after this is measured against a fixed set of
+reference charts, and the honesty rules (no silent fallback, every sub line
+value with its confidence) are rows that go red when broken.
+
+TASK 1. REFERENCE CHARTS (branch qa/hd-reference)
+  tools/fixtures/hd-reference.json and tools/check-hd-reference.js.
+  a. Twenty to thirty charts: births whose data is public and well sourced
+     (historical figures with recorded birth times, Rodden AA or A where
+     available), plus synthetic edge cases you construct: a birth on a DST
+     change, a fractional offset zone, the far north, a Sun within a tenth of
+     a degree of a gate boundary, a Moon within a hundredth of a line
+     boundary, no birth time, a century boundary. No private person, and
+     nothing taken from a user.
+  b. For each: the expected Type, Authority, Profile, defined centres,
+     defined channels, and the 26 activations to gate and line. Expected
+     values come from at least two independent public calculators. Where
+     they disagree with each other or with inCommon, the fixture records
+     the disagreement and its cause (zone revision, boundary crossing,
+     calculation convention), and the row asserts inCommon's documented
+     answer. A disagreement nobody can explain fails the row.
+  c. The check runs inCommon's own code (lift it the way
+     check-astral-bodies.js does), needs no browser, and joins the fast
+     gate list (6.1's run-gates.js).
+
+TASK 2. HONESTY ROWS (with workstream 3, as 3.2 lands)
+  Rows for each of 3.2's Task 2 cases: the arc solver removed, a Sun
+  missing, an impossible profile pair. Each asserts the chart says what was
+  approximated or is unavailable, and each is shown red against the code
+  before 3.2. For 3.2's Task 4 (Color): boundary sweeps, and a row that
+  moves the birth time by a minute and expects the Moon's confidence to drop.
+
+TASK 3. THE BENCHMARK PROTOCOL (docs only, branch qa/hd-benchmark)
+  docs/hd-upgrade/03-benchmark-protocol.txt: the study that decides whether
+  inCommon has doubled Ra.TV and Maia Mechanics. About 30 participants
+  across beginner, student and practitioner; counterbalanced task order;
+  learning tasks against Ra.TV and chart tasks against Maia at comparable
+  tiers. Define each measure in 01-competitive-study.txt section 6 exactly
+  (what is timed, what counts as correct, how errors at seven days are
+  scored), the consent wording, and what data is kept. Nothing is run until
+  the owner decides recruitment and budget (delegation plan, D5).
+
+FILES THIS ASSIGNMENT OWNS
+  tools/check-hd-reference.js, tools/fixtures/hd-reference.json, the new
+  harness rows, docs/hd-upgrade/03-benchmark-protocol.txt.
+
+DONE MEANS
+  The reference check merged and in the fast gate list, every explained
+  disagreement documented, the honesty rows red before and green after 3.2,
+  and the protocol written for the owner's approval.
+
+SECONDARY AND TERTIARY
+  As the brief says. The secondary re-derives three reference charts by
+  hand from the fixture's sources and confirms the expected values. The
+  chat only tertiary may be asked how a public calculator states its
+  conventions; never sent the fixture or any chart.

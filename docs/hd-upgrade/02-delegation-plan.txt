@@ -1,0 +1,83 @@
+HUMAN DESIGN UPGRADE, DOCUMENT 2: DELEGATION PLAN
+Who builds what, in what order, and what has to be decided first
+
+Written:   27 October 2026, against main 53d792a
+Reads:     01-competitive-study.txt (the why), docs/outsourcing/00-README.md
+           (the rules every agent follows, the roster, the helpers)
+Status:    AWAITING OWNER APPROVAL. Nothing here is issued until the owner
+           approves it and hands each file to its agent.
+
+
+1. HOW A TASK IS DELEGATED
+-----------------------------------------------------------------------------
+Each assignment file names the outcome, the files the workstream owns for it,
+what it depends on, the tests and evidence required, and what counts as done.
+The primary builds it on its own branch and opens a pull request; the
+secondary reviews it independently; the tertiary answers narrow questions or
+runs checks. Nobody reviews their own work. The rules for helpers (the browser
+runner, shared seats, blind review, the helper log) are "Helpers" in
+00-README.md and apply unchanged.
+
+Status moves DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE. READY means
+it can be handed over; ISSUED means the agent actually has it. A name in the
+roster does not start an agent: each file is pasted into that agent's working
+session, or handed over through whatever integration it has.
+
+
+2. ROUTING
+-----------------------------------------------------------------------------
+File (docs/outsourcing/assignments/)  WS  What                        Can start
+------------------------------------- --- --------------------------- --------------
+03-features-hd-assignment.txt (3.2)    3  Honest chart: fix the sleep  now, beside 3.1
+                                          teaching, surface every
+                                          fallback, the inspection
+                                          panel, then Color with its
+                                          confidence and the birth
+                                          time scanner
+06-qa-hd-assignment.txt (6.2)          6  Reference charts, precision  now, beside 6.1
+                                          and honesty rows, the
+                                          benchmark protocol
+01-schema-hd-assignment.txt (1.2)      1  Notes, chart versions,       now
+                                          import and export data model
+02-security-hd-assignment.txt (2.2)    2  Other people's charts:       after 1.2's model
+                                          consent, sharing, handouts     is agreed
+04-visuals-hd-assignment.txt (4.2)     4  The chart as study           after the graphics
+                                          workspace: select and          update merges
+                                          highlight both ways, the
+                                          readable 2D beside 3D
+05-performance-hd-assignment.txt (5.2) 5  Budgets for the scanner and  after the JPL
+                                          the sub line layer             deferral merges
+
+Order of merge for this programme: 3.2's honesty tasks first (they correct
+what readers see today), then 6.2's reference charts (everything after is
+measured against them), then 1.2, 2.2, 4.2, 5.2.
+
+
+3. WHAT THE OWNER HAS TO DECIDE BEFORE THESE ARE READY
+-----------------------------------------------------------------------------
+D1  A Human Design reviewer. Software can test arithmetic; it cannot judge
+    whether a teaching passage is faithful. Every content change in 3.2 and
+    later needs a named person with Human Design training to sign it off.
+    Who is it, and is it paid, volunteer or a professional engagement?
+D2  The sleep fix ships with or without that reviewer. Proposed: ship the
+    four corrected passages now, written by the features workstream and
+    checked against published Jovian teaching, and have the reviewer confirm
+    when appointed. The current text is wrong in the tradition's own terms.
+D3  Names for group and business features. Penta and BG5 are Jovian product
+    names and bodygraph is a mark the competitor surface gate bars. Circle
+    exists; anything further needs inCommon's own name.
+D4  Pricing and what is free. The study recommends a readable PDF and
+    handout free, because paid printing is the friction Maia's users named.
+D5  The benchmark. About 30 people, three experience levels; who recruits
+    them, and is there a budget for incentives?
+D6  Whether workstream 3's secondary may be consulted more than once for
+    3.2, given that Color and the scanner are precision astronomy work.
+
+
+4. WHAT IS DELIBERATELY NOT IN THIS ROUND
+-----------------------------------------------------------------------------
+Tone, Base and Variables (they need 3.2's Color work and 6.2's reference
+cases first, and Base is only honest with a birth time to the second);
+the 384 natal line readings and the 192 crosses (they need D1); groups and
+time study modules (they need D3); the 30 person benchmark itself (it needs
+D5 and a first release to test).

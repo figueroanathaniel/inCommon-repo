@@ -150,6 +150,8 @@ const ALLOW = [
 
   { term: '*', path: 'docs/reference/',
     why: 'The competitive research folder. Its job is to name the marks and record what they reach. A gate that fails here fails on its own evidence base.' },
+  { term: '*', path: 'docs/hd-upgrade/',
+    why: 'The Human Design upgrade study of 27 October 2026 compares inCommon with named competitors and has to name their products, including the marks it tells the workstreams not to use. It is research for the team, never a reader surface, the same as docs/reference/.' },
   { term: '*', path: 'docs/source/',
     why: 'Historical source documents. CLAUDE.md holds that a record of what was written on a date is not a pointer to be maintained, and editing it to keep a grep tidy falsifies the record.' },
 

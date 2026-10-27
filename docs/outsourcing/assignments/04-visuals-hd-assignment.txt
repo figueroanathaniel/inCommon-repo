@@ -1,0 +1,47 @@
+ASSIGNMENT 4.2   Workstream 4: Interactive Visuals (WebGL / three.js)
+Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
+Status:          AWAITING OWNER APPROVAL. Queued: starts after the graphics
+                 update in assignment 4.1 has merged.
+Issued against:  main 53d792a, 27 October 2026
+Who:             the workstream 4 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 04-visuals-webgl.md, CLAUDE.md,
+                 docs/hd-upgrade/01-competitive-study.txt (Pillar C)
+
+THE OUTCOME
+The chart is the study workspace: whatever the reader selects on the chart
+opens its explanation without losing the chart, and whatever they read lights
+up on the chart.
+
+TASK 1. SELECT, AND KEEP THE CHART (both views)
+  Selecting a gate, channel or centre in the 2D wiring or the 3D scene opens
+  its Atlas entry beside the chart, not over it, in both shells. On the
+  phone that is a sheet that leaves the chart visible above it.
+
+TASK 2. READ, AND SEE IT ON THE CHART
+  The reverse link: a gate, channel or centre named in an open Atlas entry,
+  a line reading or a note highlights the same structure on the chart, in
+  2D and 3D. One highlight model shared by both views.
+
+TASK 3. THE READABLE VIEW IS ALWAYS ONE TAP AWAY
+  Users of other platforms name unfamiliar colours and layouts as a reason
+  they could not read a chart. The 2D wiring is the conventional, readable
+  view; it stays one tap from the 3D everywhere, and the selection carries
+  across when switching.
+
+TASK 4. A TEXT ALTERNATIVE FOR EVERY GRAPHIC
+  Everything the chart shows is reachable as a structured list for a screen
+  reader and for keyboard use, with the same selection and highlight.
+
+FILES THIS ASSIGNMENT OWNS
+  The scene files and the app's stage mounting code, as in the brief; the
+  highlight model. The Atlas panel's content is workstream 3's.
+
+DONE MEANS
+  The worked journey in 01-competitive-study.txt (a hanging gate, why it is
+  active, its partner, the channel, the line reading, a note) runs end to
+  end in both shells and both views; every README gate green, H included;
+  lifecycle rows for any new GPU resource.
+
+SECONDARY AND TERTIARY
+  As the brief says; the tertiary (or the browser runner) records the worked
+  journey at 390x844 and 1440x900.
