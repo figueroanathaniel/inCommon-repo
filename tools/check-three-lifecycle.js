@@ -47,17 +47,17 @@ async function main() {
 for (const [file, exported, extra] of [
   ['chart-scene', 'ChartScene', ['wallGeo', 'pillarGeo', 'orbGeo', 'ribGeo']],
   ['hd-scene', 'HDScene', ['orbGeo', 'ribGeo']],
-  ['cycle-scene', 'CycleScene', ['pillarGeo']]
+  ['cycle-scene', 'CycleScene', ['pillarGeo', '_slabGeo', '_curGeo', '_tileGeo']]
 ]) {
   const { win, doc, canceled } = load(file);
   const s = win[exported].create({});
   const baseBlur = win.count('blur');
   const geo = asset('shared geometry'), tex = asset('label texture');
   const mat = Object.assign(asset('shared material'), { map: tex });
-  const other = asset('second material'), orphan = asset('unattached geometry');
-  s.scene = graph([{ geometry: geo, material: [mat, other] }, { geometry: geo, material: mat }]);
+  const other = asset('second material'), orphans = extra.map(asset);
+  s.scene = graph([{ geometry: geo, material: [mat, other] }, { geometry: geo, material: mat }, { geometry: orphans[0] }]);
   s.postScene = graph([{ geometry: asset('post quad'), material: mat }]);
-  s[extra[0]] = orphan;
+  extra.forEach((name, i) => { s[name] = orphans[i]; });
   const bright = s.mBright = asset('bright pass');
   const blur = s.mBlur = asset('blur pass');
   const comp = s.mComp = asset('composite pass');
@@ -84,7 +84,7 @@ for (const [file, exported, extra] of [
   const initialVis = doc.count('visibilitychange');
   s.destroy();
   check(geo.calls === 1 && mat.calls === 1 && tex.calls === 1 && other.calls === 1, file + ' frees shared assets once');
-  check(orphan.calls === 1, file + ' frees orphaned shared geometry');
+  extra.forEach((name, i) => check(orphans[i].calls === 1, file + ' frees orphaned shared geometry ' + name));
   check([bright, blur, comp].every(a => a.calls === 1), file + ' frees all three post materials');
   check(targets.every(a => a.calls === 1) && renderer.calls === 1, file + ' frees render targets and renderer');
   check(canceled.includes(101) && canceled.includes(102), file + ' cancels both queued frames');
@@ -107,6 +107,8 @@ for (const [file, exported, extra] of [
     const material = asset('pending shader material');
     const geometry = asset('pending geometry');
     const pendingRenderer = asset('pending renderer');
+    const pendingOrphans = extra.map(asset);
+    extra.forEach((name, i) => { pending[name] = pendingOrphans[i]; });
     pending.scene = graph([{ geometry, material }]);
     pending.r = pendingRenderer;
     let settle;
@@ -117,14 +119,14 @@ for (const [file, exported, extra] of [
     const beforeBlur = win.count('blur');
     pending.destroy();
     pending.destroy();
-    check(material.calls === 0 && geometry.calls === 0 && pendingRenderer.calls === 0,
+    check(material.calls === 0 && geometry.calls === 0 && pendingRenderer.calls === 0 && pendingOrphans.every(a => a.calls === 0),
       file + ' retains GPU assets while shader compile is pending (' + outcome + ')');
     check(file === 'cycle-scene' ? win.count('blur') === beforeBlur - 1 : pendingHost.count('keyup') === 0,
       file + ' detaches listeners before shader compile settles (' + outcome + ')');
     settle(outcome === 'resolve' ? undefined : new Error('shader compile failed'));
     await pending._warmJobs.catch(() => {});
     await new Promise(resolve => setImmediate(resolve));
-    check(material.calls === 1 && geometry.calls === 1 && pendingRenderer.calls === 1,
+    check(material.calls === 1 && geometry.calls === 1 && pendingRenderer.calls === 1 && pendingOrphans.every(a => a.calls === 1),
       file + ' frees every GPU asset once after shader compile (' + outcome + ')');
   }
 }
@@ -167,6 +169,13 @@ for (const [file, exported] of [['chart-scene', 'ChartScene'], ['hd-scene', 'HDS
   const before = q.level;
   q.measure(150, true);
   check(before === 0 && q.level === 1 && rungs === 1, file + ' three very late frames drop a rung at once');
+
+  q.level = 0; q.frames = []; q.late = 0; rungs = 0;
+  q.measure(150, true); q.measure(150, true);
+  q.measure(32, false);
+  q.measure(150, true);
+  check(q.level === 0 && rungs === 0 && q.late === 1,
+    file + ' an idle frame breaks a run of very late frames');
 }
 
 /* The ladder is fed frames, never the time a stage spent off screen. */
@@ -179,12 +188,16 @@ for (const [file, exported] of [['chart-scene', 'ChartScene'], ['hd-scene', 'HDS
   const s = win[exported].create({});
   const seen = [];
   s.ready = true; s.host = element(); s.el.root.isConnected = true; s.visible = true;
+  s.frames = [150, 150]; s.late = 2;
   s.measure = function (ms) { seen.push(ms); };
   s.frame = s.step = s.render = s.postSleep = function () {};
   s.updateRun();
+  check(s.frames.length === 0 && s.late === 0, file + ' starts with a fresh quality sample');
   for (let t = 1000; t <= 1400; t += 40) run(t);
   s.visible = false; s.updateRun();
+  s.frames = [150, 150]; s.late = 2;
   s.visible = true; s.updateRun();
+  check(s.frames.length === 0 && s.late === 0, file + ' never combines quality samples from separate visits');
   for (let t = 9000; t <= 9400; t += 40) run(t);
   check(seen.length > 10 && seen.every(ms => ms < 100), file + ' does not time the gap a stage was away');
   seen.length = 0;

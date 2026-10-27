@@ -5989,6 +5989,59 @@ three frames over 120ms in a row drop a rung at once. All of it is in
 `check-three-lifecycle.js`, and each rule was removed once to see the gate go
 red.
 
+### Quality samples belong to one visit (26 October 2026)
+Follow-up to #92 and #93, based on main `7324bae`. Resetting `lastDraw`
+stopped an absence being counted as a frame, but left `frames` and `late`
+carrying the previous visit's samples. All three stages now clear both on
+loop start. An idle frame also breaks the consecutive late-frame streak:
+two busy 150ms frames, an idle 32ms frame, then one busy 150ms frame must not
+count as three consecutive late frames. The 45 busy-frame average, the
+three-frame emergency drop and all existing quality levels remain in place.
+
+Cycle Audit's teardown also releases `_slabGeo`, `_curGeo` and `_tileGeo`
+explicitly, through the same deduplicated release after shader warm-up as
+the other shared geometries. That covers empty groups where traversal has
+no mesh referring to one. This is an ownership correction, not a measured
+GPU-memory saving. No new GPU resource is allocated by this change.
+
+**Controlled before and after, not phone measurements.** The production
+methods were loaded in a Node VM, once from main and once from this branch.
+Each result below was identical for chart, wiring and Cycle Audit, starting
+at level 0. The lifecycle gate now has 98 checks, including every explicitly
+owned geometry, deferred release on warm-up success and failure, deduplication,
+quality history on start and restart, and the idle break. Removing each of
+the six quality fixes and each of the three Cycle Audit releases separately
+turned the gate red: nine mutations caught.
+
+| Controlled input | Before | After |
+|---|---|---|
+| Two busy 150ms frames, a loop start, one busy 150ms frame | level 1 | level 0 |
+| Two busy 150ms frames, one idle 32ms frame, one busy 150ms frame | level 1 | level 0 |
+| Three consecutive busy 150ms frames, same visit | level 1 | level 1 |
+
+**Browser acceptance is blocked on this machine.** Playwright is installed,
+but no Chromium binary is present. Its browser installer returned invalid,
+empty ZIP downloads. `node tools/drift-check.js --force --with-h`, with the
+runtime's Playwright on `NODE_PATH`, exits 3 before opening a browser. No H
+row has run here, including H2's drawing-buffer readback; this is not the
+documented red H1 with `GL_VENDOR = Disabled`.
+
+| Required phone profile, 390x844 with 4x CPU slowdown | Before | After |
+|---|---|---|
+| Frame time | unmeasured, browser unavailable | unmeasured, browser unavailable |
+| Settled quality rung | unmeasured | unmeasured |
+| GPU memory | unmeasured | unmeasured |
+| Cover screenshot at bottom rung 8 | unavailable | unavailable |
+
+The six README gate commands, the additional gates listed in this file,
+the calculator regression gates and the rebuilt bundle check pass. These
+command-line results do not establish browser acceptance. Keep this work in
+draft until the phone measurements, bottom-rung screenshot and the full
+drift check including H are supplied. `00-README.md` is absent from main;
+`README.md` and this file are the available gate inventories. The requested
+Haiku 5.5 and Nemotron 3.5 Lightening reviewers are not available in this
+session; no review or gate result is attributed to either model.
+
 Reported by the owner on 20 October 2026: "opening the app shows a bunch of
 black boxes in the 3D objects". The boxes were the Loading veils, flat `--bg`,
 which is near black under Deep Field, held up for seconds. A CPU profile of the
