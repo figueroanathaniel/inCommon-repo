@@ -6498,6 +6498,18 @@ that a later change is most likely to break:
   and a deploy from the repo are served identically, and no rule is written
   twice.
 
+- **A change to the live schema is a numbered file in `server/migrations/`.**
+  `server/cloud-schema.sql` opens with the v1 cleanup that drops
+  `consent_events` and `profiles`, so it is never run whole again. Each
+  migration is safe to run twice, carries its down migration in a `-- DOWN`
+  comment, adds no constraint the sync module could be refused by (one refused
+  upsert ends the whole push), and creates any new table with row level
+  security on and no policies. The README there gives the order; K73 holds the
+  folder to those rules. Where every piece of data lives, device and server,
+  and what each consent gates is `data-contracts/DATA-MAP.md`, written from the
+  code on 27 October 2026, with the key by key reference in
+  `data-contracts/local-storage-schema.md`.
+
 The mark lives once, in `inCommon Logo/icons/`; `app/manifest.json`,
 `app/sw.js` and the app helmet point at it by `../inCommon%20Logo/icons/`. The
 copies inside `deploy/` are build output, because a deploy directory is

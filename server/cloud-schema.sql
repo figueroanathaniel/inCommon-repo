@@ -6,6 +6,9 @@
 -- discovered live (PGRST204) during the pass. The saved query stays as the
 -- applying copy; this file is the reviewed, diffed, and restorable record.
 -- When the schema changes, change it here first and apply from here.
+-- From 27 October 2026 a change is written as its own numbered file in
+-- server/migrations/ (see the README there for the order) and applied from
+-- there; this file stays the v2 record those migrations start from.
 --
 -- DO NOT RUN THIS FILE WHOLE AGAINST THE LIVE PROJECT. The saved query below
 -- opens with its v1 cleanup, which DROPS consent_events and profiles. Nothing
