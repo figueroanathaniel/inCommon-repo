@@ -1764,8 +1764,9 @@
        away for is not a frame, and counted as one it dropped a rung on every
        return to a stage, until even a fast machine drew at the bottom. Its
        first frames carry the page settling and the GPU uploading, so they are
-       drawn but not judged either */
-    if (want && !this.running) { this.running = true; this.last = 0; this.lastDraw = 0; this.skipFrames = 3; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
+       drawn but not judged either. Start a fresh sample as well: neither the
+       average nor a run of late frames belongs to the next visit. */
+    if (want && !this.running) { this.running = true; this.last = 0; this.lastDraw = 0; this.frames = []; this.late = 0; this.skipFrames = 3; this.raf = requestAnimationFrame(this._tick || (this._tick = this.tick.bind(this))); }
     else if (!want) this.stop();
   };
   /* An unseen stage gives back its bloom targets. The phone keeps every stage
@@ -1823,7 +1824,7 @@
     this.render();
   };
   P.measure = function (ms, busy) {
-    if (!busy) return;
+    if (!busy) { this.late = 0; return; }
     /* three frames in a row that are already far too late drop a rung at
        once, rather than waiting out the averaging window */
     this.late = ms > 120 ? (this.late || 0) + 1 : 0;
@@ -2027,7 +2028,7 @@
           (Array.isArray(node.material) ? node.material : [node.material]).forEach(release);
         });
       });
-      [self.pillarGeo, self.mBright, self.mBlur, self.mComp].forEach(release);
+      [self.pillarGeo, self._slabGeo, self._curGeo, self._tileGeo, self.mBright, self.mBlur, self.mComp].forEach(release);
       if (self.post) ['scene', 'a', 'b', 'c', 'd'].forEach(function (k) { release(self.post[k]); });
       release(self.r);
     };

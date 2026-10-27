@@ -1,0 +1,6 @@
+check-layer-boundary: ok
+  67 modules classified: 25 shell, 18 interpretation, 17 mechanics, 7 vendored
+  51 exported globals resolved, 29 dependency edges read
+  0 mechanics to interpretation, all declared in EDGES with a reason
+  0 interpretation modules touch the ephemeris
+  2290 string literals in mechanics; prose only where PROSE declares it

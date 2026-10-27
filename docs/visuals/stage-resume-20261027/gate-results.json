@@ -1,0 +1,50 @@
+[
+  {
+    "command": "node tools/build-bundle.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/run-tests-node.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/run-fixtures.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/run-module-tests.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/check-dead-controls.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/check-purple-text.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/token-compare.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/check-layer-boundary.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/check-three-lifecycle.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/build-bundle.js --check",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/drive-cover.js",
+    "exitCode": 0
+  },
+  {
+    "command": "node tools/drift-check.js --force --with-h",
+    "exitCode": 0
+  }
+]
