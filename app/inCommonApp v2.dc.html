@@ -31207,7 +31207,7 @@ class Component extends DCLogic {
   vtBindTouch() {
     let sy = 0, sx = 0, band = 0, page = null, inner = null;
     let armed = false, fired = false, pull = 0, startAt = 0;
-    let hz = 0, hzY = 0, hzOK = false, hzStart = 0;
+    let hz = 0, hzY = 0, hzOK = false, hzStart = 0, hzFlight = false;
 
     this._vtTS = e => {
       armed = false; hz = 0; hzY = 0; hzOK = false;
@@ -31223,6 +31223,9 @@ class Component extends DCLogic {
       inner = this.vtScrollableAt(t.target);
       hzOK = !band && !this.vtHScrollableAt(t.target);
       hzStart = this._vtPager ? this._vtPager.scrollLeft : 0;
+      /* One of our own moves is travelling the pager (its routed claim is
+         held until it lands), wherever on the screen this finger came down. */
+      hzFlight = this._vtRouteTab != null;
     };
 
     this._vtTM = e => {
@@ -31260,13 +31263,42 @@ class Component extends DCLogic {
     };
 
     this._vtTE = e => {
+      /* SWIPING AGAIN BEFORE A MOVE HAS LANDED (owner, 27 October 2026: "if I
+         swipe too quickly or too early ... sometimes it gets stuck between 2
+         of them"). A touch on a scroller that is still travelling cancels the
+         pin (vtSettle's bail), and on an iPhone it stops the smooth scroll
+         where it is. Two faults followed. The pager kept moving during the
+         touch, under our own animation, and that read below as the browser
+         having moved it, so the swipe was dropped. And with the swipe dropped
+         and the pin gone, nothing finished the move, so the pager or the
+         column stayed between two screens. tools/drive-swipe.js holds both. */
+      const bailed = this._vtBailed || null;
+      this._vtBailed = null;
       /* A pager that already moved under the finger was moved by the browser,
-         so the swipe is not repeated here. */
-      if (hzOK && e && e.type === 'touchend' && Math.abs(hz) >= this.VT_HSWIPE && Math.abs(hz) > Math.abs(hzY) * 1.5) {
-        const pg = this._vtPager;
-        if (!(pg && Math.abs(pg.scrollLeft - hzStart) > 8)) this.vtSwipeStep(hz < 0 ? 1 : -1);
+         so the swipe is not repeated here. Unless the movement was our own
+         move still travelling when the finger landed. */
+      const pg = this._vtPager;
+      const swiped = hzOK && e && e.type === 'touchend' && Math.abs(hz) >= this.VT_HSWIPE && Math.abs(hz) > Math.abs(hzY) * 1.5 &&
+        (hzFlight || !!(bailed && bailed.T) || !(pg && Math.abs(pg.scrollLeft - hzStart) > 8));
+      const dir = hz < 0 ? 1 : -1;
+      /* The interrupted move's destination is where the reader is: the scroll
+         handler may have written whatever the scroller was passing once the
+         claim was released, so it is put back before a swipe steps from it. */
+      const back = {};
+      if (bailed && bailed.T && bailed.T.to != null && bailed.T.to !== (this.state.vtTab || 0)) back.vtTab = bailed.T.to;
+      if (bailed && bailed.S && bailed.S.to != null && bailed.S.to !== (this.state.vtSec || 0)) {
+        back.vtSec = bailed.S.to;
+        back.tab = (this.VT_SECTIONS[bailed.S.to] || [])[0] || this.state.tab;
       }
-      hz = 0; hzY = 0; hzOK = false;
+      const finish = () => {
+        if (swiped) this.vtSwipeStep(dir);
+        /* Whatever the swipe did not replace with a move of its own is
+           finished where it was going, so nothing is left between screens. */
+        if (bailed && bailed.T && this._vtRouteTab == null) this.vtResume('T', bailed.T.to);
+        if (bailed && bailed.S && this._vtRouteSec == null) this.vtResume('S', bailed.S.to);
+      };
+      if (Object.keys(back).length) this.setState(back, finish); else finish();
+      hz = 0; hzY = 0; hzOK = false; hzFlight = false;
       const slowEnough = Date.now() - startAt >= this.VT_PULL_MS;
       if (pull > this.VT_PULL && slowEnough) {
         const now = Date.now();
@@ -31331,7 +31363,18 @@ class Component extends DCLogic {
        to where they were sent: tap a tab, swipe straight away, and the swipe was
        undone up to two seconds later. Any gesture on the scroller ends the pin
        and hands the scroll back. */
-    const bail = () => { this.vtStopSettle(key); restore(); };
+    const bail = () => {
+      /* Where this move was going, read before the stop releases the claim
+         that names it: once released, the scroll handler writes the screen
+         the scroller happens to be passing, and that is not where the reader
+         was sent. */
+      const to = key === 'T' ? this._vtRouteTab : this._vtRouteSec;
+      this.vtStopSettle(key); restore();
+      /* Remembered for the touch that caused it, so its end can finish the
+         move it interrupted (vtResume) and its swipe is not mistaken for the
+         browser's own scroll (see _vtTE). */
+      this._vtBailed = Object.assign(this._vtBailed || {}, { [key]: { at: Date.now(), to: to } });
+    };
     const evs = ['touchstart', 'pointerdown', 'mousedown', 'wheel'];
     evs.forEach(t => el.addEventListener(t, bail, { passive: true }));
     this['_vtOff' + key] = () => evs.forEach(t => el.removeEventListener(t, bail));
@@ -31355,6 +31398,36 @@ class Component extends DCLogic {
       el[prop] = target;
       restore();
     }, 90);
+  }
+  /* Finish a move a touch interrupted, to the screen it was going to (`to`,
+     read when the touch landed) or, failing that, the one the state names.
+     Nothing buzzes: the reader is not being sent anywhere new. */
+  vtResume(key, to) {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const behavior = reduce ? 'auto' : 'smooth';
+    if (key === 'T') {
+      const i = to != null ? to : (this.state.vtTab || 0);
+      const el = this._vtPager, page = el && el.children[i];
+      if (i !== (this.state.vtTab || 0)) this.setState({ vtTab: i });
+      if (!el || !page || !el.clientWidth) return;
+      const target = page.offsetLeft - el.offsetLeft;
+      if (Math.abs(el.scrollLeft - target) <= 1) return;
+      el.style.scrollSnapType = 'none';
+      el.scrollTo({ left: target, behavior: behavior });
+      this.vtSettle(el, 'x', target, 'T');
+      this._vtRouteTab = i;
+      return;
+    }
+    const i = to != null ? to : (this.state.vtSec || 0);
+    const el = this._vtScroll, sec = this.vtSecEls()[i];
+    if (!el || !sec) return;
+    if (i !== (this.state.vtSec || 0)) this.setState({ vtSec: i, tab: (this.VT_SECTIONS[i] || [])[0] || this.state.tab });
+    const target = sec.offsetTop;
+    if (Math.abs(el.scrollTop - target) <= 1) return;
+    el.style.scrollSnapType = 'none';
+    el.scrollTo({ top: target, behavior: behavior });
+    this.vtSettle(el, 'y', target, 'S');
+    this._vtRouteSec = i;
   }
   /* WHAT THE ROOT OF A SECTION IS, IN ONE PLACE.
 
