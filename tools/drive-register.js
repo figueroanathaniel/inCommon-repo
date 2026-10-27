@@ -12,18 +12,32 @@
  * met the same page. "Continue without an account" on the sign in form set
  * only the guest mark and met it too.
  *
- *   J1  Yes on the cover, signed out: the card, asking for an account.
+ *   J1  Yes on the cover, signed out: the card, with the account folded under
+ *       "Create account?" (owner, 27 October 2026), so the birth moment can be
+ *       given without an email.
  *   J2  Yes on the cover, with a sign in this browser holds: the card, asking
  *       for the birth moment only (no email, no password), never the old page.
  *   J3  Continue straight in with a held sign in, first run never finished on
  *       this device: the same card, birth moment only.
  *   J4  The same, first run already finished for that account: Today, no card.
- *   J5  Saving the signed in card: the profile takes the date and place, the
+ *   J5  Saving the signed in card: the profile takes the full name, the date
+ *       and the place (the name whole as the birth name, its first word as the
+ *       profile's), the
  *       card goes, first run is marked for the account, and a reload stays on
  *       Today.
  *   J6  The guest mark alone ("Continue without an account"): the default
  *       profile, no card and no old page.
  *   J7  Use mine on the sample banner: the card, not the old page.
+ *   J8  "Create account?" opens the email, phone and password, and the button
+ *       becomes Create my account.
+ *   J9  A guest saves the birth moment with the account left folded: the
+ *       profile takes it, no account is asked for, first run is marked, and a
+ *       reload stays on Today.
+ *   J11 No full name, no save: the field is marked and the message names it.
+ *   J10 The logo and the title never share a line box, and no section of the
+ *       card is crushed under the next, folded and opened, at three phone
+ *       heights. Measured in Chromium; the owner saw them overlap on an iPhone,
+ *       where WebKit sized the logo's box from its height alone.
  *   J-PAGE  No page error.
  *
  * HOW IT RUNS. It serves the repository itself, loads the source app at
@@ -106,6 +120,7 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
     return {
       card: vis('.welcome-registration-card'),
       askAccount: vis('#reg-email') && vis('#reg-pass'),
+      toggle: vis('.reg-acct-toggle'),
       oldPage: vis('[data-screen-label="First run"]'),
       today: window.__incommonApp.state.tab === 'today'
     };
@@ -115,32 +130,42 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
   try {
     /* J1 */
     let { ctx, p } = await open({ tab: { 'incommon.guest.chosen': '1', 'incommon.register': '1' } });
-    t('J1', 'Yes on the cover, signed out: the card asks for an account',
-      { card: true, askAccount: true, oldPage: false, today: true }, await look(p));
+    t('J1', 'Yes on the cover, signed out: the card, with the account folded under Create account?',
+      { card: true, askAccount: false, toggle: true, oldPage: false, today: true }, await look(p));
+
+    /* J8, same page */
+    await p.evaluate(() => document.querySelector('.reg-acct-toggle').click());
+    await p.waitForTimeout(500);
+    const opened = await look(p);
+    const label = await p.evaluate(() => (document.querySelector('.reg-go') || {}).textContent.trim());
+    const expanded = await p.evaluate(() => document.querySelector('.reg-acct-toggle').getAttribute('aria-expanded'));
+    t('J8', 'Create account? opens the email, phone and password, and the button becomes Create my account',
+      { askAccount: true, expanded: 'true', label: 'Create my account' }, { askAccount: opened.askAccount, expanded, label });
     await ctx.close();
 
     /* J2 */
     ({ ctx, p } = await open({ tab: { 'incommon.guest.chosen': '1', 'incommon.register': '1' }, local: signedIn }));
     t('J2', 'Yes on the cover with a held sign in: the card asks for the birth moment only, never the old page',
-      { card: true, askAccount: false, oldPage: false, today: true }, await look(p));
+      { card: true, askAccount: false, toggle: false, oldPage: false, today: true }, await look(p));
     await ctx.close();
 
     /* J3 */
     ({ ctx, p } = await open({ local: signedIn }));
     t('J3', 'Continue straight in with a held sign in, first run never finished here: the same card, birth moment only',
-      { card: true, askAccount: false, oldPage: false, today: true }, await look(p));
+      { card: true, askAccount: false, toggle: false, oldPage: false, today: true }, await look(p));
     await ctx.close();
 
     /* J4 */
     ({ ctx, p } = await open({ local: { ...signedIn, ['incommon.firstrun.u.' + USER]: 'true' } }));
     t('J4', 'Continue straight in with a held sign in, first run finished for that account: Today, no card',
-      { card: false, askAccount: false, oldPage: false, today: true }, await look(p));
+      { card: false, askAccount: false, toggle: false, oldPage: false, today: true }, await look(p));
     await ctx.close();
 
     /* J5 */
     ({ ctx, p } = await open({ local: signedIn }));
     await p.evaluate(() => {
       const a = window.__incommonApp;
+      a.afSet('bname', 'Ana Maria Ruiz');
       a.afSet('bdate', '1988-04-12');
       a.afSet('bplace', '40.7128, -74.0060');
     });
@@ -149,7 +174,7 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
     await p.waitForTimeout(1200);
     const saved = await p.evaluate(u => {
       const PM = window.ProfileManager, prof = PM.getProfile(PM.activeId()) || {};
-      return { birthDate: prof.birthDate, hasPlace: !!prof.birthLocation, marked: localStorage.getItem('incommon.firstrun.u.' + u) };
+      return { name: prof.name, birthName: window.__incommonApp.birthName(), birthDate: prof.birthDate, hasPlace: !!prof.birthLocation, marked: localStorage.getItem('incommon.firstrun.u.' + u) };
     }, USER);
     const after = await look(p);
     await p.reload();
@@ -157,14 +182,14 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
     await p.waitForTimeout(1200);
     const reloaded = await look(p);
     t('J5', 'Saving the signed in card keeps the birth moment, closes the card, marks first run, and a reload stays on Today',
-      { birthDate: '1988-04-12', hasPlace: true, marked: 'true', cardGone: true, reloadCard: false, reloadOld: false },
+      { name: 'Ana', birthName: 'Ana Maria Ruiz', birthDate: '1988-04-12', hasPlace: true, marked: 'true', cardGone: true, reloadCard: false, reloadOld: false },
       { ...saved, cardGone: !after.card, reloadCard: reloaded.card, reloadOld: reloaded.oldPage });
     await ctx.close();
 
     /* J6 */
     ({ ctx, p } = await open({ tab: { 'incommon.guest.chosen': '1' } }));
     t('J6', 'The guest mark alone (Continue without an account): the default profile, no card, no old page',
-      { card: false, askAccount: false, oldPage: false, today: true }, await look(p));
+      { card: false, askAccount: false, toggle: false, oldPage: false, today: true }, await look(p));
     await ctx.close();
 
     /* J7 */
@@ -176,8 +201,81 @@ const SESSION = JSON.stringify({ access_token: 'test.e30.test', refresh_token: '
     });
     await p.waitForTimeout(800);
     t('J7', 'Use mine on the sample banner opens the card, not the old page',
-      { button: true, card: true, askAccount: true, oldPage: false, today: true }, { button: useMine, ...(await look(p)) });
+      { button: true, card: true, askAccount: false, toggle: true, oldPage: false, today: true }, { button: useMine, ...(await look(p)) });
     await ctx.close();
+
+    /* J9 */
+    ({ ctx, p } = await open({ tab: { 'incommon.guest.chosen': '1', 'incommon.register': '1' } }));
+    await p.evaluate(() => {
+      window.__signUps = 0;
+      const CL = window.InCommonCloud;
+      if (CL) CL.passwordSignUp = () => { window.__signUps++; return Promise.resolve({ ok: false, reason: 'offline' }); };
+      const a = window.__incommonApp;
+      a.afSet('bname', 'Jordan Lee Okafor');
+      a.afSet('bdate', '1979-11-30');
+      a.afSet('bplace', '34.0522, -118.2437');
+    });
+    await p.waitForTimeout(300);
+    await p.evaluate(() => window.__incommonApp.regSubmit());
+    await p.waitForTimeout(1200);
+    const g = await p.evaluate(() => {
+      const PM = window.ProfileManager, prof = PM.getProfile(PM.activeId()) || {};
+      return { birthName: window.__incommonApp.birthName(), birthDate: prof.birthDate, hasPlace: !!prof.birthLocation, signUps: window.__signUps, marked: localStorage.getItem('incommon.firstrun') };
+    });
+    const gAfter = await look(p);
+    await p.reload();
+    await p.waitForFunction(() => window.__incommonApp && window.__incommonApp.state.ready, null, { timeout: 120000 });
+    await p.waitForTimeout(1200);
+    const gReload = await look(p);
+    t('J9', 'A guest saves the birth moment with the account folded: no account asked for, first run marked, reload stays on Today',
+      { birthName: 'Jordan Lee Okafor', birthDate: '1979-11-30', hasPlace: true, signUps: 0, marked: 'true', cardGone: true, reloadCard: false, reloadOld: false },
+      { ...g, cardGone: !gAfter.card, reloadCard: gReload.card, reloadOld: gReload.oldPage });
+    await ctx.close();
+
+    /* J11 */
+    ({ ctx, p } = await open({ tab: { 'incommon.guest.chosen': '1', 'incommon.register': '1' } }));
+    await p.evaluate(() => { const a = window.__incommonApp; a.afSet('bdate', '1979-11-30'); });
+    await p.waitForTimeout(300);
+    await p.evaluate(() => window.__incommonApp.regSubmit());
+    await p.waitForTimeout(600);
+    const noName = await p.evaluate(() => ({
+      invalid: document.querySelector('#reg-name').getAttribute('aria-invalid'),
+      msg: /full name/i.test(document.querySelector('#reg-msg').textContent),
+      marked: localStorage.getItem('incommon.firstrun')
+    }));
+    t('J11', 'The card will not save without the full name, and says so on the field',
+      { invalid: 'true', msg: true, marked: null, card: true }, { ...noName, card: (await look(p)).card });
+    await ctx.close();
+
+    /* J10 */
+    const heads = {};
+    for (const [w, h] of [[390, 664], [375, 560], [430, 740]]) {
+      const c = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+      await c.addInitScript(() => { try { if (!sessionStorage.getItem('__seeded')) { sessionStorage.setItem('__seeded', '1'); sessionStorage.setItem('incommon.guest.chosen', '1'); sessionStorage.setItem('incommon.register', '1'); } } catch (e) {} });
+      await c.route('**/*supabase.co/**', r => r.abort());
+      const q = await c.newPage();
+      q.on('pageerror', e => errors.push(e.message));
+      await q.goto(APP + '#/today', { timeout: 120000 });
+      await q.waitForFunction(() => window.__incommonApp && window.__incommonApp.state.ready, null, { timeout: 120000 });
+      await q.waitForTimeout(1200);
+      /* Folded and opened: the logo and title stay apart, and no section of
+         the card is crushed under the next (the card's sections never shrink;
+         a card taller than the screen scrolls inside itself instead). */
+      const check = () => q.evaluate(() => {
+        const a = document.querySelector('.app-logo-small').getBoundingClientRect(), b = document.querySelector('#reg-title').getBoundingClientRect();
+        const apart = a.bottom <= b.top + 0.5 || a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || b.bottom <= a.top + 0.5;
+        const kids = [...document.querySelector('.welcome-registration-card').children].map(e => e.getBoundingClientRect());
+        const stacked = kids.every((r, i) => i === 0 || r.top >= kids[i - 1].bottom - 0.5);
+        return apart && stacked && a.width > 0 && a.height > 0;
+      });
+      const folded = await check();
+      await q.evaluate(() => document.querySelector('.reg-acct-toggle').click());
+      await q.waitForTimeout(500);
+      heads[w + 'x' + h] = folded && await check();
+      await c.close();
+    }
+    t('J10', 'The logo and title never overlap and no section is crushed, folded and opened, at 390x664, 375x560 and 430x740',
+      { '390x664': true, '375x560': true, '430x740': true }, heads);
   } catch (e) {
     t('J-ERR', 'drive failure: ' + (e && e.message), 'no error', String(e && e.message));
   } finally {
