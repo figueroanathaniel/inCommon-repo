@@ -93,5 +93,5 @@ DONE MEANS
 SECONDARY AND TERTIARY
   As the brief says, with one addition: Task 4 and Task 5 are precision work,
   so the secondary's one consult for this assignment is spent on Task 4's
-  confidence model before the first PR (owner decision D6 may allow a second
-  for Task 5). The tertiary runs the gates and posts them on every PR.
+  confidence model before the first PR. Any further consult, for Task 5 or
+  anything else, needs the owner's approval first (D6, decided). The tertiary runs the gates and posts them on every PR.

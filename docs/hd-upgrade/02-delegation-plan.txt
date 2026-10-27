@@ -73,6 +73,19 @@ D5  The benchmark. About 30 people, three experience levels; who recruits
 D6  Whether workstream 3's secondary may be consulted more than once for
     3.2, given that Color and the scanner are precision astronomy work.
 
+DECISIONS SO FAR (the owner, 27 October 2026)
+  D1  OPEN. The owner will find the reviewer. Until one is named, no content
+      change merges as reviewed; it merges marked "needs Human Design
+      review", or waits.
+  D2  OPEN. Not yet answered.
+  D3  DECIDED. inCommon makes names of its own for group and business
+      features. No Jovian product name or mark on any reader surface.
+  D4  DEFERRED. To be decided as the upgrades are implemented.
+  D5  DEFERRED. To be decided as the upgrades are implemented.
+  D6  DECIDED. Features work needs the owner's approval: every consult of
+      workstream 3's secondary beyond the brief's one per assignment is
+      asked for, and given, by the owner.
+
 
 4. WHAT IS DELIBERATELY NOT IN THIS ROUND
 -----------------------------------------------------------------------------
