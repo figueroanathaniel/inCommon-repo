@@ -3038,6 +3038,26 @@ smooth scroll, so `scrollTop` equals the section's `offsetTop` and the pager
 sits on a multiple of its width. A swipe that wrote scroll offsets itself would
 fight snap and the routed-jump claims described above.
 
+**A swipe made before the last one has landed still counts, and the move it
+interrupted is finished** (reported by the owner on 27 October 2026, on an
+iPhone: "if I swipe too quickly or too early I switch tabs in the app.
+Sometimes it gets stuck between 2 of them"). A touch on a scroller still
+travelling cancels the pin (`bail` in `vtSettle`), and two faults followed.
+The swipe was dropped, because the pager was still moving under our own
+animation and `vtBindTouch` read that as the browser having moved it. And with
+the swipe dropped and the pin gone nothing finished the move: on an iPhone a
+touch also stops a smooth scroll where it is, so the pager or the column stayed
+between two screens. Now `bail` records which move it cut and where that move
+was going (`_vtBailed`, read before `vtStopSettle` releases the claim, because
+the scroll handler has already written the tab back to wherever the scroll
+stood), a swipe begun while `_vtRouteTab` is held is never mistaken for the
+browser's own scroll (`hzFlight`), and on touchend the interrupted move's
+target is restored to state first, then the swipe steps from it, then
+`vtResume()` finishes any move the swipe did not replace. A tap mid move
+finishes the move where it was going. `tools/drive-swipe.js` holds it, in
+Chromium and with a touch that stops both scrollers in place as WebKit does,
+since no WebKit is installed here; W1 and W3 fail without the fix.
+
 ## A row of pills becomes a dropdown when it is a choice of one
 The Human Design readings (My Type, Chart, Mood, Work, Sleep, Diet & Exercise,
 Health, Synastry, Just Me, At Me) and the Throughline filter were rows of pills,
