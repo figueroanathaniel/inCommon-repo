@@ -1,0 +1,71 @@
+ASSIGNMENT 5.1   Workstream 5: Load Time & Performance Tuning
+Status:          READY (the owner reports this workstream still reviewing;
+                 this assignment is what to come out of the review with)
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 5 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 05-performance.md, CLAUDE.md
+
+THE ORDER, BECAUSE OF THE GRAPHICS UPDATE
+Workstream 4 is landing a large graphics update. It changes the weight and
+the frame cost of the 3D stages and the cover, so anything measured before
+it lands is partly out of date afterwards. So:
+  1. Measure main now (STEP 2 of your brief) and record it as "baseline A,
+     main c259e80". This is still worth having: the boot path, the bundle
+     and the fonts are not what the graphics update changes.
+  2. Do STEP 3 (the ranked list) now, and mark each item "safe now" or
+     "after graphics". Safe now means it touches none of: app/cover.html,
+     the scene files, three.*.js, the code in the app file that mounts or
+     sizes a stage.
+  3. Implement only the "safe now" items before the graphics update merges.
+  4. When it merges, measure again as "baseline B", and only then start the
+     "after graphics" items.
+
+TASK 1. WRITE tools/measure-load.js AND RECORD BASELINE A
+  As STEP 2 of your brief describes. Also record, per run: the size of
+  deploy/<current>/app.html, the number of modules it inlines, and the
+  commit measured. Put baseline A in docs/PERF-BASELINE.md. Open the PR
+  with only the tool and the baseline, so other workstreams can use it
+  while you continue.
+
+TASK 2. CHECK THESE LEADS FIRST (from the 27 October analysis)
+  a. jpl-derived-points.js is 5.2 MB of source, inlined into app.html. On
+     main its global, window.JPLDerivedPoints, is read in exactly two
+     places: planetaryNodeOf() and the lunar apogee, which the expanded
+     chart uses and Today does not. That makes it the strongest deferral
+     candidate. Model the loader on how gazetteer-world.js (7.3 MB) is
+     already loaded only on demand, show "Loading" in the expanded chart
+     until it arrives, and keep it in sw.js's precache.
+  b. The next largest: comet-integrated-jpl.js (0.7 MB),
+     minor-body-elements.js (0.3 MB), comet-hyakutake-jpl.js (0.2 MB). Find
+     which of them Today, the registration card and the first run need.
+  c. modulesReady() waits for InCommonCore, PracticeLibrary, ProfileManager,
+     SabianSymbols, Astronomy and LunarMeanPoints. boot() polls it every
+     150ms. Check whether the first screen needs all six, and whether a
+     shorter poll or an event would save time. boot() is shared with
+     workstream 3: describe a change there in your PR rather than making it.
+  d. Fonts: compare Google Fonts against "node tools/build-bundle.js --fonts
+     self", on first visit and repeat visit.
+  Classify a, b and d as "safe now"; c touches boot and needs workstream 3's
+  agreement first.
+
+TASK 3. KNOWN 3D LATENCY: NOT YOURS, BUT MEASURE IT
+  The sweep found freezes from synchronous shader error checks and a quality
+  ladder that never climbs back. Workstream 4 owns both fixes (their
+  assignment 4.1, Task 3). Do not change them. Measure them in baselines A
+  and B so the fixes can be shown to work.
+
+HARD RULES (in addition to your brief's)
+  - Anything deferred stays in the service worker precache; the app keeps
+    working offline. Prove it by loading once online, then offline, and
+    opening every screen that needs the deferred file.
+  - A deferred module that fails to load leaves the screen on its Loading
+    state or an honest message, never blank.
+  - One change at a time, measured before and after, five runs each,
+    median reported. Revert anything that does not improve a number.
+
+DONE MEANS
+  measure-load.js merged with baseline A; the ranked list in
+  docs/PERF-BASELINE.md, each item marked safe now or after graphics; the
+  safe now items done, one PR each, with before and after numbers; baseline B
+  recorded once the graphics update merges. Every README gate green on each
+  PR, with "--with-h" because your brief requires it.

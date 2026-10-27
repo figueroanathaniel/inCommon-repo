@@ -1,0 +1,74 @@
+ASSIGNMENT 4.1   Workstream 4: Interactive Visuals (WebGL / three.js)
+Status:          READY
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 4 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 04-visuals-webgl.md, CLAUDE.md
+
+WHERE YOU STAND
+Merged: #92 (scene teardown), #93 (bloom release, ladder gaps), #97 (globe
+frame math). Unmerged:
+  - PR #95 (visuals/interactive-20261026), closed by you: fresh quality
+    samples per visit, idle frames break the late streak, Cycle Audit's
+    shared geometries released. Closed only because the browser gates could
+    not run on your machine.
+  - PR #64 (claude/scene-first-load), from 20 October, 166 commits behind:
+    fonts.load() for label faces and compileAsync before the first frame.
+    Part of it may already be covered by #92.
+The large graphics update you are preparing is the main work. These are
+the rules for landing it alongside five other workstreams.
+
+TASK 1. LAND THE GRAPHICS UPDATE IN REVIEWABLE PIECES
+  1. Base it on current main (c259e80 or later). Rebase, do not merge main in.
+  2. Split it into pull requests of one concern each (one scene, the cover,
+     the ladder, shared helpers), each passing every README gate on its own.
+     Name the merge order between them in the first PR's description.
+  3. You own the scene files, the cover's renderer and shaders, and
+     check-three-lifecycle.js. In the app file, you may edit the code that
+     mounts, sizes, shows and tears down a stage. Anything else in the app
+     file is workstream 3's: describe it in your PR instead.
+  4. Every new GPU resource gets a matching release and a
+     check-three-lifecycle.js row, and the row is shown failing with the
+     release removed.
+  5. The 3D stages sit inside the phone's swipeable pages. Run
+     tools/drive-swipe.js and tools/drive-routes.js on every PR, and do not
+     change vtBindTouch, vtHScrollableAt or the [data-chart] exemption.
+  6. Run "node tools/drift-check.js --force --with-h". If your machine has no
+     browser, say so in the PR and ask for the run by the agent named in
+     your brief's helper section; never mark a browser gate as passed that
+     did not run.
+
+TASK 2. RESOLVE #95 AND #64
+  a. #95: rebase visuals/interactive-20261026 onto main, get the browser
+     gates run (yours or the helper's), and reopen it, or fold its changes
+     into the graphics update and say so on #95.
+  b. #64: compare it against #92. Port what #92 does not already do into
+     the graphics update, then ask the owner to close #64 with a comment
+     naming where each part went.
+
+TASK 3. TWO FINDINGS FROM THE 27 OCTOBER LATENCY SWEEP
+  Measured on main under SwiftShader; please confirm on a real GPU.
+  a. Freezes come from synchronous WebGL queries during program link
+     (getShaderInfoLog, getProgramParameter). Each scene turns
+     renderer.debug.checkShaderErrors off only when GFX.ios is true
+     (chart-scene.js, cycle-scene.js and hd-scene.js, one line each). Turn it
+     off on every platform in production, and keep it on where a test asks
+     for it, so a broken shader is still caught (H2 reads pixels, so it
+     still catches one that paints nothing).
+  b. The quality ladder steps down and never steps back up within a visit.
+     After #93, three late frames drop a rung. Add a recovery rule (for
+     example, a sustained run of on time frames raises one rung, with
+     hysteresis so it cannot oscillate), and a lifecycle or VM row that
+     proves it climbs back and does not flap.
+
+HARD RULES (in addition to the README's)
+  - Never change the cover shader's constants without the owner's approval.
+  - Never edit three.module.js or three.core.js.
+  - Reduced motion: nothing animates, and every scene still renders.
+  - The cover's first frame landing is not proof a shader compiled
+    (CLAUDE.md, group H); H2's pixel readback is.
+
+DONE MEANS
+  The graphics update merged in pieces, each green on every README gate
+  including H; #95 and #64 resolved; 3a and 3b merged with their rows. Each
+  PR shows before and after frame times at 390x844 with the CPU slowed 4x,
+  the settled ladder rung, and a screenshot at the bottom rung.

@@ -1,0 +1,77 @@
+ASSIGNMENT 2.1   Workstream 2: Security Hardening & RLS Setup
+Status:          READY
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 2 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 02-security-rls.md, CLAUDE.md, docs/SECURITY.md
+
+THIS REPOSITORY IS PUBLIC
+Anything written in a commit, a pull request, an issue or a comment can be
+read by anyone. So:
+  - The specific weaknesses you are to fix first are NOT in this file. The
+    owner hands them to you privately as "the private addendum". Read it
+    before starting, and keep it out of the repository.
+  - Until a weakness is fixed and deployed, describe it in public only in
+    general terms ("tighten limits on an edge function"). The detail goes in
+    the private channel the owner gives you.
+  - A fix's pull request may describe what it fixed once the fix is ready to
+    deploy, and the owner deploys it before or as the PR merges.
+
+A large graphics update from workstream 4 is landing while you work. It does
+not touch your files. It will rebuild deploy/<current>/, so if you edit
+deploy/<current>/_headers, expect one rebase after it merges.
+
+TASK 1. WORK THE PRIVATE ADDENDUM, IN ITS ORDER
+  It names the findings and their order. One branch per finding,
+  security/<topic>, one pull request each. For each one:
+  1. Write a failing test first where one can be written without a live
+     project: a Node or Deno harness that runs the edge function with a
+     faked Supabase client and a faked outside service. Coordinate the
+     harness shape with workstream 6, who is building the same thing.
+  2. Fix it.
+  3. Show the test failing before the fix and passing after it.
+  4. Write the dashboard or deploy steps for the owner as numbered steps.
+
+TASK 2. THE POLICY ITEMS HANDED OVER BY WORKSTREAM 1 (PR #96)
+  These are already public in PR #96 and may be discussed openly.
+  a. pairs: the policy checks account_id only and the unique key
+     (profile_a, profile_b) is global. Make the policy also require that
+     both profiles belong to the caller's account, and decide whether the
+     unique key should include account_id. Test both on the local Postgres
+     with the stubbed auth schema.
+  b. owns_profile() has no fixed search_path. Set one (SET search_path =
+     public, pg_temp, or the convention the other functions use), and check
+     every other SECURITY DEFINER function for the same thing.
+  c. cast_counters and entitlements exist only in the dashboard. Write their
+     schema and policies into server/ as files, from what the edge functions
+     read and write, so the repo can be reviewed. Mark each as "matches the
+     dashboard: unverified" until the owner confirms by comparing.
+  d. Workstream 1's G4: account deletion leaves cast_counters and
+     entitlements. server/account/index.ts is yours; add both to the
+     deletion order, with a test.
+
+TASK 3. TWO HOUSEKEEPING ITEMS
+  a. supabase/.temp/ is tracked in git: the Supabase CLI's link cache
+     (project ref, organisation id, pooler host). It holds no password, and
+     the project ref is already public in the app's client config, but it
+     does not belong in the repo. Remove it from tracking, add
+     supabase/.temp/ to .gitignore, and say in the PR that nothing in it was
+     a secret.
+  b. docs/SECURITY.md "Known remaining risks" item 4: the edge functions
+     import npm:stripe@17 and npm:@supabase/supabase-js@2 by major version.
+     Pin exact versions. Ask the owner which versions the current deploy
+     runs (the dashboard shows them) rather than guessing.
+
+HARD RULES (in addition to the README's)
+  - Never run anything against production. Policies are tested on a local
+    Postgres; edge functions under a local runtime with fakes.
+  - No secret in any file, test, fixture or pull request.
+  - Every change to a policy keeps the two-step (aal2) rule in
+    server/mfa-policies.sql intact; re-run that file's own checks.
+  - Do not loosen CORS, CSP or any header to make something work. If a
+    header blocks a feature, say so in the PR and let the owner decide.
+
+DONE MEANS
+  Each addendum finding fixed in its own PR with a test that failed first,
+  Task 2 a to d merged or in review, Task 3 done, docs/SECURITY.md updated to
+  what is true after your changes, and every README gate green. Report back
+  privately on the addendum items and publicly on everything else.

@@ -61,6 +61,28 @@ this block updates every brief.
 File sizes and token counts quoted in the briefs and below are a snapshot
 from 27 October 2026. Measure again before relying on one.
 
+## Assignments and their status
+
+A brief says how a workstream works; an assignment says what to do next.
+Assignments live in `assignments/`, one plain text file each, numbered
+`<workstream>.<round>` (1.1 is workstream 1's first). Each file carries its
+own status line, and this board mirrors it.
+
+| # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
+|---|---|---|---|---|---|
+| 1 | assignments/01-schema-first-assignment.txt (1.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | first round done, PR #96 open |
+| 2 | assignments/02-security-first-assignment.txt (2.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | not started |
+| 3 | assignments/03-refactor-first-assignment.txt (3.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | ready to work |
+| 4 | assignments/04-visuals-first-assignment.txt (4.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | large graphics update in flight |
+| 5 | assignments/05-performance-first-assignment.txt (5.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | reviewing |
+| 6 | assignments/06-qa-first-assignment.txt (6.1) | READY | in its brief, being revised | AWAITING OWNER APPROVAL | running |
+
+The statuses are DRAFT, AWAITING OWNER APPROVAL, READY (approved and safe
+to hand over), ISSUED (handed to the agent) and DONE. **This branch does
+not merge until every cell in both status columns reads READY or later.**
+An assignment that depends on a private addendum (2.1) says so in its own
+text; the addendum itself never enters this public repository.
+
 ## What each role does
 
 - **Primary** does the work. It owns the branch and opens the pull request.
@@ -158,6 +180,8 @@ output of "npm root -g".
     node tools/check-layer-boundary.js
     node tools/check-three-lifecycle.js
     node tools/drive-cover.js
+    node tools/drive-routes.js
+    node tools/drive-swipe.js
     node tools/drift-check.js --force
 
 Workstreams 4 and 5, and anyone touching app/cover.html, also run
@@ -241,6 +265,15 @@ add its row to the roster, add its files to "Who owns which files", and
 place it in "Merge order". Retiring a workstream is the reverse; keep its
 number unused rather than renumbering the others, because pull requests and
 commits refer to briefs by number.
+
+**Issue a new assignment.** Copy the shape of an existing one in
+`assignments/`: the number, a status line, the commit it was written
+against, who (by role), what to read, the tasks, hard rules and "Done
+means". Name it like the others, workstream number, workstream and round
+(`01-schema-second-assignment.txt`), add its row to
+"Assignments and their status" at DRAFT, and move it to READY only once the
+owner has approved it. An assignment that names a security weakness not yet
+fixed stays out of the repository.
 
 **Update a fact.** Paths, versions, commits and pull request numbers that
 move belong in "Current values" and nowhere else. If a brief needs one, it

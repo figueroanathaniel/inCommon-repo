@@ -1,0 +1,71 @@
+ASSIGNMENT 6.1   Workstream 6: QA, Unit Testing & Documentation
+Status:          READY (the owner reports this workstream already running;
+                 this lines the running work up with today's main)
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 06-qa-tests-docs.md, CLAUDE.md
+
+WHAT CHANGED SINCE YOU STARTED
+  - Two new browser drives are on main, each serving the repo and faking
+    every outside service:
+      tools/drive-routes.js  B1: arriving by route, moving once, then Back
+                             lands on the screen arrived at (PR #98)
+      tools/drive-swipe.js   W1 to W3: swipes made before the last one
+                             lands, at iPhone size, in Chromium and with a
+                             simulated WebKit stop (PR #99)
+    00-README.md's gate list now includes both. Add them to your coverage
+    table.
+  - PR #96 (workstream 1) adds module rows K71 to K73. When it merges,
+    run-module-tests.js goes from 435 to 438. Do not count them as yours.
+  - A large graphics update from workstream 4 is landing. Expect group H and
+    the 3D parts of group N to churn while it does. Do NOT "stabilise" an H
+    or 3D row during that window: a row that changes result then is either a
+    real regression in the update (report it on their PR) or a timing
+    dependency (fix it at the cause, as H11 was fixed in PR #94).
+
+TASK 1. ONE COMMAND THAT RUNS EVERY GATE
+  There are 28 tools/check-*.js gates. The README lists four of them. Of
+  the other 24, 23 ran green on main c259e80 today, and check-deployed.js
+  was skipped because it fetches the live site. Write tools/run-gates.js that runs
+  every node gate and every browser drive in a fixed order, prints one line
+  per gate (name, pass or fail, seconds), and exits non-zero if any fails.
+  Options: --fast (node gates only), --with-h (adds the H phase). It never
+  runs check-deployed.js unless asked by name. Once it lands, the README's
+  gate list becomes "node tools/run-gates.js", and the owner approves that
+  edit.
+
+TASK 2. CI FOR THE GATES THAT NEED NO BROWSER
+  .github/workflows/ runs only the two calculator workflows today. Add a
+  workflow that runs "node tools/run-gates.js --fast" on every pull request.
+  Browser gates stay local for now; say so in the workflow's comments.
+
+TASK 3. THE COVERAGE TABLE, WITH THESE AT THE TOP
+  Rank by risk as your brief says. From today's analysis, the highest risk
+  untested surfaces are:
+    a. server/*/index.ts: five edge functions, no tests. Workstream 2 is
+       writing fixes that need the same harness (a faked Supabase client and
+       faked outside services). Agree its shape with them, build it, and
+       let them add their rows.
+    b. regSubmit (the registration card): validation, the profile cutover,
+       the two settings switched on.
+    c. The sync push after a profile switch: workstream 1's K72 covers the
+       module; nothing covers it through the app.
+  The edge function harness must never hold a real key. Fake keys are
+  strings like "test-anon", and a test fails if a real looking key appears.
+
+TASK 4. KEEP GOING ON YOUR BRIEF
+  Flakiness (five sweeps in a row) and the README and
+  docs/README-RUN-LOCALLY.md rewrites stand as your brief describes. For the
+  README: deploy/<current>/ is deploy/v6.4/, and the gate list is
+  00-README.md's.
+
+HARD RULES (in addition to your brief's)
+  - Never weaken an assertion; never remove another workstream's row.
+  - A new test is shown failing against the fault it guards, in the commit.
+  - No em or en dashes in test names, fixtures or docs.
+
+DONE MEANS
+  run-gates.js merged; the CI workflow merged and green; docs/TEST-COVERAGE.md
+  with the three gaps above at the top and the harness for (a) agreed with
+  workstream 2; your brief's remaining items in progress, with five
+  consecutive green sweeps reported once the graphics update has merged.

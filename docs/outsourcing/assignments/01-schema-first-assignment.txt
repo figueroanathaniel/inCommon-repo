@@ -1,0 +1,73 @@
+ASSIGNMENT 1.1   Workstream 1: Data Mapping & Schema Architecture
+Status:          READY
+Issued against:  main c259e80, 27 October 2026
+Who:             the workstream 1 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, 01-data-schema.md, CLAUDE.md
+Builds on:       your PR #96 (schema/data-map-20261027), open, 7 commits behind main
+
+WHERE YOU STAND
+Your first round is done and good: DATA-MAP.md, the storage schema rewrite,
+three migrations, the G8 consent fix (incommon-cloud.js 2.9.3) and K71 to K73.
+Two things have changed since you opened it:
+  - 00-README.md now exists in the repo (PR #100). Your PR said it was missing
+    and ran the gate list from CLAUDE.md instead. Run the list in 00-README.md
+    now, word for word.
+  - main moved: PR #97 (globe graphics), #98 (Back after a routed arrival) and
+    #99 (phone swipes) merged. None of them touches your files except
+    CLAUDE.md and the generated deploy/ bundle.
+
+A large graphics update from workstream 4 is landing while you work. It does
+not touch your files. It WILL rebuild deploy/<current>/ and edit CLAUDE.md,
+so expect to rebase once more after it merges.
+
+TASK 1. REBASE PR #96 ONTO MAIN AND MAKE IT MERGEABLE
+  1. git fetch origin main, then rebase schema/data-map-20261027 onto it.
+  2. Conflicts in deploy/: never merge them by hand. Take main's copy, then
+     run "node tools/build-bundle.js" and commit the rebuilt files.
+  3. Conflicts in CLAUDE.md: keep every section from both sides. Yours are
+     additions; nothing on main should be lost.
+  4. Run every gate in 00-README.md, including drive-routes.js and
+     drive-swipe.js, and paste the output into the pull request.
+  5. Force-push with lease to the same branch, so PR #96 stays the one PR.
+
+TASK 2. HAND OVER FOR REVIEW
+  Ask for the secondary's review on PR #96, per the "Secondary and tertiary"
+  section of your brief. Do not merge until it says "ready to merge" and the
+  owner agrees. Answer every finding in the pull request: fixed, or why not.
+
+TASK 3. WRITE UP THE TWO DECISIONS THAT ARE THE OWNER'S
+  Do not implement either. For each, add a short section to the PR
+  description with options, what each means for a reader's data, what happens
+  to data already on the server, and your recommendation:
+  - G2: "Save my profile to my account" does not stop the profile syncing.
+    Option A, change the label. Option B, make the push honour the switch
+    (and say what happens to the server copy when it is turned off).
+  - G10: device data with no cloud home. List each item, say whether it is
+    the reader's own words, and recommend sync, keep device only, or ask.
+
+TASK 4. QUEUE THE FOLLOW-UPS (start only after PR #96 merges)
+  One branch and one pull request each, in this order, each under
+  data-contracts/STORAGE-MIGRATION-POLICY.md:
+    a. G3  the sync map and outbox are device wide, not per account
+    b. G5  keys a deleted profile leaves behind
+    c. G6  saved people surviving profile deletion and account erasure
+    d. G7  device wide keys holding a reader's words or places
+    e. G11 a deletion path for Throughline and Oki rows
+  G4 (account deletion leaves cast_counters and entitlements) needs
+  server/account/index.ts, which workstream 2 owns. Write it up as a request
+  in your PR for workstream 2; do not edit that file.
+  Before starting each one, post a two line plan on its PR: what changes on
+  the device, and how a reader with existing data is migrated.
+
+HARD RULES (in addition to the README's)
+  - Nothing runs against the production Supabase project. Migrations are
+    tested on a local Postgres with the stubbed auth schema, as you did.
+  - Every migration is idempotent and carries its DOWN in a comment.
+  - A key renamed or removed on the device follows the migration policy:
+    read the old key, write the new one, and never strand a reader's data.
+
+DONE MEANS
+  PR #96 rebased, green on every README gate, reviewed by the secondary, with
+  G2 and G10 written up for the owner. The follow-ups are listed in its
+  description with their order. Report back with: the PR link, the gate
+  output, the review outcome, and anything you could not verify.
