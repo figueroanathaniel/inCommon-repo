@@ -5,16 +5,22 @@ Status:          READY (approved by the owner, 27 October 2026).
                  has merged.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 5 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E10 and E12 (approved by
+                 the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  assignment 3.2 (Tasks 4 and 5)
+
+WHERE THIS SITS
+Commits prefixed "5.2:" on the Task Force 5 branch (CHARTER.md). The budgets
+are agreed in writing on the Task Force 3 pull request.
 
 THE OUTCOME
 The new Human Design layers cost the reader nothing they can feel.
 
 TASK 1. BUDGETS, BEFORE 3.2 TASK 4 IS BUILT
-  Agree with workstream 3, in writing on their PR: the time a chart may
-  spend on the sub line layer (Color now, Tone and Base later), and the
-  time and memory the birth time scanner may use. Measure the cost of one
+  Agree with workstream 3, in writing on their pull request: the time a
+  chart may spend on the sub line layer (Color now, Tone and Base later),
+  and the time and memory the birth time scanner may use. Measure the cost of one
   full chart on a 4x slowed CPU at 390x844 as the baseline.
 
 TASK 2. THE SCANNER OFF THE RENDER PATH
@@ -25,8 +31,8 @@ TASK 2. THE SCANNER OFF THE RENDER PATH
 
 TASK 3. MODULE WEIGHT
   Any new module (hd-subline.js, reference data) follows the deferral rules
-  from 5.1: loaded when the screen that needs it opens, precached for
-  offline, with a Loading state and a failure path.
+  from 5.1: loaded when the screen that needs it opens, cached on first use
+  rather than at install, with a Loading state and a failure path.
 
 DONE MEANS
   Budgets agreed and recorded in docs/PERF-BASELINE.md, measured before and
