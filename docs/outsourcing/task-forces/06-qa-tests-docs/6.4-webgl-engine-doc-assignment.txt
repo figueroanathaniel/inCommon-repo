@@ -1,6 +1,6 @@
 ASSIGNMENT 6.4   Workstream 6: QA, Unit Testing & Documentation
 Programme:       Programme board, priority 1 (docs/outsourcing/PROGRAMME.md)
-Status:          AWAITING OWNER APPROVAL (written 28 October 2026)
+Status:          READY (approved by the owner 28 October 2026)
 Issued against:  main d9ea6ab, 28 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md (in full, or by
@@ -11,15 +11,18 @@ THE OUTCOME
 WEBGL_ENGINE.md describes the 3D engine as it is built, and proposes nothing
 the architecture forbids.
 
-BLOCKER, BEFORE ANYTHING ELSE
-WEBGL_ENGINE.md is not in the repository. It is not on main or on any branch,
-and no commit has ever named it (checked 28 October 2026). The owner commits
-it, as written, to the Task Force 6 branch under docs/WEBGL_ENGINE.md, or says
-where it lives. Until then this assignment cannot start. Record the commit
-that brings it in, so the review can see the corrections against the original.
+WHERE IT STANDS
+The WEBGL_ENGINE.md the programme board names was never committed: it was not
+on main or on any branch, and no commit had ever named it (checked 28 October
+2026). The owner chose on 28 October 2026 that the Task Force 6 primary draft
+it from the code and CLAUDE.md with the corrections below built in, and that
+the workstream 4 secondary review it, because that seat reviews the 3D code.
+The draft is docs/WEBGL_ENGINE.md on the Task Force 6 branch, in the commit
+prefixed "6.4: draft". What is left is to hold that draft to Tasks 1 and 2,
+correct it where it is wrong, and have it reviewed.
 
-TASK 1. CORRECT IT AGAINST THE CODE (one commit, prefixed "6.4:")
-Check every claim in it against the files, not against memory. At least:
+TASK 1. HOLD IT TO THE CODE (each correction its own commit, prefixed "6.4:")
+Check every claim in the draft against the files, not against memory. At least:
   a. The deploy folder is deploy/v6.4/, the value of <current> under "Current
      values" in 00-README.md. Write deploy/<current>/ where the text should
      survive the next version bump, and the literal folder only where it
@@ -50,8 +53,10 @@ Check every claim in it against the files, not against memory. At least:
      and no "bodygraph" in a heading (check-competitor-surface.js walks docs/).
 
 TASK 2. MAKE IT CHECKABLE
-Every file, function and table the document names exists: list each name
-with the grep that found it in the pull request. A name that is only proposed
+Every file, function and table the document names exists. The draft ends with
+"Checking the names", a list of each name with the file and the fixed string
+that finds it; run it and paste its output in the pull request, and add a line
+there for any name a correction brings in. A name that is only proposed
 is marked "proposed" in the document itself.
 
 FILES THIS ASSIGNMENT OWNS
@@ -61,5 +66,5 @@ FILES THIS ASSIGNMENT OWNS
 DONE MEANS
   The document matches the implemented architecture, every name in it
   resolves, the direct write is gone, check-competitor-surface.js and the
-  dash sweep pass, and the secondary has reviewed the range on Task Force 6's
-  standing pull request.
+  dash sweep pass, and the workstream 4 secondary has reviewed the range on
+  Task Force 6's standing pull request.
