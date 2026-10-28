@@ -3105,6 +3105,83 @@ async function runCloudTests() {
   });
 }
 
+/* --------------------------------------------------- H: the sleep teaching
+   Four rows for the correction of 28 October 2026. The tradition's Sleeping
+   Mechanics entry gives a design with a defined Sacral a different instruction
+   from every other design, and the app carried the other one for both, in four
+   entries, a shared closing and a health note. H1 to H3 hold the passages. H4
+   holds the selection, because pick() pads a short list from rows whose
+   condition did not match, which is how a Projector was handed the Sacral
+   instruction while the closing beneath it said the opposite. */
+(function () {
+  const LIFE = require(path.join(repo, 'app', 'hd-life.js'));
+  const TEACH = require(path.join(repo, 'app', 'hd-teachings.js'));
+
+  const OLD = /before you are tired|before the energy runs out|burn off lying down|get horizontal before you are finished|already exhausted, night after night/i;
+  const four = [
+    ['Sacral defined sleep', LIFE.CENTERS.Sacral.defined.sleep],
+    ['Generator sleep', LIFE.TYPES.Generator.sleep],
+    ['Manifesting Generator sleep', LIFE.TYPES['Manifesting Generator'].sleep],
+    ['Sacral authority sleep', LIFE.authorityFor('Sacral').sleep]
+  ];
+  t('H1', 'none of the four corrected sleep entries gives a design the instruction the tradition gives to the design it is not',
+    four.filter(r => OLD.test(r[1])).map(r => r[0]), []);
+
+  t('H2', 'the open Sacral sleep entry is unchanged, because horizontal rest is the correct teaching for a design without a defined Sacral',
+    LIFE.CENTERS.Sacral.open.sleep,
+    'You need more rest than the people around you, and often need to lie down before they do. That is not a weakness to be trained out.');
+
+  const CENTERS = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Solar Plexus', 'Sacral', 'Root'];
+  const CHANNELS = Object.keys(ATLAS.CHANNELS);
+  const chart = o => {
+    const names = CHANNELS.slice(0, o.channels || 0);
+    return {
+      type: o.type, strategy: o.type, authority: o.authority,
+      profileKey: '3/5', profileName: 'Martyr / Heretic',
+      profileHow: 'Trial and error, then a life read through other people.',
+      cLine: 3, uLine: 5,
+      defined: o.defined,
+      open: CENTERS.filter(n => o.defined.indexOf(n) === -1),
+      channelNames: names, channelCount: names.length,
+      gateCount: 12, designCount: 13, personalityCount: 13,
+      hangingNames: [], hangingCount: 0
+    };
+  };
+  const SHAPES = [
+    { name: 'Generator, Sacral authority', sacral: true,
+      chart: chart({ type: 'Generator', authority: 'Sacral', defined: ['Sacral', 'Root', 'Spleen'], channels: 3 }) },
+    { name: 'Generator, emotional authority', sacral: true,
+      chart: chart({ type: 'Generator', authority: 'Emotional', defined: ['Sacral', 'Solar Plexus', 'Root'], channels: 3 }) },
+    { name: 'Manifesting Generator, emotional authority', sacral: true,
+      chart: chart({ type: 'Manifesting Generator', authority: 'Emotional', defined: ['Sacral', 'Solar Plexus', 'Throat', 'G'], channels: 4 }) },
+    { name: 'Projector, splenic authority', sacral: false,
+      chart: chart({ type: 'Projector', authority: 'Splenic', defined: ['Spleen', 'Ajna'], channels: 1 }) },
+    { name: 'Reflector, lunar authority', sacral: false,
+      chart: chart({ type: 'Reflector', authority: 'Lunar', defined: [], channels: 0 }) },
+    { name: 'Manifestor, ego authority', sacral: false,
+      chart: chart({ type: 'Manifestor', authority: 'Ego', defined: ['Heart', 'Throat'], channels: 1 }) }
+  ];
+  const sleepOf = s => TEACH.build(s.chart, ATLAS, LIFE).filter(tab => tab.key === 'sleep')[0];
+
+  t('H3', 'the shared closing follows defined Sacral and not authority: the three Sacral shapes take the post-spending closing, the other three take the horizontal one, and none takes both',
+    SHAPES.map(s => {
+      const p = sleepOf(s).paragraphs;
+      const close = p[p.length - 1] || '';
+      return [s.name,
+        close.indexOf('has been spent, not before it') !== -1,
+        close.indexOf('horizontal position long before sleep') !== -1];
+    }),
+    SHAPES.map(s => [s.name, s.sacral, !s.sacral]));
+
+  const SACRAL_ROWS = ['engine still running', 'energy spent on something the gut said yes to'];
+  t('H4', 'the two defined-Sacral sleep rows appear in the three defined-Sacral readings and in none of the other three, so no reading contradicts its own closing',
+    SHAPES.map(s => {
+      const text = sleepOf(s).quads.map(q => q.items.join(' ')).join(' ');
+      return [s.name, SACRAL_ROWS.filter(r => text.indexOf(r) !== -1).length];
+    }),
+    SHAPES.map(s => [s.name, s.sacral ? 2 : 0]));
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -3131,7 +3208,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
