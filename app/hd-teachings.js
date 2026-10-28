@@ -383,9 +383,9 @@
       C: [['def:Head', 'Mental pressure does not switch off because the day ended.'],
           ['open:Head', 'The evening racing mind is usually the day\u2019s borrowed questions.'],
           ['def:Root', 'Adrenal pressure keeps running after everything else has stopped.'],
-          ['gen', 'A day spent on things the gut never agreed to, and a night spent with the engine still running.'],
+          ['gen', 'A day spent on things the gut never agreed to, and a night spent with the engine still running.', 'strict'],
           ['open:Sacral', 'Needing more rest than the people around you, and arguing with it.']],
-      O: [['gen', 'Ending the day with the energy spent on something the gut said yes to, so sleep arrives on its own.'],
+      O: [['gen', 'Ending the day with the energy spent on something the gut said yes to, so sleep arrives on its own.', 'strict'],
           ['def:Head', 'Emptying the questions onto paper before the light goes out.'],
           ['open:Solar Plexus', 'A real transition after an absorbing day, rather than a screen.'],
           ['type:Reflector', 'Sleeping alone in your own space, which the tradition asks for directly.'],
@@ -522,12 +522,17 @@
     return false;
   }
 
+  /* A row marked 'strict' is never used to fill a reading its condition does
+     not match. Without it the backfill below hands a claim about one design to
+     a chart it is not true of, which is how a design without a defined Sacral
+     was reading the defined-Sacral sleep instruction while the closing beneath
+     it said the opposite. A short list is honest; a padded one is not. */
   function pick(bank, c) {
     var out = [];
     (bank || []).forEach(function (row) { if (matches(row[0], c)) out.push(row[1]); });
     if (out.length < 3) {
       (bank || []).forEach(function (row) {
-        if (out.length < 3 && out.indexOf(row[1]) === -1) out.push(row[1]);
+        if (out.length < 3 && row[2] !== 'strict' && out.indexOf(row[1]) === -1) out.push(row[1]);
       });
     }
     return out.slice(0, 5);
