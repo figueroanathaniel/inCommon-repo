@@ -85,3 +85,9 @@ were approved; from 28 October 2026 that work is committed here.
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
 - 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and #111 opened as the standing pull request.
+- 28 October 2026: #111 merged into main by the owner. The branch restarted
+  from main under the same name.
+- 28 October 2026: efficiency edits approved by the owner. E6: workstream 6
+  builds the edge function harness and 2.1 writes its tests on it. E10: each
+  finding is a commit series on this branch. E11: 2.1 no longer waits on the
+  graphics update.
