@@ -3,15 +3,21 @@ Status:          READY (the owner reports this workstream still reviewing;
                  this assignment is what to come out of the review with)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 5 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E9, E10, E11 and E12
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 THE ORDER, BECAUSE OF THE GRAPHICS UPDATE
 Workstream 4 is landing a large graphics update. It changes the weight and
 the frame cost of the 3D stages and the cover, so anything measured before
-it lands is partly out of date afterwards. So:
+it lands is partly out of date afterwards. Workstream 4 lists its pieces on
+the Task Force 4 pull request and posts there when the last has merged (4.1
+Task 1); that post is "merges" below. Your commits are prefixed "5.1:" on
+the Task Force 5 branch (CHARTER.md). So:
   1. Measure main now (STEP 2 of your brief) and record it as "baseline A,
-     main c259e80". This is still worth having: the boot path, the bundle
-     and the fonts are not what the graphics update changes.
+     main <the commit measured>". This is still worth having: the boot
+     path, the bundle and the fonts are not what the graphics update
+     changes.
   2. Do STEP 3 (the ranked list) now, and mark each item "safe now" or
      "after graphics". Safe now means it touches none of: app/cover.html,
      the scene files, three.*.js, the code in the app file that mounts or
@@ -23,8 +29,9 @@ it lands is partly out of date afterwards. So:
 TASK 1. WRITE tools/measure-load.js AND RECORD BASELINE A
   As STEP 2 of your brief describes. Also record, per run: the size of
   deploy/<current>/app.html, the number of modules it inlines, and the
-  commit measured. Put baseline A in docs/PERF-BASELINE.md. Open the PR
-  with only the tool and the baseline, so other workstreams can use it
+  commit measured. Put baseline A in docs/PERF-BASELINE.md. Post the tool
+  and the baseline as your first review range on the Task Force pull
+  request, so the owner can merge it early and other workstreams can use it
   while you continue.
 
 TASK 2. CHECK THESE LEADS FIRST (from the 27 October analysis)
@@ -34,7 +41,12 @@ TASK 2. CHECK THESE LEADS FIRST (from the 27 October analysis)
      chart uses and Today does not. That makes it the strongest deferral
      candidate. Model the loader on how gazetteer-world.js (7.3 MB) is
      already loaded only on demand, show "Loading" in the expanded chart
-     until it arrives, and keep it in sw.js's precache.
+     until it arrives, and cache it on first use the way the gazetteer is:
+     in the service worker's runtime cache, never in its install time
+     precache. A file in the precache is downloaded at install by every
+     visitor, which would cancel the saving; that is why gazetteer-world.js
+     is deliberately left out of it (CLAUDE.md, "The world place list is
+     fetched when a birth place is asked for").
   b. The next largest: comet-integrated-jpl.js (0.7 MB),
      minor-body-elements.js (0.3 MB), comet-hyakutake-jpl.js (0.2 MB). Find
      which of them Today, the registration card and the first run need.
@@ -42,7 +54,8 @@ TASK 2. CHECK THESE LEADS FIRST (from the 27 October analysis)
      SabianSymbols, Astronomy and LunarMeanPoints. boot() polls it every
      150ms. Check whether the first screen needs all six, and whether a
      shorter poll or an event would save time. boot() is shared with
-     workstream 3: describe a change there in your PR rather than making it.
+     workstream 3: describe a change there on the pull request rather than
+     making it.
   d. Fonts: compare Google Fonts against "node tools/build-bundle.js --fonts
      self", on first visit and repeat visit.
   Classify a, b and d as "safe now"; c touches boot and needs workstream 3's
@@ -55,9 +68,11 @@ TASK 3. KNOWN 3D LATENCY: NOT YOURS, BUT MEASURE IT
   and B so the fixes can be shown to work.
 
 HARD RULES (in addition to your brief's)
-  - Anything deferred stays in the service worker precache; the app keeps
-    working offline. Prove it by loading once online, then offline, and
-    opening every screen that needs the deferred file.
+  - Anything deferred is cached on first use, never precached at install,
+    and every screen that needs it keeps working offline once it has been
+    opened online. Prove it by opening those screens once online, then
+    offline. A deferred file never opened online is honestly unavailable
+    offline: the screen shows its Loading state or an honest message.
   - A deferred module that fails to load leaves the screen on its Loading
     state or an honest message, never blank.
   - One change at a time, measured before and after, five runs each,
@@ -66,6 +81,6 @@ HARD RULES (in addition to your brief's)
 DONE MEANS
   measure-load.js merged with baseline A; the ranked list in
   docs/PERF-BASELINE.md, each item marked safe now or after graphics; the
-  safe now items done, one PR each, with before and after numbers; baseline B
-  recorded once the graphics update merges. Every README gate green on each
-  PR, with "--with-h" because your brief requires it.
+  safe now items done, one review range each, with before and after
+  numbers; baseline B recorded once the graphics update merges. Every README
+  gate green on each range, with "--with-h" because your brief requires it.
