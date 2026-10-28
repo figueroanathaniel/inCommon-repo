@@ -9,7 +9,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `taskforce/01-data-schema` |
-| Standing pull request | the one opened after #107 merged (number under "History" below) |
+| Standing pull request | #108 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -96,4 +96,4 @@ October 2026, so it is left alone; the file is here now.
   closed and #107 became the standing pull request.
 - 28 October 2026: #107 merged into main by the owner's approval (merge
   commit d9ea6ab). The branch restarted from main under the same name, and
-  a new standing pull request opened with this line.
+  #108 opened as the new standing pull request.
