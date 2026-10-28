@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #112 (earlier ones under "History" below) |
+| Standing pull request | #118 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -94,3 +94,4 @@ were approved; from 28 October 2026 that work is committed here.
   commits on this branch. E11: the graphics update is whatever workstream 4
   declares on its pull request. E14: the proof dump is workstream 6's
   tools/dump-render-vals.js.
+- 28 October 2026: #118 opened as the standing pull request.
