@@ -9,7 +9,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `taskforce/01-data-schema` |
-| Standing pull request | #110 (earlier ones under "History" below) |
+| Standing pull request | #116 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -115,3 +115,4 @@ October 2026, so it is left alone; the file is here now.
   notes are the inspection panel's field list. E5: synGatesOf is recorded as
   unused. E7: 1.1 DONE, its Task 4 reissued as 1.4. E10: 1.2 commits on this
   branch.
+- 28 October 2026: #116 opened as the standing pull request.
