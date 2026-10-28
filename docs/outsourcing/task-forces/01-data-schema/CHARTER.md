@@ -39,19 +39,22 @@ context, check its duties still fit ("What each agent can do" in
 
 ## What is in this folder
 
-| File | What it is | Status |
-|---|---|---|
-| `CHARTER.md` | this page | |
-| `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved |
-| `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged) and the follow-ups in its Task 4 | READY |
-| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY |
-| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | READY |
-| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | READY |
-| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | READY |
+| File | What it is | Status | Delivered |
+|---|---|---|---|
+| `CHARTER.md` | this page | | |
+| `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved | |
+| `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged) and the follow-ups in its Task 4 | READY | not recorded |
+| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | not recorded |
+| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | READY | not recorded |
+| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | READY | not recorded |
+| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | READY | not recorded |
 
-Statuses move DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE, and only
-the owner moves a file to READY. The same statuses appear on the board in
-`00-README.md`; this table is the one kept current, and the board mirrors it.
+Approval and delivery are recorded separately. **Status** is the owner's
+decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
+moves a file to READY). **Delivered** is when the file actually reached each
+seat, by whom and how, written as it happens: "primary 29 Oct, pasted by the
+owner". An assignment is ISSUED only once its primary has it. The board in
+`00-README.md` mirrors the Status column.
 
 Work this task force produces lives where its brief puts it, not in this
 folder: `data-contracts/` (the data map and the Human Design vault,
@@ -97,3 +100,6 @@ October 2026, so it is left alone; the file is here now.
 - 28 October 2026: #107 merged into main by the owner's approval (merge
   commit d9ea6ab). The branch restarted from main under the same name, and
   #108 opened as the new standing pull request.
+- 28 October 2026: a Delivered column added beside Status (the owner's
+  programme board, priority 2). 1.3 is approved; its delivery to the three
+  seats is not recorded yet.
