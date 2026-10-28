@@ -9,7 +9,7 @@ everything to do with Delegation 5.
 | | |
 |---|---|
 | Branch | `taskforce/05-performance` |
-| Standing pull request | #114 (earlier ones under "History" below) |
+| Standing pull request | #120 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/05-performance/` |
 
 Every commit for Delegation 5 lands on this branch. Work that was already
@@ -91,3 +91,4 @@ were approved; from 28 October 2026 that work is committed here.
   module is cached on first use like the gazetteer, never precached at
   install. E11: "after graphics" means after workstream 4 posts that the
   graphics update has merged. E10: commits on this branch.
+- 28 October 2026: #120 opened as the standing pull request.
