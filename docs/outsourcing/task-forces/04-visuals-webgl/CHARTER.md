@@ -9,7 +9,7 @@ everything to do with Delegation 4.
 | | |
 |---|---|
 | Branch | `taskforce/04-visuals-webgl` |
-| Standing pull request | #113 (earlier ones under "History" below) |
+| Standing pull request | #119 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/04-visuals-webgl/` |
 
 Every commit for Delegation 4 lands on this branch. Work that was already
@@ -94,3 +94,4 @@ were approved; from 28 October 2026 that work is committed here.
   when the last has merged; that post is what everyone else waits for. E14:
   4.2 uses workstream 6's dump tool. E16: 6.4 moves here as 4.3, and
   `docs/WEBGL_ENGINE.md` is this task force's, reviewed by workstream 6.
+- 28 October 2026: #119 opened as the standing pull request.
