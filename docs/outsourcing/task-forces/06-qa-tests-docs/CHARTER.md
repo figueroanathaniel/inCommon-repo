@@ -9,7 +9,7 @@ everything to do with Delegation 6.
 | | |
 |---|---|
 | Branch | `taskforce/06-qa-tests-docs` |
-| Standing pull request | #115 (earlier ones under "History" below) |
+| Standing pull request | #121 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/06-qa-tests-docs/` |
 
 Every commit for Delegation 6 lands on this branch. Work that was already
@@ -99,3 +99,4 @@ were approved; from 28 October 2026 that work is committed here.
   also 1.3's fixed cases and cite 1.3's convention notes. E15: 6.3 runs H
   only when the cover or a scene changes. E16: 6.4 moved to Task Force 4 as
   4.3, with this task force reviewing. E10: commits on this branch.
+- 28 October 2026: #121 opened as the standing pull request.
