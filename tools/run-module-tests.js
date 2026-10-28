@@ -3192,6 +3192,52 @@ async function runCloudTests() {
     SHAPES.map(s => [s.name, s.sacral ? 2 : 0]));
 })();
 
+/* --------------------------------------------------- N: the authority order
+   Authority is one expression inside hdChart() in the app file, and it is not
+   exported. This group reads that expression out of the shipped file and
+   evaluates it against the defined centres, so it tests the code a reader gets
+   rather than a copy of it. The order is the tradition's: a defined Solar Plexus
+   is Emotional before a defined Sacral is Sacral, so a Generator or Manifesting
+   Generator with both defined has Emotional authority. Rows N1 and N2 hold that
+   order; the rows after them hold the controls beside it. */
+(function () {
+  const src = require('fs').readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  /* The line is found by the branch it must contain, not by its first test, so
+     a change of order is read and judged rather than reported as a missing line. */
+  const found = src.match(/^ *const authority = .*Emotional:.*;\s*$/gm) || [];
+  const expr = found.length === 1 ? /^ *const authority = (.*);\s*$/m.exec(found[0])[1] : null;
+  /* hdChart() puts the Sacral test in a local before this line, and the line may
+     read it, so the three names it can read are supplied the same way. */
+  const derive = expr === null ? null : new Function('defined', 'seen', 'sacral', 'return ' + expr);
+  const authorityOf = (defined, seen) => {
+    const d = new Set(defined);
+    try { return derive(d, new Set(seen || []), d.has('Sacral')); } catch (e) { return 'threw: ' + e.message; }
+  };
+  const kind = (defined, seen) => authorityOf(defined, seen).split(':')[0];
+
+  t('N0', 'the authority expression is found once in the shipped app file, as a single line that reads defined centres',
+    [found.length, expr !== null && /defined\.has\(/.test(expr)],
+    [1, true]);
+
+  t('N1', 'a Generator with a defined Sacral and a defined Solar Plexus has Emotional authority, not Sacral',
+    derive ? kind(['Sacral', 'Solar Plexus', 'Root'], []) : null, 'Emotional');
+  t('N2', 'a Manifesting Generator with a defined Sacral and a defined Solar Plexus has Emotional authority, not Sacral',
+    derive ? kind(['Sacral', 'Solar Plexus', 'Throat', 'G'], ['Throat', 'G', 'Sacral']) : null, 'Emotional');
+  t('N3', 'a Generator with a defined Sacral and no Solar Plexus has Sacral authority',
+    derive ? kind(['Sacral', 'Root', 'Spleen'], []) : null, 'Sacral');
+  t('N4', 'a defined Sacral with a defined Spleen and no Solar Plexus has Sacral authority, since the Sacral is read before the Spleen',
+    derive ? kind(['Sacral', 'Spleen'], []) : null, 'Sacral');
+  t('N5', 'a Projector with a defined Solar Plexus has Emotional authority whatever its type, and no Sacral',
+    derive ? kind(['Solar Plexus', 'Ajna'], []) : null, 'Emotional');
+  t('N6', 'a defined Spleen with no Sacral or Solar Plexus has Splenic authority',
+    derive ? kind(['Spleen', 'Ajna'], []) : null, 'Splenic');
+  t('N7', 'a Heart reaching the Throat is Ego manifested; a Heart that does not is Ego projected',
+    derive ? [kind(['Heart', 'Throat'], ['Throat', 'Heart']), kind(['Heart'], ['Throat'])] : null,
+    ['Ego manifested', 'Ego projected']);
+  t('N8', 'a chart with no defined centres has Lunar authority',
+    derive ? kind([], []) : null, 'Lunar');
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -3219,7 +3265,7 @@ runCloudTests().then(() => {
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
       ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
-      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js']].forEach(([k, name]) => {
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
     });
