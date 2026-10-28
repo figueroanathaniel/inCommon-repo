@@ -9,7 +9,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `taskforce/01-data-schema` |
-| Standing pull request | #107 (earlier and later ones recorded under "History" below) |
+| Standing pull request | the one opened after #107 merged (number under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -94,3 +94,6 @@ October 2026, so it is left alone; the file is here now.
   `claude/delegation-1-instructions-bhpilx` to `taskforce/01-data-schema`.
   GitHub cannot move an open pull request to a new branch, so #106 was
   closed and #107 became the standing pull request.
+- 28 October 2026: #107 merged into main by the owner's approval (merge
+  commit d9ea6ab). The branch restarted from main under the same name, and
+  a new standing pull request opened with this line.
