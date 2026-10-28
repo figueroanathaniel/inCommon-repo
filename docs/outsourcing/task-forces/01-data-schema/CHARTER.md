@@ -8,14 +8,14 @@ force follows: see `../README.md`.
 
 | | |
 |---|---|
-| Branch | `claude/delegation-1-instructions-bhpilx` |
-| Standing pull request | #106 (later ones recorded under "History" below) |
+| Branch | `taskforce/01-data-schema` |
+| Standing pull request | #107 (earlier and later ones recorded under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
 migrations, client storage changes and the vault. No Delegation 1 work goes
-on any other branch. The branch name is kept as it is; a rename needs the
-owner's approval and is then recorded here and under "History".
+on any other branch. A rename needs the owner's approval and is then
+recorded here and under "History".
 
 ## The seats
 
@@ -90,3 +90,7 @@ October 2026, so it is left alone; the file is here now.
   into it. Seats as in the roster, subject to substitution on the owner's
   approval. Standing pull request opened: #106.
 - 28 October 2026: 1.3 (all three files) approved by the owner, READY.
+- 28 October 2026: branch renamed by the owner's approval, from
+  `claude/delegation-1-instructions-bhpilx` to `taskforce/01-data-schema`.
+  GitHub cannot move an open pull request to a new branch, so #106 was
+  closed and #107 became the standing pull request.

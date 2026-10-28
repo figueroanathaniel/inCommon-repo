@@ -23,7 +23,7 @@ When a round gives each seat its own file, the seat goes last:
 
 | # | Task force | Folder | Branch | State |
 |---|---|---|---|---|
-| 1 | Data Mapping & Schema Architecture | `01-data-schema/` | `claude/delegation-1-instructions-bhpilx` | constituted 28 October 2026 |
+| 1 | Data Mapping & Schema Architecture | `01-data-schema/` | `taskforce/01-data-schema` | constituted 28 October 2026 |
 | 2 | Security Hardening & RLS | not yet | not yet | brief and assignments still in `../` and `../assignments/` |
 | 3 | Refactoring & Feature Additions | not yet | not yet | as above |
 | 4 | Interactive Visuals (WebGL / three.js) | not yet | not yet | as above |
@@ -34,8 +34,8 @@ When a round gives each seat its own file, the seat goes last:
 
 Only when the owner asks for it, and in one commit on the new branch:
 
-1. Branch from current main. Suggested name `taskforce/<nn>-<slug>`; the
-   owner may choose another, and the charter records it.
+1. Branch from current main as `taskforce/<nn>-<slug>` (the owner approved
+   the pattern on 28 October 2026); the charter records the name.
 2. Make `task-forces/<nn>-<slug>/`. Move the workstream's brief in as
    `brief.md` and its assignments in under the naming above, with `git mv`
    so their history follows them. Fix every reference to the old paths
