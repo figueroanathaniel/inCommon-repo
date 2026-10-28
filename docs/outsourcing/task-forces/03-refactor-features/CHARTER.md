@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | opens once the change that made this folder has merged; its number goes under "History" |
+| Standing pull request | PENDING (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -84,3 +84,4 @@ were approved; from 28 October 2026 that work is committed here.
   the workstream 3 brief and assignments moved into it from
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
+- 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and PENDING opened as the standing pull request.
