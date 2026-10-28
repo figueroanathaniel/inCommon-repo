@@ -19,6 +19,7 @@
       "Bash(git show:*)",
       "Bash(grep:*)",
       "Bash(rg:*)"
+      "Bash(git push origin --delete:*)",
     ]
   },
   "autoCompactEnabled": true,
