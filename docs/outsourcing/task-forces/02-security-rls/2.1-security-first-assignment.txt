@@ -2,7 +2,7 @@ ASSIGNMENT 2.1   Workstream 2: Security Hardening & RLS Setup
 Status:          READY
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 2 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 02-security-rls.md, CLAUDE.md, docs/SECURITY.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md, docs/SECURITY.md
 
 THIS REPOSITORY IS PUBLIC
 Anything written in a commit, a pull request, an issue or a comment can be

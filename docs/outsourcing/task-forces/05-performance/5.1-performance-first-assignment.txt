@@ -3,7 +3,7 @@ Status:          READY (the owner reports this workstream still reviewing;
                  this assignment is what to come out of the review with)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 5 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 05-performance.md, CLAUDE.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 THE ORDER, BECAUSE OF THE GRAPHICS UPDATE
 Workstream 4 is landing a large graphics update. It changes the weight and

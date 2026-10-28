@@ -1,11 +1,11 @@
 # Brief 3: Refactoring & Feature Additions
 
-Agents: named in the roster in 00-README.md, workstream 3.
-Branch: feature/<topic> or refactor/<topic>
-from current main. Read 00-README.md and CLAUDE.md first.
+Agents: named in the roster in 00-README.md, workstream 3 (Task Force 3).
+Branch: the Task Force 3 branch named in CHARTER.md (since 28 October 2026).
+Read 00-README.md, CHARTER.md and CLAUDE.md first.
 
 This brief sets the rules for any refactor or feature the owner assigns.
-Each assignment arrives as its own task; do one per branch and pull request.
+Each assignment arrives as its own task; do each on the task force branch, as CHARTER.md says.
 
 ## How the app is built (read this, it is unusual)
 

@@ -3,7 +3,7 @@ Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 3 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 03-refactor-features.md, CLAUDE.md,
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  docs/hd-upgrade/01-competitive-study.txt (sections 5 and 6)
 Runs beside:     assignment 3.1. Keep each task on its own branch. If 3.1's
                  renderVals split is in flight, put new values in their own

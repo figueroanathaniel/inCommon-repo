@@ -1,8 +1,8 @@
 # Brief 4: Interactive Visuals (WebGL / three.js)
 
-Agents: named in the roster in 00-README.md, workstream 4.
-Branch: visuals/<topic> from current main.
-Read 00-README.md and CLAUDE.md first. This workstream's merged work so far
+Agents: named in the roster in 00-README.md, workstream 4 (Task Force 4).
+Branch: the Task Force 4 branch named in CHARTER.md (since 28 October 2026).
+Read 00-README.md, CHARTER.md and CLAUDE.md first. This workstream's merged work so far
 is listed under "Current values" in 00-README.md; build on it.
 
 ## What exists today

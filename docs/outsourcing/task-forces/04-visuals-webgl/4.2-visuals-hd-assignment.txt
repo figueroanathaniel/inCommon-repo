@@ -5,7 +5,7 @@ Status:          READY (approved by the owner, 27 October 2026).
                  4.1 has merged.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 4 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 04-visuals-webgl.md, CLAUDE.md,
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  docs/hd-upgrade/01-competitive-study.txt (Pillar C)
 
 THE OUTCOME

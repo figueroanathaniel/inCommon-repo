@@ -1,11 +1,11 @@
 # Brief 5: Load Time & Performance Tuning
 
-Agents: named in the roster in 00-README.md, workstream 5.
-Read 00-README.md and CLAUDE.md first.
+Agents: named in the roster in 00-README.md, workstream 5 (Task Force 5).
+Read 00-README.md, CHARTER.md and CLAUDE.md first.
 
 You are tuning load time and runtime performance for inCommon
 (repo: figueroanathaniel/inCommon-repo, base branch: main).
-Work on a new branch named perf/load-time from current main.
+Work on the Task Force 5 branch named in CHARTER.md (since 28 October 2026).
 
 STEP 0: READ BEFORE ANYTHING ELSE
 1. Read CLAUDE.md in full. These rules are mandatory:

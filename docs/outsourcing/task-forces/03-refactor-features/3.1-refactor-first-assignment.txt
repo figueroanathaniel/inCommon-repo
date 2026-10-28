@@ -2,7 +2,7 @@ ASSIGNMENT 3.1   Workstream 3: Refactoring & Feature Additions
 Status:          READY (the owner reports this workstream ready to start)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 3 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 03-refactor-features.md, CLAUDE.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 STAY CLEAR OF THE GRAPHICS UPDATE
 Workstream 4 is landing a large graphics update while you work. Until it

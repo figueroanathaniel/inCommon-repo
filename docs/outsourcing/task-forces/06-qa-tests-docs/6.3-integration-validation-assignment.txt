@@ -1,0 +1,61 @@
+ASSIGNMENT 6.3   Workstream 6: QA, Unit Testing & Documentation
+Programme:       Programme board, priority 9 (docs/outsourcing/PROGRAMME.md)
+Status:          AWAITING OWNER APPROVAL (written 28 October 2026)
+Issued against:  main d9ea6ab, 28 October 2026
+Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Read first:      00-README.md (especially "Helpers" and "The gates"),
+                 CHARTER.md, brief.md, CLAUDE.md "Verification"
+Starts:          when the first of priorities 3 to 8 merges into main, and
+                 again after each one after it
+
+THE OUTCOME
+Each integrated change is validated on main as it will ship, and the record
+says exactly what was tested, on what, by whom, and what was not.
+
+TASK 1. THE RUN, PER INTEGRATION
+After each task force branch merges into main:
+  1. Record the commit tested: the full sha of main, and the task force pull
+     request it brought in.
+  2. Run every gate in 00-README.md, including the browser gates
+     (drive-cover, drive-routes, drive-swipe, drive-register, drift-check
+     --force) and "node tools/drift-check.js --force --with-h" for the H
+     phase. A gate that did not run is reported as not run, with the reason;
+     never as passed (Helpers, item 1). If no seat of this task force can run
+     the browser gates, the run goes to the browser runner under "Current
+     values".
+  3. Paste each gate's own output, not a summary of it.
+
+TASK 2. INDEPENDENT REVIEW
+The secondary reruns the gates on the same sha without seeing the primary's
+results first, and compares. Both outputs and the comparison go on Task
+Force 6's standing pull request. Nobody validates a change they wrote
+(Helpers, item 2).
+
+TASK 3. WHAT A CONTAINER CANNOT SAY
+State, every time, the gaps a run in this repository's automation cannot
+close, and do not let a green run imply them:
+  - no physical phone: iPhone (WebKit) and Android were not driven; drive-swipe
+    stands in for WebKit's touch behaviour and is not WebKit;
+  - no hardware GPU: SwiftShader shows a shader compiles and paints, not the
+    driver crash and recovery path H1's banner names (CLAUDE.md "A GPU-less
+    container is a different failure mode");
+  - frame rates and GPU memory measured under software rendering are not
+    device figures;
+  - the theme sweep measures #/today only.
+Name the physical devices a check is still owed on, and keep that list on
+the programme board until the owner or a device run closes each line.
+
+TASK 4. THE RECORD
+One file per run, docs/validation/<YYYYMMDD>-<task force>.md: the sha, the
+pull request, every gate with its output or why it did not run, the
+independent review and its comparison, and the remaining limitations.
+Update the row in docs/outsourcing/PROGRAMME.md with a link to it.
+
+FILES THIS ASSIGNMENT OWNS
+  docs/validation/ (new) and its rows on the programme board. No gate is
+  weakened to pass (00-README.md rule 8).
+
+DONE MEANS
+  Every merged priority has a validation record that names the tested commit,
+  the independent review and the remaining limitations, and every device gap
+  is either closed by a recorded device run or still listed.

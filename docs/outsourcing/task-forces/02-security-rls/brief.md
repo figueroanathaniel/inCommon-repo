@@ -1,8 +1,8 @@
 # Brief 2: Security Hardening & RLS Setup
 
-Agents: named in the roster in 00-README.md, workstream 2.
-Branch: security/<topic> from current main.
-Read 00-README.md and CLAUDE.md first. Start after workstream 1 has merged,
+Agents: named in the roster in 00-README.md, workstream 2 (Task Force 2).
+Branch: the Task Force 2 branch named in CHARTER.md (since 28 October 2026).
+Read 00-README.md, CHARTER.md and CLAUDE.md first. Start after workstream 1 has merged,
 or work only on tables that already exist and say so.
 
 ## What exists today
