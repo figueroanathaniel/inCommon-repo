@@ -3,17 +3,20 @@ Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E2, E10 and E13
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  docs/hd-upgrade/01-competitive-study.txt
-Runs beside:     assignment 6.1. Task 1 here goes before anything else in
-                 6.1 that is not already open.
+Runs after:      6.1 Task 1 (run-gates.js), which is this task force's
+                 first job. Task 1 here then goes before the rest of 6.1.
+                 Commits prefixed "6.2:" on the Task Force 6 branch.
 
 THE OUTCOME
 Every Human Design improvement after this is measured against a fixed set of
 reference charts, and the honesty rules (no silent fallback, every sub line
 value with its confidence) are rows that go red when broken.
 
-TASK 1. REFERENCE CHARTS (branch qa/hd-reference)
+TASK 1. REFERENCE CHARTS
   tools/fixtures/hd-reference.json and tools/check-hd-reference.js.
   a. Twenty to thirty charts: births whose data is public and well sourced
      (historical figures with recorded birth times, Rodden AA or A where
@@ -28,10 +31,17 @@ TASK 1. REFERENCE CHARTS (branch qa/hd-reference)
      they disagree with each other or with inCommon, the fixture records
      the disagreement and its cause (zone revision, boundary crossing,
      calculation convention), and the row asserts inCommon's documented
-     answer. A disagreement nobody can explain fails the row.
+     answer. A disagreement nobody can explain fails the row. For a
+     convention, cite the note in 1.3's vault (data-contracts/hd-vault/
+     Verification/) that settles it rather than writing the convention out
+     again; if 1.3 has not settled it, say so and ask on the Task Force 1
+     pull request.
   c. The check runs inCommon's own code (lift it the way
      check-astral-bodies.js does), needs no browser, and joins the fast
      gate list (6.1's run-gates.js).
+  d. These charts are also 1.3's fixed cases: once the fixture lands, post
+     on the Task Force 1 pull request so 1.3's reconciliation script can run
+     over it. 1.3 and this check then read the same charts.
 
 TASK 2. HONESTY ROWS (with workstream 3, as 3.2 lands)
   Rows for each of 3.2's Task 2 cases: the arc solver removed, a Sun
@@ -40,7 +50,7 @@ TASK 2. HONESTY ROWS (with workstream 3, as 3.2 lands)
   before 3.2. For 3.2's Task 4 (Color): boundary sweeps, and a row that
   moves the birth time by a minute and expects the Moon's confidence to drop.
 
-TASK 3. THE BENCHMARK PROTOCOL (docs only, branch qa/hd-benchmark)
+TASK 3. THE BENCHMARK PROTOCOL (docs only)
   docs/hd-upgrade/03-benchmark-protocol.txt: the study that decides whether
   inCommon has doubled Ra.TV and Maia Mechanics. About 30 participants
   across beginner, student and practitioner; counterbalanced task order;

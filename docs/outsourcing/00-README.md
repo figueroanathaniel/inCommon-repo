@@ -74,7 +74,7 @@ the delivery record, and this board mirrors the status.
 
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
-| 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 merged |
+| 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | DONE | in its brief, "Secondary and tertiary" | DONE | first round done, PR #96 merged; Task 4 continues as 1.4 |
 | 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
 | 3 | task-forces/03-refactor-features/3.1-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
 | 4 | task-forces/04-visuals-webgl/4.1-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
@@ -92,7 +92,7 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 | 6 | task-forces/06-qa-tests-docs/6.2-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
 | 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | now |
 | 2 | task-forces/02-security-rls/2.2-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
-| 4 | task-forces/04-visuals-webgl/4.2-visuals-hd-assignment.txt (4.2) | READY | after the graphics update (4.1) merges |
+| 4 | task-forces/04-visuals-webgl/4.2-visuals-hd-assignment.txt (4.2) | READY | once 4.1 posts that the graphics update has merged |
 | 5 | task-forces/05-performance/5.2-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
 
 Their secondaries and tertiaries work as each brief's "Secondary and
@@ -111,8 +111,9 @@ mirror the status.
 | 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | READY |
 | 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | READY |
 | 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | READY |
+| 1 | Primary | task-forces/01-data-schema/1.4-schema-followups-assignment.txt (1.4) | READY |
+| 4 | Primary | task-forces/04-visuals-webgl/4.3-webgl-engine-doc-assignment.txt (4.3) | READY |
 | 6 | Primary | task-forces/06-qa-tests-docs/6.3-integration-validation-assignment.txt (6.3) | READY |
-| 6 | Primary | task-forces/06-qa-tests-docs/6.4-webgl-engine-doc-assignment.txt (6.4) | READY |
 
 1.3 is the Human Design logic map, asked for by the owner on 28 October
 2026: research, reconcile and map the Human Design logic end to end, keep the
@@ -120,8 +121,10 @@ schema definitions as an Obsidian vault (data-contracts/hd-vault/), and
 cross verify the positions through the tertiary.
 
 1.3 can start now, beside 1.2: its Chart address note is what 1.2's notes
-attach to. 6.3 and 6.4 are priorities 9 and 1 on `PROGRAMME.md`; their
-secondaries and tertiaries work as brief 6's "Secondary and tertiary" says.
+attach to. 1.4 is 1.1's Task 4, reissued. 6.3 is priority 9 on
+`PROGRAMME.md` and 4.3 (6.4 until E16 moved it) is priority 1; their
+secondaries and tertiaries work as each brief's "Secondary and tertiary"
+says, and 4.3 is reviewed by the workstream 6 secondary.
 
 The statuses are DRAFT, AWAITING OWNER APPROVAL, READY (approved and safe
 to hand over), ISSUED (handed to the agent) and DONE. The helper
@@ -284,9 +287,10 @@ The last full run on main is recorded under "Current values".
 | app/cover.html renderer module and shaders, the ring | 4 Visuals | yes |
 | app/chart-scene.js, cycle-scene.js, hd-scene.js, body-globes.js, flight.js | 4 Visuals | yes |
 | tools/check-three-lifecycle.js | 4 Visuals | yes |
+| docs/WEBGL_ENGINE.md | 4 Visuals | yes; workstream 6 reviews it |
 | tools/build-bundle.js inlining, sw.js precache list, module loaders | 5 Performance | yes |
 | tools/measure-load.js, docs/PERF-BASELINE.md | 5 Performance | yes |
-| tools/run-*.js, tools/check-*.js (except check-three-lifecycle.js), verification/, app/handoff/ | 6 QA | others ADD rows for their own work, never remove |
+| tools/run-*.js, tools/check-*.js (except check-three-lifecycle.js), tools/dump-render-vals.js, verification/, app/handoff/ | 6 QA | others ADD rows for their own work, never remove |
 | docs/ and CLAUDE.md | 6 QA consolidates | everyone adds a section for their own work |
 
 ## Merge order
@@ -397,3 +401,14 @@ doc here rather than working around the difference.
 - 28 October 2026: 6.3 and 6.4 approved by the owner, READY.
   docs/WEBGL_ENGINE.md drafted from the code on the Task Force 6 branch,
   for review by the workstream 4 secondary.
+- 28 October 2026: #110 to #115 merged; every task force branch restarted
+  from main. The owner approved efficiency edits E1 to E16: the tertiary
+  asks no bulk positions (E1); 1.3, 6.2 and 3.2 share their checks rather
+  than repeating them (E2 to E5); workstream 6 builds the one edge function
+  harness (E6) and the render dump tool (E14), and run-gates.js comes first
+  (E13); 1.1 is DONE and its Task 4 is 1.4 (E7); #95 is struck from 4.1
+  (E8); stale facts updated (E9); every assignment commits on its task
+  force branch (E10); workstream 4 declares the graphics update and posts
+  its end (E11); deferred modules are cached on first use (E12); 6.3 runs
+  H only when the cover or a scene changes (E15); 6.4 moved to workstream 4
+  as 4.3, and docs/WEBGL_ENGINE.md with it (E16).

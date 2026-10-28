@@ -3,7 +3,16 @@ Status:          READY (the owner reports this workstream already running;
                  this lines the running work up with today's main)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E6, E9, E11, E13 and E14
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
+
+THE ORDER
+Task 1 (run-gates.js) is this task force's first job, before 6.2 and
+before anything else here, because every assignment in every task force
+ends with "every README gate green" and one command makes that one step.
+Then 6.2 Task 1, then the rest of this file. Commits are prefixed "6.1:" on
+the Task Force 6 branch (CHARTER.md).
 
 WHAT CHANGED SINCE YOU STARTED
   - Two new browser drives are on main, each serving the repo and faking
@@ -15,10 +24,12 @@ WHAT CHANGED SINCE YOU STARTED
                              simulated WebKit stop (PR #99)
     00-README.md's gate list now includes both. Add them to your coverage
     table.
-  - PR #96 (workstream 1) adds module rows K71 to K73. When it merges,
-    run-module-tests.js goes from 435 to 438. Do not count them as yours.
-  - A large graphics update from workstream 4 is landing. Expect group H and
-    the 3D parts of group N to churn while it does. Do NOT "stabilise" an H
+  - PR #96 (workstream 1) merged, adding module rows K71 to K73 to
+    run-module-tests.js. Do not count them as yours.
+  - A large graphics update from workstream 4 is landing. Its pieces are
+    listed on the Task Force 4 pull request, and workstream 4 posts there
+    when the last has merged (4.1 Task 1). Expect group H and the 3D parts
+    of group N to churn until then. Do NOT "stabilise" an H
     or 3D row during that window: a row that changes result then is either a
     real regression in the update (report it on their PR) or a timing
     dependency (fix it at the cause, as H11 was fixed in PR #94).
@@ -42,10 +53,11 @@ TASK 2. CI FOR THE GATES THAT NEED NO BROWSER
 TASK 3. THE COVERAGE TABLE, WITH THESE AT THE TOP
   Rank by risk as your brief says. From today's analysis, the highest risk
   untested surfaces are:
-    a. server/*/index.ts: five edge functions, no tests. Workstream 2 is
-       writing fixes that need the same harness (a faked Supabase client and
-       faked outside services). Agree its shape with them, build it, and
-       let them add their rows.
+    a. server/*/index.ts: five edge functions, no tests. You build the
+       harness (a faked Supabase client and faked outside services) first,
+       and workstream 2 writes its failing tests on it (2.1 Task 1). Post
+       its shape on the Task Force 6 pull request before building, so
+       workstream 2 can say what it needs; there is one harness, not two.
     b. regSubmit (the registration card): validation, the profile cutover,
        the two settings switched on.
     c. The sync push after a profile switch: workstream 1's K72 covers the
@@ -59,13 +71,25 @@ TASK 4. KEEP GOING ON YOUR BRIEF
   README: deploy/<current>/ is deploy/v6.4/, and the gate list is
   00-README.md's.
 
+TASK 5. THE RENDER DUMP TOOL
+  Commit tools/dump-render-vals.js: it loads the app in Playwright, sets a
+  fixed list of states (each tab, each Library room, a selected placement,
+  the chart expanded, signed in and guest), and prints JSON.stringify of
+  renderVals() with functions replaced by their names, plus its SHA-256.
+  3.1 Task 2 proves its refactor with it, and 3.2 and 4.2 use it to show the
+  values outside their change are unchanged, so it is written once, here.
+  Options: --state <name> for one state, --out <file>. Show it catching a
+  one character change in a value before you call it done.
+
 HARD RULES (in addition to your brief's)
   - Never weaken an assertion; never remove another workstream's row.
   - A new test is shown failing against the fault it guards, in the commit.
   - No em or en dashes in test names, fixtures or docs.
 
 DONE MEANS
-  run-gates.js merged; the CI workflow merged and green; docs/TEST-COVERAGE.md
+  run-gates.js merged first; the CI workflow merged and green;
+  dump-render-vals.js merged; docs/TEST-COVERAGE.md
   with the three gaps above at the top and the harness for (a) agreed with
-  workstream 2; your brief's remaining items in progress, with five
-  consecutive green sweeps reported once the graphics update has merged.
+  workstream 2 and built; your brief's remaining items in progress, with
+  five consecutive green sweeps reported once workstream 4 has posted that
+  the graphics update has merged.
