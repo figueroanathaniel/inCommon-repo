@@ -85,3 +85,12 @@ were approved; from 28 October 2026 that work is committed here.
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
 - 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and #112 opened as the standing pull request.
+- 28 October 2026: #112 merged into main by the owner. The branch restarted
+  from main under the same name.
+- 28 October 2026: efficiency edits approved by the owner. E3: 3.2 Task 2
+  owns the three known faults 1.3 lists. E4: 3.2 Task 3 takes its fields
+  from 1.3's Pipeline notes and starts once they are published. E5: 1.3
+  records synGatesOf as unused, for 3.1 to remove. E10: every task is
+  commits on this branch. E11: the graphics update is whatever workstream 4
+  declares on its pull request. E14: the proof dump is workstream 6's
+  tools/dump-render-vals.js.
