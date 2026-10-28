@@ -106,9 +106,9 @@ its own status table, and the rows here mirror it.
 
 | # | Seat | Assignment | Status |
 |---|---|---|---|
-| 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | DRAFT |
-| 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | DRAFT |
-| 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | DRAFT |
+| 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | READY |
+| 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | READY |
+| 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | READY |
 
 1.3 is the Human Design logic map, asked for by the owner on 28 October
 2026: research, reconcile and map the Human Design logic end to end, keep the
@@ -381,3 +381,5 @@ doc here rather than working around the difference.
   into task-forces/01-data-schema/ with a charter; task-forces/README.md
   sets the shape the other five repeat. Seats unchanged, subject to
   substitution on the owner's approval.
+- 28 October 2026: assignment 1.3 approved by the owner, all three files
+  READY.

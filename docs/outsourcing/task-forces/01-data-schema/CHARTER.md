@@ -45,9 +45,9 @@ context, check its duties still fit ("What each agent can do" in
 | `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved |
 | `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged) and the follow-ups in its Task 4 | READY |
 | `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY |
-| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | DRAFT |
-| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | DRAFT |
-| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | DRAFT |
+| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | READY |
+| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | READY |
+| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | READY |
 
 Statuses move DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE, and only
 the owner moves a file to READY. The same statuses appear on the board in
@@ -89,3 +89,4 @@ October 2026, so it is left alone; the file is here now.
   this folder made, the workstream 1 brief and assignments 1.1 to 1.3 moved
   into it. Seats as in the roster, subject to substitution on the owner's
   approval. Standing pull request opened: #106.
+- 28 October 2026: 1.3 (all three files) approved by the owner, READY.

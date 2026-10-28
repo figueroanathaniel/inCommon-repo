@@ -1,7 +1,6 @@
 ASSIGNMENT 1.3, TERTIARY   Workstream 1: Data Mapping & Schema Architecture
 Programme:       Delegation 1, the Human Design logic map
-Status:          DRAFT (written at the owner's request, 28 October 2026;
-                 awaiting the owner's approval before it is ISSUED)
+Status:          READY (approved by the owner, 28 October 2026)
 Issued against:  main f9d0251, 28 October 2026
 Who:             the workstream 1 TERTIARY (named in the roster, 00-README.md).
                  Chat only: no repository access. Lookups only.
