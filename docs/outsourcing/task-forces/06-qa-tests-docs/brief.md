@@ -1,8 +1,8 @@
 # Brief 6: QA, Unit Testing & Documentation
 
-Agents: named in the roster in 00-README.md, workstream 6.
-Branch: qa/<topic> from current main.
-Read 00-README.md and CLAUDE.md first.
+Agents: named in the roster in 00-README.md, workstream 6 (Task Force 6).
+Branch: the Task Force 6 branch named in CHARTER.md (since 28 October 2026).
+Read 00-README.md, CHARTER.md and CLAUDE.md first.
 
 ## What exists today
 

@@ -4,7 +4,7 @@ Status:          READY (approved by the owner, 27 October 2026).
                  Starts after 1.2's model is agreed.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 2 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 02-security-rls.md, CLAUDE.md,
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  data-contracts/HD-STUDY-MODEL.md (from 1.2)
 
 THE OUTCOME

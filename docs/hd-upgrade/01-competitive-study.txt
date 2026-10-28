@@ -5,6 +5,8 @@ Written:   27 October 2026, against inCommon main 53d792a
 For:       the owner, and every workstream that takes an HD upgrade assignment
 Status:    research complete; assignments drafted separately for approval
 Companion: docs/outsourcing/assignments/*-hd-*.txt (the work this implies)
+Moved:     since 28 October 2026 the assignment files named here live in
+           docs/outsourcing/task-forces/<nn>-<slug>/, numbered <ws>.<round>.
 
 
 1. WHAT THIS IS, AND HOW FAR TO TRUST IT

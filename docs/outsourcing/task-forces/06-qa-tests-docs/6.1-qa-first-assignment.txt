@@ -3,7 +3,7 @@ Status:          READY (the owner reports this workstream already running;
                  this lines the running work up with today's main)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 06-qa-tests-docs.md, CLAUDE.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 WHAT CHANGED SINCE YOU STARTED
   - Two new browser drives are on main, each serving the repo and faking

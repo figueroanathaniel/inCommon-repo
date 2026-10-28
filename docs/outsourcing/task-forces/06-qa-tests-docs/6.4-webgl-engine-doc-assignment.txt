@@ -1,0 +1,65 @@
+ASSIGNMENT 6.4   Workstream 6: QA, Unit Testing & Documentation
+Programme:       Programme board, priority 1 (docs/outsourcing/PROGRAMME.md)
+Status:          AWAITING OWNER APPROVAL (written 28 October 2026)
+Issued against:  main d9ea6ab, 28 October 2026
+Who:             the workstream 6 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md (in full, or by
+                 the headings "Working inside a context limit" names, plus the
+                 3D sections listed under TASK 1)
+
+THE OUTCOME
+WEBGL_ENGINE.md describes the 3D engine as it is built, and proposes nothing
+the architecture forbids.
+
+BLOCKER, BEFORE ANYTHING ELSE
+WEBGL_ENGINE.md is not in the repository. It is not on main or on any branch,
+and no commit has ever named it (checked 28 October 2026). The owner commits
+it, as written, to the Task Force 6 branch under docs/WEBGL_ENGINE.md, or says
+where it lives. Until then this assignment cannot start. Record the commit
+that brings it in, so the review can see the corrections against the original.
+
+TASK 1. CORRECT IT AGAINST THE CODE (one commit, prefixed "6.4:")
+Check every claim in it against the files, not against memory. At least:
+  a. The deploy folder is deploy/v6.4/, the value of <current> under "Current
+     values" in 00-README.md. Write deploy/<current>/ where the text should
+     survive the next version bump, and the literal folder only where it
+     records a measurement taken against it.
+  b. The wiring's 3D view is app/hd-scene.js (global HDScene). The chart is
+     app/chart-scene.js, the Cycle Audit app/cycle-scene.js, close bodies
+     app/body-globes.js, flight app/flight.js. Name each by its own file.
+  c. The scenes compute nothing. Each draws a model the application builds
+     from the same calculation the 2D view reads: _csModel from placedRows,
+     natalAspects() and CAT_COLOR; _hsModel from hdChart(); the Cycle Audit
+     from cycleSceneModel(). The one position a scene asks for itself comes
+     through the app's own lonOf() (opts.lonAt). Anything in the document that
+     has a scene calculate positions, gates or chart state is wrong. CLAUDE.md:
+     "The natal chart is drawn three ways", "The wiring is drawn three ways",
+     "The Cycle Audit is drawn four ways".
+  d. Nothing in the browser talks to Supabase except app/incommon-cloud.js.
+     A scene, a renderer or an engine module never holds a client.
+  e. Remove the proposed direct write to oracle_readings. That table is
+     written only by the Oracle edge function with the service role.
+     server/oracle/schema.sql gives app users one policy, "read own oracle
+     readings", and on purpose no insert, update or delete policy, so a client
+     write is refused by row level security, and the daily limit counts those
+     rows, so a reader who could write them could defeat it. A reading reaches
+     the page through oracleRead() in incommon-cloud.js and is kept on the
+     device by oracleKeep(). If the document needs a reading in the engine,
+     it takes it from the application, never from the database.
+  f. No dash of any kind (CLAUDE.md "Zero em dash"), "astral body" in prose,
+     and no "bodygraph" in a heading (check-competitor-surface.js walks docs/).
+
+TASK 2. MAKE IT CHECKABLE
+Every file, function and table the document names exists: list each name
+with the grep that found it in the pull request. A name that is only proposed
+is marked "proposed" in the document itself.
+
+FILES THIS ASSIGNMENT OWNS
+  docs/WEBGL_ENGINE.md only. No code changes; anything the document finds
+  wrong in the code is a request to the owning task force.
+
+DONE MEANS
+  The document matches the implemented architecture, every name in it
+  resolves, the direct write is gone, check-competitor-surface.js and the
+  dash sweep pass, and the secondary has reviewed the range on Task Force 6's
+  standing pull request.

@@ -5,7 +5,7 @@ Status:          READY (approved by the owner, 27 October 2026).
                  has merged.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 5 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 05-performance.md, CLAUDE.md,
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  assignment 3.2 (Tasks 4 and 5)
 
 THE OUTCOME

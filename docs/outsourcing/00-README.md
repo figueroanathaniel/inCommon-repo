@@ -1,7 +1,9 @@
 # inCommon outsourcing: index, shared rules, ownership
 
-Six workstreams run in parallel on figueroanathaniel/inCommon-repo.
-Every agent reads THIS FILE first, then its own brief.
+Six workstreams run in parallel on figueroanathaniel/inCommon-repo, each as a
+task force with its own branch and folder (`task-forces/`). Every agent reads
+THIS FILE first, then its task force's CHARTER.md and brief.md. What comes
+next across all six is `PROGRAMME.md`.
 
 ## The roster
 
@@ -13,11 +15,11 @@ these docs" at the end.
 | # | Workstream | Primary | Secondary | Tertiary | Brief |
 |---|---|---|---|---|---|
 | 1 | Data Mapping & Schema Architecture | Claude Opus 5.5 | Gemini Argon 4 | Free Perplexity | task-forces/01-data-schema/brief.md |
-| 2 | Security Hardening & RLS | Claude Opus 5.5 | Claude Opus 5.5 (separate session) | Meta AI | 02-security-rls.md |
-| 3 | Refactoring & Feature Additions | DeepSeek V4.0 Flash | Kimi K3 | Nemotron 3.5 Lightening | 03-refactor-features.md |
-| 4 | Interactive Visuals (WebGL / three.js) | GPT Sol 6.1 | Haiku 5.5 | Nemotron 3.5 Lightening | 04-visuals-webgl.md |
-| 5 | Load Time & Performance Tuning | MiMo v2.6 Flash Slow | DeepSeek V4.1 Flash Bot | none | 05-performance.md |
-| 6 | QA, Unit Testing & Documentation | Nemotron 3.5 Lightening | Haiku 5.5 | Free Gemini / WhatsApp Bot | 06-qa-tests-docs.md |
+| 2 | Security Hardening & RLS | Claude Opus 5.5 | Claude Opus 5.5 (separate session) | Meta AI | task-forces/02-security-rls/brief.md |
+| 3 | Refactoring & Feature Additions | DeepSeek V4.0 Flash | Kimi K3 | Nemotron 3.5 Lightening | task-forces/03-refactor-features/brief.md |
+| 4 | Interactive Visuals (WebGL / three.js) | GPT Sol 6.1 | Haiku 5.5 | Nemotron 3.5 Lightening | task-forces/04-visuals-webgl/brief.md |
+| 5 | Load Time & Performance Tuning | MiMo v2.6 Flash Slow | DeepSeek V4.1 Flash Bot | none | task-forces/05-performance/brief.md |
+| 6 | QA, Unit Testing & Documentation | Nemotron 3.5 Lightening | Haiku 5.5 | Free Gemini / WhatsApp Bot | task-forces/06-qa-tests-docs/brief.md |
 
 ### What each agent can do
 
@@ -65,18 +67,19 @@ from 27 October 2026. Measure again before relying on one.
 ## Assignments and their status
 
 A brief says how a workstream works; an assignment says what to do next.
-Assignments live in `assignments/`, one plain text file each, numbered
-`<workstream>.<round>` (1.1 is workstream 1's first). Each file carries its
-own status line, and this board mirrors it.
+Assignments live in each task force's folder, one plain text file each,
+numbered `<workstream>.<round>` (1.1 is workstream 1's first). Each file
+carries its own status line; the task force's CHARTER.md keeps the status and
+the delivery record, and this board mirrors the status.
 
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
-| 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 open |
-| 2 | assignments/02-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
-| 3 | assignments/03-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
-| 4 | assignments/04-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
-| 5 | assignments/05-performance-first-assignment.txt (5.1) | READY | in its brief, "Secondary and tertiary" | READY | reviewing |
-| 6 | assignments/06-qa-first-assignment.txt (6.1) | READY | in its brief, "Secondary and tertiary" | READY | running |
+| 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 merged |
+| 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
+| 3 | task-forces/03-refactor-features/3.1-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
+| 4 | task-forces/04-visuals-webgl/4.1-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
+| 5 | task-forces/05-performance/5.1-performance-first-assignment.txt (5.1) | READY | in its brief, "Secondary and tertiary" | READY | reviewing |
+| 6 | task-forces/06-qa-tests-docs/6.1-qa-first-assignment.txt (6.1) | READY | in its brief, "Secondary and tertiary" | READY | running |
 
 ### Round 2: the Human Design upgrade
 
@@ -85,30 +88,31 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 
 | # | Assignment | Status | Can start |
 |---|---|---|---|
-| 3 | assignments/03-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
-| 6 | assignments/06-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
+| 3 | task-forces/03-refactor-features/3.2-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
+| 6 | task-forces/06-qa-tests-docs/6.2-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
 | 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | now |
-| 2 | assignments/02-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
-| 4 | assignments/04-visuals-hd-assignment.txt (4.2) | READY | after the graphics update (4.1) merges |
-| 5 | assignments/05-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
+| 2 | task-forces/02-security-rls/2.2-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
+| 4 | task-forces/04-visuals-webgl/4.2-visuals-hd-assignment.txt (4.2) | READY | after the graphics update (4.1) merges |
+| 5 | task-forces/05-performance/5.2-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
 
 Their secondaries and tertiaries work as each brief's "Secondary and
 tertiary" section says, with the additions written into each assignment.
 
 ### Task forces
 
-From 28 October 2026 each workstream becomes a task force with its own
-branch and its own folder under `task-forces/`, holding its charter, its
-brief and every assignment. `task-forces/README.md` is the shape and the
-list. Task Force 1 (workstream 1) is the first; workstreams 2 to 6 keep the
-layout above until the owner stands theirs up. A task force's charter keeps
-its own status table, and the rows here mirror it.
+From 28 October 2026 each workstream is a task force with its own branch
+and its own folder under `task-forces/`, holding its charter, its brief and
+every assignment. `task-forces/README.md` is the shape and the list. A task
+force's charter keeps its own status and delivery table, and the rows here
+mirror the status.
 
 | # | Seat | Assignment | Status |
 |---|---|---|---|
 | 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | READY |
 | 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | READY |
 | 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | READY |
+| 6 | Primary | task-forces/06-qa-tests-docs/6.3-integration-validation-assignment.txt (6.3) | AWAITING OWNER APPROVAL |
+| 6 | Primary | task-forces/06-qa-tests-docs/6.4-webgl-engine-doc-assignment.txt (6.4) | AWAITING OWNER APPROVAL |
 
 1.3 is the Human Design logic map, asked for by the owner on 28 October
 2026: research, reconcile and map the Human Design logic end to end, keep the
@@ -116,7 +120,8 @@ schema definitions as an Obsidian vault (data-contracts/hd-vault/), and
 cross verify the positions through the tertiary.
 
 1.3 can start now, beside 1.2: its Chart address note is what 1.2's notes
-attach to.
+attach to. 6.3 and 6.4 are priorities 9 and 1 on `PROGRAMME.md`; their
+secondaries and tertiaries work as brief 6's "Secondary and tertiary" says.
 
 The statuses are DRAFT, AWAITING OWNER APPROVAL, READY (approved and safe
 to hand over), ISSUED (handed to the agent) and DONE. The helper
@@ -211,9 +216,9 @@ tokens each, app/cover.html about 31k, app/incommon-cloud.js about 24k.
    too small (see "Working inside a context limit"). It is long because every
    rule in it was paid for. Where this file and CLAUDE.md disagree, CLAUDE.md
    wins, and you say so in your pull request.
-2. Never commit to main. Work on your own branch from current main:
-   schema/..., security/..., feature/..., visuals/..., perf/..., qa/...
-   One pull request per piece of work.
+2. Never commit to main. Work on your task force's branch
+   (`taskforce/<nn>-<slug>`, named in its CHARTER.md), under its standing
+   pull request, as "How work moves on the branch" in the charter says.
 3. Never put a secret in the repository or in a chat: no service role key,
    Stripe key, webhook secret, model API key or password. Secrets live in the
    Supabase, Stripe and Netlify dashboards. The Supabase anon key and the
@@ -333,19 +338,20 @@ replace its paragraph in the brief with one line saying no one holds the
 seat. To add a fourth kind of help, add a column to the roster and a
 paragraph to the brief; do not add a second roster.
 
-**Add a workstream.** Copy the shape of an existing brief: a title, a line
-saying the agents are named in the roster, "What exists today", the work,
-the files it owns, and "Secondary and tertiary". Number it 07 and onward,
-add its row to the roster, add its files to "Who owns which files", and
-place it in "Merge order". Retiring a workstream is the reverse; keep its
+**Add a workstream.** Stand it up as a task force (`task-forces/README.md`,
+"Standing up the next task force"): a folder with a charter and a brief in
+the shape of the others (a title, a line saying the agents are named in the
+roster, "What exists today", the work, the files it owns, and "Secondary and
+tertiary"). Number it 07 and onward, add its row to the roster, add its
+files to "Who owns which files", and place it in "Merge order". Retiring a workstream is the reverse; keep its
 number unused rather than renumbering the others, because pull requests and
 commits refer to briefs by number.
 
-**Issue a new assignment.** Copy the shape of an existing one in
-`assignments/`: the number, a status line, the commit it was written
+**Issue a new assignment.** Copy the shape of an existing one in the task
+force's folder: the number, a status line, the commit it was written
 against, who (by role), what to read, the tasks, hard rules and "Done
-means". Name it like the others, workstream number, workstream and round
-(`01-schema-second-assignment.txt`), add its row to
+means". Name it like the others, `<workstream>.<round>-<topic>.txt`
+(`1.4-schema-something-assignment.txt`), add its row to the charter and to
 "Assignments and their status" at DRAFT, and move it to READY only once the
 owner has approved it. An assignment that names a security weakness not yet
 fixed stays out of the repository.
@@ -383,3 +389,8 @@ doc here rather than working around the difference.
   substitution on the owner's approval.
 - 28 October 2026: assignment 1.3 approved by the owner, all three files
   READY.
+- 28 October 2026: every workstream is a task force. Briefs 2 to 6 and
+  their assignments moved into task-forces/<nn>-<slug>/ with a charter
+  each, assignments/ retired, rule 2 points at the task force branches,
+  PROGRAMME.md holds the owner's nine priorities, and 6.3 and 6.4 were
+  drafted for priorities 9 and 1.

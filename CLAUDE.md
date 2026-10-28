@@ -6735,7 +6735,7 @@ any file. A broken script tag is invisible in a screenshot.
 Six workstreams are delegated to other agents (schema, security, features,
 visuals, performance, QA), and `docs/outsourcing/` holds the briefs: `00-README.md`
 is the index, the shared rules, the file ownership table and the merge order,
-and `01` to `06` are one brief per workstream. **The roster in `00-README.md`
+and each task force folder holds one brief per workstream. **The roster in `00-README.md`
 is the only place an agent is named**, and "Current values" there is the only
 place a moving fact (the deploy folder, the last green commit, merged pull
 requests) is written out; the briefs refer to both by name. So reassigning a
@@ -6744,14 +6744,17 @@ docs" at the end of the README says how to make every other kind of change
 without spreading names and numbers back into the briefs. Where a brief and
 this file disagree, this file wins, and the brief is the one corrected.
 
-**Each workstream becomes a task force** (the owner, 28 October 2026): one
-branch and one folder, `docs/outsourcing/task-forces/<nn>-<slug>/`, holding
-its charter, its brief and every assignment, with everything for that
-delegation committed to that branch. `task-forces/README.md` is the shape and
-the list. Task Force 1, Data Mapping & Schema Architecture, is the first, so
-its brief is `task-forces/01-data-schema/brief.md` now; workstreams 2 to 6
-keep `02` to `06` and `assignments/` until theirs is stood up. A seat changes
-only with the owner's approval, in the roster and the charter's History.
+**Each workstream is a task force** (the owner, 28 October 2026): one
+branch, `taskforce/<nn>-<slug>`, and one folder,
+`docs/outsourcing/task-forces/<nn>-<slug>/`, holding its charter, its brief
+and every assignment, with everything for that delegation committed to that
+branch under one standing pull request. All six were stood up that day, so
+every brief is `task-forces/<nn>-<slug>/brief.md` and `assignments/` is
+gone. `task-forces/README.md` is the shape and the list, and
+`docs/outsourcing/PROGRAMME.md` is the owner's order of work across them. A
+seat changes only with the owner's approval, in the roster and the charter's
+History, and an assignment's approval and its delivery to the seats are
+recorded separately.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the

@@ -6,6 +6,8 @@ Reads:     01-competitive-study.txt (the why), docs/outsourcing/00-README.md
            (the rules every agent follows, the roster, the helpers)
 Status:    APPROVED by the owner, 27 October 2026. All six assignments are
            READY; each becomes ISSUED when the owner hands it to its agent.
+Moved:     since 28 October 2026 the assignment files named here live in
+           docs/outsourcing/task-forces/<nn>-<slug>/, numbered <ws>.<round>.
 
 
 1. HOW A TASK IS DELEGATED

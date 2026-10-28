@@ -2,7 +2,7 @@ ASSIGNMENT 4.1   Workstream 4: Interactive Visuals (WebGL / three.js)
 Status:          READY
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 4 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 04-visuals-webgl.md, CLAUDE.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 WHERE YOU STAND
 Merged: #92 (scene teardown), #93 (bloom release, ladder gaps), #97 (globe
