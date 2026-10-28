@@ -12,7 +12,7 @@ these docs" at the end.
 
 | # | Workstream | Primary | Secondary | Tertiary | Brief |
 |---|---|---|---|---|---|
-| 1 | Data Mapping & Schema Architecture | Claude Opus 5.5 | Gemini Argon 4 | Free Perplexity | 01-data-schema.md |
+| 1 | Data Mapping & Schema Architecture | Claude Opus 5.5 | Gemini Argon 4 | Free Perplexity | task-forces/01-data-schema/brief.md |
 | 2 | Security Hardening & RLS | Claude Opus 5.5 | Claude Opus 5.5 (separate session) | Meta AI | 02-security-rls.md |
 | 3 | Refactoring & Feature Additions | DeepSeek V4.0 Flash | Kimi K3 | Nemotron 3.5 Lightening | 03-refactor-features.md |
 | 4 | Interactive Visuals (WebGL / three.js) | GPT Sol 6.1 | Haiku 5.5 | Nemotron 3.5 Lightening | 04-visuals-webgl.md |
@@ -71,7 +71,7 @@ own status line, and this board mirrors it.
 
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
-| 1 | assignments/01-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 open |
+| 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | READY | in its brief, "Secondary and tertiary" | READY | first round done, PR #96 open |
 | 2 | assignments/02-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
 | 3 | assignments/03-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
 | 4 | assignments/04-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
@@ -87,7 +87,7 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 |---|---|---|---|
 | 3 | assignments/03-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
 | 6 | assignments/06-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
-| 1 | assignments/01-schema-hd-assignment.txt (1.2) | READY | now |
+| 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | now |
 | 2 | assignments/02-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
 | 4 | assignments/04-visuals-hd-assignment.txt (4.2) | READY | after the graphics update (4.1) merges |
 | 5 | assignments/05-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
@@ -95,18 +95,25 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 Their secondaries and tertiaries work as each brief's "Secondary and
 tertiary" section says, with the additions written into each assignment.
 
-### Delegation 1: the Human Design logic map
+### Task forces
 
-Asked for by the owner on 28 October 2026: research, reconcile and map the
-Human Design logic end to end, keep the schema definitions as an Obsidian
-vault (data-contracts/hd-vault/), and cross verify the positions through the
-tertiary. Unlike earlier rounds, each seat has a file of its own.
+From 28 October 2026 each workstream becomes a task force with its own
+branch and its own folder under `task-forces/`, holding its charter, its
+brief and every assignment. `task-forces/README.md` is the shape and the
+list. Task Force 1 (workstream 1) is the first; workstreams 2 to 6 keep the
+layout above until the owner stands theirs up. A task force's charter keeps
+its own status table, and the rows here mirror it.
 
 | # | Seat | Assignment | Status |
 |---|---|---|---|
-| 1 | Primary | assignments/01-schema-hd-mapping-primary.txt (1.3) | DRAFT |
-| 1 | Secondary | assignments/01-schema-hd-mapping-secondary.txt | DRAFT |
-| 1 | Tertiary | assignments/01-schema-hd-mapping-tertiary.txt | DRAFT |
+| 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | DRAFT |
+| 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | DRAFT |
+| 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | DRAFT |
+
+1.3 is the Human Design logic map, asked for by the owner on 28 October
+2026: research, reconcile and map the Human Design logic end to end, keep the
+schema definitions as an Obsidian vault (data-contracts/hd-vault/), and
+cross verify the positions through the tertiary.
 
 1.3 can start now, beside 1.2: its Chart address note is what 1.2's notes
 attach to.
@@ -302,9 +309,12 @@ lands. Run every gate again after each merge.
 These files are working documents, not a contract. Change them whenever the
 plan changes, and keep them in the shape below so the next change stays
 small. Commit each change on its own branch (docs/outsourcing-<topic>) with a
-line in the change log at the end of this file.
+line in the change log at the end of this file; a change that belongs to
+one task force goes on that task force's branch instead.
 
-**Reassign a seat.** Edit the cell in "The roster". If the new agent is not
+**Reassign a seat.** Only with the owner's approval. Edit the cell in "The
+roster", and for a workstream that is a task force add a line to its
+charter's "History". If the new agent is not
 in "What each agent can do", add its row with its repo access, context and
 any limit on use. Nothing in the briefs changes, because the briefs ask what
 an agent can do rather than who it is. If the new agent is chat only, check
@@ -366,3 +376,8 @@ doc here rather than working around the difference.
 - 28 October 2026: Delegation 1 drafted, the Human Design logic map: one
   instruction file each for the primary, secondary and tertiary of
   workstream 1, at DRAFT until the owner approves them.
+- 28 October 2026: Task Force 1 constituted by the owner. Its branch is
+  dedicated to Delegation 1, and its brief and assignments 1.1 to 1.3 moved
+  into task-forces/01-data-schema/ with a charter; task-forces/README.md
+  sets the shape the other five repeat. Seats unchanged, subject to
+  substitution on the owner's approval.

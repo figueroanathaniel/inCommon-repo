@@ -6744,6 +6744,15 @@ docs" at the end of the README says how to make every other kind of change
 without spreading names and numbers back into the briefs. Where a brief and
 this file disagree, this file wins, and the brief is the one corrected.
 
+**Each workstream becomes a task force** (the owner, 28 October 2026): one
+branch and one folder, `docs/outsourcing/task-forces/<nn>-<slug>/`, holding
+its charter, its brief and every assignment, with everything for that
+delegation committed to that branch. `task-forces/README.md` is the shape and
+the list. Task Force 1, Data Mapping & Schema Architecture, is the first, so
+its brief is `task-forces/01-data-schema/brief.md` now; workstreams 2 to 6
+keep `02` to `06` and `assignments/` until theirs is stood up. A seat changes
+only with the owner's approval, in the roster and the charter's History.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,

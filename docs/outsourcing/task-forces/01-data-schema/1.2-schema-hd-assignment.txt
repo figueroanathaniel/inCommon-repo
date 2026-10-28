@@ -3,7 +3,7 @@ Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026 (PR #96 merged)
 Who:             the workstream 1 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 01-data-schema.md, CLAUDE.md,
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  data-contracts/DATA-MAP.md, docs/hd-upgrade/01 and 02
 
 THE OUTCOME

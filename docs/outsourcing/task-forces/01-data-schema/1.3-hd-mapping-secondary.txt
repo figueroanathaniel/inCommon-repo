@@ -4,11 +4,12 @@ Status:          DRAFT (written at the owner's request, 28 October 2026;
                  awaiting the owner's approval before it is ISSUED)
 Issued against:  main f9d0251, 28 October 2026
 Who:             the workstream 1 SECONDARY (named in the roster, 00-README.md)
-Reviews:         the pull request the primary opens for
-                 01-schema-hd-mapping-primary.txt (branch schema/hd-logic-map)
+Reviews:         the primary's 1.3 commits on the Task Force 1 branch
+                 (CHARTER.md), from the start sha the primary posts on the
+                 Task Force pull request to its "ready for review" sha
 Read first:      00-README.md (especially "What each role does" and
-                 "Helpers"), 01-data-schema.md, CLAUDE.md in full,
-                 01-schema-hd-mapping-primary.txt, data-contracts/DATA-MAP.md
+                 "Helpers"), CHARTER.md, brief.md, CLAUDE.md in full,
+                 1.3-hd-mapping-primary.txt, data-contracts/DATA-MAP.md
 
 YOUR JOB
 An independent second pass on the Human Design logic map. The primary
@@ -120,8 +121,9 @@ STEP 7. READY FOR 1.2
 
 STEP 8. THE GATES AND THE FILE BOUNDARY
   Run every gate in 00-README.md and node tools/check-competitor-surface.js
-  on the branch, and paste the output. Confirm the branch changes nothing in
-  app/, server/, tools/ or deploy/: "git diff --stat origin/main" should show
+  on the branch, and paste the output. Confirm 1.3 changes nothing in
+  app/, server/, tools/ or deploy/: "git diff --stat <start sha> <end sha>"
+  should show
   only data-contracts/hd-vault/, data-contracts/DATA-MAP.md, .gitignore and a
   CLAUDE.md section.
 
