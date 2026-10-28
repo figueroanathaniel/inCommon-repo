@@ -119,7 +119,7 @@ defined: Heart, Throat | open: Head, Ajna, G, Spleen, Solar Plexus, Sacral, Root
   Obstacles: Treating sleep as the reward for a finished day. | Solving, at midnight, a question that was never yours. | Keeping the hours of people with an engine you do not have.
 
 ################################################################################
-  HEAD  0d3373c10dc812a0bb1df3442406d03380e496af plus the strict fix (after)
+  HEAD  cf5459978cbbf18047e45b96787648fedd54434b (after: 0d3373c plus the strict fallback fix)
   Complete Sleep tab, built by HDTeachings.build(chart, HDAtlas, HDLife)
 ################################################################################
 
