@@ -160,7 +160,7 @@
     Sacral: {
       defined: {
         work: 'Real, renewable life force, on the condition that it is spent on work you actually responded to. Work you talked yourself into drains it instead.',
-        sleep: 'The rule the tradition is most insistent about: go to bed before you are tired, and let the last of the energy burn off lying down.',
+        sleep: 'The tradition is specific about this center: a defined Sacral goes to bed once the day\u2019s energy has been spent. Sleep is the close of the expenditure rather than the place it gets finished.',
         body: 'The body wants to be used. A day without physical effort makes for a poor night.',
         health: 'The tradition watches burnout here above all, and the specific damage of going to bed already exhausted, night after night.',
         S: 'Sustainable energy, and the capacity to work at something long after others have stopped.',
@@ -235,13 +235,13 @@
     },
     Generator: {
       work: 'Built to respond. Work you said yes to from the gut renews you; work you argued yourself into empties you, slowly and then all at once.',
-      sleep: 'Go to bed before you are tired and let the last of the day burn off lying down. The tradition repeats this more than any other instruction.',
+      sleep: 'The tradition puts sleep after the day\u2019s energy has been spent, not before it. What spends it is work the gut actually responded to, and the night follows that rather than completing it.',
       body: 'The body wants to be used every day. Satisfaction after physical work is the signal that the energy was spent correctly.',
       health: 'Frustration is the signature to watch. The tradition ties chronic frustration to work the gut never actually agreed to.'
     },
     'Manifesting Generator': {
       work: 'Response first, then speed. Skipping steps is native to this design, and the correction is usually informing people rather than slowing down.',
-      sleep: 'The same rule as the Generator, made harder by the number of things still open at the end of a day. Closing loops on paper helps the body close too.',
+      sleep: 'The same rule as the Generator, with more threads still open at the end of a day. The tradition still puts sleep after the spending, and putting the open loops on paper lets the body settle once it is down.',
       body: 'Fast, multi-directional energy. Variety in movement suits this design better than a single discipline.',
       health: 'Both frustration and anger are named here. The tradition reads them as evidence of a yes that was skipped or a person who was not informed.'
     },
@@ -300,7 +300,7 @@
       X: 'Deciding at the peak, or at the bottom, and calling either one certainty.' },
     { match: 'sacral',
       work: 'The gut answers before the mind does, in sound rather than in words. The task is to hear it and not to translate it away.',
-      sleep: 'Go to bed before the energy runs out, so the last of it discharges lying down.',
+      sleep: 'The center and the authority agree on this: the tradition puts sleep after the energy has been spent, not before it. A Sacral yes is a yes to spending the energy, and the night closes that rather than finishing it.',
       body: 'The body says yes and no to food the same way it says yes and no to work. It is worth listening at the table.',
       health: 'The tradition ties burnout here to a life of yeses the gut never gave.',
       S: 'An immediate and reliable answer, available in the moment.',

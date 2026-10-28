@@ -267,7 +267,9 @@
 
     var CLOSE = {
       work: 'So the whole of it comes to one question, asked before anything is agreed to: was this responded to, or was this reasoned into? Answer honestly and act on the answer. The tradition promises nothing more dramatic than that the answer, kept for long enough, changes what a working life feels like from the inside.',
-      sleep: 'Take one thing from this and let the rest wait. Get horizontal before you are finished, and let the end of the day happen lying down rather than sitting up. It is a small instruction and the one the tradition repeats most, which is usually a sign that it was hard-won.',
+      sleep: c.defined.indexOf('Sacral') !== -1
+        ? 'Take one thing from this and let the rest wait. The tradition puts sleep after the day\u2019s energy has been spent, not before it, so the practice is knowing whether the day was actually used before asking the night to finish it. It is the instruction it returns to most for a defined Sacral, and usually the one that was hardest won.'
+        : 'Take one thing from this and let the rest wait. The tradition asks a design without a defined Sacral to take a horizontal position long before sleep, and to let the end of the day happen lying down rather than sitting up. That is the instruction it returns to most for these designs, and usually the one that was hardest won.',
       body: 'The teaching ends where it began. No food is named and no regimen is given, because the tradition holds that your body already answers these questions and has simply not been asked in a way it can hear. Ask once, quietly, before the thinking starts. Then do what it said.',
       health: 'Close this with the caution it opened with. None of this diagnoses anything, none of it should displace a doctor, and none of it is a reason to delay care. What it offers is a place to look and a vocabulary for what you find there. Bring what you notice to someone qualified to interpret it.'
     };
@@ -381,9 +383,9 @@
       C: [['def:Head', 'Mental pressure does not switch off because the day ended.'],
           ['open:Head', 'The evening racing mind is usually the day\u2019s borrowed questions.'],
           ['def:Root', 'Adrenal pressure keeps running after everything else has stopped.'],
-          ['gen', 'Going to bed already exhausted, night after night.'],
+          ['gen', 'A day spent on things the gut never agreed to, and a night spent with the engine still running.'],
           ['open:Sacral', 'Needing more rest than the people around you, and arguing with it.']],
-      O: [['gen', 'Lying down before you are finished, and letting the last of it burn off there.'],
+      O: [          ['gen', 'Ending the day with the energy spent on something the gut said yes to, so sleep arrives on its own.'],
           ['def:Head', 'Emptying the questions onto paper before the light goes out.'],
           ['open:Solar Plexus', 'A real transition after an absorbing day, rather than a screen.'],
           ['type:Reflector', 'Sleeping alone in your own space, which the tradition asks for directly.'],

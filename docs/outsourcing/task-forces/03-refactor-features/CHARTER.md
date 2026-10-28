@@ -95,3 +95,6 @@ were approved; from 28 October 2026 that work is committed here.
   declares on its pull request. E14: the proof dump is workstream 6's
   tools/dump-render-vals.js.
 - 28 October 2026: #118 opened as the standing pull request.
+- 28 October 2026: 3.2 Task 1, the sleep teaching, worked on this branch
+  from 5977935. Its record is `3.2-task1-sleep-record.md`; it stays marked
+  "needs Human Design review".
