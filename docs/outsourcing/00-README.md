@@ -111,8 +111,8 @@ mirror the status.
 | 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | READY |
 | 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | READY |
 | 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | READY |
-| 6 | Primary | task-forces/06-qa-tests-docs/6.3-integration-validation-assignment.txt (6.3) | AWAITING OWNER APPROVAL |
-| 6 | Primary | task-forces/06-qa-tests-docs/6.4-webgl-engine-doc-assignment.txt (6.4) | AWAITING OWNER APPROVAL |
+| 6 | Primary | task-forces/06-qa-tests-docs/6.3-integration-validation-assignment.txt (6.3) | READY |
+| 6 | Primary | task-forces/06-qa-tests-docs/6.4-webgl-engine-doc-assignment.txt (6.4) | READY |
 
 1.3 is the Human Design logic map, asked for by the owner on 28 October
 2026: research, reconcile and map the Human Design logic end to end, keep the
@@ -394,3 +394,6 @@ doc here rather than working around the difference.
   each, assignments/ retired, rule 2 points at the task force branches,
   PROGRAMME.md holds the owner's nine priorities, and 6.3 and 6.4 were
   drafted for priorities 9 and 1.
+- 28 October 2026: 6.3 and 6.4 approved by the owner, READY.
+  docs/WEBGL_ENGINE.md drafted from the code on the Task Force 6 branch,
+  for review by the workstream 4 secondary.

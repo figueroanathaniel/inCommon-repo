@@ -1,6 +1,6 @@
 ASSIGNMENT 6.3   Workstream 6: QA, Unit Testing & Documentation
 Programme:       Programme board, priority 9 (docs/outsourcing/PROGRAMME.md)
-Status:          AWAITING OWNER APPROVAL (written 28 October 2026)
+Status:          READY (approved by the owner 28 October 2026)
 Issued against:  main d9ea6ab, 28 October 2026
 Who:             the workstream 6 primary (named in the roster, 00-README.md)
 Read first:      00-README.md (especially "Helpers" and "The gates"),

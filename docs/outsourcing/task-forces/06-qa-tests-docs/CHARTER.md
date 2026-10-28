@@ -46,8 +46,8 @@ Its final documentation pass merges last, after every other task force (Merge or
 | `brief.md` | how the workstream works (was `docs/outsourcing/06-qa-tests-docs.md`) | approved | |
 | `6.1-qa-first-assignment.txt` | round 1: one command for every gate, CI for the gates that need no browser, the coverage table | READY | not recorded |
 | `6.2-qa-hd-assignment.txt` | reference charts, honesty rows as 3.2 lands, the benchmark protocol | READY | not recorded |
-| `6.3-integration-validation-assignment.txt` | programme priority 9: each integrated change validated on main, browser and H gates included, device gaps recorded | AWAITING OWNER APPROVAL | not recorded |
-| `6.4-webgl-engine-doc-assignment.txt` | programme priority 1: correct WEBGL_ENGINE.md against the built architecture | AWAITING OWNER APPROVAL (blocked: the file is not in the repository) | not recorded |
+| `6.3-integration-validation-assignment.txt` | programme priority 9: each integrated change validated on main, browser and H gates included, device gaps recorded | READY | not recorded |
+| `6.4-webgl-engine-doc-assignment.txt` | programme priority 1: `docs/WEBGL_ENGINE.md`, drafted from the code, held to the built architecture and reviewed by the workstream 4 secondary | READY | not recorded |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
@@ -85,3 +85,7 @@ were approved; from 28 October 2026 that work is committed here.
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
 - 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and #115 opened as the standing pull request.
+- 28 October 2026: 6.3 and 6.4 approved by the owner, READY. WEBGL_ENGINE.md
+  had never been committed, so by the owner's choice the primary drafted
+  `docs/WEBGL_ENGINE.md` from the code with the corrections built in; the
+  workstream 4 secondary reviews it.
