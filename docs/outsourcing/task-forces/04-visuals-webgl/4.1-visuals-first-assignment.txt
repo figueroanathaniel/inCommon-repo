@@ -2,15 +2,15 @@ ASSIGNMENT 4.1   Workstream 4: Interactive Visuals (WebGL / three.js)
 Status:          READY
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 4 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E8, E9, E10 and E11
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 
 WHERE YOU STAND
 Merged: #92 (scene teardown), #93 (bloom release, ladder gaps), #97 (globe
-frame math). Unmerged:
-  - PR #95 (visuals/interactive-20261026), closed by you: fresh quality
-    samples per visit, idle frames break the late streak, Cycle Audit's
-    shared geometries released. Closed only because the browser gates could
-    not run on your machine.
+frame math), and #101, which carried #95's changes (fresh quality samples
+per visit, idle frames break the late streak, Cycle Audit's shared
+geometries released) onto main. Unmerged:
   - PR #64 (claude/scene-first-load), from 20 October, 166 commits behind:
     fonts.load() for label faces and compileAsync before the first frame.
     Part of it may already be covered by #92.
@@ -18,30 +18,37 @@ The large graphics update you are preparing is the main work. These are
 the rules for landing it alongside five other workstreams.
 
 TASK 1. LAND THE GRAPHICS UPDATE IN REVIEWABLE PIECES
-  1. Base it on current main (c259e80 or later). Rebase, do not merge main in.
-  2. Split it into pull requests of one concern each (one scene, the cover,
-     the ladder, shared helpers), each passing every README gate on its own.
-     Name the merge order between them in the first PR's description.
-  3. You own the scene files, the cover's renderer and shaders, and
+  1. Base it on current main, on the Task Force 4 branch (CHARTER.md),
+     commits prefixed "4.1:". Rebase, do not merge main in.
+  2. Split it into pieces of one concern each (one scene, the cover, the
+     ladder, shared helpers), each passing every README gate on its own and
+     each posted for review as its own range on the Task Force pull
+     request.
+  3. DECLARE IT. Other task forces wait on "the graphics update" (2.1's
+     heads-up, 3.1 Task 2, 4.2, 5.1's baseline B, 6.1's sweeps), so it needs
+     an edge. Before the first piece, post on the Task Force pull request
+     the list of pieces that make it up and their order. When the last has
+     merged into main, post "the graphics update has merged" there. That
+     post is the signal everyone else waits for; nothing outside the list
+     is part of it.
+  4. You own the scene files, the cover's renderer and shaders, and
      check-three-lifecycle.js. In the app file, you may edit the code that
      mounts, sizes, shows and tears down a stage. Anything else in the app
      file is workstream 3's: describe it in your PR instead.
-  4. Every new GPU resource gets a matching release and a
+  5. Every new GPU resource gets a matching release and a
      check-three-lifecycle.js row, and the row is shown failing with the
      release removed.
-  5. The 3D stages sit inside the phone's swipeable pages. Run
-     tools/drive-swipe.js and tools/drive-routes.js on every PR, and do not
+  6. The 3D stages sit inside the phone's swipeable pages. Run
+     tools/drive-swipe.js and tools/drive-routes.js on every piece, and do not
      change vtBindTouch, vtHScrollableAt or the [data-chart] exemption.
-  6. Run "node tools/drift-check.js --force --with-h". If your machine has no
-     browser, say so in the PR and ask for the run by the agent named in
-     your brief's helper section; never mark a browser gate as passed that
-     did not run.
+  7. Run "node tools/drift-check.js --force --with-h". If your machine has no
+     browser, say so on the pull request and ask for the run by the agent
+     named in your brief's helper section; never mark a browser gate as
+     passed that did not run.
 
-TASK 2. RESOLVE #95 AND #64
-  a. #95: rebase visuals/interactive-20261026 onto main, get the browser
-     gates run (yours or the helper's), and reopen it, or fold its changes
-     into the graphics update and say so on #95.
-  b. #64: compare it against #92. Port what #92 does not already do into
+TASK 2. RESOLVE #64
+  (#95 is resolved: its changes reached main through #101.)
+  #64: compare it against #92. Port what #92 does not already do into
      the graphics update, then ask the owner to close #64 with a comment
      naming where each part went.
 
@@ -68,7 +75,8 @@ HARD RULES (in addition to the README's)
     (CLAUDE.md, group H); H2's pixel readback is.
 
 DONE MEANS
-  The graphics update merged in pieces, each green on every README gate
-  including H; #95 and #64 resolved; 3a and 3b merged with their rows. Each
-  PR shows before and after frame times at 390x844 with the CPU slowed 4x,
-  the settled ladder rung, and a screenshot at the bottom rung.
+  The graphics update declared, merged in pieces, each green on every README
+  gate including H, and its end posted; #64 resolved; 3a and 3b merged with
+  their rows. Each piece shows before and after frame times at 390x844 with
+  the CPU slowed 4x, the settled ladder rung, and a screenshot at the bottom
+  rung.

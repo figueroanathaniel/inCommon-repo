@@ -1,12 +1,19 @@
 ASSIGNMENT 4.2   Workstream 4: Interactive Visuals (WebGL / three.js)
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026).
-                 Queued: starts after the graphics update in assignment
-                 4.1 has merged.
+                 Queued: starts once 4.1 posts "the graphics update has
+                 merged" on the Task Force 4 pull request.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 4 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E10, E11 and E14
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  docs/hd-upgrade/01-competitive-study.txt (Pillar C)
+
+WHERE THIS SITS
+Commits prefixed "4.2:" on the Task Force 4 branch (CHARTER.md). Where a
+change must leave every other screen's values alone, show it with
+tools/dump-render-vals.js (6.1 Task 5).
 
 THE OUTCOME
 The chart is the study workspace: whatever the reader selects on the chart
