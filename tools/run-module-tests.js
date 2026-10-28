@@ -3131,6 +3131,16 @@ async function runCloudTests() {
     LIFE.CENTERS.Sacral.open.sleep,
     'You need more rest than the people around you, and often need to lie down before they do. That is not a weakness to be trained out.');
 
+  /* The health note carried the same reversal as the sleep entries: it called
+     going to bed already exhausted the damage, which is the correct order for a
+     design with a defined Sacral. It names the unspent day now, in the same
+     terms as the sleep entry beside it. */
+  t('H5', 'the Sacral health note no longer calls going to bed exhausted the damage, and names the unspent energy its sleep entry describes',
+    [/already exhausted/.test(LIFE.CENTERS.Sacral.defined.health),
+     /energy still running/.test(LIFE.CENTERS.Sacral.defined.health),
+     /nothing the gut agreed to spent it/.test(LIFE.CENTERS.Sacral.defined.health)],
+    [false, true, true]);
+
   const CENTERS = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Solar Plexus', 'Sacral', 'Root'];
   const CHANNELS = Object.keys(ATLAS.CHANNELS);
   const chart = o => {
