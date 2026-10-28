@@ -1,0 +1,71 @@
+ASSIGNMENT 4.3   Workstream 4: Interactive Visuals (WebGL / three.js)
+Programme:       Programme board, priority 1 (docs/outsourcing/PROGRAMME.md)
+Status:          READY (approved by the owner as efficiency edit E16,
+                 28 October 2026)
+Issued against:  main fabaef3, 28 October 2026
+Who:             the workstream 4 primary (named in the roster, 00-README.md)
+Reviewed by:     the workstream 6 secondary
+Comes from:      6.4, moved here because this task force owns the 3D engine
+                 code. 6.4 is retired under that number.
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md (the 3D
+                 sections named under TASK 1), docs/WEBGL_ENGINE.md
+
+THE OUTCOME
+docs/WEBGL_ENGINE.md describes the 3D engine as it is built, proposes nothing
+the architecture forbids, and stays true as the graphics update lands.
+
+WHERE IT STANDS
+No earlier WEBGL_ENGINE.md was ever committed. By the owner's choice of 28
+October 2026 a draft was written from the code and CLAUDE.md with the
+owner's corrections built in, and it reached main in #115 (commit a9784b0).
+It has not been reviewed. From now on the file is this task force's
+(00-README.md, "Who owns which files").
+
+WHERE THIS SITS
+Commits prefixed "4.3:" on the Task Force 4 branch (CHARTER.md). Post "4.3
+starts at <sha>" before the first and "4.3 ready for review" with the range.
+
+TASK 1. HOLD THE DRAFT TO THE CODE (each correction its own commit)
+Check every claim against the files, not against memory. At least:
+  a. The deploy folder is written deploy/<current>/, the value under
+     "Current values" in 00-README.md; the literal folder appears only where
+     it records a measurement taken against it.
+  b. Each module is named by its own file: app/chart-scene.js (ChartScene),
+     app/hd-scene.js (HDScene), app/cycle-scene.js (CycleScene),
+     app/body-globes.js (BodyGlobes), app/flight.js (Flight).
+  c. The scenes compute nothing. Each draws a model the application builds
+     from the same calculation the 2D view reads: _csModel from placedRows,
+     natalAspects() and CAT_COLOR; _hsModel from hdChart(); the Cycle Audit
+     from cycleSceneModel(). The one position a scene asks for itself comes
+     through the app's own lonOf() or cyLon() (opts.lonAt). CLAUDE.md: "The
+     natal chart is drawn three ways", "The wiring is drawn three ways",
+     "The Cycle Audit is drawn four ways".
+  d. Nothing in the browser talks to Supabase except app/incommon-cloud.js;
+     no scene, renderer or engine module holds a client.
+  e. There is no client write to oracle_readings, and none is proposed. That
+     table is written only by the Oracle edge function with the service
+     role; server/oracle/schema.sql gives app users the one select policy
+     "read own oracle readings". A reading reaches the page through
+     oracleRead() and is kept on the device by oracleKeep().
+  f. No dash of any kind, "astral body" in prose, no "bodygraph" in a
+     heading (check-competitor-surface.js walks docs/).
+
+TASK 2. KEEP IT CHECKABLE
+The document ends with "Checking the names": every name it uses, with its
+file and the fixed string that finds it. Run that block and the absence grep
+under it, paste both outputs on the pull request, and add a line for every
+name a correction brings in. A name that is only proposed is marked
+"proposed" in the document itself.
+
+TASK 3. KEEP IT TRUE
+Every piece of the graphics update (4.1) that renames, adds or removes
+anything the document names changes the document in the same piece.
+
+FILES THIS ASSIGNMENT OWNS
+  docs/WEBGL_ENGINE.md.
+
+DONE MEANS
+  Every claim checked and corrected where wrong, every name resolving, the
+  outputs of both checks on the pull request, check-competitor-surface.js
+  and the dash sweep passing, and the workstream 6 secondary's review ending
+  "ready to merge".

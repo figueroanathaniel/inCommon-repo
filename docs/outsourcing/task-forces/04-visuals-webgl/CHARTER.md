@@ -46,8 +46,9 @@ Every change here also runs `node tools/drift-check.js --force --with-h`.
 |---|---|---|---|
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/04-visuals-webgl.md`) | approved | |
-| `4.1-visuals-first-assignment.txt` | round 1: land the graphics update in reviewable pieces, resolve #95 and #64, two latency findings | READY | not recorded |
-| `4.2-visuals-hd-assignment.txt` | the chart as a study workspace: selection kept across views, readings lit on the chart, the readable view one tap away, a text alternative for every graphic | READY (starts after 4.1's graphics update merges) | not recorded |
+| `4.1-visuals-first-assignment.txt` | round 1: declare and land the graphics update in reviewable pieces, resolve #64, two latency findings | READY | not recorded |
+| `4.2-visuals-hd-assignment.txt` | the chart as a study workspace: selection kept across views, readings lit on the chart, the readable view one tap away, a text alternative for every graphic | READY (starts when 4.1 posts that the graphics update has merged) | not recorded |
+| `4.3-webgl-engine-doc-assignment.txt` | programme priority 1: hold `docs/WEBGL_ENGINE.md` to the code and keep it true; moved here from 6.4 | READY | not recorded |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
@@ -57,7 +58,7 @@ owner". An assignment is ISSUED only once its primary has it. The board in
 `00-README.md` mirrors this table.
 
 Work this task force produces lives where its brief puts it, not in this
-folder: the cover's renderer and shaders, the ring, `app/chart-scene.js`, `cycle-scene.js`, `hd-scene.js`, `body-globes.js`, `flight.js` and `tools/check-three-lifecycle.js`. This folder holds the instructions and the record.
+folder: the cover's renderer and shaders, the ring, `app/chart-scene.js`, `cycle-scene.js`, `hd-scene.js`, `body-globes.js`, `flight.js`, `tools/check-three-lifecycle.js` and `docs/WEBGL_ENGINE.md`. This folder holds the instructions and the record.
 
 ## How work moves on the branch
 
@@ -85,3 +86,11 @@ were approved; from 28 October 2026 that work is committed here.
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
 - 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and #113 opened as the standing pull request.
+- 28 October 2026: #113 merged into main by the owner. The branch restarted
+  from main under the same name.
+- 28 October 2026: efficiency edits approved by the owner. E8: #95 is
+  resolved, its changes reached main through #101. E10: 4.1 and 4.2 commit
+  on this branch. E11: 4.1 declares the graphics update's pieces and posts
+  when the last has merged; that post is what everyone else waits for. E14:
+  4.2 uses workstream 6's dump tool. E16: 6.4 moves here as 4.3, and
+  `docs/WEBGL_ENGINE.md` is this task force's, reviewed by workstream 6.
