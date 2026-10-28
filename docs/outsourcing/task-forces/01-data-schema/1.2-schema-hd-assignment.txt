@@ -3,6 +3,7 @@ Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026 (PR #96 merged)
 Who:             the workstream 1 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edit E10 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  data-contracts/DATA-MAP.md, docs/hd-upgrade/01 and 02
 
@@ -11,7 +12,8 @@ A data model, agreed before any screen is built, for what a serious Human
 Design student and a practitioner keep: notes on parts of a chart, versions of
 a chart, charts of other people, and the files that move charts in and out.
 
-TASK 1. THE MODEL (branch schema/hd-study-model; documents first)
+TASK 1. THE MODEL (documents first; commits prefixed "1.2:" on the Task
+  Force 1 branch, CHARTER.md)
   data-contracts/HD-STUDY-MODEL.md, covering:
   a. Notes: a note attached to an address in a chart (a gate, a channel, a
      centre, a line, an activation), with the chart's identity, the text,
@@ -33,7 +35,7 @@ TASK 1. THE MODEL (branch schema/hd-study-model; documents first)
 
 TASK 2. AFTER THE OWNER AGREES THE MODEL
   Migrations and the client side storage, in the order the model names,
-  one PR each, each tested on the local Postgres with the stubbed auth
+  one commit series each, prefixed "1.2:", on the Task Force 1 branch, each tested on the local Postgres with the stubbed auth
   schema as before.
 
 FILES THIS ASSIGNMENT OWNS

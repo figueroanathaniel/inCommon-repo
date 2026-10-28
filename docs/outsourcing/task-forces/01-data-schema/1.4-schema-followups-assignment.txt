@@ -1,0 +1,53 @@
+ASSIGNMENT 1.4   Workstream 1: Data Mapping & Schema Architecture
+Status:          READY (approved by the owner as efficiency edit E7,
+                 28 October 2026)
+Issued against:  main fabaef3, 28 October 2026
+Who:             the workstream 1 primary (named in the roster, 00-README.md)
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
+                 data-contracts/DATA-MAP.md,
+                 data-contracts/STORAGE-MIGRATION-POLICY.md
+Comes from:      1.1 Task 4, unchanged in substance. 1.1 is DONE: PR #96
+                 (the data map, the storage schema, three migrations, the G8
+                 consent fix, K71 to K73) merged.
+
+THE OUTCOME
+The device storage gaps the data map found are closed one at a time, each
+with a migration that never strands a reader's data.
+
+WHERE THIS SITS
+Commits prefixed "1.4:" on the Task Force 1 branch (CHARTER.md). 1.3 runs
+first or beside it; nothing here touches what 1.3 maps.
+
+TASK 1. THE FOLLOW-UPS, IN THIS ORDER
+  Each under data-contracts/STORAGE-MIGRATION-POLICY.md, each its own
+  commit series:
+    a. G3  the sync map and outbox are device wide, not per account
+    b. G5  keys a deleted profile leaves behind
+    c. G6  saved people surviving profile deletion and account erasure
+    d. G7  device wide keys holding a reader's words or places
+    e. G11 a deletion path for Throughline and Oki rows
+  Before starting each one, post a two line plan on the Task Force pull
+  request: what changes on the device, and how a reader with existing data is
+  migrated.
+
+TASK 2. THE TWO DECISIONS THAT ARE THE OWNER'S
+  G2 ("Save my profile to my account" does not stop the profile syncing) and
+  G10 (device data with no cloud home) were written up for the owner in PR
+  #96. Whether the owner has decided either is not recorded. Ask on the Task
+  Force pull request before any follow-up that depends on one, and record
+  the answer in CHARTER.md's History. Do not implement either until then.
+
+G4 (account deletion leaves cast_counters and entitlements) is workstream
+2's, as 2.1 Task 2d. Nothing here edits server/account/index.ts.
+
+HARD RULES (in addition to the README's)
+  - Nothing runs against the production Supabase project. Migrations are
+    tested on a local Postgres with the stubbed auth schema.
+  - Every migration is idempotent and carries its DOWN in a comment.
+  - A key renamed or removed on the device follows the migration policy:
+    read the old key, write the new one, and never strand a reader's data.
+
+DONE MEANS
+  G3, G5, G6, G7 and G11 each merged with its migration, its plan and every
+  README gate green; G2 and G10 either decided by the owner and recorded, or
+  still listed as waiting. DATA-MAP.md updated to what is true after each.
