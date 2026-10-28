@@ -9,7 +9,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `claude/delegation-1-instructions-bhpilx` |
-| Standing pull request | the open pull request from that branch into main (number recorded under "History" below) |
+| Standing pull request | #106 (later ones recorded under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -88,4 +88,4 @@ October 2026, so it is left alone; the file is here now.
 - 28 October 2026: Task Force 1 constituted by the owner. Branch dedicated,
   this folder made, the workstream 1 brief and assignments 1.1 to 1.3 moved
   into it. Seats as in the roster, subject to substitution on the owner's
-  approval. Standing pull request opened (number added once it exists).
+  approval. Standing pull request opened: #106.
