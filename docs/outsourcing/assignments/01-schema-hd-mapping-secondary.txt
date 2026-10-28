@@ -1,0 +1,143 @@
+ASSIGNMENT 1.3, SECONDARY   Workstream 1: Data Mapping & Schema Architecture
+Programme:       Delegation 1, the Human Design logic map
+Status:          DRAFT (written at the owner's request, 28 October 2026;
+                 awaiting the owner's approval before it is ISSUED)
+Issued against:  main f9d0251, 28 October 2026
+Who:             the workstream 1 SECONDARY (named in the roster, 00-README.md)
+Reviews:         the pull request the primary opens for
+                 01-schema-hd-mapping-primary.txt (branch schema/hd-logic-map)
+Read first:      00-README.md (especially "What each role does" and
+                 "Helpers"), 01-data-schema.md, CLAUDE.md in full,
+                 01-schema-hd-mapping-primary.txt, data-contracts/DATA-MAP.md
+
+YOUR JOB
+An independent second pass on the Human Design logic map. The primary
+researched every place the app computes Human Design, wrote it up as schema
+definitions in an Obsidian vault (data-contracts/hd-vault/), reconciled the
+duplicated logic, and cross checked the positions with the tertiary. You
+decide whether that map is true to the code and complete enough for
+assignment 1.2 to build its data model on. You review; you do not push to
+the primary's branch unless you take it over (see the end).
+
+Work independently: before you read the primary's Discrepancies/ notes,
+do steps 1 to 3 below and write your own list. Then compare. A finding both
+of you reached separately is strong; one only you reached is the reason a
+second pass exists.
+
+Confirm on your first task that "node tools/drive-swipe.js" runs on your
+machine. If it does not, say so in the review and the pull request goes to
+the browser runner (Helpers, item 1). A browser gate that did not run is
+never reported as passed.
+
+
+STEP 1. COVERAGE: IS ANYTHING MISSING FROM THE MAP
+  Search the code yourself, from the commit the primary recorded:
+
+    grep -n -E "gateOf|designT|hdChart|hdGatesFor|synGatesOf|hdSkyNow|\
+HD_CHANNELS|GATE_NAMES|HD_STRATEGY|HD_DEFINITION|HD_TYPE_LIGHT|HD_AUTH_CENTRE|\
+HDTopology|HDWheel|HDTransit|HDComposite|HDCircle|HDAtlas|cycleDesign" \
+      "app/inCommonApp v2.dc.html"
+    grep -l -E "HDTopology|HDWheel|HDTransit|HDComposite|HDCircle|HDAtlas|\
+designMoment|STATE_VERSION|gateOf" app/*.js server/*/*.ts server/*/*.js
+
+  Widen the search with any name you meet along the way. Every site that
+  computes, stores, sends or reads Human Design must appear in a Pipeline/,
+  Derivations/, Schemas/ or Consumers/ note. List each one that does not.
+
+
+STEP 2. TRUTH: DOES EACH NOTE SAY WHAT THE CODE DOES
+  Pick fifteen notes at random (list them in the review) and at least these
+  four by name: Gate and line, Type, Authority, Chart address. For each:
+  - every "source:" pointer resolves to the code it describes at the
+    recorded commit;
+  - every field in a Schemas/ note exists, with the stated type and range,
+    and is produced and read where the note says;
+  - the layer (mechanics, interpretation, shell) matches
+    tools/check-layer-boundary.js.
+
+
+STEP 3. RECOMPUTE: AN INDEPENDENT IMPLEMENTATION
+  This is the step that tests the map rather than the prose. In your own
+  scratch directory, write a small implementation of the chart FROM THE
+  VAULT'S NOTES ALONE (Gate and line, Channels, Centres, Definition, Type,
+  Authority, Profile), feed it activations lifted from the app's lonOf() and
+  designT() (the way tools/check-astral-bodies.js lifts lonRaw()), and run it
+  beside the app's hdChart() on at least 2,000 instants from 1950 to 2010,
+  plus the boundary cases the primary names (302.0, 301.999, a line edge, 0
+  and 360). Every difference is one of three things, and the review says
+  which: the vault is wrong, the app is wrong, or the rule is genuinely
+  ambiguous in the tradition. Paste your script and its output into the
+  review. Do not commit it: tools/ belongs to workstream 6; if it should
+  become a gate, say so as a request.
+  Then run the primary's reconciliation script from the pull request and
+  confirm its counts.
+
+
+STEP 4. THE DISCREPANCY REGISTER
+  Now read the primary's Discrepancies/ notes. For each: reproduce it from
+  its stated instant, or mark it not reproduced. Check its severity and its
+  owning workstream. Add any of yours the primary missed. Confirm that no
+  note, script or example carries a reader's or the owner's birth data.
+
+
+STEP 5. THE OUTSIDE CHECKS
+  Read Verification/ and the pull request's "Helpers" section.
+  - Every tertiary consult shows the question word for word, the source the
+    answer cited, and how it was checked against the code or the Horizons
+    fixture. A consult with no recorded check counts as not having happened
+    (Helpers, item 5).
+  - No value in the map rests on the tertiary alone. Where a tertiary value
+    and tools/fixtures/astral-bodies-horizons.json disagree, the fixture
+    wins unless the primary showed a fresh Horizons fetch.
+  - Nothing shown to the tertiary breaks "What may be shared with whom":
+    no server/ or data-contracts/ content, no table or column name, no
+    project ref, no person's birth details.
+  - Open three of the cited sources yourself and confirm they say what the
+    note claims.
+
+
+STEP 6. THE VAULT AS AN OBSIDIAN VAULT
+  - Every [[wikilink]] resolves to a note title in the vault (a ten line
+    script over the folder is enough; paste its output), and 00 Index links
+    every note.
+  - Every note's YAML frontmatter parses and carries kind, layer, source,
+    verified and status.
+  - data-contracts/hd-vault/.obsidian/ is ignored, not committed.
+  - No em or en dash in any note (all three encodings CLAUDE.md names), no
+    "bodygraph" in a heading, "astral body" in prose.
+    node tools/check-competitor-surface.js passes over the folder.
+
+
+STEP 7. READY FOR 1.2
+  Assignment 1.2 attaches notes to the Chart address. Check that note
+  answers: how each kind of address is named, which survive a corrected
+  birth time and which move or vanish, and how the existing atlas slugs and
+  /library/human-design-atlas/gate/<n> addresses relate. Then check the
+  Schemas/ notes against data-contracts/DATA-MAP.md: anything the map says
+  is stored or sent (computed_state, the Oracle dossier) has a consent
+  category, a deletion path and an export path there, or is listed as a gap.
+
+
+STEP 8. THE GATES AND THE FILE BOUNDARY
+  Run every gate in 00-README.md and node tools/check-competitor-surface.js
+  on the branch, and paste the output. Confirm the branch changes nothing in
+  app/, server/, tools/ or deploy/: "git diff --stat origin/main" should show
+  only data-contracts/hd-vault/, data-contracts/DATA-MAP.md, .gitignore and a
+  CLAUDE.md section.
+
+
+THE REVIEW
+  One comment on the pull request:
+  - your own findings list from steps 1 to 3, written before you read the
+    primary's, then the comparison;
+  - findings ranked by severity (wrong in the map; missing from the map;
+    unverified; formatting), each with a file and line;
+  - the outputs of your scripts and the gates;
+  - a clear verdict: "ready to merge" or "not ready".
+  Record your review in the pull request's "Helpers" section: who, when,
+  what was checked.
+
+TAKING OVER
+  Only if the primary fails the same gate twice or goes silent for a working
+  day. Then you own the branch, you finish the primary's file, and someone
+  other than you reviews it: never review your own work (Helpers, item 2).

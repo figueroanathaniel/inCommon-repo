@@ -95,6 +95,22 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 Their secondaries and tertiaries work as each brief's "Secondary and
 tertiary" section says, with the additions written into each assignment.
 
+### Delegation 1: the Human Design logic map
+
+Asked for by the owner on 28 October 2026: research, reconcile and map the
+Human Design logic end to end, keep the schema definitions as an Obsidian
+vault (data-contracts/hd-vault/), and cross verify the positions through the
+tertiary. Unlike earlier rounds, each seat has a file of its own.
+
+| # | Seat | Assignment | Status |
+|---|---|---|---|
+| 1 | Primary | assignments/01-schema-hd-mapping-primary.txt (1.3) | DRAFT |
+| 1 | Secondary | assignments/01-schema-hd-mapping-secondary.txt | DRAFT |
+| 1 | Tertiary | assignments/01-schema-hd-mapping-tertiary.txt | DRAFT |
+
+1.3 can start now, beside 1.2: its Chart address note is what 1.2's notes
+attach to.
+
 The statuses are DRAFT, AWAITING OWNER APPROVAL, READY (approved and safe
 to hand over), ISSUED (handed to the agent) and DONE. The helper
 instructions were approved by the owner on 27 October 2026. **This branch does
@@ -347,3 +363,6 @@ doc here rather than working around the difference.
 - 27 October 2026: committed to the repo under docs/outsourcing/. Model
   names gathered into the roster, facts that move gathered into "Current
   values", and "Changing these docs" added.
+- 28 October 2026: Delegation 1 drafted, the Human Design logic map: one
+  instruction file each for the primary, secondary and tertiary of
+  workstream 1, at DRAFT until the owner approves them.

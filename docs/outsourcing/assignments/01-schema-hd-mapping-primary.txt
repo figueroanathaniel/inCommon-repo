@@ -1,0 +1,235 @@
+ASSIGNMENT 1.3   Workstream 1: Data Mapping & Schema Architecture
+Programme:       Delegation 1, the Human Design logic map
+Status:          DRAFT (written at the owner's request, 28 October 2026;
+                 awaiting the owner's approval before it is ISSUED)
+Issued against:  main f9d0251, 28 October 2026
+Who:             the workstream 1 PRIMARY (named in the roster, 00-README.md)
+Companions:      01-schema-hd-mapping-secondary.txt (the review)
+                 01-schema-hd-mapping-tertiary.txt (the outside lookups)
+Read first:      00-README.md, 01-data-schema.md, CLAUDE.md in full,
+                 data-contracts/DATA-MAP.md, docs/hd-upgrade/01 and 02,
+                 assignment 1.2 (01-schema-hd-assignment.txt)
+
+THE OUTCOME
+One map of every place inCommon computes, stores, moves or reads Human Design,
+written as schema definitions in an Obsidian vault inside the repository,
+with every duplicated piece of logic reconciled, every disagreement written
+down, and the astral body positions the whole chart rests on cross checked
+against an outside source. Nothing in the app changes in this assignment:
+it produces the map and the list of what is wrong, and the fixes go to the
+workstreams that own the code.
+
+Why now: assignment 1.2 attaches notes to "an address in a chart" (a gate, a
+channel, a centre, a line, an activation). That address has to be defined
+once, from the code, before 1.2's model can be agreed. 3.2 (honest chart) and
+6.2 (reference charts) read the same map.
+
+
+TASK 0. SET UP
+  Branch: schema/hd-logic-map from current main. One pull request.
+  Confirm "node tools/drive-swipe.js" runs on your machine (Helpers, item 1).
+  Record the commit you map against; every source pointer you write is
+  "file:line at <that commit>", because line numbers move.
+
+
+TASK 1. RESEARCH: FIND EVERY SITE (inventory before any writing)
+  Search the code; do not trust a list, including this one. Start from:
+
+    grep -n -E "gateOf|designT|hdChart|hdGatesFor|synGatesOf|hdSkyNow|\
+HD_CHANNELS|GATE_NAMES|HD_STRATEGY|HD_DEFINITION|HD_TYPE_LIGHT|HD_AUTH_CENTRE|\
+HDTopology|HDWheel|HDTransit|HDComposite|HDCircle|HDAtlas|cycleDesign" \
+      "app/inCommonApp v2.dc.html"
+    grep -l -E "HDTopology|HDWheel|HDTransit|HDComposite|HDCircle|HDAtlas|\
+designMoment|STATE_VERSION" app/*.js server/*/*.ts server/*/*.js tools/*.js
+
+  Known sites, to be confirmed and extended:
+  - The instant: birth-time.js (known, unknown, unanswered; local noon for an
+    untimed chart; offsets in milliseconds), natalDateFor(), t2000().
+  - Positions: lonOf() and lonRaw() (astronomy-engine, the four day grid for
+    Mars outward, the fallback series), ephemeris-cache.js, which node the
+    North Node is (mean or true) and how the South Node and Earth are derived.
+  - The design moment: designT() and arc-solver.js designMoment(), the 88
+    degree solar arc, and the 88.36 day fallback.
+  - The wheel: gateOf() in the app and hd-wheel.js (gate 41 at 302 degrees,
+    5.625 per gate, 0.9375 per line, half open boundaries).
+  - Topology: HD_CHANNELS in the app and hd-topology.js (36 channels, 64
+    gates to 9 centres), and the atlas copy (Y1, Y4 in run-module-tests).
+  - Derivations: hdChart() for definition, type (motor to Throat by channel
+    connectivity), authority (the precedence order, the Ego split), strategy,
+    definition parts, profile (the two Sun lines), and anything that names
+    an incarnation cross.
+  - Other computations of the same chart: hdGatesFor() (synastry and
+    composite input), people-library.js computed_state and STATE_VERSION,
+    pair-cache.js, hd-composite.js (six states), hd-circle.js (the Ground),
+    hd-transit.js and hdSkyNow() (gates now), cycleDesign() (Cycle Audit),
+    the 3D model (_hsModel, hd-scene.js), the Oracle dossier
+    (oracleDossier(), and what server/oracle receives).
+  - Interpretation that keys on mechanics: hd-atlas.js, hd-teachings.js,
+    hd-life.js, timing-lexicon.js GATE, GATE_LINE and CHANNEL, iching.js
+    (hexagram N is gate N).
+  - Tests that hold any of it: run-module-tests.js (X, Y, C, G and B rows),
+    check-hd-atlas-map.js, check-astral-bodies.js, check-layer-boundary.js,
+    the harness rows in app/handoff/tests-v6.0.js.
+
+  Output of Task 1: an inventory table (site, file:line, layer: mechanics,
+  interpretation or shell, what it reads, what it returns, who calls it).
+  It becomes the vault's Consumers and Pipeline notes.
+
+
+TASK 2. MAP: THE SCHEMA DEFINITIONS, IN AN OBSIDIAN VAULT
+  The vault is data-contracts/hd-vault/, a folder of Markdown that the owner
+  opens in Obsidian (Open folder as vault) or links into their own vault.
+  The repository copy is the source of truth; nothing is written anywhere an
+  agent cannot commit. Do not commit Obsidian's own .obsidian/ folder: add
+  "data-contracts/hd-vault/.obsidian/" to .gitignore.
+
+  Every note:
+  - starts with YAML frontmatter:
+        kind:      pipeline | topology | derivation | schema | consumer |
+                   discrepancy | verification
+        layer:     mechanics | interpretation | shell
+        source:    [file:line at <commit>, ...]
+        verified:  how it was checked (a gate, a script, a lookup), or "no"
+        status:    draft | checked | disputed
+  - links with Obsidian [[wikilinks]] by note title, never by file path;
+  - follows CLAUDE.md: no em or en dash (the zero dash sweep covers docs),
+    "astral body" in prose, and "the wiring" wherever a heading or a name
+    would otherwise say bodygraph (check-competitor-surface.js walks this
+    folder and bars it in a heading).
+
+  Required notes (titles exact, so the secondary and 1.2 can link to them):
+    00 Index                     the map of content, every note linked
+    Pipeline/  Birth instant, Positions, Design moment, Gate and line,
+               Activations
+    Topology/  Centres, Channels, Gates
+    Derivations/  Definition, Type, Authority, Strategy, Profile,
+                  Incarnation cross (if the app computes none, say so)
+    Schemas/   one note per data structure, with every field, its type, its
+               range, and where it is produced and read: Activation, HD
+               chart (the object hdChart() returns), Chart address (see
+               below), Composite row, Ground, Transit reading,
+               computed_state, Oracle dossier (HD part)
+    Consumers/ one note per module or screen that reads Human Design
+    Discrepancies/  D-01 onward (Task 3)
+    Verification/   Astral body cross check, Tradition conventions,
+                    Tertiary log (Task 4)
+
+  The Chart address note is the one 1.2 is waiting on. Define how a gate, a
+  channel, a centre, a line and an activation are named (for example gate
+  number, channel as its sorted pair, centre by its HDTopology.CENTERS name,
+  activation as side, body, gate and line), which of them survive a
+  corrected birth time and which can move or vanish, and how the existing
+  slugs (atlasSlug(), the /library/human-design-atlas/gate/<n> address)
+  relate to it. Propose; 1.2 decides.
+
+
+TASK 3. RECONCILE
+  Wherever the same fact is computed or held twice, prove they agree or
+  record that they do not. At minimum:
+  a. HD_CHANNELS in the app against hd-topology.js and hd-atlas.js.
+  b. gateOf() against hd-wheel.js, including exactly on a boundary
+     (302.0, 301.999, and a line edge) and at 0 and 360.
+  c. hdChart() against hdGatesFor(), people-library.js computed_state, and
+     every other path in Task 1 that builds a chart for the same instant:
+     same activations, same defined centres, same type, authority and
+     definition.
+  d. Authority strings against the lookups that match them by first word
+     (HD_AUTH_CENTRE, the atlas), and the Ego manifested or projected split.
+  e. Gate names: GATE_NAMES against hd-atlas.js and iching.js. CLAUDE.md
+     records six names (2, 10, 29, 47, 61, 62) as a deliberate choice; list
+     them as recorded, not as faults.
+  f. Each derivation against the tradition's published rule, from public
+     sources (Task 4b): type, the authority precedence, definition, profile.
+
+  Method: write a throwaway script in your scratch directory (not in tools/,
+  which workstream 6 owns) that lifts the methods out of the app the way
+  bench-ephemeris.js and check-astral-bodies.js do, runs every path on at
+  least 2,000 instants from 1950 to 2010 plus the boundary cases, and counts
+  disagreements. Paste the script and its output into the pull request so
+  the secondary can rerun it. If a path differs, write it up; do not fix it.
+
+  Each disagreement is a Discrepancies/ note: what differs, the evidence (the
+  instant and both answers, never a person), how many of the 2,000 it
+  touches, which reader surface shows it, severity (changes a type or
+  authority; changes a gate or line; cosmetic), and the workstream that owns
+  the fix (3 for app logic and content, 6 for a missing test row, 1 if it is
+  storage). Also list each as a request in the pull request.
+
+
+TASK 4. CROSS VERIFY THE POSITIONS AND THE CONVENTIONS
+  a. Positions. The repository's own check is check-astral-bodies.js
+     against JPL Horizons (tools/fixtures/astral-bodies-horizons.json, the
+     ten bodies to 0.03 degree). Run it and record the result. Then choose
+     about twelve PUBLIC instants, never a reader's or the owner's birth:
+     J2000.0, the fixture's own instants, and edge cases (the Sun at 302
+     degrees, a body sitting within 0.01 degree of a gate or line boundary,
+     a station, a fast Moon). For each, record the app's longitude, frame,
+     gate and line for every body in PLNS, Earth and the South Node, at the
+     birth instant and at its design instant.
+     Send the tertiary the questions its file allows (01-schema-hd-mapping-
+     tertiary.txt, "Question shapes"), one batch at a time, word for word.
+  b. Conventions. Ask the tertiary the tradition questions its file lists
+     (the solar arc, the wheel origin, the node, Earth and the South Node, the
+     zodiac), each answer to cite a published source.
+  c. Check every answer before relying on it. A tertiary value is
+     corroboration, never authority: if it disagrees with the Horizons
+     fixture, the fixture wins unless you can fetch Horizons yourself
+     (fetch-astral-bodies.js shows how) and show otherwise. A citation you
+     cannot open does not count. What matters for Human Design is whether the
+     gate and line agree; record the degree difference and the gate and line
+     on each side.
+  d. Write it up in Verification/: the table, each consult in the helper log
+     shape (00-README.md, Helpers item 5), and what each check found.
+
+
+TASK 5. HAND OVER
+  Open the pull request. Ask the secondary for its review per
+  01-schema-hd-mapping-secondary.txt. Answer every finding: fixed, or why
+  not. Do not merge until the secondary says "ready to merge" and the owner
+  agrees.
+
+
+FILES THIS ASSIGNMENT OWNS
+  data-contracts/hd-vault/ (new), one line in .gitignore, a short pointer
+  section in data-contracts/DATA-MAP.md, and one section added to CLAUDE.md
+  pointing at the vault (everyone adds a section for their own work).
+  Nothing in app/, server/ or tools/ changes. A fix you find is a request in
+  the pull request, addressed to the owning workstream.
+
+
+HARD RULES (in addition to the README's)
+  - No reader data anywhere: not in the vault, not in a script, not in a
+    question to the tertiary. Instants are public ones or fixtures; the
+    sample chart is fine; the owner's birth data is not.
+  - The tertiary is chat only. Show it only what its file allows: never the
+    contents of server/ or data-contracts/, a table or column name, a
+    project ref, a secret, or a person's birth details.
+  - Mechanics and interpretation stay separate in the map exactly as
+    check-layer-boundary.js has them; a note that mixes them is wrong.
+  - No dashes, no "bodygraph" in a heading, "astral body" in prose.
+  - check-competitor-surface.js walks the vault. The original publisher's
+    name and its trademarked system name are barred outside docs/reference/
+    and docs/hd-upgrade/, so cite that publisher as "the original
+    publisher" in the vault, and keep the full citation (name and URL) in
+    docs/reference/ or the pull request. If the vault truly needs the name,
+    ask workstream 6 for an ALLOW entry with its reason; never add one
+    yourself.
+  - Rebuild nothing in deploy/ unless something in app/ changed, which in
+    this assignment it must not.
+
+
+DONE MEANS
+  - data-contracts/hd-vault/ holds every required note, every source pointer
+    resolves at the recorded commit, every [[link]] resolves, and 00 Index
+    links every note.
+  - The Chart address note is ready for 1.2 to decide on.
+  - The reconciliation script and its output are in the pull request, and
+    every disagreement is a Discrepancies/ note and a request to its owner.
+  - The cross check table is in Verification/, with every tertiary consult
+    in the helper log and its check recorded.
+  - Every gate in 00-README.md passes, plus check-competitor-surface.js;
+    a browser gate that could not run is labelled, never reported as passed.
+  - The secondary's verdict is "ready to merge".
+  Report back with: the PR link, the gate output, the count of
+  discrepancies by severity, the secondary's verdict, and anything you could
+  not verify.
