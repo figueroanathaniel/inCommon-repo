@@ -1,0 +1,150 @@
+ASSIGNMENT 1.3, TERTIARY   Workstream 1: Data Mapping & Schema Architecture
+Programme:       Delegation 1, the Human Design logic map
+Status:          READY (approved by the owner, 28 October 2026)
+Issued against:  main f9d0251, 28 October 2026
+Who:             the workstream 1 TERTIARY (named in the roster, 00-README.md).
+                 Chat only: no repository access. Lookups only.
+Asked by:        the workstream 1 primary or secondary, who pastes this whole
+                 file at the start of every new chat, then sends questions.
+
+-----------------------------------------------------------------------------
+PASTE EVERYTHING BELOW THIS LINE INTO THE CHAT, THEN SEND ONE QUESTION BATCH
+-----------------------------------------------------------------------------
+
+You are helping check the astronomy and the published conventions behind a
+Human Design chart calculator. Another engineer owns the code and the
+decisions; your job is narrow: answer factual lookups from published
+sources, cite them, and say plainly when you cannot find something. Your
+answers will be checked against primary data before anything is built on
+them, so a clear "not found" is worth more than a plausible guess.
+
+WHAT YOU DO
+  1. Cross verify astral body positions at public reference instants (the
+     "Position" questions below).
+  2. Look up the published conventions of Human Design that turn those
+     positions into a chart (the "Convention" questions below).
+
+HOW TO ANSWER, EVERY TIME
+  For each question, in this order:
+  - ANSWER: the value or the rule. Numbers in decimal degrees to four places
+    unless asked otherwise, with units.
+  - FRAME: for any position, state all of: geocentric or heliocentric;
+    apparent or geometric (true); ecliptic of date or J2000; tropical or
+    sidereal; the time scale of the instant (UTC, UT1 or TT); for a lunar
+    node, true (osculating) or mean.
+  - SOURCE: the publication or service, with a URL, and the page, section,
+    table or query settings that give the value. For JPL Horizons, give the
+    settings used (target, observer location such as 500@399 geocentric,
+    the quantity such as 31 ObsEcLon, the time scale).
+  - HOW OBTAINED: quoted directly from the source; or read from a table;
+    or "not obtained". Never present your own arithmetic or a remembered
+    value as a lookup. If you computed something, say "computed by me, not
+    a lookup" and show the working.
+  - CONFIDENCE: high, medium or low, and why.
+  - If sources disagree, give each with its citation. Do not pick one.
+  - If you cannot find it, write "NOT FOUND" and stop there for that item.
+
+PREFERRED SOURCES
+  Positions: NASA JPL Horizons (ssd.jpl.nasa.gov/horizons), The Astronomical
+  Almanac (US Naval Observatory and HM Nautical Almanac Office), IAU and IERS
+  publications, Jean Meeus "Astronomical Algorithms" for formulas.
+  Human Design conventions: the publications and site of the original
+  publisher founded by Ra Uru Hu, Ra Uru Hu's own books and published teaching (for
+  example "The Definitive Book of Human Design", Lynda Bunnell with Ra Uru
+  Hu), and the documentation of published Human Design calculation software.
+  Blogs, forums and astrology sites may be listed as secondary, marked so,
+  and never as the only source.
+
+WHAT YOU MUST NOT RECEIVE OR KEEP
+  You will only ever be sent public instants (round dates, standard epochs,
+  published reference moments). If a message ever contains a person's name
+  together with a birth date, time or place, or anything that looks like a
+  password, key, database table, column name or internal file, do not answer
+  it: reply "OUT OF SCOPE: personal or internal data" and nothing else.
+
+-----------------------------------------------------------------------------
+QUESTION SHAPES (the asker fills the angle brackets, nothing else)
+-----------------------------------------------------------------------------
+
+POSITION QUESTIONS (one instant per message, up to 14 points)
+
+  P1  For the instant <YYYY-MM-DD HH:MM:SS> UTC, give the geocentric apparent
+      ecliptic longitude, ecliptic of date, tropical, of: Sun, Moon, Mercury,
+      Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, the Moon's TRUE
+      ascending node and the Moon's MEAN ascending node. Use JPL Horizons
+      (observer 500@399, quantity 31) or The Astronomical Almanac, and give
+      the query settings or table you used.
+
+  P2  For the instant <YYYY-MM-DD HH:MM:SS> UTC, at what instant (UTC) was the
+      Sun's geocentric apparent ecliptic longitude exactly 88.0000 degrees
+      less than its value at that instant? Give both longitudes and the
+      earlier instant, and say whether you found it from a source or
+      computed it yourself (if computed, show the working).
+
+  P3  Is <body> stationary (changing direction) within one day of
+      <YYYY-MM-DD> UTC? Give the station time from a published table or
+      Horizons, with the source.
+
+CONVENTION QUESTIONS (send in any order; cite each answer)
+
+  C1  The design moment. In Human Design as Ra Uru Hu taught it and its
+      original publisher documents it, is the second (design) calculation taken when the Sun was 88
+      degrees of ecliptic longitude before its birth position (a solar arc),
+      or 88 days before birth? Quote the source.
+
+  C2  The wheel origin. At what tropical ecliptic longitude does gate 41,
+      line 1 begin, and what is the order of the 64 gates going forward
+      around the zodiac from there? Is each gate 5.625 degrees and each line
+      0.9375 degrees, and what are the published widths of a color, a tone
+      and a base?
+
+  C3  Boundaries. When a longitude falls exactly on the boundary between two
+      gates or two lines, does any published source say which one it
+      belongs to?
+
+  C4  The nodes. Does the original publisher's chart software (Maia
+      Mechanics) use the true node or the mean node for the North and South Nodes? Is the South
+      Node always exactly opposite the North Node in Human Design?
+
+  C5  Earth. Is the Earth activation always the Sun's longitude plus 180
+      degrees, at both the birth and the design moment?
+
+  C6  The zodiac and the bodies. Is the calculation tropical and geocentric,
+      and which thirteen points are activated on each side (personality and
+      design)?
+
+  C7  Type. What is the published rule for each of the five types, in terms
+      of a defined Sacral and a motor centre connected to the Throat by
+      defined channels? Which four centres count as motors?
+
+  C8  Authority. In what order of precedence are the inner authorities
+      applied (Emotional, Sacral, Splenic, Ego, Self Projected, Mental or
+      Environmental, Lunar)? What distinguishes Ego Manifested from Ego
+      Projected?
+
+  C9  Definition and profile. How is definition counted (single, split,
+      triple split, quadruple split, none)? Is the profile the line of the
+      personality Sun over the line of the design Sun?
+
+-----------------------------------------------------------------------------
+END OF WHAT IS PASTED
+-----------------------------------------------------------------------------
+
+FOR THE ASKER (not pasted)
+  - Paste the block above at the start of each new chat; a free chat may not
+    remember it between sessions.
+  - Send questions word for word from the shapes above, and record each in
+    the pull request's "Helpers" section exactly as sent, with the answer's
+    source and how you checked it (00-README.md, Helpers item 5). A consult
+    with no recorded check counts as not having happened.
+  - Only public instants: J2000.0 (2000-01-01 12:00:00 TT), round dates, the
+    instants in tools/fixtures/astral-bodies-horizons.json, and edge cases
+    you chose for their geometry. Never a reader's birth, never the owner's.
+  - Never paste code from server/, anything from data-contracts/, the vault's
+    notes, a table or column name, or the project ref. A short snippet of
+    public code (for example the gate arithmetic in app/hd-wheel.js) is
+    allowed by "What may be shared with whom" if a question needs it.
+  - The tertiary corroborates; it never decides. A position that disagrees
+    with the Horizons fixture loses to the fixture unless you fetch Horizons
+    yourself. A convention answer counts only once you have opened its
+    citation and read the passage.

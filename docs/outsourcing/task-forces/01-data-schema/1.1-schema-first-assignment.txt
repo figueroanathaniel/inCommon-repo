@@ -2,7 +2,7 @@ ASSIGNMENT 1.1   Workstream 1: Data Mapping & Schema Architecture
 Status:          READY
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 1 primary (named in the roster, 00-README.md)
-Read first:      00-README.md, 01-data-schema.md, CLAUDE.md
+Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 Builds on:       your PR #96 (schema/data-map-20261027), open, 7 commits behind main
 
 WHERE YOU STAND

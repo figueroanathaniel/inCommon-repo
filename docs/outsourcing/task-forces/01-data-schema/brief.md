@@ -1,8 +1,8 @@
 # Brief 1: Data Mapping & Schema Architecture
 
-Agents: named in the roster in 00-README.md, workstream 1.
-Branch: schema/<topic> from current main.
-Read 00-README.md and CLAUDE.md first.
+Agents: named in the roster in 00-README.md, workstream 1 (Task Force 1).
+Branch: the Task Force 1 branch named in CHARTER.md (since 28 October 2026).
+Read 00-README.md, CHARTER.md and CLAUDE.md first.
 
 ## What exists today
 
