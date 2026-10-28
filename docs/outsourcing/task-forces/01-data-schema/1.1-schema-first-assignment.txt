@@ -1,7 +1,10 @@
 ASSIGNMENT 1.1   Workstream 1: Data Mapping & Schema Architecture
-Status:          READY
+Status:          DONE (Tasks 1 to 3 merged as PR #96; Task 4 reissued as 1.4)
 Issued against:  main c259e80, 27 October 2026
 Who:             the workstream 1 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E7 and E9 (approved by the
+                 owner). This file is now a record of round 1. Task 4 below
+                 continues as 1.4-schema-followups-assignment.txt.
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md
 Builds on:       your PR #96 (schema/data-map-20261027), open, 7 commits behind main
 
