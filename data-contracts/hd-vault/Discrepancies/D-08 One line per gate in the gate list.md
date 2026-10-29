@@ -24,3 +24,5 @@ line; the wiring and the 3D stage, which read `acts`, show both.
 holds is missing from the list.
 
 **Owner.** Workstream 3 (list `acts`, or carry every line on the gate row).
+
+**Fixed in d6e8000** (on `taskforce/03-refactor-features`). Each gate row carries every holding in `holds`. The list shows every line the side holds, and a gate now shows on a side whenever that side holds it; before, the side of the first holding decided. R3 holds both, and it fails on the code before. `hdSelOf('g:<n>')` still opens the first line's reading.

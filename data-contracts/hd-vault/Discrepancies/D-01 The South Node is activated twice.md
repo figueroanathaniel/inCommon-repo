@@ -36,3 +36,5 @@ tradition's own terms.
 **Owner.** Workstream 3 (drop one of the two, most simply the
 `if (n === 'North Node')` derivation, or `South Node` from the iteration). Request
 to workstream 6: a row that `hdChart().acts` has thirteen per side.
+
+**Fixed in d6e8000** (on `taskforce/03-refactor-features`). The North Node derivation is gone, so each side carries thirteen and the Chart reading says 13. R1 in `tools/run-module-tests.js` lifts the collect step out of the app and fails on the code before.

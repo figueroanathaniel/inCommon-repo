@@ -111,14 +111,14 @@ Outside checks.
 | Note | Severity | Charts of 2,000 | Reader surface today | Owner |
 |---|---|---|---|---|
 | [[D-06 Mean lunar node where the tradition may use the true node]] | changes a Type or Authority (disputed: depends on C4) | 89 Types, 357 node gates | the wiring, Type, Authority | owner decision; then workstream 3, workstream 6 |
-| [[D-03 Saved people charts store the wrong instant for an untimed birth]] | changes a gate or line | 408 of 600 untimed | none yet (stored, unread) | workstream 1 (fixed, f6b38fd), with 3 |
+| [[D-03 Saved people charts store the wrong instant for an untimed birth]] | changes a gate or line | 408 of 600 untimed | none yet (stored, unread) | workstream 1 (fixed, f6b38fd), with 3 (fixed, d6e8000) |
 | [[D-04 Saved people charts use the standard offset in summer]] | changes a gate or line | 292 of 1,535 summer | none yet (stored, unread) | workstream 1 (fixed, f6b38fd), with 3 |
 | [[D-07 Positions on the wrong side of an edge]] | changes a gate or line (precision limit) | 23 of 19,750 positions | a gate or line, rarely | workstream 3 (3.2 panel), workstream 6 |
 | [[D-09 The birth stamp ignores the zone]] | changes a gate or line in a stored reading | not measured | kept Oracle reading after a zone repair | workstream 1 (fixed, f6b38fd) |
-| [[D-01 The South Node is activated twice]] | cosmetic | 2,000 | "carries 14 activations" in the Chart reading; 3D keys | workstream 3, workstream 6 |
+| [[D-01 The South Node is activated twice]] | cosmetic | 2,000 | "carries 14 activations" in the Chart reading; 3D keys | workstream 3 (fixed, d6e8000), workstream 6 |
 | [[D-02 Two gate name tables disagree on six gates]] | cosmetic | six gates | gate names differ between screens | workstream 3, workstream 6 |
-| [[D-05 Self-projected authority lights no centre in the Atlas]] | cosmetic | one Atlas entry | the Atlas wiring | workstream 3, workstream 6 |
-| [[D-08 One line per gate in the gate list]] | cosmetic | 1,999 | the Activated Gates list | workstream 3 |
+| [[D-05 Self-projected authority lights no centre in the Atlas]] | cosmetic | one Atlas entry | the Atlas wiring | workstream 3 (fixed, d6e8000), workstream 6 |
+| [[D-08 One line per gate in the gate list]] | cosmetic | 1,999 | the Activated Gates list | workstream 3 (fixed, d6e8000) |
 | [[Known, owned by 3.2 Task 2]] | listed, not re-derived | 427 Types on the fallback path | | workstream 3 (3.2 Task 2) |
 
 ## What agreed

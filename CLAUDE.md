@@ -6796,8 +6796,22 @@ Four things in it are easy to lose:
   correction moves the instant, so a stamp without them let a kept Oracle
   reading outlive the correction.
 
-P27 to P29 and O8 hold all three. The app half of D-03, where
-`peopleCompute()` reads its gates at that same instant, is workstream 3's.
+P27 to P29 and O8 hold all three.
+
+**Four more are fixed on `taskforce/03-refactor-features`, in d6e8000**, and
+R1 to R4 hold them. Each of those rows lifts its piece out of the shipped app
+file and fails on the code before.
+- **D-01:** each side carries thirteen activations, because PLNS already
+  holds the South Node. Do not derive it from the North Node again.
+- **D-05:** `HD_AUTH_CENTRE` is keyed `self-projected`, as `authOf()` splits
+  the name.
+- **D-08:** a gate row carries every holding in `holds`, and the gate list
+  shows every line.
+- **D-03, the app half:** `peopleCompute()` reads the gates at the stored
+  instant.
+
+D-02 (which gate names are right) waits on the Human Design reviewer, D-06 on
+the owner, and D-07 on 3.2's inspection panel.
 
 The vault holds no reader's data. Add to it by the same rules as the docs: no
 dash, astral body in prose, and the wiring wherever a heading would otherwise

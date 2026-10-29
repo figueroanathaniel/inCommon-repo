@@ -25,3 +25,5 @@ lights nothing.
 **Owner.** Workstream 3 (key the table `self-projected`, or split on the hyphen
 too). Request to workstream 6: a row that every authority entry except Lunar
 lights a centre.
+
+**Fixed in d6e8000** (on `taskforce/03-refactor-features`). The table is keyed `self-projected`. R2 runs `authOf()` over every Atlas authority, and it fails on the code before.

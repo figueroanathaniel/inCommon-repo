@@ -41,3 +41,5 @@ at noon where it happened, and `STATE_VERSION` is 4. P27 and P29 in
 `tools/run-module-tests.js` hold it, and both fail on the code before. The app
 half, `peopleCompute()` reading its gates at that same instant, is workstream
 3's.
+
+**The app half is fixed in d6e8000** (on `taskforce/03-refactor-features`). `peopleCompute()` reads the gates at the stored instant, and R4 holds it. With both halves applied, reconcile.js c2 reports 0 of 600 untimed, 0 of 1,535 summer and 0 of 1,535 winter births differing from the reader's chart. Schema merges before Features, so the halves land in order. On its own, the app half reads the gates at midnight at Greenwich.
