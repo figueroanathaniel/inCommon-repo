@@ -3238,6 +3238,75 @@ async function runCloudTests() {
     derive ? kind([], []) : null, 'Lunar');
 })();
 
+/* ---------------------------------------- R: the 1.3 register, fixed in app
+   Four of the discrepancies 1.3 found live in the app class, which no module
+   test loads. Each row lifts the piece it judges out of the shipped file, as
+   N does, and runs it, so it tests the code a reader gets. Every row fails on
+   the code before the fix. */
+(function () {
+  const src = require('fs').readFileSync(path.join(repo, 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  const between = (from, to) => { const a = src.indexOf(from), b = a === -1 ? -1 : src.indexOf(to, a); return a === -1 || b === -1 ? null : src.slice(a, b); };
+
+  /* D-01: thirteen activations a side, and one South Node on each. */
+  const collectSrc = between('const collect = (t, kind) =>', "collect(tP, 'personality')");
+  let acts = null;
+  if (collectSrc) {
+    const stub = { PLNS: [['Sun'], ['Moon'], ['Mercury'], ['Venus'], ['Mars'], ['Jupiter'], ['Saturn'], ['Uranus'], ['Neptune'], ['Pluto'], ['North Node'], ['South Node']],
+      lonOf: (n, t) => (n.length * 29 + t) % 360, gateOf: lon => ({ gate: 1 + Math.floor(((lon % 360) + 360) % 360 / 5.625), line: 1 }) };
+    acts = [];
+    try { new Function('acts', collectSrc.replace(/\/\*[\s\S]*?\*\//g, '') + "\ncollect(0, 'personality'); collect(1, 'design');").call(stub, acts); } catch (e) { acts = null; }
+  }
+  t('R1', 'each side carries thirteen activations and the South Node once, as the tradition counts them (D-01)',
+    acts ? ['personality', 'design'].map(k => [acts.filter(a => a.kind === k).length, acts.filter(a => a.kind === k && a.body === 'South Node').length]) : null,
+    [[13, 1], [13, 1]]);
+
+  /* D-05: every authority in the Atlas but Lunar lights its centre. */
+  const fieldLine = (src.match(/^ *HD_AUTH_CENTRE = \{.*\};\s*$/m) || [''])[0];
+  const authLine = (src.match(/^ *const authOf = name => this\.HD_AUTH_CENTRE\[.*\];\s*$/m) || [''])[0];
+  let lit = null;
+  try {
+    const host = vm.runInNewContext('(class { ' + fieldLine.trim() + ' })');
+    const inst = new host();
+    const authOf = new Function('name', authLine.trim().replace(/^const authOf = name => /, 'return ').replace(/;\s*$/, '')).bind(inst);
+    const ATL = require(path.join(repo, 'app', 'hd-atlas.js'));
+    lit = ATL.AUTHORITIES.map(a => [a.name, authOf(a.name) === undefined ? 'UNDEFINED' : String(authOf(a.name))]);
+  } catch (e) { lit = 'threw: ' + e.message; }
+  t('R2', 'every Atlas authority but Lunar lights a centre, Self-projected (G) the G (D-05)',
+    lit, [['Emotional (Solar Plexus)', 'Solar Plexus'], ['Sacral', 'Sacral'], ['Splenic', 'Spleen'], ['Ego (Heart)', 'Heart'],
+      ['Self-projected (G)', 'G'], ['Mental (environmental)', 'Ajna'], ['Lunar (Reflector)', 'null']]);
+
+  /* D-08: a gate held at two lines keeps both, and each side's list shows the
+     lines that side holds. */
+  const gatesSrc = between('const gates = [...gset]', 'this._hd = {');
+  const sideSrc = (src.match(/^ *const sideLines = g => .*;\s*$/m) || [''])[0];
+  let lists = null;
+  try {
+    const sample = [{ body: 'Pluto', kind: 'personality', gate: 19, line: 6 }, { body: 'Moon', kind: 'personality', gate: 41, line: 2 },
+      { body: 'Pluto', kind: 'design', gate: 19, line: 3 }, { body: 'Saturn', kind: 'design', gate: 41, line: 4 }];
+    const rowsOf = new Function('acts', 'gset', gatesSrc.replace(/\/\*[\s\S]*?\*\//g, '') + '\nreturn gates;').bind({ GATE_NAMES: {} });
+    const rows = rowsOf(sample, new Set(sample.map(a => a.gate)));
+    lists = ['both', 'personality', 'design'].map(mode => rows.map(g => g.gate + ':' +
+      new Function('mode', 'g', sideSrc.trim().replace(/^const sideLines = g => /, 'return ').replace(/;\s*$/, ''))(mode, g).join('.')));
+  } catch (e) { lists = 'threw: ' + e.message; }
+  t('R3', 'a gate held at two lines shows both in the list, and each side shows the line it holds (D-08)',
+    lists, [['19:3.6', '41:2.4'], ['19:6', '41:2'], ['19:3', '41:4']]);
+
+  /* D-03, the app half: a saved person's gates are read at the instant the
+     store settled on, the same instant as the longitudes. */
+  const pcSrc = between('peopleCompute(o) {', '  /* Wired once,');
+  let asked = null;
+  try {
+    const host = vm.runInNewContext('(class { ' + pcSrc + ' })');
+    const inst = new host();
+    inst.t2000 = d => d.getTime(); inst.lonOf = () => 1; inst.PLNS = [['Sun']]; inst.HD_CHANNELS = []; inst.gateCenter = () => null;
+    inst.hdGatesFor = p => { asked = p; return new Set([1]); };
+    inst.peopleCompute({ instant: Date.UTC(1990, 2, 15, 17, 0), timeKnown: false });
+    asked = asked && [asked.birthDate, asked.birthTime, asked.timeUnknown, asked.timezone];
+  } catch (e) { asked = 'threw: ' + e.message; }
+  t('R4', 'an untimed saved person\'s gates are read at the stored instant, noon where born, not at noon at Greenwich (D-03)',
+    asked, ['1990-03-15', '17:00', false, 'UTC']);
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -3265,7 +3334,7 @@ runCloudTests().then(() => {
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
       ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
-      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority']].forEach(([k, name]) => {
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
     });
