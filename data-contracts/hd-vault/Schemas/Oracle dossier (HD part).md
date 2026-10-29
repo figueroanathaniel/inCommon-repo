@@ -6,6 +6,8 @@ source:
   - "app/inCommonApp v2.dc.html:25537 at 1c02c7c (hdChart, the Human Design lines)"
   - "app/inCommonApp v2.dc.html:25507 at 1c02c7c (ORACLE_STRATEGY, ORACLE_PROFILE, ORACLE_CENTER)"
   - "app/inCommonApp v2.dc.html:26641 at 1c02c7c (cycleDossier)"
+  - "app/inCommonApp v2.dc.html:25474 at 1c02c7c (oracleConsentKey)"
+  - "app/profile-manager.js:847 at 1c02c7c (exportProfile, which does not carry Oracle readings)"
 verified: "by reading; values traced to hdChart() fields"
 status: checked
 ---
@@ -52,3 +54,11 @@ The Oracle readings are in DATA-MAP.md (`oracle_readings`, and
 app; the server keeps a hash of it as `chart_key`. The Privacy Policy section 6
 lists what is sent. The device's kept reading is keyed on `birthStamp`, which
 does not change with the zone: [[D-09 The birth stamp ignores the zone]].
+
+Consent: the Oracle's own mark, `incommon.p.<pid>.oracleConsent`, set by the
+first Consult the Oracle press; it is not one of the categories in DATA-MAP.md's
+consent table. Deletion: deleting the profile removes the kept readings, and deleting the
+account removes the server's copies and, with erase chosen, the device's
+(DATA-MAP's removal table); the dossier itself is not kept. Export: none;
+`exportProfile()` does not carry the kept readings. The consent and export
+halves are DATA-MAP G15.

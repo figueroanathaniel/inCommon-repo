@@ -10,6 +10,7 @@ source:
   - "app/people-library.js:379 at 1c02c7c (migrateLegacy)"
   - "app/inCommonApp v2.dc.html:13855 at 1c02c7c (peopleCompute)"
   - "app/inCommonApp v2.dc.html:13872 at 1c02c7c (peopleReady)"
+  - "app/profile-manager.js:847 at 1c02c7c (exportProfile, which does not carry saved people)"
 verified: "reconcile.js section c2 (600 people, three zones)"
 status: disputed
 ---
@@ -76,6 +77,8 @@ D-03 and D-04 matter before it does.
 
 ## Consent, deletion, export (DATA-MAP.md)
 
-Consent: none; device only by design. Deletion: not reached by
-`_dropProfileKeys()` or `accountStorageKeys()` (DATA-MAP G6). Export: none. These
-are listed as gaps in DATA-MAP.md, not new ones.
+Consent: none; device only by design, and no category in DATA-MAP.md's consent
+table covers saved people. Deletion: not reached by `_dropProfileKeys()` or
+`accountStorageKeys()` (DATA-MAP G6). Export: none; `exportProfile()` does not
+carry `incommon.people.v1`. The consent and export halves are DATA-MAP G15, added
+when this note was found to claim they were already listed.
