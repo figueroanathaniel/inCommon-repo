@@ -6756,6 +6756,36 @@ seat changes only with the owner's approval, in the roster and the charter's
 History, and an assignment's approval and its delivery to the seats are
 recorded separately.
 
+## The Human Design logic is mapped in a vault (assignment 1.3)
+`data-contracts/hd-vault/` is the map of every place the build computes,
+stores, sends or reads Human Design, written as notes an Obsidian vault opens
+(`00 Index` links all of them; `.obsidian/` is ignored). It was mapped from the
+code at 1c02c7c, and every note's `source:` lines are `file:line at 1c02c7c`, so
+**a line number there is a record of that commit, not a live pointer**: map
+again rather than nudging numbers by hand.
+
+Four things in it are easy to lose:
+
+- **The Chart address note is a proposal for 1.2**, not code: `centre:<name>`,
+  `channel:<low>-<high>`, `gate:<n>`, `line:<gate>.<line>`,
+  `activation:<side>:<body>`, `facet:<name>`, with an activation addressed by
+  who it is rather than where it landed.
+- **Everything duplicated agreed except what the Discrepancies notes list**:
+  the channel and centre tables, `gateOf()` against `HDWheel` over 362,001
+  longitudes, `hdChart()` against `hdGatesFor()`, `HDTransit`, the Circle and
+  the composite, and Type, Authority and Definition against an independent
+  implementation over 100,000 random channel sets.
+- **The lunar node is the open convention** (D-06): the app draws the mean
+  node, and the true node would change the Type in 89 of 2,000 births. It stays
+  disputed until a primary source is read.
+- **The tertiary has not been consulted.** Its questions are written out word
+  for word in `Verification/Tertiary log`; the positions rest on JPL Horizons
+  directly.
+
+The vault holds no reader's data. Add to it by the same rules as the docs: no
+dash, astral body in prose, and the wiring wherever a heading would otherwise
+say the field's word for it.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,
