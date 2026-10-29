@@ -15,8 +15,9 @@
 //      rather than ending up with no account and a renewal still coming.
 //      Stripe keeps the payment records the law makes it keep.
 //   2. The rows, child tables before parents, so the order is right whether
-//      or not the project's foreign keys cascade: the four tables keyed by
-//      profile (memories, throughline_entries, oki_messages, consent_events),
+//      or not the project's foreign keys cascade: the five tables keyed by
+//      profile (memories, throughline_entries, oki_messages, consent_events,
+//      chart_versions),
 //      then pairs and profiles (keyed by account), oracle_readings,
 //      subscriptions, store_subscriptions and luminary_unlocks (keyed by user),
 //      then the accounts row itself. Between Stripe and the rows, RevenueCat's record
@@ -162,7 +163,7 @@ Deno.serve(async (req) => {
     const { data: profs, error } = await db.from("profiles").select("id").eq("account_id", uid);
     if (error && !missing(error)) throw new StoreError("profiles: " + error.message);
     const ids = ((profs as { id: string }[] | null) ?? []).map((p) => p.id);
-    for (const t of ["memories", "throughline_entries", "oki_messages", "consent_events"]) await del(t, "profile_id", ids);
+    for (const t of ["memories", "throughline_entries", "oki_messages", "consent_events", "chart_versions"]) await del(t, "profile_id", ids);
     await del("pairs", "account_id", uid);
     await del("profiles", "account_id", uid);
     await del("oracle_readings", "user_id", uid);

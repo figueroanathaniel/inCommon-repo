@@ -2822,9 +2822,39 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 4, bad: [], listedInOrder: true, uncovered: []
+    files: 5, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
+
+  /* ---- K74: a table a migration adds is reached by the two walls that do
+     not read it by name: the account function's deletion and the two-step
+     rule (assignment 2.2). Every table keyed by profile_id, in the schema of
+     record or a migration, is in the account function's profile list, and
+     every table a migration creates is in server/mfa-policies.sql's list. A
+     new table missing from either is a reader's rows that outlive their
+     account, or a table a stolen password reads. ---- */
+  var k74Sql = [fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8')]
+    .concat(migFiles.map(function (f) { return fs.readFileSync(path.join(migDir, f), 'utf8'); }));
+  var k74Child = [], k74New = [];
+  k74Sql.forEach(function (src, i) {
+    var code = src.split('\n').filter(function (l) { return !/^\s*--/.test(l); }).join('\n');
+    var re = /create table (?:if not exists )?(?:public\.)?(\w+) \(([\s\S]*?)\n\);/gi, m;
+    while ((m = re.exec(code))) {
+      if (/\bprofile_id uuid not null references (?:public\.)?profiles\b/i.test(m[2])) k74Child.push(m[1]);
+      if (i > 0) k74New.push(m[1]);
+    }
+  });
+  var k74Acct = fs.readFileSync(path.join(repo, 'server', 'account', 'index.ts'), 'utf8');
+  var k74List = ((k74Acct.match(/for \(const t of \[([^\]]*)\]\) await del\(t, "profile_id"/) || [])[1] || '')
+    .split(',').map(function (x) { return x.trim().replace(/"/g, ''); }).filter(Boolean);
+  var k74Mfa = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
+  var k74MfaList = ((k74Mfa.match(/foreach t in array array\[([\s\S]*?)\] loop/) || [])[1] || '')
+    .split(',').map(function (x) { return x.trim().replace(/'/g, ''); }).filter(Boolean);
+  ts('K74', 'every table keyed by profile is deleted by the account function, and every table a migration adds is under the two-step rule', {
+    childrenSeen: true, notDeleted: [], notTwoStep: []
+  }, { childrenSeen: k74Child.indexOf('memories') !== -1 && k74Child.length >= 5,
+    notDeleted: k74Child.filter(function (t) { return k74List.indexOf(t) === -1; }),
+    notTwoStep: k74New.filter(function (t) { return k74MfaList.indexOf(t) === -1; }) });
 
   /* ---- O1-O7: each account has its own profiles on a device, the owner's
      request of 12 October 2026 after three accounts on one browser all opened

@@ -47,6 +47,12 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    (2.2 Task 1) is resolved**, and apply it with its policies, which are
    workstream 2's.
 
+5. `0005-chart-versions-policies.sql`: who may touch a chart version
+   (workstream 2, assignment 2.2): read, add and delete on the reader's own
+   profiles, no update, nothing for anon. Then run `server/mfa-policies.sql`
+   again, which lists `chart_versions`. Tested by
+   `tools/check-hd-study-rls.js`.
+
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in.
 
