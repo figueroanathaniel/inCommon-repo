@@ -62,3 +62,13 @@ quoted in [[Tradition conventions]] before the row there changes status.
 | P1c | not yet | | | |
 | P2 | not yet | | | |
 | C1 to C9 | not yet | | | |
+
+## Closed without a consult
+
+When the owner concluded 1.3 on 29 October 2026, none of the questions above
+had been sent, and none were. Each position the tertiary was to confirm is
+already held against a fresh JPL Horizons fetch in [[Astral body cross check]],
+which wins on any disagreement anyway. C1 to C9 keep the statuses
+[[Tradition conventions]] gives them, so D-06 stays disputed until a primary
+source is read. If the conventions are taken up again, start from the Record
+table above.

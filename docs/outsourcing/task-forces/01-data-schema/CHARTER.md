@@ -45,9 +45,9 @@ context, check its duties still fit ("What each agent can do" in
 | `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved | |
 | `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged); its Task 4 continues as 1.4 | DONE | not recorded |
 | `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | not recorded |
-| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | READY | not recorded |
-| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | READY | not recorded |
-| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | READY | not recorded |
+| `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | DONE | primary, pasted by the owner (date not recorded); delivered as #124 |
+| `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | DONE | secondary 29 Oct, pasted by the owner; that pass was sent back, and the primary's evidence on #125 was accepted in its place |
+| `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | DONE | not delivered; closed without a consult (the vault's Tertiary log) |
 | `1.4-schema-followups-assignment.txt` | 1.1's Task 4 reissued: G3, G5, G6, G7, G11, and the owner's G2 and G10 | READY | not recorded |
 
 Approval and delivery are recorded separately. **Status** is the owner's
@@ -122,3 +122,10 @@ October 2026, so it is left alone; the file is here now.
   at 1c02c7c (no merge commit, no history rewritten). 1.3 merged into it by
   the owner through #124 (merge commit 2adf5dd), before the secondary's
   review. #125 opened as the standing pull request.
+- 29 October 2026: #125 recorded as the standing pull request. It carries the
+  1.3 fixes (D-03, D-04, D-09 in f6b38fd; G15 in cfdb5d3) and the review
+  evidence the primary ran at the owner's instruction.
+- 29 October 2026: 1.3 concluded by the owner, all three files DONE. The
+  secondary's pass was sent back as not independent, and the owner accepted
+  the primary's evidence on #125 in its place. The tertiary was not
+  consulted. Open items are listed in the vault's `00 Index`, under Outcome.

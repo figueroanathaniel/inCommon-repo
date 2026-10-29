@@ -129,3 +129,32 @@ and centre tables (app, topology, atlas), `gateOf()` against `HDWheel` over
 `HDTransit`, `HDCircle.definedFor()` and the composite definition on 2,000
 charts, and Type, Authority and Definition against an independent implementation
 on 2,000 charts and 100,000 random channel sets.
+
+## Outcome
+
+Assignment 1.3 was concluded by the owner on 29 October 2026.
+
+- **The map** reached main through #124. The fixes and the review evidence on
+  `taskforce/01-data-schema` reach it through #125, and the app fixes on
+  `taskforce/03-refactor-features` through #127, Schema before Features as the
+  merge order says.
+- **The review.** The first secondary pass was sent back as not independent.
+  At the owner's instruction the primary then ran the review items: a
+  derivation built from these notes alone, the reconciliation rerun, all nine
+  discrepancies reproduced, three sources opened, the Chart address and
+  DATA-MAP checked, and every gate. The evidence is on #125. It found one
+  fault in the map, G15, fixed in cfdb5d3. The owner accepted that evidence in
+  place of an independent sign-off. It is recorded here as that and nothing
+  more.
+- **The tertiary was not consulted.** The positions rest on JPL Horizons
+  directly ([[Astral body cross check]]). The conventions stand as
+  [[Tradition conventions]] records them. See [[Tertiary log]].
+- **Fixed:** D-01, D-05 and D-08 in d6e8000; D-03 in f6b38fd and d6e8000; D-04
+  and D-09 in f6b38fd.
+- **Open, each with its owner:** D-02 waits on the Human Design reviewer; D-06
+  waits on the owner's decision once a primary source is read; D-07 waits on
+  3.2 Task 3's inspection panel. Separately, `hdSelOf('g:<n>')` still opens
+  only the first line's reading (see D-08).
+
+The source pointers throughout stay at 1c02c7c. They record what was mapped,
+so map again rather than move them.
