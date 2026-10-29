@@ -45,9 +45,9 @@ makes a version; Clear birth data removes the history; no `.mmi` import until
 its shape is public or licensed. The table keeps the options and reasons as
 the record of what was weighed.
 
-One thing O2 does not settle: versions follow the profile row, and whether the
-birthData switch stops the profile row syncing is still G2, which is the
-owner's under 1.4.
+O2 and G2 together: versions follow the profile row, and the owner decided
+G2 the same day: a saved profile keeps syncing (DATA-MAP G2), so its versions
+will too once step 3 is built.
 
 | # | Decision | Options | Recommended | Why |
 |---|---|---|---|---|
@@ -464,6 +464,9 @@ stubbed auth schema, each migration idempotent with its DOWN:
 
 1. Device: `chartVersions` and `chartNotes` keys, ProfileManager writers,
    `_dropProfileKeys()`, Clear birth data, exports; harness rows (7.1).
+   **Built 29 October 2026** at the owner's request, ahead of the review:
+   `app/profile-manager.js` 1.6.0, rows O9 to O18. If the review changes
+   anything here, this step changes with it.
 2. Server (O2 (b)): `0004-chart-versions.sql` (the table, RLS on, no
    policies) and `0005-memories-chart-note.sql` (the widened check), handed to
    workstream 2 for policies before the owner applies them.

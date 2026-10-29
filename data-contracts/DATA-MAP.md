@@ -125,11 +125,19 @@ new device adopts the account; a client change could add the active and
 default flags to the hash.
 
 **G2. "Save my profile to my account" does not stop the profile going up
-(decision).** The Settings switch toggles the birthData consent, but the push
+(decided by the owner, 29 October 2026: a saved profile keeps syncing, so the
+push is unchanged; see below).** The Settings switch toggles the birthData consent, but the push
 never reads birthData: the comment on the cloud module's consent gate says
 entering birth data is the consent. Turning the switch off leaves the profile, birth data included,
 syncing. Either the switch's label or the push has to change, and turning it
 off would also have to decide what happens to the copy already on the server.
+
+The owner's words, 29 October 2026: "syncing remains constant when profile is
+saved. if synced today and further use continues into saturday, the saved
+profile will pick up on sunday where saturday left off." Read as: once a
+profile is saved to the account it stays in sync from one day to the next, so
+the push keeps sending profile rows and the switch does not gate it. What the
+switch's label should say is not decided by that answer.
 
 **G3. The sync map and outbox are device wide, not per account (follow-up,
 client).** `incommon_cloud_map_v2` and `incommon_cloud_outbox_v2` are not
@@ -263,11 +271,19 @@ it yet), and the
 Oracle dossier's Human Design lines are listed in "Oracle dossier (HD part)". No
 key, table or column was added by that work.
 
-## Proposed: notes, chart versions, other people's charts (1.2)
+## Notes, chart versions, other people's charts (1.2)
 
-`data-contracts/HD-STUDY-MODEL.md` is the proposed model for notes attached to
-a part of a chart, chart versions, saved people and clients, and import and
-export (assignment 1.2, drafted 29 October 2026 at 18a066b). It is a draft for
-the owner's approval and workstream 2's review: no key, table or column in it
-exists yet, and nothing in the tables above changes until it is approved and
-built. This map is updated to what is true once it is.
+`data-contracts/HD-STUDY-MODEL.md` is the model for notes attached to a part of
+a chart, chart versions, saved people and clients, and import and export
+(assignment 1.2). The owner approved its decisions O1 to O9 on 29 October 2026;
+workstream 2's privacy review (2.2 Task 1) is outstanding, and no table or
+column exists until it is resolved.
+
+**Built on the device (section 10, step 1):** two profile scoped keys,
+`incommon.p.<pid>.chartVersions.v1` and `incommon.p.<pid>.chartNotes.v1`
+(`local-storage-schema.md`). Neither syncs yet.
+
+| Item | Log Out | Delete account, device "erase" | Delete account, device "keep" | Clear birth data | Delete profile | Export |
+|---|---|---|---|---|---|---|
+| Chart versions | stay | removed (`accountStorageKeys()` matches the id) | move with the profile | **removed** (O8) | removed | carried |
+| Chart notes | stay | removed | move with the profile | **stay**, unresolved until a birth is given | removed | carried while journal is on, counted as withheld while it is off |

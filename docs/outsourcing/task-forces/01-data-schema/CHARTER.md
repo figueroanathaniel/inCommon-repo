@@ -134,3 +134,11 @@ October 2026, so it is left alone; the file is here now.
   privacy review (2.2 Task 1) is resolved. G2 stays open under 1.4. The draft
   was committed on `claude/peaceful-ptolemy-w2y3jt`, the branch that session
   was given, not on this branch; moving it is the owner's call.
+- 29 October 2026: by the owner's approval, this branch fast forwarded from
+  640111c to ce0d153, carrying the two 1.2 commits made on
+  `claude/peaceful-ptolemy-w2y3jt`; no history rewritten. 1.2 continues here.
+- 29 October 2026: G2 decided by the owner: a saved profile keeps syncing
+  ("syncing remains constant when profile is saved"), so the push is
+  unchanged. Recorded in DATA-MAP.md G2.
+- 29 October 2026: the owner asked for 1.2 step 1 (the device half) to start
+  before 2.2's review; built as profile-manager.js 1.6.0 with rows O9 to O18.

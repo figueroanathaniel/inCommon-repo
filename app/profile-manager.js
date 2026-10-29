@@ -1,4 +1,4 @@
-/* profile-manager.js: inCommon multi-profile data layer. V1.3.0
+/* profile-manager.js: inCommon multi-profile data layer. V1.6.0
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -16,6 +16,8 @@
      incommon.p.<pid>.oki         conversation history
      incommon.p.<pid>.oracle      Oracle readings kept on this device, per period
      incommon.p.<pid>.oracleDeep  set once an in-depth reading has been asked for (lets the page prepare the next)
+     incommon.p.<pid>.chartVersions.v1  { v, versions[] } earlier and current births, once one is corrected (1.2)
+     incommon.p.<pid>.chartNotes.v1     { v, notes[] } notes attached to an address in the chart (1.2)
    Legacy (pre-multi-profile) keys are migrated once by migrateLegacyProfile().  */
 (function () {
   'use strict';
@@ -143,6 +145,88 @@
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function drop(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
+  /* ---------- chart versions and chart notes (1.2) --------------------------
+     data-contracts/HD-STUDY-MODEL.md, sections 3 and 4, approved by the owner
+     on 29 October 2026. A corrected birth is a new version, never an
+     overwrite: the profile keeps the current birth where it always has, and
+     the history sits beside it under its own key. A version stores the birth,
+     never the chart, because a stored chart outlives the arithmetic that made
+     it. Notes are attached to an address (the vault's Chart address) and the
+     version they were written against, and they are never moved, rewritten or
+     deleted because the chart changed. */
+  var CHART_NOTE_MAX = 4000;
+  function versionsKey(id) { return 'incommon.p.' + id + '.chartVersions.v1'; }
+  function notesKey(id) { return 'incommon.p.' + id + '.chartNotes.v1'; }
+  function birthFields(p) {
+    return { birth_date: p.birth_date || '', birth_time: p.birth_time || '',
+      birth_time_unknown: p.birth_time_unknown === true, birth_location: p.birth_location || '',
+      birth_lat: p.birth_lat == null ? null : p.birth_lat, birth_lon: p.birth_lon == null ? null : p.birth_lon,
+      timezone: p.timezone || '', tz_offset: p.tz_offset == null ? null : p.tz_offset };
+  }
+  /* The birth record of section 2.2, for a profile. A typed profile has no
+     precision, no source rating and no recorded offset, so those are null and
+     the zone check is not_given. offset_used is what birth-time.js draws the
+     chart with, which is the offset the zone had on that date. */
+  function birthRecord(b) {
+    var BT = window.BirthTime, used = b.tz_offset, state = b.birth_time ? 'known' : b.birth_time_unknown ? 'unknown' : 'unanswered';
+    if (BT && BT.instant) {
+      try {
+        var r = BT.instant({ birthDate: b.birth_date, birthTime: b.birth_time, timeUnknown: b.birth_time_unknown,
+          timezone: b.timezone, tzOffset: b.tz_offset });
+        if (r) { if (typeof r.offset === 'number' && !isNaN(r.offset)) used = r.offset; state = r.timeState || state; }
+      } catch (e) {}
+    }
+    return { date: b.birth_date, time: state === 'known' ? b.birth_time : null, time_state: state,
+      time_precision: null, time_window_min: null, time_source: null,
+      place: b.birth_location, lat: b.birth_lat, lon: b.birth_lon, zone: b.timezone,
+      offset_recorded: null, offset_used: used == null ? null : used, zone_check: 'not_given' };
+  }
+  /* The same hash the pair cache keys on, when people-library.js is loaded,
+     so two births that describe one instant in one place are one version.
+     Without it the raw fields are compared, which can only make a version
+     too many, never one too few. */
+  function birthHash(b) {
+    var PL = window.PeopleLibrary;
+    if (PL && PL.chartHash) {
+      try { var h = PL.chartHash(b); if (h) return h; } catch (e) {}
+    }
+    return 'raw:' + JSON.stringify([b.birth_date, b.birth_time, b.birth_time_unknown, b.birth_lat, b.birth_lon, b.timezone, b.tz_offset]);
+  }
+  function birthReason(a, b) {
+    if (a.birth_date !== b.birth_date) return 'date_corrected';
+    if (a.birth_time !== b.birth_time || a.birth_time_unknown !== b.birth_time_unknown) return 'time_corrected';
+    if (a.birth_lat !== b.birth_lat || a.birth_lon !== b.birth_lon || a.birth_location !== b.birth_location) return 'place_corrected';
+    return 'zone_repaired';
+  }
+  /* An address, as the vault's Chart address note proposes and section 2.3
+     adopts. A channel is checked against the topology's thirty six when that
+     module is loaded, and against the shape alone when it is not. */
+  var CHART_CENTRES = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Sacral', 'Solar Plexus', 'Root'];
+  var CHART_BODIES = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars',
+    'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  var CHART_FACETS = ['type', 'strategy', 'authority', 'profile', 'definition', 'cross'];
+  function gateOk(n) { return /^\d{1,2}$/.test(n) && +n >= 1 && +n <= 64; }
+  function chartAddressOk(a) {
+    var m, s = String(a || '');
+    if ((m = /^centre:(.+)$/.exec(s))) return CHART_CENTRES.indexOf(m[1]) !== -1;
+    if ((m = /^gate:(\d+)$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^line:(\d+)\.([1-6])$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^channel:(\d+)-(\d+)$/.exec(s))) {
+      if (!gateOk(m[1]) || !gateOk(m[2]) || +m[1] >= +m[2]) return false;
+      var T = window.HDTopology;
+      return T && Array.isArray(T.PAIRS) ? T.PAIRS.indexOf(+m[1] + '-' + +m[2]) !== -1 : true;
+    }
+    if ((m = /^activation:(personality|design):(.+)$/.exec(s))) return CHART_BODIES.indexOf(m[2]) !== -1;
+    if ((m = /^facet:(.+)$/.exec(s))) return CHART_FACETS.indexOf(m[1]) !== -1;
+    return false;
+  }
+  /* Key order is not meaning, so the comparison is over sorted keys. */
+  function stable(v) {
+    if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + stable(v[k]); }).join(',') + '}';
+    return JSON.stringify(v);
+  }
+
   /* Non-cryptographic PIN digest. A 4-digit PIN is a courtesy lock on a local
      device, not a security boundary: this is stated plainly in the UI. */
   function pinHash(pin, salt) {
@@ -162,7 +246,7 @@
   }
 
   var PM = {
-    VERSION: '1.5.0',
+    VERSION: '1.6.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -396,7 +480,7 @@
       var s = this._store(), target = null;
       s.profiles.forEach(function (p) { if (p.id === id) target = p; });
       if (!target) throw new Error('No such profile');
-      var birthChanged = false;
+      var birthChanged = false, before = birthFields(target);
       if (patch.name != null && String(patch.name).trim()) target.name = String(patch.name).trim();
       if (patch.avatarColor) target.avatar_color = patch.avatarColor;
       /* Avatar face: 'initials' | 'photo' | 'sign'. The photo is a downscaled data
@@ -428,6 +512,7 @@
         target.location_resolved = geo.resolved;
       }
       this._save(s);
+      if (birthChanged) this._birthMoved(id, before, birthFields(target));
       /* Birth data drives every calculated system: drop all cached charts. */
       if (birthChanged) { this.invalidateCalculations(id); this._emit('profile:recalculated', { id: id }); }
       return this.getProfile(id);
@@ -469,9 +554,122 @@
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
         'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
-        'incommon.p.' + id + '.study'
+        'incommon.p.' + id + '.study', versionsKey(id), notesKey(id)
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
+    },
+
+    /* ---------- chart versions (1.2, HD-STUDY-MODEL.md section 4) ----------
+       Called after a birth field changed and the store was saved. The first
+       birth a profile is given is not a correction, so it makes no version;
+       the first correction writes the old birth as version 1 and the new one
+       as version 2, and every correction after that adds one. The sample
+       chart is nobody's, so replacing it is not a correction either. Clearing
+       the birth date clears the history (O8): a reader who clears their birth
+       data has asked for it to be gone, and a history that kept every earlier
+       birth would defeat the button. Notes stay; they are the reader's own
+       words, and read as unresolved until a birth is given again. */
+    _birthMoved: function (id, before, after) {
+      if (!after.birth_date) { drop(versionsKey(id)); return null; }
+      if (!before.birth_date) return null;
+      if (read(scoped('incommon.sample', scope().owner), '') === id) return null;
+      if (birthHash(before) === birthHash(after)) return null;
+      var rec = read(versionsKey(id), null);
+      if (!rec || !Array.isArray(rec.versions)) rec = { v: 1, versions: [] };
+      var make = function (b, reason) {
+        return { id: uuid(), subject: 'profile:' + id, seq: rec.versions.length + 1, reason: reason,
+          birth: birthRecord(b), chart_hash: birthHash(b), created_at: nowISO() };
+      };
+      var first = null;
+      if (!rec.versions.length) { first = make(before, 'initial'); rec.versions.push(first); }
+      var v = make(after, birthReason(before, after));
+      rec.versions.push(v);
+      if (!write(versionsKey(id), rec)) return null;
+      /* A note written before any correction was written against the birth
+         that is now version 1, so it is given that version's id. */
+      if (first) {
+        var nr = read(notesKey(id), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.version == null; })) {
+          nr.notes.forEach(function (n) { if (n.version == null) n.version = first.id; });
+          write(notesKey(id), nr);
+        }
+      }
+      this._emit('chart:versioned', { id: id, version: v.id, reason: v.reason });
+      return v;
+    },
+    listChartVersions: function (id) {
+      var pid = id || this.activeId();
+      var rec = pid ? read(versionsKey(pid), null) : null;
+      return rec && Array.isArray(rec.versions) ? rec.versions.slice() : [];
+    },
+    /* The version a note written now belongs to: the latest, or null while
+       the birth has never been corrected. */
+    currentChartVersion: function (id) {
+      var list = this.listChartVersions(id);
+      return list.length ? list[list.length - 1] : null;
+    },
+
+    /* ---------- chart notes (1.2, HD-STUDY-MODEL.md section 3) ---------------
+       The reader's own words about a part of their own chart. Kept on the
+       device whatever the consent switches say; the journal consent (O1)
+       decides only whether they leave it, once sync is built. */
+    chartAddressOk: function (a) { return chartAddressOk(a); },
+    listChartNotes: function (id, filter) {
+      var pid = id || this.activeId(), f = filter || {};
+      var rec = pid ? read(notesKey(pid), null) : null;
+      var out = rec && Array.isArray(rec.notes) ? rec.notes.slice() : [];
+      if (f.address) out = out.filter(function (n) { return n.address === f.address; });
+      if (f.version !== undefined) out = out.filter(function (n) { return n.version === f.version; });
+      return out;
+    },
+    addChartNote: function (id, o) {
+      var pid = id || this.activeId();
+      if (!this.getProfile(pid)) throw new Error('No such profile');
+      o = o || {};
+      if (!chartAddressOk(o.address)) throw new Error('Not a chart address: ' + o.address);
+      var text = String(o.text == null ? '' : o.text);
+      if (!text.trim()) throw new Error('A note needs some words');
+      if (text.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      var cur = this.currentChartVersion(pid), at = nowISO();
+      var note = { id: uuid(), subject: 'profile:' + pid, address: o.address, version: cur ? cur.id : null,
+        resolved: o.resolved == null ? null : o.resolved, text: text, created_at: at, updated_at: at };
+      var rec = read(notesKey(pid), null);
+      if (!rec || !Array.isArray(rec.notes)) rec = { v: 1, notes: [] };
+      rec.notes.push(note);
+      if (!write(notesKey(pid), rec)) throw new Error('The note could not be saved on this device');
+      this._emit('chart:note', { id: pid, note: note.id, action: 'added' });
+      return note;
+    },
+    /* Editing changes the words only. What the address resolved to when the
+       note was written stays as it was, because that is what a later reading
+       is compared with. */
+    updateChartNote: function (id, noteId, text) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null), hit = null;
+      var t = String(text == null ? '' : text);
+      if (!t.trim()) throw new Error('A note needs some words');
+      if (t.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      ((rec && rec.notes) || []).forEach(function (n) { if (n.id === noteId) { n.text = t; n.updated_at = nowISO(); hit = n; } });
+      if (!hit) throw new Error('No such note');
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'updated' });
+      return hit;
+    },
+    deleteChartNote: function (id, noteId) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null);
+      var list = (rec && rec.notes) || [], kept = list.filter(function (n) { return n.id !== noteId; });
+      if (kept.length === list.length) return false;
+      rec.notes = kept;
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'deleted' });
+      return true;
+    },
+    /* Section 3.2: the note's address resolved again against the current
+       chart, compared with what it resolved to when written. The caller
+       resolves (it holds the chart); this only compares. */
+    chartNoteStatus: function (note, resolvedNow) {
+      if (!note || resolvedNow == null) return 'unresolved';
+      if (note.resolved == null) return 'unresolved';
+      return stable(note.resolved) === stable(resolvedNow) ? 'same' : 'changed';
     },
 
     /* ---------- PIN ---------- */
@@ -683,7 +881,8 @@
        smaller gazetteer, or that were placed in Puerto Rico with the wrong
        zone. Returns the ids whose charts must be recomputed. */
     reresolveLocations: function () {
-      var s = this._store(), fixed = [], self = this;
+      var s = this._store(), fixed = [], self = this, before = {};
+      s.profiles.forEach(function (p) { before[p.id] = birthFields(p); });
       s.profiles.forEach(function (p) {
         /* A Puerto Rico place saved while the list filed the island under New
            York's zone carries New_York: an hour out every winter. Its
@@ -703,6 +902,9 @@
       });
       if (fixed.length) {
         this._save(s);
+        /* A repair moves the instant, so it is a version like a correction
+           the reader made (the owner's decision O7). */
+        s.profiles.forEach(function (p) { if (fixed.indexOf(p.id) !== -1) self._birthMoved(p.id, before[p.id], birthFields(p)); });
         fixed.forEach(function (id) { self.invalidateCalculations(id); });
         this._emit('profile:recalculated', { ids: fixed });
       }
@@ -862,6 +1064,12 @@
           return all - shown;
         })(this),
         throughline: read('incommon.p.' + pid + '.throughline', []),
+        /* 1.2: the birth's history and the notes on the chart. The notes are
+           withheld while the journal consent is off, as journal entries are,
+           and counted so the export says something was left out. */
+        chartVersions: this.listChartVersions(pid),
+        chartNotes: this.getConsents(pid).journal ? this.listChartNotes(pid) : [],
+        chartNotesWithheld: this.getConsents(pid).journal ? 0 : this.listChartNotes(pid).length,
         sharedWith: this.sharedPartners(pid).map(function (x) { return x.name; })
       };
     },

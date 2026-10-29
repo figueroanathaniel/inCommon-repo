@@ -2935,6 +2935,138 @@ async function runCloudTests() {
     fixed: true, zone: 'America/Puerto_Rico', moved: true
   }, { fixed: (prFixed || []).indexOf(prP.id) !== -1, zone: prAfter.timezone, moved: prAfter.birthStamp !== stampBefore });
 
+  /* ---- O9-O18: chart versions and chart notes (1.2, data-contracts/
+     HD-STUDY-MODEL.md, approved by the owner on 29 October 2026). The device
+     half: a corrected birth is a new version, never an overwrite; a note is
+     attached to an address and the version it was written against; Clear
+     birth data takes the history and leaves the notes; deleting a profile
+     takes both. Every actual is computed inside a guard, so the build before
+     this change reports red rows rather than stopping the suite. */
+  function cv(fn) { try { return fn(); } catch (e) { return { threw: String(e && e.message || e) }; } }
+  var cvDev = ownerStore(), cvPm = pmPage(cvDev);
+  var cvA = cvPm.createProfile({ name: 'Ana', birthDate: '1985-03-10', birthTime: '06:30', birthLocation: 'Chicago' });
+  var cvB = cvPm.createProfile({ name: 'Bea', birthDate: '1990-01-01' });
+  var VK = function (id) { return 'incommon.p.' + id + '.chartVersions.v1'; };
+  var NK = function (id) { return 'incommon.p.' + id + '.chartNotes.v1'; };
+
+  t('O9', 'a profile in the shape before versions existed, edited only by name and avatar, gains no versions and no new key', {
+    versions: 0, key: null
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { name: 'Ana Maria', avatarColor: '#123456' });
+    return { versions: cvPm.listChartVersions(cvA.id).length, key: cvDev.getItem(VK(cvA.id)) };
+  }));
+
+  var cvNoteEarly = cv(function () { return cvPm.addChartNote(cvA.id, { address: 'activation:design:Moon', resolved: { value: '41.2' }, text: 'Before any correction.' }); });
+  t('O10', 'the first correction of a time writes the old birth as version 1 and the new one as version 2, and the profile still holds the new birth', {
+    count: 2, seqs: [1, 2], reasons: ['initial', 'time_corrected'], times: ['06:30', '07:15'], subject: 'profile:' + cvA.id,
+    noChart: true, current: '07:15', currentIsLast: true
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { birthTime: '07:15' });
+    var v = cvPm.listChartVersions(cvA.id);
+    return { count: v.length, seqs: v.map(function (x) { return x.seq; }), reasons: v.map(function (x) { return x.reason; }),
+      times: v.map(function (x) { return x.birth.time; }), subject: v[0].subject,
+      noChart: v.every(function (x) { return !('computed_state' in x) && !('longitudes' in x.birth) && !('gates' in x); }),
+      current: cvPm.getProfile(cvA.id).birthTime, currentIsLast: cvPm.currentChartVersion(cvA.id).id === v[1].id };
+  }));
+
+  t('O11', 'a note written before the first correction is given version 1, and a note written after it the current version', {
+    early: 'v1', late: 'v2'
+  }, cv(function () {
+    var v = cvPm.listChartVersions(cvA.id), early = cvPm.listChartNotes(cvA.id).filter(function (n) { return n.id === cvNoteEarly.id; })[0];
+    var late = cvPm.addChartNote(cvA.id, { address: 'channel:20-34', resolved: { defined: true, by: ['activation:personality:Sun'] }, text: 'After.' });
+    return { early: early.version === v[0].id ? 'v1' : early.version, late: late.version === v[1].id ? 'v2' : late.version };
+  }));
+
+  t('O12', 'a corrected date and then a corrected place each add one version with their own reason; a repeated value adds none', {
+    reasons: ['initial', 'time_corrected', 'date_corrected', 'place_corrected'], seqs: [1, 2, 3, 4]
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11' });
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11' });
+    cvPm.updateProfile(cvA.id, { birthLocation: 'Los Angeles' });
+    var v = cvPm.listChartVersions(cvA.id);
+    return { reasons: v.map(function (x) { return x.reason; }), seqs: v.map(function (x) { return x.seq; }) };
+  }));
+
+  t('O13', 'the first birth a blank profile is given is not a correction, and replacing the sample chart is not one either', {
+    blank: 0, sample: 0
+  }, cv(function () {
+    var e = cvPm.createProfile({ name: 'Cal' });
+    cvPm.updateProfile(e.id, { birthDate: '2000-02-02' });
+    var smp = cvPm.createProfile({ name: 'Default Profile', birthDate: '1990-06-15' });
+    cvDev.setItem('incommon.sample', JSON.stringify(smp.id));
+    cvPm.updateProfile(smp.id, { birthDate: '1979-11-30', birthTime: '23:05' });
+    cvDev.removeItem('incommon.sample');
+    var out = { blank: cvPm.listChartVersions(e.id).length, sample: cvPm.listChartVersions(smp.id).length };
+    cvPm.deleteProfile(e.id, 'Cal'); cvPm.deleteProfile(smp.id, 'Default Profile');
+    return out;
+  }));
+
+  t('O14', 'putting a Puerto Rico place back on Atlantic time is a version of its own, reason zone_repaired (O7)', {
+    reasons: ['initial', 'zone_repaired'], zones: ['America/New_York', 'America/Puerto_Rico']
+  }, cv(function () {
+    var d = ownerStore(), pm = pmPage(d);
+    var p = pm.createProfile({ name: 'Ana', birthDate: '1985-01-01', birthTime: '06:30' });
+    var raw = JSON.parse(d.getItem(ROOTK));
+    raw.profiles.forEach(function (q) { if (q.id === p.id) { q.birth_lat = 18.4655; q.birth_lon = -66.1057; q.timezone = 'America/New_York'; q.tz_offset = -5; } });
+    d.setItem(ROOTK, JSON.stringify(raw));
+    var pm2 = pmPage(d); pm2.reresolveLocations();
+    var v = pmPage(d).listChartVersions(p.id);
+    return { reasons: v.map(function (x) { return x.reason; }), zones: v.map(function (x) { return x.birth.zone; }) };
+  }));
+
+  t('O15', 'addresses: the vault\'s six forms are taken and anything else is refused, before anything is written', {
+    ok: [true, true, true, true, true, true, true], refused: [false, false, false, false, false, false, false], thrown: 7, written: 0
+  }, cv(function () {
+    var good = ['centre:Solar Plexus', 'channel:20-34', 'gate:64', 'line:20.3', 'activation:design:Moon', 'activation:personality:South Node', 'facet:cross'];
+    var bad = ['centre:Spleen ', 'channel:34-20', 'gate:65', 'line:20.7', 'activation:design:Chiron', 'facet:colour', 'gate:20; 1-1'];
+    var before = cvPm.listChartNotes(cvA.id).length, thrown = 0;
+    bad.forEach(function (a) { try { cvPm.addChartNote(cvA.id, { address: a, text: 'x' }); } catch (e) { thrown++; } });
+    return { ok: good.map(function (a) { return cvPm.chartAddressOk(a); }), refused: bad.map(function (a) { return cvPm.chartAddressOk(a); }),
+      thrown: thrown, written: cvPm.listChartNotes(cvA.id).length - before };
+  }));
+
+  t('O16', 'a note compares what its address resolved to then with now: same, changed, or unresolved; editing the words keeps the snapshot', {
+    same: 'same', reordered: 'same', changed: 'changed', unresolved: 'unresolved', kept: { value: '41.2' }, text: 'Edited.', tooLong: true, deleted: true
+  }, cv(function () {
+    var n = cvPm.listChartNotes(cvA.id).filter(function (x) { return x.id === cvNoteEarly.id; })[0];
+    var c = cvPm.listChartNotes(cvA.id, { address: 'channel:20-34' })[0], long = false;
+    var ed = cvPm.updateChartNote(cvA.id, n.id, 'Edited.');
+    try { cvPm.updateChartNote(cvA.id, n.id, new Array(4002).join('a')); } catch (e) { long = true; }
+    var tmp = cvPm.addChartNote(cvA.id, { address: 'gate:1', text: 'temp' });
+    return { same: cvPm.chartNoteStatus(n, { value: '41.2' }),
+      reordered: cvPm.chartNoteStatus(c, { by: ['activation:personality:Sun'], defined: true }),
+      changed: cvPm.chartNoteStatus(c, { defined: false, by: [] }), unresolved: cvPm.chartNoteStatus(n, null),
+      kept: ed.resolved, text: cvPm.listChartNotes(cvA.id).filter(function (x) { return x.id === n.id; })[0].text,
+      tooLong: long, deleted: cvPm.deleteChartNote(cvA.id, tmp.id) && cvPm.listChartNotes(cvA.id).every(function (x) { return x.id !== tmp.id; }) };
+  }));
+
+  t('O17', 'the export carries the versions, withholds the notes while journal is off and counts them, and carries them once it is on', {
+    versions: 4, offNotes: 0, offWithheld: 2, onNotes: 2, onWithheld: 0
+  }, cv(function () {
+    var off = cvPm.exportProfile(cvA.id);
+    cvPm.setConsent('journal', true, cvA.id);
+    var on = cvPm.exportProfile(cvA.id);
+    return { versions: (off.chartVersions || []).length, offNotes: (off.chartNotes || []).length, offWithheld: off.chartNotesWithheld,
+      onNotes: (on.chartNotes || []).length, onWithheld: on.chartNotesWithheld };
+  }));
+
+  t('O18', 'Clear birth data takes the version history and keeps the notes (O8); deleting the profile takes both keys, which erasing the account also names', {
+    clearedVersions: 0, versionKey: null, notesKept: 2, erasedNamed: true, afterDelete: [null, null], otherUntouched: true
+  }, cv(function () {
+    cvPm.updateChartNote(cvA.id, cvPm.listChartNotes(cvA.id)[0].id, 'Still mine.');
+    cvPm.updateProfile(cvA.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+    var cleared = { clearedVersions: cvPm.listChartVersions(cvA.id).length, versionKey: cvDev.getItem(VK(cvA.id)), notesKept: cvPm.listChartNotes(cvA.id).length };
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11', birthTime: '07:15' });
+    cvPm.updateProfile(cvA.id, { birthTime: '08:00' });
+    var named = cvPm.accountStorageKeys();
+    cvPm.addChartNote(cvB.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Bea\'s own.' });
+    cvPm.deleteProfile(cvA.id, 'Ana Maria');
+    cleared.erasedNamed = named.indexOf(VK(cvA.id)) !== -1 && named.indexOf(NK(cvA.id)) !== -1;
+    cleared.afterDelete = [cvDev.getItem(VK(cvA.id)), cvDev.getItem(NK(cvA.id))];
+    cleared.otherUntouched = cvPm.listChartNotes(cvB.id).length === 1;
+    return cleared;
+  }));
+
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
   function mfaHarness(o) {

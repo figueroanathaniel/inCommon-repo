@@ -6817,6 +6817,33 @@ The vault holds no reader's data. Add to it by the same rules as the docs: no
 dash, astral body in prose, and the wiring wherever a heading would otherwise
 say the field's word for it.
 
+## A corrected birth is a version, and a note keeps its address (1.2)
+`data-contracts/HD-STUDY-MODEL.md` is the model for notes on a chart, chart
+versions, other people's charts and import and export. The owner approved its
+nine decisions on 29 October 2026; workstream 2's privacy review is still
+owed, and no table exists until it is done. The device half is built in
+`profile-manager.js` 1.6.0, held by O9 to O18:
+
+- **The profile keeps the current birth where it always has**, and
+  `incommon.p.<pid>.chartVersions.v1` holds the history beside it. A version
+  stores the birth, never the chart. The first birth a profile is given is not
+  a correction, nor is replacing the sample; the first real correction writes
+  version 1 and 2, and a zone repair is a version of its own. Two births with
+  the same `chartHash` are one.
+- **Clear birth data removes the history.** A history that kept every earlier
+  birth would defeat the button. The notes stay.
+- **A note is `{ address, version, resolved, text }`** in
+  `incommon.p.<pid>.chartNotes.v1`. The address is the vault's Chart address
+  form and anything else is refused. `resolved` is what the address meant when
+  the note was written; editing the words never refreshes it, because
+  `chartNoteStatus()` compares it with now. A note is never moved or deleted
+  because the chart changed.
+- **Both keys are in `_dropProfileKeys()`.** A new profile key that is not
+  added there is G5 again.
+
+The owner decided G2 the same day: a saved profile keeps syncing, so the push
+is unchanged.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,
