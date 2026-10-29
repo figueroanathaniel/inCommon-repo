@@ -44,7 +44,7 @@ context, check its duties still fit ("What each agent can do" in
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved | |
 | `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged); its Task 4 continues as 1.4 | DONE | not recorded |
-| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | not recorded |
+| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | primary 29 Oct, pasted by the owner into a Claude Code session; Task 1 drafted as `data-contracts/HD-STUDY-MODEL.md`, awaiting the owner's decisions |
 | `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | DONE | primary, pasted by the owner (date not recorded); delivered as #124 |
 | `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | DONE | secondary 29 Oct, pasted by the owner; that pass was sent back, and the primary's evidence on #125 was accepted in its place |
 | `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | DONE | not delivered; closed without a consult (the vault's Tertiary log) |

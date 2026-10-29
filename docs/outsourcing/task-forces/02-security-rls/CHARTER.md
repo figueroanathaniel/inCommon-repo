@@ -47,7 +47,7 @@ Its secondary is the same model as its primary, so it reviews blind (Helpers, it
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/02-security-rls.md`) | approved | |
 | `2.1-security-first-assignment.txt` | round 1: the private addendum (kept out of this repository), the policies workstream 1 handed over in PR #96, two housekeeping items | READY | not recorded |
-| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | READY (starts after 1.2's model is agreed) | not recorded |
+| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | READY (starts after 1.2's model is agreed) | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model; not started, because Task 1 reviews that model and its author may not review it |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner

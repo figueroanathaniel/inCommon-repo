@@ -262,3 +262,12 @@ hour out for a summer one until f6b38fd (vault notes D-03 and D-04; nothing read
 it yet), and the
 Oracle dossier's Human Design lines are listed in "Oracle dossier (HD part)". No
 key, table or column was added by that work.
+
+## Proposed: notes, chart versions, other people's charts (1.2)
+
+`data-contracts/HD-STUDY-MODEL.md` is the proposed model for notes attached to
+a part of a chart, chart versions, saved people and clients, and import and
+export (assignment 1.2, drafted 29 October 2026 at 18a066b). It is a draft for
+the owner's approval and workstream 2's review: no key, table or column in it
+exists yet, and nothing in the tables above changes until it is approved and
+built. This map is updated to what is true once it is.
