@@ -34,3 +34,10 @@ channel, in data that is stored but not yet shown.
 with workstream 3 for `peopleCompute()` in the app. The fix is to give the
 stored record the same instant `BirthTime.instant()` gives the reader, and bump
 `STATE_VERSION`.
+
+**Fixed, the workstream 1 half, in f6b38fd** (on `taskforce/01-data-schema`).
+`normalize()` asks birth-time.js for the instant, so an unknown time is stored
+at noon where it happened, and `STATE_VERSION` is 4. P27 and P29 in
+`tools/run-module-tests.js` hold it, and both fail on the code before. The app
+half, `peopleCompute()` reading its gates at that same instant, is workstream
+3's.

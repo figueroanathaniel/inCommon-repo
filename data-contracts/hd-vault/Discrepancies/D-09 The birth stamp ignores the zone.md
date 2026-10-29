@@ -34,3 +34,11 @@ zone repair touches (and any later zone only correction).
 **Owner.** Workstream 1 (profile-manager.js owns `birthStamp`; adding the zone
 invalidates every memo and kept reading once, which wants the storage migration
 policy's review).
+
+**Fixed in f6b38fd.** The stamp now ends with the zone and the stored offset.
+Nothing stores the stamp itself; it is derived each time a profile is read.
+What moves once is every memo and slot keyed on it. A kept Oracle reading for
+the current period is asked for again, and the server answers it from its own
+copy, which is keyed on the dossier rather than the stamp. Older kept readings
+age out under the cap of twelve. O8 holds the repair path, and it fails on the
+code before.

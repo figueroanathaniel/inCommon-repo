@@ -1672,8 +1672,10 @@ to an invalid date would have thrown out of a render instead of drawing nothing.
 `lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
 back for all ten bodies.
 
-**`people-library.js` `STATE_VERSION` was 2 for this, and is 3 since the
-Codex comparison changed untimed noon and the angles.** Its own comment says the number
+**`people-library.js` `STATE_VERSION` was 2 for this, 3 after the Codex
+comparison changed untimed noon and the angles, and is 4 since a saved person
+takes the reader's own instant (see "The Human Design logic is mapped in a
+vault").** Its own comment says the number
 moves when the arithmetic of `computed_state` changes, and the bump is what
 invalidates `pair-cache.js`, so no stored composite outlives the positions it
 was made from.
@@ -6781,6 +6783,21 @@ Four things in it are easy to lose:
 - **The tertiary has not been consulted.** Its questions are written out word
   for word in `Verification/Tertiary log`; the positions rest on JPL Horizons
   directly.
+
+**Three of its discrepancies are fixed, and the fixes are the rule now.**
+- **A saved person is drawn for the reader's instant (D-03, D-04).**
+  `people-library.js` asks birth-time.js for it, so a summer birth takes the
+  zone's offset on that date, and an unknown time is noon where it happened.
+  Every time dependent field is still null, by that module's rule 3.
+  `STATE_VERSION` is 4. Do not give the store arithmetic of its own again: a
+  saved person and the reader would then be drawn for two different moments,
+  and both would look right.
+- **The birth stamp ends with the zone and the stored offset (D-09).** A zone
+  correction moves the instant, so a stamp without them let a kept Oracle
+  reading outlive the correction.
+
+P27 to P29 and O8 hold all three. The app half of D-03, where
+`peopleCompute()` reads its gates at that same instant, is workstream 3's.
 
 The vault holds no reader's data. Add to it by the same rules as the docs: no
 dash, astral body in prose, and the wiring wherever a heading would otherwise

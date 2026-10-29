@@ -257,7 +257,8 @@ Where Human Design is computed, stored, sent and read, field by field, is
 `data-contracts/hd-vault/` (assignment 1.3, mapped at 1c02c7c), an Obsidian vault
 whose `00 Index` links every note. The two Human Design items this map already
 holds are described there in full: `incommon.people.v1` records carry a
-`computed_state` whose stored instant is wrong for an untimed birth and an hour
-out for a summer one (vault notes D-03 and D-04; nothing reads it yet), and the
+`computed_state` whose stored instant was wrong for an untimed birth and an
+hour out for a summer one until f6b38fd (vault notes D-03 and D-04; nothing reads
+it yet), and the
 Oracle dossier's Human Design lines are listed in "Oracle dossier (HD part)". No
 key, table or column was added by that work.

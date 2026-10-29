@@ -27,3 +27,6 @@ States ran daylight time through that winter).
 **Severity.** Changes a gate or line in stored data.
 
 **Owner.** Workstream 1, with workstream 3; the same fix as D-03.
+
+**Fixed in f6b38fd**, with [[D-03 Saved people charts store the wrong instant for an untimed birth]]:
+a known time takes the offset its zone had on the birth date. P28 holds it.
