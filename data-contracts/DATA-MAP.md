@@ -238,3 +238,14 @@ local Postgres: "new row violates row-level security policy (USING
 expression)"), which stops their push; profile ids are random UUIDs that are
 not shown anywhere, so this is a hardening item rather than a live hole;
 and `owns_profile()` has no fixed `search_path`.
+
+## Human Design: the logic map is a vault beside this file
+
+Where Human Design is computed, stored, sent and read, field by field, is
+`data-contracts/hd-vault/` (assignment 1.3, mapped at 1c02c7c), an Obsidian vault
+whose `00 Index` links every note. The two Human Design items this map already
+holds are described there in full: `incommon.people.v1` records carry a
+`computed_state` whose stored instant is wrong for an untimed birth and an hour
+out for a summer one (vault notes D-03 and D-04; nothing reads it yet), and the
+Oracle dossier's Human Design lines are listed in "Oracle dossier (HD part)". No
+key, table or column was added by that work.
