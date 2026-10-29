@@ -41928,9 +41928,14 @@ class Component extends DCLogic {
       const t = this.t2000(new Date(o.instant));
       const lons = {};
       this.PLNS.forEach(([n]) => { const v = this.lonOf(n, t); if (v != null) lons[n] = Math.round(v * 1000) / 1000; });
-      const gates = [...this.hdGatesFor({ birthDate: new Date(o.instant).toISOString().slice(0, 10),
-        birthTime: o.timeKnown ? new Date(o.instant).toISOString().slice(11, 16) : '',
-        timeUnknown: !o.timeKnown, timezone: '', tzOffset: 0 })];
+      /* The gates are read at the same instant as the longitudes, which is
+         the instant the store settled on: for an unknown time that is noon
+         where the birth happened, as the reader's own chart is drawn. Handing
+         hdGatesFor() an unknown time here used to put the gates at noon at
+         Greenwich and the longitudes at midnight (1.3, D-03). */
+      const iso = new Date(o.instant).toISOString();
+      const gates = [...this.hdGatesFor({ birthDate: iso.slice(0, 10), birthTime: iso.slice(11, 16),
+        timeUnknown: false, timezone: 'UTC', tzOffset: 0 })];
       const chans = (this.HD_CHANNELS || []).filter(c => gates.indexOf(c[0]) > -1 && gates.indexOf(c[1]) > -1)
         .map(c => c[0] + '-' + c[1]);
       const centers = [...new Set(chans.map(k => k.split('-')).flat().map(g => this.gateCenter(+g)).filter(Boolean))];
@@ -45270,7 +45275,9 @@ class Component extends DCLogic {
       const lon = this.lonOf(n, t), g = this.gateOf(lon);
       acts.push({ body: n, kind: kind, gate: g.gate, line: g.line });
       if (n === 'Sun') { const e = this.gateOf(lon + 180); acts.push({ body: 'Earth', kind: kind, gate: e.gate, line: e.line }); }
-      if (n === 'North Node') { const s = this.gateOf(lon + 180); acts.push({ body: 'South Node', kind: kind, gate: s.gate, line: s.line }); }
+      /* No South Node here: PLNS carries it already, and adding it from the
+         North Node as well made fourteen activations a side where the
+         tradition has thirteen (1.3, D-01). */
     });
     collect(tP, 'personality'); collect(tD, 'design');
     const gset = new Set(acts.map(a => a.gate));
@@ -45296,7 +45303,13 @@ class Component extends DCLogic {
     const counted = new Set(); let parts = 0;
     defined.forEach(c => { if (counted.has(c)) return; parts++; piece(c).forEach(x => counted.add(x)); });
     const definition = this.HD_DEFINITION[Math.min(parts, 4)];
-    const gates = [...gset].sort((a, b) => a - b).map(g => { const a = acts.find(x => x.gate === g); return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '' }; });
+    /* One row per gate, and every way the gate is held on it: a slow body or
+       the node can sit in one gate at both instants on two different lines,
+       and the row used to keep only the first (1.3, D-08). line, body and kind
+       stay the first holding, for the readers that want one. */
+    const gates = [...gset].sort((a, b) => a - b).map(g => { const held = acts.filter(x => x.gate === g), a = held[0];
+      return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '',
+        holds: held.map(x => ({ kind: x.kind, line: x.line, body: x.body })) }; });
     this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts,
       definition: definition, definitionParts: parts };
     return this._hd;
@@ -49725,7 +49738,10 @@ class Component extends DCLogic {
     open: '◌', terms: '◇', example: '✎' };
   HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
     Projector: ['G', 'Ajna'], Reflector: [] };
-  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', self: 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
+  /* Keyed by the first word of an authority's name as authOf() splits it, so
+     Self-projected (G) is 'self-projected': keyed 'self', it lit no centre
+     (1.3, D-05). */
+  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', 'self-projected': 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
   hdShape(name) {
     const q = this.BG_POS[name], x = q[0], y = q[1], w = q[2], h = q[3], cx = x + w / 2, cy = y + h / 2;
     if (name === 'Head' || name === 'Heart') return [[cx, y], [x + w, y + h], [x, y + h]];
@@ -57839,7 +57855,11 @@ class Component extends DCLogic {
             const modes = [['personality', 'Personality'], ['design', 'Design'], ['both', 'Both']].map(([k, label]) => ({
               label: label, on: mode === k, bg: mode === k ? 'var(--ac)' : 'transparent', c: mode === k ? '#05060a' : 'var(--dim)',
               go: () => this.setState({ bgMode: k }) }));
-            const shown = hd.gates.filter(g => mode === 'both' ? true : g.kind === mode);
+            /* A gate shows on a side when that side holds it, not only when
+               its first holding is on that side, and its chip names every
+               line that side holds it at (1.3, D-08). */
+            const sideLines = g => [...new Set((g.holds || [g]).filter(h => mode === 'both' || h.kind === mode).map(h => h.line))].sort((a, b) => a - b);
+            const shown = hd.gates.filter(g => sideLines(g).length > 0);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
             /* The 2D wiring is drawn as the Atlas draws it: the centres in their
@@ -57899,7 +57919,7 @@ class Component extends DCLogic {
                 tag: defined ? 'DEFINED' : 'OPEN', tagC: defined ? 'var(--ok)' : 'var(--dim)',
                 tagBg: defined ? 'rgba(89,179,125,.16)' : 'rgba(238,240,248,.08)',
                 gates: byCenter[c].sort((a, b) => a.gate - b.gate).map(g => ({
-                  n: g.gate, line: '.' + g.line,
+                  n: g.gate, line: sideLines(g).map(l => '.' + l).join(' '),
                   bd: inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
                   bg: inChannel.has(g.gate) ? 'rgba(var(--atmc),.28)' : 'var(--sf2)',
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',

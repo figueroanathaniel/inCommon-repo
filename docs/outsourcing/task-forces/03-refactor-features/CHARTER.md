@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #118 (earlier ones under "History" below) |
+| Standing pull request | #127 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -98,3 +98,9 @@ were approved; from 28 October 2026 that work is committed here.
 - 28 October 2026: 3.2 Task 1, the sleep teaching, worked on this branch
   from 5977935. Its record is `3.2-task1-sleep-record.md`; it stays marked
   "needs Human Design review".
+- 28 October 2026: #118 merged into main by the owner.
+- 29 October 2026: the branch restarted from main at 1c02c7c. By the owner's
+  instruction, the app side of the 1.3 register was fixed on it: D-01, D-05,
+  D-08 and the app half of D-03, in d6e8000, with the bundle rebuilt in
+  3ee7d28. D-02 waits on the Human Design reviewer, D-06 on the owner, and
+  D-07 on 3.2 Task 3. #127 opened as the standing pull request.
