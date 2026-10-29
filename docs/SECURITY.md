@@ -229,3 +229,130 @@ origins, and pins the Edge Function dependencies (stripe 17.7.0,
 supabase-js 2.117.2). Known risk 4 above is thereby closed; risk 3 is
 bounded by the daily reading limit and Turnstile at signup and remains the
 accepted design.
+
+## Other people's charts: chart versions, handouts and exports (assignment 2.2, 29 October 2026)
+
+Assignment 2.2, Tasks 2 and 3, against the model in
+`data-contracts/HD-STUDY-MODEL.md` (the owner approved its decisions O1 to O9
+on 29 October 2026). **Task 1, the privacy review of that model, is not done
+here**: the model was written in the same session, and nobody reviews their
+own work (Helpers, item 2). It goes to a fresh session, and nothing below is
+applied to the live project until it is resolved.
+
+### Who may touch a chart version (Task 2)
+
+`server/migrations/0004-chart-versions.sql` (workstream 1) makes
+`public.chart_versions`, row level security on, no policy.
+`server/migrations/0005-chart-versions-policies.sql` gives it three rules, all
+for `authenticated`, all through `owns_profile(profile_id)`: read, add and
+delete the versions of the reader's own profiles. **There is no update rule**:
+a version is history, so an update matches nothing and an upsert that would
+rewrite one is refused. The sync module (1.2 step 3) must push versions with
+`ignoreDuplicates` (insert, on conflict do nothing), which needs only the add
+rule. `chart_versions` is on the two-step list in `server/mfa-policies.sql`,
+and the account function deletes it with the other profile tables.
+
+**Proven, not assumed**, by `node tools/check-hd-study-rls.js`, which makes a
+throwaway Postgres 16 cluster in a temporary folder, stubs Supabase's auth
+schema, applies the schema of record, every migration and the two-step file,
+and signs in as two readers. It needs the Postgres binaries and says NOT RUN
+(exit 2) without them; it never touches a real project. 16 of 16 cases on the
+full schema: own rows readable and writable, another reader's neither, no
+rewrite, ignoreDuplicates accepted, anon refused, aal1 refused with a verified
+authenticator and aal2 allowed, Clear birth data and profile deletion remove
+the versions, and both files apply twice and undo cleanly. It also runs the
+same cases without the rules (the reader's own writes fail) and without the
+two-step entry.
+
+**A finding from that second run, kept as a rule.** With `chart_versions` off
+the two-step list, an aal1 session was still refused, because
+`owns_profile()` runs as the caller and reads `profiles`, which carries its own
+two-step rule: a child table inherits the refusal. That protection lasts only
+while `owns_profile()` stays SECURITY INVOKER. The gate makes it SECURITY
+DEFINER in a further run and the aal1 read gets through unless the table is
+on the list. So **every new table goes on the two-step list even when it looks
+covered, and `owns_profile()` must not be made SECURITY DEFINER** without
+re-running this gate. K74 in `tools/run-module-tests.js` fails if a table a
+migration adds is missing from the two-step list, or a table keyed by
+`profile_id` is missing from the account function's deletion. (The
+`owns_profile()` search_path noted in `DATA-MAP.md` is still open and is
+2.1's.)
+
+### What a handout and an export may carry (Task 3)
+
+**Measured first.** `node tools/measure-handout-identifiability.js` (fixed
+seed, about 30 seconds) asks how much of a birth a "no birth data" Human Design
+handout gives back. Over 3,000 random births from 1950 to 2010:
+
+| A handout carrying | Births alone in their crowd of 3,000 | Days 1900 to 2100 that fit | Time window around the birth |
+|---|---|---|---|
+| Type, Authority, Profile, Definition | 2.4% (median crowd 23) | | median 13.5 h |
+| and the defined centres | 39% | | median 10.3 h |
+| and the defined channels | 88% | | median 8.8 h |
+| and every gate held | 97% | median 58 | median 5.4 h |
+| every activation with its line | 99.5% | exactly 1 | median 59 min |
+
+Type, Authority and Definition there are this tool's own implementation of the
+standard rules, enough for a measurement and not a check of the app. The
+conclusion does not depend on their details: from the defined centres on, a
+handout is a fingerprint, and the full activation list is the birth date and
+hour by another route.
+
+**So the rules, all in `app/share-rules.js`** (`ShareRules`, shell layer), the
+one place a handout or an export file is shaped. Workstream 3's handout screen
+and 1.2's export (step 5) call it; neither builds a payload of its own.
+
+1. **Nothing is sent.** There is no share link (the owner's decision O6) and no
+   server function for sharing. A handout or an export leaves the device only
+   through the reader's own download or share sheet.
+2. **A handout carries, by default, Type, Strategy, Authority, Profile,
+   Definition and the notes the reader picked**, and on the reader's own chart
+   their first name. Never more than a first name.
+3. **The defined centres, the channels, the gates, the activations, the birth
+   date, the birth time and the birth place are each off until the reader turns
+   it on**, because the measurement puts all of them on the identifying side.
+   The place is a place name, never coordinates or a zone.
+4. **Another person's chart needs their recorded word** for anything in rule 3:
+   `subject_consent` with basis `card` or `stated`, `handout` in its scope, not
+   withdrawn. **A client's chart needs it for any handout at all.** The name is
+   off by default for anybody but the reader. (The model said off for a client;
+   this is stricter, for any other person, and is the owner's to relax.)
+5. **A note travels as its words.** What its address resolved to never
+   travels, and its address goes only beside the part of the chart it names.
+6. **The export is the reader's backup**: their own birth, versions and notes by
+   default, other people only on the separate tick (O5), and an `includes`
+   header that says what the file holds. Without birth data it carries no
+   birth, no version and no resolved value for anybody.
+7. **Nothing is spread.** Every field is named and copied one at a time, and an
+   unknown option is refused rather than ignored, so a misspelled option fails
+   loudly instead of shipping what it meant to leave out.
+
+T1 to T10 in `tools/run-module-tests.js` hold it, against a chart object
+stuffed with everything a screen's chart carries (coordinates, zone, stored
+hash, email, record id, full name, raw longitudes), and search the serialised
+payload for each value. All ten are red without the module; spreading the chart
+into the payload turns T1 to T5 red, skipping the consent check T4 and T5, and
+ignoring an unknown option T6.
+
+**The synastry card is the precedent and stays different.** A card carries a
+birth moment on purpose, sent by the person it describes, which is that
+person's consent; a handout is the reader's summary of a chart and carries no
+birth moment unless rule 3 is turned on.
+
+**If a share link is ever wanted** (O6 reversed), it is a server table and its
+own review: a random token of at least 128 bits, only its SHA-256 stored, an
+expiry, revocation by deleting the row, a payload that is exactly what
+`ShareRules.handout()` returns and nothing else, the owner's rows readable and
+deletable only by them, and the public read through one function that takes
+the token. Not built.
+
+### The owner's steps, in this order, once 2.2 Task 1 is resolved
+
+1. SQL Editor: run `server/migrations/0004-chart-versions.sql`.
+2. SQL Editor: run `server/migrations/0005-chart-versions-policies.sql`.
+3. SQL Editor: run `server/mfa-policies.sql` again; its check query should now
+   list `chart_versions`.
+4. Redeploy the `account` function (it now deletes `chart_versions`; deploying
+   it first is harmless, because it skips a table that does not exist yet).
+5. Nothing syncs to the table until 1.2 step 3 ships, so there is no order
+   between these and the app.

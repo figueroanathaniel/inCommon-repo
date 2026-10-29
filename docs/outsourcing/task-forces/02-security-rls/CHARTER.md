@@ -47,7 +47,7 @@ Its secondary is the same model as its primary, so it reviews blind (Helpers, it
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/02-security-rls.md`) | approved | |
 | `2.1-security-first-assignment.txt` | round 1: the private addendum (kept out of this repository), the policies workstream 1 handed over in PR #96, two housekeeping items | READY | not recorded |
-| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | READY (starts after 1.2's model is agreed) | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model; not started, because Task 1 reviews that model and its author may not review it |
+| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | READY (starts after 1.2's model is agreed) | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model. Tasks 2 and 3 done there at the owner's choice; Task 1 owed by a fresh session, because its author may not review the model |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
@@ -95,3 +95,9 @@ were approved; from 28 October 2026 that work is committed here.
 - 29 October 2026: 1.2's model approved by the owner, so 2.2 can start. Its
   Task 1 (the privacy review of `data-contracts/HD-STUDY-MODEL.md`) goes to a
   session that did not write the model (Helpers, item 2).
+- 29 October 2026: by the owner's choice, the session that wrote 1.2's model
+  did 2.2 Tasks 2 and 3 and not Task 1, which reviews that model and goes to a
+  fresh session. This branch fast forwarded from aab2c41 onto
+  `taskforce/01-data-schema` at b40444d (1.2's 0004 table), so the policies
+  stack on the table they are for; it merges after Task Force 1, as the merge
+  order says.

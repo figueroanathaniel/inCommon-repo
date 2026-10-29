@@ -3097,6 +3097,117 @@ async function runCloudTests() {
     return cleared;
   }));
 
+  /* ---- T1-T10: what a handout and an export may carry (assignment 2.2,
+     Task 3, app/share-rules.js). The rows load the module guarded, so a
+     build without it reports red rows rather than stopping the suite. The
+     chart handed in is stuffed with everything a chart object near the
+     screens carries, and the rows search the serialised payload for each of
+     those values, because a rule that holds for the fields a test names and
+     leaks the ones it did not name is the failure this module exists for. */
+  var SR = null;
+  try { SR = require(path.join(repo, 'app', 'share-rules.js')); } catch (e) { SR = null; }
+  function sr(fn) { try { if (!SR) return { missing: 'share-rules.js' }; return fn(); } catch (e) { return { threw: String(e && e.message || e) }; } }
+  function srChart(kind, consent) {
+    return { kind: kind, name: 'Ana Maria Lopez', type: 'Generator', strategy: 'To respond', authority: 'Sacral',
+      profile: '3/5', definition: 'Single', centres: ['Sacral', 'Throat', 'Root'], channels: ['20-34', '53-42'],
+      gates: [20, 34, 53, 42, 7], activations: [{ side: 'personality', body: 'Sun', gate: 20, line: 3, lon: 301.11 },
+        { side: 'design', body: 'Moon', gate: 34, line: 5 }],
+      birth: { date: '1985-03-10', time: '06:30', place: 'Chicago, Illinois', lat: 41.8781, lon: -87.6298, zone: 'America/Chicago' },
+      birth_date: '1985-03-10', birth_time: '06:30', birth_lat: 41.8781, birth_lon: -87.6298, timezone: 'America/Chicago',
+      tz_offset: -6, chart_hash: 'c0ffee1234abcd', email: 'ana@example.test', id: 'p9f8e7d6c5b4a3921',
+      subject_consent: consent || null,
+      notes: [{ id: 'n1', address: 'facet:type', text: 'Waiting to respond.', resolved: { value: 'Generator' } },
+        { id: 'n2', address: 'activation:design:Moon', text: 'The design Moon again.', resolved: { value: '34.5' } },
+        { id: 'n3', address: 'gate:20', text: 'Not picked.', resolved: { held: true } }] };
+  }
+  var SR_SECRETS = ['1985', '06:30', 'Chicago', '41.87', '87.62', 'America/Chicago', 'c0ffee', 'example.test', 'p9f8e7d6', 'Maria', 'Lopez', '301.11', '34.5'];
+  function srLeaks(obj) { var j = JSON.stringify(obj); return SR_SECRETS.filter(function (v) { return j.indexOf(v) !== -1; }); }
+
+  t('T1', 'a handout of the reader\'s own chart carries Type, Strategy, Authority, Profile, Definition and a first name, and nothing of the wiring or the birth unless asked', {
+    ok: true, keys: 'authority,definition,includes,kind,name,notes,profile,schema,strategy,type', name: 'Ana', wiringOff: true
+  }, sr(function () {
+    var r = SR.handout(srChart('self'));
+    return { ok: r.ok, keys: Object.keys(r.payload).sort().join(','), name: r.payload.name,
+      wiringOff: ['centres', 'channels', 'gates', 'activations', 'birthDate', 'birthTime', 'birthPlace'].every(function (k) { return r.payload.includes[k] === false; }) };
+  }));
+  t('T2', 'none of the birth date, time, place, coordinates, zone, stored hash, email, record id, full name or positions reaches a default handout, wherever the chart object kept them', {
+    leaks: []
+  }, sr(function () { return { leaks: srLeaks(SR.handout(srChart('self'), { notes: ['n1', 'n2'] }).payload) }; }));
+  t('T3', 'each option adds its own part and only that: the place is a name and never coordinates or a zone, and an activation keeps four fields', {
+    centres: ['Sacral', 'Throat', 'Root'], channels: ['20-34', '53-42'], gates: 5, acts: 'body,gate,line,side', birth: { date: '1985-03-10', time: '06:30', place: 'Chicago, Illinois' },
+    placeOnlyLeaks: ['Chicago']
+  }, sr(function () {
+    var all = SR.handout(srChart('self'), { include: { centres: true, channels: true, gates: true, activations: true, birthDate: true, birthTime: true, birthPlace: true } }).payload;
+    var place = SR.handout(srChart('self'), { include: { birthPlace: true } }).payload;
+    return { centres: all.centres, channels: all.channels, gates: all.gates.length, acts: Object.keys(all.activations[0]).sort().join(','),
+      birth: all.birth, placeOnlyLeaks: srLeaks(place) };
+  }));
+  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it needs their recorded word, and a withdrawn word is no word', {
+    plain: true, name: false, refused: 'no_consent', stated: true, card: true, withdrawn: 'no_consent', named: 'Ana'
+  }, sr(function () {
+    var plain = SR.handout(srChart('person'));
+    return { plain: plain.ok, name: 'name' in plain.payload,
+      refused: SR.handout(srChart('person'), { include: { centres: true } }).reason,
+      stated: SR.handout(srChart('person', { basis: 'stated', scope: ['store', 'handout'] }), { include: { gates: true } }).ok,
+      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'] }), { include: { birthDate: true } }).ok,
+      withdrawn: SR.handout(srChart('person', { basis: 'stated', scope: ['handout'], withdrawn_at: '2026-10-29T00:00:00Z' }), { include: { centres: true } }).reason,
+      named: SR.handout(srChart('person'), { include: { name: true } }).payload.name };
+  }));
+  t('T5', 'a client\'s chart: no handout at all without their word, a word that does not cover handouts is not enough, and with it the name still starts off', {
+    none: 'no_consent', notesOnly: 'no_consent', withWord: true, name: false, basisNone: 'no_consent'
+  }, sr(function () {
+    var ok = SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes', 'handout'] }));
+    return { none: SR.handout(srChart('client')).reason,
+      notesOnly: SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes'] })).reason,
+      withWord: ok.ok, name: 'name' in ok.payload,
+      basisNone: SR.handout(srChart('client', { basis: 'none', scope: ['handout'] })).reason };
+  }));
+  t('T6', 'an option the module does not know is refused rather than ignored, so a misspelled one cannot ship what it meant to leave out', {
+    typo: 'unknown_option', detail: 'birthdate', stray: 'unknown_option', kind: 'kind'
+  }, sr(function () {
+    var r = SR.handout(srChart('self'), { include: { birthdate: false } });
+    return { typo: r.reason, detail: r.detail, stray: SR.handout(srChart('self'), { everything: true }).reason,
+      kind: SR.handout({ type: 'Generator' }).reason };
+  }));
+  t('T7', 'notes travel as the reader picked them, as words: what an address resolved to never travels, and an address goes only beside the part it names', {
+    count: 2, first: { text: 'Waiting to respond.', address: 'facet:type' }, second: { text: 'The design Moon again.' },
+    withActs: 'activation:design:Moon', resolvedNever: true
+  }, sr(function () {
+    var a = SR.handout(srChart('self'), { notes: ['n1', 'n2'] }).payload, b = SR.handout(srChart('self'), { notes: ['n2'], include: { activations: true } }).payload;
+    return { count: a.notes.length, first: a.notes[0], second: a.notes[1], withActs: b.notes[0].address,
+      resolvedNever: JSON.stringify([a, b]).indexOf('resolved') === -1 };
+  }));
+  var srSubjects = [
+    { kind: 'self', id: 'pSelf', display_name: 'Ana', birth: { date: '1985-03-10', time: '06:30', place: 'Chicago', lat: 41.8781, lon: -87.6298, zone: 'America/Chicago', secret: 'x' },
+      versions: [{ id: 'v1', seq: 1, reason: 'initial', birth: { date: '1985-03-10', time: '06:15' }, chart_hash: 'h1', created_at: '2026-10-29T00:00:00Z' }],
+      notes: [{ id: 'n1', address: 'gate:20', version: 'v1', text: 'Mine.', resolved: { held: true }, created_at: 'a', updated_at: 'b' }] },
+    { kind: 'person', id: 'pPerson', display_name: 'Bea', birth: { date: '1990-01-01' }, versions: [], notes: [],
+      subject_consent: { basis: 'none', scope: [] } },
+    { kind: 'client', id: 'pClient', display_name: 'Cal', birth: { date: '1970-07-07', time: '10:00' }, versions: [], notes: [],
+      subject_consent: { basis: 'stated', scope: ['store', 'notes', 'handout'], stated_at: '2026-10-01T00:00:00Z' } }];
+  t('T8', 'the reader\'s export carries their own birth, versions and notes and nobody else unless asked, and says so in its header', {
+    schema: 'incommon.charts.v1', includes: { birth_data: true, notes: true, people: false }, kinds: ['self'], versions: 1, notes: 1, resolved: true, extra: false
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, {}, Date.UTC(2026, 9, 29)).file;
+    return { schema: f.schema, includes: f.includes, kinds: f.subjects.map(function (x) { return x.kind; }), versions: f.subjects[0].versions.length,
+      notes: f.subjects[0].notes.length, resolved: !!f.subjects[0].notes[0].resolved, extra: 'secret' in f.subjects[0].birth };
+  }));
+  t('T9', 'with people ticked the export carries them and their recorded word; without birth data it carries no birth, no version and no resolved value for anyone', {
+    kinds: ['self', 'person', 'client'], clientWord: 'stated', noBirth: true, refused: 'unknown_option'
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, { people: true }).file, g = SR.exportFile(srSubjects, { people: true, birthData: false }).file;
+    var j = JSON.stringify(g);
+    return { kinds: f.subjects.map(function (x) { return x.kind; }), clientWord: f.subjects[2].subject_consent.basis,
+      noBirth: g.subjects.every(function (x) { return x.birth === null && x.versions.length === 0; }) && j.indexOf('resolved') === -1 && j.indexOf('1985') === -1 && j.indexOf('1970') === -1,
+      refused: SR.exportFile(srSubjects, { everyone: true }).reason };
+  }));
+  t('T10', 'the module sends nothing and keeps nothing: no network, no storage, no clock beyond the export stamp', {
+    clean: true
+  }, sr(function () {
+    var src = fs.readFileSync(path.join(repo, 'app', 'share-rules.js'), 'utf8').split('\n').filter(function (l) { return !/^\s*(\/\*|\*)/.test(l); }).join('\n');
+    return { clean: !/fetch\(|XMLHttpRequest|localStorage|sessionStorage|indexedDB|navigator\.|document\.|window\./.test(src) };
+  }));
+
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
   function mfaHarness(o) {
@@ -3541,7 +3652,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['T', 'share-rules.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);

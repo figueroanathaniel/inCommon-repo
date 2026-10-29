@@ -6844,6 +6844,28 @@ owed, and no table exists until it is done. The device half is built in
 The owner decided G2 the same day: a saved profile keeps syncing, so the push
 is unchanged.
 
+## A handout is a crowd, and anything past it is birth data (2.2)
+Assignment 2.2, Tasks 2 and 3, on `taskforce/02-security-rls`; `docs/SECURITY.md`
+has the whole account. Task 1, the privacy review of the 1.2 model, is owed by
+a session that did not write the model.
+
+- **`chart_versions` has no update rule**, because a version is history. The
+  push must use `ignoreDuplicates`. `tools/check-hd-study-rls.js` proves the
+  rules on a throwaway Postgres and says NOT RUN without one.
+- **A child table inherits the two-step refusal through `owns_profile()`**
+  only while that function is SECURITY INVOKER. Every new table still goes on
+  the two-step list, and K74 fails when one does not, or when a table keyed by
+  `profile_id` is missing from the account function's deletion.
+- **`app/share-rules.js` is the one place a handout or an export is shaped.**
+  Measured (`tools/measure-handout-identifiability.js`): Type, Authority,
+  Profile and Definition keep a birth in a crowd; the defined centres, the
+  channels, the gates and the activations each make it a fingerprint, and the
+  full activation list names the day and the hour. So those, like the date,
+  time and place, are off until the reader turns each on, need the other
+  person's recorded word when it is not the reader's chart, and a client's
+  chart needs that word for any handout. Nothing is spread, an unknown option is
+  refused, and nothing is sent: there is no share link. T1 to T10 hold it.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,
