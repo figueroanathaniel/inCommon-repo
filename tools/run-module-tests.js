@@ -1061,6 +1061,35 @@ const stubCompute = o => ({
      trip out of a number it does not expose. */
   t('P26', 'the store exposes no last-viewed, streak or completeness field',
     Object.keys(PL.list('p')[0] || {}).filter(k => /streak|last_view|viewed|complete|score/i.test(k)), []);
+
+  /* THE STORED INSTANT IS THE READER'S INSTANT (1.3, D-03 and D-04). A saved
+     person is drawn for the moment birth-time.js gives the reader: the zone's
+     offset on the birth date, and noon where it happened for an unknown time.
+     Before STATE_VERSION 4 an unknown time was midnight at Greenwich and a
+     summer birth took the stored standard offset, an hour late. */
+  const BTm = require(path.join(repo, 'app', 'birth-time.js'));
+  PL.configure({ birthTime: BTm });
+  const iso = x => new Date(PL.normalize(x).instant).toISOString();
+  t('P27', 'an unknown birth time is read at noon where it happened, as the reader is, not midnight at Greenwich',
+    [iso({ birth_date: '1990-03-15', tz_offset: -5, birth_tz: 'America/New_York' }),
+      iso({ birth_date: '1990-03-15', tz_offset: 9, birth_tz: 'Asia/Tokyo' })],
+    ['1990-03-15T17:00:00.000Z', '1990-03-15T03:00:00.000Z']);
+  t('P28', 'a summer birth given with the zone\'s standard offset is read at the offset the zone had that day, and a winter one is unchanged',
+    [iso({ birth_date: '1985-07-01', birth_time: '14:00', tz_offset: -5, birth_tz: 'America/New_York' }),
+      iso({ birth_date: '1985-01-15', birth_time: '14:00', tz_offset: -5, birth_tz: 'America/New_York' })],
+    ['1985-07-01T18:00:00.000Z', '1985-01-15T19:00:00.000Z']);
+  const cases = [
+    { birth_date: '1990-03-15', tz_offset: -5, birth_tz: 'America/New_York' },
+    { birth_date: '1985-07-01', birth_time: '14:00', tz_offset: -5, birth_tz: 'America/New_York' },
+    { birth_date: '1972-06-30', birth_time: '23:30', tz_offset: 0, birth_tz: 'Europe/London' },
+    { birth_date: '2001-11-02', birth_time: '06:15', tz_offset: 5.5, birth_tz: 'Asia/Kolkata' },
+    { birth_date: '1999-12-31', birth_time: '12:00', tz_offset: -3 },
+    { birth_date: '1966-02-14', tz_offset: 10, birth_tz: 'Australia/Sydney' }];
+  t('P29', 'for every case, the store and birth-time.js agree on the instant to the millisecond, and the version that marks the change is 4',
+    { same: cases.map(() => true), v: 4 },
+    { same: cases.map(c => PL.normalize(c).instant === BTm.instant({ birthDate: c.birth_date, birthTime: c.birth_time || '',
+      timeUnknown: !c.birth_time, timezone: c.birth_tz || '', tzOffset: c.tz_offset }).date.getTime()), v: PL.STATE_VERSION });
+  PL.configure({ birthTime: null });
 })();
 
 /* ------------------------------------------------------ Q: the pair cache */
@@ -2888,6 +2917,23 @@ async function runCloudTests() {
     released: true, guestProfiles: ['Nate'], firstrunPlain: 'true', scopedGone: true, bKept: true
   }, { released: released, guestProfiles: guest.listProfiles().map(function (p) { return p.name; }), firstrunPlain: dev.getItem('incommon.firstrun'),
     scopedGone: dev.getItem(ROOTK + '.u.' + UA) === null && dev.getItem('incommon.firstrun.u.' + UA) === null, bKept: dev.getItem(ROOTK + '.u.' + UB) !== null });
+
+  /* THE STAMP CARRIES THE ZONE (1.3, D-09). reresolveLocations() puts a
+     Puerto Rico place saved under New York's zone back on Atlantic time and
+     keeps its coordinates. The instant moves an hour, so the stamp every chart
+     cache and every kept Oracle reading is keyed on has to move with it. */
+  var prDev = ownerStore();
+  var prPm = pmPage(prDev);
+  var prP = prPm.createProfile({ name: 'Ana', birthDate: '1985-01-01', birthTime: '06:30' });
+  var prRaw = JSON.parse(prDev.getItem(ROOTK));
+  prRaw.profiles.forEach(function (q) { if (q.id === prP.id) { q.birth_lat = 18.4655; q.birth_lon = -66.1057; q.timezone = 'America/New_York'; q.tz_offset = -5; } });
+  prDev.setItem(ROOTK, JSON.stringify(prRaw));
+  var prPm2 = pmPage(prDev), stampBefore = prPm2.getProfile(prP.id).birthStamp;
+  var prFixed = prPm2.reresolveLocations();
+  var prAfter = pmPage(prDev).getProfile(prP.id);
+  t('O8', 'putting a Puerto Rico place back on Atlantic time moves the birth stamp, so no cache keyed on it outlives the correction', {
+    fixed: true, zone: 'America/Puerto_Rico', moved: true
+  }, { fixed: (prFixed || []).indexOf(prP.id) !== -1, zone: prAfter.timezone, moved: prAfter.birthStamp !== stampBefore });
 
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
