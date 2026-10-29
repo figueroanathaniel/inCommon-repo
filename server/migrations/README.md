@@ -41,8 +41,14 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    two-person consent records that name it, as the device already does.
    Needs 0001's `pairs (profile_b)` index to stay a lookup.
 
-None of them creates a table, so `server/mfa-policies.sql` does not need to be
-run again for them.
+4. `0004-chart-versions.sql`: the chart version history (1.2,
+   `data-contracts/HD-STUDY-MODEL.md` section 4), row level security on and
+   no policy. **Do not apply until workstream 2's privacy review of the model
+   (2.2 Task 1) is resolved**, and apply it with its policies, which are
+   workstream 2's.
+
+0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
+run again for them. 0004 does, once its policies are in.
 
 Proven on 27 October 2026 against Postgres 16 with `server/cloud-schema.sql`
 (from its v2 section), `server/oracle/schema.sql`, `server/store/schema.sql`,
