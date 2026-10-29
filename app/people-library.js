@@ -56,8 +56,13 @@
      3: a birth with no time is drawn at noon where it happened rather than
      noon at Greenwich, and the angles take the apparent sidereal time and the
      true obliquity, both as the Celestial Codex did, so a stored untimed
-     longitude and a stored Ascendant are each from arithmetic that is gone. */
-  var STATE_VERSION = 3;
+     longitude and a stored Ascendant are each from arithmetic that is gone.
+     4: the stored instant is the one the reader's own chart is drawn for,
+     from birth-time.js: a summer birth takes the offset its zone had on that
+     date rather than the stored standard one, and a birth with no time is
+     noon where it happened rather than midnight at Greenwich (1.3, D-03 and
+     D-04), so every stored record and every cached composite moves. */
+  var STATE_VERSION = 4;
   var KEY = 'incommon.people.v1';
   var LEGACY_KEY = 'incommon.friends';
   var MAX_PEOPLE = 12;
@@ -115,7 +120,7 @@
   }
 
   /* ---------- wiring ------------------------------------------------------- */
-  var store = null, compute = null, clock = null;
+  var store = null, compute = null, clock = null, birthTimeMod = null;
   /* The app injects the chart engine; the tests inject a plain object and a
      stub. Nothing in this file knows how to compute a chart, which is what
      keeps the store testable without a browser. */
@@ -124,6 +129,17 @@
     if (opts.store !== undefined) store = opts.store;
     if (opts.compute !== undefined) compute = opts.compute;
     if (opts.now !== undefined) clock = opts.now;
+    if (opts.birthTime !== undefined) birthTimeMod = opts.birthTime;
+  }
+  /* birth-time.js decides what instant a birth is drawn for, everywhere. The
+     store asks it rather than doing its own arithmetic, so a saved person and
+     the reader's own chart cannot be drawn for two different moments. It is
+     found the way the app finds it, on the global, unless a caller hands one
+     in; without it the store falls back to the same rule written out. */
+  function birthTimeModule() {
+    if (birthTimeMod) return birthTimeMod;
+    try { if (typeof self !== 'undefined' && self.BirthTime) return self.BirthTime; } catch (e) {}
+    return null;
   }
   function backing() {
     if (store) return store;
@@ -156,12 +172,27 @@
     var time = String(b.birth_time || b.birthTime || '');
     var known = /^\d{2}:\d{2}$/.test(time);
     var offset = b.tz_offset != null ? +b.tz_offset : (b.tzOffset != null ? +b.tzOffset : 0);
+    var tz = String(b.birth_tz || b.timezone || '');
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-    var hh = known ? +time.slice(0, 2) : 0, mi = known ? +time.slice(3, 5) : 0;
-    /* An unknown time has no instant. It gets the date at 00:00 UTC as its
-       canonical marker and a flag, so two unknown-time records for the same
-       day and place are the same record and neither pretends to a moment. */
-    var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], known ? hh : 0, known ? mi : 0) - (known ? offset * 36e5 : 0);
+    /* THE INSTANT IS THE ONE THE READER'S OWN CHART IS DRAWN FOR. A known time
+       takes the offset the zone had on the birth date, not the stored one,
+       because a gazetteer stores the standard offset and a summer birth would
+       otherwise be an hour late. An unknown time is drawn at 12:00 noon where
+       it happened, exactly as birth-time.js draws it for the reader; the flag
+       still says the time is unknown, and every time dependent field is still
+       null (rule 3), so the noon is where the time independent part is read
+       from, never a claim about the hour. Two unknown-time records for the
+       same day and zone are still the same record. */
+    var BT = birthTimeModule(), ms = null;
+    if (BT && BT.instant) {
+      var r = BT.instant({ birthDate: date, birthTime: known ? time : '', timeUnknown: !known,
+        timezone: tz, tzOffset: offset });
+      if (r && r.date && isFinite(r.date.getTime())) ms = r.date.getTime();
+    }
+    if (ms == null) {
+      var hh = known ? +time.slice(0, 2) : 12, mi = known ? +time.slice(3, 5) : 0;
+      ms = Date.UTC(+m[1], +m[2] - 1, +m[3], hh, mi) - offset * 36e5;
+    }
     var lat = b.birth_lat != null ? +b.birth_lat : (b.birthLat != null ? +b.birthLat : null);
     var lon = b.birth_lon != null ? +b.birth_lon : (b.birthLon != null ? +b.birthLon : null);
     return {
