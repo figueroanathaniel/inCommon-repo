@@ -226,6 +226,18 @@ whatever was typed,
 and a profile id made where `crypto.randomUUID` is missing is `p-...`, which the
 uuid column already refuses (follow-up, client: such a device can never sync).
 
+**G15. Two Human Design stores with no consent category and no export path
+(follow-up, client and decision).** Found by assignment 1.3's step 7 check.
+Saved people (`incommon.people.v1`, whose records carry `computed_state`) are in
+no consent category: the table above has none for them, and `relationships`
+gates nothing synced. The Oracle dossier is sent under the Oracle's own mark,
+`incommon.p.<pid>.oracleConsent`, which is not one of the categories either.
+`ProfileManager.exportProfile()` carries the profile, consents, memories and the
+Throughline, and neither saved people nor the kept Oracle readings
+(`incommon.p.<pid>.oracle`), so a reader's export holds neither. The deletion
+half for saved people is G6. Whether saved people take a category, and whether
+either store joins the export, is a product and privacy choice.
+
 ## Tables that need policies from workstream 2
 
 No table was created by this work, so none starts with deny all. For the
@@ -238,3 +250,15 @@ local Postgres: "new row violates row-level security policy (USING
 expression)"), which stops their push; profile ids are random UUIDs that are
 not shown anywhere, so this is a hardening item rather than a live hole;
 and `owns_profile()` has no fixed `search_path`.
+
+## Human Design: the logic map is a vault beside this file
+
+Where Human Design is computed, stored, sent and read, field by field, is
+`data-contracts/hd-vault/` (assignment 1.3, mapped at 1c02c7c), an Obsidian vault
+whose `00 Index` links every note. The two Human Design items this map already
+holds are described there in full: `incommon.people.v1` records carry a
+`computed_state` whose stored instant was wrong for an untimed birth and an
+hour out for a summer one until f6b38fd (vault notes D-03 and D-04; nothing reads
+it yet), and the
+Oracle dossier's Human Design lines are listed in "Oracle dossier (HD part)". No
+key, table or column was added by that work.

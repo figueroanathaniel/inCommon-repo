@@ -108,9 +108,9 @@ mirror the status.
 
 | # | Seat | Assignment | Status |
 |---|---|---|---|
-| 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | READY |
-| 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | READY |
-| 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | READY |
+| 1 | Primary | task-forces/01-data-schema/1.3-hd-mapping-primary.txt (1.3) | DONE |
+| 1 | Secondary | task-forces/01-data-schema/1.3-hd-mapping-secondary.txt | DONE |
+| 1 | Tertiary | task-forces/01-data-schema/1.3-hd-mapping-tertiary.txt | DONE |
 | 1 | Primary | task-forces/01-data-schema/1.4-schema-followups-assignment.txt (1.4) | READY |
 | 4 | Primary | task-forces/04-visuals-webgl/4.3-webgl-engine-doc-assignment.txt (4.3) | READY |
 | 6 | Primary | task-forces/06-qa-tests-docs/6.3-integration-validation-assignment.txt (6.3) | READY |

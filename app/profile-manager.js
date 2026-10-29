@@ -300,8 +300,13 @@
         /* The stamp is what invalidates every cached chart, so the answer to
            the time question belongs in it: saying "I do not know" changes what
            the app is allowed to draw, and a cache that survived that change
-           would keep drawing the old answer. */
-        birthStamp: [p.birth_date, p.birth_time, p.birth_lat, p.birth_lon, p.birth_time_unknown ? 'u' : ''].join('|')
+           would keep drawing the old answer. The zone and the stored offset
+           belong in it for the same reason: they move the birth instant, and
+           reresolveLocations() changes a zone while keeping the coordinates,
+           so a stamp without them let a kept Oracle reading and the Cycle
+           Audit scan outlive the correction (1.3, D-09). */
+        birthStamp: [p.birth_date, p.birth_time, p.birth_lat, p.birth_lon, p.birth_time_unknown ? 'u' : '',
+          p.timezone || '', p.tz_offset == null ? '' : p.tz_offset].join('|')
       };
       out.isDefault = p.id === (s || this._store()).defaultId;
       out.hasBirthTime = !!(p.birth_time && /^\d{2}:\d{2}$/.test(p.birth_time));

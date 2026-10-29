@@ -1672,8 +1672,10 @@ to an invalid date would have thrown out of a render instead of drawing nothing.
 `lonRaw()` hands a non-finite `t` to the series, and the gate asserts NaN comes
 back for all ten bodies.
 
-**`people-library.js` `STATE_VERSION` was 2 for this, and is 3 since the
-Codex comparison changed untimed noon and the angles.** Its own comment says the number
+**`people-library.js` `STATE_VERSION` was 2 for this, 3 after the Codex
+comparison changed untimed noon and the angles, and is 4 since a saved person
+takes the reader's own instant (see "The Human Design logic is mapped in a
+vault").** Its own comment says the number
 moves when the arithmetic of `computed_state` changes, and the bump is what
 invalidates `pair-cache.js`, so no stored composite outlives the positions it
 was made from.
@@ -6755,6 +6757,65 @@ gone. `task-forces/README.md` is the shape and the list, and
 seat changes only with the owner's approval, in the roster and the charter's
 History, and an assignment's approval and its delivery to the seats are
 recorded separately.
+
+## The Human Design logic is mapped in a vault (assignment 1.3)
+`data-contracts/hd-vault/` is the map of every place the build computes,
+stores, sends or reads Human Design, written as notes an Obsidian vault opens
+(`00 Index` links all of them; `.obsidian/` is ignored). It was mapped from the
+code at 1c02c7c, and every note's `source:` lines are `file:line at 1c02c7c`, so
+**a line number there is a record of that commit, not a live pointer**: map
+again rather than nudging numbers by hand.
+
+Four things in it are easy to lose:
+
+- **The Chart address note is a proposal for 1.2**, not code: `centre:<name>`,
+  `channel:<low>-<high>`, `gate:<n>`, `line:<gate>.<line>`,
+  `activation:<side>:<body>`, `facet:<name>`, with an activation addressed by
+  who it is rather than where it landed.
+- **Everything duplicated agreed except what the Discrepancies notes list**:
+  the channel and centre tables, `gateOf()` against `HDWheel` over 362,001
+  longitudes, `hdChart()` against `hdGatesFor()`, `HDTransit`, the Circle and
+  the composite, and Type, Authority and Definition against an independent
+  implementation over 100,000 random channel sets.
+- **The lunar node is the open convention** (D-06): the app draws the mean
+  node, and the true node would change the Type in 89 of 2,000 births. It stays
+  disputed until a primary source is read.
+- **The tertiary has not been consulted.** Its questions are written out word
+  for word in `Verification/Tertiary log`; the positions rest on JPL Horizons
+  directly.
+
+**Three of its discrepancies are fixed, and the fixes are the rule now.**
+- **A saved person is drawn for the reader's instant (D-03, D-04).**
+  `people-library.js` asks birth-time.js for it, so a summer birth takes the
+  zone's offset on that date, and an unknown time is noon where it happened.
+  Every time dependent field is still null, by that module's rule 3.
+  `STATE_VERSION` is 4. Do not give the store arithmetic of its own again: a
+  saved person and the reader would then be drawn for two different moments,
+  and both would look right.
+- **The birth stamp ends with the zone and the stored offset (D-09).** A zone
+  correction moves the instant, so a stamp without them let a kept Oracle
+  reading outlive the correction.
+
+P27 to P29 and O8 hold all three.
+
+**Four more are fixed on `taskforce/03-refactor-features`, in d6e8000**, and
+R1 to R4 hold them. Each of those rows lifts its piece out of the shipped app
+file and fails on the code before.
+- **D-01:** each side carries thirteen activations, because PLNS already
+  holds the South Node. Do not derive it from the North Node again.
+- **D-05:** `HD_AUTH_CENTRE` is keyed `self-projected`, as `authOf()` splits
+  the name.
+- **D-08:** a gate row carries every holding in `holds`, and the gate list
+  shows every line.
+- **D-03, the app half:** `peopleCompute()` reads the gates at the stored
+  instant.
+
+D-02 (which gate names are right) waits on the Human Design reviewer, D-06 on
+the owner, and D-07 on 3.2's inspection panel.
+
+The vault holds no reader's data. Add to it by the same rules as the docs: no
+dash, astral body in prose, and the wiring wherever a heading would otherwise
+say the field's word for it.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
