@@ -1,9 +1,9 @@
 # The Human Design study model: notes, chart versions, other people's charts, import and export
 
-Assignment 1.2, Task 1. **Status: DRAFT, for the owner's approval and for
-workstream 2's privacy review (2.2 Task 1). Nothing in it is built.** No
-migration, key or screen is written until the owner approves the decisions in
-section 1 and workstream 2 has reviewed section 9.
+Assignment 1.2, Task 1. **Status: the owner approved O1 to O9 as recommended
+on 29 October 2026. Awaiting workstream 2's privacy review (2.2 Task 1).
+Nothing in it is built.** No migration is written until that review is
+resolved; a finding from it changes this file first.
 
 Written 29 October 2026 from the code at `main` 18a066b. Every "today" claim
 names the file it was read from. Where a sentence is a proposal it says so;
@@ -36,8 +36,18 @@ that; section 9 asks workstream 2 to look at it.
 
 ## 1. The decisions that are the owner's
 
-Each has a recommendation and the reason. Nothing that depends on a decision
-is built until it is made.
+**Decided by the owner on 29 October 2026: every recommendation below, O1 to
+O9, as written.** So: own chart notes under `journal`; own notes and versions
+sync with the profile; other people's charts stay on the device; clients are
+`kind: 'client'` in the one store, their cap left to D4; the export carries
+people only on a separate tick, off by default; no share link; a zone repair
+makes a version; Clear birth data removes the history; no `.mmi` import until
+its shape is public or licensed. The table keeps the options and reasons as
+the record of what was weighed.
+
+One thing O2 does not settle: versions follow the profile row, and whether the
+birthData switch stops the profile row syncing is still G2, which is the
+owner's under 1.4.
 
 | # | Decision | Options | Recommended | Why |
 |---|---|---|---|---|
@@ -364,7 +374,7 @@ for: a profile with no versions changing its time (version 1 and 2 appear), an
 edit that changes only the name (none appears), Clear birth data (versions
 gone, notes kept), delete profile (both keys gone).
 
-### 7.2 On the server, only under O2 (b)
+### 7.2 On the server (O2 (b), decided)
 
 | Object | Change | RLS |
 |---|---|---|
@@ -389,7 +399,7 @@ still name it, as it names the others).
 
 ### 7.3 Nothing on the server for other people
 
-Under O3 (A) there is no table for saved people, clients, their versions or
+Under O3 (A), decided, there is no table for saved people, clients, their versions or
 their notes. Under (B) or (C) the table would be workstream 1's and its rules
 workstream 2's, designed then.
 
@@ -454,7 +464,7 @@ stubbed auth schema, each migration idempotent with its DOWN:
 
 1. Device: `chartVersions` and `chartNotes` keys, ProfileManager writers,
    `_dropProfileKeys()`, Clear birth data, exports; harness rows (7.1).
-2. Server, if O2 (b): `0004-chart-versions.sql` (the table, RLS on, no
+2. Server (O2 (b)): `0004-chart-versions.sql` (the table, RLS on, no
    policies) and `0005-memories-chart-note.sql` (the widened check), handed to
    workstream 2 for policies before the owner applies them.
 3. Client sync, after the server is widened: `SYNC_MEMORY_TYPES`, K69, the

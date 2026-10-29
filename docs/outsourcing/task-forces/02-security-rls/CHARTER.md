@@ -92,3 +92,6 @@ were approved; from 28 October 2026 that work is committed here.
   finding is a commit series on this branch. E11: 2.1 no longer waits on the
   graphics update.
 - 28 October 2026: #117 opened as the standing pull request.
+- 29 October 2026: 1.2's model approved by the owner, so 2.2 can start. Its
+  Task 1 (the privacy review of `data-contracts/HD-STUDY-MODEL.md`) goes to a
+  session that did not write the model (Helpers, item 2).
