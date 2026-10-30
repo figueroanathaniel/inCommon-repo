@@ -149,3 +149,10 @@ October 2026, so it is left alone; the file is here now.
   F7, F8, F10, F11 and F3 fixed or specified in the model; 0004's hash column
   renamed `birth_key` before anything was applied. F2 and F9 wait on the
   owner. The review's own text is not in the repository.
+- 30 October 2026: the owner decided F2 ("no, and absolutely fix that. it
+  serves no purpose if it defaults with no option") and F9 ("(b), with the
+  privacy policy wording from (a). Also, introduce (c). Separate the primary
+  profiles from the friends."). Built in incommon-cloud.js buildPlan and pull
+  and profile-manager.js 1.7.0, rows K75 to K81; Privacy Policy section 5
+  dated 30 October 2026. The screens, the Oracle and card refusals and the
+  section 14 sentence are workstream 3's, specified in the model's section 13.

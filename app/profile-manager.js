@@ -1,4 +1,4 @@
-/* profile-manager.js: inCommon multi-profile data layer. V1.6.1
+/* profile-manager.js: inCommon multi-profile data layer. V1.7.0
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -249,7 +249,7 @@
   }
 
   var PM = {
-    VERSION: '1.6.1',
+    VERSION: '1.7.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -340,8 +340,36 @@
         return { id: p.id, name: p.name, avatarColor: p.avatar_color, initials: initials(p.name),
           avatarKind: p.avatar_kind || 'initials', avatarImage: p.avatar_image || '', avatarSign: p.avatar_sign || '',
           isActive: p.id === s.activeId, isDefault: p.id === s.defaultId, birthDate: p.birth_date, birthTime: p.birth_time,
-          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at };
+          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at, forOther: p.for_other === true };
       });
+    },
+    /* The reader's own profiles and the ones made for somebody else, apart
+       (privacy review F9, the owner's (c) of 30 October 2026). A screen that
+       lists profiles shows the two as two groups, never one list. */
+    ownProfiles: function () { return this.listProfiles().filter(function (p) { return !p.forOther; }); },
+    otherProfiles: function () { return this.listProfiles().filter(function (p) { return p.forOther; }); },
+    /* A profile made for somebody else stays on this device: the sync module
+       sends nothing of it and asks the server to delete any copy it already
+       holds, which the 'profile:for-other' event queues. It is the owner's (b)
+       of 30 October 2026, the rule section 5 of HD-STUDY-MODEL.md keeps for
+       every other person's chart. The Oracle and the card are the app's to
+       refuse for it, through isForOther(). */
+    isForOther: function (id) {
+      var s = this._store(), pid = id || s.activeId, hit = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.for_other === true) hit = true; });
+      return hit;
+    },
+    setProfileForOther: function (id, on) {
+      var s = this._store(), target = null;
+      s.profiles.forEach(function (p) { if (p.id === id) target = p; });
+      if (!target) throw new Error('No such profile');
+      if (!!on === (target.for_other === true)) return this.getProfile(id);
+      /* The key is absent rather than false on the reader's own profiles, so
+         a profile that was never marked hashes exactly as it did before. */
+      if (on) target.for_other = true; else delete target.for_other;
+      this._save(s);
+      this._emit('profile:for-other', { id: id, forOther: !!on });
+      return this.getProfile(id);
     },
     count: function () { return this._store().profiles.length; },
     atCapacity: function () { return this.count() >= MAX_PROFILES; },
@@ -383,7 +411,7 @@
         birthDate: p.birth_date || '', birthTime: p.birth_time || '', birthLocation: p.birth_location || '',
         birthLat: p.birth_lat == null ? null : p.birth_lat, birthLon: p.birth_lon == null ? null : p.birth_lon,
         tzOffset: p.tz_offset == null ? null : p.tz_offset, timezone: p.timezone || '',
-        locationResolved: !!p.location_resolved,
+        locationResolved: !!p.location_resolved, forOther: p.for_other === true,
         /* The stamp is what invalidates every cached chart, so the answer to
            the time question belongs in it: saying "I do not know" changes what
            the app is allowed to draw, and a cache that survived that change
@@ -464,13 +492,15 @@
         location_resolved: geo.resolved,
         birth_time_unknown: opts.timeUnknown === true
       };
+      if (opts.forOther === true) p.for_other = true;
       s.profiles.push(p);
       if (!s.activeId || s.profiles.length === 1) s.activeId = p.id;
       if (!s.defaultId) s.defaultId = p.id;
       this._save(s);
-      /* Memory consents start off. birthData is not a toggle: entering birth data
-         IS the consent for the calculations it feeds, disclosed at creation and
-         revocable only by deleting the profile. */
+      /* Memory consents start off. birthData starts on with a birth date: it
+         is "Save my profile to my account", and since 30 October 2026 the sync
+         module reads it (privacy review F2, the owner: "it serves no purpose
+         if it defaults with no option"). Off keeps the birth on this device. */
       this.initConsents(p.id);
       if (p.birth_date) this.setConsent('birthData', true, p.id);
       this.invalidateCalculations(p.id);
@@ -719,7 +749,30 @@
     getConsents: function (id) {
       var rec = read(this.keyFor('incommon.consent', id), null), out = {};
       CONSENT_TYPES.forEach(function (t) { out[t] = !!(rec && rec.consents && rec.consents[t] && rec.consents[t].granted); });
+      if (!out.birthData && this._birthUndecided(id, rec)) out.birthData = true;
       return out;
+    },
+    /* birthData that was never decided reads as on while the profile holds a
+       birth date, because that is what createProfile has always recorded and
+       what every profile given its birth later was synced as. Only a decision,
+       the switch turned off, reads as off. Without this a profile given its
+       birth after it was made would show the switch off while it synced, and
+       would stop syncing the moment the push started reading the switch. */
+    _birthUndecided: function (id, rec) {
+      var c = rec && rec.consents && rec.consents.birthData;
+      if (c && c.updatedAt) return false;
+      var s = this._store(), pid = id || s.activeId, has = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.birth_date) has = true; });
+      return has;
+    },
+    /* One consent as the sync module needs it to merge with the account's
+       ledger: what it reads now, and when it was decided (null if never). */
+    consentState: function (type, id) {
+      var rec = read(this.keyFor('incommon.consent', id), null);
+      var c = rec && rec.consents && rec.consents[type];
+      var granted = !!(c && c.granted);
+      if (type === 'birthData' && !granted && this._birthUndecided(id, rec)) granted = true;
+      return { granted: granted, at: c && c.updatedAt ? c.updatedAt : null };
     },
     setConsent: function (type, granted, id) {
       var pid = id || this.activeId(), k = this.keyFor('incommon.consent', pid), rec = read(k, null), ts = nowISO();

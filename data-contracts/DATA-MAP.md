@@ -31,7 +31,7 @@ What this does not cover, because the repository does not hold it:
 | Owning account | (the session) | (none) | `profiles.account_id`, `accounts.id` | none | push |
 | Name | same | `name` | `profiles.name` | none | push, pull |
 | Avatar | same | `avatar_color`, `avatar_kind`, `avatar_image` (a data URL photo), `avatar_sign` | same names | none | push, pull |
-| Birth date, time, place | same | `birth_date`, `birth_time`, `birth_location` | same names (text) | none: birthData is not checked by the push (G2) | push, pull |
+| Birth date, time, place | same | `birth_date`, `birth_time`, `birth_location` | same names (text) | birthData, "Save my profile to my account": off sends these empty (G2, since 30 October 2026) | push, pull |
 | Coordinates and zone | same | `birth_lat`, `birth_lon`, `timezone`, `tz_offset`, `location_resolved` | same names | none | push, pull |
 | Time question answered "unknown" | same | `birth_time_unknown` | `profiles.birth_time_unknown` | none | push, pull |
 | PIN | same | `pin_hash` (salted by profile id) | `profiles.pin_hash`; `pin_updated_at` written only by `completePinRecovery()` | none | push, pull |
@@ -81,7 +81,7 @@ write the same record, `incommon.consent.<pid>`.
 
 | Category | Gates sync of | Gates on the device |
 |---|---|---|
-| `birthData` | nothing: profile rows always go up (G2). Settings labels it "Save my profile to my account". | set on when a profile is made with a birth date, and by the registration card |
+| `birthData` | the birth fields of the profile row: off, they go up empty and the account's copy loses them; never decided reads as on while there is a birth date (G2). Settings labels it "Save my profile to my account". | set on when a profile is made with a birth date, and by the registration card |
 | `journal` | `memories` of type journal, the manual Throughline | what the reader side may read back (`getMemory` with respectConsent) |
 | `mood` | `memories` of type mood | same |
 | `assessments` | `memories` of type practice_completion | same |
@@ -138,6 +138,18 @@ profile will pick up on sunday where saturday left off." Read as: once a
 profile is saved to the account it stays in sync from one day to the next, so
 the push keeps sending profile rows and the switch does not gate it. What the
 switch's label should say is not decided by that answer.
+
+**Superseded on 30 October 2026**, when the privacy review (F2) put the
+question again and the owner answered: "no, and absolutely fix that. it serves
+no purpose if it defaults with no option." The switch now governs the birth
+fields of the profile row: off, they go up empty, the account loses them at the
+next push, and the device keeps its own copy; a saved profile still syncs from
+one day to the next as the 29 October answer asked. HD-STUDY-MODEL.md section
+13 has the rules, K75 to K78 hold them.
+
+**A profile made for somebody else is not sent at all** (F9, the owner's (b),
+30 October 2026): `for_other` on the profile; no row, memories, ledger or pair
+goes up, and marking a synced one deletes the account's copy (K79 to K81).
 
 **G3. The sync map and outbox are device wide, not per account (follow-up,
 client).** `incommon_cloud_map_v2` and `incommon_cloud_outbox_v2` are not

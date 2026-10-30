@@ -6822,8 +6822,7 @@ say the field's word for it.
 versions, other people's charts and import and export. The owner approved its
 nine decisions on 29 October 2026. Workstream 2's privacy review came back on
 30 October as not ready for migrations, and section 12 of the model answers it
-finding by finding; F2 and F9 wait on the owner, and nothing is applied until
-they are decided. The device half is built in `profile-manager.js` 1.6.1,
+finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js` 1.7.0,
 held by O9 to O21:
 
 - **The profile keeps the current birth where it always has**, and
@@ -6850,8 +6849,24 @@ held by O9 to O21:
 - **Both keys are in `_dropProfileKeys()`.** A new profile key that is not
   added there is G5 again.
 
-The owner decided G2 the same day: a saved profile keeps syncing, so the push
-is unchanged.
+The owner decided G2 the same day: a saved profile keeps syncing. On 30
+October, answering the review's F2, they decided the switch must work, and it
+does now (model section 13, K75 to K78):
+
+- **"Save my profile to my account" off sends the birth fields empty**, and
+  the profile row still goes up, because memories and the ledger hang off it.
+  The account loses the birth at the next push and the device keeps it.
+- **An empty row never empties a birth.** The pull decides from this device's
+  decision and the account's ledger, the later one winning, because the
+  ledger arrives in the same pull. Take that merge out and K77 goes red.
+- **Never decided reads as on while there is a birth date**
+  (`consentState()`). Do not make it read off: every profile given its birth
+  after it was made would stop syncing the moment it did.
+- **A profile made for somebody else (`for_other`) sends nothing** and
+  marking a synced one deletes the account's copy (F9, K79 to K81).
+  `ownProfiles()` and `otherProfiles()` list them apart. The screens, the
+  Oracle and card refusals and the Privacy Policy section 14 sentence are
+  workstream 3's, specified in the model's section 13.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
