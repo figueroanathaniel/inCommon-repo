@@ -1,4 +1,4 @@
-/*! share-rules.js: what a chart handout and a chart export may carry. V1.1.0 (UMD)
+/*! share-rules.js: what a chart handout and a chart export may carry. V1.2.0 (UMD)
  *
  * Assignment 2.2, Task 3. A birth date, time and place together identify a
  * person, and the person on a handout is often not the reader: a client, a
@@ -61,7 +61,7 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
   var HANDOUT_SCHEMA = 'incommon.handout.v1';
   var EXPORT_SCHEMA = 'incommon.charts.v1';
   var KINDS = ['self', 'person', 'client'];
@@ -105,6 +105,10 @@
 
   function handout(chart, opts) {
     var c = chart || {}, o = opts || {}, inc = o.include || {}, k;
+    /* A profile the reader marked as made for somebody else is that person's
+       chart, not the reader's, whatever kind the caller passed (the
+       follow-up review's finding 3). */
+    if (c.kind === 'self' && c.forOther === true) c = Object.assign({}, c, { kind: 'person' });
     if (KINDS.indexOf(c.kind) === -1) return fail('kind');
     for (k in inc) if (own(inc, k) && OPTIONS.indexOf(k) === -1) return fail('unknown_option', k);
     for (k in o) if (own(o, k) && k !== 'include' && k !== 'notes') return fail('unknown_option', k);
@@ -155,11 +159,16 @@
   /* subjects: [{ kind, id, display_name, birth, versions, notes, subject_consent }]
      opts: { birthData, notes, people }, the first two on unless set false, the
      last off unless set true. */
+  /* A profile made for somebody else is exported as a person, so it goes
+     only under O5's tick. */
   function exportFile(subjects, opts, now) {
     var o = opts || {}, k;
     for (k in o) if (own(o, k) && EXPORT_OPTIONS.indexOf(k) === -1) return fail('unknown_option', k);
     var inc = { birth_data: o.birthData !== false, notes: o.notes !== false, people: o.people === true };
-    var list = (Array.isArray(subjects) ? subjects : []).filter(function (s) {
+    subjects = (Array.isArray(subjects) ? subjects : []).map(function (s) {
+      return s && s.kind === 'self' && s.forOther === true ? Object.assign({}, s, { kind: 'person' }) : s;
+    });
+    var list = subjects.filter(function (s) {
       return s && KINDS.indexOf(s.kind) !== -1 && (s.kind === 'self' || inc.people);
     }).map(function (s) {
       var out = { kind: s.kind, id: text(s.id, 80), display_name: text(s.display_name, 80) };

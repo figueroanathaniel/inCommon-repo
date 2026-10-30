@@ -3395,6 +3395,16 @@ async function runCloudTests() {
       noBirth: g.subjects.every(function (x) { return x.birth === null && x.versions.length === 0; }) && j.indexOf('resolved') === -1 && j.indexOf('1985') === -1 && j.indexOf('1970') === -1,
       refused: SR.exportFile(srSubjects, { everyone: true }).reason };
   }));
+  t('T11', 'a profile marked as made for somebody else is shaped as that person\'s chart: no name by default, no centres or birth date without their word, and out of the export unless people are ticked', {
+    named: false, centres: 'no_consent', date: 'no_consent', kind: 'person', exported: ['self'], withPeople: ['self', 'person']
+  }, sr(function () {
+    var c = srChart('self'); c.forOther = true;
+    var mine = srSubjects[0], theirs = Object.assign({}, mine, { id: 'pTheirs', forOther: true });
+    return { named: 'name' in SR.handout(c).payload, centres: SR.handout(c, { include: { centres: true } }).reason,
+      date: SR.handout(c, { include: { birthDate: true } }).reason, kind: SR.handout(c).payload.kind,
+      exported: SR.exportFile([mine, theirs], {}).file.subjects.map(function (x) { return x.kind; }),
+      withPeople: SR.exportFile([mine, theirs], { people: true }).file.subjects.map(function (x) { return x.kind; }) };
+  }));
   t('T10', 'the module sends nothing and keeps nothing: no network, no storage, no clock beyond the export stamp', {
     clean: true
   }, sr(function () {

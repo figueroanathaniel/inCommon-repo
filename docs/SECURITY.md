@@ -250,6 +250,16 @@ governs the birth fields the push sends, and a profile made for somebody else
 sends nothing. Both are the sync module's, which 1.2 owns, and hold through
 K75 to K81.
 
+**A follow-up review of those answers (30 October 2026)** found the marks
+reached only the device that set them. Both travel in the consent ledger now
+(model section 14, K82 to K84), and `share-rules.js` 1.2.0 shapes a profile
+made for somebody else as that person's chart (T11). Two of its findings are
+the owner's and belong to this workstream when decided: a server rule so that
+an older build cannot send a birth the switch has turned off, or a profile
+that was marked for somebody else (finding 4), and removing the Oracle
+readings written from such a profile, which are keyed by the account and not
+the profile (finding 5).
+
 ### Who may touch a chart version (Task 2)
 
 `server/migrations/0004-chart-versions.sql` (workstream 1) makes

@@ -113,3 +113,7 @@ were approved; from 28 October 2026 that work is committed here.
   committed to this branch. The review's author session was asked to commit
   its own text; the 1.2 work for F2 and F9 (1b38223) is merged here and the
   owner's step 0 in SECURITY.md no longer waits on a decision.
+- 30 October 2026: the reviewer's follow-up (sixteen findings) answered with
+  the 1.2 primary: the 1.2 work merged here, share-rules.js 1.2.0 with T11
+  (finding 3), SECURITY.md updated. Findings 4 (a server rule for older
+  builds) and 5 (Oracle readings of a marked profile) wait on the owner.
