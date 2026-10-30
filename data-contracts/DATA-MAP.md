@@ -166,9 +166,10 @@ profile are not kept (`served`) and the kept ones are withdrawn (findings 5 and
 9), and its chart versions are dropped on arrival and deleted when it becomes
 withheld. An event dated more than five minutes ahead of the server is stored
 at the server's time, so a device with a fast clock cannot outrank a later
-event. Memories, the Throughline and Oki messages an older build sends for a
-marked profile are not covered (the owner's decision).
-`tools/check-hd-study-rls.js` WH1 to WH16.
+event. A marked profile keeps no memory, Throughline entry or Oki message on
+the account: one that arrives is dropped and the ones held go when the mark
+arrives (the owner, 30 October 2026). `tools/check-hd-study-rls.js` WH1 to
+WH18.
 
 **G3. The sync map and outbox are device wide, not per account (follow-up,
 client).** `incommon_cloud_map_v2` and `incommon_cloud_outbox_v2` are not
