@@ -6957,7 +6957,7 @@ the check off quietly). A table the client reads with no `id` belongs in
 `ORDER_BY` in `fetchAll()`.
 
 The live project had also drifted: `pairs` keyed by `profile_id` with no
-`account_id` and no identity id, `luminary_unlocks` keyed by `profile_id`
+`account_id`, `luminary_unlocks` keyed by `profile_id`
 with no `user_id` and no key, and four policies no file made, one of which
 lets a reader write their own unlock once `user_id` exists.
 `server/migrations/0009` brings it to the repository's shape and is a no op

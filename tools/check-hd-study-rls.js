@@ -27,7 +27,7 @@
  *
  * Rows LV1 to LV9 are migration 0009: the live project's pairs and
  * luminary_unlocks had drifted from the repository (pairs keyed by profile_id
- * with no account_id and no identity id, unlocks by profile_id with no user_id
+ * with no account_id, unlocks by profile_id with no user_id
  * and no key) and carried four policies no file made, one of which would hand
  * a reader a free unlock once user_id existed. Found 30 October 2026.
  *
@@ -163,14 +163,13 @@ insert into public.accounts (id) values ('${A}'), ('${B}');
 insert into public.profiles (id, account_id, name) values ('${PA}', '${A}', 'Ana'), ('${PB}', '${B}', 'Bea');
 `;
 /* The live project's shape as it was read on 30 October 2026, made from the
-   repository's: pairs keyed by a profile_id with no account_id and an id with
-   no identity, luminary_unlocks keyed by a profile_id with no user_id and no
-   key, and four policies no file in the repository made. Applied before any
+   repository's: pairs keyed by a profile_id with no account_id (its id is an
+   identity, as live has it), luminary_unlocks keyed by a profile_id with no
+   user_id and no key, and four policies no file in the repository made. Applied before any
    migration in the live runs, with 0001 to 0003 absent, as they were there. */
 const DRIFT = `
 drop policy if exists "own pairs" on public.pairs;
 alter table public.pairs drop column account_id;
-alter table public.pairs alter column id drop identity;
 alter table public.pairs add column profile_id uuid not null references public.profiles(id) on delete cascade;
 create policy "own pairs" on public.pairs for all to authenticated
   using (profile_id in (select id from public.profiles where account_id = auth.uid()));
@@ -192,7 +191,7 @@ create policy "Users can manage memories of their profiles." on public.memories 
    on rows rather than on an empty table. */
 const PX = 'c0000000-0000-4000-8000-0000000000c1';
 const LEGACY = `
-insert into public.pairs (id, profile_id, profile_a, profile_b, enabled) values (7, '${PA}', '${PA}', '${PX}', true);
+insert into public.pairs (profile_id, profile_a, profile_b, enabled) values ('${PA}', '${PA}', '${PX}', true);
 insert into public.luminary_unlocks (profile_id, stripe_session_id, amount, currency) values ('${PB}', 'cs_legacy', 300, 'usd');
 `;
 function as(user, aal, body) {
