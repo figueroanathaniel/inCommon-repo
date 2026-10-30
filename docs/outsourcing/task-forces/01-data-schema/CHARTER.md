@@ -181,3 +181,11 @@ October 2026, so it is left alone; the file is here now.
   (d) too broad) fixed in the text; gap 10, a defect in built code (a clear
   followed by a new birth was skipped on a device that missed both), fixed in
   profile-manager.js 1.7.1 with K87, red on 1.7.0.
+- 30 October 2026: the 2.2 reviewer reviewed #128 at 7e317dd: not ready, for
+  RV1 and RV3 (model section 15). Both are fixed on
+  `taskforce/02-security-rls`, not here, because both fixes rest on that
+  branch's migrations: marking can stop deleting the account's copy only
+  because 0006 empties it when the mark lands, and a deletion can hold
+  everywhere only with 0007's record. So this branch's sync code still has
+  both faults on its own, and it must not ship without #129; the release
+  order in the migrations README already ships the app after 0006 to 0008.
