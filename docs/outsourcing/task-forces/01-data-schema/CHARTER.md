@@ -175,3 +175,9 @@ October 2026, so it is left alone; the file is here now.
   request. #125 had merged into main on 29 October; the branch was not
   restarted, and main is an ancestor of it, so #128 carries only the ten 1.2
   commits after that merge.
+- 30 October 2026: the reviewer checked the answers to the seven gaps and
+  then gap 8's fix, at the owner's request in its session. Gap 8 (a withheld
+  history comes back) specified as section 4 rule 5 (d) and (e); gap 9 (rule
+  (d) too broad) fixed in the text; gap 10, a defect in built code (a clear
+  followed by a new birth was skipped on a device that missed both), fixed in
+  profile-manager.js 1.7.1 with K87, red on 1.7.0.

@@ -6822,7 +6822,7 @@ say the field's word for it.
 versions, other people's charts and import and export. The owner approved its
 nine decisions on 29 October 2026. Workstream 2's privacy review came back on
 30 October as not ready for migrations, and section 12 of the model answers it
-finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js` 1.7.0,
+finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js` 1.7.1,
 held by O9 to O21:
 
 - **The profile keeps the current birth where it always has**, and
@@ -6870,7 +6870,11 @@ does now (model section 13, K75 to K78):
 - **Clear birth data is a `birthCleared` ledger event**, so it reaches every
   device whatever the switch says. A device drops its birth only when its own
   `birth_at` is older than the clear; a birth given since writes the revoke
-  and stands (K82, K83). Do not read an empty birth on the server as a clear:
+  and stands (K82, K83). **The pull acts on the newest clear, not the latest
+  state**: a clear and then a new birth ends the ledger on a revoke, and a
+  device that missed both still drops its history of the cleared birth and
+  what its notes resolved to; a birth that arrives in a pull moves `birth_at`
+  to the pull (K87). Do not read an empty birth on the server as a clear:
   with the switch off it only means not saved.
   `ownProfiles()` and `otherProfiles()` list them apart. The screens, the
   Oracle and card refusals and the Privacy Policy section 14 sentence are
