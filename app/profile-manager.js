@@ -1,4 +1,4 @@
-/* profile-manager.js: inCommon multi-profile data layer. V1.3.0
+/* profile-manager.js: inCommon multi-profile data layer. V1.7.1
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -16,6 +16,8 @@
      incommon.p.<pid>.oki         conversation history
      incommon.p.<pid>.oracle      Oracle readings kept on this device, per period
      incommon.p.<pid>.oracleDeep  set once an in-depth reading has been asked for (lets the page prepare the next)
+     incommon.p.<pid>.chartVersions.v1  { v, versions[] } earlier and current births, once one is corrected (1.2)
+     incommon.p.<pid>.chartNotes.v1     { v, notes[] } notes attached to an address in the chart (1.2)
    Legacy (pre-multi-profile) keys are migrated once by migrateLegacyProfile().  */
 (function () {
   'use strict';
@@ -48,6 +50,8 @@
      claims it, along with the ACCOUNT_KEYS below. Every account after that
      starts on a blank page, and the guest store starts blank once claimed. */
   var ACCOUNT_KEYS = ['incommon.firstrun', 'incommon.sample', 'incommon.friends', 'incommon.adverse.log', 'incommon.mem.archived'];
+  /* people-library.js's store, device wide, { <profile id>: [records] }. */
+  var PEOPLE_KEY = 'incommon.people.v1';
   var SCOPE = null;
   function owesCode(st) {
     try {
@@ -139,9 +143,107 @@
     return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   }
   function nowISO() { return new Date().toISOString(); }
+  /* The ledger keeps its last fifty events, and never drops the latest event
+     of a consent to do it: the sync module sends the ledger from this list,
+     and a mark (forOther, birthData, birthCleared) pushed out of it would
+     never reach the account again (the 2.2 review's note, 30 October 2026). */
+  function keepEvents(list) {
+    var tail = list.slice(-50), last = {};
+    list.forEach(function (e, i) { if (e && e.id) last[e.id] = i; });
+    var start = list.length - tail.length;
+    var extra = Object.keys(last).map(function (k) { return last[k]; })
+      .filter(function (i) { return i < start; }).sort(function (a, b) { return a - b; })
+      .map(function (i) { return list[i]; });
+    return extra.concat(tail);
+  }
   function read(k, fb) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function drop(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  /* ---------- chart versions and chart notes (1.2) --------------------------
+     data-contracts/HD-STUDY-MODEL.md, sections 3 and 4, approved by the owner
+     on 29 October 2026. A corrected birth is a new version, never an
+     overwrite: the profile keeps the current birth where it always has, and
+     the history sits beside it under its own key. A version stores the birth,
+     never the chart, because a stored chart outlives the arithmetic that made
+     it. Notes are attached to an address (the vault's Chart address) and the
+     version they were written against, and they are never moved, rewritten or
+     deleted because the chart changed. */
+  var CHART_NOTE_MAX = 4000;
+  function versionsKey(id) { return 'incommon.p.' + id + '.chartVersions.v1'; }
+  function notesKey(id) { return 'incommon.p.' + id + '.chartNotes.v1'; }
+  function birthFields(p) {
+    return { birth_date: p.birth_date || '', birth_time: p.birth_time || '',
+      birth_time_unknown: p.birth_time_unknown === true, birth_location: p.birth_location || '',
+      birth_lat: p.birth_lat == null ? null : p.birth_lat, birth_lon: p.birth_lon == null ? null : p.birth_lon,
+      timezone: p.timezone || '', tz_offset: p.tz_offset == null ? null : p.tz_offset };
+  }
+  /* The birth record of section 2.2, for a profile. A typed profile has no
+     precision, no source rating and no recorded offset, so those are null and
+     the zone check is not_given. offset_used is what birth-time.js draws the
+     chart with, which is the offset the zone had on that date. */
+  function birthRecord(b) {
+    var BT = window.BirthTime, used = b.tz_offset, state = b.birth_time ? 'known' : b.birth_time_unknown ? 'unknown' : 'unanswered';
+    if (BT && BT.instant) {
+      try {
+        var r = BT.instant({ birthDate: b.birth_date, birthTime: b.birth_time, timeUnknown: b.birth_time_unknown,
+          timezone: b.timezone, tzOffset: b.tz_offset });
+        if (r) { if (typeof r.offset === 'number' && !isNaN(r.offset)) used = r.offset; state = r.timeState || state; }
+      } catch (e) {}
+    }
+    return { date: b.birth_date, time: state === 'known' ? b.birth_time : null, time_state: state,
+      time_precision: null, time_window_min: null, time_source: null,
+      place: b.birth_location, lat: b.birth_lat, lon: b.birth_lon, zone: b.timezone,
+      offset_recorded: null, offset_used: used == null ? null : used, zone_check: 'not_given' };
+  }
+  /* The key two versions are compared by: the birth itself, written out.
+     Not PeopleLibrary.chartHash(), which carries STATE_VERSION, so every
+     arithmetic change would make the same birth read as a new version
+     (privacy review F14). Not a hash either: a hash of a birth is the birth
+     to anybody who can enumerate the days and places (F10), so a hash would
+     only look like it hid something. It never leaves the device in an
+     export (share-rules.js), and on the server it sits beside the birth it
+     describes, which the same reader already holds. */
+  function birthKey(b) {
+    var c = function (v) { return v == null || v === '' ? '' : String(v); };
+    var ll = function (v) { return v == null || v === '' || isNaN(+v) ? '' : (+v).toFixed(4); };
+    return ['b1', c(b.birth_date), c(b.birth_time), b.birth_time_unknown === true ? 'u' : '',
+      ll(b.birth_lat), ll(b.birth_lon), c(b.timezone), c(b.tz_offset)].join('|');
+  }
+  function birthReason(a, b) {
+    if (a.birth_date !== b.birth_date) return 'date_corrected';
+    if (a.birth_time !== b.birth_time || a.birth_time_unknown !== b.birth_time_unknown) return 'time_corrected';
+    if (a.birth_lat !== b.birth_lat || a.birth_lon !== b.birth_lon || a.birth_location !== b.birth_location) return 'place_corrected';
+    return 'zone_repaired';
+  }
+  /* An address, as the vault's Chart address note proposes and section 2.3
+     adopts. A channel is checked against the topology's thirty six when that
+     module is loaded, and against the shape alone when it is not. */
+  var CHART_CENTRES = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Sacral', 'Solar Plexus', 'Root'];
+  var CHART_BODIES = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars',
+    'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  var CHART_FACETS = ['type', 'strategy', 'authority', 'profile', 'definition', 'cross'];
+  function gateOk(n) { return /^\d{1,2}$/.test(n) && +n >= 1 && +n <= 64; }
+  function chartAddressOk(a) {
+    var m, s = String(a || '');
+    if ((m = /^centre:(.+)$/.exec(s))) return CHART_CENTRES.indexOf(m[1]) !== -1;
+    if ((m = /^gate:(\d+)$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^line:(\d+)\.([1-6])$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^channel:(\d+)-(\d+)$/.exec(s))) {
+      if (!gateOk(m[1]) || !gateOk(m[2]) || +m[1] >= +m[2]) return false;
+      var T = window.HDTopology;
+      return T && Array.isArray(T.PAIRS) ? T.PAIRS.indexOf(+m[1] + '-' + +m[2]) !== -1 : true;
+    }
+    if ((m = /^activation:(personality|design):(.+)$/.exec(s))) return CHART_BODIES.indexOf(m[2]) !== -1;
+    if ((m = /^facet:(.+)$/.exec(s))) return CHART_FACETS.indexOf(m[1]) !== -1;
+    return false;
+  }
+  /* Key order is not meaning, so the comparison is over sorted keys. */
+  function stable(v) {
+    if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + stable(v[k]); }).join(',') + '}';
+    return JSON.stringify(v);
+  }
 
   /* Non-cryptographic PIN digest. A 4-digit PIN is a courtesy lock on a local
      device, not a security boundary: this is stated plainly in the UI. */
@@ -162,7 +264,7 @@
   }
 
   var PM = {
-    VERSION: '1.5.0',
+    VERSION: '1.8.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -253,8 +355,40 @@
         return { id: p.id, name: p.name, avatarColor: p.avatar_color, initials: initials(p.name),
           avatarKind: p.avatar_kind || 'initials', avatarImage: p.avatar_image || '', avatarSign: p.avatar_sign || '',
           isActive: p.id === s.activeId, isDefault: p.id === s.defaultId, birthDate: p.birth_date, birthTime: p.birth_time,
-          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at };
+          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at, forOther: p.for_other === true };
       });
+    },
+    /* The reader's own profiles and the ones made for somebody else, apart
+       (privacy review F9, the owner's (c) of 30 October 2026). A screen that
+       lists profiles shows the two as two groups, never one list. */
+    ownProfiles: function () { return this.listProfiles().filter(function (p) { return !p.forOther; }); },
+    otherProfiles: function () { return this.listProfiles().filter(function (p) { return p.forOther; }); },
+    /* A profile made for somebody else stays on this device: the sync module
+       sends nothing of it and asks the server to delete any copy it already
+       holds, which the 'profile:for-other' event queues. It is the owner's (b)
+       of 30 October 2026, the rule section 5 of HD-STUDY-MODEL.md keeps for
+       every other person's chart. The Oracle and the card are the app's to
+       refuse for it, through isForOther(). */
+    isForOther: function (id) {
+      var s = this._store(), pid = id || s.activeId, hit = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.for_other === true) hit = true; });
+      return hit;
+    },
+    setProfileForOther: function (id, on) {
+      var s = this._store(), target = null;
+      s.profiles.forEach(function (p) { if (p.id === id) target = p; });
+      if (!target) throw new Error('No such profile');
+      if (!!on === (target.for_other === true)) return this.getProfile(id);
+      /* The key is absent rather than false on the reader's own profiles, so
+         a profile that was never marked hashes exactly as it did before. */
+      if (on) target.for_other = true; else delete target.for_other;
+      this._save(s);
+      /* The mark travels in the consent ledger, which every device merges
+         whatever the birth switch says, so the account's other devices learn
+         it and stop sending the profile (the follow-up review's finding 2). */
+      this.setConsent('forOther', !!on, id);
+      this._emit('profile:for-other', { id: id, forOther: !!on });
+      return this.getProfile(id);
     },
     count: function () { return this._store().profiles.length; },
     atCapacity: function () { return this.count() >= MAX_PROFILES; },
@@ -296,7 +430,7 @@
         birthDate: p.birth_date || '', birthTime: p.birth_time || '', birthLocation: p.birth_location || '',
         birthLat: p.birth_lat == null ? null : p.birth_lat, birthLon: p.birth_lon == null ? null : p.birth_lon,
         tzOffset: p.tz_offset == null ? null : p.tz_offset, timezone: p.timezone || '',
-        locationResolved: !!p.location_resolved,
+        locationResolved: !!p.location_resolved, forOther: p.for_other === true,
         /* The stamp is what invalidates every cached chart, so the answer to
            the time question belongs in it: saying "I do not know" changes what
            the app is allowed to draw, and a cache that survived that change
@@ -377,15 +511,18 @@
         location_resolved: geo.resolved,
         birth_time_unknown: opts.timeUnknown === true
       };
+      if (opts.forOther === true) p.for_other = true;
       s.profiles.push(p);
       if (!s.activeId || s.profiles.length === 1) s.activeId = p.id;
       if (!s.defaultId) s.defaultId = p.id;
       this._save(s);
-      /* Memory consents start off. birthData is not a toggle: entering birth data
-         IS the consent for the calculations it feeds, disclosed at creation and
-         revocable only by deleting the profile. */
+      /* Memory consents start off. birthData starts on with a birth date: it
+         is "Save my profile to my account", and since 30 October 2026 the sync
+         module reads it (privacy review F2, the owner: "it serves no purpose
+         if it defaults with no option"). Off keeps the birth on this device. */
       this.initConsents(p.id);
       if (p.birth_date) this.setConsent('birthData', true, p.id);
+      if (p.for_other) this.setConsent('forOther', true, p.id);
       this.invalidateCalculations(p.id);
       this._emit('profile:created', { id: p.id });
       return this.getProfile(p.id);
@@ -396,7 +533,7 @@
       var s = this._store(), target = null;
       s.profiles.forEach(function (p) { if (p.id === id) target = p; });
       if (!target) throw new Error('No such profile');
-      var birthChanged = false;
+      var birthChanged = false, before = birthFields(target);
       if (patch.name != null && String(patch.name).trim()) target.name = String(patch.name).trim();
       if (patch.avatarColor) target.avatar_color = patch.avatarColor;
       /* Avatar face: 'initials' | 'photo' | 'sign'. The photo is a downscaled data
@@ -428,6 +565,7 @@
         target.location_resolved = geo.resolved;
       }
       this._save(s);
+      if (birthChanged) this._birthMoved(id, before, birthFields(target));
       /* Birth data drives every calculated system: drop all cached charts. */
       if (birthChanged) { this.invalidateCalculations(id); this._emit('profile:recalculated', { id: id }); }
       return this.getProfile(id);
@@ -458,8 +596,31 @@
       if (s.activeId === id) { s.activeId = s.profiles[0].id; this.clearOkiContext(); }
       this._save(s);
       this._dropProfileKeys(id);
+      this._forgetPeople(id);
       this._emit('profile:deleted', { id: id });
       return this.getActiveProfile();
+    },
+
+    /* The people this profile saved go with it (G6, the owner, 30 October
+       2026: "if a profile is deleted, delete it everywhere"). The saved
+       people store is people-library.js's and device wide, keyed inside by
+       the profile that saved them, so neither this module's keys nor the
+       account's cascade reach it. Its own forgetOwner() is asked when the
+       module is loaded; without it the one entry is removed directly, so the
+       deletion does not depend on a module having loaded. Called for a
+       deletion made here and for one another device made, never for the
+       sample giving way to the account's own profile. */
+    _forgetPeople: function (id) {
+      var PL = null;
+      try { PL = typeof window !== 'undefined' && window.PeopleLibrary; } catch (e) { PL = null; }
+      if (PL && typeof PL.forgetOwner === 'function') { PL.forgetOwner(id); return; }
+      try {
+        var all = JSON.parse(localStorage.getItem(PEOPLE_KEY) || 'null');
+        if (all && typeof all === 'object' && Object.prototype.hasOwnProperty.call(all, String(id))) {
+          delete all[String(id)];
+          localStorage.setItem(PEOPLE_KEY, JSON.stringify(all));
+        }
+      } catch (e) {}
     },
 
     /* Cascade: every scoped key for this profile is removed. Shared by a
@@ -469,9 +630,148 @@
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
         'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
-        'incommon.p.' + id + '.study'
+        'incommon.p.' + id + '.study', versionsKey(id), notesKey(id)
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
+    },
+
+    /* ---------- chart versions (1.2, HD-STUDY-MODEL.md section 4) ----------
+       Called after a birth field changed and the store was saved. The first
+       birth a profile is given is not a correction, so it makes no version;
+       the first correction writes the old birth as version 1 and the new one
+       as version 2, and every correction after that adds one. The sample
+       chart is nobody's, so replacing it is not a correction either. Clearing
+       the birth date clears the history (O8): a reader who clears their birth
+       data has asked for it to be gone, and a history that kept every earlier
+       birth would defeat the button. Notes stay; they are the reader's own
+       words, and read as unresolved until a birth is given again. */
+    _birthMoved: function (id, before, after) {
+      /* When the birth last moved on this device, and whether it was cleared,
+         so a Clear birth data made on another device can be told from a birth
+         given here since (the follow-up review's finding 1). The clear is a
+         ledger event, which syncs whatever the birth switch says, and it
+         carries no birth data. */
+      if (birthKey(before) !== birthKey(after)) {
+        var st = this._store(), at = nowISO();
+        st.profiles.forEach(function (p) { if (p.id === id) p.birth_at = at; });
+        this._save(st);
+        var bc = this.consentState('birthCleared', id);
+        if (!after.birth_date && before.birth_date) this.setConsent('birthCleared', true, id);
+        else if (after.birth_date && bc.granted) this.setConsent('birthCleared', false, id);
+      }
+      /* Clear birth data (O8). The history goes, and so does every note's
+         record of what its address resolved to, because that is derived from
+         the birth (privacy review F4): a gate and line list kept after the
+         date is cleared is the date by another name. The words stay, and
+         read as unresolved. */
+      if (!after.birth_date) {
+        drop(versionsKey(id));
+        var cr = read(notesKey(id), null);
+        if (cr && Array.isArray(cr.notes) && cr.notes.some(function (n) { return n.resolved != null; })) {
+          cr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(id), cr);
+        }
+        return null;
+      }
+      if (!before.birth_date) return null;
+      if (read(scoped('incommon.sample', scope().owner), '') === id) return null;
+      if (birthKey(before) === birthKey(after)) return null;
+      var rec = read(versionsKey(id), null);
+      if (!rec || !Array.isArray(rec.versions)) rec = { v: 1, versions: [] };
+      var make = function (b, reason) {
+        return { id: uuid(), subject: 'profile:' + id, seq: rec.versions.length + 1, reason: reason,
+          birth: birthRecord(b), birth_key: birthKey(b), created_at: nowISO() };
+      };
+      var first = null;
+      if (!rec.versions.length) { first = make(before, 'initial'); rec.versions.push(first); }
+      var v = make(after, birthReason(before, after));
+      rec.versions.push(v);
+      if (!write(versionsKey(id), rec)) return null;
+      /* A note written before any correction was written against the birth
+         that is now version 1, so it is given that version's id. */
+      if (first) {
+        var nr = read(notesKey(id), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.version == null; })) {
+          nr.notes.forEach(function (n) { if (n.version == null) n.version = first.id; });
+          write(notesKey(id), nr);
+        }
+      }
+      this._emit('chart:versioned', { id: id, version: v.id, reason: v.reason });
+      return v;
+    },
+    listChartVersions: function (id) {
+      var pid = id || this.activeId();
+      var rec = pid ? read(versionsKey(pid), null) : null;
+      return rec && Array.isArray(rec.versions) ? rec.versions.slice() : [];
+    },
+    /* The version a note written now belongs to: the latest, or null while
+       the birth has never been corrected. */
+    currentChartVersion: function (id) {
+      var list = this.listChartVersions(id);
+      return list.length ? list[list.length - 1] : null;
+    },
+
+    /* ---------- chart notes (1.2, HD-STUDY-MODEL.md section 3) ---------------
+       The reader's own words about a part of their own chart. Kept on the
+       device whatever the consent switches say; the journal consent (O1)
+       decides only whether they leave it, once sync is built. */
+    chartAddressOk: function (a) { return chartAddressOk(a); },
+    listChartNotes: function (id, filter) {
+      var pid = id || this.activeId(), f = filter || {};
+      var rec = pid ? read(notesKey(pid), null) : null;
+      var out = rec && Array.isArray(rec.notes) ? rec.notes.slice() : [];
+      if (f.address) out = out.filter(function (n) { return n.address === f.address; });
+      if (f.version !== undefined) out = out.filter(function (n) { return n.version === f.version; });
+      return out;
+    },
+    addChartNote: function (id, o) {
+      var pid = id || this.activeId();
+      if (!this.getProfile(pid)) throw new Error('No such profile');
+      o = o || {};
+      if (!chartAddressOk(o.address)) throw new Error('Not a chart address: ' + o.address);
+      var text = String(o.text == null ? '' : o.text);
+      if (!text.trim()) throw new Error('A note needs some words');
+      if (text.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      var cur = this.currentChartVersion(pid), at = nowISO();
+      var note = { id: uuid(), subject: 'profile:' + pid, address: o.address, version: cur ? cur.id : null,
+        resolved: o.resolved == null ? null : o.resolved, text: text, created_at: at, updated_at: at };
+      var rec = read(notesKey(pid), null);
+      if (!rec || !Array.isArray(rec.notes)) rec = { v: 1, notes: [] };
+      rec.notes.push(note);
+      if (!write(notesKey(pid), rec)) throw new Error('The note could not be saved on this device');
+      this._emit('chart:note', { id: pid, note: note.id, action: 'added' });
+      return note;
+    },
+    /* Editing changes the words only. What the address resolved to when the
+       note was written stays as it was, because that is what a later reading
+       is compared with. */
+    updateChartNote: function (id, noteId, text) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null), hit = null;
+      var t = String(text == null ? '' : text);
+      if (!t.trim()) throw new Error('A note needs some words');
+      if (t.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      ((rec && rec.notes) || []).forEach(function (n) { if (n.id === noteId) { n.text = t; n.updated_at = nowISO(); hit = n; } });
+      if (!hit) throw new Error('No such note');
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'updated' });
+      return hit;
+    },
+    deleteChartNote: function (id, noteId) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null);
+      var list = (rec && rec.notes) || [], kept = list.filter(function (n) { return n.id !== noteId; });
+      if (kept.length === list.length) return false;
+      rec.notes = kept;
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'deleted' });
+      return true;
+    },
+    /* Section 3.2: the note's address resolved again against the current
+       chart, compared with what it resolved to when written. The caller
+       resolves (it holds the chart); this only compares. */
+    chartNoteStatus: function (note, resolvedNow) {
+      if (!note || resolvedNow == null) return 'unresolved';
+      if (note.resolved == null) return 'unresolved';
+      return stable(note.resolved) === stable(resolvedNow) ? 'same' : 'changed';
     },
 
     /* ---------- PIN ---------- */
@@ -505,14 +805,37 @@
     getConsents: function (id) {
       var rec = read(this.keyFor('incommon.consent', id), null), out = {};
       CONSENT_TYPES.forEach(function (t) { out[t] = !!(rec && rec.consents && rec.consents[t] && rec.consents[t].granted); });
+      if (!out.birthData && this._birthUndecided(id, rec)) out.birthData = true;
       return out;
+    },
+    /* birthData that was never decided reads as on while the profile holds a
+       birth date, because that is what createProfile has always recorded and
+       what every profile given its birth later was synced as. Only a decision,
+       the switch turned off, reads as off. Without this a profile given its
+       birth after it was made would show the switch off while it synced, and
+       would stop syncing the moment the push started reading the switch. */
+    _birthUndecided: function (id, rec) {
+      var c = rec && rec.consents && rec.consents.birthData;
+      if (c && c.updatedAt) return false;
+      var s = this._store(), pid = id || s.activeId, has = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.birth_date) has = true; });
+      return has;
+    },
+    /* One consent as the sync module needs it to merge with the account's
+       ledger: what it reads now, and when it was decided (null if never). */
+    consentState: function (type, id) {
+      var rec = read(this.keyFor('incommon.consent', id), null);
+      var c = rec && rec.consents && rec.consents[type];
+      var granted = !!(c && c.granted);
+      if (type === 'birthData' && !granted && this._birthUndecided(id, rec)) granted = true;
+      return { granted: granted, at: c && c.updatedAt ? c.updatedAt : null };
     },
     setConsent: function (type, granted, id) {
       var pid = id || this.activeId(), k = this.keyFor('incommon.consent', pid), rec = read(k, null), ts = nowISO();
       if (!rec || !rec.consents) { this.initConsents(pid); rec = read(k, null); }
       rec.consents[type] = { granted: !!granted, updatedAt: ts };
       rec.updatedAt = ts;
-      rec.events = (rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]).slice(-50);
+      rec.events = keepEvents((rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]));
       write(k, rec);
       this._emit('consent:changed', { profileId: pid, type: type, granted: !!granted });
       return this.getConsents(pid);
@@ -522,7 +845,7 @@
        Single write path for everything the app remembers about a person.
        Each memory type is bound to the consent flag that governs it: a write
        with consent off is refused and reported, never silently dropped. */
-    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation' },
+    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation', chart_note: 'journal' },
     ENFORCE_ON_WRITE: { stella_conversation: true },
     consentFor: function (type) { return this.MEMORY_CONSENT[type] || null; },
 
@@ -683,7 +1006,8 @@
        smaller gazetteer, or that were placed in Puerto Rico with the wrong
        zone. Returns the ids whose charts must be recomputed. */
     reresolveLocations: function () {
-      var s = this._store(), fixed = [], self = this;
+      var s = this._store(), fixed = [], self = this, before = {};
+      s.profiles.forEach(function (p) { before[p.id] = birthFields(p); });
       s.profiles.forEach(function (p) {
         /* A Puerto Rico place saved while the list filed the island under New
            York's zone carries New_York: an hour out every winter. Its
@@ -703,6 +1027,9 @@
       });
       if (fixed.length) {
         this._save(s);
+        /* A repair moves the instant, so it is a version like a correction
+           the reader made (the owner's decision O7). */
+        s.profiles.forEach(function (p) { if (fixed.indexOf(p.id) !== -1) self._birthMoved(p.id, before[p.id], birthFields(p)); });
         fixed.forEach(function (id) { self.invalidateCalculations(id); });
         this._emit('profile:recalculated', { ids: fixed });
       }
@@ -756,7 +1083,39 @@
        d.recalc          ids whose birth data changed */
     importSynced: function (d) {
       d = d || {};
-      var s = this._store(), self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      var self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      /* Deleted on another device, and so deleted here, whatever this device
+         did to it since (the owner, 30 October 2026: "if a profile is
+         deleted, delete it everywhere"). Every screen reads a profile, so a
+         device the deletion would leave with none starts over with a fresh
+         one first, as the delete dialog does on the device it was deleted on;
+         that one is new here and goes up like any other. */
+      var dead = {};
+      (d.deletedProfiles || []).forEach(function (id) { dead[id] = 1; });
+      var s0 = this._store();
+      if ((d.deletedProfiles || []).length && !s0.profiles.some(function (p) { return !dead[p.id]; }) &&
+          !(d.profiles || []).some(function (p) { return p && !dead[p.id]; })) {
+        try {
+          var fresh = this.createProfile({ name: 'Default Profile' });
+          var s1 = this._store(); s1.activeId = fresh.id; s1.defaultId = fresh.id; this._save(s1);
+        } catch (e) {
+          /* Six profiles, all deleted elsewhere: no room for the fresh one,
+             so one of them stays until the next pull, which makes it. */
+          var keep = d.deletedProfiles.filter(function (id) { return s0.profiles.some(function (p) { return p.id === id; }); })[0];
+          if (keep) delete dead[keep];
+        }
+      }
+      var s = this._store();
+      (d.deletedProfiles || []).forEach(function (id) {
+        if (!dead[id]) return;
+        self._forgetPeople(id);
+        var before = s.profiles.length;
+        s.profiles = s.profiles.filter(function (p) { return p.id !== id; });
+        if (s.profiles.length === before) return;
+        s.pairs = s.pairs.filter(function (pr) { return pr.a !== id && pr.b !== id; });
+        self._dropProfileKeys(id);
+        out.removed++;
+      });
       (d.removeProfiles || []).forEach(function (id) {
         if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
         var before = s.profiles.length;
@@ -766,10 +1125,12 @@
         self._dropProfileKeys(id);
         out.removed++;
       });
+      var arrived = {};
       (d.profiles || []).forEach(function (p) {
         if (!p || !p.id) return;
         var i = -1;
         s.profiles.forEach(function (x, j) { if (x.id === p.id) i = j; });
+        if (i !== -1 && p.birth_date && birthKey(s.profiles[i]) !== birthKey(p)) arrived[p.id] = 1;
         if (i !== -1) s.profiles[i] = p;
         else if (s.profiles.length < MAX_PROFILES) s.profiles.push(p);
         else return;
@@ -789,6 +1150,7 @@
       write(scope().root, s);
 
       var when = function (x) { var t = Date.parse(x); return isNaN(t) ? 0 : t; };
+      var clearAt = {};
       Object.keys(d.consents || {}).forEach(function (pid) {
         if (!has(pid)) return;
         self.initConsents(pid);
@@ -800,13 +1162,61 @@
           seen[sig] = 1; all.push({ ts: e.ts, id: e.id, granted: !!e.granted });
         });
         all.sort(function (a, b) { return when(a.ts) - when(b.ts); });
+        /* The newest Clear birth data, whatever came after it: a clear and
+           then a new birth leaves the ledger on the revoke the new birth
+           writes, and a device that missed both still owes the clear. */
+        all.forEach(function (e) { if (e.id === 'birthCleared' && e.granted) clearAt[pid] = e.ts; });
         /* The latest event for each consent is its state, whichever device it
            was made on. */
         all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
-        rec.events = all.slice(-50);
+        rec.events = keepEvents(all);
         if (all.length) rec.updatedAt = all[all.length - 1].ts;
         write(k, rec);
         out.consents++;
+      });
+      /* Two marks the account's other devices made, read from the merged
+         ledger: a profile made for somebody else, and a Clear birth data.
+         Neither carries any birth data, so both travel whatever the birth
+         switch says. The newest clear is acted on whether or not a new birth
+         followed it (the ledger then ends on that birth's revoke), and only
+         when the birth this device held is older than the clear: then this
+         device's history and what its notes resolved to are of the cleared
+         birth, and go. The birth fields go too while the clear is still in
+         force; after a new birth the pulled row has already brought it. A
+         birth that arrives in a pull is this device's birth from then on, so
+         its birth_at moves to now and a later pull does not clear what is
+         written about it. */
+      var st2 = this._store(), moved = false, dropped = [];
+      st2.profiles.forEach(function (p) {
+        if (!d.consents || !d.consents[p.id]) return;
+        var rec2 = read('incommon.consent.' + p.id, null), c2 = (rec2 && rec2.consents) || {};
+        var fo = c2.forOther;
+        if (fo && fo.updatedAt && !!fo.granted !== (p.for_other === true)) {
+          if (fo.granted) p.for_other = true; else delete p.for_other;
+          moved = true;
+        }
+        var bc = c2.birthCleared, cut = clearAt[p.id];
+        var older = !!cut && (!p.birth_at || when(p.birth_at) < when(cut));
+        if (older && bc && bc.granted && (p.birth_date || p.birth_time || p.birth_location)) {
+          p.birth_date = ''; p.birth_time = ''; p.birth_location = ''; p.birth_lat = null; p.birth_lon = null;
+          p.timezone = ''; p.tz_offset = null; p.location_resolved = false; p.birth_time_unknown = false;
+          p.birth_at = bc.updatedAt;
+          moved = true;
+        } else if (arrived[p.id]) {
+          p.birth_at = nowISO();
+          moved = true;
+        }
+        if (older) dropped.push(p.id);
+      });
+      if (moved) write(scope().root, st2);
+      dropped.forEach(function (pid) {
+        drop(versionsKey(pid));
+        var nr = read(notesKey(pid), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.resolved != null; })) {
+          nr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(pid), nr);
+        }
+        self.invalidateCalculations(pid);
       });
       Object.keys(d.memories || {}).forEach(function (pid) {
         if (!has(pid)) return;
@@ -862,6 +1272,12 @@
           return all - shown;
         })(this),
         throughline: read('incommon.p.' + pid + '.throughline', []),
+        /* 1.2: the birth's history and the notes on the chart. The notes are
+           withheld while the journal consent is off, as journal entries are,
+           and counted so the export says something was left out. */
+        chartVersions: this.listChartVersions(pid),
+        chartNotes: this.getConsents(pid).journal ? this.listChartNotes(pid) : [],
+        chartNotesWithheld: this.getConsents(pid).journal ? 0 : this.listChartNotes(pid).length,
         sharedWith: this.sharedPartners(pid).map(function (x) { return x.name; })
       };
     },

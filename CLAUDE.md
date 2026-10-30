@@ -6817,6 +6817,134 @@ The vault holds no reader's data. Add to it by the same rules as the docs: no
 dash, astral body in prose, and the wiring wherever a heading would otherwise
 say the field's word for it.
 
+## A corrected birth is a version, and a note keeps its address (1.2)
+`data-contracts/HD-STUDY-MODEL.md` is the model for notes on a chart, chart
+versions, other people's charts and import and export. The owner approved its
+nine decisions on 29 October 2026. Workstream 2's privacy review came back on
+30 October as not ready for migrations, and section 12 of the model answers it
+finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js` 1.7.1,
+held by O9 to O21:
+
+- **The profile keeps the current birth where it always has**, and
+  `incommon.p.<pid>.chartVersions.v1` holds the history beside it. A version
+  stores the birth, never the chart. The first birth a profile is given is not
+  a correction, nor is replacing the sample; the first real correction writes
+  version 1 and 2, and a zone repair is a version of its own. Two births with
+  the same `birth_key` are one. **Do not key versions on
+  `PeopleLibrary.chartHash()` again**: it carries STATE_VERSION, so every
+  arithmetic change made the same birth a new version, and a hash of a birth
+  is the birth to anybody who can enumerate days and places.
+- **Clear birth data removes the history**, and every note's `resolved`
+  with it, because a gate and line list is the birth by another name. A
+  history that kept every earlier birth would defeat the button. The words
+  stay, and read as unresolved.
+- **`chart_note` is a journal memory for the consent gate.** A type missing
+  from `MEMORY_CONSENT` reads as allowed, which is K71's fault.
+- **A note is `{ address, version, resolved, text }`** in
+  `incommon.p.<pid>.chartNotes.v1`. The address is the vault's Chart address
+  form and anything else is refused. `resolved` is what the address meant when
+  the note was written; editing the words never refreshes it, because
+  `chartNoteStatus()` compares it with now. A note is never moved or deleted
+  because the chart changed.
+- **Both keys are in `_dropProfileKeys()`.** A new profile key that is not
+  added there is G5 again.
+
+The owner decided G2 the same day: a saved profile keeps syncing. On 30
+October, answering the review's F2, they decided the switch must work, and it
+does now (model section 13, K75 to K78):
+
+- **"Save my profile to my account" off sends the birth fields empty**, and
+  the profile row still goes up, because memories and the ledger hang off it.
+  The account loses the birth at the next push and the device keeps it.
+- **An empty row never empties a birth.** The pull decides from this device's
+  decision and the account's ledger, the later one winning, because the
+  ledger arrives in the same pull. Take that merge out and K77 goes red.
+- **Never decided reads as on while there is a birth date**
+  (`consentState()`). Do not make it read off: every profile given its birth
+  after it was made would stop syncing the moment it did.
+- **A profile made for somebody else (`for_other`) sends an empty row and
+  its `forOther` ledger event, nothing else** (F9, K79 to K81). **Marking
+  deletes nothing** (RV1, K88): migration 0006 empties the account's copy and
+  deletes its journal, Throughline and Oki rows when the mark lands, so a push
+  that fails leaves the account as it was. Do not queue `del-profile` on a
+  mark again: a failed push after it left another device reading the absence
+  as a deletion. The empty row is how the mark reaches the account's other
+  devices, because the ledger hangs off the row; a device that learns it
+  keeps its own copy and journal (K84).
+- **A deleted profile is deleted everywhere** (the owner, 30 October 2026).
+  `del-profile` writes a `deleted_profiles` record (0007) before it deletes
+  the row, and every pull deletes a recorded profile on its device, the
+  first pull included and over changes made there since (K89 to K91). The
+  record outlives the row because the row's cascade takes the ledger, and
+  without it any device still holding the profile sent it back. The server
+  drops whatever arrives for a recorded profile. The people it saved go with
+  it (`forgetOwner`, K94). The app ships after 0007 and 0008, never before:
+  its pull fails without the table (K93).
+- **Clear birth data is a `birthCleared` ledger event**, so it reaches every
+  device whatever the switch says. A device drops its birth only when its own
+  `birth_at` is older than the clear; a birth given since writes the revoke
+  and stands (K82, K83). **The pull acts on the newest clear, not the latest
+  state**: a clear and then a new birth ends the ledger on a revoke, and a
+  device that missed both still drops its history of the cleared birth and
+  what its notes resolved to; a birth that arrives in a pull moves `birth_at`
+  to the pull (K87). Do not read an empty birth on the server as a clear:
+  with the switch off it only means not saved.
+  `ownProfiles()` and `otherProfiles()` list them apart. The screens, the
+  Oracle and card refusals and the Privacy Policy section 14 sentence are
+  workstream 3's, specified in the model's section 13.
+
+## A handout is a crowd, and anything past it is birth data (2.2)
+Assignment 2.2, Tasks 2 and 3, on `taskforce/02-security-rls`; `docs/SECURITY.md`
+has the whole account. Task 1, the privacy review of the 1.2 model, is owed by
+a session that did not write the model.
+
+- **`chart_versions` has no update rule**, because a version is history. The
+  push must use `ignoreDuplicates`. `tools/check-hd-study-rls.js` proves the
+  rules on a throwaway Postgres and says NOT RUN without one.
+- **A child table inherits the two-step refusal through `owns_profile()`**
+  only while that function is SECURITY INVOKER. Every new table still goes on
+  the two-step list, and K74 fails when one does not, or when a table keyed by
+  `profile_id` is missing from the account function's deletion.
+- **`app/share-rules.js` is the one place a handout or an export is shaped.**
+  Measured (`tools/measure-handout-identifiability.js`): Type, Authority,
+  Profile and Definition keep a birth in a crowd; the defined centres, the
+  channels, the gates and the activations each make it a fingerprint, and the
+  full activation list names the day and the hour. So those, like the date,
+  time and place, are off until the reader turns each on, need the other
+  person's stated word when it is not the reader's chart, and a client's
+  chart needs that word for any handout. **A card is not that word**: it is
+  sent from the sender's active profile, so it says where a chart came from,
+  not who agreed. Nothing is spread, an unknown option is refused, and
+  nothing is sent: there is no share link. An export never carries
+  `subject_consent` or a key or hash of a birth. T1 to T10 hold it.
+- **Another person's notes and first name are past the default too**, and a
+  word is dated: it counts only with its `stated_at`, never after the moment
+  the caller passes as `now`, and for a year (`WORD_DAYS`). The module reads
+  no clock, so a handout made without `now` honours no word. A backup carries
+  `consent_noted` (no basis), and `restoreConsent()` brings it back as `basis:
+  restored`, which keeps the record and its notes and opens no handout until
+  `confirmWord()`. T12 to T14. It is still a record the app cannot verify.
+- **The server holds the switch and the mark** (migration 0006): a profile row
+  is emptied by the account's latest `birthData`, `birthCleared` and
+  `forOther` events, and an Oracle reading carries `profile_id`, so a withheld
+  profile's readings are `served` (not kept) or `withdrawn`, both still
+  counted toward the limit. The Oracle answers `FOR_OTHER` for a marked
+  profile. **The push resends a row after its own moved events** (K86), because
+  the rule reads the ledger when the row arrives; take that out and turning
+  saving back on keeps nothing. **A push flushes deletions first** (K85): the
+  deletion marking queues takes the profile's ledger on the live schema, and
+  flushed after the push it took the mark. The fake database in the K rows
+  cascades as the live one does; a fake that does not is how K79 to K84 passed
+  over that fault. 0006 also drops a chart version for a withheld profile and
+  deletes a profile's versions when it becomes withheld, and stores an event
+  dated more than five minutes ahead of the server at the server's time, so a
+  fast device clock cannot outrank a later event. A profile marked as
+  somebody else's keeps no memory, Throughline entry or Oki message on the
+  account: one that arrives is dropped, and the ones held go when the mark
+  arrives (the owner, 30 October 2026). **Undoing and reapplying 0004 takes
+  0006's trigger with the table; run 0006 again.**
+  `tools/check-hd-study-rls.js` WH1 to WH18.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,

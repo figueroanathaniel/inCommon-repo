@@ -41,8 +41,64 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    two-person consent records that name it, as the device already does.
    Needs 0001's `pairs (profile_b)` index to stay a lookup.
 
-None of them creates a table, so `server/mfa-policies.sql` does not need to be
-run again for them.
+4. `0004-chart-versions.sql`: the chart version history (1.2,
+   `data-contracts/HD-STUDY-MODEL.md` section 4), row level security on and
+   no policy. **Do not apply until workstream 2's privacy review of the model
+   (2.2 Task 1) is resolved**, and apply it with its policies, which are
+   workstream 2's.
+
+5. `0005-chart-versions-policies.sql`: who may touch a chart version
+   (workstream 2, assignment 2.2): read, add and delete on the reader's own
+   profiles, no update, nothing for anon. Then run `server/mfa-policies.sql`
+   again, which lists `chart_versions`. Tested by
+   `tools/check-hd-study-rls.js`.
+
+6. `0006-server-holds-the-switch.sql`: the server holds "Save my profile to
+   my account" and "this profile is for someone else" (the follow-up review's
+   findings 4, 5 and 9, decided by the owner on 30 October 2026). A profile
+   row is emptied of its birth while the account's latest `birthData` event
+   is a revoke or its latest `birthCleared` a grant, and emptied whole while
+   its latest `forOther` is a grant, so a build older than the switch cannot
+   put the birth back. A chart version follows the same rule; a profile
+   marked as somebody else's keeps no memory, Throughline entry or Oki
+   message; and an event dated more than five minutes ahead of the server is
+   stored at its time. An Oracle reading gains `profile_id`; one finished for
+   such a profile is stored as `served` with no content, and the kept readings
+   of a profile that becomes withheld turn `withdrawn`. Apply after
+   `server/oracle/schema.sql`. **Deploy the Oracle function and the app that
+   go with it (taskforce/02-security-rls) with this file, in the same window,
+   once 0007 and 0008 are applied too (see 7)**: the app
+   resends a row after its events so that turning saving back on keeps the
+   birth (K86), and without that a reader who turns it back on loses the
+   account copy until the next change to the profile. Tested by
+   `tools/check-hd-study-rls.js`, rows WH1 to WH18. It also hangs a trigger
+   on `chart_versions`, so it runs after 0004, and **if 0004 is ever undone
+   and applied again, run 0006 again too**: dropping the table drops the
+   trigger with it.
+
+7. `0007-profiles-deleted-everywhere.sql`: a deleted profile stays deleted
+   on every device (the owner, 30 October 2026: "if a profile is deleted,
+   delete it everywhere"; the 2.2 review's RV3). `deleted_profiles` holds the
+   account, the profile's id and the server's time, and nothing else. A record
+   arriving deletes the profile's row (and by the cascades its journal,
+   ledger, Throughline, Oki log, chart versions and two person records) and
+   turns its kept Oracle readings `withdrawn`; anything that arrives for that
+   profile afterwards is dropped, and a reading finished for it is stored as
+   `served`. Every rule acts inside the record's own account. Row level
+   security on, no policy. Apply after 0006. **The app from
+   taskforce/02-security-rls ships after this file and 0008, never before**:
+   it records deletions here, and its pull reads this table and fails without
+   it. Tested by `tools/check-hd-study-rls.js`, rows DP1 to DP13.
+
+8. `0008-deleted-profiles-policies.sql`: a signed in reader may read and add
+   records for their own account, and nothing else: no update and no delete,
+   because a record that could be removed would let a deleted profile come
+   back. Then run `server/mfa-policies.sql` again, which lists
+   `deleted_profiles`.
+
+0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
+run again for them. 0004 does, once its policies are in, and 0007 does, once
+0008 is in.
 
 Proven on 27 October 2026 against Postgres 16 with `server/cloud-schema.sql`
 (from its v2 section), `server/oracle/schema.sql`, `server/store/schema.sql`,

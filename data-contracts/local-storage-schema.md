@@ -41,6 +41,8 @@ throw), `read` / `write` in `profile-manager.js` (the same), and direct
 | `incommon.p.<pid>.oracleConsent` | the Oracle's own consent mark | the Oracle page | no |
 | `incommon.p.<pid>.oracleDeep` | set once an in-depth reading was asked for | the Oracle page | no |
 | `incommon.p.<pid>.study` | `{ path, ... }` study progress | `studySave()` | no |
+| `incommon.p.<pid>.chartVersions.v1` | `{ v: 1, versions: [{ id, subject, seq, reason, birth, birth_key, created_at }] }`; absent until the birth is first corrected (1.2, `HD-STUDY-MODEL.md` section 4) | `PM._birthMoved()`, from `PM.updateProfile()` and `PM.reresolveLocations()`; removed by Clear birth data and `_dropProfileKeys()` | not yet (1.2 step 3) |
+| `incommon.p.<pid>.chartNotes.v1` | `{ v: 1, notes: [{ id, subject, address, version, resolved, text, created_at, updated_at }] }` (section 3) | `PM.addChartNote()`, `updateChartNote()`, `deleteChartNote()`; removed by `_dropProfileKeys()` | not yet (1.2 step 3, journal gated) |
 | `incommon.p.<pid>.birthName` | string, the full name at birth | the numerology pages (`nkey()`) | no (the screen says it stays on the device) |
 | `incommon.theme.<pid>` | `{ key, hc }` | `themeWrite()` | no |
 | `incommon.charts.<pid>` | none found | removed by `_dropProfileKeys()` only | no |

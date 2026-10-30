@@ -45,7 +45,8 @@ begin
   foreach t in array array[
     'accounts', 'profiles', 'memories', 'throughline_entries', 'oki_messages',
     'consent_events', 'pairs', 'oracle_readings', 'subscriptions', 'store_subscriptions',
-    'luminary_unlocks', 'support_requests', 'cast_counters', 'entitlements'
+    'luminary_unlocks', 'support_requests', 'cast_counters', 'entitlements',
+    'chart_versions', 'deleted_profiles'
   ] loop
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists "two-step sign in, when turned on" on public.%I', t);
@@ -80,7 +81,10 @@ end $$;
 
 -- To check it took, after applying: the policy should now list on 13 tables
 -- (the eleven above plus cast_counters and entitlements, added 13 October
--- 2026 because both were created after this file was written):
+-- 2026 because both were created after this file was written), and on 14
+-- once server/migrations/0004 has made chart_versions (added 29 October 2026,
+-- assignment 2.2), and on 15 once 0007 has made deleted_profiles (added 30
+-- October 2026):
 --   select tablename, policyname, permissive from pg_policies
 --   where policyname = 'two-step sign in, when turned on' order by 1;
 -- And a signed-in reader must actually reach their own rows. A 403 whose

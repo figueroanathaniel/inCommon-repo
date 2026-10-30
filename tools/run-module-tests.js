@@ -1090,6 +1090,19 @@ const stubCompute = o => ({
     { same: cases.map(c => PL.normalize(c).instant === BTm.instant({ birthDate: c.birth_date, birthTime: c.birth_time || '',
       timeUnknown: !c.birth_time, timezone: c.birth_tz || '', tzOffset: c.tz_offset }).date.getTime()), v: PL.STATE_VERSION });
   PL.configure({ birthTime: null });
+
+  /* G6 (the owner, 30 October 2026: "if a profile is deleted, delete it
+     everywhere"): the people a profile saved go with it, in one write, and
+     another profile's stay. */
+  const st6 = memStore2();
+  PL.configure({ store: st6, compute: stubCompute });
+  PL.add('gone', { display_name: 'Ivy', birth_date: '1990-01-01' });
+  PL.add('gone', { display_name: 'Jun', birth_date: '1991-02-02' });
+  PL.add('stays', { display_name: 'Kai', birth_date: '1992-03-03' });
+  const fo = PL.forgetOwner('gone'), fo2 = PL.forgetOwner('gone');
+  t('P30', 'forgetting a profile removes every person it saved and nothing another profile saved, and asking twice is harmless',
+    { removed: fo.removed, again: fo2.removed, gone: PL.count('gone'), stays: PL.count('stays'), key: Object.keys(JSON.parse(st6.mem[PL.KEY])) },
+    { removed: 2, again: 0, gone: 0, stays: 1, key: ['stays'] });
 })();
 
 /* ------------------------------------------------------ Q: the pair cache */
@@ -2233,6 +2246,27 @@ async function runCloudTests() {
     parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
   }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
     legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
+  /* ---- K29d: the follow-up review's findings 5 and 9. The active profile's
+     id goes with the dossier, a first half the server did not keep is joined
+     here, and a profile marked for somebody else is a reason. ---- */
+  var COp = loadIsolatedCloud({ createClient: function () { return {}; } });
+  COp._setConfigForTests({ storage: null, pm: { activeId: function () { return 'p-active'; } }, core: null });
+  var alone = oracleClient(function (n, o) {
+    return o.body.part === 'b' ? { data: { reading: { chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+  });
+  COp._setClientForTests(alone.client, { user: { id: 'u1' } });
+  var rAlone = await COp.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var named = oracleClient(function () { return { data: { reading: { title: 'x' } }, error: null }; });
+  COp._setClientForTests(named.client, { user: { id: 'u1' } });
+  await COp.oracleRead({ period: 'daily', localDate: '2026-09-29', dossier: 'D', profileId: 'p-named' });
+  COp._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'FOR_OTHER') }; }).client, { user: { id: 'u1' } });
+  var rOther = await COp.oracleRead({ period: 'daily', localDate: '2026-09-29', dossier: 'D' });
+  t('K29d', 'the Oracle is asked with the active profile\'s id unless the page names one, a second half that comes back alone is joined to the first, and a profile marked for somebody else is a reason', {
+    ids: ['p-active', 'p-active'], named: 'p-named', joined: { title: 'T', chapters: 1 }, other: { ok: false, reason: 'forOther' }
+  }, { ids: alone.calls.map(function (c) { return c.body.profileId; }), named: named.calls[0] && named.calls[0].body.profileId,
+    joined: { title: rAlone.reading && rAlone.reading.title, chapters: rAlone.reading && rAlone.reading.chapters ? rAlone.reading.chapters.length : 0 },
+    other: { ok: rOther.ok, reason: rOther.reason } });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {
@@ -2468,9 +2502,46 @@ async function runCloudTests() {
      PostgREST does: upserts on the named conflict columns, an identity id for
      the child tables, timestamps returned as +00:00, and pages by range. ---- */
   function memDB() {
-    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [] },
-      seq: 1, failSelect: null, failDelete: false, maxRows: 1000 };
+    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [], deleted_profiles: [] },
+      seq: 1, failSelect: null, failDelete: false, failUpsert: null, noDeleted: false, maxRows: 1000 };
+    /* The live schema's on delete cascade from profiles (server/
+       cloud-schema.sql), the ledger included, and 0003's two person records:
+       a fake that kept the ledger hid that deleting a profile takes its marks. */
+    var cascade = function (gone) {
+      ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+        db.t[t] = db.t[t].filter(function (r) { return gone.indexOf(r.profile_id) === -1; });
+      });
+      db.t.pairs = db.t.pairs.filter(function (r) { return gone.indexOf(r.profile_a) === -1 && gone.indexOf(r.profile_b) === -1; });
+    };
+    /* Migration 0007, as it decides: a record of a deleted profile removes
+       its row and everything under it, and whatever arrives for that profile
+       afterwards is dropped without an error. */
+    var dead = function (pid) { return db.t.deleted_profiles.some(function (d) { return d.profile_id === pid; }); };
+    var dropped = function (table, row) {
+      if (table === 'profiles') return dead(row.id);
+      if (['memories', 'throughline_entries', 'oki_messages', 'consent_events'].indexOf(table) !== -1 && dead(row.profile_id)) return true;
+      if (table === 'pairs') return dead(row.profile_a) || dead(row.profile_b);
+      /* 0006: a profile marked as somebody else's keeps no journal,
+         Throughline entry or Oki message on the account. */
+      return !!db.withhold && ['memories', 'throughline_entries', 'oki_messages'].indexOf(table) !== -1 && db.latest(row.profile_id, 'forOther') === 'grant';
+    };
     var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    /* withhold: migration 0006's two triggers, as they decide. A profile row
+       is judged by the account's latest event in each mark's scope when it
+       arrives, and again when an event arrives. */
+    db.latest = function (pid, scope) {
+      var ev = db.t.consent_events.filter(function (e) { return e.profile_id === pid && e.scope === scope; })
+        .sort(function (a, b) { return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0; });
+      return ev.length ? ev[ev.length - 1].action : null;
+    };
+    db.withholdRow = function (r) {
+      var birth = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'timezone', 'tz_offset'];
+      var other = db.latest(r.id, 'forOther') === 'grant';
+      if (other || db.latest(r.id, 'birthData') === 'revoke' || db.latest(r.id, 'birthCleared') === 'grant') {
+        birth.forEach(function (k) { r[k] = null; }); r.location_resolved = false; r.birth_time_unknown = false;
+      }
+      if (other) ['name', 'avatar_color', 'avatar_kind', 'avatar_image', 'avatar_sign', 'pin_hash'].forEach(function (k) { r[k] = null; });
+    };
     var pgTime = function (r) {
       ['ts', 'created_at', 'enabled_at'].forEach(function (k) { if (typeof r[k] === 'string') r[k] = r[k].replace(/Z$/, '+00:00'); });
       return r;
@@ -2487,6 +2558,16 @@ async function runCloudTests() {
       q.range = function (a, b) { q._range = [a, b]; return q; };
       q.then = function (res, rej) {
         var rows = db.t[table], out = { data: null, error: null };
+        if (table === 'deleted_profiles' && db.noDeleted) {
+          /* A project without migration 0007, as PostgREST answers it. */
+          out.error = { code: 'PGRST205', message: "Could not find the table 'public.deleted_profiles' in the schema cache" };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if ((q._op === 'upsert' || q._op === 'insert') && db.failUpsert === table) {
+          out.error = { message: 'Failed to fetch' };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if ((q._op === 'upsert' || q._op === 'insert') && dropped(table, q._row)) return Promise.resolve(out).then(res, rej);
         var match = function (x) { return q._f.every(function (f) { return f(x); }); };
         if (q._op === 'select') {
           if (db.failSelect === table) out.error = { message: 'fake read failure' };
@@ -2519,9 +2600,26 @@ async function runCloudTests() {
           var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
           if (hit) Object.assign(hit, row);
           else { if (row.id === undefined) row.id = db.seq++; rows.push(row); }
+          if (db.withhold && table === 'profiles') db.withholdRow(hit || row);
+          if (db.withhold && table === 'consent_events') db.t.profiles.forEach(function (x) { if (x.id === row.profile_id) db.withholdRow(x); });
+          if (db.withhold && table === 'consent_events' && db.latest(row.profile_id, 'forOther') === 'grant') {
+            ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+              db.t[t] = db.t[t].filter(function (r) { return r.profile_id !== row.profile_id; });
+            });
+          }
+          if (table === 'deleted_profiles') {
+            (hit || row).deleted_at = new Date().toISOString();
+            var was = db.t.profiles.filter(function (x) { return x.id === row.profile_id && x.account_id === row.account_id; }).map(function (x) { return x.id; });
+            db.t.profiles = db.t.profiles.filter(function (x) { return was.indexOf(x.id) === -1; });
+            cascade(was);
+          }
         } else if (q._op === 'delete') {
           if (db.failDelete) out.error = { message: 'Failed to fetch' };
-          else db.t[table] = rows.filter(function (x) { return !match(x); });
+          else {
+            var gone = rows.filter(match).map(function (x) { return x.id; });
+            db.t[table] = rows.filter(function (x) { return !match(x); });
+            if (table === 'profiles') cascade(gone);
+          }
         }
         return Promise.resolve(out).then(res, rej);
       };
@@ -2549,16 +2647,10 @@ async function runCloudTests() {
     C._setConfigForTests({ storage: store, pm: pm, core: null,
       placeholders: function () { return dev.placeholders; }, onPulled: function (r) { dev.pulled.push(r); } });
     C._setClientForTests(db.client, { user: { id: userId } });
-    /* The module subscribes in init(); the test seam skips init(), so the
-       deletion events are routed into the outbox here the same way. */
-    pm.subscribe(function (name, d) {
-      var o = JSON.parse(store.getItem('incommon_cloud_outbox_v2') || '[]');
-      if (name === 'profile:deleted') o.push({ op: 'del-profile', pid: d.id });
-      else if (name === 'memory:deleted' && d.id) o.push({ op: 'del-memory', pid: d.profileId, id: String(d.id) });
-      else if (name === 'memory:deleted') o.push({ op: 'del-memories', pid: d.profileId, type: d.type || null });
-      else return;
-      store.setItem('incommon_cloud_outbox_v2', JSON.stringify(o));
-    });
+    /* The module subscribes in init(); the test seam skips init(), so each
+       event is handed to the module's own routing, which is what init()
+       subscribes, less the debounced push. */
+    pm.subscribe(function (name, d) { C._routeForTests(name, d); });
     return dev;
   }
   var tl = function (dev, pid) { return JSON.parse(dev.store.getItem('incommon.p.' + pid + '.throughline') || '[]'); };
@@ -2703,6 +2795,434 @@ async function runCloudTests() {
   }, { ok: e68.ok, count: devE.pm.getMemory({ profileId: dp.id }).length, second: devE.pm.getMemory({ profileId: dp2.id }).length, newest: devE.pm.getMemory({ profileId: dp.id })[0].content.n,
     same: JSON.stringify(devE.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) === JSON.stringify(devD.pm.getMemory({ profileId: dp.id }).map(function (m) { return m.id; })) });
 
+  /* ---- K75-K80: "Save my profile to my account" and a profile made for
+     somebody else (the 2.2 Task 1 privacy review, F2 and F9, decided by the
+     owner on 30 October 2026). Until then the switch changed nothing that
+     was sent, and every profile on the device went to the account. ---- */
+  var bdb = memDB(), BU = 'bbbbbbbb-0000-4000-8000-0000000000b0';
+  var devS = syncDevice(bdb, BU);
+  var sp = devS.pm.createProfile({ name: 'Sol', birthDate: '1979-03-03', birthTime: '04:40', birthLocation: '41.88,-87.63' });
+  devS.pm.setConsent('journal', true, sp.id);
+  devS.pm.addMemory({ profileId: sp.id, type: 'journal', content: { t: 'mine' } });
+  var sRow = function () { var r = bdb.t.profiles.filter(function (x) { return x.id === sp.id; })[0]; return r ? JSON.parse(JSON.stringify(r)) : null; };
+  var s75a = await devS.C.sync(), row75a = sRow();
+  devS.pm.setConsent('birthData', false, sp.id);
+  var s75b = await devS.C.sync(), row75b = sRow();
+  ts('K75', 'with Save my profile on the birth goes up; switched off, the next push takes it away from the account and keeps the row, its journal and the device\'s own copy', {
+    on: { date: '1979-03-03', time: '04:40', lat: 41.88 }, off: { date: null, time: null, place: null, lat: null, lon: null, zone: null, offset: null, unknown: false },
+    rowKept: true, journal: 1, local: '04:40', okA: true, okB: true
+  }, {
+    on: row75a ? { date: row75a.birth_date, time: row75a.birth_time, lat: row75a.birth_lat } : null,
+    off: row75b ? { date: row75b.birth_date, time: row75b.birth_time, place: row75b.birth_location, lat: row75b.birth_lat, lon: row75b.birth_lon,
+      zone: row75b.timezone, offset: row75b.tz_offset, unknown: row75b.birth_time_unknown } : null,
+    rowKept: !!row75b, journal: bdb.t.memories.filter(function (m) { return m.profile_id === sp.id; }).length,
+    local: devS.pm.getProfile(sp.id).birthTime, okA: s75a.ok, okB: s75b.ok
+  });
+
+  var devT = syncDevice(bdb, BU);
+  var s76 = await devT.C.sync();
+  var tHas = devT.pm.getProfile(sp.id);
+  devS.pm.updateProfile(sp.id, { name: 'Sol R' });
+  await devS.C.sync();
+  var s76b = await devS.C.sync(), s76c = await devT.C.sync();
+  ts('K76', 'a device that never saw the birth gets the profile without it, and a device that held it keeps its own copy: an empty row never empties a birth, and the name still travels', {
+    tOk: true, tBirth: '', tSwitch: false, sBirth: '1979-03-03', sName: 'Sol R', tName: 'Sol R', serverEmpty: null
+  }, {
+    tOk: s76.ok, tBirth: tHas ? tHas.birthDate : 'missing', tSwitch: devT.pm.getConsents(sp.id).birthData,
+    sBirth: devS.pm.getProfile(sp.id).birthDate, sName: devS.pm.getProfile(sp.id).name, tName: devT.pm.getProfile(sp.id).name,
+    serverEmpty: sRow().birth_date
+  });
+
+  /* A device whose own switch is still on learns of the change from the
+     ledger in the same pull, and must not take the empty row as a cleared
+     birth. */
+  var bdb2 = memDB(), BU2 = 'bbbbbbbb-0000-4000-8000-0000000000b2';
+  var devU = syncDevice(bdb2, BU2), up = devU.pm.createProfile({ name: 'Una', birthDate: '1966-06-06', birthTime: '06:06' });
+  await devU.C.sync();
+  var devV = syncDevice(bdb2, BU2);
+  await devV.C.sync();
+  var vBefore = devV.pm.getProfile(up.id).birthTime;
+  devU.pm.setConsent('birthData', false, up.id);
+  await devU.C.sync();
+  var s77 = await devV.C.sync();
+  ts('K77', 'a second device that held the birth while the switch was on keeps it when the first device turns the switch off, and takes the switch from the ledger', {
+    before: '06:06', after: '06:06', date: '1966-06-06', switchNow: false, ok: true
+  }, { before: vBefore, after: devV.pm.getProfile(up.id).birthTime, date: devV.pm.getProfile(up.id).birthDate,
+    switchNow: devV.pm.getConsents(up.id).birthData, ok: s77.ok });
+
+  devU.pm.setConsent('birthData', true, up.id);
+  await devU.C.sync();
+  var row78 = bdb2.t.profiles.filter(function (r) { return r.id === up.id; })[0];
+  var undecided = (function () {
+    var d = syncDevice(memDB(), 'bbbbbbbb-0000-4000-8000-0000000000b3');
+    var e = d.pm.createProfile({ name: 'Eve' });
+    d.pm.updateProfile(e.id, { birthDate: '2001-01-01' });
+    return { reads: d.pm.getConsents(e.id).birthData, state: d.pm.consentState('birthData', e.id) };
+  })();
+  ts('K78', 'switched back on, the birth goes up again; and a birth given after the profile was made, with the switch never touched, reads as saved, as it always synced', {
+    back: '1966-06-06', time: '06:06', reads: true, state: { granted: true, at: null }
+  }, { back: row78 && row78.birth_date, time: row78 && row78.birth_time, reads: undecided.reads, state: undecided.state });
+
+  /* F9: a profile made for somebody else stays on the device. */
+  var odb = memDB(), OU = 'bbbbbbbb-0000-4000-8000-0000000000b4';
+  odb.withhold = true;  // migration 0006, which the account now holds the mark by
+  var devO = syncDevice(odb, OU);
+  var mine = devO.pm.createProfile({ name: 'Ola', birthDate: '1983-03-08' });
+  var theirs = devO.pm.createProfile({ name: 'Pia', birthDate: '1985-05-05', forOther: true });
+  devO.pm.setConsent('journal', true, theirs.id);
+  devO.pm.addMemory({ profileId: theirs.id, type: 'journal', content: { t: 'about Pia' } });
+  var s79 = await devO.C.sync();
+  var emptyRow = function (db, id) {
+    var r = db.t.profiles.filter(function (x) { return x.id === id; })[0];
+    return !!r && r.name == null && r.birth_date == null && r.birth_time == null && r.birth_location == null &&
+      r.birth_lat == null && r.timezone == null && r.avatar_image == null && r.pin_hash == null;
+  };
+  ts('K79', 'a profile made for somebody else sends an empty row and its mark and nothing else: no name, no birth, no journal, while the reader\'s own goes up; the two are listed apart', {
+    ok: true, rows: 2, empty: true, theirMem: 0, theirLedger: ['forOther'], own: ['Ola'], other: ['Pia'], forOther: true, ownForOther: false
+  }, {
+    ok: s79.ok, rows: odb.t.profiles.length, empty: emptyRow(odb, theirs.id),
+    theirMem: odb.t.memories.filter(function (m) { return m.profile_id === theirs.id; }).length,
+    theirLedger: odb.t.consent_events.filter(function (e) { return e.profile_id === theirs.id; }).map(function (e) { return e.scope; }),
+    own: devO.pm.ownProfiles().map(function (p) { return p.name; }), other: devO.pm.otherProfiles().map(function (p) { return p.name; }),
+    forOther: devO.pm.isForOther(theirs.id), ownForOther: devO.pm.isForOther(mine.id)
+  });
+
+  var late = devO.pm.createProfile({ name: 'Rae', birthDate: '1990-09-09' });
+  devO.pm.setConsent('journal', true, late.id);
+  devO.pm.addMemory({ profileId: late.id, type: 'journal', content: { t: 'about Rae' } });
+  await devO.C.sync();
+  var wasThere = odb.t.profiles.some(function (r) { return r.id === late.id; });
+  devO.pm.setProfileForOther(late.id, true);
+  var s80 = await devO.C.sync();
+  devO.pm.addMemory({ profileId: late.id, type: 'journal', content: { t: 'written after' } });
+  var s80b = await devO.C.sync();
+  /* 0006's rule deletes the journal when the mark arrives, which the fake
+     database does as the migration does; that the migration does is held by
+     check-hd-study-rls.js (WH17). Nothing is deleted from the device (RV1). */
+  var noDelQueued = !JSON.parse(devO.store.getItem('incommon_cloud_outbox_v2') || '[]').some(function (o) { return o.op === 'del-profile'; });
+  ts('K80', 'marking a synced profile as made for somebody else empties the account\'s copy and takes its journal by 0006\'s rule, queues no deletion, nothing of it goes up again, and the profile and its journal stay on the device through the pulls after', {
+    wasThere: true, ok: true, okAgain: true, onServer: 'empty', serverMem: 0, noDelQueued: true, newSent: false, local: 'Rae', localMem: 2, hash: false
+  }, {
+    wasThere: wasThere, ok: s80.ok, okAgain: s80b.ok, onServer: emptyRow(odb, late.id) ? 'empty' : odb.t.profiles.some(function (r) { return r.id === late.id; }),
+    serverMem: odb.t.memories.filter(function (m) { return m.profile_id === late.id; }).length, noDelQueued: noDelQueued,
+    newSent: odb.t.memories.some(function (m) { return m.content && m.content.t === 'written after'; }),
+    local: (devO.pm.getProfile(late.id) || {}).name, localMem: devO.pm.getMemory({ profileId: late.id }).length,
+    hash: JSON.stringify(devO.pm._store().profiles.filter(function (p) { return p.id === mine.id; })[0]).indexOf('for_other') !== -1
+  });
+
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devO.pm.setProfileForOther(late.id, false);
+  var s81 = await devO.C.sync();
+  ts('K81', 'unmarked again, the profile and every entry it holds go back up, because what the device recorded as sent was forgotten when the mark moved', {
+    ok: true, onServer: true, mem: ['about Rae', 'written after']
+  }, { ok: s81.ok, onServer: odb.t.profiles.some(function (r) { return r.id === late.id; }),
+    mem: odb.t.memories.filter(function (m) { return m.profile_id === late.id; }).map(function (m) { return m.content.t; }).sort() });
+
+  /* ---- K82-K84: the follow-up review of 30 October 2026, findings 1 and 2.
+     A Clear birth data and a profile marked for somebody else each travel as
+     a ledger mark, so a second device follows them whatever its birth switch
+     says and whether or not it changed the profile since. ---- */
+  var cdb2 = memDB(), CU = 'bbbbbbbb-0000-4000-8000-0000000000c1';
+  var devG = syncDevice(cdb2, CU);
+  var gp = devG.pm.createProfile({ name: 'Gil', birthDate: '1977-07-07', birthTime: '07:07' });
+  devG.pm.updateProfile(gp.id, { birthTime: '08:08' });
+  devG.pm.addChartNote(gp.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Mine.' });
+  await devG.C.sync();
+  var devH = syncDevice(cdb2, CU);
+  await devH.C.sync();
+  devH.pm.updateProfile(gp.id, { birthTime: '09:09' });  // H holds a history of its own too
+  var hHad = { time: devH.pm.getProfile(gp.id).birthTime, versions: devH.pm.listChartVersions(gp.id).length };
+  devG.pm.setConsent('birthData', false, gp.id);
+  await devG.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devG.pm.updateProfile(gp.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+  await devG.C.sync();
+  devH.pm.addChartNote(gp.id, { address: 'gate:20', resolved: { held: true }, text: 'H note.' });
+  var s82 = await devH.C.sync();
+  devH.pm.setConsent('birthData', true, gp.id);
+  await devH.C.sync();
+  var row82 = cdb2.t.profiles.filter(function (r) { return r.id === gp.id; })[0];
+  ts('K82', 'Clear birth data with the switch off reaches the other device: its birth, its history and what its notes resolved to go, and switching the switch on there uploads no birth', {
+    had: { time: '09:09', versions: 2 }, ok: true, time: '', date: '', versions: 0, resolved: [null], words: ['H note.'], server: null
+  }, { had: hHad, ok: s82.ok, time: devH.pm.getProfile(gp.id).birthTime, date: devH.pm.getProfile(gp.id).birthDate,
+    versions: devH.pm.listChartVersions(gp.id).length,
+    resolved: devH.pm.listChartNotes(gp.id).filter(function (n) { return n.text === 'H note.'; }).map(function (n) { return n.resolved; }),
+    words: devH.pm.listChartNotes(gp.id).filter(function (n) { return n.text === 'H note.'; }).map(function (n) { return n.text; }),
+    server: row82 ? row82.birth_date : 'no row' });
+
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devG.pm.updateProfile(gp.id, { birthDate: '1977-07-08', birthTime: '10:10' });
+  await devG.C.sync();
+  await devH.C.sync();
+  ts('K83', 'a birth given again after the clear stands on both devices: the clear is not applied to a birth newer than it', {
+    g: '1977-07-08', h: '1977-07-08', cleared: false
+  }, { g: devG.pm.getProfile(gp.id).birthDate, h: devH.pm.getProfile(gp.id).birthDate,
+    cleared: devG.pm.consentState('birthCleared', gp.id).granted });
+
+  var mdb = memDB(), MU = 'bbbbbbbb-0000-4000-8000-0000000000c2';
+  mdb.withhold = true;
+  var devJ = syncDevice(mdb, MU), devK = null;
+  devJ.pm.createProfile({ name: 'Jo', birthDate: '1980-01-01' });
+  var jp = devJ.pm.createProfile({ name: 'Kit', birthDate: '1982-02-02', birthTime: '02:02' });
+  devJ.pm.setConsent('journal', true, jp.id);
+  devJ.pm.addMemory({ profileId: jp.id, type: 'journal', content: { t: 'shared' } });
+  await devJ.C.sync();
+  devK = syncDevice(mdb, MU);
+  await devK.C.sync();
+  devK.pm.updateProfile(jp.id, { name: 'Kit B' });  // changed on K since its last sync
+  devJ.pm.setProfileForOther(jp.id, true);
+  await devJ.C.sync();
+  var s84 = await devK.C.sync(), s84b = await devK.C.sync();
+  ts('K84', 'a device that changed the profile since its last sync still learns it was marked for somebody else: it keeps its own copy and journal, and sends back only the empty row', {
+    ok: true, okAgain: true, marked: true, name: 'Kit B', birth: '1982-02-02', localMem: 1, empty: true, serverMem: 0
+  }, { ok: s84.ok, okAgain: s84b.ok, marked: devK.pm.isForOther(jp.id), name: (devK.pm.getProfile(jp.id) || {}).name,
+    birth: (devK.pm.getProfile(jp.id) || {}).birthDate, localMem: devK.pm.getMemory({ profileId: jp.id }).length,
+    empty: emptyRow(mdb, jp.id), serverMem: mdb.t.memories.filter(function (m) { return m.profile_id === jp.id; }).length });
+
+  /* ---- K85: marking a profile for somebody else holds when the debounced
+     push runs before any sync. A push sends the empty row and the mark and
+     then flushes the deletion it queued, and on the live schema deleting a
+     profile takes its ledger, so the account was left with neither the row
+     nor the mark and the other device never learned it. The fake database
+     cascades as the live one does since this row. ---- */
+  var pdb = memDB(), PU = 'bbbbbbbb-0000-4000-8000-0000000000c3';
+  var devP = syncDevice(pdb, PU);
+  devP.pm.createProfile({ name: 'Pat', birthDate: '1981-01-01' });
+  var pp = devP.pm.createProfile({ name: 'Quin', birthDate: '1983-03-03', birthTime: '03:03' });
+  await devP.C.sync();
+  var devQ = syncDevice(pdb, PU);
+  await devQ.C.sync();
+  devP.pm.setProfileForOther(pp.id, true);
+  var p85 = await devP.C.push();
+  var p85b = await devP.C.push();
+  var q85 = await devQ.C.sync();
+  ts('K85', 'a push alone, before any sync, leaves the account the empty row and the mark, and the other device learns it and keeps its copy', {
+    pushOk: true, empty: true, markOnServer: true, qOk: true, qMarked: true, qName: 'Quin'
+  }, { pushOk: !!(p85.ok && p85b.ok), empty: emptyRow(pdb, pp.id),
+    markOnServer: pdb.latest(pp.id, 'forOther') === 'grant', qOk: q85.ok, qMarked: devQ.pm.isForOther(pp.id),
+    qName: (devQ.pm.getProfile(pp.id) || {}).name });
+
+  /* ---- K86: with migration 0006's rule on the server, a row whose switch
+     or mark moved in this push is judged by the new word. The rule reads the
+     ledger when the row arrives and rows go up before their events, so the
+     push sends each such row again after its events. Without that, turning
+     saving back on, or taking a profile back as the reader's own, would send
+     the birth and the server would keep nothing. ---- */
+  var wdb = memDB(); wdb.withhold = true;
+  var WU = 'bbbbbbbb-0000-4000-8000-0000000000c4';
+  var devW = syncDevice(wdb, WU);
+  devW.pm.createProfile({ name: 'Wren', birthDate: '1979-09-09' });
+  var wp = devW.pm.createProfile({ name: 'Vale', birthDate: '1984-04-04', birthTime: '04:04' });
+  await devW.C.sync();
+  var wRow = function () { return wdb.t.profiles.filter(function (r) { return r.id === wp.id; })[0] || {}; };
+  devW.pm.setConsent('birthData', false, wp.id);
+  await devW.C.push();
+  var offDate = wRow().birth_date;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devW.pm.setConsent('birthData', true, wp.id);
+  await devW.C.push();
+  var onDate = wRow().birth_date;
+  devW.pm.setProfileForOther(wp.id, true);
+  await devW.C.push();
+  var markedName = wRow().name;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devW.pm.setProfileForOther(wp.id, false);
+  await devW.C.push();
+  ts('K86', 'saving turned off empties the account copy, turned back on puts the birth back, and a profile taken back as the reader\'s own goes up whole, with the server emptying by the ledger', {
+    off: null, on: '1984-04-04', marked: null, back: { name: 'Vale', date: '1984-04-04' }
+  }, { off: offDate === undefined ? 'no row' : offDate, on: onDate, marked: markedName === undefined ? 'no row' : markedName,
+    back: { name: wRow().name, date: wRow().birth_date } });
+
+  /* ---- K87: a Clear birth data followed by a new birth reaches a device
+     that missed both (the reviewer's check of gap 8, 30 October 2026). The
+     ledger then ends on the revoke the new birth writes, so a pull that read
+     only the latest state skipped the clear, and the other device kept its
+     history of the cleared birth and what its notes resolved to. ---- */
+  var xdb = memDB(), XU = 'bbbbbbbb-0000-4000-8000-0000000000c5';
+  var devX = syncDevice(xdb, XU);
+  devX.pm.createProfile({ name: 'Xan', birthDate: '1976-06-06' });
+  var xp = devX.pm.createProfile({ name: 'Yael', birthDate: '1988-08-08', birthTime: '08:08' });
+  await devX.C.sync();
+  var devY = syncDevice(xdb, XU);
+  await devY.C.sync();
+  devY.pm.updateProfile(xp.id, { birthTime: '09:09' });
+  devY.pm.addChartNote(xp.id, { address: 'gate:20', resolved: { held: true }, text: 'Old birth.' });
+  await devY.C.sync();
+  var yHad = devY.pm.listChartVersions(xp.id).length;
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devX.pm.updateProfile(xp.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devX.pm.updateProfile(xp.id, { birthDate: '1988-08-09', birthTime: '10:10' });
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  var s87 = await devY.C.sync();
+  devY.pm.addChartNote(xp.id, { address: 'gate:21', resolved: { held: false }, text: 'New birth.' });
+  var s87b = await devY.C.sync();
+  var yNotes = devY.pm.listChartNotes(xp.id);
+  ts('K87', 'a clear followed by a new birth reaches a device that missed both: its history of the cleared birth and what its notes resolved to go, the new birth stands, and a note written after keeps its own', {
+    had: 2, ok: true, okAgain: true, date: '1988-08-09', versions: 0,
+    oldResolved: null, newResolved: { held: false }, words: ['New birth.', 'Old birth.']
+  }, { had: yHad, ok: s87.ok, okAgain: s87b.ok, date: devY.pm.getProfile(xp.id).birthDate,
+    versions: devY.pm.listChartVersions(xp.id).length,
+    oldResolved: (yNotes.filter(function (n) { return n.text === 'Old birth.'; })[0] || {}).resolved,
+    newResolved: (yNotes.filter(function (n) { return n.text === 'New birth.'; })[0] || {}).resolved,
+    words: yNotes.map(function (n) { return n.text; }).sort() });
+
+  /* ---- K88: the 2.2 review's RV1 (30 October 2026). Marking a profile for
+     somebody else used to queue the deletion of the account's copy, flushed
+     before the push; a push that failed after the flush left the account
+     with neither the row nor the mark, and another device read the absence
+     as a deletion and dropped its own copy and journal. Nothing is deleted
+     now, so a failed push leaves the account as it was. ---- */
+  var rdb = memDB(); rdb.withhold = true;
+  var RU = 'bbbbbbbb-0000-4000-8000-0000000000c5';
+  var devR = syncDevice(rdb, RU);
+  devR.pm.createProfile({ name: 'Rio', birthDate: '1980-02-02' });
+  var rf = devR.pm.createProfile({ name: 'Sal', birthDate: '1988-08-08' });
+  devR.pm.setConsent('journal', true, rf.id);
+  devR.pm.addMemory({ profileId: rf.id, type: 'journal', content: { t: 'about Sal' } });
+  await devR.C.sync();
+  var devS = syncDevice(rdb, RU);
+  await devS.C.sync();
+  var sHad = devS.pm.getMemory({ profileId: rf.id }).length;
+  devR.pm.setProfileForOther(rf.id, true);
+  rdb.failUpsert = 'profiles';
+  var r88 = await devR.C.push();
+  rdb.failUpsert = null;
+  var kept88 = rdb.t.profiles.some(function (r) { return r.id === rf.id && r.name === 'Sal'; });
+  var s88 = await devS.C.sync();
+  var sKept88 = { has: !!devS.pm.getProfile(rf.id), mem: devS.pm.getMemory({ profileId: rf.id }).length };
+  var r88b = await devR.C.sync();
+  var s88b = await devS.C.sync();
+  ts('K88', 'a push that fails after a profile is marked for somebody else leaves the account as it was, and the other device keeps the profile and its journal; once the push lands, the account holds the empty row and the mark and that device still keeps its own copy', {
+    sHad: 1, pushOk: false, serverKept: true, sOk: true, sKept: { has: true, mem: 1 },
+    recovered: true, empty: true, serverMem: 0, sMarked: true, sAfter: { has: true, mem: 1, name: 'Sal' }
+  }, { sHad: sHad, pushOk: r88.ok, serverKept: kept88, sOk: s88.ok, sKept: sKept88,
+    recovered: !!(r88b.ok && s88b.ok), empty: emptyRow(rdb, rf.id),
+    serverMem: rdb.t.memories.filter(function (m) { return m.profile_id === rf.id; }).length,
+    sMarked: devS.pm.isForOther(rf.id),
+    sAfter: { has: !!devS.pm.getProfile(rf.id), mem: devS.pm.getMemory({ profileId: rf.id }).length, name: (devS.pm.getProfile(rf.id) || {}).name } });
+
+  /* ---- K89-K94: the owner's decision of 30 October 2026, "if a profile is
+     deleted, delete it everywhere" (the 2.2 review's RV3). The account keeps
+     a record of the deletion that outlives the row (migration 0007, which the
+     fake database does as the migration does; check-hd-study-rls.js DP1 to
+     DP13 hold the migration itself), and every device honours it. ---- */
+  var xdb = memDB(), XU = 'bbbbbbbb-0000-4000-8000-0000000000c6';
+  var devX = syncDevice(xdb, XU);
+  var xo = devX.pm.createProfile({ name: 'Xan', birthDate: '1970-01-01' });
+  var xp = devX.pm.createProfile({ name: 'Yul', birthDate: '1971-01-01' });
+  devX.pm.setConsent('journal', true, xp.id);
+  devX.pm.setConsent('journal', true, xo.id);
+  devX.pm.addMemory({ profileId: xp.id, type: 'journal', content: { t: 'about Yul' } });
+  devX.store.setItem('incommon.p.' + xp.id + '.throughline', JSON.stringify([{ id: 'm1793000000000', date: '2026-10-01', type: 'event', title: 'Met', manual: true }]));
+  await devX.C.sync();
+  var devY = syncDevice(xdb, XU); await devY.C.sync();
+  var devZ = syncDevice(xdb, XU); await devZ.C.sync();
+  var devV = syncDevice(xdb, XU); await devV.C.sync();
+  /* Saved people never leave a device, so each device holds its own. */
+  var people = function (dev) { return JSON.parse(dev.store.getItem('incommon.people.v1') || '{}'); };
+  [devX, devY].forEach(function (dev) {
+    var all = {}; all[xp.id] = [{ id: 'pa', display_name: 'Ivy' }]; all[xo.id] = [{ id: 'pb', display_name: 'Kai' }];
+    dev.store.setItem('incommon.people.v1', JSON.stringify(all));
+  });
+  devY.pm.updateProfile(xp.id, { name: 'Yul Y' });  // changed on Y since its last sync
+  var mapZ = JSON.parse(devZ.store.getItem('incommon_cloud_map_v2'));
+  mapZ.pulled = {};  // as a device on its first pull for the account
+  devZ.store.setItem('incommon_cloud_map_v2', JSON.stringify(mapZ));
+  devX.pm.deleteProfile(xp.id, 'Yul');
+  var x89 = await devX.C.sync();
+  var record89 = xdb.t.deleted_profiles.filter(function (r) { return r.profile_id === xp.id; });
+  var y89 = await devY.C.sync(), y89b = await devY.C.sync();
+  var gone = function (db, pid) {
+    return { row: db.t.profiles.some(function (r) { return r.id === pid; }),
+      mem: db.t.memories.filter(function (m) { return m.profile_id === pid; }).length,
+      tl: db.t.throughline_entries.filter(function (m) { return m.profile_id === pid; }).length,
+      ledger: db.t.consent_events.filter(function (m) { return m.profile_id === pid; }).length };
+  };
+  ts('K89', 'a profile deleted on one device is deleted on another that changed it since its last sync: gone from it with its keys and not sent back, and the account keeps only the record, which names the account and the profile and nothing else', {
+    xOk: true, record: [['account_id', 'deleted_at', 'profile_id']], yOk: true, yRemoved: 1, yHas: false, yKeysGone: true,
+    server: { row: false, mem: 0, tl: 0, ledger: 0 }, yOkAgain: true
+  }, { xOk: x89.ok, record: record89.map(function (r) { return Object.keys(r).filter(function (k) { return k !== 'id'; }).sort(); }),
+    yOk: y89.ok, yRemoved: y89.pull.profilesRemoved, yHas: !!devY.pm.getProfile(xp.id),
+    yKeysGone: devY.store.getItem('incommon.consent.' + xp.id) === null && devY.store.getItem('incommon.p.' + xp.id + '.throughline') === null,
+    server: gone(xdb, xp.id), yOkAgain: y89b.ok });
+
+  var z90 = await devZ.C.sync();
+  ts('K90', 'on a device\'s first pull for the account the deleted profile is deleted there, not sent again with its journal by the rule that repairs an older build\'s history', {
+    firstPull: true, ok: true, removed: 1, zHas: false, server: { row: false, mem: 0, tl: 0, ledger: 0 }
+  }, { firstPull: z90.pull.firstPull, ok: z90.ok, removed: z90.pull.profilesRemoved, zHas: !!devZ.pm.getProfile(xp.id), server: gone(xdb, xp.id) });
+
+  devV.pm.updateProfile(xp.id, { name: 'Yul V' });
+  devV.pm.addMemory({ profileId: xp.id, type: 'journal', content: { t: 'written on V after' } });
+  devV.pm.addMemory({ profileId: xo.id, type: 'journal', content: { t: 'about Xan, on V' } });
+  var v91 = await devV.C.push();
+  var v91s = gone(xdb, xp.id);
+  var v91b = await devV.C.sync();
+  ts('K91', 'a device that pushes before it has pulled the deletion lands nothing for the deleted profile and is not stopped by it: the rest of its push goes up, and its next pull deletes the profile there', {
+    pushOk: true, server: { row: false, mem: 0, tl: 0, ledger: 0 }, otherSent: true, syncOk: true, vHas: false
+  }, { pushOk: v91.ok, server: v91s,
+    otherSent: xdb.t.memories.some(function (m) { return m.profile_id === xo.id && m.content && m.content.t === 'about Xan, on V'; }),
+    syncOk: v91b.ok, vHas: !!devV.pm.getProfile(xp.id) });
+
+  var ldb = memDB(); ldb.withhold = true;
+  var LU = 'bbbbbbbb-0000-4000-8000-0000000000c7';
+  var devL = syncDevice(ldb, LU);
+  devL.pm.createProfile({ name: 'Lou', birthDate: '1975-05-05' });
+  var lp = devL.pm.createProfile({ name: 'Mae', birthDate: '1976-06-06' });
+  await devL.C.sync();
+  devL.pm.setProfileForOther(lp.id, true);
+  /* As an older build leaves the outbox: the deletion it queued on marking. */
+  devL.store.setItem('incommon_cloud_outbox_v2', JSON.stringify([{ op: 'del-profile', pid: lp.id }]));
+  var l92 = await devL.C.sync();
+  ts('K92', 'a deletion an older build queued when it marked a profile is dropped for a profile the device still holds: no record, the account keeps the empty row and the mark, and the queue is empty', {
+    ok: true, record: 0, empty: true, mark: 'grant', queued: 0, local: 'Mae'
+  }, { ok: l92.ok, record: ldb.t.deleted_profiles.length, empty: emptyRow(ldb, lp.id), mark: ldb.latest(lp.id, 'forOther'),
+    queued: JSON.parse(devL.store.getItem('incommon_cloud_outbox_v2') || '[]').length, local: (devL.pm.getProfile(lp.id) || {}).name });
+
+  var ndb = memDB(); ndb.noDeleted = true;
+  var NU = 'bbbbbbbb-0000-4000-8000-0000000000c8';
+  var devN = syncDevice(ndb, NU);
+  devN.pm.createProfile({ name: 'Ned', birthDate: '1960-01-01' });
+  var np = devN.pm.createProfile({ name: 'Ora', birthDate: '1961-01-01' });
+  await devN.C.push();
+  devN.pm.deleteProfile(np.id, 'Ora');
+  var n93 = await devN.C.sync();
+  ts('K93', 'against a project without migration 0007 a pull reads as failed and applies nothing, and the deletion stays queued with the row still on the account', {
+    pullOk: false, queued: 1, serverRow: true, localHas: false
+  }, { pullOk: n93.pull.ok, queued: JSON.parse(devN.store.getItem('incommon_cloud_outbox_v2') || '[]').length,
+    serverRow: ndb.t.profiles.some(function (r) { return r.id === np.id; }), localHas: !!devN.pm.getProfile(np.id) });
+
+  /* Marked and taken back again with only pushes between, as the debounce
+     sends them: the account's journal went when the mark landed, so what this
+     device recorded as sent has to go too, or the next pull reads the gap as
+     entries deleted elsewhere and removes them here. */
+  var udb = memDB(); udb.withhold = true;
+  var UU = 'bbbbbbbb-0000-4000-8000-0000000000c9';
+  var devU = syncDevice(udb, UU);
+  devU.pm.createProfile({ name: 'Una', birthDate: '1966-06-06' });
+  var up = devU.pm.createProfile({ name: 'Val', birthDate: '1967-07-07' });
+  devU.pm.setConsent('journal', true, up.id);
+  devU.pm.addMemory({ profileId: up.id, type: 'journal', content: { t: 'about Val' } });
+  await devU.C.sync();
+  devU.pm.setProfileForOther(up.id, true);
+  await devU.C.push();
+  var uGone = udb.t.memories.filter(function (m) { return m.profile_id === up.id; }).length;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devU.pm.setProfileForOther(up.id, false);
+  await devU.C.push();
+  var u95 = await devU.C.sync();
+  ts('K95', 'a profile marked and taken back with only pushes between keeps its journal on the device, and the journal goes back up to the account', {
+    goneWhileMarked: 0, ok: true, local: 1, server: 1
+  }, { goneWhileMarked: uGone, ok: u95.ok, local: devU.pm.getMemory({ profileId: up.id }).length,
+    server: udb.t.memories.filter(function (m) { return m.profile_id === up.id; }).length });
+
+  ts('K94', 'the people a deleted profile saved go with it on the device it was deleted on and on the device that learned it, and another profile\'s saved people stay', {
+    x: [xo.id], y: [xo.id]
+  }, { x: Object.keys(people(devX)), y: Object.keys(people(devY)) });
+
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint
      refuses, and one refused upsert ended the push before the Throughline
@@ -2822,9 +3342,39 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 3, bad: [], listedInOrder: true, uncovered: []
+    files: 8, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
+
+  /* ---- K74: a table a migration adds is reached by the two walls that do
+     not read it by name: the account function's deletion and the two-step
+     rule (assignment 2.2). Every table keyed by profile_id, in the schema of
+     record or a migration, is in the account function's profile list, and
+     every table a migration creates is in server/mfa-policies.sql's list. A
+     new table missing from either is a reader's rows that outlive their
+     account, or a table a stolen password reads. ---- */
+  var k74Sql = [fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8')]
+    .concat(migFiles.map(function (f) { return fs.readFileSync(path.join(migDir, f), 'utf8'); }));
+  var k74Child = [], k74New = [];
+  k74Sql.forEach(function (src, i) {
+    var code = src.split('\n').filter(function (l) { return !/^\s*--/.test(l); }).join('\n');
+    var re = /create table (?:if not exists )?(?:public\.)?(\w+) \(([\s\S]*?)\n\);/gi, m;
+    while ((m = re.exec(code))) {
+      if (/\bprofile_id uuid not null references (?:public\.)?profiles\b/i.test(m[2])) k74Child.push(m[1]);
+      if (i > 0) k74New.push(m[1]);
+    }
+  });
+  var k74Acct = fs.readFileSync(path.join(repo, 'server', 'account', 'index.ts'), 'utf8');
+  var k74List = ((k74Acct.match(/for \(const t of \[([^\]]*)\]\) await del\(t, "profile_id"/) || [])[1] || '')
+    .split(',').map(function (x) { return x.trim().replace(/"/g, ''); }).filter(Boolean);
+  var k74Mfa = fs.readFileSync(path.join(repo, 'server', 'mfa-policies.sql'), 'utf8');
+  var k74MfaList = ((k74Mfa.match(/foreach t in array array\[([\s\S]*?)\] loop/) || [])[1] || '')
+    .split(',').map(function (x) { return x.trim().replace(/'/g, ''); }).filter(Boolean);
+  ts('K74', 'every table keyed by profile is deleted by the account function, and every table a migration adds is under the two-step rule', {
+    childrenSeen: true, notDeleted: [], notTwoStep: []
+  }, { childrenSeen: k74Child.indexOf('memories') !== -1 && k74Child.length >= 5,
+    notDeleted: k74Child.filter(function (t) { return k74List.indexOf(t) === -1; }),
+    notTwoStep: k74New.filter(function (t) { return k74MfaList.indexOf(t) === -1; }) });
 
   /* ---- O1-O7: each account has its own profiles on a device, the owner's
      request of 12 October 2026 after three accounts on one browser all opened
@@ -2934,6 +3484,374 @@ async function runCloudTests() {
   t('O8', 'putting a Puerto Rico place back on Atlantic time moves the birth stamp, so no cache keyed on it outlives the correction', {
     fixed: true, zone: 'America/Puerto_Rico', moved: true
   }, { fixed: (prFixed || []).indexOf(prP.id) !== -1, zone: prAfter.timezone, moved: prAfter.birthStamp !== stampBefore });
+
+  /* ---- O9-O18: chart versions and chart notes (1.2, data-contracts/
+     HD-STUDY-MODEL.md, approved by the owner on 29 October 2026). The device
+     half: a corrected birth is a new version, never an overwrite; a note is
+     attached to an address and the version it was written against; Clear
+     birth data takes the history and leaves the notes; deleting a profile
+     takes both. Every actual is computed inside a guard, so the build before
+     this change reports red rows rather than stopping the suite. */
+  function cv(fn) { try { return fn(); } catch (e) { return { threw: String(e && e.message || e) }; } }
+  var cvDev = ownerStore(), cvPm = pmPage(cvDev);
+  var cvA = cvPm.createProfile({ name: 'Ana', birthDate: '1985-03-10', birthTime: '06:30', birthLocation: 'Chicago' });
+  var cvB = cvPm.createProfile({ name: 'Bea', birthDate: '1990-01-01' });
+  var VK = function (id) { return 'incommon.p.' + id + '.chartVersions.v1'; };
+  var NK = function (id) { return 'incommon.p.' + id + '.chartNotes.v1'; };
+
+  t('O9', 'a profile in the shape before versions existed, edited only by name and avatar, gains no versions and no new key', {
+    versions: 0, key: null
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { name: 'Ana Maria', avatarColor: '#123456' });
+    return { versions: cvPm.listChartVersions(cvA.id).length, key: cvDev.getItem(VK(cvA.id)) };
+  }));
+
+  var cvNoteEarly = cv(function () { return cvPm.addChartNote(cvA.id, { address: 'activation:design:Moon', resolved: { value: '41.2' }, text: 'Before any correction.' }); });
+  t('O10', 'the first correction of a time writes the old birth as version 1 and the new one as version 2, and the profile still holds the new birth', {
+    count: 2, seqs: [1, 2], reasons: ['initial', 'time_corrected'], times: ['06:30', '07:15'], subject: 'profile:' + cvA.id,
+    noChart: true, current: '07:15', currentIsLast: true
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { birthTime: '07:15' });
+    var v = cvPm.listChartVersions(cvA.id);
+    return { count: v.length, seqs: v.map(function (x) { return x.seq; }), reasons: v.map(function (x) { return x.reason; }),
+      times: v.map(function (x) { return x.birth.time; }), subject: v[0].subject,
+      noChart: v.every(function (x) { return !('computed_state' in x) && !('longitudes' in x.birth) && !('gates' in x); }),
+      current: cvPm.getProfile(cvA.id).birthTime, currentIsLast: cvPm.currentChartVersion(cvA.id).id === v[1].id };
+  }));
+
+  t('O11', 'a note written before the first correction is given version 1, and a note written after it the current version', {
+    early: 'v1', late: 'v2'
+  }, cv(function () {
+    var v = cvPm.listChartVersions(cvA.id), early = cvPm.listChartNotes(cvA.id).filter(function (n) { return n.id === cvNoteEarly.id; })[0];
+    var late = cvPm.addChartNote(cvA.id, { address: 'channel:20-34', resolved: { defined: true, by: ['activation:personality:Sun'] }, text: 'After.' });
+    return { early: early.version === v[0].id ? 'v1' : early.version, late: late.version === v[1].id ? 'v2' : late.version };
+  }));
+
+  t('O12', 'a corrected date and then a corrected place each add one version with their own reason; a repeated value adds none', {
+    reasons: ['initial', 'time_corrected', 'date_corrected', 'place_corrected'], seqs: [1, 2, 3, 4]
+  }, cv(function () {
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11' });
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11' });
+    cvPm.updateProfile(cvA.id, { birthLocation: 'Los Angeles' });
+    var v = cvPm.listChartVersions(cvA.id);
+    return { reasons: v.map(function (x) { return x.reason; }), seqs: v.map(function (x) { return x.seq; }) };
+  }));
+
+  t('O13', 'the first birth a blank profile is given is not a correction, and replacing the sample chart is not one either', {
+    blank: 0, sample: 0
+  }, cv(function () {
+    var e = cvPm.createProfile({ name: 'Cal' });
+    cvPm.updateProfile(e.id, { birthDate: '2000-02-02' });
+    var smp = cvPm.createProfile({ name: 'Default Profile', birthDate: '1990-06-15' });
+    cvDev.setItem('incommon.sample', JSON.stringify(smp.id));
+    cvPm.updateProfile(smp.id, { birthDate: '1979-11-30', birthTime: '23:05' });
+    cvDev.removeItem('incommon.sample');
+    var out = { blank: cvPm.listChartVersions(e.id).length, sample: cvPm.listChartVersions(smp.id).length };
+    cvPm.deleteProfile(e.id, 'Cal'); cvPm.deleteProfile(smp.id, 'Default Profile');
+    return out;
+  }));
+
+  t('O14', 'putting a Puerto Rico place back on Atlantic time is a version of its own, reason zone_repaired (O7)', {
+    reasons: ['initial', 'zone_repaired'], zones: ['America/New_York', 'America/Puerto_Rico']
+  }, cv(function () {
+    var d = ownerStore(), pm = pmPage(d);
+    var p = pm.createProfile({ name: 'Ana', birthDate: '1985-01-01', birthTime: '06:30' });
+    var raw = JSON.parse(d.getItem(ROOTK));
+    raw.profiles.forEach(function (q) { if (q.id === p.id) { q.birth_lat = 18.4655; q.birth_lon = -66.1057; q.timezone = 'America/New_York'; q.tz_offset = -5; } });
+    d.setItem(ROOTK, JSON.stringify(raw));
+    var pm2 = pmPage(d); pm2.reresolveLocations();
+    var v = pmPage(d).listChartVersions(p.id);
+    return { reasons: v.map(function (x) { return x.reason; }), zones: v.map(function (x) { return x.birth.zone; }) };
+  }));
+
+  t('O15', 'addresses: the vault\'s six forms are taken and anything else is refused, before anything is written', {
+    ok: [true, true, true, true, true, true, true], refused: [false, false, false, false, false, false, false], thrown: 7, written: 0
+  }, cv(function () {
+    var good = ['centre:Solar Plexus', 'channel:20-34', 'gate:64', 'line:20.3', 'activation:design:Moon', 'activation:personality:South Node', 'facet:cross'];
+    var bad = ['centre:Spleen ', 'channel:34-20', 'gate:65', 'line:20.7', 'activation:design:Chiron', 'facet:colour', 'gate:20; 1-1'];
+    var before = cvPm.listChartNotes(cvA.id).length, thrown = 0;
+    bad.forEach(function (a) { try { cvPm.addChartNote(cvA.id, { address: a, text: 'x' }); } catch (e) { thrown++; } });
+    return { ok: good.map(function (a) { return cvPm.chartAddressOk(a); }), refused: bad.map(function (a) { return cvPm.chartAddressOk(a); }),
+      thrown: thrown, written: cvPm.listChartNotes(cvA.id).length - before };
+  }));
+
+  t('O16', 'a note compares what its address resolved to then with now: same, changed, or unresolved; editing the words keeps the snapshot', {
+    same: 'same', reordered: 'same', changed: 'changed', unresolved: 'unresolved', kept: { value: '41.2' }, text: 'Edited.', tooLong: true, deleted: true
+  }, cv(function () {
+    var n = cvPm.listChartNotes(cvA.id).filter(function (x) { return x.id === cvNoteEarly.id; })[0];
+    var c = cvPm.listChartNotes(cvA.id, { address: 'channel:20-34' })[0], long = false;
+    var ed = cvPm.updateChartNote(cvA.id, n.id, 'Edited.');
+    try { cvPm.updateChartNote(cvA.id, n.id, new Array(4002).join('a')); } catch (e) { long = true; }
+    var tmp = cvPm.addChartNote(cvA.id, { address: 'gate:1', text: 'temp' });
+    return { same: cvPm.chartNoteStatus(n, { value: '41.2' }),
+      reordered: cvPm.chartNoteStatus(c, { by: ['activation:personality:Sun'], defined: true }),
+      changed: cvPm.chartNoteStatus(c, { defined: false, by: [] }), unresolved: cvPm.chartNoteStatus(n, null),
+      kept: ed.resolved, text: cvPm.listChartNotes(cvA.id).filter(function (x) { return x.id === n.id; })[0].text,
+      tooLong: long, deleted: cvPm.deleteChartNote(cvA.id, tmp.id) && cvPm.listChartNotes(cvA.id).every(function (x) { return x.id !== tmp.id; }) };
+  }));
+
+  t('O17', 'the export carries the versions, withholds the notes while journal is off and counts them, and carries them once it is on', {
+    versions: 4, offNotes: 0, offWithheld: 2, onNotes: 2, onWithheld: 0
+  }, cv(function () {
+    var off = cvPm.exportProfile(cvA.id);
+    cvPm.setConsent('journal', true, cvA.id);
+    var on = cvPm.exportProfile(cvA.id);
+    return { versions: (off.chartVersions || []).length, offNotes: (off.chartNotes || []).length, offWithheld: off.chartNotesWithheld,
+      onNotes: (on.chartNotes || []).length, onWithheld: on.chartNotesWithheld };
+  }));
+
+  t('O18', 'Clear birth data takes the version history and keeps the notes (O8); deleting the profile takes both keys, which erasing the account also names', {
+    clearedVersions: 0, versionKey: null, notesKept: 2, erasedNamed: true, afterDelete: [null, null], otherUntouched: true
+  }, cv(function () {
+    cvPm.updateChartNote(cvA.id, cvPm.listChartNotes(cvA.id)[0].id, 'Still mine.');
+    cvPm.updateProfile(cvA.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+    var cleared = { clearedVersions: cvPm.listChartVersions(cvA.id).length, versionKey: cvDev.getItem(VK(cvA.id)), notesKept: cvPm.listChartNotes(cvA.id).length };
+    cvPm.updateProfile(cvA.id, { birthDate: '1985-03-11', birthTime: '07:15' });
+    cvPm.updateProfile(cvA.id, { birthTime: '08:00' });
+    var named = cvPm.accountStorageKeys();
+    cvPm.addChartNote(cvB.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Bea\'s own.' });
+    cvPm.deleteProfile(cvA.id, 'Ana Maria');
+    cleared.erasedNamed = named.indexOf(VK(cvA.id)) !== -1 && named.indexOf(NK(cvA.id)) !== -1;
+    cleared.afterDelete = [cvDev.getItem(VK(cvA.id)), cvDev.getItem(NK(cvA.id))];
+    cleared.otherUntouched = cvPm.listChartNotes(cvB.id).length === 1;
+    return cleared;
+  }));
+
+  /* ---- T1-T10: what a handout and an export may carry (assignment 2.2,
+     Task 3, app/share-rules.js). The rows load the module guarded, so a
+     build without it reports red rows rather than stopping the suite. The
+     chart handed in is stuffed with everything a chart object near the
+     screens carries, and the rows search the serialised payload for each of
+     those values, because a rule that holds for the fields a test names and
+     leaks the ones it did not name is the failure this module exists for. */
+  var SR = null;
+  try { SR = require(path.join(repo, 'app', 'share-rules.js')); } catch (e) { SR = null; }
+  function sr(fn) { try { if (!SR) return { missing: 'share-rules.js' }; return fn(); } catch (e) { return { threw: String(e && e.message || e) }; } }
+  function srChart(kind, consent) {
+    return { kind: kind, name: 'Ana Maria Lopez', type: 'Generator', strategy: 'To respond', authority: 'Sacral',
+      profile: '3/5', definition: 'Single', centres: ['Sacral', 'Throat', 'Root'], channels: ['20-34', '53-42'],
+      gates: [20, 34, 53, 42, 7], activations: [{ side: 'personality', body: 'Sun', gate: 20, line: 3, lon: 301.11 },
+        { side: 'design', body: 'Moon', gate: 34, line: 5 }],
+      birth: { date: '1985-03-10', time: '06:30', place: 'Chicago, Illinois', lat: 41.8781, lon: -87.6298, zone: 'America/Chicago' },
+      birth_date: '1985-03-10', birth_time: '06:30', birth_lat: 41.8781, birth_lon: -87.6298, timezone: 'America/Chicago',
+      tz_offset: -6, chart_hash: 'c0ffee1234abcd', email: 'ana@example.test', id: 'p9f8e7d6c5b4a3921',
+      subject_consent: consent || null,
+      notes: [{ id: 'n1', address: 'facet:type', text: 'Waiting to respond.', resolved: { value: 'Generator' } },
+        { id: 'n2', address: 'activation:design:Moon', text: 'The design Moon again.', resolved: { value: '34.5' } },
+        { id: 'n3', address: 'gate:20', text: 'Not picked.', resolved: { held: true } }] };
+  }
+  var SR_SECRETS = ['1985', '06:30', 'Chicago', '41.87', '87.62', 'America/Chicago', 'c0ffee', 'example.test', 'p9f8e7d6', 'Maria', 'Lopez', '301.11', '34.5'];
+  function srLeaks(obj) { var j = JSON.stringify(obj); return SR_SECRETS.filter(function (v) { return j.indexOf(v) !== -1; }); }
+
+  t('T1', 'a handout of the reader\'s own chart carries Type, Strategy, Authority, Profile, Definition and a first name, and nothing of the wiring or the birth unless asked', {
+    ok: true, keys: 'authority,definition,includes,kind,name,notes,profile,schema,strategy,type', name: 'Ana', wiringOff: true
+  }, sr(function () {
+    var r = SR.handout(srChart('self'));
+    return { ok: r.ok, keys: Object.keys(r.payload).sort().join(','), name: r.payload.name,
+      wiringOff: ['centres', 'channels', 'gates', 'activations', 'birthDate', 'birthTime', 'birthPlace'].every(function (k) { return r.payload.includes[k] === false; }) };
+  }));
+  t('T2', 'none of the birth date, time, place, coordinates, zone, stored hash, email, record id, full name or positions reaches a default handout, wherever the chart object kept them', {
+    leaks: []
+  }, sr(function () { return { leaks: srLeaks(SR.handout(srChart('self'), { notes: ['n1', 'n2'] }).payload) }; }));
+  t('T3', 'each option adds its own part and only that: the place is a name and never coordinates or a zone, and an activation keeps four fields', {
+    centres: ['Sacral', 'Throat', 'Root'], channels: ['20-34', '53-42'], gates: 5, acts: 'body,gate,line,side', birth: { date: '1985-03-10', time: '06:30', place: 'Chicago, Illinois' },
+    placeOnlyLeaks: ['Chicago']
+  }, sr(function () {
+    var all = SR.handout(srChart('self'), { include: { centres: true, channels: true, gates: true, activations: true, birthDate: true, birthTime: true, birthPlace: true } }).payload;
+    var place = SR.handout(srChart('self'), { include: { birthPlace: true } }).payload;
+    return { centres: all.centres, channels: all.channels, gates: all.gates.length, acts: Object.keys(all.activations[0]).sort().join(','),
+      birth: all.birth, placeOnlyLeaks: srLeaks(place) };
+  }));
+  /* A word is dated, and a handout is made at a moment (finding 12): these
+     rows hand the module the same moment every time. */
+  var SR_NOW = Date.UTC(2026, 9, 30), SR_AT = '2026-10-01T00:00:00Z';
+  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it, the name included since the follow-up review, needs their stated word, a card is not a word (F7), and a withdrawn word is no word', {
+    plain: true, name: false, refused: 'no_consent', stated: true, card: 'no_consent', withdrawn: 'no_consent', named: 'no_consent', namedWithWord: 'Ana'
+  }, sr(function () {
+    var plain = SR.handout(srChart('person'));
+    var word = { basis: 'stated', scope: ['store', 'handout'], stated_at: SR_AT };
+    return { plain: plain.ok, name: 'name' in plain.payload,
+      refused: SR.handout(srChart('person'), { include: { centres: true } }).reason,
+      stated: SR.handout(srChart('person', word), { include: { gates: true }, now: SR_NOW }).ok,
+      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'], stated_at: SR_AT }), { include: { birthDate: true }, now: SR_NOW }).reason,
+      withdrawn: SR.handout(srChart('person', { basis: 'stated', scope: ['handout'], stated_at: SR_AT, withdrawn_at: '2026-10-29T00:00:00Z' }), { include: { centres: true }, now: SR_NOW }).reason,
+      named: SR.handout(srChart('person'), { include: { name: true } }).reason,
+      namedWithWord: SR.handout(srChart('person', word), { include: { name: true }, now: SR_NOW }).payload.name };
+  }));
+  t('T5', 'a client\'s chart: no handout at all without their word, a word that does not cover handouts is not enough, and with it the name still starts off', {
+    none: 'no_consent', notesOnly: 'no_consent', withWord: true, name: false, basisNone: 'no_consent'
+  }, sr(function () {
+    var ok = SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes', 'handout'], stated_at: SR_AT }), { now: SR_NOW });
+    return { none: SR.handout(srChart('client')).reason,
+      notesOnly: SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes'], stated_at: SR_AT }), { now: SR_NOW }).reason,
+      withWord: ok.ok, name: 'name' in ok.payload,
+      basisNone: SR.handout(srChart('client', { basis: 'none', scope: ['handout'] }), { now: SR_NOW }).reason };
+  }));
+  t('T6', 'an option the module does not know is refused rather than ignored, so a misspelled one cannot ship what it meant to leave out', {
+    typo: 'unknown_option', detail: 'birthdate', stray: 'unknown_option', kind: 'kind'
+  }, sr(function () {
+    var r = SR.handout(srChart('self'), { include: { birthdate: false } });
+    return { typo: r.reason, detail: r.detail, stray: SR.handout(srChart('self'), { everything: true }).reason,
+      kind: SR.handout({ type: 'Generator' }).reason };
+  }));
+  t('T7', 'notes travel as the reader picked them, as words: what an address resolved to never travels, and an address goes only beside the part it names', {
+    count: 2, first: { text: 'Waiting to respond.', address: 'facet:type' }, second: { text: 'The design Moon again.' },
+    withActs: 'activation:design:Moon', resolvedNever: true
+  }, sr(function () {
+    var a = SR.handout(srChart('self'), { notes: ['n1', 'n2'] }).payload, b = SR.handout(srChart('self'), { notes: ['n2'], include: { activations: true } }).payload;
+    return { count: a.notes.length, first: a.notes[0], second: a.notes[1], withActs: b.notes[0].address,
+      resolvedNever: JSON.stringify([a, b]).indexOf('resolved') === -1 };
+  }));
+  var srSubjects = [
+    { kind: 'self', id: 'pSelf', display_name: 'Ana', birth: { date: '1985-03-10', time: '06:30', place: 'Chicago', lat: 41.8781, lon: -87.6298, zone: 'America/Chicago', secret: 'x' },
+      versions: [{ id: 'v1', seq: 1, reason: 'initial', birth: { date: '1985-03-10', time: '06:15' }, chart_hash: 'h1', birth_key: 'b1|x', created_at: '2026-10-29T00:00:00Z' }],
+      notes: [{ id: 'n1', address: 'gate:20', version: 'v1', text: 'Mine.', resolved: { held: true }, created_at: 'a', updated_at: 'b' }] },
+    { kind: 'person', id: 'pPerson', display_name: 'Bea', birth: { date: '1990-01-01' }, versions: [], notes: [],
+      subject_consent: { basis: 'none', scope: [] } },
+    { kind: 'client', id: 'pClient', display_name: 'Cal', birth: { date: '1970-07-07', time: '10:00' }, versions: [], notes: [],
+      subject_consent: { basis: 'stated', scope: ['store', 'notes', 'handout'], stated_at: '2026-10-01T00:00:00Z' } }];
+  t('T8', 'the reader\'s export carries their own birth, versions and notes and nobody else unless asked, and says so in its header', {
+    schema: 'incommon.charts.v1', includes: { birth_data: true, notes: true, people: false }, kinds: ['self'], versions: 1, notes: 1, resolved: true, extra: false
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, {}, Date.UTC(2026, 9, 29)).file;
+    return { schema: f.schema, includes: f.includes, kinds: f.subjects.map(function (x) { return x.kind; }), versions: f.subjects[0].versions.length,
+      notes: f.subjects[0].notes.length, resolved: !!f.subjects[0].notes[0].resolved, extra: 'secret' in f.subjects[0].birth };
+  }));
+  t('T9', 'with people ticked the export carries them and no consent record a restore would honour, and no birth hash (F6, F10); without birth data it carries no birth, no version and no resolved value for anyone', {
+    kinds: ['self', 'person', 'client'], noConsent: true, noHash: true, noBirth: true, refused: 'unknown_option'
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, { people: true }).file, g = SR.exportFile(srSubjects, { people: true, birthData: false }).file;
+    var j = JSON.stringify(g);
+    var fj = JSON.stringify(f);
+    return { kinds: f.subjects.map(function (x) { return x.kind; }),
+      noConsent: fj.indexOf('subject_consent') === -1 && fj.indexOf('stated') === -1,
+      noHash: fj.indexOf('chart_hash') === -1 && fj.indexOf('birth_key') === -1 && fj.indexOf('"h1"') === -1,
+      noBirth: g.subjects.every(function (x) { return x.birth === null && x.versions.length === 0; }) && j.indexOf('resolved') === -1 && j.indexOf('1985') === -1 && j.indexOf('1970') === -1,
+      refused: SR.exportFile(srSubjects, { everyone: true }).reason };
+  }));
+  t('T11', 'a profile marked as made for somebody else is shaped as that person\'s chart: no name by default, no centres or birth date without their word, and out of the export unless people are ticked', {
+    named: false, centres: 'no_consent', date: 'no_consent', kind: 'person', exported: ['self'], withPeople: ['self', 'person']
+  }, sr(function () {
+    var c = srChart('self'); c.forOther = true;
+    var mine = srSubjects[0], theirs = Object.assign({}, mine, { id: 'pTheirs', forOther: true });
+    return { named: 'name' in SR.handout(c).payload, centres: SR.handout(c, { include: { centres: true } }).reason,
+      date: SR.handout(c, { include: { birthDate: true } }).reason, kind: SR.handout(c).payload.kind,
+      exported: SR.exportFile([mine, theirs], {}).file.subjects.map(function (x) { return x.kind; }),
+      withPeople: SR.exportFile([mine, theirs], { people: true }).file.subjects.map(function (x) { return x.kind; }) };
+  }));
+  /* ---- T12-T14: the follow-up review's findings 10 to 12, which the owner
+     asked on 30 October 2026 to be fixed rather than accepted. ---- */
+  t('T12', 'the notes the reader picked go on another person\'s handout only with that person\'s word, and on the reader\'s own as before (finding 10)', {
+    person: 'no_consent', withWord: 1, own: 1, nonePicked: true
+  }, sr(function () {
+    var word = { basis: 'stated', scope: ['handout'], stated_at: SR_AT };
+    return { person: SR.handout(srChart('person'), { notes: ['n1'] }).reason,
+      withWord: (SR.handout(srChart('person', word), { notes: ['n1'], now: SR_NOW }).payload || {}).notes.length,
+      own: SR.handout(srChart('self'), { notes: ['n1'] }).payload.notes.length,
+      nonePicked: SR.handout(srChart('person'), { notes: [] }).ok };
+  }));
+  t('T13', 'a word counts only with its day and for a year: undated, dated after the handout, older than a year, or asked without a moment, it opens nothing, and the refusal says which (finding 12)', {
+    ok: true, undated: 'undated', future: 'undated', expired: 'expired', noNow: 'undated', lastDay: true, days: 365
+  }, sr(function () {
+    var c = function (at) { return srChart('person', { basis: 'stated', scope: ['handout'], stated_at: at }); };
+    var inc = { include: { centres: true } };
+    return { ok: SR.handout(c(SR_AT), Object.assign({ now: SR_NOW }, inc)).ok,
+      undated: SR.handout(c(null), Object.assign({ now: SR_NOW }, inc)).detail,
+      future: SR.handout(c('2026-11-02T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).detail,
+      expired: SR.handout(c('2025-10-29T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).detail,
+      noNow: SR.handout(c(SR_AT), inc).detail,
+      lastDay: SR.handout(c('2025-10-30T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).ok, days: SR.WORD_DAYS };
+  }));
+  t('T14', 'a backup keeps what each person\'s record said: the export notes the scope and day with no basis, a restore keeps the record and notes and opens no handout, and the reader stating it again opens it (finding 11)', {
+    noted: { scope: ['store', 'notes', 'handout'], noted_at: '2026-10-01T00:00:00Z', withdrawn_at: null }, noBasis: true,
+    restored: 'restored', keepsNotes: true, handout: 'no_consent', detail: 'restored', confirmed: true, foreign: 'none', withdrawnStays: 'withdrawn'
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, { people: true }).file, cal = f.subjects.filter(function (x) { return x.id === 'pClient'; })[0];
+    var back = SR.restoreConsent(cal.consent_noted);
+    var refused = SR.handout(srChart('client', back), { now: SR_NOW });
+    var again = SR.confirmWord(back, SR_NOW);
+    return { noted: cal.consent_noted, noBasis: JSON.stringify(f).indexOf('basis') === -1,
+      restored: back.basis, keepsNotes: SR.consentKeeps(back, 'notes'), handout: refused.reason, detail: refused.detail,
+      confirmed: SR.handout(srChart('client', again), { now: SR_NOW + 1000 }).ok,
+      foreign: SR.restoreConsent({ scope: ['everything'] }).basis,
+      withdrawnStays: SR.wordState(SR.restoreConsent({ scope: ['handout'], noted_at: SR_AT, withdrawn_at: SR_AT }), 'handout', SR_NOW) };
+  }));
+  t('T10', 'the module sends nothing and keeps nothing: no network, no storage, no clock beyond the export stamp', {
+    clean: true
+  }, sr(function () {
+    var src = fs.readFileSync(path.join(repo, 'app', 'share-rules.js'), 'utf8').split('\n').filter(function (l) { return !/^\s*(\/\*|\*)/.test(l); }).join('\n');
+    return { clean: !/fetch\(|XMLHttpRequest|localStorage|sessionStorage|indexedDB|navigator\.|document\.|window\./.test(src) };
+  }));
+
+  /* ---- O19-O21: the 2.2 Task 1 privacy review of HD-STUDY-MODEL.md (30
+     October 2026). F4: what a note's address resolved to is derived from the
+     birth, so Clear birth data clears it. F5: a chart note is a journal
+     memory for the consent gate, or a missing entry reads as allowed. F14:
+     two versions are compared by the birth, not by a hash that moves with
+     STATE_VERSION. */
+  var rvDev = ownerStore(), rvPm = pmPage(rvDev);
+  var rvP = rvPm.createProfile({ name: 'Dee', birthDate: '1972-07-04', birthTime: '14:20', birthLocation: 'Chicago' });
+  t('O19', 'Clear birth data clears what every note resolved to and keeps its words, so a note reads unresolved and carries no gate or line of the cleared birth', {
+    resolved: [null, null], words: ['Moon here.', 'Type.'], status: 'unresolved', otherKept: { value: 'Generator' }
+  }, cv(function () {
+    rvPm.addChartNote(rvP.id, { address: 'activation:design:Moon', resolved: { value: '12.4' }, text: 'Moon here.' });
+    rvPm.addChartNote(rvP.id, { address: 'facet:type', resolved: { value: 'Projector' }, text: 'Type.' });
+    var other = rvPm.createProfile({ name: 'Eli', birthDate: '1999-09-09' });
+    rvPm.addChartNote(other.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Eli.' });
+    rvPm.updateProfile(rvP.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+    var n = rvPm.listChartNotes(rvP.id);
+    return { resolved: n.map(function (x) { return x.resolved; }), words: n.map(function (x) { return x.text; }),
+      status: rvPm.chartNoteStatus(n[0], { value: '12.4' }), otherKept: rvPm.listChartNotes(other.id)[0].resolved };
+  }));
+  t('O20', 'a chart note is held to the journal consent, like a journal entry', {
+    consent: 'journal'
+  }, cv(function () { return { consent: rvPm.consentFor('chart_note') }; }));
+  t('O21', 'a version is keyed by its birth, never by a hash carrying STATE_VERSION: no chart_hash, and the key names no arithmetic version', {
+    hasHash: false, keyed: true, noStateVersion: true, distinct: true
+  }, cv(function () {
+    rvPm.updateProfile(rvP.id, { birthDate: '1972-07-04', birthTime: '14:20' });
+    rvPm.updateProfile(rvP.id, { birthTime: '14:50' });
+    var v = rvPm.listChartVersions(rvP.id);
+    return { hasHash: v.some(function (x) { return 'chart_hash' in x; }),
+      keyed: v.every(function (x) { return /^b1\|/.test(x.birth_key || ''); }),
+      noStateVersion: v.every(function (x) { return !/\|v\d+\|/.test('|' + x.birth_key + '|') && x.birth_key.indexOf('|v') !== 0; }),
+      distinct: v.length === 2 && v[0].birth_key !== v[1].birth_key };
+  }));
+
+  /* ---- O22-O24: deleted everywhere, on the device (the owner, 30 October
+     2026), and the ledger's fifty event cap (the 2.2 review's note). ---- */
+  t('O22', 'a deletion another device made that would leave this device with no profile starts it over with a fresh one, which is active, and the deleted one goes with its keys', {
+    names: ['Default Profile'], active: true, gone: true, keysGone: true
+  }, cv(function () {
+    var d1 = ownerStore(), p1 = pmPage(d1), only = p1.createProfile({ name: 'Uma', birthDate: '1990-01-01' });
+    p1.importSynced({ deletedProfiles: [only.id] });
+    var list = p1.listProfiles();
+    return { names: list.map(function (x) { return x.name; }), active: p1.activeId() === list[0].id,
+      gone: !p1.getProfile(only.id), keysGone: d1.getItem('incommon.consent.' + only.id) === null };
+  }));
+  t('O23', 'the ledger keeps its last fifty events and never drops the latest event of a consent to do it, here and when another device\'s events are merged in', {
+    hasForOther: true, hasBirthData: true, length: 52, merged: true
+  }, cv(function () {
+    var d2 = ownerStore(), p2 = pmPage(d2), lg = p2.createProfile({ name: 'Lee', birthDate: '1990-01-01' });
+    p2.setConsent('forOther', true, lg.id);
+    for (var i = 0; i < 60; i++) p2.setConsent('journal', i % 2 === 0, lg.id);
+    var ev = JSON.parse(d2.getItem('incommon.consent.' + lg.id)).events;
+    p2.importSynced({ consents: (function () { var o = {}; o[lg.id] = [{ ts: '2099-01-01T00:00:00.000Z', id: 'mood', granted: true }]; return o; })() });
+    var ev2 = JSON.parse(d2.getItem('incommon.consent.' + lg.id)).events;
+    return { hasForOther: ev.some(function (e) { return e.id === 'forOther'; }), hasBirthData: ev.some(function (e) { return e.id === 'birthData'; }),
+      length: ev.length, merged: ev2.some(function (e) { return e.id === 'forOther'; }) && ev2.some(function (e) { return e.id === 'mood'; }) };
+  }));
+  t('O24', 'deleting a profile here forgets the people it saved, without people-library.js loaded, and keeps another profile\'s', {
+    keys: ['other']
+  }, cv(function () {
+    var d3 = ownerStore(), p3 = pmPage(d3);
+    p3.createProfile({ name: 'Vic', birthDate: '1990-01-01' });
+    var dp = p3.createProfile({ name: 'Wes', birthDate: '1991-01-01' });
+    var all = { other: [{ id: 'x' }] }; all[dp.id] = [{ id: 'y' }];
+    d3.setItem('incommon.people.v1', JSON.stringify(all));
+    p3.deleteProfile(dp.id, 'Wes');
+    return { keys: Object.keys(JSON.parse(d3.getItem('incommon.people.v1'))) };
+  }));
 
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
@@ -3379,7 +4297,7 @@ runCloudTests().then(() => {
     [['B', 'birth-time.js'], ['C', 'hd-composite.js'], ['W', 'hd-wheel.js'], ['D', 'arc-solver.js'],
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
-      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
+      ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['T', 'share-rules.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
       ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);

@@ -179,6 +179,48 @@
     return false;
   }
 
+  /* ---------- "Save my profile to my account" ----------
+
+     The birthData consent is that switch, and until 30 October 2026 the push
+     never read it: profile rows went up whatever it said, so the switch
+     changed nothing that was sent (privacy review F2; the owner: "it serves
+     no purpose if it defaults with no option"). Now, while it is off, the
+     profile row still goes up, because memories and the consent ledger hang
+     off it, but every birth field goes up empty, so the account stops holding
+     the birth and the next push takes away what it held. The device keeps its
+     own copy, and a pull never empties it (see the pull's profiles). Never
+     decided reads as on: ProfileManager's consentState() says why. A
+     ProfileManager older than that method is treated as on, which is the
+     behaviour it was written against. */
+  var BIRTH_ROW = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'timezone', 'tz_offset',
+    'location_resolved', 'birth_time_unknown'];
+  function birthSaved(pm, pid) {
+    if (typeof pm.consentState !== 'function') return true;
+    try { return !!pm.consentState('birthData', pid).granted; } catch (e) { return true; }
+  }
+  function withoutBirth(p) {
+    var o = Object.assign({}, p);
+    BIRTH_ROW.forEach(function (k) { o[k] = null; });
+    o._birthNotSaved = 1;
+    return o;
+  }
+  /* The hash a profile is cached under. With the birth saved it is exactly
+     hashOf(p), so nothing cached before this changes; with it not saved it
+     is the hash of what was sent, so switching the setting either way is a
+     change the next push sends. */
+  function profileHash(pm, p) {
+    return birthSaved(pm, p.id) ? hashOf(p) : hashOf(withoutBirth(p));
+  }
+  /* A profile made for somebody else never leaves the device (privacy review
+     F9, the owner's (b)): no row, no memories, no ledger, no pair. */
+  function forOther(p) { return !!(p && p.for_other === true); }
+  function tombRow(p, userId) {
+    var r = { id: p.id, account_id: userId, is_active: false, is_default: false, name: null, avatar_color: null,
+      avatar_kind: null, avatar_image: null, avatar_sign: null, pin_hash: null, updated_at: new Date().toISOString() };
+    BIRTH_ROW.forEach(function (k) { r[k] = (k === 'location_resolved' || k === 'birth_time_unknown') ? false : null; });
+    return r;
+  }
+
   /* ---------- plan building: ProfileManager state to remote rows ---------- */
 
   /* RAW PROFILE ROWS. pm._store() is named private by convention, not
@@ -193,9 +235,27 @@
     var plan = { profiles: [], memories: [], throughline: [], oki: [], consent: [], pairs: [], map: map };
 
     store.profiles.forEach(function (p) {
+      if (forOther(p)) {
+        /* A profile made for somebody else goes up as an empty row and its
+           forOther ledger events, nothing else: no name, no birth, no
+           memory. The row is what lets the account's other devices learn the
+           mark, because the ledger hangs off it (the follow-up review's
+           finding 2). Migration 0006 empties the row and deletes the
+           profile's journal, Throughline and Oki rows when the mark arrives,
+           so nothing is deleted from here (RV1). */
+        plan.profiles.push({ _key: p.id, _hash: hashOf({ tomb: p.id }), row: tombRow(p, userId) });
+        var trec = readJSON('incommon.consent.' + p.id, null);
+        ((trec && trec.events) || []).forEach(function (e) {
+          if (!e || e.id !== 'forOther') return;
+          plan.consent.push({ _key: p.id + '/' + e.id + '/' + e.ts, _hash: hashOf(e),
+            row: { profile_id: p.id, scope: 'forOther', action: e.granted ? 'grant' : 'revoke', via: 'user', ts: e.ts || new Date().toISOString() } });
+        });
+        return;
+      }
+      var saved = birthSaved(pm, p.id);
       plan.profiles.push({
         _key: p.id,
-        _hash: hashOf(p),
+        _hash: profileHash(pm, p),
         row: {
           id: p.id,
           account_id: userId,
@@ -206,15 +266,15 @@
           avatar_kind: p.avatar_kind || null,
           avatar_image: p.avatar_image || null,
           avatar_sign: p.avatar_sign || null,
-          birth_date: p.birth_date || null,
-          birth_time: p.birth_time || null,
-          birth_location: p.birth_location || null,
-          birth_lat: p.birth_lat == null ? null : p.birth_lat,
-          birth_lon: p.birth_lon == null ? null : p.birth_lon,
-          timezone: p.timezone || null,
-          tz_offset: p.tz_offset == null ? null : p.tz_offset,
-          location_resolved: !!p.location_resolved,
-          birth_time_unknown: !!p.birth_time_unknown,
+          birth_date: saved ? (p.birth_date || null) : null,
+          birth_time: saved ? (p.birth_time || null) : null,
+          birth_location: saved ? (p.birth_location || null) : null,
+          birth_lat: !saved || p.birth_lat == null ? null : p.birth_lat,
+          birth_lon: !saved || p.birth_lon == null ? null : p.birth_lon,
+          timezone: saved ? (p.timezone || null) : null,
+          tz_offset: !saved || p.tz_offset == null ? null : p.tz_offset,
+          location_resolved: saved && !!p.location_resolved,
+          birth_time_unknown: saved && !!p.birth_time_unknown,
           pin_hash: p.pin_hash || null,
           updated_at: new Date().toISOString()
         }
@@ -294,7 +354,10 @@
     /* Two-person consent binds profiles, not the account, but the row is
        account scoped in the schema because both parties are this user's
        profiles or cards held by them. */
+    var away = {};
+    store.profiles.forEach(function (p) { if (forOther(p)) away[p.id] = 1; });
     (store.pairs || []).forEach(function (pr) {
+      if (away[pr.a] || away[pr.b]) return;
       plan.pairs.push({
         _key: pr.key,
         _hash: hashOf(pr),
@@ -327,7 +390,7 @@
   /* Upsert one table. The schema's unique constraints do the dedupe, and the
      hash cache skips rows that have not changed, so a push after a quiet
      week touches nothing. */
-  function pushTable(table, items, onConflict) {
+  function pushTable(table, items, onConflict, onSent) {
     var map = loadMap();
     var cache = hashCache(map, table);
     var chain = Promise.resolve({ ok: true, sent: 0, skipped: 0 });
@@ -338,11 +401,39 @@
           if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
           cache[item._key] = item._hash;
           acc.sent++;
+          if (onSent) onSent(item);
           return acc;
         });
       });
     });
     return chain.then(function (acc) { saveMap(map); return acc; });
+  }
+
+  /* THE SERVER HOLDS THE SWITCH TOO (server/migrations/0006, the follow-up
+     review's finding 4). A profile row is emptied of its birth when it
+     arrives while the account's latest birthData event is a revoke or its
+     latest birthCleared a grant, and emptied whole while its latest forOther
+     is a grant, so a build older than the switch cannot put back what the
+     reader took off. The rule reads the ledger as it stands when the row
+     arrives, and rows go up before their events (an event needs its row), so
+     a row whose own switch or mark moved in this push would be judged by the
+     old word: turning saving back on would send the birth, see the revoke,
+     and keep nothing. So each such row is sent once more after its events.
+     The cache is not touched: it already holds what was sent. */
+  var MARK_SCOPES = ['birthData', 'birthCleared', 'forOther'];
+  function resendMarked(items, marked) {
+    var chain = Promise.resolve({ ok: true });
+    items.forEach(function (item) {
+      if (!marked[item._key]) return;
+      chain = chain.then(function (acc) {
+        if (!acc.ok) return acc;
+        return client.from('profiles').upsert(item.row, { onConflict: 'id' }).then(function (res) {
+          if (res.error) { acc.ok = false; acc.error = res.error.message; }
+          return acc;
+        });
+      });
+    });
+    return chain;
   }
 
   function push() {
@@ -353,12 +444,34 @@
        record. It waits; the pull's own sync:pulled event schedules it anyway. */
     if (pulling) return pulling.then(function () { return push(); });
 
-    var plan = buildPlan();
+    /* Deletions first, as the pull does: a deleted profile's record must be
+       on the account before anything else goes up, and an older build's
+       queued deletion of a marked profile, flushed after this push, would
+       take the mark the push had just sent (K85). A deletion that fails here
+       stays queued and the push goes on, as before. */
+    return flushOutbox().then(function () {
+      var plan = buildPlan();
+      return pushPlan(userId, plan);
+    }).then(function (acc) {
+      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
+      return acc;
+    }).catch(function (e) {
+      return { ok: false, reason: 'offline', error: e && e.message };
+    });
+  }
+
+  function pushPlan(userId, plan) {
     return ensureAccountRow(userId).then(function (acc) {
       if (!acc.ok) return acc;
+      var marked = {};
       return pushTable('profiles', plan.profiles, 'id').then(function (r) {
         if (!r.ok) return r;
-        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts').then(function (r2) {
+        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts', function (item) {
+          if (MARK_SCOPES.indexOf(item.row.scope) !== -1) marked[item.row.profile_id] = 1;
+        }).then(function (r2) {
+          if (!r2.ok) return r2;
+          return resendMarked(plan.profiles, marked);
+        }).then(function (r2) {
           if (!r2.ok) return r2;
           return pushTable('pairs', plan.pairs, 'profile_a,profile_b').then(function (r3) {
             if (!r3.ok) return r3;
@@ -372,11 +485,6 @@
           });
         });
       });
-    }).then(function (acc) {
-      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
-      return acc;
-    }).catch(function (e) {
-      return { ok: false, reason: 'offline', error: e && e.message };
     });
   }
 
@@ -387,6 +495,36 @@
   }
 
   /* ---------- outbox: deletions cannot be outrun ---------- */
+
+  /* What a ProfileManager event asks of the account. A deletion is queued,
+     never pushed, so a wipe is not re-uploaded by the debounce after it.
+
+     A PROFILE MARKED FOR SOMEBODY ELSE IS NOT DELETED (the 2.2 review's RV1,
+     30 October 2026). Marking it used to queue the deletion of the account's
+     copy, flushed before the push; a push that then failed left the account
+     with neither the row nor the mark, and another device read the absence as
+     a deletion and dropped its own copy and journal. The push sends the empty
+     row and the mark instead, and migration 0006 empties the row and deletes
+     the profile's journal, Throughline and Oki rows when the mark arrives. A
+     push that fails leaves the account as it was, which every device reads
+     correctly. What this device recorded as sent for those rows is forgotten
+     either way the mark moves, because the server no longer holds them once
+     the mark lands, and unmarking must send them all again. */
+  function routeEvent(name, detail) {
+    var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
+    if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
+    else if (name === 'profile:for-other' && detail && detail.id) forgetChildRows(detail.id);
+    else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
+    else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+  }
+  function forgetChildRows(pid) {
+    var map = loadMap();
+    ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+      var c = hashCache(map, t);
+      Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+    });
+    saveMap(map);
+  }
 
   function opSig(x) { return x.op + ':' + (x.pid || '') + ':' + (x.type || '') + ':' + (x.id || ''); }
   function queueOp(op) {
@@ -405,14 +543,32 @@
     var o = loadOutbox();
     if (!o.length) return Promise.resolve({ ok: true });
     var chain = Promise.resolve({ ok: true });
-    var remaining = [];
+    var remaining = [], resendAfter = false;
     o.forEach(function (op) {
       chain = chain.then(function (acc) {
         if (!acc.ok) { remaining.push(op); return acc; }
         if (op.op === 'del-profile') {
-          return client.from('profiles').delete().eq('id', op.pid).then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
-            return acc;
+          /* A profile this device still holds was not deleted: the op is one
+             an older build queued when the profile was marked for somebody
+             else (RV1). It is dropped rather than carried out, and what was
+             recorded as sent for the row and its ledger is forgotten, so the
+             push sends the empty row and the mark. */
+          if (stillHeld(op.pid)) { forgetRow(op.pid); forgetChildRows(op.pid); resendAfter = true; return acc; }
+          /* DELETED EVERYWHERE (the owner, 30 October 2026: "if a profile is
+             deleted, delete it everywhere"). The deletion is recorded first,
+             in deleted_profiles (migration 0007), which outlives the row: the
+             row's cascade takes its ledger, so without the record nothing on
+             the server says the profile was deleted and any device still
+             holding it could bring it back. The record carries the two ids
+             and nothing else. Then the row goes, which on 0007 the record's
+             own trigger has already done. */
+          return client.from('deleted_profiles').upsert({ account_id: userId, profile_id: op.pid },
+            { onConflict: 'account_id,profile_id', ignoreDuplicates: true }).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); return acc; }
+            return client.from('profiles').delete().eq('id', op.pid).then(function (res2) {
+              if (res2.error) { acc.ok = false; acc.error = res2.error.message; remaining.push(op); }
+              return acc;
+            });
           });
         }
         /* One entry, by the id it carries both here and on the server. Before
@@ -436,7 +592,21 @@
         return acc;
       });
     });
-    return chain.then(function (acc) { saveOutbox(remaining); return acc; });
+    return chain.then(function (acc) {
+      saveOutbox(remaining);
+      if (resendAfter) schedule();
+      return acc;
+    });
+  }
+  function stillHeld(pid) {
+    try { return (cfg.pm._store().profiles || []).some(function (p) { return p.id === pid; }); } catch (e) { return false; }
+  }
+  function forgetRow(pid) {
+    var map = loadMap();
+    delete hashCache(map, 'profiles')[pid];
+    var cc = hashCache(map, 'consent_events');
+    Object.keys(cc).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete cc[k]; });
+    saveMap(map);
   }
 
   /* ---------- pull: the account, brought down and merged in ----------
@@ -463,7 +633,13 @@
 
      A PENDING LOCAL DELETION WINS. The outbox is flushed before reading, and
      anything still queued is skipped on the way in, so a deletion made offline
-     is not undone by the pull that runs when the signal comes back. */
+     is not undone by the pull that runs when the signal comes back.
+
+     A RECORDED DELETION OVERRIDES ALL OF THE ABOVE. A profile in the
+     account's deleted_profiles (migration 0007) goes from this device on
+     every pull, the first included, whether or not it was changed here since,
+     and the server drops anything that arrives for it afterwards. That record
+     is the one absence the pull does not have to guess at. */
   function fetchAll(table, filter) {
     var rows = [];
     function page(from) {
@@ -531,6 +707,12 @@
     if (pulling) return pulling;
     var remote = {};
     pulling = flushOutbox().catch(function () {}).then(function () {
+      /* The account's deleted profiles, read first. A server without
+         migration 0007 has no such table, and that fails the pull like any
+         other read: a failed read applies nothing. */
+      return fetchAll('deleted_profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+    }).then(function (rows) {
+      remote.deleted_profiles = rows;
       return fetchAll('profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
     }).then(function (rows) {
       remote.profiles = rows;
@@ -577,14 +759,59 @@
     if (cfg.placeholders) { try { placeholders = cfg.placeholders() || []; } catch (e) { placeholders = []; } }
     var isPlaceholder = function (id) { return placeholders.indexOf(id) !== -1; };
 
-    var d = { profiles: [], removeProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
+    var d = { profiles: [], removeProfiles: [], deletedProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
     var res = { ok: true, changed: false, adopted: false, firstPull: firstPull,
       profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
 
     /* ---- profiles ---- */
+    /* Whether each profile's birth is saved to the account, from this
+       device's decision and the account's ledger, the later one deciding,
+       because the ledger arrives in this same pull and is merged below. A row
+       whose birth was not saved comes down empty, and that must never empty
+       the birth this device holds. */
+    var latest = {};
+    (remote.consent_events || []).forEach(function (r) {
+      if (!r || !r.profile_id || (r.scope !== 'birthData' && r.scope !== 'forOther')) return;
+      var bag = latest[r.scope] = latest[r.scope] || {};
+      var t = iso(r.ts), cur = bag[r.profile_id];
+      if (!cur || t > cur.ts) bag[r.profile_id] = { ts: t, granted: r.action === 'grant' };
+    });
+    var ledgerEff = function (scope, pid, fallback) {
+      var here = typeof pm.consentState === 'function' ? pm.consentState(scope, pid) : { granted: fallback, at: null };
+      var there = (latest[scope] || {})[pid];
+      if (there && (!here.at || there.ts > iso(here.at))) return there.granted;
+      return here.at ? here.granted : fallback;
+    };
+    var savedEff = function (pid) {
+      var there = (latest.birthData || {})[pid], here = typeof pm.consentState === 'function' ? pm.consentState('birthData', pid) : null;
+      if (there && (!here || !here.at || there.ts > iso(here.at))) return there.granted;
+      return birthSaved(pm, pid);
+    };
+    /* Made for somebody else, here or on another device. Its rows on this
+       device are its own: nothing is taken from the account's empty row,
+       nothing here is removed because the account no longer holds it, and
+       what this device recorded as sent is forgotten, so unmarking sends it
+       all again. */
+    var otherEff = function (pid) {
+      var L0 = localById[pid];
+      return forOther(L0) || ledgerEff('forOther', pid, false);
+    };
+    var forgetSent = function (pid) {
+      [cM, cC, cT, cO].forEach(function (c) {
+        Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+      });
+    };
+    var hashFor = function (p, saved) { return saved ? hashOf(p) : hashOf(withoutBirth(p)); };
     var localById = {};
     store.profiles.forEach(function (p) { localById[p.id] = p; });
-    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
+    /* DELETED EVERYWHERE. A profile the account recorded as deleted goes
+       from this device whatever else is true of it: on a first pull, when it
+       was changed here since, and when it is marked for somebody else. The
+       record outlives the row, so this is the one absence that is never a
+       guess. */
+    var deleted = {};
+    (remote.deleted_profiles || []).forEach(function (r) { if (r && r.profile_id) deleted[r.profile_id] = 1; });
+    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id] && !deleted[r.id]; });
     var remoteById = {};
     remoteRows.forEach(function (r) { remoteById[r.id] = r; });
     var ownBefore = store.profiles.filter(function (p) { return !isPlaceholder(p.id); });
@@ -592,15 +819,20 @@
     var room = (pm.MAX_PROFILES || 6) - ownBefore.length;
     remoteRows.forEach(function (r) {
       var L = localById[r.id];
+      if (otherEff(r.id)) { if (L) forgetSent(r.id); return; }  // stays on its device; never made from the empty row
       if (L) {
         /* Changed here since the last sync: the local copy wins and the push
            sends it. Untouched here: the server's copy is the newer one. */
-        if (cP[r.id] !== hashOf(L)) return;
-        var m = profileFromRow(r, L);
-        if (!m.changed) return;
+        if (cP[r.id] !== profileHash(pm, L)) return;
+        var m = profileFromRow(r, L), saved = savedEff(r.id);
+        if (!saved) {
+          BIRTH_ROW.forEach(function (k) { m.profile[k] = L[k]; });
+          m.changed = hashOf(m.profile) !== hashOf(L);
+        }
+        if (!m.changed) { if (!saved) cP[r.id] = hashFor(L, false); return; }
         d.profiles.push(m.profile);
         if (birthMoved(L, m.profile)) d.recalc.push(r.id);
-        cP[r.id] = hashOf(m.profile);
+        cP[r.id] = hashFor(m.profile, saved);
         res.profilesUpdated++;
         return;
       }
@@ -608,16 +840,24 @@
       if (room <= 0) return;
       var made = profileFromRow(r, null).profile;
       d.profiles.push(made);
-      cP[r.id] = hashOf(made);
+      cP[r.id] = hashFor(made, savedEff(r.id));
       room--;
       res.profilesAdded++;
     });
     store.profiles.forEach(function (L) {
+      if (deleted[L.id]) {
+        d.deletedProfiles.push(L.id);
+        delete cP[L.id];
+        forgetSent(L.id);
+        res.profilesRemoved++;
+        return;
+      }
       if (remoteById[L.id] || !serverHas) return;
       if (isPlaceholder(L.id)) return;
+      if (otherEff(L.id)) { delete cP[L.id]; forgetSent(L.id); return; }  // its absence on the account is not a deletion
       if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
       if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
-      if (cP[L.id] !== hashOf(L)) return;           // changed here since: keep it, the push restores it
+      if (cP[L.id] !== profileHash(pm, L)) return;  // changed here since: keep it, the push restores it
       d.removeProfiles.push(L.id);
       delete cP[L.id];
       res.profilesRemoved++;
@@ -627,7 +867,7 @@
        too. */
     if (remoteRows.some(function (r) { return !isPlaceholder(r.id); })) {
       placeholders.forEach(function (id) {
-        if (!localById[id] || remoteById[id]) return;
+        if (!localById[id] || remoteById[id] || deleted[id]) return;
         d.removeProfiles.push(id);
         delete cP[id];
       });
@@ -641,7 +881,7 @@
     }
     /* Profiles that will exist once this lands. */
     var gone = {};
-    d.removeProfiles.forEach(function (id) { gone[id] = 1; });
+    d.removeProfiles.concat(d.deletedProfiles).forEach(function (id) { gone[id] = 1; });
     var present = {};
     store.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
     d.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
@@ -661,6 +901,7 @@
       (remoteMem[r.profile_id] = remoteMem[r.profile_id] || {})[String(r.local_id)] = r;
     });
     Object.keys(present).forEach(function (pid) {
+      if (otherEff(pid)) return;
       var local = localById[pid] ? pm.getMemory({ profileId: pid, respectConsent: false }) : [];
       var have = {}, rm = remoteMem[pid] || {}, add = [], remove = [];
       local.forEach(function (m) { have[m.id] = m; });
@@ -679,7 +920,7 @@
       /* Only for a profile the server still holds: one it no longer holds is
          either deleted (and goes whole, above) or changed here and kept, and
          its rows are not the server's to remove. */
-      if (localById[pid] && remoteById[pid]) {
+      if (localById[pid] && remoteById[pid] && !otherEff(pid)) {
         local.forEach(function (m) {
           var key = pid + '/' + m.id;
           if (rm[m.id] || cM[key] === undefined) return;
@@ -707,6 +948,7 @@
         (byPid[r.profile_id] = byPid[r.profile_id] || []).push(r.payload);
       });
       Object.keys(byPid).forEach(function (pid) {
+        if (otherEff(pid)) return;
         var arr = localById[pid] ? readJSON('incommon.p.' + pid + '.' + spec[1], []) : [];
         if (!Array.isArray(arr)) arr = arr ? [arr] : [];
         var count = {}, ids = {}, add = [];
@@ -751,7 +993,7 @@
       cR[key] = hashOf(pr);
     });
 
-    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
+    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.deletedProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
       res.entriesAdded || Object.keys(d.consents).some(function (pid) { return consentNews(pid, d.consents[pid]); }));
     if (res.changed) pm.importSynced(d);
     map.pulled[userId] = new Date().toISOString();
@@ -1496,18 +1738,35 @@
      chapters to add) answers the first with them already in, and the second
      call is skipped. The page may pass onFirst, called with the first half as
      soon as it arrives, so it can be shown while the second is written. */
+  /* THE PROFILE THE DOSSIER WAS WRITTEN FROM travels with it, the active one
+     unless the page names another (server/migrations/0006). The server
+     stores it beside the reading so it can withdraw what was written from a
+     profile that stops being saved to the account or is marked as somebody
+     else's, and keeps no reading of such a profile; it refuses one marked as
+     somebody else's outright, which reads as forOther here. The id is the
+     random one the device made; it carries nothing of the birth. */
+  function activeProfileId() {
+    try { return (cfg && cfg.pm && cfg.pm.activeId()) || null; } catch (e) { return null; }
+  }
   function oracleRead(req) {
     if (!req) return oracleCall(req);
     var onFirst = typeof req.onFirst === 'function' ? req.onFirst : null;
     var body = Object.assign({}, req);
     delete body.onFirst;
+    if (body.profileId == null) { var pid = activeProfileId(); if (pid) body.profileId = pid; else delete body.profileId; }
     if (body.depth !== 'deep') return oracleCall(body);
     return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
       /* The first half is on its way to the page before the second is asked
          for, so the reader has something to read while it is written. */
       if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      return oracleCall(Object.assign({}, body, { part: 'b' }));
+      /* The server joins the two halves when it kept the first. When it did
+         not (the birth is not saved to the account, so nothing of the reading
+         is kept there), the second comes back alone and is joined here. */
+      return oracleCall(Object.assign({}, body, { part: 'b' })).then(function (b) {
+        if (b.ok && a.reading && b.reading) b.reading = Object.assign({}, a.reading, b.reading);
+        return b;
+      });
     });
   }
   function oracleCall(req) {
@@ -1525,6 +1784,9 @@
         /* The code decides first, because two failures share a status: the
            daily limit and the provider's rate limit are both 429. */
         if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
+        /* A profile the reader marked as made for somebody else: the Oracle
+           writes for the reader, and the server refused before asking. */
+        if (code === 'FOR_OTHER') return { ok: false, reason: 'forOther' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         /* The function gave up on Kimi (504 TIMEOUT). Kimi was writing, so it
@@ -1827,10 +2089,7 @@
        a wipe is never re-uploaded by the debounce that follows it. */
     try {
       opts.pm.subscribe(function (name, detail) {
-        var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
-        if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
-        else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
-        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+        routeEvent(name, detail);
         schedule();
       });
     } catch (e) {}
@@ -1934,7 +2193,8 @@
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
     _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
-    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; }
+    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; },
+    _routeForTests: function (name, detail) { routeEvent(name, detail); }
   };
 
   return api;

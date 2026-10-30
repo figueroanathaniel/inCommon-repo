@@ -102,6 +102,9 @@ const LAYERS = {
   shell: [
     'profile-manager.js', 'memory-store.js', 'people-library.js', 'pair-cache.js',
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
+    /* What a chart handout and a chart export may carry (2.2, Task 3).
+       Shapes a payload from what the screen hands it; computes nothing. */
+    'share-rules.js',
     'oki-api.js', 'oki-post-processor.js', 'oki-prompt-builder.js', 'oki-voice-v144.js',
     'sw.js',
     /* Flight for every scene: input in, a camera pose out. Knows no chart. */
