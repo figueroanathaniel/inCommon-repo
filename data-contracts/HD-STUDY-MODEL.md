@@ -220,14 +220,21 @@ Rules:
    red without it:
    (a) a pending `del-chart-versions` for the profile stops the pull from
    adding or keeping any version of it, as `del-memories` does for memories;
-   (b) a pulled profile row with no birth date deletes that profile's local
-   versions and nulls its notes' `resolved`, so a device that never saw the
-   clear still follows it;
+   (b) a pulled `birthCleared` grant newer than the device's `birth_at`
+   deletes that profile's local versions and nulls its notes' `resolved`, so a
+   device that never saw the clear still follows it. This is the rule the
+   profile row already follows (K82, K83). **An empty birth on the server is
+   never read as a clear**: since F2 it also means only that saving is off, and
+   a device must not lose its history because another device turned saving off
+   (the follow-up review's review, gap 1);
    (c) a device's first pull never resends `chart_versions` for a profile whose
-   server row holds no birth date. K66 resends absent rows on a first pull, to
-   repair an account an older build emptied, and that rule must not reach
-   versions: a version absent on the server is either not yet pushed, and its
-   profile has a birth, or cleared, and its profile has none.
+   latest `birthCleared` event is a grant, whose latest `birthData` event is a
+   revoke, or whose latest `forOther` event is a grant. K66 resends absent
+   rows on a first pull, to repair an account an older build emptied, and that
+   rule must not reach a history the reader cleared or withheld. Migration
+   0006 holds the same on the server (the WH rows): a version for a withheld
+   profile is dropped on arrival, and a profile's versions are deleted when it
+   becomes withheld.
 
 ## 5. Other people's charts, and a practitioner's clients
 
@@ -326,7 +333,10 @@ trimming. A `client` cap is the owner's, with D4.
    notes where the scope held `store` and `notes` and opens no handout until
    the reader states the word again (`confirmWord()`). So a practitioner's
    restore no longer drops every client's notes (the follow-up review's
-   finding 11), and a file still cannot open a handout.
+   finding 11), and a file still cannot open a handout. **The trade-off, said
+   plainly**: this is a second way a person's notes come in besides the
+   reader's own hand, and a hand edited file can use it. It brings in only the
+   notes the file itself carries, which an import brings in anyway.
 9. **Duplicates update, they do not double**, by the people store's own
    `chart_hash`, as `add()` already does. That hash is the store's, computed on
    the device and never written into an export (6.4, F10); a chart version's
@@ -462,12 +472,12 @@ the other way round.
 
 **Versions sync only while "Save my profile to my account" is on** (privacy
 review F2, decided by the owner on 30 October 2026: section 13). That switch sets the
-`birthData` consent, and the push does not read it today:
-`incommon-cloud.js` says "birthData is not a toggle" and sends profile rows
-whatever it says. A version history is more birth data than the profile row
-(every birth the reader ever gave), so the version push reads the switch even if
-the profile row goes on not reading it. Turning the switch off queues
-`del-chart-versions`. The profile row reads the switch too now (section 13).
+`birthData` consent, and the push reads it: off, the profile row goes up
+without its birth (section 13) and no version goes up at all, because a version
+history is more birth data than the profile row (every birth the reader ever
+gave). Turning the switch off queues `del-chart-versions`, and migration 0006
+deletes the profile's versions on the server when the revoke arrives, so the
+history goes even if the deletion is lost.
 
 Two new outbox operations: `del-chart-versions` (every version of a profile,
 for Clear birth data, O8) and nothing for notes (`del-memory` covers them).
@@ -723,7 +733,11 @@ specification, and the owner can move it to this session instead):
    does not exist: "A profile you mark as being for someone else stays on your
    device: it is not copied to your account, it is not sent to the Oracle, and no
    card is made from it." The policy's date moves with it.
-7. Readers who already made a profile for somebody else are asked once, on
+7. A profile has no `subject_consent`, so a profile marked for somebody else
+   can only ever get the base handout from `share-rules.js` (the reviewer's
+   gap 7). If the screen should offer that person's word as it does for a
+   saved person, the profile needs the field first; that is a model change.
+8. Readers who already made a profile for somebody else are asked once, on
    the profile list, which of their profiles are someone else's, because
    nothing else would ever mark the profiles that exist today (the follow-up
    review's finding 7).
@@ -749,6 +763,20 @@ each now says:
 | 11 | restoring a backup drops every client's consent | **fixed**: `consent_noted` and `basis: restored` (6.1 rule 8, T14) |
 | 12 | `stated` is a record, not a protection | **made a stricter record**, and still a record: dated, never in the future, a year's life for a handout, and the refusal says which (T13). Section 5 says what it cannot be |
 | 13, 14, 15, 16 | the card line in section 5, `chart_hash` in section 4 and 6.1, the old caution in 6.5, the word "agrees" in section 12 | **fixed** in this file |
+
+**The reviewer then reviewed these answers** (30 October 2026, at 101eb4b, at
+the owner's request in that session). Points 2 to 16 hold, point 1 holds for the
+profile row, and seven gaps came back:
+
+| | Gap | Now |
+|---|---|---|
+| 1 | section 4 rule 5 (b) and (c) still read an empty server birth as a clear, and 7.2 said the push does not read the switch | **fixed** in this file: both rules key on the ledger, and 7.2 says what the push does |
+| 2 | 0006 covers the profile row and the readings, not `chart_versions`, memories, the Throughline or Oki messages | **`chart_versions` built** on the security branch (0006 drops a version for a withheld profile and deletes a profile's versions when it becomes withheld). Memories, the Throughline and Oki messages of a marked profile from an older build: **the owner's** |
+| 3 | the ledger is ordered by client clocks, so a device whose clock runs ahead outranks a later true event | **built** on the security branch: 0006 clamps an event dated more than five minutes ahead of the server to the server's time. The device side (`birth_at` against another device's `updatedAt`) still compares clocks; said, not fixed |
+| 4 | a backup can bring a person in with notes kept (`basis: restored`), a second way in that people-library.js rule 1 does not have | **said**, in `share-rules.js`'s header and 6.1 rule 8: a file can keep the notes it already carries and can open no handout. The trade-off is the owner's to know |
+| 5 | the refusal and the withdrawal need the client's `profileId`; and the Oracle function's comment said an id with no profile row is not stored, when it is | **comment corrected**. The older client point stands as disclosed |
+| 6 | for a marked profile an older build loses the name and picture at its next pull, not only the birth | **said** in 0006's note |
+| 7 | profiles carry no `subject_consent`, so a profile marked for somebody else only ever gets the base handout | **noted** for workstream 3 in section 13 |
 
 **Found while building finding 4, in this session's own fix for finding 2.**
 A push sent the empty row and the mark, then flushed the deletion marking had
