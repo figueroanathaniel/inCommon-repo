@@ -2471,6 +2471,22 @@ async function runCloudTests() {
     var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [] },
       seq: 1, failSelect: null, failDelete: false, maxRows: 1000 };
     var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
+    /* withhold: migration 0006's two triggers, as they decide. A profile row
+       is judged by the account's latest event in each mark's scope when it
+       arrives, and again when an event arrives. */
+    db.latest = function (pid, scope) {
+      var ev = db.t.consent_events.filter(function (e) { return e.profile_id === pid && e.scope === scope; })
+        .sort(function (a, b) { return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0; });
+      return ev.length ? ev[ev.length - 1].action : null;
+    };
+    db.withholdRow = function (r) {
+      var birth = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'timezone', 'tz_offset'];
+      var other = db.latest(r.id, 'forOther') === 'grant';
+      if (other || db.latest(r.id, 'birthData') === 'revoke' || db.latest(r.id, 'birthCleared') === 'grant') {
+        birth.forEach(function (k) { r[k] = null; }); r.location_resolved = false; r.birth_time_unknown = false;
+      }
+      if (other) ['name', 'avatar_color', 'avatar_kind', 'avatar_image', 'avatar_sign', 'pin_hash'].forEach(function (k) { r[k] = null; });
+    };
     var pgTime = function (r) {
       ['ts', 'created_at', 'enabled_at'].forEach(function (k) { if (typeof r[k] === 'string') r[k] = r[k].replace(/Z$/, '+00:00'); });
       return r;
@@ -2519,9 +2535,20 @@ async function runCloudTests() {
           var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
           if (hit) Object.assign(hit, row);
           else { if (row.id === undefined) row.id = db.seq++; rows.push(row); }
+          if (db.withhold && table === 'profiles') db.withholdRow(hit || row);
+          if (db.withhold && table === 'consent_events') db.t.profiles.forEach(function (x) { if (x.id === row.profile_id) db.withholdRow(x); });
         } else if (q._op === 'delete') {
           if (db.failDelete) out.error = { message: 'Failed to fetch' };
-          else db.t[table] = rows.filter(function (x) { return !match(x); });
+          else {
+            var gone = rows.filter(match).map(function (x) { return x.id; });
+            db.t[table] = rows.filter(function (x) { return !match(x); });
+            /* The live schema's on delete cascade from profiles
+               (server/cloud-schema.sql), the ledger included: a fake that
+               kept the ledger hid that deleting a profile takes its marks. */
+            if (table === 'profiles') ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+              db.t[t] = db.t[t].filter(function (r) { return gone.indexOf(r.profile_id) === -1; });
+            });
+          }
         }
         return Promise.resolve(out).then(res, rej);
       };
@@ -2893,6 +2920,60 @@ async function runCloudTests() {
   }, { ok: s84.ok, okAgain: s84b.ok, marked: devK.pm.isForOther(jp.id), name: (devK.pm.getProfile(jp.id) || {}).name,
     birth: (devK.pm.getProfile(jp.id) || {}).birthDate, localMem: devK.pm.getMemory({ profileId: jp.id }).length,
     empty: emptyRow(mdb, jp.id), serverMem: mdb.t.memories.filter(function (m) { return m.profile_id === jp.id; }).length });
+
+  /* ---- K85: marking a profile for somebody else holds when the debounced
+     push runs before any sync. A push sends the empty row and the mark and
+     then flushes the deletion it queued, and on the live schema deleting a
+     profile takes its ledger, so the account was left with neither the row
+     nor the mark and the other device never learned it. The fake database
+     cascades as the live one does since this row. ---- */
+  var pdb = memDB(), PU = 'bbbbbbbb-0000-4000-8000-0000000000c3';
+  var devP = syncDevice(pdb, PU);
+  devP.pm.createProfile({ name: 'Pat', birthDate: '1981-01-01' });
+  var pp = devP.pm.createProfile({ name: 'Quin', birthDate: '1983-03-03', birthTime: '03:03' });
+  await devP.C.sync();
+  var devQ = syncDevice(pdb, PU);
+  await devQ.C.sync();
+  devP.pm.setProfileForOther(pp.id, true);
+  var p85 = await devP.C.push();
+  var p85b = await devP.C.push();
+  var q85 = await devQ.C.sync();
+  ts('K85', 'a push alone, before any sync, leaves the account the empty row and the mark, and the other device learns it and keeps its copy', {
+    pushOk: true, empty: true, markOnServer: true, qOk: true, qMarked: true, qName: 'Quin'
+  }, { pushOk: !!(p85.ok && p85b.ok), empty: emptyRow(pdb, pp.id),
+    markOnServer: pdb.latest(pp.id, 'forOther') === 'grant', qOk: q85.ok, qMarked: devQ.pm.isForOther(pp.id),
+    qName: (devQ.pm.getProfile(pp.id) || {}).name });
+
+  /* ---- K86: with migration 0006's rule on the server, a row whose switch
+     or mark moved in this push is judged by the new word. The rule reads the
+     ledger when the row arrives and rows go up before their events, so the
+     push sends each such row again after its events. Without that, turning
+     saving back on, or taking a profile back as the reader's own, would send
+     the birth and the server would keep nothing. ---- */
+  var wdb = memDB(); wdb.withhold = true;
+  var WU = 'bbbbbbbb-0000-4000-8000-0000000000c4';
+  var devW = syncDevice(wdb, WU);
+  devW.pm.createProfile({ name: 'Wren', birthDate: '1979-09-09' });
+  var wp = devW.pm.createProfile({ name: 'Vale', birthDate: '1984-04-04', birthTime: '04:04' });
+  await devW.C.sync();
+  var wRow = function () { return wdb.t.profiles.filter(function (r) { return r.id === wp.id; })[0] || {}; };
+  devW.pm.setConsent('birthData', false, wp.id);
+  await devW.C.push();
+  var offDate = wRow().birth_date;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devW.pm.setConsent('birthData', true, wp.id);
+  await devW.C.push();
+  var onDate = wRow().birth_date;
+  devW.pm.setProfileForOther(wp.id, true);
+  await devW.C.push();
+  var markedName = wRow().name;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devW.pm.setProfileForOther(wp.id, false);
+  await devW.C.push();
+  ts('K86', 'saving turned off empties the account copy, turned back on puts the birth back, and a profile taken back as the reader\'s own goes up whole, with the server emptying by the ledger', {
+    off: null, on: '1984-04-04', marked: null, back: { name: 'Vale', date: '1984-04-04' }
+  }, { off: offDate === undefined ? 'no row' : offDate, on: onDate, marked: markedName === undefined ? 'no row' : markedName,
+    back: { name: wRow().name, date: wRow().birth_date } });
 
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint

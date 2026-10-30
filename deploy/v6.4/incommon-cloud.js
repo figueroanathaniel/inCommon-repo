@@ -389,7 +389,7 @@
   /* Upsert one table. The schema's unique constraints do the dedupe, and the
      hash cache skips rows that have not changed, so a push after a quiet
      week touches nothing. */
-  function pushTable(table, items, onConflict) {
+  function pushTable(table, items, onConflict, onSent) {
     var map = loadMap();
     var cache = hashCache(map, table);
     var chain = Promise.resolve({ ok: true, sent: 0, skipped: 0 });
@@ -400,11 +400,39 @@
           if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
           cache[item._key] = item._hash;
           acc.sent++;
+          if (onSent) onSent(item);
           return acc;
         });
       });
     });
     return chain.then(function (acc) { saveMap(map); return acc; });
+  }
+
+  /* THE SERVER HOLDS THE SWITCH TOO (server/migrations/0006, the follow-up
+     review's finding 4). A profile row is emptied of its birth when it
+     arrives while the account's latest birthData event is a revoke or its
+     latest birthCleared a grant, and emptied whole while its latest forOther
+     is a grant, so a build older than the switch cannot put back what the
+     reader took off. The rule reads the ledger as it stands when the row
+     arrives, and rows go up before their events (an event needs its row), so
+     a row whose own switch or mark moved in this push would be judged by the
+     old word: turning saving back on would send the birth, see the revoke,
+     and keep nothing. So each such row is sent once more after its events.
+     The cache is not touched: it already holds what was sent. */
+  var MARK_SCOPES = ['birthData', 'birthCleared', 'forOther'];
+  function resendMarked(items, marked) {
+    var chain = Promise.resolve({ ok: true });
+    items.forEach(function (item) {
+      if (!marked[item._key]) return;
+      chain = chain.then(function (acc) {
+        if (!acc.ok) return acc;
+        return client.from('profiles').upsert(item.row, { onConflict: 'id' }).then(function (res) {
+          if (res.error) { acc.ok = false; acc.error = res.error.message; }
+          return acc;
+        });
+      });
+    });
+    return chain;
   }
 
   function push() {
@@ -415,12 +443,34 @@
        record. It waits; the pull's own sync:pulled event schedules it anyway. */
     if (pulling) return pulling.then(function () { return push(); });
 
-    var plan = buildPlan();
+    /* Deletions first, as the pull does. Marking a profile for somebody else
+       queues the deletion of the account's copy, and on the live schema that
+       deletion takes the profile's ledger with it, so flushed after this push
+       it would take the mark the push had just sent (K85). A deletion that
+       fails here stays queued and the push goes on, as before. */
+    return flushOutbox().then(function () {
+      var plan = buildPlan();
+      return pushPlan(userId, plan);
+    }).then(function (acc) {
+      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
+      return acc;
+    }).catch(function (e) {
+      return { ok: false, reason: 'offline', error: e && e.message };
+    });
+  }
+
+  function pushPlan(userId, plan) {
     return ensureAccountRow(userId).then(function (acc) {
       if (!acc.ok) return acc;
+      var marked = {};
       return pushTable('profiles', plan.profiles, 'id').then(function (r) {
         if (!r.ok) return r;
-        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts').then(function (r2) {
+        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts', function (item) {
+          if (MARK_SCOPES.indexOf(item.row.scope) !== -1) marked[item.row.profile_id] = 1;
+        }).then(function (r2) {
+          if (!r2.ok) return r2;
+          return resendMarked(plan.profiles, marked);
+        }).then(function (r2) {
           if (!r2.ok) return r2;
           return pushTable('pairs', plan.pairs, 'profile_a,profile_b').then(function (r3) {
             if (!r3.ok) return r3;
@@ -434,11 +484,6 @@
           });
         });
       });
-    }).then(function (acc) {
-      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
-      return acc;
-    }).catch(function (e) {
-      return { ok: false, reason: 'offline', error: e && e.message };
     });
   }
 
@@ -467,13 +512,14 @@
     var o = loadOutbox();
     if (!o.length) return Promise.resolve({ ok: true });
     var chain = Promise.resolve({ ok: true });
-    var remaining = [];
+    var remaining = [], resendAfter = false;
     o.forEach(function (op) {
       chain = chain.then(function (acc) {
         if (!acc.ok) { remaining.push(op); return acc; }
         if (op.op === 'del-profile') {
           return client.from('profiles').delete().eq('id', op.pid).then(function (res) {
             if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
+            else if (stillOther(op.pid)) { forgetRow(op.pid); resendAfter = true; }
             return acc;
           });
         }
@@ -498,7 +544,26 @@
         return acc;
       });
     });
-    return chain.then(function (acc) { saveOutbox(remaining); return acc; });
+    return chain.then(function (acc) {
+      saveOutbox(remaining);
+      if (resendAfter) schedule();
+      return acc;
+    });
+  }
+  /* A profile the device still holds, marked for somebody else: its deletion
+     took the account's copy and that copy's ledger, so what the device
+     recorded as sent for its row and its ledger is forgotten, and the next
+     push sends the empty row and the mark again. That is what keeps the mark
+     on the account whichever way round the push and the deletion ran. */
+  function stillOther(pid) {
+    try { return (cfg.pm._store().profiles || []).some(function (p) { return p.id === pid && forOther(p); }); } catch (e) { return false; }
+  }
+  function forgetRow(pid) {
+    var map = loadMap();
+    delete hashCache(map, 'profiles')[pid];
+    var cc = hashCache(map, 'consent_events');
+    Object.keys(cc).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete cc[k]; });
+    saveMap(map);
   }
 
   /* ---------- pull: the account, brought down and merged in ----------
