@@ -156,3 +156,8 @@ October 2026, so it is left alone; the file is here now.
   and profile-manager.js 1.7.0, rows K75 to K81; Privacy Policy section 5
   dated 30 October 2026. The screens, the Oracle and card refusals and the
   section 14 sentence are workstream 3's, specified in the model's section 13.
+- 30 October 2026: the reviewing session sent a follow-up of sixteen findings
+  on the answers, passed on at the owner's request. Findings 1 and 2 built
+  (both marks travel in the consent ledger; rows K79, K80, K82 to K84, each red
+  before), 13 to 16 fixed in the model, 3 fixed on the security branch, and 4,
+  5 and 9 to 12 put to the owner. HD-STUDY-MODEL.md section 14.

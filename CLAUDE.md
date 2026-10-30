@@ -6862,8 +6862,16 @@ does now (model section 13, K75 to K78):
 - **Never decided reads as on while there is a birth date**
   (`consentState()`). Do not make it read off: every profile given its birth
   after it was made would stop syncing the moment it did.
-- **A profile made for somebody else (`for_other`) sends nothing** and
-  marking a synced one deletes the account's copy (F9, K79 to K81).
+- **A profile made for somebody else (`for_other`) sends an empty row and
+  its `forOther` ledger event, nothing else**, and marking a synced one
+  deletes the account's copy first (F9, K79 to K81). The empty row is how the
+  mark reaches the account's other devices, because the ledger hangs off the
+  row; a device that learns it keeps its own copy and journal (K84).
+- **Clear birth data is a `birthCleared` ledger event**, so it reaches every
+  device whatever the switch says. A device drops its birth only when its own
+  `birth_at` is older than the clear; a birth given since writes the revoke
+  and stands (K82, K83). Do not read an empty birth on the server as a clear:
+  with the switch off it only means not saved.
   `ownProfiles()` and `otherProfiles()` list them apart. The screens, the
   Oracle and card refusals and the Privacy Policy section 14 sentence are
   workstream 3's, specified in the model's section 13.

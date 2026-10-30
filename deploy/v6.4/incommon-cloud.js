@@ -214,6 +214,12 @@
   /* A profile made for somebody else never leaves the device (privacy review
      F9, the owner's (b)): no row, no memories, no ledger, no pair. */
   function forOther(p) { return !!(p && p.for_other === true); }
+  function tombRow(p, userId) {
+    var r = { id: p.id, account_id: userId, is_active: false, is_default: false, name: null, avatar_color: null,
+      avatar_kind: null, avatar_image: null, avatar_sign: null, pin_hash: null, updated_at: new Date().toISOString() };
+    BIRTH_ROW.forEach(function (k) { r[k] = (k === 'location_resolved' || k === 'birth_time_unknown') ? false : null; });
+    return r;
+  }
 
   /* ---------- plan building: ProfileManager state to remote rows ---------- */
 
@@ -229,7 +235,22 @@
     var plan = { profiles: [], memories: [], throughline: [], oki: [], consent: [], pairs: [], map: map };
 
     store.profiles.forEach(function (p) {
-      if (forOther(p)) return;
+      if (forOther(p)) {
+        /* A profile made for somebody else goes up as an empty row and its
+           forOther ledger events, nothing else: no name, no birth, no
+           memory. The row is what lets the account's other devices learn the
+           mark, because the ledger hangs off it (the follow-up review's
+           finding 2). Marking it queued del-profile first, so the cascade has
+           already taken what the account held. */
+        plan.profiles.push({ _key: p.id, _hash: hashOf({ tomb: p.id }), row: tombRow(p, userId) });
+        var trec = readJSON('incommon.consent.' + p.id, null);
+        ((trec && trec.events) || []).forEach(function (e) {
+          if (!e || e.id !== 'forOther') return;
+          plan.consent.push({ _key: p.id + '/' + e.id + '/' + e.ts, _hash: hashOf(e),
+            row: { profile_id: p.id, scope: 'forOther', action: e.granted ? 'grant' : 'revoke', via: 'user', ts: e.ts || new Date().toISOString() } });
+        });
+        return;
+      }
       var saved = birthSaved(pm, p.id);
       plan.profiles.push({
         _key: p.id,
@@ -628,17 +649,37 @@
        because the ledger arrives in this same pull and is merged below. A row
        whose birth was not saved comes down empty, and that must never empty
        the birth this device holds. */
-    var bdRemote = {};
+    var latest = {};
     (remote.consent_events || []).forEach(function (r) {
-      if (!r || r.scope !== 'birthData' || !r.profile_id) return;
-      var t = iso(r.ts), cur = bdRemote[r.profile_id];
-      if (!cur || t > cur.ts) bdRemote[r.profile_id] = { ts: t, granted: r.action === 'grant' };
+      if (!r || !r.profile_id || (r.scope !== 'birthData' && r.scope !== 'forOther')) return;
+      var bag = latest[r.scope] = latest[r.scope] || {};
+      var t = iso(r.ts), cur = bag[r.profile_id];
+      if (!cur || t > cur.ts) bag[r.profile_id] = { ts: t, granted: r.action === 'grant' };
     });
-    var savedEff = function (pid) {
-      var here = typeof pm.consentState === 'function' ? pm.consentState('birthData', pid) : { granted: true, at: null };
-      var there = bdRemote[pid];
+    var ledgerEff = function (scope, pid, fallback) {
+      var here = typeof pm.consentState === 'function' ? pm.consentState(scope, pid) : { granted: fallback, at: null };
+      var there = (latest[scope] || {})[pid];
       if (there && (!here.at || there.ts > iso(here.at))) return there.granted;
+      return here.at ? here.granted : fallback;
+    };
+    var savedEff = function (pid) {
+      var there = (latest.birthData || {})[pid], here = typeof pm.consentState === 'function' ? pm.consentState('birthData', pid) : null;
+      if (there && (!here || !here.at || there.ts > iso(here.at))) return there.granted;
       return birthSaved(pm, pid);
+    };
+    /* Made for somebody else, here or on another device. Its rows on this
+       device are its own: nothing is taken from the account's empty row,
+       nothing here is removed because the account no longer holds it, and
+       what this device recorded as sent is forgotten, so unmarking sends it
+       all again. */
+    var otherEff = function (pid) {
+      var L0 = localById[pid];
+      return forOther(L0) || ledgerEff('forOther', pid, false);
+    };
+    var forgetSent = function (pid) {
+      [cM, cC, cT, cO].forEach(function (c) {
+        Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+      });
     };
     var hashFor = function (p, saved) { return saved ? hashOf(p) : hashOf(withoutBirth(p)); };
     var localById = {};
@@ -651,8 +692,8 @@
     var room = (pm.MAX_PROFILES || 6) - ownBefore.length;
     remoteRows.forEach(function (r) {
       var L = localById[r.id];
+      if (otherEff(r.id)) { if (L) forgetSent(r.id); return; }  // stays on its device; never made from the empty row
       if (L) {
-        if (forOther(L)) return;  // kept on this device; the outbox is taking the server's copy away
         /* Changed here since the last sync: the local copy wins and the push
            sends it. Untouched here: the server's copy is the newer one. */
         if (cP[r.id] !== profileHash(pm, L)) return;
@@ -679,16 +720,7 @@
     store.profiles.forEach(function (L) {
       if (remoteById[L.id] || !serverHas) return;
       if (isPlaceholder(L.id)) return;
-      if (forOther(L)) {
-        /* Never on the account, so its absence there is not a deletion. What
-           this device recorded as sent for it went with the account's copy,
-           so it is forgotten too: unmarked later, every row goes up again. */
-        delete cP[L.id];
-        [cM, cC, cT, cO].forEach(function (c) {
-          Object.keys(c).forEach(function (k) { if (k.indexOf(L.id + '/') === 0) delete c[k]; });
-        });
-        return;
-      }
+      if (otherEff(L.id)) { delete cP[L.id]; forgetSent(L.id); return; }  // its absence on the account is not a deletion
       if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
       if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
       if (cP[L.id] !== profileHash(pm, L)) return;  // changed here since: keep it, the push restores it
@@ -735,6 +767,7 @@
       (remoteMem[r.profile_id] = remoteMem[r.profile_id] || {})[String(r.local_id)] = r;
     });
     Object.keys(present).forEach(function (pid) {
+      if (otherEff(pid)) return;
       var local = localById[pid] ? pm.getMemory({ profileId: pid, respectConsent: false }) : [];
       var have = {}, rm = remoteMem[pid] || {}, add = [], remove = [];
       local.forEach(function (m) { have[m.id] = m; });
@@ -753,7 +786,7 @@
       /* Only for a profile the server still holds: one it no longer holds is
          either deleted (and goes whole, above) or changed here and kept, and
          its rows are not the server's to remove. */
-      if (localById[pid] && remoteById[pid]) {
+      if (localById[pid] && remoteById[pid] && !otherEff(pid)) {
         local.forEach(function (m) {
           var key = pid + '/' + m.id;
           if (rm[m.id] || cM[key] === undefined) return;
@@ -781,6 +814,7 @@
         (byPid[r.profile_id] = byPid[r.profile_id] || []).push(r.payload);
       });
       Object.keys(byPid).forEach(function (pid) {
+        if (otherEff(pid)) return;
         var arr = localById[pid] ? readJSON('incommon.p.' + pid + '.' + spec[1], []) : [];
         if (!Array.isArray(arr)) arr = arr ? [arr] : [];
         var count = {}, ids = {}, add = [];

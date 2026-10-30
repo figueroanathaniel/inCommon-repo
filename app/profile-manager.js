@@ -368,6 +368,10 @@
          a profile that was never marked hashes exactly as it did before. */
       if (on) target.for_other = true; else delete target.for_other;
       this._save(s);
+      /* The mark travels in the consent ledger, which every device merges
+         whatever the birth switch says, so the account's other devices learn
+         it and stop sending the profile (the follow-up review's finding 2). */
+      this.setConsent('forOther', !!on, id);
       this._emit('profile:for-other', { id: id, forOther: !!on });
       return this.getProfile(id);
     },
@@ -503,6 +507,7 @@
          if it defaults with no option"). Off keeps the birth on this device. */
       this.initConsents(p.id);
       if (p.birth_date) this.setConsent('birthData', true, p.id);
+      if (p.for_other) this.setConsent('forOther', true, p.id);
       this.invalidateCalculations(p.id);
       this._emit('profile:created', { id: p.id });
       return this.getProfile(p.id);
@@ -603,6 +608,19 @@
        birth would defeat the button. Notes stay; they are the reader's own
        words, and read as unresolved until a birth is given again. */
     _birthMoved: function (id, before, after) {
+      /* When the birth last moved on this device, and whether it was cleared,
+         so a Clear birth data made on another device can be told from a birth
+         given here since (the follow-up review's finding 1). The clear is a
+         ledger event, which syncs whatever the birth switch says, and it
+         carries no birth data. */
+      if (birthKey(before) !== birthKey(after)) {
+        var st = this._store(), at = nowISO();
+        st.profiles.forEach(function (p) { if (p.id === id) p.birth_at = at; });
+        this._save(st);
+        var bc = this.consentState('birthCleared', id);
+        if (!after.birth_date && before.birth_date) this.setConsent('birthCleared', true, id);
+        else if (after.birth_date && bc.granted) this.setConsent('birthCleared', false, id);
+      }
       /* Clear birth data (O8). The history goes, and so does every note's
          record of what its address resolved to, because that is derived from
          the birth (privacy review F4): a gate and line list kept after the
@@ -1078,6 +1096,41 @@
         if (all.length) rec.updatedAt = all[all.length - 1].ts;
         write(k, rec);
         out.consents++;
+      });
+      /* Two marks the account's other devices made, read from the merged
+         ledger: a profile made for somebody else, and a Clear birth data.
+         Neither carries any birth data, so both travel whatever the birth
+         switch says. A clear takes this device's birth only when the birth
+         here is older than the clear, so a birth given here since stands. */
+      var st2 = this._store(), moved = false, dropped = [];
+      st2.profiles.forEach(function (p) {
+        if (!d.consents || !d.consents[p.id]) return;
+        var rec2 = read('incommon.consent.' + p.id, null), c2 = (rec2 && rec2.consents) || {};
+        var fo = c2.forOther;
+        if (fo && fo.updatedAt && !!fo.granted !== (p.for_other === true)) {
+          if (fo.granted) p.for_other = true; else delete p.for_other;
+          moved = true;
+        }
+        var bc = c2.birthCleared;
+        if (bc && bc.granted && bc.updatedAt && (!p.birth_at || when(p.birth_at) < when(bc.updatedAt))) {
+          if (p.birth_date || p.birth_time || p.birth_location) {
+            p.birth_date = ''; p.birth_time = ''; p.birth_location = ''; p.birth_lat = null; p.birth_lon = null;
+            p.timezone = ''; p.tz_offset = null; p.location_resolved = false; p.birth_time_unknown = false;
+            p.birth_at = bc.updatedAt;
+            moved = true;
+          }
+          dropped.push(p.id);
+        }
+      });
+      if (moved) write(scope().root, st2);
+      dropped.forEach(function (pid) {
+        drop(versionsKey(pid));
+        var nr = read(notesKey(pid), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.resolved != null; })) {
+          nr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(pid), nr);
+        }
+        self.invalidateCalculations(pid);
       });
       Object.keys(d.memories || {}).forEach(function (pid) {
         if (!has(pid)) return;
