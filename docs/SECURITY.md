@@ -244,9 +244,11 @@ fourteen findings.** The model answers each in its section 12. What it changed
 here: `card` no longer opens a handout and the export carries no consent
 record and no birth key (F6, F7, F10, share-rules.js 1.1.0); 0004's column is
 `birth_key` now, and the harness below inserts into it. F13 (the two-step list
-and the account function) was already met by Task 2. Two findings, F2 and F9,
-are the owner's to decide, and the steps at the end of this section wait on
-them as well as on the review.
+and the account function) was already met by Task 2. The owner decided F2 and
+F9 the same day (model section 13): "Save my profile to my account" now
+governs the birth fields the push sends, and a profile made for somebody else
+sends nothing. Both are the sync module's, which 1.2 owns, and hold through
+K75 to K81.
 
 ### Who may touch a chart version (Task 2)
 
@@ -365,8 +367,8 @@ the token. Not built.
 
 ### The owner's steps, in this order, once 2.2 Task 1 is resolved
 
-0. Decide F2 and F9 (model section 12), and change Privacy Policy sections 5
-   and 14 to name the version history, with the date moved (F12). Not before.
+0. Privacy Policy sections 5 and 14 name the version history, with the date
+   moved (F12), in the change that ships 1.2 step 3. Not before.
 1. SQL Editor: run `server/migrations/0004-chart-versions.sql`.
 2. SQL Editor: run `server/migrations/0005-chart-versions-policies.sql`.
 3. SQL Editor: run `server/mfa-policies.sql` again; its check query should now

@@ -109,3 +109,7 @@ were approved; from 28 October 2026 that work is committed here.
   (16 of 16), SECURITY.md updated. F13 was already met. F2 and F9 wait on the
   owner. The review's own text is not in the repository; whether it is
   committed or posted is the owner's call.
+- 30 October 2026: the owner decided F2 and F9 and asked for the review to be
+  committed to this branch. The review's author session was asked to commit
+  its own text; the 1.2 work for F2 and F9 (1b38223) is merged here and the
+  owner's step 0 in SECURITY.md no longer waits on a decision.
