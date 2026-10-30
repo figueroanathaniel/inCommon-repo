@@ -129,3 +129,8 @@ were approved; from 28 October 2026 that work is committed here.
   ancestor of this branch. It is stacked on `taskforce/01-data-schema`, so
   until #128 lands its diff includes that branch's 1.2 commits, and it merges
   after #128.
+- 30 October 2026: the 2.2 Task 1 privacy review committed at the owner's
+  request, with its follow-up review of the answers, as
+  `reviews/2.2-task1-privacy-review.md`. Written by a session that wrote
+  none of the model; the answers to the follow-up are in model section 14 and
+  were not checked by it.
