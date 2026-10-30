@@ -6945,6 +6945,29 @@ a session that did not write the model.
   0006's trigger with the table; run 0006 again.**
   `tools/check-hd-study-rls.js` WH1 to WH18.
 
+## The live project is not the schema of record until 0009 has run
+Found 30 October 2026, and the rule worth keeping is about the tests rather
+than the tables. The pull asked for `deleted_profiles` in `id` order, a
+column that table never had, and every K row was green while every device's
+pull failed, because the fake database in `run-module-tests.js` took any
+column at all. **The fake now reads every table's columns out of
+`server/cloud-schema.sql` and the migrations, and refuses an unknown one with
+Postgres's 42703** (K96 holds the parse itself, so a broken parse cannot turn
+the check off quietly). A table the client reads with no `id` belongs in
+`ORDER_BY` in `fetchAll()`.
+
+The live project had also drifted: `pairs` keyed by `profile_id` with no
+`account_id` and no identity id, `luminary_unlocks` keyed by `profile_id`
+with no `user_id` and no key, and four policies no file made, one of which
+lets a reader write their own unlock once `user_id` exists.
+`server/migrations/0009` brings it to the repository's shape and is a no op
+on that shape. **On the live project it runs before 0001 to 0003**, which
+were never applied there. `tools/check-hd-study-rls.js` builds that live shape
+(`live_before`, `live_after`, rows LV1 to LV9). The fake matches the
+repository, not the live project, so a later drift there would pass the module
+tests again: compare the live columns with the repository's before believing a
+green K section about the server.
+
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the
 owner's instruction in its own order: `tools/build-assets.js`,

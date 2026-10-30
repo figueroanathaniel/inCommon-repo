@@ -96,6 +96,21 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    back. Then run `server/mfa-policies.sql` again, which lists
    `deleted_profiles`.
 
+9. `0009-live-schema-reconcile.sql`: brings a project whose `pairs` and
+   `luminary_unlocks` drifted from the repository back to its shape, and
+   drops four policies no file here made. It changes nothing on a project
+   already of the repository's shape. Found on the live project on 30 October
+   2026: `pairs` had `profile_id` in place of `account_id` and an id with no
+   identity, so every pull and every pair write failed; `luminary_unlocks`
+   had `profile_id` in place of `user_id` and no key, so no payment could be
+   recorded or recognised; and one stray policy would have let a reader write
+   their own unlock the moment `user_id` existed, so it is dropped in the same
+   file. **On the live project this file runs first, then 0001, 0002 and
+   0003**, which were never applied there (0001 indexes `pairs.account_id`).
+   Then run `server/mfa-policies.sql` again. Tested by
+   `tools/check-hd-study-rls.js`, rows LV1 to LV9, against the live shape
+   before and after.
+
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in, and 0007 does, once
 0008 is in.

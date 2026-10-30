@@ -67,7 +67,7 @@ session arrives, the profile row goes up like any other.
 |---|---|---|---|
 | `oracle_readings` | `server/oracle` (service role) | per account: `period`, `period_key`, `depth`, `chart_key` (a hash of the dossier, `.b` for a second half), `status`, `content`, `model`, and since migration 0006 `profile_id`, the profile the dossier was written from (null for a reading written before, or an id that is not a profile of the account). `status` `served` is a reading handed back and not kept (its profile was withheld, see below), `withdrawn` one that was kept until its profile was; neither has content, both count toward the daily limit | own rows (select policy); the device also keeps its own copy, see `incommon.p.<pid>.oracle` |
 | `subscriptions` | `server/billing` | Stripe customer and subscription ids, status, plan, period end | through the billing function |
-| `luminary_unlocks` | `server/billing` | the one time unlock: Stripe session id, amount, currency | through the billing function |
+| `luminary_unlocks` | `server/billing` | the one time unlock, keyed by `user_id`: Stripe session id, amount, currency (the live table was keyed by `profile_id` until migration 0009) | through the billing function |
 | `store_subscriptions` | `server/store` | RevenueCat's word on an app purchase | through the billing function |
 | `support_requests` | the app, insert only, anon or signed in | topic, email, message, status; `user_id` stamped by default | never (no select policy) |
 | `cast_counters`, `entitlements` | dashboard only | not in the repository | not mapped |

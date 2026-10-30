@@ -25,8 +25,19 @@
  * is the account's own: nobody else reads it, adds to it or reaches through
  * it, and nobody removes it.
  *
- * It runs the cases five times, in five databases:
- *   before          without 0005 to 0008 and chart_versions in the two-step
+ * Rows LV1 to LV9 are migration 0009: the live project's pairs and
+ * luminary_unlocks had drifted from the repository (pairs keyed by profile_id
+ * with no account_id and no identity id, unlocks by profile_id with no user_id
+ * and no key) and carried four policies no file made, one of which would hand
+ * a reader a free unlock once user_id existed. Found 30 October 2026.
+ *
+ * It runs the cases seven times, in seven databases:
+ *   live_before     the live project as it was read: the drift, the legacy
+ *                   rows, 0004 to 0008, and none of 0001 to 0003 or 0009:
+ *                   every LV row is red;
+ *   live_after      the same, then 0009, 0001, 0002 and 0003 in that order,
+ *                   as the README gives it for the live project: all pass;
+ *   before          without 0005 to 0009 and chart_versions in the two-step
  *                   list: the table must be unreachable, so the reader's own
  *                   writes fail, nothing withholds a birth, and a deleted
  *                   profile can come back;
@@ -151,6 +162,39 @@ insert into auth.users (id, email) values ('${A}', 'a@test.invalid'), ('${B}', '
 insert into public.accounts (id) values ('${A}'), ('${B}');
 insert into public.profiles (id, account_id, name) values ('${PA}', '${A}', 'Ana'), ('${PB}', '${B}', 'Bea');
 `;
+/* The live project's shape as it was read on 30 October 2026, made from the
+   repository's: pairs keyed by a profile_id with no account_id and an id with
+   no identity, luminary_unlocks keyed by a profile_id with no user_id and no
+   key, and four policies no file in the repository made. Applied before any
+   migration in the live runs, with 0001 to 0003 absent, as they were there. */
+const DRIFT = `
+drop policy if exists "own pairs" on public.pairs;
+alter table public.pairs drop column account_id;
+alter table public.pairs alter column id drop identity;
+alter table public.pairs add column profile_id uuid not null references public.profiles(id) on delete cascade;
+create policy "own pairs" on public.pairs for all to authenticated
+  using (profile_id in (select id from public.profiles where account_id = auth.uid()));
+drop policy if exists "read own luminary unlock" on public.luminary_unlocks;
+alter table public.luminary_unlocks drop column user_id;
+alter table public.luminary_unlocks add column profile_id uuid not null references public.profiles(id) on delete cascade;
+create policy "Users can manage luminary unlocks of their profiles." on public.luminary_unlocks for all to authenticated
+  using (profile_id in (select id from public.profiles where account_id = auth.uid()))
+  with check (profile_id in (select id from public.profiles where account_id = auth.uid()));
+create policy "Users can manage their own oracle readings." on public.oracle_readings for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Users can manage their own profiles." on public.profiles for all to authenticated
+  using (account_id = auth.uid()) with check (account_id = auth.uid());
+create policy "Users can manage memories of their profiles." on public.memories for all to authenticated
+  using (profile_id in (select id from public.profiles where account_id = auth.uid()))
+  with check (profile_id in (select id from public.profiles where account_id = auth.uid()));
+`;
+/* A pair and an unlock written in the drifted shape, so 0009's fill is proven
+   on rows rather than on an empty table. */
+const PX = 'c0000000-0000-4000-8000-0000000000c1';
+const LEGACY = `
+insert into public.pairs (id, profile_id, profile_a, profile_b, enabled) values (7, '${PA}', '${PA}', '${PX}', true);
+insert into public.luminary_unlocks (profile_id, stripe_session_id, amount, currency) values ('${PB}', 'cs_legacy', 300, 'usd');
+`;
 function as(user, aal, body) {
   const claims = user ? JSON.stringify({ sub: user, role: 'authenticated', aal: aal || 'aal1' }) : JSON.stringify({ role: 'anon' });
   return `begin;\nset local role ${user ? 'authenticated' : 'anon'};\nset local request.jwt.claims = '${claims}';\n${body}\ncommit;\n`;
@@ -222,6 +266,57 @@ function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(
    answers true when the rule holds. The cases run in order on one database,
    so a later case sees what an earlier one wrote, as a reader would. */
 const CASES = [
+  /* ---- LV: the live shape (migration 0009). Each holds on the repository's
+     own shape and on the live one once 0009 has run, and fails on the live
+     one before it. ---- */
+  ['LV1', 'the pull\'s reads answer as the reader: pairs by account and deleted profiles in profile order',
+    db => psql(db, as(A, 'aal1', `select count(*) from public.pairs where account_id = '${A}';
+      select count(*) from (select profile_id from public.deleted_profiles where account_id = '${A}' order by profile_id) d;`)).ok],
+  ['LV2', 'a pair lands exactly as the push sends it, and again as an update, without an id',
+    db => { const up = `insert into public.pairs (account_id, profile_a, profile_b, enabled, enabled_by, enabled_at)
+      values ('${A}', '${PA}', 'd0000000-0000-4000-8000-0000000000d1', false, null, null)
+      on conflict (profile_a, profile_b) do update set enabled = excluded.enabled;`;
+      return psql(db, as(A, 'aal1', up)).ok && psql(db, as(A, 'aal1', up.replace('false', 'true'))).ok
+        && psql(db, `select count(*) || '|' || bool_and(enabled) from public.pairs where profile_b = 'd0000000-0000-4000-8000-0000000000d1';`).out === '1|true'; }],
+  ['LV3', 'another reader neither reads the account\'s pairs nor writes one in its name',
+    db => { const r1 = psql(db, as(B, 'aal1', `select count(*) from public.pairs where account_id = '${A}';`));
+      const w = psql(db, as(B, 'aal1', `insert into public.pairs (account_id, profile_a, profile_b) values ('${A}', '${PA}', 'd0000000-0000-4000-8000-0000000000d2');`));
+      return r1.ok && r1.out === '0' && !w.ok
+        && psql(db, `select count(*) from public.pairs where profile_b = 'd0000000-0000-4000-8000-0000000000d2';`).out === '0'; }],
+  ['LV4', 'every pair has its account and every unlock its reader, both not null, and the pair id is an identity',
+    db => psql(db, `select (select is_nullable from information_schema.columns where table_name = 'pairs' and column_name = 'account_id')
+        || '|' || (select is_identity from information_schema.columns where table_name = 'pairs' and column_name = 'id')
+        || '|' || (select is_nullable from information_schema.columns where table_name = 'luminary_unlocks' and column_name = 'user_id')
+        || '|' || (select count(*) from public.pairs where account_id is null)
+        || '|' || (select count(*) from public.luminary_unlocks where user_id is null);`).out === 'NO|YES|NO|0|0'],
+  ['LV5', 'the billing function records an unlock by user, once, and finds it by user',
+    db => { const w = sid => `begin; set local role service_role;
+      insert into public.luminary_unlocks (user_id, stripe_session_id, amount, currency) values ('${A}', '${sid}', 300, 'usd')
+      on conflict (user_id) do nothing; commit;`;
+      return psql(db, w('cs_lv5a')).ok && psql(db, w('cs_lv5b')).ok
+        && psql(db, `select count(*) || '|' || min(stripe_session_id) from public.luminary_unlocks where user_id = '${A}';`).out === '1|cs_lv5a'; }],
+  ['LV6', 'a reader cannot write an unlock for themselves, in whichever shape the table has',
+    db => { const has = c => psql(db, `select count(*) from information_schema.columns where table_name = 'luminary_unlocks' and column_name = '${c}';`).out === '1';
+      /* A reader who holds no unlock, so no key can refuse the row before a
+         policy is asked. */
+      const C = 'cccccccc-0000-4000-8000-00000000000c', PCC = 'c0000000-0000-4000-8000-0000000000cc';
+      psql(db, `insert into auth.users (id, email) values ('${C}', 'c@test.invalid') on conflict do nothing;
+        insert into public.accounts (id) values ('${C}') on conflict do nothing;
+        insert into public.profiles (id, account_id, name) values ('${PCC}', '${C}', 'Cy') on conflict do nothing;`);
+      const cols = [], vals = [];
+      if (has('user_id')) { cols.push('user_id'); vals.push(`'${C}'`); }
+      if (has('profile_id')) { cols.push('profile_id'); vals.push(`'${PCC}'`); }
+      const w = psql(db, as(C, 'aal1', `insert into public.luminary_unlocks (${cols.join(', ')}, stripe_session_id, amount, currency)
+        values (${vals.join(', ')}, 'cs_free', 0, 'usd');`));
+      return !w.ok && psql(db, `select count(*) from public.luminary_unlocks where stripe_session_id = 'cs_free';`).out === '0'; }],
+  ['LV7', 'a reader reads their own unlock and nobody else\'s',
+    db => { const a = psql(db, as(A, 'aal1', `select count(*) from public.luminary_unlocks where user_id = '${A}';`));
+      const b = psql(db, as(B, 'aal1', `select count(*) from public.luminary_unlocks where user_id = '${A}';`));
+      return a.ok && a.out === '1' && b.ok && b.out === '0'; }],
+  ['LV8', 'the four policies no file made are gone, and nothing but the two-step rule lets a reader write a reading or an unlock',
+    db => psql(db, `select count(*) from pg_policies where policyname in ('Users can manage luminary unlocks of their profiles.',
+        'Users can manage their own oracle readings.', 'Users can manage their own profiles.', 'Users can manage memories of their profiles.')
+        or (tablename in ('oracle_readings', 'luminary_unlocks') and cmd <> 'SELECT' and permissive = 'PERMISSIVE');`).out === '0'],
   ['CV1', 'a reader adds a version to a profile their account holds',
     db => psql(db, as(A, 'aal1', ins('v1'))).ok],
   ['CV2', 'a reader reads back their own version',
@@ -439,6 +534,19 @@ const CASES = [
       const back = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10';
       return again && d && back;
     }],
+  ['LV9', 'applying 0009 again changes no column, key or policy on the two tables, and its DOWN applies',
+    db => {
+      const f = fs.readFileSync(path.join(repo, 'server', 'migrations', '0009-live-schema-reconcile.sql'), 'utf8');
+      const down = f.split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
+      const shape = () => psql(db, `select string_agg(x, ' ' order by x) from (
+        select table_name || '.' || column_name || ':' || is_nullable || ':' || is_identity x from information_schema.columns
+         where table_schema = 'public' and table_name in ('pairs', 'luminary_unlocks')
+        union all select conrelid::regclass || ':' || conname from pg_constraint where conrelid in ('public.pairs'::regclass, 'public.luminary_unlocks'::regclass)
+        union all select indexname from pg_indexes where tablename in ('pairs', 'luminary_unlocks')
+        union all select tablename || ':' || policyname from pg_policies where tablename in ('pairs', 'luminary_unlocks', 'oracle_readings', 'profiles', 'memories')) s;`).out;
+      const was = shape();
+      return psql(db, f).ok && shape() === was && psql(db, down).ok && psql(db, f).ok;
+    }],
 ];
 
 /* owns_profile() runs as the caller, so it reads profiles under that table's
@@ -447,12 +555,23 @@ const CASES = [
    definer runs make it SECURITY DEFINER, as a later performance change might,
    to show the list entry is the wall that still stands then. */
 const DEFINER = `alter function public.owns_profile(uuid) security definer;`;
-function prepare(name, skipMig, mfaWith, definer) {
+function prepare(name, skipMig, mfaWith, definer, live) {
   const made = psql('postgres', `create database ${name};`);
   if (!made.ok) throw new Error('create database ' + name + ': ' + made.err);
-  const steps = [['stub', STUB], ['cloud-schema v2', cloudV2()],
+  const mig = n => { const f = fs.readdirSync(path.join(repo, 'server', 'migrations')).filter(x => x.indexOf(n) === 0)[0];
+    return [f, fs.readFileSync(path.join(repo, 'server', 'migrations', f), 'utf8')]; };
+  const base = [['stub', STUB], ['cloud-schema v2', cloudV2()],
     ['support.sql', fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8')],
-    ['oracle schema', fs.readFileSync(path.join(repo, 'server', 'oracle', 'schema.sql'), 'utf8')]]
+    ['oracle schema', fs.readFileSync(path.join(repo, 'server', 'oracle', 'schema.sql'), 'utf8')]];
+  /* live: the drift, its rows, the five migrations the live project had,
+     then (after) 0009 and the three it never had, in the order the README
+     gives for it. */
+  const steps = live
+    ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
+        ['0004', '0005', '0006', '0007', '0008'].map(mig),
+        live === 'after' ? ['0009', '0001', '0002', '0003'].map(mig) : [],
+        [['mfa-policies', mfa(true)]])
+    : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
     .concat([['mfa-policies', mfa(mfaWith)], ['seed', SEED]])
     .concat(definer ? [['definer', DEFINER]] : []);
@@ -470,7 +589,12 @@ function runCases(db) {
 }
 
 const RUNS = [
-  { name: 'before', skip: ['0005', '0006', '0007', '0008'], mfa: false,
+  /* The live project as it was: every LV row red, and the shape broken
+     enough that much else is red too, which is not what this run asserts. */
+  { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9'] },
+  /* The live project once 0009, 0001, 0002 and 0003 have run: everything. */
+  { name: 'live_after', live: 'after', mustFail: [] },
+  { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
       'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16', 'WH17', 'WH18',
       'DP1', 'DP2', 'DP3', 'DP4', 'DP5', 'DP6', 'DP7', 'DP8', 'DP9', 'DP10', 'DP11', 'DP12'] },
@@ -482,7 +606,7 @@ const RUNS = [
 
 let bad = 0;
 for (const R of RUNS) {
-  try { prepare(R.name, R.skip, R.mfa, R.definer); } catch (e) {
+  try { prepare(R.name, R.skip, R.mfa, R.definer, R.live); } catch (e) {
     console.log('check-hd-study-rls: NOT RUN, the schema would not apply: ' + e.message); process.exit(2);
   }
   const rows = runCases(R.name);
