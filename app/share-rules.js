@@ -48,7 +48,10 @@
  * notes where the scope held store and notes (consentKeeps) and opens no
  * handout until the reader states the word again (confirmWord). A file is
  * not the person, so it cannot open a handout; it can stop a restore from
- * throwing away what the reader was told.
+ * throwing away what the reader was told. That makes a file a second way a
+ * person's notes come in besides the reader's own hand, and a hand edited
+ * file can use it; it brings in only the notes the file itself carries, which
+ * an import brings in anyway. The owner was told of this trade-off.
  *
  * A NAME ON A HANDOUT IS A FIRST NAME, and it is off by default for anybody
  * but the reader.

@@ -6918,7 +6918,12 @@ a session that did not write the model.
   deletion marking queues takes the profile's ledger on the live schema, and
   flushed after the push it took the mark. The fake database in the K rows
   cascades as the live one does; a fake that does not is how K79 to K84 passed
-  over that fault. `tools/check-hd-study-rls.js` WH1 to WH12.
+  over that fault. 0006 also drops a chart version for a withheld profile and
+  deletes a profile's versions when it becomes withheld, and stores an event
+  dated more than five minutes ahead of the server at the server's time, so a
+  fast device clock cannot outrank a later event. **Undoing and reapplying
+  0004 takes 0006's trigger with the table; run 0006 again.**
+  `tools/check-hd-study-rls.js` WH1 to WH16.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the

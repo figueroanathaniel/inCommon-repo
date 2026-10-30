@@ -11,7 +11,7 @@
  * by setting the request's JWT claims the way PostgREST does, and asks what
  * each may do.
  *
- * Rows WH1 to WH12 are migration 0006, the server holding "Save my profile
+ * Rows WH1 to WH16 are migration 0006, the server holding "Save my profile
  * to my account" and "this profile is for someone else" (the follow-up
  * review's findings 4, 5 and 9): an older build's birth is emptied while the
  * ledger says off, cleared or somebody else's, the right later word puts it
@@ -171,6 +171,11 @@ function reading(user, key, profile) {
       values ('${user}', 'daily', '2026-10-30', 'standard', '${key}', 'pending', '${profile}');
     update public.oracle_readings set status = 'done', content = '{"x": 1}'::jsonb where chart_key = '${key}';`;
 }
+const PD = 'c0000000-0000-4000-8000-0000000000d1';
+function evAt(pid, scope, action, tsExpr) {
+  return `insert into public.consent_events (profile_id, scope, action, ts) values ('${pid}', '${scope}', '${action}', ${tsExpr});`;
+}
+function versionsOf(db, pid) { return psql(db, `select count(*) from public.chart_versions where profile_id = '${pid}';`).out; }
 function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(content::text, '') from public.oracle_readings where chart_key = '${key}';`).out; }
 
 /* Each case: a name, what it checks, and a function of the database that
@@ -216,15 +221,19 @@ const CASES = [
     db => psql(db, `select string_agg(cmd || ':' || array_to_string(roles, ','), ' ' order by cmd)
       from pg_policies where tablename = 'chart_versions' and policyname like 'own chart versions%';`).out
       === 'DELETE:authenticated INSERT:authenticated SELECT:authenticated'],
-  ['CV15', 'applying 0004 and 0005 again changes nothing, the DOWN of 0005 removes its rules and 0004 its table, and both apply cleanly after',
+  ['CV15', 'applying 0004 and 0005 again changes nothing, the DOWN of 0005 removes its rules and 0004 its table, and both apply cleanly after, with 0006 put back on the new table',
     db => {
       const file = n => fs.readFileSync(path.join(repo, 'server', 'migrations', n), 'utf8');
       const down = n => file(n).split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
       const pol = () => psql(db, `select count(*) from pg_policies where tablename = 'chart_versions' and policyname like 'own chart versions%';`).out;
+      const had6 = psql(db, `select to_regprocedure('public.chart_versions_withhold()') is not null;`).out === 't';
       const again = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3';
       const d5 = psql(db, down('0005-chart-versions-policies.sql')).ok && pol() === '0';
       const d4 = psql(db, down('0004-chart-versions.sql')).ok && psql(db, `select to_regclass('public.chart_versions') is null;`).out === 't';
-      const back = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3';
+      // 0006 hangs a trigger on chart_versions, which 0004's DOWN drops with
+      // the table, so it is applied again with the other two.
+      const back = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3'
+        && (!had6 || psql(db, file('0006-server-holds-the-switch.sql')).ok);
       return again && d5 && d4 && back;
     }],
 
@@ -266,16 +275,45 @@ const CASES = [
     db => psql(db, `select to_regprocedure('public.profile_withheld(uuid)') is not null;`).out === 't'
       && !psql(db, as(A, 'aal1', `select public.profile_withheld('${PC}');`)).ok
       && !psql(db, as(null, null, `select public.profile_withheld('${PC}');`)).ok],
+  /* ---- the reviewer's review of section 14 (30 October 2026): gap 2, chart
+     versions follow the switch and the mark on the server too; gap 3, an
+     event from a fast clock cannot outrank later ones. A fresh profile, set
+     up as the service would, so each row tests the rule alone. ---- */
+  ['WH13', 'a chart version that arrives for a profile whose saving is off is dropped without an error, and one for a saved profile is kept',
+    db => { psql(db, `insert into public.profiles (id, account_id, name, birth_date) values ('${PD}', '${A}', 'Dee', '1972-07-04');`);
+      const kept = psql(db, ins('d1', PD)).ok && versionsOf(db, PD) === '1';
+      psql(db, evAt(PD, 'birthData', 'revoke', "'2026-10-30T10:00:20Z'"));
+      const dropped = psql(db, ins('d2', PD)).ok && versionsOf(db, PD) === '0';
+      return kept && dropped; }],
+  ['WH14', 'a profile\'s versions are deleted when it becomes withheld, whether by a clear or by a mark, so the history goes even if the app\'s own deletion is lost',
+    db => { psql(db, evAt(PD, 'birthData', 'grant', "'2026-10-30T10:00:21Z'"));
+      psql(db, ins('d3', PD));
+      const before = versionsOf(db, PD);
+      psql(db, evAt(PD, 'birthCleared', 'grant', "'2026-10-30T10:00:22Z'"));
+      const cleared = versionsOf(db, PD);
+      psql(db, evAt(PD, 'birthCleared', 'revoke', "'2026-10-30T10:00:23Z'"));
+      psql(db, ins('d4', PD));
+      psql(db, evAt(PD, 'forOther', 'grant', "'2026-10-30T10:00:24Z'"));
+      return before === '1' && cleared === '0' && versionsOf(db, PD) === '0'; }],
+  ['WH15', 'an event dated more than five minutes ahead of the server is stored at the server\'s time, and one a minute ahead keeps its own',
+    db => { psql(db, evAt(PD, 'forOther', 'revoke', `'2099-01-01T00:00:00Z'`) + evAt(PD, 'journal', 'grant', `now() + interval '1 minute'`));
+      return psql(db, `select (select max(ts) < now() + interval '5 minutes' from public.consent_events where profile_id = '${PD}' and scope = 'forOther')
+        and (select max(ts) > now() + interval '30 seconds' from public.consent_events where profile_id = '${PD}' and scope = 'journal');`).out === 't'; }],
+  ['WH16', 'so a saving on dated years ahead does not outrank a later true saving off: the birth is emptied',
+    db => { psql(db, `update public.profiles set birth_date = '1972-07-04' where id = '${PD}';`);
+      psql(db, evAt(PD, 'birthData', 'grant', `'2099-01-01T00:00:00Z'`));
+      psql(db, evAt(PD, 'birthData', 'revoke', `now() + interval '1 minute'`));
+      return psql(db, `select coalesce(birth_date, '') from public.profiles where id = '${PD}';`).out === ''; }],
   ['WH12', 'applying 0006 again changes nothing, its DOWN removes it and turns served and withdrawn rows to failed, and it applies cleanly after',
     db => {
       const file = fs.readFileSync(path.join(repo, 'server', 'migrations', '0006-server-holds-the-switch.sql'), 'utf8');
       const down = file.split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
-      const trig = () => psql(db, `select count(*) from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply');`).out;
-      const again = psql(db, file).ok && trig() === '3';
+      const trig = () => psql(db, `select count(*) from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp');`).out;
+      const again = psql(db, file).ok && trig() === '5';
       const d = psql(db, down).ok && trig() === '0'
         && psql(db, `select count(*) from public.oracle_readings where status in ('served', 'withdrawn');`).out === '0'
         && psql(db, `select count(*) from information_schema.columns where table_name = 'oracle_readings' and column_name = 'profile_id';`).out === '0';
-      const back = psql(db, file).ok && trig() === '3';
+      const back = psql(db, file).ok && trig() === '5';
       return again && d && back;
     }],
 ];
@@ -311,7 +349,7 @@ function runCases(db) {
 const RUNS = [
   { name: 'before', skip: ['0005', '0006'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
-      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11'] },
+      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

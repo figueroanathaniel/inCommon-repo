@@ -481,8 +481,10 @@ Deno.serve(async (req) => {
   // stored with the reading so the server can withdraw what was written from
   // a profile that stops being saved to the account or is marked as somebody
   // else's; a reading of such a profile is handed back and not kept, which
-  // the table's own trigger decides. An id that is not a profile of this
-  // reader's account is not stored. A profile marked as somebody else's is
+  // the table's own trigger decides. An id that names another account's
+  // profile is not stored; an id the server holds no profile for yet (one
+  // not synced) is stored, and the trigger, which checks the account, ignores
+  // it until the profile arrives. A profile marked as somebody else's is
   // refused before anything is asked or counted: the Oracle writes for the
   // reader (HD-STUDY-MODEL.md section 13, item 3).
   let profileId: string | null = typeof body.profileId === "string" && UUID.test(body.profileId) ? body.profileId : null;

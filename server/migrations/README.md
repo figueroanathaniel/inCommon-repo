@@ -59,7 +59,8 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    row is emptied of its birth while the account's latest `birthData` event
    is a revoke or its latest `birthCleared` a grant, and emptied whole while
    its latest `forOther` is a grant, so a build older than the switch cannot
-   put the birth back. An Oracle reading gains `profile_id`; one finished for
+   put the birth back. A chart version follows the same rule, and an event
+   dated more than five minutes ahead of the server is stored at its time. An Oracle reading gains `profile_id`; one finished for
    such a profile is stored as `served` with no content, and the kept readings
    of a profile that becomes withheld turn `withdrawn`. Apply after
    `server/oracle/schema.sql`. **Deploy the Oracle function and the app that
@@ -67,7 +68,10 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    resends a row after its events so that turning saving back on keeps the
    birth (K86), and without that a reader who turns it back on loses the
    account copy until the next change to the profile. Tested by
-   `tools/check-hd-study-rls.js`, rows WH1 to WH12.
+   `tools/check-hd-study-rls.js`, rows WH1 to WH16. It also hangs a trigger
+   on `chart_versions`, so it runs after 0004, and **if 0004 is ever undone
+   and applied again, run 0006 again too**: dropping the table drops the
+   trigger with it.
 
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in.

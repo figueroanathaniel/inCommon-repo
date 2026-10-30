@@ -35,6 +35,20 @@
 -- one of the day's six. Readings written before this file carry no profile
 -- and cannot be found; deleting the account removes them.
 --
+-- A chart version (0004) is birth data too: a version that arrives for a
+-- withheld profile is dropped, and a profile's versions are deleted when it
+-- becomes withheld, so a clear or a switch turned off does not depend on the
+-- app's own deletion reaching the server (the reviewer's gap 2, 30 October
+-- 2026). Memories, the Throughline and Oki messages are not covered here: an
+-- older build can still land them for a marked profile, which is the owner's
+-- decision.
+--
+-- THE LEDGER IS ORDERED BY THE TIME EACH EVENT CARRIES, which the device
+-- wrote. A device whose clock runs ahead would outrank every later event for
+-- good, so an event dated more than five minutes ahead of the server is stored
+-- at the server's time (the reviewer's gap 3). An event replayed later keeps
+-- its own time, so the push's conflict key still matches it.
+--
 -- NOTHING IS REFUSED. Every rule empties fields rather than raising, because
 -- one refused upsert ends the whole push (migrations README).
 --
@@ -50,12 +64,14 @@
 -- keeps sending it, and the server keeps none of it. Its next pull reads the
 -- emptied row, and a device that had not changed the profile since its last
 -- sync takes the server's copy, so the older build loses its local birth
--- until it reloads into this build. That is the cost of the server holding
--- the rule, and the birth is still on the device that turned saving off.
+-- until it reloads into this build. For a profile marked as somebody else's
+-- the older build loses the name and the picture the same way, because the
+-- whole row is emptied. That is the cost of the server holding the rule, and
+-- everything is still on the device that set the switch or the mark.
 --
 -- WHO MAY CALL WHAT. profile_withheld() reads the ledger as its owner so the
 -- triggers see every event; it is closed to anon and authenticated, so the
--- API cannot be asked about a profile by id. The three trigger functions are
+-- API cannot be asked about a profile by id. The trigger functions are
 -- security definer for the same reason and touch only the row in hand, or,
 -- for the ledger trigger, the profile the event names, which the ledger's own
 -- policy has already checked the caller owns, and that profile's readings
@@ -67,13 +83,17 @@
 -- Run in the Supabase dashboard: SQL Editor, paste, Run, after
 -- server/oracle/schema.sql has been applied (oracle_readings must exist).
 -- Safe to run again. Proven on a throwaway Postgres 16 by
--- tools/check-hd-study-rls.js (rows WH1 to WH12).
+-- tools/check-hd-study-rls.js (rows WH1 to WH16).
 --
 -- The DOWN below turns served and withdrawn readings into failed ones, which
 -- the old check allows and the daily limit does not count.
 --
 -- DOWN (run to undo):
 --   drop trigger if exists consent_marks_apply on public.consent_events;
+--   drop trigger if exists consent_events_clamp on public.consent_events;
+--   drop trigger if exists chart_versions_withhold on public.chart_versions;
+--   drop function if exists public.consent_events_clamp();
+--   drop function if exists public.chart_versions_withhold();
 --   drop trigger if exists profiles_withhold on public.profiles;
 --   drop trigger if exists oracle_readings_withhold on public.oracle_readings;
 --   drop function if exists public.consent_marks_apply();
@@ -181,6 +201,7 @@ begin
   update public.oracle_readings r set status = 'withdrawn', content = null
    where r.profile_id = new.profile_id and r.status = 'done'
      and r.user_id = (select p.account_id from public.profiles p where p.id = new.profile_id);
+  delete from public.chart_versions where profile_id = new.profile_id;
   return null;
 end $marks$;
 
@@ -192,6 +213,39 @@ create trigger consent_marks_apply
   for each row when (new.scope in ('birthData', 'birthCleared', 'forOther'))
   execute function public.consent_marks_apply();
 
--- To see that it took: three triggers, and the function closed to the API.
---  select tgname from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply');
+-- ---------- a chart version, as it arrives ----------
+
+create or replace function public.chart_versions_withhold() returns trigger
+language plpgsql security definer set search_path = public as $versions$
+begin
+  -- Dropped, not refused: returning nothing skips the row without an error.
+  if public.profile_withheld(new.profile_id) is not null then return null; end if;
+  return new;
+end $versions$;
+
+revoke execute on function public.chart_versions_withhold() from public, anon, authenticated;
+
+drop trigger if exists chart_versions_withhold on public.chart_versions;
+create trigger chart_versions_withhold
+  before insert on public.chart_versions
+  for each row execute function public.chart_versions_withhold();
+
+-- ---------- an event's time, as it arrives ----------
+
+create or replace function public.consent_events_clamp() returns trigger
+language plpgsql set search_path = public as $clamp$
+begin
+  if new.ts > now() + interval '5 minutes' then new.ts := now(); end if;
+  return new;
+end $clamp$;
+
+revoke execute on function public.consent_events_clamp() from public, anon, authenticated;
+
+drop trigger if exists consent_events_clamp on public.consent_events;
+create trigger consent_events_clamp
+  before insert or update on public.consent_events
+  for each row execute function public.consent_events_clamp();
+
+-- To see that it took: five triggers, and the function closed to the API.
+--  select tgname from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp');
 --  select has_function_privilege('authenticated', 'public.profile_withheld(uuid)', 'execute');  -- false

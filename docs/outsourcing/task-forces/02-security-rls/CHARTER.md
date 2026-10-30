@@ -139,3 +139,10 @@ were approved; from 28 October 2026 that work is committed here.
   session read and tested the answers in model section 14 at 101eb4b (module
   tests 502 of 502, the study RLS harness 28 of 28) and found seven gaps, two
   of them to fix before step 3.
+- 30 October 2026: the seven gaps answered (model section 14). On this
+  branch: 0006 covers chart versions and clamps event times dated ahead of
+  the server (WH13 to WH16, the harness 32 of 32), the Oracle function's
+  comment on an unsynced profile id corrected, share-rules.js's header says
+  the restore trade-off, and 0006's note says an older build loses a marked
+  profile's name and picture too. Covering memories, the Throughline and Oki
+  messages for a marked profile is put to the owner.

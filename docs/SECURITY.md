@@ -293,6 +293,18 @@ to OR10, the five core ones red on the function before). That harness was
 run, not committed; the function was typechecked strict only against a shim
 of the Supabase client, not its real types.
 
+**The reviewer reviewed those answers too** (30 October 2026, at 101eb4b).
+Points 2 to 16 held; seven gaps came back, recorded in model section 14. On
+this branch: 0006 now drops a chart version for a withheld profile and deletes
+a profile's versions when it becomes withheld (gap 2), and stores an event
+dated more than five minutes ahead of the server at the server's time, so a
+fast device clock cannot outrank later events (gap 3). WH13 to WH16 hold both,
+and each is red without the file; `check-hd-study-rls.js` is 32 of 32 now.
+CV15 applies 0006 again after it rebuilds `chart_versions`, because dropping
+the table drops 0006's trigger with it. Memories, the Throughline and Oki
+messages an older build sends for a marked profile are not covered, which is
+the owner's decision.
+
 **Apply order for the owner**: deploy the Oracle function and the app from
 this branch, then run 0006 after `server/oracle/schema.sql`. 0006 before the
 app means a reader who turns saving back on keeps no account copy until the
