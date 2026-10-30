@@ -179,6 +179,42 @@
     return false;
   }
 
+  /* ---------- "Save my profile to my account" ----------
+
+     The birthData consent is that switch, and until 30 October 2026 the push
+     never read it: profile rows went up whatever it said, so the switch
+     changed nothing that was sent (privacy review F2; the owner: "it serves
+     no purpose if it defaults with no option"). Now, while it is off, the
+     profile row still goes up, because memories and the consent ledger hang
+     off it, but every birth field goes up empty, so the account stops holding
+     the birth and the next push takes away what it held. The device keeps its
+     own copy, and a pull never empties it (see the pull's profiles). Never
+     decided reads as on: ProfileManager's consentState() says why. A
+     ProfileManager older than that method is treated as on, which is the
+     behaviour it was written against. */
+  var BIRTH_ROW = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'timezone', 'tz_offset',
+    'location_resolved', 'birth_time_unknown'];
+  function birthSaved(pm, pid) {
+    if (typeof pm.consentState !== 'function') return true;
+    try { return !!pm.consentState('birthData', pid).granted; } catch (e) { return true; }
+  }
+  function withoutBirth(p) {
+    var o = Object.assign({}, p);
+    BIRTH_ROW.forEach(function (k) { o[k] = null; });
+    o._birthNotSaved = 1;
+    return o;
+  }
+  /* The hash a profile is cached under. With the birth saved it is exactly
+     hashOf(p), so nothing cached before this changes; with it not saved it
+     is the hash of what was sent, so switching the setting either way is a
+     change the next push sends. */
+  function profileHash(pm, p) {
+    return birthSaved(pm, p.id) ? hashOf(p) : hashOf(withoutBirth(p));
+  }
+  /* A profile made for somebody else never leaves the device (privacy review
+     F9, the owner's (b)): no row, no memories, no ledger, no pair. */
+  function forOther(p) { return !!(p && p.for_other === true); }
+
   /* ---------- plan building: ProfileManager state to remote rows ---------- */
 
   /* RAW PROFILE ROWS. pm._store() is named private by convention, not
@@ -193,9 +229,11 @@
     var plan = { profiles: [], memories: [], throughline: [], oki: [], consent: [], pairs: [], map: map };
 
     store.profiles.forEach(function (p) {
+      if (forOther(p)) return;
+      var saved = birthSaved(pm, p.id);
       plan.profiles.push({
         _key: p.id,
-        _hash: hashOf(p),
+        _hash: profileHash(pm, p),
         row: {
           id: p.id,
           account_id: userId,
@@ -206,15 +244,15 @@
           avatar_kind: p.avatar_kind || null,
           avatar_image: p.avatar_image || null,
           avatar_sign: p.avatar_sign || null,
-          birth_date: p.birth_date || null,
-          birth_time: p.birth_time || null,
-          birth_location: p.birth_location || null,
-          birth_lat: p.birth_lat == null ? null : p.birth_lat,
-          birth_lon: p.birth_lon == null ? null : p.birth_lon,
-          timezone: p.timezone || null,
-          tz_offset: p.tz_offset == null ? null : p.tz_offset,
-          location_resolved: !!p.location_resolved,
-          birth_time_unknown: !!p.birth_time_unknown,
+          birth_date: saved ? (p.birth_date || null) : null,
+          birth_time: saved ? (p.birth_time || null) : null,
+          birth_location: saved ? (p.birth_location || null) : null,
+          birth_lat: !saved || p.birth_lat == null ? null : p.birth_lat,
+          birth_lon: !saved || p.birth_lon == null ? null : p.birth_lon,
+          timezone: saved ? (p.timezone || null) : null,
+          tz_offset: !saved || p.tz_offset == null ? null : p.tz_offset,
+          location_resolved: saved && !!p.location_resolved,
+          birth_time_unknown: saved && !!p.birth_time_unknown,
           pin_hash: p.pin_hash || null,
           updated_at: new Date().toISOString()
         }
@@ -294,7 +332,10 @@
     /* Two-person consent binds profiles, not the account, but the row is
        account scoped in the schema because both parties are this user's
        profiles or cards held by them. */
+    var away = {};
+    store.profiles.forEach(function (p) { if (forOther(p)) away[p.id] = 1; });
     (store.pairs || []).forEach(function (pr) {
+      if (away[pr.a] || away[pr.b]) return;
       plan.pairs.push({
         _key: pr.key,
         _hash: hashOf(pr),
@@ -582,6 +623,24 @@
       profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
 
     /* ---- profiles ---- */
+    /* Whether each profile's birth is saved to the account, from this
+       device's decision and the account's ledger, the later one deciding,
+       because the ledger arrives in this same pull and is merged below. A row
+       whose birth was not saved comes down empty, and that must never empty
+       the birth this device holds. */
+    var bdRemote = {};
+    (remote.consent_events || []).forEach(function (r) {
+      if (!r || r.scope !== 'birthData' || !r.profile_id) return;
+      var t = iso(r.ts), cur = bdRemote[r.profile_id];
+      if (!cur || t > cur.ts) bdRemote[r.profile_id] = { ts: t, granted: r.action === 'grant' };
+    });
+    var savedEff = function (pid) {
+      var here = typeof pm.consentState === 'function' ? pm.consentState('birthData', pid) : { granted: true, at: null };
+      var there = bdRemote[pid];
+      if (there && (!here.at || there.ts > iso(here.at))) return there.granted;
+      return birthSaved(pm, pid);
+    };
+    var hashFor = function (p, saved) { return saved ? hashOf(p) : hashOf(withoutBirth(p)); };
     var localById = {};
     store.profiles.forEach(function (p) { localById[p.id] = p; });
     var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
@@ -593,14 +652,19 @@
     remoteRows.forEach(function (r) {
       var L = localById[r.id];
       if (L) {
+        if (forOther(L)) return;  // kept on this device; the outbox is taking the server's copy away
         /* Changed here since the last sync: the local copy wins and the push
            sends it. Untouched here: the server's copy is the newer one. */
-        if (cP[r.id] !== hashOf(L)) return;
-        var m = profileFromRow(r, L);
-        if (!m.changed) return;
+        if (cP[r.id] !== profileHash(pm, L)) return;
+        var m = profileFromRow(r, L), saved = savedEff(r.id);
+        if (!saved) {
+          BIRTH_ROW.forEach(function (k) { m.profile[k] = L[k]; });
+          m.changed = hashOf(m.profile) !== hashOf(L);
+        }
+        if (!m.changed) { if (!saved) cP[r.id] = hashFor(L, false); return; }
         d.profiles.push(m.profile);
         if (birthMoved(L, m.profile)) d.recalc.push(r.id);
-        cP[r.id] = hashOf(m.profile);
+        cP[r.id] = hashFor(m.profile, saved);
         res.profilesUpdated++;
         return;
       }
@@ -608,16 +672,26 @@
       if (room <= 0) return;
       var made = profileFromRow(r, null).profile;
       d.profiles.push(made);
-      cP[r.id] = hashOf(made);
+      cP[r.id] = hashFor(made, savedEff(r.id));
       room--;
       res.profilesAdded++;
     });
     store.profiles.forEach(function (L) {
       if (remoteById[L.id] || !serverHas) return;
       if (isPlaceholder(L.id)) return;
+      if (forOther(L)) {
+        /* Never on the account, so its absence there is not a deletion. What
+           this device recorded as sent for it went with the account's copy,
+           so it is forgotten too: unmarked later, every row goes up again. */
+        delete cP[L.id];
+        [cM, cC, cT, cO].forEach(function (c) {
+          Object.keys(c).forEach(function (k) { if (k.indexOf(L.id + '/') === 0) delete c[k]; });
+        });
+        return;
+      }
       if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
       if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
-      if (cP[L.id] !== hashOf(L)) return;           // changed here since: keep it, the push restores it
+      if (cP[L.id] !== profileHash(pm, L)) return;  // changed here since: keep it, the push restores it
       d.removeProfiles.push(L.id);
       delete cP[L.id];
       res.profilesRemoved++;
@@ -1829,6 +1903,9 @@
       opts.pm.subscribe(function (name, detail) {
         var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
         if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
+        /* Marked as made for somebody else: the account's copy goes, with its
+           memories by the cascade, and the profile stays on this device. */
+        else if (name === 'profile:for-other' && detail && detail.id && detail.forOther) queueOp({ op: 'del-profile', pid: detail.id });
         else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
         else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
         schedule();

@@ -449,15 +449,13 @@ is widened first, then `SYNC_MEMORY_TYPES` and K69 change together**, never
 the other way round.
 
 **Versions sync only while "Save my profile to my account" is on** (privacy
-review F2, the owner's to confirm in section 12). That switch sets the
+review F2, decided by the owner on 30 October 2026: section 13). That switch sets the
 `birthData` consent, and the push does not read it today:
 `incommon-cloud.js` says "birthData is not a toggle" and sends profile rows
 whatever it says. A version history is more birth data than the profile row
 (every birth the reader ever gave), so the version push reads the switch even if
 the profile row goes on not reading it. Turning the switch off queues
-`del-chart-versions`. Whether the profile row should read the switch too is a
-fault in the sync module as it stands, not something this model adds, and
-section 12 raises it.
+`del-chart-versions`. The profile row reads the switch too now (section 13).
 
 Two new outbox operations: `del-chart-versions` (every version of a profile,
 for Clear birth data, O8) and nothing for notes (`del-memory` covers them).
@@ -510,8 +508,8 @@ design claims for each:
    O3 (A); the card and the import both keep them on the device. To check: no
    push path reads `incommon.people.v1`, and the Oracle dossier never carries a
    saved person (it is built for the active profile).
-4. **A profile used for another person.** Raised by the review as F9 and put
-   to the owner in section 12. As written before the review: a profile made for a partner syncs that person's birth
+4. **A profile used for another person.** Raised by the review as F9 and
+   decided by the owner in section 13. As written before the review: a profile made for a partner syncs that person's birth
    data under the reader's account today, which Privacy Policy section 5
    describes as "your profiles". Whether that needs words or a control is
    workstream 2's call to raise.
@@ -578,22 +576,22 @@ of 3,000):
 | | Severity | Finding | Now |
 |---|---|---|---|
 | F1 | High | activations and gate lists are birth data; the default handout must be the five facets | **met.** 6.5 rewritten; `share-rules.js` already defaulted to the five (T rows) |
-| F2 | High | versions would sync with "Save my profile" off | **the owner's to confirm** (below); 7.2 proposes that versions read the switch |
+| F2 | High | versions would sync with "Save my profile" off | **decided and built** (section 13): versions and the profile row's birth both read the switch |
 | F3 | High | Clear birth data does not reach a second device: no pull rule, K66 resends, the pull knows no `del-chart-versions` | **specified**, section 4 rule 5 (a) to (c); built with the sync, step 3, each with a K row |
 | F4 | High | `resolved` is derived birth data and survived Clear birth data | **built** (O19) and 3.1; handouts never carry it, exports only with birth data |
 | F5 | Medium | no `MEMORY_CONSENT` entry for `chart_note`, so a restored note would leave with journal off | **built** (O20) |
 | F6 | Medium | importing inCommon's own export could launder consent | **fixed**: the export carries no `subject_consent`, 6.1 rule 8 and 6.4 |
 | F7 | Medium | `card` overstates; an exported `stated` reads like a consent record | **fixed**: `card` is provenance only, section 5; `share-rules.js` asks for `stated` |
 | F8 | Medium | withdrawing consent kept the birth data | **fixed**: withdrawing `store` deletes the record, section 5 |
-| F9 | Medium | a profile made for another person syncs, feeds the Oracle and makes cards | **the owner's** (below) |
+| F9 | Medium | a profile made for another person syncs, feeds the Oracle and makes cards | **decided** (section 13): the data and sync half built, the screens specified for workstream 3 |
 | F10 | Medium | `chart_hash` is an unsalted hash of a birth and links a person across files | **fixed**: versions carry `birth_key`, the birth written out, never exported; 0004's column renamed |
 | F11 | Low | export files are plaintext with generic names; people-library rule 5 becomes false | **specified**, 6.4: named for contents, plaintext said plainly, rule 5's sentence in step 4 |
 | F12 | Low | Privacy Policy sections 5 and 14 must name the version history | **a precondition** of applying 0004, step 2 |
 | F13 | Low | `mfa-policies.sql` must be re-run and the account function must name `chart_versions` | **met** by 2.2 Task 2 (0005, the list, the account function, K74) |
 | F14 | Low | `chart_hash` carries STATE_VERSION, so the same birth reads as new after a bump | **built** (O21): `birth_key` |
 
-**Two decisions are the owner's, and nothing past step 1 is built until they
-are made.**
+**Two decisions were the owner's, and both are made: section 13.** The text
+below is the question as it was put.
 
 - **F2. Should a version history leave the device while "Save my profile to my
   account" is off?** Recommended: no. A version history is every birth the
@@ -616,3 +614,92 @@ are made.**
   steer such a chart into saved people rather than profiles. Recommended: (b),
   with (a) in the same change, because it is the rule this model already keeps
   for every other person's chart.
+
+## 13. F2 and F9, as the owner decided them (30 October 2026)
+
+**F2.** The owner: "no, and absolutely fix that. it serves no purpose if it
+defaults with no option." So a version history never leaves the device while
+"Save my profile to my account" is off, and the switch now governs the profile
+row as well, which it never did.
+
+Built, `incommon-cloud.js` (buildPlan and the pull, which 1.2 owns) and
+`profile-manager.js` 1.7.0:
+
+- **Off, the profile row still goes up and every birth field goes up empty**:
+  date, time, place, coordinates, zone, offset, whether the place resolved and
+  the unknown time mark. The row stays because memories, the ledger and pairs
+  hang off it. So the account stops holding the birth at the next push, and
+  the device keeps its own copy.
+- **An empty row never empties a birth.** A pull reads whether the birth is
+  saved from this device's decision and the account's ledger, the later one
+  deciding, because the ledger arrives in the same pull. A device that held
+  the birth keeps it when another device turns the switch off (K77); a device
+  that never had it gets the profile without it (K76).
+- **Never decided reads as on while the profile has a birth date**
+  (`consentState()`, `getConsents()`), because that is what `createProfile`
+  has always recorded and what every profile given its birth later has been
+  synced as. Only the switch turned off reads as off. Without this, a profile
+  given its birth after it was made would have shown the switch off while it
+  synced, and would have stopped syncing the moment the push read the switch.
+- **The cache moves with the switch**: a profile's sync hash is the hash of
+  what was sent, so turning the switch either way is a change the next push
+  sends, and a profile with the birth saved hashes exactly as before, so
+  nothing already synced is sent again.
+- Held by K75 to K78. K75, K76 and K78's first half are red on the module
+  before; K77 is the guard on the new code, and goes red when the ledger merge
+  is taken out.
+- The Privacy Policy, section 5, says what the switch does now, dated 30
+  October 2026.
+
+Clear birth data while the switch is off clears this device only, because the
+account already holds no birth for it; that is section 4 rule 5 (b) read with
+the switch.
+
+**F9.** The owner: "(b), with the privacy policy wording from (a). Also,
+introduce (c). Separate the primary profiles from the friends."
+
+Built, `profile-manager.js` 1.7.0 and the sync:
+
+- **A profile is the reader's own or made for somebody else.** `for_other:
+  true` on the profile (absent, never false, on the reader's own, so their
+  hash is unchanged); `createProfile({ forOther: true })`,
+  `setProfileForOther(id, on)`, `isForOther(id)`, and `forOther` on every
+  profile the module hands out.
+- **One made for somebody else stays on the device**: no row, no memories, no
+  ledger, no pair is sent (K79). Marking one that was already synced queues
+  `del-profile`, so the account's copy goes, with its memories by the schema's
+  cascade; nothing written afterwards goes up, and the profile and its journal
+  stay on the device through the pulls after (K80). Unmarking it sends it again
+  with every entry it holds, because what the device recorded as sent for it is
+  forgotten when it is marked (K81, red without that). Another device that held the account's copy loses it at its
+  next pull, by the existing rule that a row the server no longer holds was
+  deleted elsewhere, unless it changed it since.
+- **The two are listed apart**: `ownProfiles()` and `otherProfiles()`. That
+  is (c)'s data half: the reader's primary profiles and the friends' are never
+  one list.
+
+**For workstream 3, the screens** (the app file is theirs; this is the
+specification, and the owner can move it to this session instead):
+
+1. Wherever profiles are listed (the profile card in both shells, the switcher,
+   Settings), two groups: the reader's own first, then Friends, from
+   `ownProfiles()` and `otherProfiles()`. Never one mixed list.
+2. Adding a profile asks whose it is, and a profile's own page has a switch,
+   "This profile is for someone else", which calls `setProfileForOther()`.
+   The registration card and the first run always write the reader's own.
+3. The Oracle, the Cycle Audit's reading and Omni refuse a profile made for
+   somebody else on the page, before anything is sent, the way they refuse the
+   sample chart. The server cannot tell the two apart, so the page is the only
+   place this can hold, which is why it must hold there.
+4. No card is made from a profile made for somebody else.
+5. (c), moving a friend out of profiles: "Move to saved people" copies the
+   birth into the saved people store with `subject_consent.basis: none`
+   (section 5) and then deletes the profile through the existing typed name
+   dialog, which must say that the profile's journal and notes go with it. Until
+   1.4 G6 gives the saved people store a deletion path, this writes to the store
+   the Synastry screen reads today.
+6. The Privacy Policy, section 14, gains this sentence in the same change as
+   items 2 to 4, and not before, because before them it describes a control that
+   does not exist: "A profile you mark as being for someone else stays on your
+   device: it is not copied to your account, it is not sent to the Oracle, and no
+   card is made from it." The policy's date moves with it.
