@@ -6925,9 +6925,12 @@ a session that did not write the model.
   over that fault. 0006 also drops a chart version for a withheld profile and
   deletes a profile's versions when it becomes withheld, and stores an event
   dated more than five minutes ahead of the server at the server's time, so a
-  fast device clock cannot outrank a later event. **Undoing and reapplying
-  0004 takes 0006's trigger with the table; run 0006 again.**
-  `tools/check-hd-study-rls.js` WH1 to WH16.
+  fast device clock cannot outrank a later event. A profile marked as
+  somebody else's keeps no memory, Throughline entry or Oki message on the
+  account: one that arrives is dropped, and the ones held go when the mark
+  arrives (the owner, 30 October 2026). **Undoing and reapplying 0004 takes
+  0006's trigger with the table; run 0006 again.**
+  `tools/check-hd-study-rls.js` WH1 to WH18.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the

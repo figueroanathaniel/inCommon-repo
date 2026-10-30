@@ -146,3 +146,7 @@ were approved; from 28 October 2026 that work is committed here.
   the restore trade-off, and 0006's note says an older build loses a marked
   profile's name and picture too. Covering memories, the Throughline and Oki
   messages for a marked profile is put to the owner.
+- 30 October 2026: the owner decided the open part of gap 2 ("yes, drop them
+  too"): 0006 drops a memory, Throughline entry or Oki message that arrives
+  for a profile marked as somebody else's and deletes the ones held when the
+  mark arrives (WH17, WH18, red without the file; the harness 34 of 34).

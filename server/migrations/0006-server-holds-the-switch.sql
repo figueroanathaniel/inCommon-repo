@@ -39,9 +39,13 @@
 -- withheld profile is dropped, and a profile's versions are deleted when it
 -- becomes withheld, so a clear or a switch turned off does not depend on the
 -- app's own deletion reaching the server (the reviewer's gap 2, 30 October
--- 2026). Memories, the Throughline and Oki messages are not covered here: an
--- older build can still land them for a marked profile, which is the owner's
--- decision.
+-- 2026). A profile marked as somebody else's keeps nothing of its own on the
+-- account either: a memory, a Throughline entry or an Oki message that
+-- arrives for it is dropped, and the ones the account held are deleted when
+-- the mark arrives, so an older build cannot land a journal for somebody
+-- else (the owner, 30 October 2026: "yes, drop them too"). These three follow
+-- the mark only: saving turned off or a clear governs the birth, and memories
+-- keep their own consents.
 --
 -- THE LEDGER IS ORDERED BY THE TIME EACH EVENT CARRIES, which the device
 -- wrote. A device whose clock runs ahead would outrank every later event for
@@ -83,7 +87,7 @@
 -- Run in the Supabase dashboard: SQL Editor, paste, Run, after
 -- server/oracle/schema.sql has been applied (oracle_readings must exist).
 -- Safe to run again. Proven on a throwaway Postgres 16 by
--- tools/check-hd-study-rls.js (rows WH1 to WH16).
+-- tools/check-hd-study-rls.js (rows WH1 to WH18).
 --
 -- The DOWN below turns served and withdrawn readings into failed ones, which
 -- the old check allows and the daily limit does not count.
@@ -93,6 +97,10 @@
 --   drop trigger if exists consent_events_clamp on public.consent_events;
 --   drop trigger if exists chart_versions_withhold on public.chart_versions;
 --   drop function if exists public.consent_events_clamp();
+--   drop trigger if exists memories_withhold on public.memories;
+--   drop trigger if exists throughline_entries_withhold on public.throughline_entries;
+--   drop trigger if exists oki_messages_withhold on public.oki_messages;
+--   drop function if exists public.marked_rows_withhold();
 --   drop function if exists public.chart_versions_withhold();
 --   drop trigger if exists profiles_withhold on public.profiles;
 --   drop trigger if exists oracle_readings_withhold on public.oracle_readings;
@@ -202,6 +210,11 @@ begin
    where r.profile_id = new.profile_id and r.status = 'done'
      and r.user_id = (select p.account_id from public.profiles p where p.id = new.profile_id);
   delete from public.chart_versions where profile_id = new.profile_id;
+  if public.profile_withheld(new.profile_id) = 'other' then
+    delete from public.memories where profile_id = new.profile_id;
+    delete from public.throughline_entries where profile_id = new.profile_id;
+    delete from public.oki_messages where profile_id = new.profile_id;
+  end if;
   return null;
 end $marks$;
 
@@ -230,6 +243,33 @@ create trigger chart_versions_withhold
   before insert on public.chart_versions
   for each row execute function public.chart_versions_withhold();
 
+-- ---------- a marked profile's own rows, as they arrive ----------
+
+create or replace function public.marked_rows_withhold() returns trigger
+language plpgsql security definer set search_path = public as $marked$
+begin
+  -- Dropped, not refused, as a chart version is.
+  if public.profile_withheld(new.profile_id) = 'other' then return null; end if;
+  return new;
+end $marked$;
+
+revoke execute on function public.marked_rows_withhold() from public, anon, authenticated;
+
+drop trigger if exists memories_withhold on public.memories;
+create trigger memories_withhold
+  before insert or update on public.memories
+  for each row execute function public.marked_rows_withhold();
+
+drop trigger if exists throughline_entries_withhold on public.throughline_entries;
+create trigger throughline_entries_withhold
+  before insert or update on public.throughline_entries
+  for each row execute function public.marked_rows_withhold();
+
+drop trigger if exists oki_messages_withhold on public.oki_messages;
+create trigger oki_messages_withhold
+  before insert or update on public.oki_messages
+  for each row execute function public.marked_rows_withhold();
+
 -- ---------- an event's time, as it arrives ----------
 
 create or replace function public.consent_events_clamp() returns trigger
@@ -246,6 +286,6 @@ create trigger consent_events_clamp
   before insert or update on public.consent_events
   for each row execute function public.consent_events_clamp();
 
--- To see that it took: five triggers, and the function closed to the API.
---  select tgname from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp');
+-- To see that it took: eight triggers, and the function closed to the API.
+--  select tgname from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp', 'memories_withhold', 'throughline_entries_withhold', 'oki_messages_withhold');
 --  select has_function_privilege('authenticated', 'public.profile_withheld(uuid)', 'execute');  -- false

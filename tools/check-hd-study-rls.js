@@ -11,7 +11,7 @@
  * by setting the request's JWT claims the way PostgREST does, and asks what
  * each may do.
  *
- * Rows WH1 to WH16 are migration 0006, the server holding "Save my profile
+ * Rows WH1 to WH18 are migration 0006, the server holding "Save my profile
  * to my account" and "this profile is for someone else" (the follow-up
  * review's findings 4, 5 and 9): an older build's birth is emptied while the
  * ledger says off, cleared or somebody else's, the right later word puts it
@@ -175,6 +175,17 @@ const PD = 'c0000000-0000-4000-8000-0000000000d1';
 function evAt(pid, scope, action, tsExpr) {
   return `insert into public.consent_events (profile_id, scope, action, ts) values ('${pid}', '${scope}', '${action}', ${tsExpr});`;
 }
+const PE = 'c0000000-0000-4000-8000-0000000000e1';
+function childRows(pid, tag) {
+  return `insert into public.memories (profile_id, local_id, memory_type, content, created_at) values ('${pid}', '${tag}', 'journal', '{"t": "x"}'::jsonb, now());
+    insert into public.throughline_entries (profile_id, local_id, payload) values ('${pid}', '${tag}', '{"t": "x"}'::jsonb);
+    insert into public.oki_messages (profile_id, local_id, payload) values ('${pid}', '${tag}', '{"t": "x"}'::jsonb);`;
+}
+function childCount(db, pid) {
+  return psql(db, `select (select count(*) from public.memories where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.throughline_entries where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.oki_messages where profile_id = '${pid}');`).out;
+}
 function versionsOf(db, pid) { return psql(db, `select count(*) from public.chart_versions where profile_id = '${pid}';`).out; }
 function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(content::text, '') from public.oracle_readings where chart_key = '${key}';`).out; }
 
@@ -304,16 +315,32 @@ const CASES = [
       psql(db, evAt(PD, 'birthData', 'grant', `'2099-01-01T00:00:00Z'`));
       psql(db, evAt(PD, 'birthData', 'revoke', `now() + interval '1 minute'`));
       return psql(db, `select coalesce(birth_date, '') from public.profiles where id = '${PD}';`).out === ''; }],
+  /* ---- the owner's yes of 30 October 2026: a profile marked as somebody
+     else's keeps no memory, Throughline entry or Oki message on the account,
+     whichever build sends one. A fresh profile again. ---- */
+  ['WH17', 'once a profile is marked as somebody else\'s, the journal, Throughline and Oki rows it held are deleted, and saving off alone deletes none of them',
+    db => { psql(db, `insert into public.profiles (id, account_id, name) values ('${PE}', '${A}', 'Eli');`);
+      psql(db, childRows(PE, 'e1'));
+      const before = childCount(db, PE);
+      psql(db, evAt(PE, 'birthData', 'revoke', "'2026-10-30T10:00:30Z'"));
+      const unsaved = childCount(db, PE);
+      psql(db, evAt(PE, 'forOther', 'grant', "'2026-10-30T10:00:31Z'"));
+      return before === '1|1|1' && unsaved === '1|1|1' && childCount(db, PE) === '0|0|0'; }],
+  ['WH18', 'and an older build sending them for the marked profile lands nothing, without an error; taken back as the reader\'s own, they land again',
+    db => { const sent = psql(db, childRows(PE, 'e2')).ok && childCount(db, PE) === '0|0|0';
+      psql(db, evAt(PE, 'forOther', 'revoke', "'2026-10-30T10:00:32Z'"));
+      const back = psql(db, childRows(PE, 'e3')).ok && childCount(db, PE) === '1|1|1';
+      return sent && back; }],
   ['WH12', 'applying 0006 again changes nothing, its DOWN removes it and turns served and withdrawn rows to failed, and it applies cleanly after',
     db => {
       const file = fs.readFileSync(path.join(repo, 'server', 'migrations', '0006-server-holds-the-switch.sql'), 'utf8');
       const down = file.split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
-      const trig = () => psql(db, `select count(*) from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp');`).out;
-      const again = psql(db, file).ok && trig() === '5';
+      const trig = () => psql(db, `select count(*) from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply', 'chart_versions_withhold', 'consent_events_clamp', 'memories_withhold', 'throughline_entries_withhold', 'oki_messages_withhold');`).out;
+      const again = psql(db, file).ok && trig() === '8';
       const d = psql(db, down).ok && trig() === '0'
         && psql(db, `select count(*) from public.oracle_readings where status in ('served', 'withdrawn');`).out === '0'
         && psql(db, `select count(*) from information_schema.columns where table_name = 'oracle_readings' and column_name = 'profile_id';`).out === '0';
-      const back = psql(db, file).ok && trig() === '5';
+      const back = psql(db, file).ok && trig() === '8';
       return again && d && back;
     }],
 ];
@@ -349,7 +376,7 @@ function runCases(db) {
 const RUNS = [
   { name: 'before', skip: ['0005', '0006'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
-      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16'] },
+      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16', 'WH17', 'WH18'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

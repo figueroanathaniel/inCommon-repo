@@ -301,9 +301,12 @@ dated more than five minutes ahead of the server at the server's time, so a
 fast device clock cannot outrank later events (gap 3). WH13 to WH16 hold both,
 and each is red without the file; `check-hd-study-rls.js` is 32 of 32 now.
 CV15 applies 0006 again after it rebuilds `chart_versions`, because dropping
-the table drops 0006's trigger with it. Memories, the Throughline and Oki
-messages an older build sends for a marked profile are not covered, which is
-the owner's decision.
+the table drops 0006's trigger with it. The owner then decided (30 October
+2026, "yes, drop them too") that a profile marked as somebody else's keeps no
+memory, Throughline entry or Oki message either: 0006 drops one that arrives
+for it and deletes the ones the account held when the mark arrives (WH17,
+WH18). Saving turned off or a clear does not touch them, because memories keep
+their own consents. The harness is 34 of 34.
 
 **Apply order for the owner**: deploy the Oracle function and the app from
 this branch, then run 0006 after `server/oracle/schema.sql`. 0006 before the
