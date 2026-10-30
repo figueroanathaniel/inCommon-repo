@@ -234,7 +234,20 @@ Rules:
    rule must not reach a history the reader cleared or withheld. Migration
    0006 holds the same on the server (the WH rows): a version for a withheld
    profile is dropped on arrival, and a profile's versions are deleted when it
-   becomes withheld.
+   becomes withheld;
+   (d) **a profile that stops being withheld sends its history again.** A
+   `birthData` grant after a revoke, or a `forOther` revoke after a grant,
+   forgets what the device recorded as sent for that profile's versions and
+   sends them all once more, as K86 sends the profile row again, because 0006
+   deleted the account's copy and the device's cache still says it was sent;
+   (e) **an absent version is a deletion only when the profile's latest
+   `birthCleared` event is a grant.** In every other case a version the
+   device synced and the server no longer holds was withheld, or is waiting to
+   be sent again, and the pull keeps it. Without this, the ordinary three way
+   rule (an absence after the first pull is a deletion elsewhere) would delete
+   every device's history after a reader turned saving off and on again.
+   (d) and (e) are the reviewer's eighth gap (30 October 2026) and each needs
+   a K row that goes red without it when step 3 is built.
 
 ## 5. Other people's charts, and a practitioner's clients
 
@@ -477,7 +490,9 @@ without its birth (section 13) and no version goes up at all, because a version
 history is more birth data than the profile row (every birth the reader ever
 gave). Turning the switch off queues `del-chart-versions`, and migration 0006
 deletes the profile's versions on the server when the revoke arrives, so the
-history goes even if the deletion is lost.
+history goes even if the deletion is lost. Turning it back on sends the whole
+history again, and the pull never reads a withheld history's absence as a
+deletion (section 4 rule 5 (d) and (e)).
 
 Two new outbox operations: `del-chart-versions` (every version of a profile,
 for Clear birth data, O8) and nothing for notes (`del-memory` covers them).
@@ -777,6 +792,13 @@ profile row, and seven gaps came back:
 | 5 | the refusal and the withdrawal need the client's `profileId`; and the Oracle function's comment said an id with no profile row is not stored, when it is | **comment corrected**. The older client point stands as disclosed |
 | 6 | for a marked profile an older build loses the name and picture at its next pull, not only the birth | **said** in 0006's note |
 | 7 | profiles carry no `subject_consent`, so a profile marked for somebody else only ever gets the base handout | **noted** for workstream 3 in section 13 |
+
+The reviewer checked these answers at 2a95d7a (module tests 502/502, the RLS
+harness 32 of 32): gaps 1 to 5 hold. It found an eighth:
+
+| | Gap | Now |
+|---|---|---|
+| 8 | 0006 deletes a profile's versions when it becomes withheld, and nothing says what happens when it stops being withheld: the device's cache still says they were sent, and an ordinary three way pull would read their absence as a deletion and remove every device's history | **specified** for step 3, section 4 rule 5 (d) and (e) and section 7.2: the history is sent again when the profile stops being withheld, and only a `birthCleared` grant makes an absence a deletion. Data loss rather than privacy, and nothing live today: versions do not sync yet |
 
 **Found while building finding 4, in this session's own fix for finding 2.**
 A push sent the empty row and the mark, then flushed the deletion marking had
