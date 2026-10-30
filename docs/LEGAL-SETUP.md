@@ -83,7 +83,10 @@ the address in the row, then set `status` to `answered`.
             (select count(*) from public.profiles where id = '<profile id>') as remaining;
      ```
      Expect `recorded` 1 and `remaining` 0.
-  6. **When nothing matches**, say so plainly. A profile marked as made for
+  6. **The account holder is not told** (the owner, 30 October 2026). The
+     profile goes from their devices at the next sync with nothing said, and
+     nothing about the requester is passed on.
+  7. **When nothing matches**, say so plainly. A profile marked as made for
      somebody else is stored as an empty row, with no name and no birth, and
      a profile whose saving is off keeps its name but no birth, so neither can
      be found by the person's details. Tell the requester that we hold
