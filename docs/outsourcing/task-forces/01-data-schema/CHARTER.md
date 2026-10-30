@@ -9,7 +9,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `taskforce/01-data-schema` |
-| Standing pull request | #125 (earlier ones under "History" below) |
+| Standing pull request | #128 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -171,3 +171,7 @@ October 2026, so it is left alone; the file is here now.
 - 30 October 2026: the owner decided finding 6: the Privacy Policy section 14
   sentence is held until workstream 3's screens exist, and ships with them
   (model section 13, item 6).
+- 30 October 2026: #128 opened as the standing pull request, at the owner's
+  request. #125 had merged into main on 29 October; the branch was not
+  restarted, and main is an ancestor of it, so #128 carries only the ten 1.2
+  commits after that merge.
