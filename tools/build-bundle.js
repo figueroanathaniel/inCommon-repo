@@ -194,6 +194,8 @@ const MODULES = [
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',
   'pair-cache.js',
+  /* What a chart handout and a chart export may carry. Reads nothing. */
+  'share-rules.js',
   'hd-composite.js',
   'analytics.js',
   /* Consent-gated cloud sync. Loads after the store and analytics because it
