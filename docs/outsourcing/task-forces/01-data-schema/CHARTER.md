@@ -168,3 +168,6 @@ October 2026, so it is left alone; the file is here now.
   to cascade (K85, red before), and a row whose switch or mark moved is resent
   after its events for 0006 (K86). 0006, the Oracle function and the sharing
   rules are on the security branch. Section 14 and DATA-MAP.md record it.
+- 30 October 2026: the owner decided finding 6: the Privacy Policy section 14
+  sentence is held until workstream 3's screens exist, and ships with them
+  (model section 13, item 6).
