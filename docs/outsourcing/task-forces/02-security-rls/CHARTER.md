@@ -216,3 +216,12 @@ were approved; from 28 October 2026 that work is committed here.
   the method forgets the account's profiles' people, keeps another key's, and
   the page throws nothing. The delete account flow itself was not driven end
   to end, because it needs the account function to answer.
+- 30 October 2026: at the owner's request ("identify everything that needs
+  to be addressed"), this session read the live project and found the pull
+  failing on every device, payments unrecordable and a stray policy one
+  column away from a free unlock (docs/SECURITY.md, "The live schema drifted
+  from the repository"). The owner approved fixing A1 to A3 of that scope.
+  The client fix, migration 0009 and the live shape runs of
+  check-hd-study-rls.js are on this branch for review. Nothing has been
+  applied to the live project for it yet: that waits on the review and the
+  owner's merge.

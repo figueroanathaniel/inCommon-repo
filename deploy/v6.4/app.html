@@ -26207,13 +26207,20 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      every pull, the first included, whether or not it was changed here since,
      and the server drops anything that arrives for it afterwards. That record
      is the one absence the pull does not have to guess at. */
+  /* Pages are read in a stable order, by a column the table has. Every
+     synced table has an id except deleted_profiles, whose key is the account
+     and the profile; ordering it by id was refused by the server on every
+     pull (column deleted_profiles.id does not exist), so no device could pull
+     from 30 October 2026 until this was fixed. The module tests now refuse a
+     column the repository's schema does not declare. */
+  var ORDER_BY = { deleted_profiles: 'profile_id' };
   function fetchAll(table, filter) {
     var rows = [];
     function page(from) {
       var q = client.from(table).select('*');
       if (filter) q = filter(q);
       var paged = typeof q.range === 'function';
-      if (paged && typeof q.order === 'function') q = q.order('id', { ascending: true });
+      if (paged && typeof q.order === 'function') q = q.order(ORDER_BY[table] || 'id', { ascending: true });
       if (paged) q = q.range(from, from + PAGE - 1);
       return Promise.resolve(q).then(function (res) {
         if (!res || res.error) throw new Error((res && res.error && res.error.message) || 'no answer');

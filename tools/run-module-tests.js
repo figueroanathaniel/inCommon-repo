@@ -2501,6 +2501,34 @@ async function runCloudTests() {
      the cloud module, share one in memory database that answers the way
      PostgREST does: upserts on the named conflict columns, an identity id for
      the child tables, timestamps returned as +00:00, and pages by range. ---- */
+  /* The columns each synced table has, read out of the repository's schema
+     (server/cloud-schema.sql and every migration) rather than typed here, so
+     the fake refuses a column the server does not have, as PostgREST does with
+     42703. Until 30 October 2026 the fake took any column at all, and the pull
+     shipped ordering deleted_profiles by an id it does not have: green here,
+     refused on every pull in production. */
+  var SCHEMA_COLS = (function () {
+    var files = [path.join(repo, 'server', 'cloud-schema.sql')].concat(
+      fs.readdirSync(path.join(repo, 'server', 'migrations')).filter(function (f) { return /^\d{4}-.*\.sql$/.test(f); }).sort()
+        .map(function (f) { return path.join(repo, 'server', 'migrations', f); }));
+    var cols = {};
+    var NOT_COL = /^(unique|primary|check|constraint|foreign|exclude)\b/i;
+    files.forEach(function (f) {
+      var sql = fs.readFileSync(f, 'utf8').replace(/--[^\n]*/g, '');
+      var re = /create table if not exists (?:public\.)?(\w+)\s*\(([\s\S]*?)\n\);/g, m;
+      while ((m = re.exec(sql))) {
+        var list = cols[m[1]] = cols[m[1]] || [];
+        m[2].split('\n').forEach(function (line) {
+          var w = line.trim().match(/^(\w+)\s+\w/);
+          if (w && !NOT_COL.test(line.trim()) && list.indexOf(w[1]) === -1) list.push(w[1]);
+        });
+      }
+      var add = /alter table (?:public\.)?(\w+) add column if not exists (\w+)/g, a;
+      while ((a = add.exec(sql))) { (cols[a[1]] = cols[a[1]] || []).indexOf(a[2]) === -1 && cols[a[1]].push(a[2]); }
+    });
+    return cols;
+  })();
+
   function memDB() {
     var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [], deleted_profiles: [] },
       seq: 1, failSelect: null, failDelete: false, failUpsert: null, noDeleted: false, maxRows: 1000 };
@@ -2552,12 +2580,20 @@ async function runCloudTests() {
       q.insert = function (row) { q._op = 'insert'; q._row = row; return q; };
       q.upsert = function (row, o) { q._op = 'upsert'; q._row = row; q._on = String((o && o.onConflict) || 'id').split(','); return q; };
       q.delete = function () { q._op = 'delete'; return q; };
-      q.eq = function (c, v) { q._f.push(function (r) { return r[c] === v; }); return q; };
-      q.in = function (c, vs) { q._f.push(function (r) { return vs.indexOf(r[c]) !== -1; }); return q; };
-      q.order = function (c) { q._order = c; return q; };
+      q._cols = [];
+      q.eq = function (c, v) { q._cols.push(c); q._f.push(function (r) { return r[c] === v; }); return q; };
+      q.in = function (c, vs) { q._cols.push(c); q._f.push(function (r) { return vs.indexOf(r[c]) !== -1; }); return q; };
+      q.order = function (c) { q._cols.push(c); q._order = c; return q; };
       q.range = function (a, b) { q._range = [a, b]; return q; };
       q.then = function (res, rej) {
         var rows = db.t[table], out = { data: null, error: null };
+        var known = SCHEMA_COLS[table];
+        var asked = q._cols.concat(q._row ? Object.keys(q._row) : [], q._op === 'upsert' ? q._on : []);
+        var unknown = known ? asked.filter(function (c) { return known.indexOf(c) === -1; })[0] : null;
+        if (unknown) {
+          out.error = { code: '42703', message: 'column ' + table + '.' + unknown + ' does not exist' };
+          return Promise.resolve(out).then(res, rej);
+        }
         if (table === 'deleted_profiles' && db.noDeleted) {
           /* A project without migration 0007, as PostgREST answers it. */
           out.error = { code: 'PGRST205', message: "Could not find the table 'public.deleted_profiles' in the schema cache" };
@@ -3223,6 +3259,21 @@ async function runCloudTests() {
     x: [xo.id], y: [xo.id]
   }, { x: Object.keys(people(devX)), y: Object.keys(people(devY)) });
 
+  /* ---- K96: the fake refuses a column the schema does not have, and the
+     pull asks for none. The live pull read deleted_profiles in id order, a
+     column that table never had, and the fake took it, so every K row was
+     green over a pull that failed in production on every device. */
+  var k96 = memDB(), k96Read = await k96.client.from('deleted_profiles').select('*').order('id');
+  var k96Dev = syncDevice(memDB(), 'k96-user');
+  k96Dev.pm.createProfile({ name: 'K', birthDate: '1990-01-01' });
+  var k96Sync = await k96Dev.C.sync();
+  ts('K96', 'the fake database knows the schema\'s columns, refuses one it does not have as Postgres does, and a whole sync asks for none', {
+    deletedCols: ['account_id', 'profile_id', 'deleted_at'], pairsHasAccount: true, refused: '42703', synced: true
+  }, {
+    deletedCols: SCHEMA_COLS.deleted_profiles, pairsHasAccount: (SCHEMA_COLS.pairs || []).indexOf('account_id') !== -1,
+    refused: k96Read.error && k96Read.error.code, synced: !!(k96Sync && k96Sync.ok)
+  });
+
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint
      refuses, and one refused upsert ended the push before the Throughline
@@ -3342,7 +3393,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 8, bad: [], listedInOrder: true, uncovered: []
+    files: 9, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
