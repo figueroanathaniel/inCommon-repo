@@ -58,12 +58,16 @@ the address in the row, then set `status` to `answered`.
      record of what was asked and done.
   2. Confirm, in proportion, that the requester is the person the profile
      describes, and not somebody acting against the account holder.
-  3. Find the profile from what they tell you, and confirm exactly one row
-     comes back:
+  3. Find the profile from what they tell you, by birth date first. A profile
+     is usually named by a first name or whatever the person who added it
+     chose ("Mom"), so the name is compared loosely and never exactly:
      ```sql
      select id, account_id, name, birth_date from public.profiles
-     where name = '<name>' and birth_date = '<YYYY-MM-DD>';
+     where birth_date = '<YYYY-MM-DD>' and name ilike '<first name>%';
      ```
+     Go on only when exactly one row comes back. No rows, or more than one,
+     is a reason to ask the requester for more (a birth time or a place), not
+     to pick one.
   4. Record the deletion for that one id:
      ```sql
      insert into public.deleted_profiles (account_id, profile_id)
