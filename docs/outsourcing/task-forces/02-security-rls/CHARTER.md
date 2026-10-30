@@ -170,3 +170,17 @@ were approved; from 28 October 2026 that work is committed here.
   the erase loop is in the app file; it needs `PM._forgetPeople(id)` for each
   of the account's profiles before `accountStorageKeys()` is removed. Nothing
   applied to the live project.
+- 30 October 2026: #129 merged into main at e099aa4, and #128 closed with it,
+  at the owner's decision ("merge #129 and close #128"). The live site was
+  found serving that code. At the owner's request, this session applied to
+  the live project (inCommon, lkzcybzhjjxdqetwwdrx) through the Supabase
+  connector: 0004, 0005, `server/mfa-policies.sql`, 0006, 0007, 0008 and
+  `server/mfa-policies.sql` again. 0004 and 0005 went first because 0006
+  and 0007 hang triggers on `chart_versions`. The owner chose to run them
+  ahead of the F12 wording, because `chart_versions` stays empty until
+  version syncing is built. Checked afterwards: 0006's eight triggers and
+  0007's ten, both tables with row level security on, their policies
+  (DELETE, INSERT, SELECT and INSERT, SELECT), the two-step rule on 16
+  tables, and neither rule function callable by authenticated. Not done: the
+  Oracle and account functions were not redeployed. The six profile fix is
+  #130.
