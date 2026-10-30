@@ -884,15 +884,20 @@ Section 5, a paragraph after the "Save my profile to my account" one:
 > details, the dated versions described in section 3, but only while "Save my
 > profile to my account" is on. Switch it off and they are removed from your
 > account and stay on your device. Clearing a profile's birth details removes
-> them from your device and your account, and deleting the profile or your
-> account deletes them everywhere.
+> them from your device and your account. Deleting the profile deletes them
+> everywhere, and deleting your account deletes them from our servers, and
+> from this device if you choose to erase it.
 
 Section 14, after "contact us.":
 
-> We will delete that profile and everything kept with it, including its
-> earlier birth details, and the devices signed in to that account will remove
-> it the next time they sync.
+> If we find a profile of yours that someone else added, we will delete it and
+> everything we keep with it, including its earlier birth details, and the
+> devices signed in to that account will remove it the next time they sync.
+> Details kept only on someone's own device, or saved there as a person, are
+> theirs, and we cannot reach them.
 
-Section 3's bullet says the app can show what a reading or a note was written
-against. That screen is workstream 3's; if it does not, the clause goes.
+Section 3's bullet says a note stays matched to the birth details it was
+written against, which is what a note's `version` field does. It names no
+screen, and readings are not matched to versions (a kept Oracle reading is
+keyed by the birth stamp), so it does not say they are.
 

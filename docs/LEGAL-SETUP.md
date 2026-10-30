@@ -52,19 +52,44 @@ the address in the row, then set `status` to `answered`.
   the subscription in Stripe first, and delete the Stripe customer if they asked
   for everything to go (Stripe keeps payment records it is required to keep).
 - **Somebody whose details another reader added** (Privacy Policy section
-  14): find the profile in `profiles` by what they tell you, confirm it is
-  theirs and not the account holder's own, then in the SQL Editor run
-  ```sql
-  insert into public.deleted_profiles (account_id, profile_id)
-  select account_id, id from public.profiles where id = '<profile id>';
-  ```
-  That is migration 0007's record of a deletion. It removes the profile and
-  everything under it on the server (its journal, consents, Throughline, Oki
-  log, chart versions and two person records) and withdraws its kept Oracle
-  readings. Every device signed in to that account deletes the profile at its
-  next sync, and nothing an older app sends for it afterwards is kept. Check
-  afterwards that the profile row is gone. The record holds only the two ids
-  and the time.
+  14). The deletion cannot be undone: `deleted_profiles` has no delete rule,
+  so a record once written keeps the profile deleted on every device.
+  1. Answer through the request's `support_requests` row, so there is a
+     record of what was asked and done.
+  2. Confirm, in proportion, that the requester is the person the profile
+     describes, and not somebody acting against the account holder.
+  3. Find the profile from what they tell you, and confirm exactly one row
+     comes back:
+     ```sql
+     select id, account_id, name, birth_date from public.profiles
+     where name = '<name>' and birth_date = '<YYYY-MM-DD>';
+     ```
+  4. Record the deletion for that one id:
+     ```sql
+     insert into public.deleted_profiles (account_id, profile_id)
+     select account_id, id from public.profiles where id = '<profile id>';
+     ```
+     That is migration 0007's record. It removes the profile and everything
+     under it on the server (its journal, consents, Throughline, Oki log,
+     chart versions and two person records) and withdraws its kept Oracle
+     readings. Every device signed in to that account deletes the profile at
+     its next sync, and nothing an older app sends for it afterwards is kept.
+     The record holds only the two ids and the time.
+  5. Confirm it took: the record exists and the row is gone. A mistyped id in
+     step 4 writes nothing and raises nothing, so checking only that the row
+     is gone would pass on a profile that was never touched.
+     ```sql
+     select (select count(*) from public.deleted_profiles where profile_id = '<profile id>') as recorded,
+            (select count(*) from public.profiles where id = '<profile id>') as remaining;
+     ```
+     Expect `recorded` 1 and `remaining` 0.
+  6. **When nothing matches**, say so plainly. A profile marked as made for
+     somebody else is stored as an empty row, with no name and no birth, and
+     a profile whose saving is off keeps its name but no birth, so neither can
+     be found by the person's details. Tell the requester that we hold
+     nothing that identifies them, and that a copy kept on somebody else's
+     device, or saved there as a person, is that person's and is not ours to
+     reach.
 - **A copy of their data**: export their rows from those tables as CSV or JSON
   and send them. Data that only ever lived on their device is not yours to
   export; Settings, Export gives them that themselves.
