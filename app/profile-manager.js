@@ -1,4 +1,4 @@
-/* profile-manager.js: inCommon multi-profile data layer. V1.7.0
+/* profile-manager.js: inCommon multi-profile data layer. V1.7.1
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -249,7 +249,7 @@
   }
 
   var PM = {
-    VERSION: '1.7.0',
+    VERSION: '1.7.1',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -1055,10 +1055,12 @@
         self._dropProfileKeys(id);
         out.removed++;
       });
+      var arrived = {};
       (d.profiles || []).forEach(function (p) {
         if (!p || !p.id) return;
         var i = -1;
         s.profiles.forEach(function (x, j) { if (x.id === p.id) i = j; });
+        if (i !== -1 && p.birth_date && birthKey(s.profiles[i]) !== birthKey(p)) arrived[p.id] = 1;
         if (i !== -1) s.profiles[i] = p;
         else if (s.profiles.length < MAX_PROFILES) s.profiles.push(p);
         else return;
@@ -1078,6 +1080,7 @@
       write(scope().root, s);
 
       var when = function (x) { var t = Date.parse(x); return isNaN(t) ? 0 : t; };
+      var clearAt = {};
       Object.keys(d.consents || {}).forEach(function (pid) {
         if (!has(pid)) return;
         self.initConsents(pid);
@@ -1089,6 +1092,10 @@
           seen[sig] = 1; all.push({ ts: e.ts, id: e.id, granted: !!e.granted });
         });
         all.sort(function (a, b) { return when(a.ts) - when(b.ts); });
+        /* The newest Clear birth data, whatever came after it: a clear and
+           then a new birth leaves the ledger on the revoke the new birth
+           writes, and a device that missed both still owes the clear. */
+        all.forEach(function (e) { if (e.id === 'birthCleared' && e.granted) clearAt[pid] = e.ts; });
         /* The latest event for each consent is its state, whichever device it
            was made on. */
         all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
@@ -1100,8 +1107,15 @@
       /* Two marks the account's other devices made, read from the merged
          ledger: a profile made for somebody else, and a Clear birth data.
          Neither carries any birth data, so both travel whatever the birth
-         switch says. A clear takes this device's birth only when the birth
-         here is older than the clear, so a birth given here since stands. */
+         switch says. The newest clear is acted on whether or not a new birth
+         followed it (the ledger then ends on that birth's revoke), and only
+         when the birth this device held is older than the clear: then this
+         device's history and what its notes resolved to are of the cleared
+         birth, and go. The birth fields go too while the clear is still in
+         force; after a new birth the pulled row has already brought it. A
+         birth that arrives in a pull is this device's birth from then on, so
+         its birth_at moves to now and a later pull does not clear what is
+         written about it. */
       var st2 = this._store(), moved = false, dropped = [];
       st2.profiles.forEach(function (p) {
         if (!d.consents || !d.consents[p.id]) return;
@@ -1111,16 +1125,18 @@
           if (fo.granted) p.for_other = true; else delete p.for_other;
           moved = true;
         }
-        var bc = c2.birthCleared;
-        if (bc && bc.granted && bc.updatedAt && (!p.birth_at || when(p.birth_at) < when(bc.updatedAt))) {
-          if (p.birth_date || p.birth_time || p.birth_location) {
-            p.birth_date = ''; p.birth_time = ''; p.birth_location = ''; p.birth_lat = null; p.birth_lon = null;
-            p.timezone = ''; p.tz_offset = null; p.location_resolved = false; p.birth_time_unknown = false;
-            p.birth_at = bc.updatedAt;
-            moved = true;
-          }
-          dropped.push(p.id);
+        var bc = c2.birthCleared, cut = clearAt[p.id];
+        var older = !!cut && (!p.birth_at || when(p.birth_at) < when(cut));
+        if (older && bc && bc.granted && (p.birth_date || p.birth_time || p.birth_location)) {
+          p.birth_date = ''; p.birth_time = ''; p.birth_location = ''; p.birth_lat = null; p.birth_lon = null;
+          p.timezone = ''; p.tz_offset = null; p.location_resolved = false; p.birth_time_unknown = false;
+          p.birth_at = bc.updatedAt;
+          moved = true;
+        } else if (arrived[p.id]) {
+          p.birth_at = nowISO();
+          moved = true;
         }
+        if (older) dropped.push(p.id);
       });
       if (moved) write(scope().root, st2);
       dropped.forEach(function (pid) {

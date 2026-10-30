@@ -2975,6 +2975,43 @@ async function runCloudTests() {
   }, { off: offDate === undefined ? 'no row' : offDate, on: onDate, marked: markedName === undefined ? 'no row' : markedName,
     back: { name: wRow().name, date: wRow().birth_date } });
 
+  /* ---- K87: a Clear birth data followed by a new birth reaches a device
+     that missed both (the reviewer's check of gap 8, 30 October 2026). The
+     ledger then ends on the revoke the new birth writes, so a pull that read
+     only the latest state skipped the clear, and the other device kept its
+     history of the cleared birth and what its notes resolved to. ---- */
+  var xdb = memDB(), XU = 'bbbbbbbb-0000-4000-8000-0000000000c5';
+  var devX = syncDevice(xdb, XU);
+  devX.pm.createProfile({ name: 'Xan', birthDate: '1976-06-06' });
+  var xp = devX.pm.createProfile({ name: 'Yael', birthDate: '1988-08-08', birthTime: '08:08' });
+  await devX.C.sync();
+  var devY = syncDevice(xdb, XU);
+  await devY.C.sync();
+  devY.pm.updateProfile(xp.id, { birthTime: '09:09' });
+  devY.pm.addChartNote(xp.id, { address: 'gate:20', resolved: { held: true }, text: 'Old birth.' });
+  await devY.C.sync();
+  var yHad = devY.pm.listChartVersions(xp.id).length;
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devX.pm.updateProfile(xp.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devX.pm.updateProfile(xp.id, { birthDate: '1988-08-09', birthTime: '10:10' });
+  await devX.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  var s87 = await devY.C.sync();
+  devY.pm.addChartNote(xp.id, { address: 'gate:21', resolved: { held: false }, text: 'New birth.' });
+  var s87b = await devY.C.sync();
+  var yNotes = devY.pm.listChartNotes(xp.id);
+  ts('K87', 'a clear followed by a new birth reaches a device that missed both: its history of the cleared birth and what its notes resolved to go, the new birth stands, and a note written after keeps its own', {
+    had: 2, ok: true, okAgain: true, date: '1988-08-09', versions: 0,
+    oldResolved: null, newResolved: { held: false }, words: ['New birth.', 'Old birth.']
+  }, { had: yHad, ok: s87.ok, okAgain: s87b.ok, date: devY.pm.getProfile(xp.id).birthDate,
+    versions: devY.pm.listChartVersions(xp.id).length,
+    oldResolved: (yNotes.filter(function (n) { return n.text === 'Old birth.'; })[0] || {}).resolved,
+    newResolved: (yNotes.filter(function (n) { return n.text === 'New birth.'; })[0] || {}).resolved,
+    words: yNotes.map(function (n) { return n.text; }).sort() });
+
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint
      refuses, and one refused upsert ended the push before the Throughline

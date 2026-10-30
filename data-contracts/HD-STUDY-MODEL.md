@@ -220,10 +220,15 @@ Rules:
    red without it:
    (a) a pending `del-chart-versions` for the profile stops the pull from
    adding or keeping any version of it, as `del-memories` does for memories;
-   (b) a pulled `birthCleared` grant newer than the device's `birth_at`
-   deletes that profile's local versions and nulls its notes' `resolved`, so a
-   device that never saw the clear still follows it. This is the rule the
-   profile row already follows (K82, K83). **An empty birth on the server is
+   (b) the newest `birthCleared` grant in the merged ledger, whatever followed
+   it, when it is newer than the device's `birth_at`, deletes that profile's
+   local versions and nulls its notes' `resolved`, so a device that never saw
+   the clear still follows it. "Whatever followed it" matters: a clear and then
+   a new birth leaves the ledger on the revoke the new birth writes, and a
+   device that missed both still holds the cleared birth's history (K87, the
+   reviewer's ninth gap). A birth that arrives in a pull moves `birth_at` to
+   the pull, so what is written about it afterwards is not cleared by an older
+   clear. This is the rule the profile row already follows (K82, K83, K87). **An empty birth on the server is
    never read as a clear**: since F2 it also means only that saving is off, and
    a device must not lose its history because another device turned saving off
    (the follow-up review's review, gap 1);
@@ -235,10 +240,13 @@ Rules:
    0006 holds the same on the server (the WH rows): a version for a withheld
    profile is dropped on arrival, and a profile's versions are deleted when it
    becomes withheld;
-   (d) **a profile that stops being withheld sends its history again.** A
-   `birthData` grant after a revoke, or a `forOther` revoke after a grant,
-   forgets what the device recorded as sent for that profile's versions and
-   sends them all once more, as K86 sends the profile row again, because 0006
+   (d) **a profile that stops being withheld sends its history again**, and
+   only when it is withheld on none of the three counts: its latest
+   `birthData` is not a revoke, its latest `birthCleared` is not a grant and
+   its latest `forOther` is not a grant. Then, and on the event that made it
+   so, the device forgets what it recorded as sent for that profile's versions
+   and sends them all once more (unmarking a profile whose saving is still off
+   sends nothing, by F2), as K86 sends the profile row again, because 0006
    deleted the account's copy and the device's cache still says it was sent;
    (e) **an absent version is a deletion only when the profile's latest
    `birthCleared` event is a grant.** In every other case a version the
@@ -799,6 +807,14 @@ harness 32 of 32): gaps 1 to 5 hold. It found an eighth:
 | | Gap | Now |
 |---|---|---|
 | 8 | 0006 deletes a profile's versions when it becomes withheld, and nothing says what happens when it stops being withheld: the device's cache still says they were sent, and an ordinary three way pull would read their absence as a deletion and remove every device's history | **specified** for step 3, section 4 rule 5 (d) and (e) and section 7.2: the history is sent again when the profile stops being withheld, and only a `birthCleared` grant makes an absence a deletion. Data loss rather than privacy, and nothing live today: versions do not sync yet |
+
+The reviewer checked gap 8's fix at 82f797f (module tests 502/502, the RLS
+harness 32 of 32) and found two more:
+
+| | Gap | Now |
+|---|---|---|
+| 9 | rule (d) sent the history again on one scope's change, so unmarking a profile whose saving was still off would send it, against F2 | **fixed** in rule (d): only when the profile is withheld on none of the three counts |
+| 10 | in built code: the pull read only the latest `birthCleared` state, so a clear followed by a new birth was skipped on a device that missed both, which kept the cleared birth's version history and what its notes resolved to (against O8 and F4) | **fixed** in `profile-manager.js` 1.7.1: the pull acts on the newest `birthCleared` grant whatever followed it, when this device's birth is older than it, and a birth that arrives in a pull moves `birth_at`. K87 drives the sequence and was red on 1.7.0, with two versions and the old note's `resolved` kept. Rule (b) says the same |
 
 **Found while building finding 4, in this session's own fix for finding 2.**
 A push sent the empty row and the mark, then flushed the deletion marking had
