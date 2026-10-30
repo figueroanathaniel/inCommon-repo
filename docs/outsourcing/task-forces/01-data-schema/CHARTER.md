@@ -161,3 +161,10 @@ October 2026, so it is left alone; the file is here now.
   (both marks travel in the consent ledger; rows K79, K80, K82 to K84, each red
   before), 13 to 16 fixed in the model, 3 fixed on the security branch, and 4,
   5 and 9 to 12 put to the owner. HD-STUDY-MODEL.md section 14.
+- 30 October 2026: the owner decided findings 4 and 5 (yes, the server check;
+  yes, the readings) and 9 to 12 (fix now). This branch: a marked profile
+  kept its mark only through a sync, because a push flushed the deletion that
+  takes the ledger after sending the mark; fixed, with the fake database made
+  to cascade (K85, red before), and a row whose switch or mark moved is resent
+  after its events for 0006 (K86). 0006, the Oracle function and the sharing
+  rules are on the security branch. Section 14 and DATA-MAP.md record it.
