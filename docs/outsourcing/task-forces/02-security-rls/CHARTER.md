@@ -184,3 +184,17 @@ were approved; from 28 October 2026 that work is committed here.
   tables, and neither rule function callable by authenticated. Not done: the
   Oracle and account functions were not redeployed. The six profile fix is
   #130.
+- 30 October 2026: #130 (the six profile fix) reviewed "ready to merge" by
+  the 2.2 reviewer and merged at the owner's decision. At the owner's
+  request, this session then redeployed both functions from main to the live
+  project through the Supabase connector, both with JWT verification on, as
+  before. `account` is version 33, and its source read back byte for byte
+  equal to `server/account/index.ts`. `oracle` is version 55: `index.ts` and
+  `tarot-omni.js` read back byte for byte, and `tarot.js` read back with its
+  21 `\u` escapes stored as the characters themselves (all inside string
+  literals, so the same strings at runtime). The upload path did that;
+  version 54, deployed another way, kept them. A byte exact copy needs the
+  Supabase CLI. Before replacing either function, the live source was checked
+  against git: both were the 9f237d4 versions, so nothing made in the
+  dashboard was overwritten. This corrects the entry above that says neither
+  function was redeployed.
