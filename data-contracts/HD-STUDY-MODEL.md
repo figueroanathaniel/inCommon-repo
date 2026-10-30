@@ -206,7 +206,7 @@ Rules:
 2. **A version is made only when the instant or the place can move.** A change
    to the date, the time, the time state, the coordinates or the zone makes
    one; a change to the name, the avatar or the PIN does not. Two edits that
-   leave the same `chart_hash` make none.
+   leave the same `birth_key` make none.
 3. **The current birth stays where it is today** (the profile fields, the
    person record), so nothing that reads a profile changes. Versions are the
    history beside it. The first version of an existing profile is written
@@ -252,7 +252,7 @@ rule 7).
 
 | Field | Values | Notes |
 |---|---|---|
-| `basis` | `card` / `stated` / `none` | `card`: the person sent it (the only basis the app can see). `stated`: the reader says the person agreed. `none`: typed or imported with no statement. |
+| `basis` | `card` / `stated` / `none` | `card`: the record came from a card, which says where it came from and not who agreed (F7, below). `stated`: the reader says the person agreed. `none`: typed or imported with no statement. |
 | `scope` | subset of `store`, `notes`, `handout` | what was agreed to |
 | `stated_at` | ISO or `null` | |
 | `withdrawn_at` | ISO or `null` | see withdrawal below |
@@ -315,8 +315,10 @@ trimming. A `client` cap is the owner's, with D4.
    does not carry `subject_consent` at all (privacy review F6): a field the
    importer must discard is a field that reads, in the file, like a consent
    record.
-9. **Duplicates update, they do not double**, by `chart_hash`, as `add()`
-   already does.
+9. **Duplicates update, they do not double**, by the people store's own
+   `chart_hash`, as `add()` already does. That hash is the store's, computed on
+   the device and never written into an export (6.4, F10); a chart version's
+   key is `birth_key` (section 4).
 
 ### 6.2 CSV, the first format
 
@@ -403,14 +405,9 @@ time and the place are: each is off until the reader turns it on, and on
 another person's chart each needs that person's stated word. The name is a first
 name and is off by default for anybody but the reader.
 
-One caution for 2.2, and it is an inference from the motion rates the Chart
-address note measured, not a measurement: **a full activation list at line
-level is close to a birth date.** The slow bodies' gates narrow the year, the
-Sun's line (one every 23 hours) the day, and the Moon's line (one every 1.7
-hours) the time. A handout that prints all twenty six gate.line values with no
-birth data may still identify the birth to within a day or two and a few hours.
-Whether a handout may list activations, and at what depth, is the question 2.2
-should measure before it rules (method in section 9).
+The caution this section used to carry, an inference that a full activation
+list at line level is close to a birth date, was measured before 2.2 ruled:
+section 12 has both measurements, and the default above follows them.
 
 ## 7. Storage
 
@@ -562,9 +559,14 @@ as text and is not in this repository; the findings and what this file now
 says about each are below. Every line number it cited was read again here
 before anything was changed.
 
-Its measurement of section 9's question 6, over 30 targets, agrees with
-`tools/measure-handout-identifiability.js` (2.2 Task 3, 40 targets in a crowd
-of 3,000):
+Its measurement of section 9's question 6, over 30 targets, points the same
+way as `tools/measure-handout-identifiability.js` (2.2 Task 3, 40 targets in a
+crowd of 3,000). They are not the same claim: the review counted the minutes
+in two centuries that share a handout (whether the birth can be recovered),
+Task 3 counted how often a handout is unique among 3,000 births. The review's
+own figure for the five facets with centres and channels inside the birth year
+rests on small samples (five of thirty targets had no hit, and clustering
+across days was not measured), so it is rough:
 
 | A handout carrying | The review: births that fit | Task 3: births alone among 3,000 |
 |---|---|---|
@@ -651,9 +653,10 @@ Built, `incommon-cloud.js` (buildPlan and the pull, which 1.2 owns) and
 - The Privacy Policy, section 5, says what the switch does now, dated 30
   October 2026.
 
-Clear birth data while the switch is off clears this device only, because the
-account already holds no birth for it; that is section 4 rule 5 (b) read with
-the switch.
+Clear birth data travels as a ledger mark, so it reaches every device whatever
+the switch says: section 14, finding 1. (Until then this paragraph said a clear
+with the switch off cleared one device only, which the follow-up review showed
+let another device upload the cleared birth again.)
 
 **F9.** The owner: "(b), with the privacy policy wording from (a). Also,
 introduce (c). Separate the primary profiles from the friends."
@@ -703,3 +706,31 @@ specification, and the owner can move it to this session instead):
    does not exist: "A profile you mark as being for someone else stays on your
    device: it is not copied to your account, it is not sent to the Oracle, and no
    card is made from it." The policy's date moves with it.
+7. Readers who already made a profile for somebody else are asked once, on
+   the profile list, which of their profiles are someone else's, because
+   nothing else would ever mark the profiles that exist today (the follow-up
+   review's finding 7).
+
+## 14. The follow-up review (30 October 2026)
+
+The reviewing session read sections 4 to 6, 12 and 13 and the code at e5157c7
+and sent sixteen findings. It did not run the K rows or the RLS harness. What
+each now says:
+
+| | Finding | Now |
+|---|---|---|
+| 1 | an empty birth on the server means both "cleared" and "not saved", so a clear with the switch off reached one device and another could upload the cleared birth | **built**: Clear birth data writes a `birthCleared` ledger event, which syncs whatever the switch says and carries no birth. A device whose birth is older than the clear (`birth_at`, stamped on every birth change) drops its birth, its history and its notes' `resolved` on the pull; a birth given after the clear writes the revoke and stands. K82, K83 |
+| 2 | the for_other mark never left its device, so another device could push the profile back | **built**: the mark is a `forOther` ledger event, and the marked profile goes up as an empty row carrying nothing but that event, because the ledger hangs off the row. Another device learns the mark on its next pull, even one that changed the profile since, keeps its own copy and journal, and sends back only the empty row. K79, K80, K84 |
+| 3 | share-rules.js shaped a profile made for somebody else as the reader's own | **fixed** on the security branch: a chart carrying `forOther` is shaped as `person`. T11 |
+| 4 | only an up to date client honours the switch and the mark; an older cached build still sends the birth | **the owner's**: a server rule (a trigger that empties the birth columns while the latest `birthData` event is a revoke, and the whole row while the latest `forOther` is a grant) or softer Privacy Policy wording. Recommended: the trigger, written as a numbered migration for workstream 2 to review, because the policy's sentence should be true of every build |
+| 5 | marking a profile for somebody else leaves the Oracle readings written from it, which are keyed by the account | **the owner's**: the readings carry no profile id, so finding them needs a column or a deletion by dossier key. Workstream 2's server function |
+| 6 | Privacy Policy section 14 did not get the (a) wording | **held on purpose**: the sentence describes a control, and until workstream 3 builds it there is no way to mark a profile. It ships with the screen (section 13, item 6). If the owner wants it now, it is one paragraph |
+| 7 | F9 is inert until the screens exist, and profiles already made for other people stay on the server | **true**. Workstream 3's spec gains: existing readers are asked once, on the profile list, which profiles are someone else's |
+| 8 | F3 versions sync, F11 and F12 are specified only; G6 is open | **true, and the tables in sections 12 and 13 say so**: built means built, specified means waiting on step 3 or 4 |
+| 9 to 12 | the Oracle with the switch off; notes on a person's handout; consent after restoring a backup; `stated` is a record, not a protection | **the owner's**, put to them with this section |
+| 13, 14, 15, 16 | the card line in section 5, `chart_hash` in section 4 and 6.1, the old caution in 6.5, the word "agrees" in section 12 | **fixed** in this file |
+
+What finding 2's empty row still costs, said plainly: the account keeps a row
+with an id and nothing else for each profile made for somebody else, so that
+the mark can reach the account's other devices. A build older than this one
+does not know the mark, and is finding 4.

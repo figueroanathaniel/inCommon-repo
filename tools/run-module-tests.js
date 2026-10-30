@@ -2562,6 +2562,14 @@ async function runCloudTests() {
     });
     return dev;
   }
+  /* What the live schema's on delete cascade does when a profile row goes,
+     which the fake database does not do by itself. Only rows written before
+     the empty row was sent are taken. */
+  function odbCascade(db, pid) {
+    ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+      db.t[t] = db.t[t].filter(function (r) { return r.profile_id !== pid; });
+    });
+  }
   var tl = function (dev, pid) { return JSON.parse(dev.store.getItem('incommon.p.' + pid + '.throughline') || '[]'); };
   var counts = function (db) { var o = {}; Object.keys(db.t).forEach(function (k) { o[k] = db.t[k].length; }); return o; };
 
@@ -2780,12 +2788,17 @@ async function runCloudTests() {
   devO.pm.setConsent('journal', true, theirs.id);
   devO.pm.addMemory({ profileId: theirs.id, type: 'journal', content: { t: 'about Pia' } });
   var s79 = await devO.C.sync();
-  ts('K79', 'a profile made for somebody else sends nothing: no row, no journal, no consent, while the reader\'s own goes up; the two are listed apart', {
-    ok: true, rows: [mine.id], theirMem: 0, theirLedger: 0, own: ['Ola'], other: ['Pia'], forOther: true, ownForOther: false
+  var emptyRow = function (db, id) {
+    var r = db.t.profiles.filter(function (x) { return x.id === id; })[0];
+    return !!r && r.name == null && r.birth_date == null && r.birth_time == null && r.birth_location == null &&
+      r.birth_lat == null && r.timezone == null && r.avatar_image == null && r.pin_hash == null;
+  };
+  ts('K79', 'a profile made for somebody else sends an empty row and its mark and nothing else: no name, no birth, no journal, while the reader\'s own goes up; the two are listed apart', {
+    ok: true, rows: 2, empty: true, theirMem: 0, theirLedger: ['forOther'], own: ['Ola'], other: ['Pia'], forOther: true, ownForOther: false
   }, {
-    ok: s79.ok, rows: odb.t.profiles.map(function (r) { return r.id; }),
+    ok: s79.ok, rows: odb.t.profiles.length, empty: emptyRow(odb, theirs.id),
     theirMem: odb.t.memories.filter(function (m) { return m.profile_id === theirs.id; }).length,
-    theirLedger: odb.t.consent_events.filter(function (e) { return e.profile_id === theirs.id; }).length,
+    theirLedger: odb.t.consent_events.filter(function (e) { return e.profile_id === theirs.id; }).map(function (e) { return e.scope; }),
     own: devO.pm.ownProfiles().map(function (p) { return p.name; }), other: devO.pm.otherProfiles().map(function (p) { return p.name; }),
     forOther: devO.pm.isForOther(theirs.id), ownForOther: devO.pm.isForOther(mine.id)
   });
@@ -2804,9 +2817,9 @@ async function runCloudTests() {
   var memCascade = /create table if not exists memories \([\s\S]*?profile_id uuid not null references profiles\(id\) on delete cascade/.test(
     fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8'));
   ts('K80', 'marking a synced profile as made for somebody else takes the account\'s copy away (its journal by the schema\'s cascade), nothing of it goes up again, and the profile and its journal stay on the device through the pulls after', {
-    wasThere: true, ok: true, okAgain: true, onServer: false, cascade: true, newSent: false, local: 'Rae', localMem: 2, hash: false
+    wasThere: true, ok: true, okAgain: true, onServer: 'empty', cascade: true, newSent: false, local: 'Rae', localMem: 2, hash: false
   }, {
-    wasThere: wasThere, ok: s80.ok, okAgain: s80b.ok, onServer: odb.t.profiles.some(function (r) { return r.id === late.id; }),
+    wasThere: wasThere, ok: s80.ok, okAgain: s80b.ok, onServer: emptyRow(odb, late.id) ? 'empty' : odb.t.profiles.some(function (r) { return r.id === late.id; }),
     cascade: memCascade, newSent: odb.t.memories.some(function (m) { return m.content && m.content.t === 'written after'; }),
     local: (devO.pm.getProfile(late.id) || {}).name, localMem: devO.pm.getMemory({ profileId: late.id }).length,
     hash: JSON.stringify(devO.pm._store().profiles.filter(function (p) { return p.id === mine.id; })[0]).indexOf('for_other') !== -1
@@ -2819,6 +2832,67 @@ async function runCloudTests() {
     ok: true, onServer: true, mem: ['about Rae', 'written after']
   }, { ok: s81.ok, onServer: odb.t.profiles.some(function (r) { return r.id === late.id; }),
     mem: odb.t.memories.filter(function (m) { return m.profile_id === late.id; }).map(function (m) { return m.content.t; }).sort() });
+
+  /* ---- K82-K84: the follow-up review of 30 October 2026, findings 1 and 2.
+     A Clear birth data and a profile marked for somebody else each travel as
+     a ledger mark, so a second device follows them whatever its birth switch
+     says and whether or not it changed the profile since. ---- */
+  var cdb2 = memDB(), CU = 'bbbbbbbb-0000-4000-8000-0000000000c1';
+  var devG = syncDevice(cdb2, CU);
+  var gp = devG.pm.createProfile({ name: 'Gil', birthDate: '1977-07-07', birthTime: '07:07' });
+  devG.pm.updateProfile(gp.id, { birthTime: '08:08' });
+  devG.pm.addChartNote(gp.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Mine.' });
+  await devG.C.sync();
+  var devH = syncDevice(cdb2, CU);
+  await devH.C.sync();
+  devH.pm.updateProfile(gp.id, { birthTime: '09:09' });  // H holds a history of its own too
+  var hHad = { time: devH.pm.getProfile(gp.id).birthTime, versions: devH.pm.listChartVersions(gp.id).length };
+  devG.pm.setConsent('birthData', false, gp.id);
+  await devG.C.sync();
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devG.pm.updateProfile(gp.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+  await devG.C.sync();
+  devH.pm.addChartNote(gp.id, { address: 'gate:20', resolved: { held: true }, text: 'H note.' });
+  var s82 = await devH.C.sync();
+  devH.pm.setConsent('birthData', true, gp.id);
+  await devH.C.sync();
+  var row82 = cdb2.t.profiles.filter(function (r) { return r.id === gp.id; })[0];
+  ts('K82', 'Clear birth data with the switch off reaches the other device: its birth, its history and what its notes resolved to go, and switching the switch on there uploads no birth', {
+    had: { time: '09:09', versions: 2 }, ok: true, time: '', date: '', versions: 0, resolved: [null], words: ['H note.'], server: null
+  }, { had: hHad, ok: s82.ok, time: devH.pm.getProfile(gp.id).birthTime, date: devH.pm.getProfile(gp.id).birthDate,
+    versions: devH.pm.listChartVersions(gp.id).length,
+    resolved: devH.pm.listChartNotes(gp.id).filter(function (n) { return n.text === 'H note.'; }).map(function (n) { return n.resolved; }),
+    words: devH.pm.listChartNotes(gp.id).filter(function (n) { return n.text === 'H note.'; }).map(function (n) { return n.text; }),
+    server: row82 ? row82.birth_date : 'no row' });
+
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devG.pm.updateProfile(gp.id, { birthDate: '1977-07-08', birthTime: '10:10' });
+  await devG.C.sync();
+  await devH.C.sync();
+  ts('K83', 'a birth given again after the clear stands on both devices: the clear is not applied to a birth newer than it', {
+    g: '1977-07-08', h: '1977-07-08', cleared: false
+  }, { g: devG.pm.getProfile(gp.id).birthDate, h: devH.pm.getProfile(gp.id).birthDate,
+    cleared: devG.pm.consentState('birthCleared', gp.id).granted });
+
+  var mdb = memDB(), MU = 'bbbbbbbb-0000-4000-8000-0000000000c2';
+  var devJ = syncDevice(mdb, MU), devK = null;
+  devJ.pm.createProfile({ name: 'Jo', birthDate: '1980-01-01' });
+  var jp = devJ.pm.createProfile({ name: 'Kit', birthDate: '1982-02-02', birthTime: '02:02' });
+  devJ.pm.setConsent('journal', true, jp.id);
+  devJ.pm.addMemory({ profileId: jp.id, type: 'journal', content: { t: 'shared' } });
+  await devJ.C.sync();
+  devK = syncDevice(mdb, MU);
+  await devK.C.sync();
+  devK.pm.updateProfile(jp.id, { name: 'Kit B' });  // changed on K since its last sync
+  devJ.pm.setProfileForOther(jp.id, true);
+  await devJ.C.sync();
+  odbCascade(mdb, jp.id);
+  var s84 = await devK.C.sync(), s84b = await devK.C.sync();
+  ts('K84', 'a device that changed the profile since its last sync still learns it was marked for somebody else: it keeps its own copy and journal, and sends back only the empty row', {
+    ok: true, okAgain: true, marked: true, name: 'Kit B', birth: '1982-02-02', localMem: 1, empty: true, serverMem: 0
+  }, { ok: s84.ok, okAgain: s84b.ok, marked: devK.pm.isForOther(jp.id), name: (devK.pm.getProfile(jp.id) || {}).name,
+    birth: (devK.pm.getProfile(jp.id) || {}).birthDate, localMem: devK.pm.getMemory({ profileId: jp.id }).length,
+    empty: emptyRow(mdb, jp.id), serverMem: mdb.t.memories.filter(function (m) { return m.profile_id === jp.id; }).length });
 
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint
