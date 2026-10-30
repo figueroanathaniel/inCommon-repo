@@ -6820,18 +6820,27 @@ say the field's word for it.
 ## A corrected birth is a version, and a note keeps its address (1.2)
 `data-contracts/HD-STUDY-MODEL.md` is the model for notes on a chart, chart
 versions, other people's charts and import and export. The owner approved its
-nine decisions on 29 October 2026; workstream 2's privacy review is still
-owed, and no table exists until it is done. The device half is built in
-`profile-manager.js` 1.6.0, held by O9 to O18:
+nine decisions on 29 October 2026. Workstream 2's privacy review came back on
+30 October as not ready for migrations, and section 12 of the model answers it
+finding by finding; F2 and F9 wait on the owner, and nothing is applied until
+they are decided. The device half is built in `profile-manager.js` 1.6.1,
+held by O9 to O21:
 
 - **The profile keeps the current birth where it always has**, and
   `incommon.p.<pid>.chartVersions.v1` holds the history beside it. A version
   stores the birth, never the chart. The first birth a profile is given is not
   a correction, nor is replacing the sample; the first real correction writes
   version 1 and 2, and a zone repair is a version of its own. Two births with
-  the same `chartHash` are one.
-- **Clear birth data removes the history.** A history that kept every earlier
-  birth would defeat the button. The notes stay.
+  the same `birth_key` are one. **Do not key versions on
+  `PeopleLibrary.chartHash()` again**: it carries STATE_VERSION, so every
+  arithmetic change made the same birth a new version, and a hash of a birth
+  is the birth to anybody who can enumerate days and places.
+- **Clear birth data removes the history**, and every note's `resolved`
+  with it, because a gate and line list is the birth by another name. A
+  history that kept every earlier birth would defeat the button. The words
+  stay, and read as unresolved.
+- **`chart_note` is a journal memory for the consent gate.** A type missing
+  from `MEMORY_CONSENT` reads as allowed, which is K71's fault.
 - **A note is `{ address, version, resolved, text }`** in
   `incommon.p.<pid>.chartNotes.v1`. The address is the vault's Chart address
   form and anything else is refused. `resolved` is what the address meant when

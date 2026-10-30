@@ -3067,6 +3067,41 @@ async function runCloudTests() {
     return cleared;
   }));
 
+  /* ---- O19-O21: the 2.2 Task 1 privacy review of HD-STUDY-MODEL.md (30
+     October 2026). F4: what a note's address resolved to is derived from the
+     birth, so Clear birth data clears it. F5: a chart note is a journal
+     memory for the consent gate, or a missing entry reads as allowed. F14:
+     two versions are compared by the birth, not by a hash that moves with
+     STATE_VERSION. */
+  var rvDev = ownerStore(), rvPm = pmPage(rvDev);
+  var rvP = rvPm.createProfile({ name: 'Dee', birthDate: '1972-07-04', birthTime: '14:20', birthLocation: 'Chicago' });
+  t('O19', 'Clear birth data clears what every note resolved to and keeps its words, so a note reads unresolved and carries no gate or line of the cleared birth', {
+    resolved: [null, null], words: ['Moon here.', 'Type.'], status: 'unresolved', otherKept: { value: 'Generator' }
+  }, cv(function () {
+    rvPm.addChartNote(rvP.id, { address: 'activation:design:Moon', resolved: { value: '12.4' }, text: 'Moon here.' });
+    rvPm.addChartNote(rvP.id, { address: 'facet:type', resolved: { value: 'Projector' }, text: 'Type.' });
+    var other = rvPm.createProfile({ name: 'Eli', birthDate: '1999-09-09' });
+    rvPm.addChartNote(other.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Eli.' });
+    rvPm.updateProfile(rvP.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+    var n = rvPm.listChartNotes(rvP.id);
+    return { resolved: n.map(function (x) { return x.resolved; }), words: n.map(function (x) { return x.text; }),
+      status: rvPm.chartNoteStatus(n[0], { value: '12.4' }), otherKept: rvPm.listChartNotes(other.id)[0].resolved };
+  }));
+  t('O20', 'a chart note is held to the journal consent, like a journal entry', {
+    consent: 'journal'
+  }, cv(function () { return { consent: rvPm.consentFor('chart_note') }; }));
+  t('O21', 'a version is keyed by its birth, never by a hash carrying STATE_VERSION: no chart_hash, and the key names no arithmetic version', {
+    hasHash: false, keyed: true, noStateVersion: true, distinct: true
+  }, cv(function () {
+    rvPm.updateProfile(rvP.id, { birthDate: '1972-07-04', birthTime: '14:20' });
+    rvPm.updateProfile(rvP.id, { birthTime: '14:50' });
+    var v = rvPm.listChartVersions(rvP.id);
+    return { hasHash: v.some(function (x) { return 'chart_hash' in x; }),
+      keyed: v.every(function (x) { return /^b1\|/.test(x.birth_key || ''); }),
+      noStateVersion: v.every(function (x) { return !/\|v\d+\|/.test('|' + x.birth_key + '|') && x.birth_key.indexOf('|v') !== 0; }),
+      distinct: v.length === 2 && v[0].birth_key !== v[1].birth_key };
+  }));
+
   /* A cover client whose sign ins come back owing a code or not, and whose
      authenticator calls are recorded. */
   function mfaHarness(o) {

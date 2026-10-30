@@ -1,4 +1,4 @@
-/* profile-manager.js: inCommon multi-profile data layer. V1.6.0
+/* profile-manager.js: inCommon multi-profile data layer. V1.6.1
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -181,16 +181,19 @@
       place: b.birth_location, lat: b.birth_lat, lon: b.birth_lon, zone: b.timezone,
       offset_recorded: null, offset_used: used == null ? null : used, zone_check: 'not_given' };
   }
-  /* The same hash the pair cache keys on, when people-library.js is loaded,
-     so two births that describe one instant in one place are one version.
-     Without it the raw fields are compared, which can only make a version
-     too many, never one too few. */
-  function birthHash(b) {
-    var PL = window.PeopleLibrary;
-    if (PL && PL.chartHash) {
-      try { var h = PL.chartHash(b); if (h) return h; } catch (e) {}
-    }
-    return 'raw:' + JSON.stringify([b.birth_date, b.birth_time, b.birth_time_unknown, b.birth_lat, b.birth_lon, b.timezone, b.tz_offset]);
+  /* The key two versions are compared by: the birth itself, written out.
+     Not PeopleLibrary.chartHash(), which carries STATE_VERSION, so every
+     arithmetic change would make the same birth read as a new version
+     (privacy review F14). Not a hash either: a hash of a birth is the birth
+     to anybody who can enumerate the days and places (F10), so a hash would
+     only look like it hid something. It never leaves the device in an
+     export (share-rules.js), and on the server it sits beside the birth it
+     describes, which the same reader already holds. */
+  function birthKey(b) {
+    var c = function (v) { return v == null || v === '' ? '' : String(v); };
+    var ll = function (v) { return v == null || v === '' || isNaN(+v) ? '' : (+v).toFixed(4); };
+    return ['b1', c(b.birth_date), c(b.birth_time), b.birth_time_unknown === true ? 'u' : '',
+      ll(b.birth_lat), ll(b.birth_lon), c(b.timezone), c(b.tz_offset)].join('|');
   }
   function birthReason(a, b) {
     if (a.birth_date !== b.birth_date) return 'date_corrected';
@@ -246,7 +249,7 @@
   }
 
   var PM = {
-    VERSION: '1.6.0',
+    VERSION: '1.6.1',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -570,15 +573,28 @@
        birth would defeat the button. Notes stay; they are the reader's own
        words, and read as unresolved until a birth is given again. */
     _birthMoved: function (id, before, after) {
-      if (!after.birth_date) { drop(versionsKey(id)); return null; }
+      /* Clear birth data (O8). The history goes, and so does every note's
+         record of what its address resolved to, because that is derived from
+         the birth (privacy review F4): a gate and line list kept after the
+         date is cleared is the date by another name. The words stay, and
+         read as unresolved. */
+      if (!after.birth_date) {
+        drop(versionsKey(id));
+        var cr = read(notesKey(id), null);
+        if (cr && Array.isArray(cr.notes) && cr.notes.some(function (n) { return n.resolved != null; })) {
+          cr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(id), cr);
+        }
+        return null;
+      }
       if (!before.birth_date) return null;
       if (read(scoped('incommon.sample', scope().owner), '') === id) return null;
-      if (birthHash(before) === birthHash(after)) return null;
+      if (birthKey(before) === birthKey(after)) return null;
       var rec = read(versionsKey(id), null);
       if (!rec || !Array.isArray(rec.versions)) rec = { v: 1, versions: [] };
       var make = function (b, reason) {
         return { id: uuid(), subject: 'profile:' + id, seq: rec.versions.length + 1, reason: reason,
-          birth: birthRecord(b), chart_hash: birthHash(b), created_at: nowISO() };
+          birth: birthRecord(b), birth_key: birthKey(b), created_at: nowISO() };
       };
       var first = null;
       if (!rec.versions.length) { first = make(before, 'initial'); rec.versions.push(first); }
@@ -720,7 +736,7 @@
        Single write path for everything the app remembers about a person.
        Each memory type is bound to the consent flag that governs it: a write
        with consent off is refused and reported, never silently dropped. */
-    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation' },
+    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation', chart_note: 'journal' },
     ENFORCE_ON_WRITE: { stella_conversation: true },
     consentFor: function (type) { return this.MEMORY_CONSENT[type] || null; },
 

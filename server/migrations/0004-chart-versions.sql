@@ -36,7 +36,7 @@ create table if not exists public.chart_versions (
   seq integer not null,
   reason text not null,
   birth jsonb not null,
-  chart_hash text not null,
+  birth_key text not null,
   created_at timestamptz not null,
   unique (profile_id, local_id)
 );
