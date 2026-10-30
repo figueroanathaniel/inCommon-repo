@@ -4310,7 +4310,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   var PM = {
-    VERSION: '1.8.0',
+    VERSION: '1.8.1',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -5132,36 +5132,29 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       var self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
       /* Deleted on another device, and so deleted here, whatever this device
          did to it since (the owner, 30 October 2026: "if a profile is
-         deleted, delete it everywhere"). Every screen reads a profile, so a
-         device the deletion would leave with none starts over with a fresh
-         one first, as the delete dialog does on the device it was deleted on;
-         that one is new here and goes up like any other. */
+         deleted, delete it everywhere"). The deleted profiles go first, and
+         then, if that leaves this device with none and the pull brings none,
+         it starts over with a fresh one, as the delete dialog does on the
+         device it was deleted on; that one is new here and goes up like any
+         other. Removing first is what lets a device whose six profiles were
+         all deleted end on the fresh one in this pull: made first, it had no
+         room. */
       var dead = {};
       (d.deletedProfiles || []).forEach(function (id) { dead[id] = 1; });
       var s0 = this._store();
-      if ((d.deletedProfiles || []).length && !s0.profiles.some(function (p) { return !dead[p.id]; }) &&
-          !(d.profiles || []).some(function (p) { return p && !dead[p.id]; })) {
-        try {
+      var gone = s0.profiles.filter(function (p) { return dead[p.id]; }).map(function (p) { return p.id; });
+      if (gone.length) {
+        s0.profiles = s0.profiles.filter(function (p) { return !dead[p.id]; });
+        s0.pairs = (s0.pairs || []).filter(function (pr) { return !dead[pr.a] && !dead[pr.b]; });
+        write(scope().root, s0);
+        gone.forEach(function (id) { self._dropProfileKeys(id); out.removed++; });
+        if (!s0.profiles.length && !(d.profiles || []).some(function (p) { return p && !dead[p.id]; })) {
           var fresh = this.createProfile({ name: 'Default Profile' });
-          var s1 = this._store(); s1.activeId = fresh.id; s1.defaultId = fresh.id; this._save(s1);
-        } catch (e) {
-          /* Six profiles, all deleted elsewhere: no room for the fresh one,
-             so one of them stays until the next pull, which makes it. */
-          var keep = d.deletedProfiles.filter(function (id) { return s0.profiles.some(function (p) { return p.id === id; }); })[0];
-          if (keep) delete dead[keep];
+          var s1 = this._store(); s1.activeId = fresh.id; s1.defaultId = fresh.id; write(scope().root, s1);
         }
       }
+      (d.deletedProfiles || []).forEach(function (id) { self._forgetPeople(id); });
       var s = this._store();
-      (d.deletedProfiles || []).forEach(function (id) {
-        if (!dead[id]) return;
-        self._forgetPeople(id);
-        var before = s.profiles.length;
-        s.profiles = s.profiles.filter(function (p) { return p.id !== id; });
-        if (s.profiles.length === before) return;
-        s.pairs = s.pairs.filter(function (pr) { return pr.a !== id && pr.b !== id; });
-        self._dropProfileKeys(id);
-        out.removed++;
-      });
       (d.removeProfiles || []).forEach(function (id) {
         if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
         var before = s.profiles.length;

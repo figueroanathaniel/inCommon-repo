@@ -858,6 +858,15 @@ included ("yes, go ahead with all of it"). Built on the security branch:
 | note | Privacy Policy sections 5 and 6 are true only once 0006 is applied | **true, and now 0007 too**: the migrations README says the app ships after 0006 to 0008 in one window, and section 5 now says a deleted profile is deleted from every device |
 | note | `share-rules.js` is not loaded by the app yet | **true**, workstream 3's |
 
+The reviewer re-checked these at 1eb9292 and found RV1 and RV3 hold. Of its
+low items, the six profile case is **fixed** after the merge (profile-manager.js
+1.8.1, O25, red on 1.8.0): the deleted profiles are removed before the fresh one
+is made, so a device whose six profiles were all deleted elsewhere ends on the
+fresh one in that pull rather than the next. A row written to a child table by
+the service role carries no `auth.uid()`, so 0007 cannot drop it; nothing in
+`server/` writes those tables that way, and a function that does must call
+`profile_deleted()` itself.
+
 What it costs, said plainly. The account keeps a row for every profile ever
 deleted, holding two ids and a time, until the account is deleted; that is
 what makes the deletion hold on a device that has not synced since. A pull
