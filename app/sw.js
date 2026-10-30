@@ -52,7 +52,7 @@ var PRECACHE = [
   './sabian-symbols.js', './sabian-symbols-data.js', './minor-bodies-ephemeris.js', './minor-body-elements.js', './comet-hyakutake-jpl.js', './comet-integrated-jpl.js',
   './hd-topology.js', './hd-atlas.js', './astropedia.js', './iching.js', './gazetteer-us.js',
   './birth-time.js', './astronomy-engine-2.1.19.min.js', './lunar-mean-points.js', './jpl-derived-points.js', './arc-solver.js', './ephemeris-cache.js', './hd-wheel.js', './hd-transit.js', './hd-composite.js', './hd-circle.js', './flight.js', './body-globes.js', './cycle-scene.js', './chart-scene.js', './hd-scene.js',
-  './people-library.js', './pair-cache.js', './analytics.js',
+  './people-library.js', './pair-cache.js', './share-rules.js', './analytics.js',
   './forecast/newsEngine.js', './forecast/news/synastryTemplates.js', './forecast/news/multiChart.js',
   './forecast/news/skyWire.js', './forecast/news/lint.js', './forecast/feedBuilder.js',
   './i18n/index.js', './i18n/en.js', './i18n/es.js'

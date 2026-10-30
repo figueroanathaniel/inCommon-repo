@@ -198,3 +198,11 @@ were approved; from 28 October 2026 that work is committed here.
   against git: both were the 9f237d4 versions, so nothing made in the
   dashboard was overwritten. This corrects the entry above that says neither
   function was redeployed.
+- 30 October 2026: `share-rules.js` is loaded by the app, at the owner's
+  request ("load share-rules.js in the app"). The app file is workstream 3's;
+  the change there is one script tag beside `people-library.js` and nothing
+  else, with the module added to `app/sw.js`'s precache and to
+  `tools/build-bundle.js`'s inline list. Driven in Chromium against both the
+  source shell and the rebuilt bundle: each boots, `window.ShareRules` is
+  there with its six functions, and the page throws nothing. Nothing calls it
+  yet; the handout and export screens are still workstream 3's to build.

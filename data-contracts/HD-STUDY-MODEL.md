@@ -856,7 +856,7 @@ included ("yes, go ahead with all of it"). Built on the security branch:
 | note | the ledger's fifty event cap could drop an old `forOther` grant, so a resend and `profile_withheld()` would miss the mark | **fixed**: the ledger keeps its last fifty events and the latest event of every consent beyond them. O23 |
 | note | the F12 wording reads as coming before 0004 | **stands**: F12 is specified, waiting on step 3, and the migrations README gives the order |
 | note | Privacy Policy sections 5 and 6 are true only once 0006 is applied | **true, and now 0007 too**: the migrations README says the app ships after 0006 to 0008 in one window, and section 5 now says a deleted profile is deleted from every device |
-| note | `share-rules.js` is not loaded by the app yet | **true**, workstream 3's |
+| note | `share-rules.js` is not loaded by the app yet | **loaded** since 30 October 2026, at the owner's request: a script tag in the app beside `people-library.js`, the source service worker's precache, and the bundle's inline list. Nothing calls it yet: the handout and export screens that hand it their data are workstream 3's |
 
 The reviewer re-checked these at 1eb9292 and found RV1 and RV3 hold. Of its
 low items, the six profile case is **fixed** after the merge (profile-manager.js
