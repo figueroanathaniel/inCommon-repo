@@ -11,10 +11,17 @@
  * by setting the request's JWT claims the way PostgREST does, and asks what
  * each may do.
  *
+ * Rows WH1 to WH12 are migration 0006, the server holding "Save my profile
+ * to my account" and "this profile is for someone else" (the follow-up
+ * review's findings 4, 5 and 9): an older build's birth is emptied while the
+ * ledger says off, cleared or somebody else's, the right later word puts it
+ * back, and an Oracle reading of a withheld profile is not kept. So this
+ * applies server/oracle/schema.sql too.
+ *
  * It runs the cases five times, in five databases:
- *   before          without 0005 and without chart_versions in the two-step
+ *   before          without 0005, 0006 and chart_versions in the two-step
  *                   list: the table must be unreachable, so the reader's own
- *                   writes fail;
+ *                   writes fail, and nothing withholds a birth;
  *   nomfa           0005 without the two-step entry: an aal1 session is still
  *                   refused, because owns_profile() reads profiles under that
  *                   table's own two-step rule; only CV14 (the rule on the
@@ -147,6 +154,25 @@ function ins(local, profile) {
     values ('${profile || PA}', '${local}', 1, 'initial', ${BIRTH}, 'h1', now());`;
 }
 
+const PC = 'c0000000-0000-4000-8000-0000000000c1';
+function upP(name, date) {
+  return `insert into public.profiles (id, account_id, name, birth_date, birth_lat, location_resolved)
+    values ('${PC}', '${A}', '${name}', '${date}', 41.88, true)
+    on conflict (id) do update set name = excluded.name, birth_date = excluded.birth_date,
+      birth_lat = excluded.birth_lat, location_resolved = excluded.location_resolved;`;
+}
+function rowP(db) { return psql(db, `select coalesce(name, '') || '|' || coalesce(birth_date, '') from public.profiles where id = '${PC}';`).out; }
+function ev(scope, action, n) {
+  return `insert into public.consent_events (profile_id, scope, action, ts) values ('${PC}', '${scope}', '${action}', '2026-10-30T10:00:0${n}Z');`;
+}
+/* As the Oracle function writes it, with the service role: claimed, then finished. */
+function reading(user, key, profile) {
+  return `insert into public.oracle_readings (user_id, period, period_key, depth, chart_key, status, profile_id)
+      values ('${user}', 'daily', '2026-10-30', 'standard', '${key}', 'pending', '${profile}');
+    update public.oracle_readings set status = 'done', content = '{"x": 1}'::jsonb where chart_key = '${key}';`;
+}
+function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(content::text, '') from public.oracle_readings where chart_key = '${key}';`).out; }
+
 /* Each case: a name, what it checks, and a function of the database that
    answers true when the rule holds. The cases run in order on one database,
    so a later case sees what an earlier one wrote, as a reader would. */
@@ -201,6 +227,57 @@ const CASES = [
       const back = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3';
       return again && d5 && d4 && back;
     }],
+
+  /* ---- migration 0006: the server holds the switch and the mark ---- */
+  ['WH1', 'a profile with no switch or mark keeps its birth, as before 0006',
+    db => { psql(db, as(A, 'aal1', upP('Cal', '1985-03-10')));
+      return rowP(db) === 'Cal|1985-03-10'; }],
+  ['WH2', 'saving turned off (a birthData revoke) empties the birth the account held, and keeps the name',
+    db => psql(db, as(A, 'aal1', ev('birthData', 'revoke', 1))).ok && rowP(db) === 'Cal|'],
+  ['WH3', 'an older build sending the birth again while saving is off is stored without it',
+    db => psql(db, as(A, 'aal1', upP('Cal', '1985-03-10'))).ok && rowP(db) === 'Cal|'],
+  ['WH4', 'saving turned back on, and the row sent again after the event as the app does, keeps the birth',
+    db => psql(db, as(A, 'aal1', ev('birthData', 'grant', 2) + upP('Cal', '1985-03-10'))).ok && rowP(db) === 'Cal|1985-03-10'],
+  ['WH5', 'a profile marked for somebody else (a forOther grant) is emptied whole, name and PIN included',
+    db => { psql(db, `update public.profiles set pin_hash = 'p1' where id = '${PC}';`);
+      return psql(db, as(A, 'aal1', ev('forOther', 'grant', 3))).ok && rowP(db) === '|'
+        && psql(db, `select pin_hash is null from public.profiles where id = '${PC}';`).out === 't'; }],
+  ['WH6', 'an older build sending the whole profile while it is marked is stored empty',
+    db => psql(db, as(A, 'aal1', upP('Cal', '1985-03-10'))).ok && rowP(db) === '|'],
+  ['WH7', 'taken back as the reader\'s own and sent again after the event, the profile is whole',
+    db => psql(db, as(A, 'aal1', ev('forOther', 'revoke', 4) + upP('Cal', '1985-03-10'))).ok && rowP(db) === 'Cal|1985-03-10'],
+  ['WH8', 'Clear birth data (a birthCleared grant) empties the birth and an older build cannot put it back, and a birth given after the clear stands',
+    db => { const a = psql(db, as(A, 'aal1', ev('birthCleared', 'grant', 5))).ok && rowP(db) === 'Cal|';
+      const b = psql(db, as(A, 'aal1', upP('Cal', '1985-03-10'))).ok && rowP(db) === 'Cal|';
+      const c = psql(db, as(A, 'aal1', ev('birthCleared', 'revoke', 6) + upP('Cal', '1986-04-11'))).ok && rowP(db) === 'Cal|1986-04-11';
+      return a && b && c; }],
+  ['WH9', 'an Oracle reading finished for a withheld profile is stored as served with no content, and for a saved one is kept',
+    db => { psql(db, as(A, 'aal1', ev('birthData', 'revoke', 7)));
+      psql(db, reading(A, 'k9', PC));
+      const off = readingOf(db, 'k9') === 'served|';
+      psql(db, as(A, 'aal1', ev('birthData', 'grant', 8) + upP('Cal', '1986-04-11')));
+      psql(db, reading(A, 'k9b', PC));
+      return off && readingOf(db, 'k9b') === 'done|{"x": 1}'; }],
+  ['WH10', 'marking the profile withdraws its kept readings, and leaves another reader\'s reading that names the same profile id untouched',
+    db => { psql(db, reading(B, 'kB', PC));
+      const ok = psql(db, as(A, 'aal1', ev('forOther', 'grant', 9))).ok;
+      return ok && readingOf(db, 'k9b') === 'withdrawn|' && readingOf(db, 'kB') === 'done|{"x": 1}'; }],
+  ['WH11', 'nobody signed in or not can ask the API whether a profile is withheld',
+    db => psql(db, `select to_regprocedure('public.profile_withheld(uuid)') is not null;`).out === 't'
+      && !psql(db, as(A, 'aal1', `select public.profile_withheld('${PC}');`)).ok
+      && !psql(db, as(null, null, `select public.profile_withheld('${PC}');`)).ok],
+  ['WH12', 'applying 0006 again changes nothing, its DOWN removes it and turns served and withdrawn rows to failed, and it applies cleanly after',
+    db => {
+      const file = fs.readFileSync(path.join(repo, 'server', 'migrations', '0006-server-holds-the-switch.sql'), 'utf8');
+      const down = file.split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
+      const trig = () => psql(db, `select count(*) from pg_trigger where tgname in ('profiles_withhold', 'oracle_readings_withhold', 'consent_marks_apply');`).out;
+      const again = psql(db, file).ok && trig() === '3';
+      const d = psql(db, down).ok && trig() === '0'
+        && psql(db, `select count(*) from public.oracle_readings where status in ('served', 'withdrawn');`).out === '0'
+        && psql(db, `select count(*) from information_schema.columns where table_name = 'oracle_readings' and column_name = 'profile_id';`).out === '0';
+      const back = psql(db, file).ok && trig() === '3';
+      return again && d && back;
+    }],
 ];
 
 /* owns_profile() runs as the caller, so it reads profiles under that table's
@@ -213,7 +290,8 @@ function prepare(name, skipMig, mfaWith, definer) {
   const made = psql('postgres', `create database ${name};`);
   if (!made.ok) throw new Error('create database ' + name + ': ' + made.err);
   const steps = [['stub', STUB], ['cloud-schema v2', cloudV2()],
-    ['support.sql', fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8')]]
+    ['support.sql', fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8')],
+    ['oracle schema', fs.readFileSync(path.join(repo, 'server', 'oracle', 'schema.sql'), 'utf8')]]
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
     .concat([['mfa-policies', mfa(mfaWith)], ['seed', SEED]])
     .concat(definer ? [['definer', DEFINER]] : []);
@@ -231,8 +309,9 @@ function runCases(db) {
 }
 
 const RUNS = [
-  { name: 'before', skip: ['0005'], mfa: false,
-    mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14'] },
+  { name: 'before', skip: ['0005', '0006'], mfa: false,
+    mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
+      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

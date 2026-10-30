@@ -2233,6 +2233,27 @@ async function runCloudTests() {
     parts: ['a', 'b'], hasChapters: true, legacyCalls: 1, half: { ok: false, reason: 'timeout' }
   }, { parts: two.calls.map(function (c) { return c.body.part; }), hasChapters: !!(rTwo.reading && rTwo.reading.chapters && rTwo.reading.title),
     legacyCalls: one.calls.length, half: { ok: rHalf.ok, reason: rHalf.reason } });
+  /* ---- K29d: the follow-up review's findings 5 and 9. The active profile's
+     id goes with the dossier, a first half the server did not keep is joined
+     here, and a profile marked for somebody else is a reason. ---- */
+  var COp = loadIsolatedCloud({ createClient: function () { return {}; } });
+  COp._setConfigForTests({ storage: null, pm: { activeId: function () { return 'p-active'; } }, core: null });
+  var alone = oracleClient(function (n, o) {
+    return o.body.part === 'b' ? { data: { reading: { chapters: [{ heading: 'h', body: 'b' }], shadowWork: 's' } }, error: null }
+      : { data: { reading: { title: 'T', overview: 'O' } }, error: null };
+  });
+  COp._setClientForTests(alone.client, { user: { id: 'u1' } });
+  var rAlone = await COp.oracleRead({ period: 'daily', depth: 'deep', localDate: '2026-09-29', dossier: 'D' });
+  var named = oracleClient(function () { return { data: { reading: { title: 'x' } }, error: null }; });
+  COp._setClientForTests(named.client, { user: { id: 'u1' } });
+  await COp.oracleRead({ period: 'daily', localDate: '2026-09-29', dossier: 'D', profileId: 'p-named' });
+  COp._setClientForTests(oracleClient(function () { return { data: null, error: httpErr(403, 'FOR_OTHER') }; }).client, { user: { id: 'u1' } });
+  var rOther = await COp.oracleRead({ period: 'daily', localDate: '2026-09-29', dossier: 'D' });
+  t('K29d', 'the Oracle is asked with the active profile\'s id unless the page names one, a second half that comes back alone is joined to the first, and a profile marked for somebody else is a reason', {
+    ids: ['p-active', 'p-active'], named: 'p-named', joined: { title: 'T', chapters: 1 }, other: { ok: false, reason: 'forOther' }
+  }, { ids: alone.calls.map(function (c) { return c.body.profileId; }), named: named.calls[0] && named.calls[0].body.profileId,
+    joined: { title: rAlone.reading && rAlone.reading.title, chapters: rAlone.reading && rAlone.reading.chapters ? rAlone.reading.chapters.length : 0 },
+    other: { ok: rOther.ok, reason: rOther.reason } });
   CO._setClientForTests(oracleClient(function () { throw new Error('socket hang up'); }).client, { user: { id: 'u1' } });
   var rThrow = await CO.oracleRead({ period: 'monthly' });
   t('K29', 'a thrown call comes back as offline, not as an exception out of the page', {
@@ -3094,7 +3115,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 5, bad: [], listedInOrder: true, uncovered: []
+    files: 6, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
@@ -3414,25 +3435,30 @@ async function runCloudTests() {
     return { centres: all.centres, channels: all.channels, gates: all.gates.length, acts: Object.keys(all.activations[0]).sort().join(','),
       birth: all.birth, placeOnlyLeaks: srLeaks(place) };
   }));
-  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it needs their stated word, a card is not a word (F7), and a withdrawn word is no word', {
-    plain: true, name: false, refused: 'no_consent', stated: true, card: 'no_consent', withdrawn: 'no_consent', named: 'Ana'
+  /* A word is dated, and a handout is made at a moment (finding 12): these
+     rows hand the module the same moment every time. */
+  var SR_NOW = Date.UTC(2026, 9, 30), SR_AT = '2026-10-01T00:00:00Z';
+  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it, the name included since the follow-up review, needs their stated word, a card is not a word (F7), and a withdrawn word is no word', {
+    plain: true, name: false, refused: 'no_consent', stated: true, card: 'no_consent', withdrawn: 'no_consent', named: 'no_consent', namedWithWord: 'Ana'
   }, sr(function () {
     var plain = SR.handout(srChart('person'));
+    var word = { basis: 'stated', scope: ['store', 'handout'], stated_at: SR_AT };
     return { plain: plain.ok, name: 'name' in plain.payload,
       refused: SR.handout(srChart('person'), { include: { centres: true } }).reason,
-      stated: SR.handout(srChart('person', { basis: 'stated', scope: ['store', 'handout'] }), { include: { gates: true } }).ok,
-      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'] }), { include: { birthDate: true } }).reason,
-      withdrawn: SR.handout(srChart('person', { basis: 'stated', scope: ['handout'], withdrawn_at: '2026-10-29T00:00:00Z' }), { include: { centres: true } }).reason,
-      named: SR.handout(srChart('person'), { include: { name: true } }).payload.name };
+      stated: SR.handout(srChart('person', word), { include: { gates: true }, now: SR_NOW }).ok,
+      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'], stated_at: SR_AT }), { include: { birthDate: true }, now: SR_NOW }).reason,
+      withdrawn: SR.handout(srChart('person', { basis: 'stated', scope: ['handout'], stated_at: SR_AT, withdrawn_at: '2026-10-29T00:00:00Z' }), { include: { centres: true }, now: SR_NOW }).reason,
+      named: SR.handout(srChart('person'), { include: { name: true } }).reason,
+      namedWithWord: SR.handout(srChart('person', word), { include: { name: true }, now: SR_NOW }).payload.name };
   }));
   t('T5', 'a client\'s chart: no handout at all without their word, a word that does not cover handouts is not enough, and with it the name still starts off', {
     none: 'no_consent', notesOnly: 'no_consent', withWord: true, name: false, basisNone: 'no_consent'
   }, sr(function () {
-    var ok = SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes', 'handout'] }));
+    var ok = SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes', 'handout'], stated_at: SR_AT }), { now: SR_NOW });
     return { none: SR.handout(srChart('client')).reason,
-      notesOnly: SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes'] })).reason,
+      notesOnly: SR.handout(srChart('client', { basis: 'stated', scope: ['store', 'notes'], stated_at: SR_AT }), { now: SR_NOW }).reason,
       withWord: ok.ok, name: 'name' in ok.payload,
-      basisNone: SR.handout(srChart('client', { basis: 'none', scope: ['handout'] })).reason };
+      basisNone: SR.handout(srChart('client', { basis: 'none', scope: ['handout'] }), { now: SR_NOW }).reason };
   }));
   t('T6', 'an option the module does not know is refused rather than ignored, so a misspelled one cannot ship what it meant to leave out', {
     typo: 'unknown_option', detail: 'birthdate', stray: 'unknown_option', kind: 'kind'
@@ -3464,7 +3490,7 @@ async function runCloudTests() {
     return { schema: f.schema, includes: f.includes, kinds: f.subjects.map(function (x) { return x.kind; }), versions: f.subjects[0].versions.length,
       notes: f.subjects[0].notes.length, resolved: !!f.subjects[0].notes[0].resolved, extra: 'secret' in f.subjects[0].birth };
   }));
-  t('T9', 'with people ticked the export carries them and no consent record or birth hash (F6, F10); without birth data it carries no birth, no version and no resolved value for anyone', {
+  t('T9', 'with people ticked the export carries them and no consent record a restore would honour, and no birth hash (F6, F10); without birth data it carries no birth, no version and no resolved value for anyone', {
     kinds: ['self', 'person', 'client'], noConsent: true, noHash: true, noBirth: true, refused: 'unknown_option'
   }, sr(function () {
     var f = SR.exportFile(srSubjects, { people: true }).file, g = SR.exportFile(srSubjects, { people: true, birthData: false }).file;
@@ -3485,6 +3511,43 @@ async function runCloudTests() {
       date: SR.handout(c, { include: { birthDate: true } }).reason, kind: SR.handout(c).payload.kind,
       exported: SR.exportFile([mine, theirs], {}).file.subjects.map(function (x) { return x.kind; }),
       withPeople: SR.exportFile([mine, theirs], { people: true }).file.subjects.map(function (x) { return x.kind; }) };
+  }));
+  /* ---- T12-T14: the follow-up review's findings 10 to 12, which the owner
+     asked on 30 October 2026 to be fixed rather than accepted. ---- */
+  t('T12', 'the notes the reader picked go on another person\'s handout only with that person\'s word, and on the reader\'s own as before (finding 10)', {
+    person: 'no_consent', withWord: 1, own: 1, nonePicked: true
+  }, sr(function () {
+    var word = { basis: 'stated', scope: ['handout'], stated_at: SR_AT };
+    return { person: SR.handout(srChart('person'), { notes: ['n1'] }).reason,
+      withWord: (SR.handout(srChart('person', word), { notes: ['n1'], now: SR_NOW }).payload || {}).notes.length,
+      own: SR.handout(srChart('self'), { notes: ['n1'] }).payload.notes.length,
+      nonePicked: SR.handout(srChart('person'), { notes: [] }).ok };
+  }));
+  t('T13', 'a word counts only with its day and for a year: undated, dated after the handout, older than a year, or asked without a moment, it opens nothing, and the refusal says which (finding 12)', {
+    ok: true, undated: 'undated', future: 'undated', expired: 'expired', noNow: 'undated', lastDay: true, days: 365
+  }, sr(function () {
+    var c = function (at) { return srChart('person', { basis: 'stated', scope: ['handout'], stated_at: at }); };
+    var inc = { include: { centres: true } };
+    return { ok: SR.handout(c(SR_AT), Object.assign({ now: SR_NOW }, inc)).ok,
+      undated: SR.handout(c(null), Object.assign({ now: SR_NOW }, inc)).detail,
+      future: SR.handout(c('2026-11-02T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).detail,
+      expired: SR.handout(c('2025-10-29T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).detail,
+      noNow: SR.handout(c(SR_AT), inc).detail,
+      lastDay: SR.handout(c('2025-10-30T00:00:00Z'), Object.assign({ now: SR_NOW }, inc)).ok, days: SR.WORD_DAYS };
+  }));
+  t('T14', 'a backup keeps what each person\'s record said: the export notes the scope and day with no basis, a restore keeps the record and notes and opens no handout, and the reader stating it again opens it (finding 11)', {
+    noted: { scope: ['store', 'notes', 'handout'], noted_at: '2026-10-01T00:00:00Z', withdrawn_at: null }, noBasis: true,
+    restored: 'restored', keepsNotes: true, handout: 'no_consent', detail: 'restored', confirmed: true, foreign: 'none', withdrawnStays: 'withdrawn'
+  }, sr(function () {
+    var f = SR.exportFile(srSubjects, { people: true }).file, cal = f.subjects.filter(function (x) { return x.id === 'pClient'; })[0];
+    var back = SR.restoreConsent(cal.consent_noted);
+    var refused = SR.handout(srChart('client', back), { now: SR_NOW });
+    var again = SR.confirmWord(back, SR_NOW);
+    return { noted: cal.consent_noted, noBasis: JSON.stringify(f).indexOf('basis') === -1,
+      restored: back.basis, keepsNotes: SR.consentKeeps(back, 'notes'), handout: refused.reason, detail: refused.detail,
+      confirmed: SR.handout(srChart('client', again), { now: SR_NOW + 1000 }).ok,
+      foreign: SR.restoreConsent({ scope: ['everything'] }).basis,
+      withdrawnStays: SR.wordState(SR.restoreConsent({ scope: ['handout'], noted_at: SR_AT, withdrawn_at: SR_AT }), 'handout', SR_NOW) };
   }));
   t('T10', 'the module sends nothing and keeps nothing: no network, no storage, no clock beyond the export stamp', {
     clean: true

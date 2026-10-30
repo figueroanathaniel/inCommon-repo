@@ -84,6 +84,9 @@ const ADMINS = (Deno.env.get("LUMINARY_ADMIN_EMAILS") ?? "").split(",").map((e) 
 const isAdmin = (u: { email?: string; email_confirmed_at?: string | null }) =>
   !!u.email_confirmed_at && ADMINS.includes(String(u.email ?? "").toLowerCase());
 const ACTIVE = new Set(["active", "trialing"]);
+// A profile id as the app makes them (crypto.randomUUID), checked before it
+// is used in a query or stored.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type TarotRead = (o: Record<string, unknown>) => { title: string; passages: { tag: string; text: string }[]; summary: string; stats: Record<string, number> } | null;
 type TarotModule = { read: TarotRead; DEPTHS: Record<string, { counts: number[] }>; TOPICS: Record<string, unknown> };
 const g = globalThis as unknown as { Tarot?: TarotModule; TarotOmni?: (...a: unknown[]) => unknown };
@@ -474,6 +477,27 @@ Deno.serve(async (req) => {
   if (cycle && depth !== "standard") return reply(400, { code: "BAD_REQUEST" });
   if (!plausibleDate(localDate) || !dossier || dossier.length > 20000) return reply(400, { code: "BAD_REQUEST" });
 
+  // The profile the dossier was written from (server/migrations/0006). It is
+  // stored with the reading so the server can withdraw what was written from
+  // a profile that stops being saved to the account or is marked as somebody
+  // else's; a reading of such a profile is handed back and not kept, which
+  // the table's own trigger decides. An id that is not a profile of this
+  // reader's account is not stored. A profile marked as somebody else's is
+  // refused before anything is asked or counted: the Oracle writes for the
+  // reader (HD-STUDY-MODEL.md section 13, item 3).
+  let profileId: string | null = typeof body.profileId === "string" && UUID.test(body.profileId) ? body.profileId : null;
+  if (profileId) {
+    const p = await db.from("profiles").select("account_id").eq("id", profileId).maybeSingle();
+    if (p.error) { console.error("oracle: reading the profile failed", p.error); return reply(500, { code: "STORE" }); }
+    if (p.data && p.data.account_id !== user.id) profileId = null;
+  }
+  if (profileId) {
+    const mark = await db.from("consent_events").select("action").eq("profile_id", profileId).eq("scope", "forOther")
+      .order("ts", { ascending: false }).limit(1).maybeSingle();
+    if (mark.error) { console.error("oracle: reading the ledger failed", mark.error); return reply(500, { code: "STORE" }); }
+    if (mark.data?.action === "grant") return reply(403, { code: "FOR_OTHER" });
+  }
+
   const deep = depth === "deep";
   // An in-depth reading is two calls (see DEEP_B_SCHEMA). A caller that names no
   // part gets the first, whose stored rows are the key old full readings sit on.
@@ -498,12 +522,14 @@ Deno.serve(async (req) => {
   const same = { user_id: user.id, period, period_key: key, depth, chart_key: part === "b" ? chartKey + ".b" : chartKey };
 
   // The second half is written to follow the first and is returned joined to
-  // it, so it can only be asked for once the first is done.
+  // it, so it can only be asked for once the first is done. A first half that
+  // was handed back and not kept ('served', see profileId above) has no
+  // content to join; the second comes back alone and the app joins the two.
   let first: Record<string, unknown> | null = null;
   if (part === "b") {
-    const a = await mine().select("content").match({ ...same, chart_key: chartKey, status: "done" }).limit(1).maybeSingle();
-    if (!a.data?.content) return reply(400, { code: "BAD_REQUEST" });
-    first = a.data.content as Record<string, unknown>;
+    const a = await mine().select("content").match({ ...same, chart_key: chartKey }).in("status", ["done", "served"]).limit(1).maybeSingle();
+    if (!a.data) return reply(400, { code: "BAD_REQUEST" });
+    first = (a.data.content as Record<string, unknown> | null) ?? null;
   }
 
   // Already written for this chart and period: hand it back, free.
@@ -538,7 +564,7 @@ Deno.serve(async (req) => {
   // Claim the key before paying for it. The partial unique index in schema.sql
   // lets only one pending or finished row exist per key, so a second press, or
   // a second tab, waits rather than paying twice.
-  const claim = await mine().insert({ ...same, status: "pending" }).select("id").single();
+  const claim = await mine().insert({ ...same, status: "pending", profile_id: profileId }).select("id").single();
   if (claim.error) {
     if (claim.error.code === "23505") return reply(409, { code: "PENDING" });
     console.error("oracle: claiming the row failed", claim.error);

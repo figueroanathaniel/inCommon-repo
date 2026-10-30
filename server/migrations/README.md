@@ -53,6 +53,22 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    again, which lists `chart_versions`. Tested by
    `tools/check-hd-study-rls.js`.
 
+6. `0006-server-holds-the-switch.sql`: the server holds "Save my profile to
+   my account" and "this profile is for someone else" (the follow-up review's
+   findings 4, 5 and 9, decided by the owner on 30 October 2026). A profile
+   row is emptied of its birth while the account's latest `birthData` event
+   is a revoke or its latest `birthCleared` a grant, and emptied whole while
+   its latest `forOther` is a grant, so a build older than the switch cannot
+   put the birth back. An Oracle reading gains `profile_id`; one finished for
+   such a profile is stored as `served` with no content, and the kept readings
+   of a profile that becomes withheld turn `withdrawn`. Apply after
+   `server/oracle/schema.sql`. **Deploy the Oracle function and the app that
+   go with it (taskforce/02-security-rls) before or with this file**: the app
+   resends a row after its events so that turning saving back on keeps the
+   birth (K86), and without that a reader who turns it back on loses the
+   account copy until the next change to the profile. Tested by
+   `tools/check-hd-study-rls.js`, rows WH1 to WH12.
+
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in.
 

@@ -1669,18 +1669,35 @@
      chapters to add) answers the first with them already in, and the second
      call is skipped. The page may pass onFirst, called with the first half as
      soon as it arrives, so it can be shown while the second is written. */
+  /* THE PROFILE THE DOSSIER WAS WRITTEN FROM travels with it, the active one
+     unless the page names another (server/migrations/0006). The server
+     stores it beside the reading so it can withdraw what was written from a
+     profile that stops being saved to the account or is marked as somebody
+     else's, and keeps no reading of such a profile; it refuses one marked as
+     somebody else's outright, which reads as forOther here. The id is the
+     random one the device made; it carries nothing of the birth. */
+  function activeProfileId() {
+    try { return (cfg && cfg.pm && cfg.pm.activeId()) || null; } catch (e) { return null; }
+  }
   function oracleRead(req) {
     if (!req) return oracleCall(req);
     var onFirst = typeof req.onFirst === 'function' ? req.onFirst : null;
     var body = Object.assign({}, req);
     delete body.onFirst;
+    if (body.profileId == null) { var pid = activeProfileId(); if (pid) body.profileId = pid; else delete body.profileId; }
     if (body.depth !== 'deep') return oracleCall(body);
     return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
       /* The first half is on its way to the page before the second is asked
          for, so the reader has something to read while it is written. */
       if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      return oracleCall(Object.assign({}, body, { part: 'b' }));
+      /* The server joins the two halves when it kept the first. When it did
+         not (the birth is not saved to the account, so nothing of the reading
+         is kept there), the second comes back alone and is joined here. */
+      return oracleCall(Object.assign({}, body, { part: 'b' })).then(function (b) {
+        if (b.ok && a.reading && b.reading) b.reading = Object.assign({}, a.reading, b.reading);
+        return b;
+      });
     });
   }
   function oracleCall(req) {
@@ -1698,6 +1715,9 @@
         /* The code decides first, because two failures share a status: the
            daily limit and the provider's rate limit are both 429. */
         if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
+        /* A profile the reader marked as made for somebody else: the Oracle
+           writes for the reader, and the server refused before asking. */
+        if (code === 'FOR_OTHER') return { ok: false, reason: 'forOther' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         /* The function gave up on Kimi (504 TIMEOUT). Kimi was writing, so it
