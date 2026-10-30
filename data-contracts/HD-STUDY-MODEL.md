@@ -252,9 +252,9 @@ rule 7).
 
 | Field | Values | Notes |
 |---|---|---|
-| `basis` | `card` / `stated` / `none` | `card`: the record came from a card, which says where it came from and not who agreed (F7, below). `stated`: the reader says the person agreed. `none`: typed or imported with no statement. |
+| `basis` | `card` / `stated` / `restored` / `none` | `card`: the record came from a card, which says where it came from and not who agreed (F7, below). `stated`: the reader says the person agreed. `restored`: what the reader's own backup noted (6.4); it keeps the record and notes its scope holds and opens no handout until the reader states it again (follow-up finding 11). `none`: typed or imported with no statement. |
 | `scope` | subset of `store`, `notes`, `handout` | what was agreed to |
-| `stated_at` | ISO or `null` | |
+| `stated_at` | ISO or `null` | the day the word was given. A word with no day, or dated after the handout, opens nothing, and a handout word lasts a year (`share-rules.js` `WORD_DAYS`), after which the reader asks again (follow-up finding 12) |
 | `withdrawn_at` | ISO or `null` | see withdrawal below |
 
 **`card` is where the record came from, not a consent** (privacy review F7). A
@@ -272,7 +272,15 @@ notes. Withdrawing `handout` stops handouts and deletes nothing, because the
 handouts already made were sent by the reader and the app cannot reach them.
 
 The app records a statement; it cannot verify one, and no screen may present
-`stated` as proof. For a `client`, adding the record asks for `basis` and
+`stated` as proof. What it can do is make the record say more, and it does:
+the day, the scope, and a year's life for a handout (finding 12). It remains a
+record and a moment of friction, not a protection, and the owner was told so on
+30 October 2026.
+
+**Another person's notes and name are past the default** (finding 10). A note
+is free text and can name the person, so the notes the reader picked go on a
+`person`'s handout only with that person's handout word, and so does their
+first name; on the reader's own chart they go as before. For a `client`, adding the record asks for `basis` and
 `scope` (a practitioner's working relationship is the case where asking is
 natural), and `notes_enabled` may be switched on only when `scope` holds
 `notes`. For a `person` nothing new is asked; the field defaults to `none`, or
@@ -311,10 +319,14 @@ trimming. A `client` cap is the owner's, with D4.
    imports the first rows up to the cap and names the rest as not imported.
 8. **Imported people come in with `subject_consent.basis: none`**, whatever the
    file says, and `source: 'import'`. A file's claim about consent is not the
-   person's. This includes inCommon's own export (6.4), which for that reason
-   does not carry `subject_consent` at all (privacy review F6): a field the
-   importer must discard is a field that reads, in the file, like a consent
-   record.
+   person's. inCommon's own export (6.4) carries no `subject_consent` and no
+   basis (privacy review F6); it carries `consent_noted`, the scope, the day
+   and any withdrawal the reader recorded, and `ShareRules.restoreConsent()`
+   turns that into `basis: restored`, which keeps the person's record and
+   notes where the scope held `store` and `notes` and opens no handout until
+   the reader states the word again (`confirmWord()`). So a practitioner's
+   restore no longer drops every client's notes (the follow-up review's
+   finding 11), and a file still cannot open a handout.
 9. **Duplicates update, they do not double**, by the people store's own
    `chart_hash`, as `add()` already does. That hash is the store's, computed on
    the device and never written into an export (6.4, F10); a chart version's
@@ -373,6 +385,7 @@ sheet. Never uploaded.
       "birth": { section 2.2 } | null,
       "versions": [ section 4 ],
       "notes": [ section 3 ],
+      "consent_noted": { "scope": [...], "noted_at": "...", "withdrawn_at": null }
     }
   ]
 }
@@ -381,8 +394,10 @@ sheet. Never uploaded.
 `includes` is written into the file so anybody opening it can see what it
 holds. `people` is O5's tick. Importing this file is 6.1 with every field it
 carries kept, notes included; `subject_consent` is not among them (6.1 rule 8,
-privacy review F6), and neither is `birth_key`, which the importer computes
-again (F10).
+privacy review F6), `consent_noted` comes back as `basis: restored` (rule 8),
+and `birth_key` is not carried; the importer computes it again (F10).
+`consent_noted` is written only for a person or a client whose record is
+`stated` or `restored`.
 
 **The file is plaintext and is named for what is in it** (privacy review F11):
 `inCommon charts, with birth data, 2026-10-30.json` or `inCommon charts, notes
@@ -692,8 +707,10 @@ specification, and the owner can move it to this session instead):
    The registration card and the first run always write the reader's own.
 3. The Oracle, the Cycle Audit's reading and Omni refuse a profile made for
    somebody else on the page, before anything is sent, the way they refuse the
-   sample chart. The server cannot tell the two apart, so the page is the only
-   place this can hold, which is why it must hold there.
+   sample chart. Since the follow-up the server refuses a reading too, with
+   `FOR_OTHER` (the cloud module's reason `forOther`), once the profile's mark
+   has reached the account; until then, and for Omni, which carries no profile,
+   the page is the only place it holds.
 4. No card is made from a profile made for somebody else.
 5. (c), moving a friend out of profiles: "Move to saved people" copies the
    birth into the saved people store with `subject_consent.basis: none`
@@ -722,13 +739,26 @@ each now says:
 | 1 | an empty birth on the server means both "cleared" and "not saved", so a clear with the switch off reached one device and another could upload the cleared birth | **built**: Clear birth data writes a `birthCleared` ledger event, which syncs whatever the switch says and carries no birth. A device whose birth is older than the clear (`birth_at`, stamped on every birth change) drops its birth, its history and its notes' `resolved` on the pull; a birth given after the clear writes the revoke and stands. K82, K83 |
 | 2 | the for_other mark never left its device, so another device could push the profile back | **built**: the mark is a `forOther` ledger event, and the marked profile goes up as an empty row carrying nothing but that event, because the ledger hangs off the row. Another device learns the mark on its next pull, even one that changed the profile since, keeps its own copy and journal, and sends back only the empty row. K79, K80, K84 |
 | 3 | share-rules.js shaped a profile made for somebody else as the reader's own | **fixed** on the security branch: a chart carrying `forOther` is shaped as `person`. T11 |
-| 4 | only an up to date client honours the switch and the mark; an older cached build still sends the birth | **the owner's**: a server rule (a trigger that empties the birth columns while the latest `birthData` event is a revoke, and the whole row while the latest `forOther` is a grant) or softer Privacy Policy wording. Recommended: the trigger, written as a numbered migration for workstream 2 to review, because the policy's sentence should be true of every build |
-| 5 | marking a profile for somebody else leaves the Oracle readings written from it, which are keyed by the account | **the owner's**: the readings carry no profile id, so finding them needs a column or a deletion by dossier key. Workstream 2's server function |
+| 4 | only an up to date client honours the switch and the mark; an older cached build still sends the birth | **built**, the owner's yes of 30 October 2026: migration 0006 empties a profile row by the account's ledger (birth while `birthData` is revoked or `birthCleared` granted, the whole row while `forOther` is granted) when the row arrives and when an event arrives, and refuses nothing; the push sends a row again after its own moved events (K86). Postgres rows WH1 to WH12. An older build loses its own local birth at its next pull until it reloads, which is the cost, said in the migration |
+| 5 | marking a profile for somebody else leaves the Oracle readings written from it, which are keyed by the account | **built**, the owner's yes: a reading carries `profile_id`; 0006 withdraws the kept readings of a profile that becomes withheld and keeps none of a withheld profile's new ones (`served`); the Oracle refuses a marked profile with `FOR_OTHER` (harness rows OR1 to OR10, K29d). Readings stored before carry no profile and are not found |
 | 6 | Privacy Policy section 14 did not get the (a) wording | **held on purpose**: the sentence describes a control, and until workstream 3 builds it there is no way to mark a profile. It ships with the screen (section 13, item 6). If the owner wants it now, it is one paragraph |
 | 7 | F9 is inert until the screens exist, and profiles already made for other people stay on the server | **true**. Workstream 3's spec gains: existing readers are asked once, on the profile list, which profiles are someone else's |
 | 8 | F3 versions sync, F11 and F12 are specified only; G6 is open | **true, and the tables in sections 12 and 13 say so**: built means built, specified means waiting on step 3 or 4 |
-| 9 to 12 | the Oracle with the switch off; notes on a person's handout; consent after restoring a backup; `stated` is a record, not a protection | **the owner's**, put to them with this section |
+| 9 | the Oracle with the switch off sends the dossier and the readings are kept | **fixed**, the owner's "fix now": the dossier still has to be sent for a reading to be written, but the account keeps no reading of a profile whose birth is not saved or was cleared, and switching off withdraws the kept ones (finding 5's mechanism). Privacy Policy section 6 says so |
+| 10 | a person's picked notes go on a handout with no word | **fixed**: notes and the first name are past the default on another person's chart (section 5, T12, T4) |
+| 11 | restoring a backup drops every client's consent | **fixed**: `consent_noted` and `basis: restored` (6.1 rule 8, T14) |
+| 12 | `stated` is a record, not a protection | **made a stricter record**, and still a record: dated, never in the future, a year's life for a handout, and the refusal says which (T13). Section 5 says what it cannot be |
 | 13, 14, 15, 16 | the card line in section 5, `chart_hash` in section 4 and 6.1, the old caution in 6.5, the word "agrees" in section 12 | **fixed** in this file |
+
+**Found while building finding 4, in this session's own fix for finding 2.**
+A push sent the empty row and the mark, then flushed the deletion marking had
+queued, and on the live schema deleting a profile takes its ledger: a
+debounced push, with no sync before it, left the account with neither, and the
+other device then dropped its copy. The fake database in the K rows kept the
+ledger on delete, which is why K79 to K84 passed. It cascades as the live one
+does now, the push flushes deletions first, and a flushed deletion of a profile
+still marked forgets what was sent for it so the next push sends it again (K85,
+red before).
 
 What finding 2's empty row still costs, said plainly: the account keeps a row
 with an id and nothing else for each profile made for somebody else, so that

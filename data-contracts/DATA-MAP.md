@@ -65,7 +65,7 @@ session arrives, the profile row goes up like any other.
 
 | Table | Written by | Holds | Read by the app |
 |---|---|---|---|
-| `oracle_readings` | `server/oracle` (service role) | per account, not per profile: `period`, `period_key`, `depth`, `chart_key` (a hash of the dossier, `.b` for a second half), `status`, `content`, `model` | own rows (select policy); the device also keeps its own copy, see `incommon.p.<pid>.oracle` |
+| `oracle_readings` | `server/oracle` (service role) | per account: `period`, `period_key`, `depth`, `chart_key` (a hash of the dossier, `.b` for a second half), `status`, `content`, `model`, and since migration 0006 `profile_id`, the profile the dossier was written from (null for a reading written before, or an id that is not a profile of the account). `status` `served` is a reading handed back and not kept (its profile was withheld, see below), `withdrawn` one that was kept until its profile was; neither has content, both count toward the daily limit | own rows (select policy); the device also keeps its own copy, see `incommon.p.<pid>.oracle` |
 | `subscriptions` | `server/billing` | Stripe customer and subscription ids, status, plan, period end | through the billing function |
 | `luminary_unlocks` | `server/billing` | the one time unlock: Stripe session id, amount, currency | through the billing function |
 | `store_subscriptions` | `server/store` | RevenueCat's word on an app purchase | through the billing function |
@@ -147,9 +147,23 @@ next push, and the device keeps its own copy; a saved profile still syncs from
 one day to the next as the 29 October answer asked. HD-STUDY-MODEL.md section
 13 has the rules, K75 to K78 hold them.
 
-**A profile made for somebody else is not sent at all** (F9, the owner's (b),
-30 October 2026): `for_other` on the profile; no row, memories, ledger or pair
-goes up, and marking a synced one deletes the account's copy (K79 to K81).
+**A profile made for somebody else goes up as an empty row and its mark** (F9,
+the owner's (b), 30 October 2026, and the follow-up review's finding 2):
+`for_other` on the profile; the row carries an id and nothing else, its
+`forOther` ledger events go with it so the account's other devices learn the
+mark, and no memory or pair goes up. Marking a synced one deletes the account's
+copy first, and a push flushes that deletion before it sends the empty row, or
+the deletion would take the mark with it (K79 to K81, K84, K85).
+
+**The server holds both rules too** (migration 0006, the follow-up review's
+finding 4, decided 30 October 2026). A profile row is emptied of its birth
+while the account's latest `birthData` event is a revoke or its latest
+`birthCleared` a grant, and emptied whole while its latest `forOther` is a
+grant, when the row arrives and again when an event arrives, so a build older
+than the switch cannot put the birth back. A row whose own switch or mark moved
+in a push is sent again after its events (K86). The Oracle readings of such a
+profile are not kept (`served`) and the kept ones are withdrawn (findings 5 and
+9). `tools/check-hd-study-rls.js` WH1 to WH12.
 
 **G3. The sync map and outbox are device wide, not per account (follow-up,
 client).** `incommon_cloud_map_v2` and `incommon_cloud_outbox_v2` are not
