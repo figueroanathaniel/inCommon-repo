@@ -6900,6 +6900,25 @@ a session that did not write the model.
   not who agreed. Nothing is spread, an unknown option is refused, and
   nothing is sent: there is no share link. An export never carries
   `subject_consent` or a key or hash of a birth. T1 to T10 hold it.
+- **Another person's notes and first name are past the default too**, and a
+  word is dated: it counts only with its `stated_at`, never after the moment
+  the caller passes as `now`, and for a year (`WORD_DAYS`). The module reads
+  no clock, so a handout made without `now` honours no word. A backup carries
+  `consent_noted` (no basis), and `restoreConsent()` brings it back as `basis:
+  restored`, which keeps the record and its notes and opens no handout until
+  `confirmWord()`. T12 to T14. It is still a record the app cannot verify.
+- **The server holds the switch and the mark** (migration 0006): a profile row
+  is emptied by the account's latest `birthData`, `birthCleared` and
+  `forOther` events, and an Oracle reading carries `profile_id`, so a withheld
+  profile's readings are `served` (not kept) or `withdrawn`, both still
+  counted toward the limit. The Oracle answers `FOR_OTHER` for a marked
+  profile. **The push resends a row after its own moved events** (K86), because
+  the rule reads the ledger when the row arrives; take that out and turning
+  saving back on keeps nothing. **A push flushes deletions first** (K85): the
+  deletion marking queues takes the profile's ledger on the live schema, and
+  flushed after the push it took the mark. The fake database in the K rows
+  cascades as the live one does; a fake that does not is how K79 to K84 passed
+  over that fault. `tools/check-hd-study-rls.js` WH1 to WH12.
 
 ## The image toolkit, and what it found
 Supplied by the owner on 27 October 2026, written by Meta AI, and run by the

@@ -117,3 +117,10 @@ were approved; from 28 October 2026 that work is committed here.
   the 1.2 primary: the 1.2 work merged here, share-rules.js 1.2.0 with T11
   (finding 3), SECURITY.md updated. Findings 4 (a server rule for older
   builds) and 5 (Oracle readings of a marked profile) wait on the owner.
+- 30 October 2026: the owner decided findings 4 and 5 (yes to both) and 9 to
+  12 (fix now). On this branch: migration 0006 (WH1 to WH12 on Postgres 16,
+  28 of 28), the Oracle function storing `profile_id` and refusing
+  `FOR_OTHER`, the app sending the profile and joining an unkept first half
+  (K29d), share-rules.js 1.3.0 (T12 to T14), Privacy Policy sections 5 and 6.
+  The schema branch's K85 fix (a push lost the mark) and K86 resend are merged
+  here. Nothing applied to the live project.

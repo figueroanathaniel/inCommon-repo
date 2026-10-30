@@ -253,12 +253,50 @@ K75 to K81.
 **A follow-up review of those answers (30 October 2026)** found the marks
 reached only the device that set them. Both travel in the consent ledger now
 (model section 14, K82 to K84), and `share-rules.js` 1.2.0 shapes a profile
-made for somebody else as that person's chart (T11). Two of its findings are
-the owner's and belong to this workstream when decided: a server rule so that
-an older build cannot send a birth the switch has turned off, or a profile
-that was marked for somebody else (finding 4), and removing the Oracle
-readings written from such a profile, which are keyed by the account and not
-the profile (finding 5).
+made for somebody else as that person's chart (T11).
+
+**The owner decided the rest the same day: the server holds the switch, the
+readings follow it, and findings 9 to 12 are fixed rather than accepted.**
+
+- **`server/migrations/0006-server-holds-the-switch.sql`** (finding 4) reads
+  the consent ledger, which syncs whatever the switch says: a profile row is
+  emptied of its birth while its latest `birthData` event is a revoke or its
+  latest `birthCleared` a grant, and emptied whole while its latest
+  `forOther` is a grant, when the row arrives and again when an event
+  arrives. Nothing is refused, because one refused upsert ends the push.
+  `profile_withheld()` and the three trigger functions are SECURITY DEFINER
+  with a fixed search_path and closed to anon and authenticated, so the API
+  cannot be asked about a profile by id; the ledger trigger touches only the
+  profile its event names, which the ledger's own policy has already checked,
+  and that profile's readings under its own account.
+- **Oracle readings carry `profile_id`** (findings 5 and 9). The Oracle
+  function stores it only for a profile of the reader's account, refuses a
+  profile marked for somebody else with `FOR_OTHER` before anything is
+  claimed, counted or sent to Kimi, and 0006 keeps no reading of a withheld
+  profile (`served`, no content) and withdraws the kept ones (`withdrawn`).
+  Both states still count toward the daily limit, so nobody lowers it by
+  turning a switch. Readings stored before carry no profile and are not
+  found; the Privacy Policy says so.
+- **`share-rules.js` 1.3.0** (findings 10 to 12): another person's notes and
+  first name need their word; a word counts only with its day, never dated
+  after the handout and for a year (`WORD_DAYS`), and a handout made without a
+  moment honours none; a backup notes each person's scope and day with no
+  basis, and a restore keeps the record and notes and asks again.
+  **`stated` is still a record, not a proof**: the app cannot verify it, and
+  these rules make it say more, not prove more.
+
+Proven by `tools/check-hd-study-rls.js` (now 28 cases: WH1 to WH12 are 0006,
+and the eight that test the rule are red without it), module rows K29d, K85,
+K86 and T12 to T14 (each red on the code before), and the Oracle function
+driven under Node against a fake Supabase and a fake Kimi for ten cases (OR1
+to OR10, the five core ones red on the function before). That harness was
+run, not committed; the function was typechecked strict only against a shim
+of the Supabase client, not its real types.
+
+**Apply order for the owner**: deploy the Oracle function and the app from
+this branch, then run 0006 after `server/oracle/schema.sql`. 0006 before the
+app means a reader who turns saving back on keeps no account copy until the
+profile next changes (the migration says why).
 
 ### Who may touch a chart version (Task 2)
 
