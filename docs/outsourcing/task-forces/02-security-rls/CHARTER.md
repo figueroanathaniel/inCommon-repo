@@ -101,3 +101,11 @@ were approved; from 28 October 2026 that work is committed here.
   `taskforce/01-data-schema` at b40444d (1.2's 0004 table), so the policies
   stack on the table they are for; it merges after Task Force 1, as the merge
   order says.
+- 30 October 2026: 2.2 Task 1 returned by a fresh session: not ready for
+  migrations, fourteen findings, answered in HD-STUDY-MODEL.md section 12 by
+  the 1.2 primary. On this branch: share-rules.js 1.1.0 (a card opens no
+  handout, F7; the export carries no subject_consent, F6, and no birth key,
+  F10), T4 and T9 changed and red on 1.0.0, the RLS harness on `birth_key`
+  (16 of 16), SECURITY.md updated. F13 was already met. F2 and F9 wait on the
+  owner. The review's own text is not in the repository; whether it is
+  committed or posted is the owner's call.

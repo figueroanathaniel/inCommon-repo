@@ -142,3 +142,10 @@ October 2026, so it is left alone; the file is here now.
   unchanged. Recorded in DATA-MAP.md G2.
 - 29 October 2026: the owner asked for 1.2 step 1 (the device half) to start
   before 2.2's review; built as profile-manager.js 1.6.0 with rows O9 to O18.
+- 30 October 2026: 2.2 Task 1, the privacy review, returned by a session that
+  did not write the model: not ready for migrations, fourteen findings. The
+  primary answered them in HD-STUDY-MODEL.md section 12: F4, F5 and F14 built
+  in profile-manager.js 1.6.1 (rows O19 to O21, each red on 1.6.0); F1, F6,
+  F7, F8, F10, F11 and F3 fixed or specified in the model; 0004's hash column
+  renamed `birth_key` before anything was applied. F2 and F9 wait on the
+  owner. The review's own text is not in the repository.

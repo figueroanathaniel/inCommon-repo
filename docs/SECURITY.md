@@ -239,6 +239,15 @@ here**: the model was written in the same session, and nobody reviews their
 own work (Helpers, item 2). It goes to a fresh session, and nothing below is
 applied to the live project until it is resolved.
 
+**That review came back on 30 October 2026: not ready for migrations,
+fourteen findings.** The model answers each in its section 12. What it changed
+here: `card` no longer opens a handout and the export carries no consent
+record and no birth key (F6, F7, F10, share-rules.js 1.1.0); 0004's column is
+`birth_key` now, and the harness below inserts into it. F13 (the two-step list
+and the account function) was already met by Task 2. Two findings, F2 and F9,
+are the owner's to decide, and the steps at the end of this section wait on
+them as well as on the review.
+
 ### Who may touch a chart version (Task 2)
 
 `server/migrations/0004-chart-versions.sql` (workstream 1) makes
@@ -313,8 +322,10 @@ and 1.2's export (step 5) call it; neither builds a payload of its own.
    it on**, because the measurement puts all of them on the identifying side.
    The place is a place name, never coordinates or a zone.
 4. **Another person's chart needs their recorded word** for anything in rule 3:
-   `subject_consent` with basis `card` or `stated`, `handout` in its scope, not
-   withdrawn. **A client's chart needs it for any handout at all.** The name is
+   `subject_consent` with basis `stated`, `handout` in its scope, not
+   withdrawn. **A card is not a word** (privacy review F7): it is sent from the
+   sender's active profile, which may be somebody else's chart, so `card`
+   records where a chart came from and opens nothing. **A client's chart needs it for any handout at all.** The name is
    off by default for anybody but the reader. (The model said off for a client;
    this is stricter, for any other person, and is the owner's to relax.)
 5. **A note travels as its words.** What its address resolved to never
@@ -322,12 +333,17 @@ and 1.2's export (step 5) call it; neither builds a payload of its own.
 6. **The export is the reader's backup**: their own birth, versions and notes by
    default, other people only on the separate tick (O5), and an `includes`
    header that says what the file holds. Without birth data it carries no
-   birth, no version and no resolved value for anybody.
+   birth, no version and no resolved value for anybody. It never carries
+   `subject_consent` (F6: an import resets it, and in a file it reads like a
+   consent record) or any hash or key of a birth (F10: one links a person
+   across files, and a hash of a birth is the birth to anybody who can
+   enumerate days and places).
 7. **Nothing is spread.** Every field is named and copied one at a time, and an
    unknown option is refused rather than ignored, so a misspelled option fails
    loudly instead of shipping what it meant to leave out.
 
-T1 to T10 in `tools/run-module-tests.js` hold it, against a chart object
+T1 to T10 in `tools/run-module-tests.js` hold it (T4 and T9 changed for F6,
+F7 and F10 on 30 October 2026, and both are red on share-rules.js 1.0.0), against a chart object
 stuffed with everything a screen's chart carries (coordinates, zone, stored
 hash, email, record id, full name, raw longitudes), and search the serialised
 payload for each value. All ten are red without the module; spreading the chart
@@ -335,8 +351,9 @@ into the payload turns T1 to T5 red, skipping the consent check T4 and T5, and
 ignoring an unknown option T6.
 
 **The synastry card is the precedent and stays different.** A card carries a
-birth moment on purpose, sent by the person it describes, which is that
-person's consent; a handout is the reader's summary of a chart and carries no
+birth moment on purpose, and the reader chose to send it. That is the sender's
+act, not proof that the person in the chart agreed, which is why rule 4 does
+not count it; a handout is the reader's summary of a chart and carries no
 birth moment unless rule 3 is turned on.
 
 **If a share link is ever wanted** (O6 reversed), it is a server table and its
@@ -348,6 +365,8 @@ the token. Not built.
 
 ### The owner's steps, in this order, once 2.2 Task 1 is resolved
 
+0. Decide F2 and F9 (model section 12), and change Privacy Policy sections 5
+   and 14 to name the version history, with the date moved (F12). Not before.
 1. SQL Editor: run `server/migrations/0004-chart-versions.sql`.
 2. SQL Editor: run `server/migrations/0005-chart-versions-policies.sql`.
 3. SQL Editor: run `server/mfa-policies.sql` again; its check query should now

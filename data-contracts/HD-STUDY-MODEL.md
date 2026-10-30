@@ -139,6 +139,15 @@ Plus `provisional: true` when the version's `time_state` is not `known` and the
 address can depend on the time (the two Moon activations and anything they
 define: the Chart address note measures the Moon at a line every 1.7 hours).
 
+**`resolved` is derived from the birth, so it is treated as birth data**
+(privacy review F4). Section 12 holds the measurement: a set of gate and line
+values names the birth day, and often the hour. So it goes only where the birth
+goes. Clear birth data sets every note's `resolved` to null, which reads as
+`unresolved` and keeps the words (built, O19). It never travels on a handout. It
+is in an export only when that export carries birth data. On the server it rides
+in the note's memory row only while the profile row holds a birth, and the push
+after a clear sends the nulled note.
+
 ### 3.2 When the birth data changes
 
 A note is never moved, rewritten or deleted because the chart changed. On
@@ -164,6 +173,11 @@ snapshot are both kept.
 | `profile:` | the profile's own key (section 7) | O1 (`journal` recommended) for sync; always kept on the device | on, as journal entries are |
 | `person:` | on the person record itself | the record's `notes_enabled` | **off**, by rule 1. Turning it off destroys `notes` and every chart note, in one write, by rule 2's reasoning. |
 
+`chart_note` is in ProfileManager's `MEMORY_CONSENT` as `journal`. Without
+that entry the sync's consent gate reads a missing category as allowed, so a note
+restored with no `consent_required` would leave with journal off. That is the
+K71 fault (privacy review F5; built, O20).
+
 A note on another person's chart never syncs under O3 (A), whatever the
 reader's journal switch says. The reader's consent switches are the reader's
 consent about the reader's data; they cannot consent for anybody else.
@@ -179,7 +193,7 @@ A version is a birth record (2.2) with an identity:
 | `seq` | 1, 2, 3 ... | per subject |
 | `reason` | `initial` / `time_corrected` / `date_corrected` / `place_corrected` / `zone_repaired` / `imported` | `zone_repaired` is O7 |
 | `birth` | section 2.2 | |
-| `chart_hash` | `PeopleLibrary.chartHash()` of the birth | the same hash the pair cache keys on, so two versions that describe one instant are recognised as one |
+| `birth_key` | the birth written out (`b1`, then date, time, unknown mark, lat, lon, zone, offset, joined by bars) | how two versions are compared. It was `chart_hash`, `PeopleLibrary.chartHash()`, until the privacy review: that hash carries STATE_VERSION, so the same birth read as a new version after every arithmetic change (F14), and a hash of a birth is the birth to anybody who can enumerate the days and places (F10), so it only looked like it hid something. It is never exported. |
 | `created_at` | ISO | |
 
 Rules:
@@ -200,6 +214,20 @@ Rules:
    version 1 and the new ones version 2.
 4. **Deleting the subject deletes every version.** Clear birth data deletes
    the history too (O8), on the device and, when synced, on the server.
+5. **A cleared history stays cleared on every device** (privacy review F3).
+   Clear birth data queues `del-chart-versions`. Three rules on the pull keep a
+   second device from bringing the history back, each with a K row that goes
+   red without it:
+   (a) a pending `del-chart-versions` for the profile stops the pull from
+   adding or keeping any version of it, as `del-memories` does for memories;
+   (b) a pulled profile row with no birth date deletes that profile's local
+   versions and nulls its notes' `resolved`, so a device that never saw the
+   clear still follows it;
+   (c) a device's first pull never resends `chart_versions` for a profile whose
+   server row holds no birth date. K66 resends absent rows on a first pull, to
+   repair an account an older build emptied, and that rule must not reach
+   versions: a version absent on the server is either not yet pushed, and its
+   profile has a birth, or cleared, and its profile has none.
 
 ## 5. Other people's charts, and a practitioner's clients
 
@@ -227,7 +255,21 @@ rule 7).
 | `basis` | `card` / `stated` / `none` | `card`: the person sent it (the only basis the app can see). `stated`: the reader says the person agreed. `none`: typed or imported with no statement. |
 | `scope` | subset of `store`, `notes`, `handout` | what was agreed to |
 | `stated_at` | ISO or `null` | |
-| `withdrawn_at` | ISO or `null` | a withdrawal clears `notes` from scope, which destroys the notes |
+| `withdrawn_at` | ISO or `null` | see withdrawal below |
+
+**`card` is where the record came from, not a consent** (privacy review F7). A
+card is sent from the sender's active profile, which may itself be somebody
+else's chart, so a card shows that a chart arrived, not that the person in it
+agreed to anything. Only `stated` with the act in `scope` permits anything past
+the default. `share-rules.js` follows that rule: `card` alone does not open a
+handout.
+
+**Withdrawing takes what was withdrawn** (privacy review F8). Withdrawing
+`store` deletes the record, its birth, its versions and its notes in one write,
+the same as deleting the person, because a record kept after its subject said
+no is the thing withdrawal exists to stop. Withdrawing `notes` destroys the
+notes. Withdrawing `handout` stops handouts and deletes nothing, because the
+handouts already made were sent by the reader and the app cannot reach them.
 
 The app records a statement; it cannot verify one, and no screen may present
 `stated` as proof. For a `client`, adding the record asks for `basis` and
@@ -269,7 +311,10 @@ trimming. A `client` cap is the owner's, with D4.
    imports the first rows up to the cap and names the rest as not imported.
 8. **Imported people come in with `subject_consent.basis: none`**, whatever the
    file says, and `source: 'import'`. A file's claim about consent is not the
-   person's.
+   person's. This includes inCommon's own export (6.4), which for that reason
+   does not carry `subject_consent` at all (privacy review F6): a field the
+   importer must discard is a field that reads, in the file, like a consent
+   record.
 9. **Duplicates update, they do not double**, by `chart_hash`, as `add()`
    already does.
 
@@ -326,25 +371,37 @@ sheet. Never uploaded.
       "birth": { section 2.2 } | null,
       "versions": [ section 4 ],
       "notes": [ section 3 ],
-      "subject_consent": { section 5 }
     }
   ]
 }
 ```
 
 `includes` is written into the file so anybody opening it can see what it
-holds. `people` is O5's tick. Importing this file is 6.1 with every field kept,
-notes included. Settings' existing `incommon.profile.v1` export gains the
+holds. `people` is O5's tick. Importing this file is 6.1 with every field it
+carries kept, notes included; `subject_consent` is not among them (6.1 rule 8,
+privacy review F6), and neither is `birth_key`, which the importer computes
+again (F10).
+
+**The file is plaintext and is named for what is in it** (privacy review F11):
+`inCommon charts, with birth data, 2026-10-30.json` or `inCommon charts, notes
+only, ...`, with `and other people` when O5's tick is on. That is honest about
+the file and does not protect it: nobody can encrypt it without a passphrase
+design, which this model does not add. `people-library.js` rule 5, "nothing
+leaves", stays true of the store and becomes false of a person the reader
+exports, so that module's header gains a sentence saying so in step 4. Settings' existing `incommon.profile.v1` export gains the
 profile's own versions and notes (they are the reader's data and an export that
 leaves them out is the G15 fault again); saved people join it only under O5.
 
 ### 6.5 What a handout carries (for 2.2 Task 3)
 
-The model defines the payload; 2.2 writes the rules. A handout is mechanics
-only: Type, Strategy, Authority, Profile, Definition, defined centres, defined
-channels, and whichever notes the reader picks. **Birth date, time and place
-are absent unless the reader turns each on.** The name is a first name and is
-off by default for a client.
+The model defines the payload; 2.2 writes the rules (`app/share-rules.js`). **A
+handout carries Type, Strategy, Authority, Profile, Definition and whichever
+notes the reader picks, and nothing else by default** (privacy review F1,
+measured in section 12). The defined centres, the defined channels, the gates
+and the activations are birth data for this purpose, exactly as the date, the
+time and the place are: each is off until the reader turns it on, and on
+another person's chart each needs that person's stated word. The name is a first
+name and is off by default for anybody but the reader.
 
 One caution for 2.2, and it is an inference from the motion rates the Chart
 address note measured, not a measurement: **a full activation list at line
@@ -379,7 +436,7 @@ gone, notes kept), delete profile (both keys gone).
 | Object | Change | RLS |
 |---|---|---|
 | `memories` | widen the `memory_type` check to add `chart_note`; the note is the memory's `content`, `consent_required` is O1's category | existing policies, existing two-step rule |
-| `chart_versions` | **new table**: `id bigint identity`, `profile_id uuid not null references profiles(id) on delete cascade`, `local_id text not null`, `seq int not null`, `reason text not null`, `birth jsonb not null`, `chart_hash text not null`, `created_at timestamptz not null`, unique `(profile_id, local_id)` | **enabled, no policies.** Workstream 2 writes them (2.2 Task 2), and it joins the list in `server/mfa-policies.sql`. |
+| `chart_versions` | **new table**: `id bigint identity`, `profile_id uuid not null references profiles(id) on delete cascade`, `local_id text not null`, `seq int not null`, `reason text not null`, `birth jsonb not null`, `birth_key text not null`, `created_at timestamptz not null`, unique `(profile_id, local_id)` | **enabled, no policies** in 0004; read, add and delete for the owner in 0005 (2.2 Task 2), no update, because a version is history. It is on the list in `server/mfa-policies.sql`. |
 
 Why notes ride in `memories`: the consent gate, the three way merge, the single
 row deletion (`del-memory`, K62) and the export already exist there, so a note
@@ -390,6 +447,17 @@ not a memory gate.
 The `memory_type` change is the one that can stop a push (K69): **the server
 is widened first, then `SYNC_MEMORY_TYPES` and K69 change together**, never
 the other way round.
+
+**Versions sync only while "Save my profile to my account" is on** (privacy
+review F2, the owner's to confirm in section 12). That switch sets the
+`birthData` consent, and the push does not read it today:
+`incommon-cloud.js` says "birthData is not a toggle" and sends profile rows
+whatever it says. A version history is more birth data than the profile row
+(every birth the reader ever gave), so the version push reads the switch even if
+the profile row goes on not reading it. Turning the switch off queues
+`del-chart-versions`. Whether the profile row should read the switch too is a
+fault in the sync module as it stands, not something this model adds, and
+section 12 raises it.
 
 Two new outbox operations: `del-chart-versions` (every version of a profile,
 for Clear birth data, O8) and nothing for notes (`del-memory` covers them).
@@ -409,11 +477,11 @@ The check the 1.2 secondary is asked to make.
 
 | Data | Consent category | Deleted by | Exported by |
 |---|---|---|---|
-| Own chart version | follows the profile row (G2) | delete profile (key and cascade), Clear birth data (key and `del-chart-versions`), delete account (cascade and account function) | `incommon.profile.v1` and `incommon.charts.v1` |
-| Own chart note | O1 (`journal`) | `del-memory` per note; delete profile; delete account | both exports, through memories; withheld from the export when its consent is off, as journal entries are today |
+| Own chart version | follows the profile row (G2), and only while "Save my profile" is on (F2) | delete profile (key and cascade), Clear birth data (key and `del-chart-versions`), delete account (cascade and account function) | `incommon.profile.v1` and `incommon.charts.v1` |
+| Own chart note | O1 (`journal`, in `MEMORY_CONSENT`); its `resolved` as birth data (F4) | `del-memory` per note; delete profile; delete account; Clear birth data nulls `resolved` | both exports, through memories; withheld from the export when its consent is off, as journal entries are today |
 | A person's or client's version | none: device only, governed by the record | deleting the person (one write) | `incommon.charts.v1` under O5 |
-| A person's or client's chart note | `notes_enabled`, and for a client `subject_consent.scope` holds `notes` | switching notes off, withdrawing consent, deleting the person | `incommon.charts.v1` under O5, with `includes.notes` |
-| `subject_consent` | none (it is the record of one) | with the person | with the person |
+| A person's or client's chart note | `notes_enabled`, and for a client `subject_consent.scope` holds `notes` | switching notes off, withdrawing `notes` or `store`, deleting the person | `incommon.charts.v1` under O5, with `includes.notes` |
+| `subject_consent` | none (it is the record of one) | with the person | never (F6) |
 | `birth_meta` | as the birth it describes | with the record | with the record |
 
 Not new, and carried as known: G6 (saved people not reached by profile
@@ -442,8 +510,8 @@ design claims for each:
    O3 (A); the card and the import both keep them on the device. To check: no
    push path reads `incommon.people.v1`, and the Oracle dossier never carries a
    saved person (it is built for the active profile).
-4. **A profile used for another person.** Not changed here, and worth a
-   finding of its own: a profile made for a partner syncs that person's birth
+4. **A profile used for another person.** Raised by the review as F9 and put
+   to the owner in section 12. As written before the review: a profile made for a partner syncs that person's birth
    data under the reader's account today, which Privacy Policy section 5
    describes as "your profiles". Whether that needs words or a control is
    workstream 2's call to raise.
@@ -468,8 +536,11 @@ stubbed auth schema, each migration idempotent with its DOWN:
    `app/profile-manager.js` 1.6.0, rows O9 to O18. If the review changes
    anything here, this step changes with it.
 2. Server (O2 (b)): `0004-chart-versions.sql` (the table, RLS on, no
-   policies) and `0005-memories-chart-note.sql` (the widened check), handed to
-   workstream 2 for policies before the owner applies them.
+   policies; written) and `0006-memories-chart-note.sql` (the widened check),
+   handed to workstream 2 for policies before the owner applies them. 0005 is
+   2.2's policies for 0004. **Before the owner applies 0004**: Privacy Policy
+   sections 5 and 14 name the version history (privacy review F12), in the
+   same change, with the date moved.
 3. Client sync, after the server is widened: `SYNC_MEMORY_TYPES`, K69, the
    `chart_versions` push and pull, `del-chart-versions`, K rows.
 4. People: section 5's fields in `people-library.js`, after 1.4 G6; the screens'
@@ -484,3 +555,64 @@ Screens (how a `changed` note looks, where a version list lives) are
 workstream 3's and 4's. Prices and caps for clients are D4. Group features need
 names of inCommon's own (D3). Colour, tone and base are 3.2's. The share link,
 if O6 changes, is 2.2 Task 3's to specify.
+
+## 12. The privacy review, and what changed (30 October 2026)
+
+2.2 Task 1 was done by a session that did not write this file, as section 9
+asks. Its verdict: **not ready for migrations**. Its report reached the owner
+as text and is not in this repository; the findings and what this file now
+says about each are below. Every line number it cited was read again here
+before anything was changed.
+
+Its measurement of section 9's question 6, over 30 targets, agrees with
+`tools/measure-handout-identifiability.js` (2.2 Task 3, 40 targets in a crowd
+of 3,000):
+
+| A handout carrying | The review: births that fit | Task 3: births alone among 3,000 |
+|---|---|---|
+| Type, Strategy, Authority, Profile, Definition | about 690,000 minutes | 2.4% |
+| that and the defined centres and channels | about 400 minutes, inside the birth year | 39% (centres), 88% (channels) |
+| the gate set alone | median 349 minutes, inside the birth year | 97% |
+| all 26 activations at gate and line | median 62 minutes, one stretch, on the birth day | 99.5%, one day in two centuries |
+
+| | Severity | Finding | Now |
+|---|---|---|---|
+| F1 | High | activations and gate lists are birth data; the default handout must be the five facets | **met.** 6.5 rewritten; `share-rules.js` already defaulted to the five (T rows) |
+| F2 | High | versions would sync with "Save my profile" off | **the owner's to confirm** (below); 7.2 proposes that versions read the switch |
+| F3 | High | Clear birth data does not reach a second device: no pull rule, K66 resends, the pull knows no `del-chart-versions` | **specified**, section 4 rule 5 (a) to (c); built with the sync, step 3, each with a K row |
+| F4 | High | `resolved` is derived birth data and survived Clear birth data | **built** (O19) and 3.1; handouts never carry it, exports only with birth data |
+| F5 | Medium | no `MEMORY_CONSENT` entry for `chart_note`, so a restored note would leave with journal off | **built** (O20) |
+| F6 | Medium | importing inCommon's own export could launder consent | **fixed**: the export carries no `subject_consent`, 6.1 rule 8 and 6.4 |
+| F7 | Medium | `card` overstates; an exported `stated` reads like a consent record | **fixed**: `card` is provenance only, section 5; `share-rules.js` asks for `stated` |
+| F8 | Medium | withdrawing consent kept the birth data | **fixed**: withdrawing `store` deletes the record, section 5 |
+| F9 | Medium | a profile made for another person syncs, feeds the Oracle and makes cards | **the owner's** (below) |
+| F10 | Medium | `chart_hash` is an unsalted hash of a birth and links a person across files | **fixed**: versions carry `birth_key`, the birth written out, never exported; 0004's column renamed |
+| F11 | Low | export files are plaintext with generic names; people-library rule 5 becomes false | **specified**, 6.4: named for contents, plaintext said plainly, rule 5's sentence in step 4 |
+| F12 | Low | Privacy Policy sections 5 and 14 must name the version history | **a precondition** of applying 0004, step 2 |
+| F13 | Low | `mfa-policies.sql` must be re-run and the account function must name `chart_versions` | **met** by 2.2 Task 2 (0005, the list, the account function, K74) |
+| F14 | Low | `chart_hash` carries STATE_VERSION, so the same birth reads as new after a bump | **built** (O21): `birth_key` |
+
+**Two decisions are the owner's, and nothing past step 1 is built until they
+are made.**
+
+- **F2. Should a version history leave the device while "Save my profile to my
+  account" is off?** Recommended: no. A version history is every birth the
+  reader ever gave, which is more than the profile row, and the switch is the
+  reader's own word about birth data leaving. This reads the owner's G2 answer
+  ("syncing remains constant when profile is saved") as a statement about a
+  saved profile, which it still is: saved, the history syncs and carries on
+  where the last device left it. **Found on the way, and wider than this
+  model:** the switch does not stop the profile row either. It sets the
+  `birthData` consent, and the push sends profile rows whatever that consent
+  says. So today the switch is a control that changes nothing about what is
+  sent. That is a fault in `incommon-cloud.js` as shipped, not in this model,
+  and it is raised for whoever owns the sync, with the owner deciding whether
+  the switch should gate the profile row or come off the screen.
+- **F9. A profile made for somebody else.** It syncs that person's birth under
+  the reader's account, feeds the Oracle, and is what a card is sent from.
+  Options: (a) say so in the Privacy Policy and change nothing else; (b) a
+  profile marked as somebody else's stays on the device, is not sent to the
+  Oracle and cannot send a card, which is O3 (A) applied to profiles; (c)
+  steer such a chart into saved people rather than profiles. Recommended: (b),
+  with (a) in the same change, because it is the rule this model already keeps
+  for every other person's chart.

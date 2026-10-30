@@ -1,4 +1,4 @@
-/*! share-rules.js: what a chart handout and a chart export may carry. V1.0.0 (UMD)
+/*! share-rules.js: what a chart handout and a chart export may carry. V1.1.0 (UMD)
  *
  * Assignment 2.2, Task 3. A birth date, time and place together identify a
  * person, and the person on a handout is often not the reader: a client, a
@@ -26,8 +26,10 @@
  * default. A client's chart needs it for any handout at all, because a
  * practitioner's handout is the thing a client is asked about
  * (data-contracts/HD-STUDY-MODEL.md, section 5). The word is the record the
- * reader keeps, subject_consent with basis card or stated and handout in its
- * scope, not withdrawn. The app cannot verify a stated consent and this file
+ * reader keeps, subject_consent with basis stated and handout in its scope,
+ * not withdrawn. A card is not a word: it is sent from the sender's active
+ * profile, which may be somebody else's chart, so it says where a record came
+ * from and nothing about who agreed (privacy review F7, 30 October 2026). The app cannot verify a stated consent and this file
  * does not pretend to; it only refuses to go further than the record says.
  *
  * A NAME ON A HANDOUT IS A FIRST NAME, and it is off by default for anybody
@@ -40,7 +42,11 @@
  * AN EXPORT is the reader's own backup, made and kept on the device. It carries
  * their own birth data and notes by default and other people only when the
  * reader ticks it (the owner's decision O5), and its includes header says what
- * is in it.
+ * is in it. It carries no subject_consent, because an import resets that
+ * whatever a file says and a field the importer must discard reads, in the
+ * file, like a consent record (F6). It carries no birth key or hash, which
+ * links one person across files and is the birth to anybody who can
+ * enumerate days and places (F10); an import computes its own.
  *
  * NOTHING HERE SENDS ANYTHING. There is no share link (O6): a handout or an
  * export leaves the device only through the reader's own download or share
@@ -55,7 +61,7 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var HANDOUT_SCHEMA = 'incommon.handout.v1';
   var EXPORT_SCHEMA = 'incommon.charts.v1';
   var KINDS = ['self', 'person', 'client'];
@@ -80,7 +86,7 @@
   function lineNo(v) { var n = +v; return n >= 1 && n <= 6 && Math.floor(n) === n ? n : null; }
   function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function hasWord(sc, what) {
-    return !!(sc && !sc.withdrawn_at && (sc.basis === 'card' || sc.basis === 'stated') &&
+    return !!(sc && !sc.withdrawn_at && sc.basis === 'stated' &&
       Array.isArray(sc.scope) && sc.scope.indexOf(what) !== -1);
   }
 
@@ -160,7 +166,7 @@
       out.birth = inc.birth_data ? birthOf(s.birth) : null;
       out.versions = inc.birth_data ? (Array.isArray(s.versions) ? s.versions : []).map(function (v) {
         return { id: text(v.id, 80), seq: +v.seq || null, reason: text(v.reason, 40), birth: birthOf(v.birth),
-          chart_hash: text(v.chart_hash, 80), created_at: text(v.created_at, 40) };
+          created_at: text(v.created_at, 40) };
       }) : [];
       out.notes = inc.notes ? (Array.isArray(s.notes) ? s.notes : []).map(function (n) {
         var nn = { id: text(n.id, 80), address: text(n.address, 80), version: n.version == null ? null : text(n.version, 80),
@@ -170,11 +176,6 @@
         if (inc.birth_data && n.resolved != null) nn.resolved = JSON.parse(JSON.stringify(n.resolved));
         return nn;
       }) : [];
-      if (s.kind !== 'self' && s.subject_consent) {
-        var sc = s.subject_consent;
-        out.subject_consent = { basis: text(sc.basis, 20), scope: Array.isArray(sc.scope) ? sc.scope.map(String) : [],
-          stated_at: sc.stated_at == null ? null : text(sc.stated_at, 40), withdrawn_at: sc.withdrawn_at == null ? null : text(sc.withdrawn_at, 40) };
-      }
       return out;
     });
     return { ok: true, file: { schema: EXPORT_SCHEMA, exported_at: (now ? new Date(now) : new Date()).toISOString(), includes: inc, subjects: list } };

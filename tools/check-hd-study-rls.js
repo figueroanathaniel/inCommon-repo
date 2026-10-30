@@ -143,7 +143,7 @@ function as(user, aal, body) {
 const COUNT_ALL = `select count(*) from public.chart_versions;`;
 function superCount(db) { return psql(db, COUNT_ALL).out; }
 function ins(local, profile) {
-  return `insert into public.chart_versions (profile_id, local_id, seq, reason, birth, chart_hash, created_at)
+  return `insert into public.chart_versions (profile_id, local_id, seq, reason, birth, birth_key, created_at)
     values ('${profile || PA}', '${local}', 1, 'initial', ${BIRTH}, 'h1', now());`;
 }
 

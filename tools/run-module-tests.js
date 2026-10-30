@@ -3142,14 +3142,14 @@ async function runCloudTests() {
     return { centres: all.centres, channels: all.channels, gates: all.gates.length, acts: Object.keys(all.activations[0]).sort().join(','),
       birth: all.birth, placeOnlyLeaks: srLeaks(place) };
   }));
-  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it needs their recorded word, and a withdrawn word is no word', {
-    plain: true, name: false, refused: 'no_consent', stated: true, card: true, withdrawn: 'no_consent', named: 'Ana'
+  t('T4', 'another person\'s chart: the default handout goes without their name; anything beyond it needs their stated word, a card is not a word (F7), and a withdrawn word is no word', {
+    plain: true, name: false, refused: 'no_consent', stated: true, card: 'no_consent', withdrawn: 'no_consent', named: 'Ana'
   }, sr(function () {
     var plain = SR.handout(srChart('person'));
     return { plain: plain.ok, name: 'name' in plain.payload,
       refused: SR.handout(srChart('person'), { include: { centres: true } }).reason,
       stated: SR.handout(srChart('person', { basis: 'stated', scope: ['store', 'handout'] }), { include: { gates: true } }).ok,
-      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'] }), { include: { birthDate: true } }).ok,
+      card: SR.handout(srChart('person', { basis: 'card', scope: ['handout'] }), { include: { birthDate: true } }).reason,
       withdrawn: SR.handout(srChart('person', { basis: 'stated', scope: ['handout'], withdrawn_at: '2026-10-29T00:00:00Z' }), { include: { centres: true } }).reason,
       named: SR.handout(srChart('person'), { include: { name: true } }).payload.name };
   }));
@@ -3179,7 +3179,7 @@ async function runCloudTests() {
   }));
   var srSubjects = [
     { kind: 'self', id: 'pSelf', display_name: 'Ana', birth: { date: '1985-03-10', time: '06:30', place: 'Chicago', lat: 41.8781, lon: -87.6298, zone: 'America/Chicago', secret: 'x' },
-      versions: [{ id: 'v1', seq: 1, reason: 'initial', birth: { date: '1985-03-10', time: '06:15' }, chart_hash: 'h1', created_at: '2026-10-29T00:00:00Z' }],
+      versions: [{ id: 'v1', seq: 1, reason: 'initial', birth: { date: '1985-03-10', time: '06:15' }, chart_hash: 'h1', birth_key: 'b1|x', created_at: '2026-10-29T00:00:00Z' }],
       notes: [{ id: 'n1', address: 'gate:20', version: 'v1', text: 'Mine.', resolved: { held: true }, created_at: 'a', updated_at: 'b' }] },
     { kind: 'person', id: 'pPerson', display_name: 'Bea', birth: { date: '1990-01-01' }, versions: [], notes: [],
       subject_consent: { basis: 'none', scope: [] } },
@@ -3192,12 +3192,15 @@ async function runCloudTests() {
     return { schema: f.schema, includes: f.includes, kinds: f.subjects.map(function (x) { return x.kind; }), versions: f.subjects[0].versions.length,
       notes: f.subjects[0].notes.length, resolved: !!f.subjects[0].notes[0].resolved, extra: 'secret' in f.subjects[0].birth };
   }));
-  t('T9', 'with people ticked the export carries them and their recorded word; without birth data it carries no birth, no version and no resolved value for anyone', {
-    kinds: ['self', 'person', 'client'], clientWord: 'stated', noBirth: true, refused: 'unknown_option'
+  t('T9', 'with people ticked the export carries them and no consent record or birth hash (F6, F10); without birth data it carries no birth, no version and no resolved value for anyone', {
+    kinds: ['self', 'person', 'client'], noConsent: true, noHash: true, noBirth: true, refused: 'unknown_option'
   }, sr(function () {
     var f = SR.exportFile(srSubjects, { people: true }).file, g = SR.exportFile(srSubjects, { people: true, birthData: false }).file;
     var j = JSON.stringify(g);
-    return { kinds: f.subjects.map(function (x) { return x.kind; }), clientWord: f.subjects[2].subject_consent.basis,
+    var fj = JSON.stringify(f);
+    return { kinds: f.subjects.map(function (x) { return x.kind; }),
+      noConsent: fj.indexOf('subject_consent') === -1 && fj.indexOf('stated') === -1,
+      noHash: fj.indexOf('chart_hash') === -1 && fj.indexOf('birth_key') === -1 && fj.indexOf('"h1"') === -1,
       noBirth: g.subjects.every(function (x) { return x.birth === null && x.versions.length === 0; }) && j.indexOf('resolved') === -1 && j.indexOf('1985') === -1 && j.indexOf('1970') === -1,
       refused: SR.exportFile(srSubjects, { everyone: true }).reason };
   }));
@@ -3206,6 +3209,41 @@ async function runCloudTests() {
   }, sr(function () {
     var src = fs.readFileSync(path.join(repo, 'app', 'share-rules.js'), 'utf8').split('\n').filter(function (l) { return !/^\s*(\/\*|\*)/.test(l); }).join('\n');
     return { clean: !/fetch\(|XMLHttpRequest|localStorage|sessionStorage|indexedDB|navigator\.|document\.|window\./.test(src) };
+  }));
+
+  /* ---- O19-O21: the 2.2 Task 1 privacy review of HD-STUDY-MODEL.md (30
+     October 2026). F4: what a note's address resolved to is derived from the
+     birth, so Clear birth data clears it. F5: a chart note is a journal
+     memory for the consent gate, or a missing entry reads as allowed. F14:
+     two versions are compared by the birth, not by a hash that moves with
+     STATE_VERSION. */
+  var rvDev = ownerStore(), rvPm = pmPage(rvDev);
+  var rvP = rvPm.createProfile({ name: 'Dee', birthDate: '1972-07-04', birthTime: '14:20', birthLocation: 'Chicago' });
+  t('O19', 'Clear birth data clears what every note resolved to and keeps its words, so a note reads unresolved and carries no gate or line of the cleared birth', {
+    resolved: [null, null], words: ['Moon here.', 'Type.'], status: 'unresolved', otherKept: { value: 'Generator' }
+  }, cv(function () {
+    rvPm.addChartNote(rvP.id, { address: 'activation:design:Moon', resolved: { value: '12.4' }, text: 'Moon here.' });
+    rvPm.addChartNote(rvP.id, { address: 'facet:type', resolved: { value: 'Projector' }, text: 'Type.' });
+    var other = rvPm.createProfile({ name: 'Eli', birthDate: '1999-09-09' });
+    rvPm.addChartNote(other.id, { address: 'facet:type', resolved: { value: 'Generator' }, text: 'Eli.' });
+    rvPm.updateProfile(rvP.id, { birthDate: '', birthTime: '', birthLocation: '', timeUnknown: false });
+    var n = rvPm.listChartNotes(rvP.id);
+    return { resolved: n.map(function (x) { return x.resolved; }), words: n.map(function (x) { return x.text; }),
+      status: rvPm.chartNoteStatus(n[0], { value: '12.4' }), otherKept: rvPm.listChartNotes(other.id)[0].resolved };
+  }));
+  t('O20', 'a chart note is held to the journal consent, like a journal entry', {
+    consent: 'journal'
+  }, cv(function () { return { consent: rvPm.consentFor('chart_note') }; }));
+  t('O21', 'a version is keyed by its birth, never by a hash carrying STATE_VERSION: no chart_hash, and the key names no arithmetic version', {
+    hasHash: false, keyed: true, noStateVersion: true, distinct: true
+  }, cv(function () {
+    rvPm.updateProfile(rvP.id, { birthDate: '1972-07-04', birthTime: '14:20' });
+    rvPm.updateProfile(rvP.id, { birthTime: '14:50' });
+    var v = rvPm.listChartVersions(rvP.id);
+    return { hasHash: v.some(function (x) { return 'chart_hash' in x; }),
+      keyed: v.every(function (x) { return /^b1\|/.test(x.birth_key || ''); }),
+      noStateVersion: v.every(function (x) { return !/\|v\d+\|/.test('|' + x.birth_key + '|') && x.birth_key.indexOf('|v') !== 0; }),
+      distinct: v.length === 2 && v[0].birth_key !== v[1].birth_key };
   }));
 
   /* A cover client whose sign ins come back owing a code or not, and whose
