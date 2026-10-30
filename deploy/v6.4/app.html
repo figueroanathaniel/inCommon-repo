@@ -4310,7 +4310,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   var PM = {
-    VERSION: '1.8.1',
+    VERSION: '1.8.2',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -4356,6 +4356,17 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       } catch (e) {}
       ACCOUNT_KEYS.forEach(function (k) { var a = scoped(k, sc.owner); if (out.indexOf(a) === -1) out.push(a); });
       return out;
+    },
+
+    /* The people this account's profiles saved, removed from people-library's
+       device wide store (G6). accountStorageKeys() matches key names, and that
+       store is one key holding every profile's people, so erasing the keys
+       leaves them: "erase this device" calls this first. Another account's
+       people, and the guest's, stay. */
+    forgetAccountPeople: function () {
+      var self = this, n = 0;
+      this._store().profiles.forEach(function (p) { self._forgetPeople(p.id); n++; });
+      return n;
     },
 
     /* The account is gone and the reader kept what was on the device: it
@@ -53418,6 +53429,9 @@ class Component extends DCLogic {
     const shut = { adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '' };
     const wipe = () => {
       const PM = this.PM();
+      /* The people this account saved first (G6): they live in one device wide
+         key, keyed by profile, which accountStorageKeys() cannot name. */
+      try { if (PM && PM.forgetAccountPeople) PM.forgetAccountPeople(); } catch (e) {}
       try { (PM && PM.accountStorageKeys ? PM.accountStorageKeys() : []).forEach(k => localStorage.removeItem(k)); } catch (e) {}
     };
     const keep = () => { const PM = this.PM(); if (PM && PM.releaseToGuest) PM.releaseToGuest(); };
