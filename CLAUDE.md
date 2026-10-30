@@ -6863,10 +6863,23 @@ does now (model section 13, K75 to K78):
   (`consentState()`). Do not make it read off: every profile given its birth
   after it was made would stop syncing the moment it did.
 - **A profile made for somebody else (`for_other`) sends an empty row and
-  its `forOther` ledger event, nothing else**, and marking a synced one
-  deletes the account's copy first (F9, K79 to K81). The empty row is how the
-  mark reaches the account's other devices, because the ledger hangs off the
-  row; a device that learns it keeps its own copy and journal (K84).
+  its `forOther` ledger event, nothing else** (F9, K79 to K81). **Marking
+  deletes nothing** (RV1, K88): migration 0006 empties the account's copy and
+  deletes its journal, Throughline and Oki rows when the mark lands, so a push
+  that fails leaves the account as it was. Do not queue `del-profile` on a
+  mark again: a failed push after it left another device reading the absence
+  as a deletion. The empty row is how the mark reaches the account's other
+  devices, because the ledger hangs off the row; a device that learns it
+  keeps its own copy and journal (K84).
+- **A deleted profile is deleted everywhere** (the owner, 30 October 2026).
+  `del-profile` writes a `deleted_profiles` record (0007) before it deletes
+  the row, and every pull deletes a recorded profile on its device, the
+  first pull included and over changes made there since (K89 to K91). The
+  record outlives the row because the row's cascade takes the ledger, and
+  without it any device still holding the profile sent it back. The server
+  drops whatever arrives for a recorded profile. The people it saved go with
+  it (`forgetOwner`, K94). The app ships after 0007 and 0008, never before:
+  its pull fails without the table (K93).
 - **Clear birth data is a `birthCleared` ledger event**, so it reaches every
   device whatever the switch says. A device drops its birth only when its own
   `birth_at` is older than the clear; a birth given since writes the revoke

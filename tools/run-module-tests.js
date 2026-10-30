@@ -1090,6 +1090,19 @@ const stubCompute = o => ({
     { same: cases.map(c => PL.normalize(c).instant === BTm.instant({ birthDate: c.birth_date, birthTime: c.birth_time || '',
       timeUnknown: !c.birth_time, timezone: c.birth_tz || '', tzOffset: c.tz_offset }).date.getTime()), v: PL.STATE_VERSION });
   PL.configure({ birthTime: null });
+
+  /* G6 (the owner, 30 October 2026: "if a profile is deleted, delete it
+     everywhere"): the people a profile saved go with it, in one write, and
+     another profile's stay. */
+  const st6 = memStore2();
+  PL.configure({ store: st6, compute: stubCompute });
+  PL.add('gone', { display_name: 'Ivy', birth_date: '1990-01-01' });
+  PL.add('gone', { display_name: 'Jun', birth_date: '1991-02-02' });
+  PL.add('stays', { display_name: 'Kai', birth_date: '1992-03-03' });
+  const fo = PL.forgetOwner('gone'), fo2 = PL.forgetOwner('gone');
+  t('P30', 'forgetting a profile removes every person it saved and nothing another profile saved, and asking twice is harmless',
+    { removed: fo.removed, again: fo2.removed, gone: PL.count('gone'), stays: PL.count('stays'), key: Object.keys(JSON.parse(st6.mem[PL.KEY])) },
+    { removed: 2, again: 0, gone: 0, stays: 1, key: ['stays'] });
 })();
 
 /* ------------------------------------------------------ Q: the pair cache */
@@ -2489,8 +2502,29 @@ async function runCloudTests() {
      PostgREST does: upserts on the named conflict columns, an identity id for
      the child tables, timestamps returned as +00:00, and pages by range. ---- */
   function memDB() {
-    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [] },
-      seq: 1, failSelect: null, failDelete: false, maxRows: 1000 };
+    var db = { t: { accounts: [], profiles: [], memories: [], consent_events: [], pairs: [], throughline_entries: [], oki_messages: [], deleted_profiles: [] },
+      seq: 1, failSelect: null, failDelete: false, failUpsert: null, noDeleted: false, maxRows: 1000 };
+    /* The live schema's on delete cascade from profiles (server/
+       cloud-schema.sql), the ledger included, and 0003's two person records:
+       a fake that kept the ledger hid that deleting a profile takes its marks. */
+    var cascade = function (gone) {
+      ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+        db.t[t] = db.t[t].filter(function (r) { return gone.indexOf(r.profile_id) === -1; });
+      });
+      db.t.pairs = db.t.pairs.filter(function (r) { return gone.indexOf(r.profile_a) === -1 && gone.indexOf(r.profile_b) === -1; });
+    };
+    /* Migration 0007, as it decides: a record of a deleted profile removes
+       its row and everything under it, and whatever arrives for that profile
+       afterwards is dropped without an error. */
+    var dead = function (pid) { return db.t.deleted_profiles.some(function (d) { return d.profile_id === pid; }); };
+    var dropped = function (table, row) {
+      if (table === 'profiles') return dead(row.id);
+      if (['memories', 'throughline_entries', 'oki_messages', 'consent_events'].indexOf(table) !== -1 && dead(row.profile_id)) return true;
+      if (table === 'pairs') return dead(row.profile_a) || dead(row.profile_b);
+      /* 0006: a profile marked as somebody else's keeps no journal,
+         Throughline entry or Oki message on the account. */
+      return !!db.withhold && ['memories', 'throughline_entries', 'oki_messages'].indexOf(table) !== -1 && db.latest(row.profile_id, 'forOther') === 'grant';
+    };
     var clone = function (x) { return JSON.parse(JSON.stringify(x)); };
     /* withhold: migration 0006's two triggers, as they decide. A profile row
        is judged by the account's latest event in each mark's scope when it
@@ -2524,6 +2558,16 @@ async function runCloudTests() {
       q.range = function (a, b) { q._range = [a, b]; return q; };
       q.then = function (res, rej) {
         var rows = db.t[table], out = { data: null, error: null };
+        if (table === 'deleted_profiles' && db.noDeleted) {
+          /* A project without migration 0007, as PostgREST answers it. */
+          out.error = { code: 'PGRST205', message: "Could not find the table 'public.deleted_profiles' in the schema cache" };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if ((q._op === 'upsert' || q._op === 'insert') && db.failUpsert === table) {
+          out.error = { message: 'Failed to fetch' };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if ((q._op === 'upsert' || q._op === 'insert') && dropped(table, q._row)) return Promise.resolve(out).then(res, rej);
         var match = function (x) { return q._f.every(function (f) { return f(x); }); };
         if (q._op === 'select') {
           if (db.failSelect === table) out.error = { message: 'fake read failure' };
@@ -2558,17 +2602,23 @@ async function runCloudTests() {
           else { if (row.id === undefined) row.id = db.seq++; rows.push(row); }
           if (db.withhold && table === 'profiles') db.withholdRow(hit || row);
           if (db.withhold && table === 'consent_events') db.t.profiles.forEach(function (x) { if (x.id === row.profile_id) db.withholdRow(x); });
+          if (db.withhold && table === 'consent_events' && db.latest(row.profile_id, 'forOther') === 'grant') {
+            ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+              db.t[t] = db.t[t].filter(function (r) { return r.profile_id !== row.profile_id; });
+            });
+          }
+          if (table === 'deleted_profiles') {
+            (hit || row).deleted_at = new Date().toISOString();
+            var was = db.t.profiles.filter(function (x) { return x.id === row.profile_id && x.account_id === row.account_id; }).map(function (x) { return x.id; });
+            db.t.profiles = db.t.profiles.filter(function (x) { return was.indexOf(x.id) === -1; });
+            cascade(was);
+          }
         } else if (q._op === 'delete') {
           if (db.failDelete) out.error = { message: 'Failed to fetch' };
           else {
             var gone = rows.filter(match).map(function (x) { return x.id; });
             db.t[table] = rows.filter(function (x) { return !match(x); });
-            /* The live schema's on delete cascade from profiles
-               (server/cloud-schema.sql), the ledger included: a fake that
-               kept the ledger hid that deleting a profile takes its marks. */
-            if (table === 'profiles') ['consent_events', 'memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
-              db.t[t] = db.t[t].filter(function (r) { return gone.indexOf(r.profile_id) === -1; });
-            });
+            if (table === 'profiles') cascade(gone);
           }
         }
         return Promise.resolve(out).then(res, rej);
@@ -2597,26 +2647,11 @@ async function runCloudTests() {
     C._setConfigForTests({ storage: store, pm: pm, core: null,
       placeholders: function () { return dev.placeholders; }, onPulled: function (r) { dev.pulled.push(r); } });
     C._setClientForTests(db.client, { user: { id: userId } });
-    /* The module subscribes in init(); the test seam skips init(), so the
-       deletion events are routed into the outbox here the same way. */
-    pm.subscribe(function (name, d) {
-      var o = JSON.parse(store.getItem('incommon_cloud_outbox_v2') || '[]');
-      if (name === 'profile:deleted') o.push({ op: 'del-profile', pid: d.id });
-      else if (name === 'profile:for-other' && d.forOther) o.push({ op: 'del-profile', pid: d.id });
-      else if (name === 'memory:deleted' && d.id) o.push({ op: 'del-memory', pid: d.profileId, id: String(d.id) });
-      else if (name === 'memory:deleted') o.push({ op: 'del-memories', pid: d.profileId, type: d.type || null });
-      else return;
-      store.setItem('incommon_cloud_outbox_v2', JSON.stringify(o));
-    });
+    /* The module subscribes in init(); the test seam skips init(), so each
+       event is handed to the module's own routing, which is what init()
+       subscribes, less the debounced push. */
+    pm.subscribe(function (name, d) { C._routeForTests(name, d); });
     return dev;
-  }
-  /* What the live schema's on delete cascade does when a profile row goes,
-     which the fake database does not do by itself. Only rows written before
-     the empty row was sent are taken. */
-  function odbCascade(db, pid) {
-    ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
-      db.t[t] = db.t[t].filter(function (r) { return r.profile_id !== pid; });
-    });
   }
   var tl = function (dev, pid) { return JSON.parse(dev.store.getItem('incommon.p.' + pid + '.throughline') || '[]'); };
   var counts = function (db) { var o = {}; Object.keys(db.t).forEach(function (k) { o[k] = db.t[k].length; }); return o; };
@@ -2830,6 +2865,7 @@ async function runCloudTests() {
 
   /* F9: a profile made for somebody else stays on the device. */
   var odb = memDB(), OU = 'bbbbbbbb-0000-4000-8000-0000000000b4';
+  odb.withhold = true;  // migration 0006, which the account now holds the mark by
   var devO = syncDevice(odb, OU);
   var mine = devO.pm.createProfile({ name: 'Ola', birthDate: '1983-03-08' });
   var theirs = devO.pm.createProfile({ name: 'Pia', birthDate: '1985-05-05', forOther: true });
@@ -2860,23 +2896,24 @@ async function runCloudTests() {
   var s80 = await devO.C.sync();
   devO.pm.addMemory({ profileId: late.id, type: 'journal', content: { t: 'written after' } });
   var s80b = await devO.C.sync();
-  /* The fake database does not cascade; the live schema does, and that is
-     read out of server/cloud-schema.sql rather than assumed. */
-  var memCascade = /create table if not exists memories \([\s\S]*?profile_id uuid not null references profiles\(id\) on delete cascade/.test(
-    fs.readFileSync(path.join(repo, 'server', 'cloud-schema.sql'), 'utf8'));
-  ts('K80', 'marking a synced profile as made for somebody else takes the account\'s copy away (its journal by the schema\'s cascade), nothing of it goes up again, and the profile and its journal stay on the device through the pulls after', {
-    wasThere: true, ok: true, okAgain: true, onServer: 'empty', cascade: true, newSent: false, local: 'Rae', localMem: 2, hash: false
+  /* 0006's rule deletes the journal when the mark arrives, which the fake
+     database does as the migration does; that the migration does is held by
+     check-hd-study-rls.js (WH17). Nothing is deleted from the device (RV1). */
+  var noDelQueued = !JSON.parse(devO.store.getItem('incommon_cloud_outbox_v2') || '[]').some(function (o) { return o.op === 'del-profile'; });
+  ts('K80', 'marking a synced profile as made for somebody else empties the account\'s copy and takes its journal by 0006\'s rule, queues no deletion, nothing of it goes up again, and the profile and its journal stay on the device through the pulls after', {
+    wasThere: true, ok: true, okAgain: true, onServer: 'empty', serverMem: 0, noDelQueued: true, newSent: false, local: 'Rae', localMem: 2, hash: false
   }, {
     wasThere: wasThere, ok: s80.ok, okAgain: s80b.ok, onServer: emptyRow(odb, late.id) ? 'empty' : odb.t.profiles.some(function (r) { return r.id === late.id; }),
-    cascade: memCascade, newSent: odb.t.memories.some(function (m) { return m.content && m.content.t === 'written after'; }),
+    serverMem: odb.t.memories.filter(function (m) { return m.profile_id === late.id; }).length, noDelQueued: noDelQueued,
+    newSent: odb.t.memories.some(function (m) { return m.content && m.content.t === 'written after'; }),
     local: (devO.pm.getProfile(late.id) || {}).name, localMem: devO.pm.getMemory({ profileId: late.id }).length,
     hash: JSON.stringify(devO.pm._store().profiles.filter(function (p) { return p.id === mine.id; })[0]).indexOf('for_other') !== -1
   });
 
+  await new Promise(function (r) { setTimeout(r, 5); });
   devO.pm.setProfileForOther(late.id, false);
-  odb.t.memories = odb.t.memories.filter(function (m) { return m.profile_id !== late.id; });  // what the cascade did
   var s81 = await devO.C.sync();
-  ts('K81', 'unmarked again, the profile and every entry it holds go back up, because what the device recorded as sent went with the account\'s copy', {
+  ts('K81', 'unmarked again, the profile and every entry it holds go back up, because what the device recorded as sent was forgotten when the mark moved', {
     ok: true, onServer: true, mem: ['about Rae', 'written after']
   }, { ok: s81.ok, onServer: odb.t.profiles.some(function (r) { return r.id === late.id; }),
     mem: odb.t.memories.filter(function (m) { return m.profile_id === late.id; }).map(function (m) { return m.content.t; }).sort() });
@@ -2923,6 +2960,7 @@ async function runCloudTests() {
     cleared: devG.pm.consentState('birthCleared', gp.id).granted });
 
   var mdb = memDB(), MU = 'bbbbbbbb-0000-4000-8000-0000000000c2';
+  mdb.withhold = true;
   var devJ = syncDevice(mdb, MU), devK = null;
   devJ.pm.createProfile({ name: 'Jo', birthDate: '1980-01-01' });
   var jp = devJ.pm.createProfile({ name: 'Kit', birthDate: '1982-02-02', birthTime: '02:02' });
@@ -2934,7 +2972,6 @@ async function runCloudTests() {
   devK.pm.updateProfile(jp.id, { name: 'Kit B' });  // changed on K since its last sync
   devJ.pm.setProfileForOther(jp.id, true);
   await devJ.C.sync();
-  odbCascade(mdb, jp.id);
   var s84 = await devK.C.sync(), s84b = await devK.C.sync();
   ts('K84', 'a device that changed the profile since its last sync still learns it was marked for somebody else: it keeps its own copy and journal, and sends back only the empty row', {
     ok: true, okAgain: true, marked: true, name: 'Kit B', birth: '1982-02-02', localMem: 1, empty: true, serverMem: 0
@@ -3032,6 +3069,159 @@ async function runCloudTests() {
     oldResolved: (yNotes.filter(function (n) { return n.text === 'Old birth.'; })[0] || {}).resolved,
     newResolved: (yNotes.filter(function (n) { return n.text === 'New birth.'; })[0] || {}).resolved,
     words: yNotes.map(function (n) { return n.text; }).sort() });
+
+  /* ---- K88: the 2.2 review's RV1 (30 October 2026). Marking a profile for
+     somebody else used to queue the deletion of the account's copy, flushed
+     before the push; a push that failed after the flush left the account
+     with neither the row nor the mark, and another device read the absence
+     as a deletion and dropped its own copy and journal. Nothing is deleted
+     now, so a failed push leaves the account as it was. ---- */
+  var rdb = memDB(); rdb.withhold = true;
+  var RU = 'bbbbbbbb-0000-4000-8000-0000000000c5';
+  var devR = syncDevice(rdb, RU);
+  devR.pm.createProfile({ name: 'Rio', birthDate: '1980-02-02' });
+  var rf = devR.pm.createProfile({ name: 'Sal', birthDate: '1988-08-08' });
+  devR.pm.setConsent('journal', true, rf.id);
+  devR.pm.addMemory({ profileId: rf.id, type: 'journal', content: { t: 'about Sal' } });
+  await devR.C.sync();
+  var devS = syncDevice(rdb, RU);
+  await devS.C.sync();
+  var sHad = devS.pm.getMemory({ profileId: rf.id }).length;
+  devR.pm.setProfileForOther(rf.id, true);
+  rdb.failUpsert = 'profiles';
+  var r88 = await devR.C.push();
+  rdb.failUpsert = null;
+  var kept88 = rdb.t.profiles.some(function (r) { return r.id === rf.id && r.name === 'Sal'; });
+  var s88 = await devS.C.sync();
+  var sKept88 = { has: !!devS.pm.getProfile(rf.id), mem: devS.pm.getMemory({ profileId: rf.id }).length };
+  var r88b = await devR.C.sync();
+  var s88b = await devS.C.sync();
+  ts('K88', 'a push that fails after a profile is marked for somebody else leaves the account as it was, and the other device keeps the profile and its journal; once the push lands, the account holds the empty row and the mark and that device still keeps its own copy', {
+    sHad: 1, pushOk: false, serverKept: true, sOk: true, sKept: { has: true, mem: 1 },
+    recovered: true, empty: true, serverMem: 0, sMarked: true, sAfter: { has: true, mem: 1, name: 'Sal' }
+  }, { sHad: sHad, pushOk: r88.ok, serverKept: kept88, sOk: s88.ok, sKept: sKept88,
+    recovered: !!(r88b.ok && s88b.ok), empty: emptyRow(rdb, rf.id),
+    serverMem: rdb.t.memories.filter(function (m) { return m.profile_id === rf.id; }).length,
+    sMarked: devS.pm.isForOther(rf.id),
+    sAfter: { has: !!devS.pm.getProfile(rf.id), mem: devS.pm.getMemory({ profileId: rf.id }).length, name: (devS.pm.getProfile(rf.id) || {}).name } });
+
+  /* ---- K89-K94: the owner's decision of 30 October 2026, "if a profile is
+     deleted, delete it everywhere" (the 2.2 review's RV3). The account keeps
+     a record of the deletion that outlives the row (migration 0007, which the
+     fake database does as the migration does; check-hd-study-rls.js DP1 to
+     DP13 hold the migration itself), and every device honours it. ---- */
+  var xdb = memDB(), XU = 'bbbbbbbb-0000-4000-8000-0000000000c6';
+  var devX = syncDevice(xdb, XU);
+  var xo = devX.pm.createProfile({ name: 'Xan', birthDate: '1970-01-01' });
+  var xp = devX.pm.createProfile({ name: 'Yul', birthDate: '1971-01-01' });
+  devX.pm.setConsent('journal', true, xp.id);
+  devX.pm.setConsent('journal', true, xo.id);
+  devX.pm.addMemory({ profileId: xp.id, type: 'journal', content: { t: 'about Yul' } });
+  devX.store.setItem('incommon.p.' + xp.id + '.throughline', JSON.stringify([{ id: 'm1793000000000', date: '2026-10-01', type: 'event', title: 'Met', manual: true }]));
+  await devX.C.sync();
+  var devY = syncDevice(xdb, XU); await devY.C.sync();
+  var devZ = syncDevice(xdb, XU); await devZ.C.sync();
+  var devV = syncDevice(xdb, XU); await devV.C.sync();
+  /* Saved people never leave a device, so each device holds its own. */
+  var people = function (dev) { return JSON.parse(dev.store.getItem('incommon.people.v1') || '{}'); };
+  [devX, devY].forEach(function (dev) {
+    var all = {}; all[xp.id] = [{ id: 'pa', display_name: 'Ivy' }]; all[xo.id] = [{ id: 'pb', display_name: 'Kai' }];
+    dev.store.setItem('incommon.people.v1', JSON.stringify(all));
+  });
+  devY.pm.updateProfile(xp.id, { name: 'Yul Y' });  // changed on Y since its last sync
+  var mapZ = JSON.parse(devZ.store.getItem('incommon_cloud_map_v2'));
+  mapZ.pulled = {};  // as a device on its first pull for the account
+  devZ.store.setItem('incommon_cloud_map_v2', JSON.stringify(mapZ));
+  devX.pm.deleteProfile(xp.id, 'Yul');
+  var x89 = await devX.C.sync();
+  var record89 = xdb.t.deleted_profiles.filter(function (r) { return r.profile_id === xp.id; });
+  var y89 = await devY.C.sync(), y89b = await devY.C.sync();
+  var gone = function (db, pid) {
+    return { row: db.t.profiles.some(function (r) { return r.id === pid; }),
+      mem: db.t.memories.filter(function (m) { return m.profile_id === pid; }).length,
+      tl: db.t.throughline_entries.filter(function (m) { return m.profile_id === pid; }).length,
+      ledger: db.t.consent_events.filter(function (m) { return m.profile_id === pid; }).length };
+  };
+  ts('K89', 'a profile deleted on one device is deleted on another that changed it since its last sync: gone from it with its keys and not sent back, and the account keeps only the record, which names the account and the profile and nothing else', {
+    xOk: true, record: [['account_id', 'deleted_at', 'profile_id']], yOk: true, yRemoved: 1, yHas: false, yKeysGone: true,
+    server: { row: false, mem: 0, tl: 0, ledger: 0 }, yOkAgain: true
+  }, { xOk: x89.ok, record: record89.map(function (r) { return Object.keys(r).filter(function (k) { return k !== 'id'; }).sort(); }),
+    yOk: y89.ok, yRemoved: y89.pull.profilesRemoved, yHas: !!devY.pm.getProfile(xp.id),
+    yKeysGone: devY.store.getItem('incommon.consent.' + xp.id) === null && devY.store.getItem('incommon.p.' + xp.id + '.throughline') === null,
+    server: gone(xdb, xp.id), yOkAgain: y89b.ok });
+
+  var z90 = await devZ.C.sync();
+  ts('K90', 'on a device\'s first pull for the account the deleted profile is deleted there, not sent again with its journal by the rule that repairs an older build\'s history', {
+    firstPull: true, ok: true, removed: 1, zHas: false, server: { row: false, mem: 0, tl: 0, ledger: 0 }
+  }, { firstPull: z90.pull.firstPull, ok: z90.ok, removed: z90.pull.profilesRemoved, zHas: !!devZ.pm.getProfile(xp.id), server: gone(xdb, xp.id) });
+
+  devV.pm.updateProfile(xp.id, { name: 'Yul V' });
+  devV.pm.addMemory({ profileId: xp.id, type: 'journal', content: { t: 'written on V after' } });
+  devV.pm.addMemory({ profileId: xo.id, type: 'journal', content: { t: 'about Xan, on V' } });
+  var v91 = await devV.C.push();
+  var v91s = gone(xdb, xp.id);
+  var v91b = await devV.C.sync();
+  ts('K91', 'a device that pushes before it has pulled the deletion lands nothing for the deleted profile and is not stopped by it: the rest of its push goes up, and its next pull deletes the profile there', {
+    pushOk: true, server: { row: false, mem: 0, tl: 0, ledger: 0 }, otherSent: true, syncOk: true, vHas: false
+  }, { pushOk: v91.ok, server: v91s,
+    otherSent: xdb.t.memories.some(function (m) { return m.profile_id === xo.id && m.content && m.content.t === 'about Xan, on V'; }),
+    syncOk: v91b.ok, vHas: !!devV.pm.getProfile(xp.id) });
+
+  var ldb = memDB(); ldb.withhold = true;
+  var LU = 'bbbbbbbb-0000-4000-8000-0000000000c7';
+  var devL = syncDevice(ldb, LU);
+  devL.pm.createProfile({ name: 'Lou', birthDate: '1975-05-05' });
+  var lp = devL.pm.createProfile({ name: 'Mae', birthDate: '1976-06-06' });
+  await devL.C.sync();
+  devL.pm.setProfileForOther(lp.id, true);
+  /* As an older build leaves the outbox: the deletion it queued on marking. */
+  devL.store.setItem('incommon_cloud_outbox_v2', JSON.stringify([{ op: 'del-profile', pid: lp.id }]));
+  var l92 = await devL.C.sync();
+  ts('K92', 'a deletion an older build queued when it marked a profile is dropped for a profile the device still holds: no record, the account keeps the empty row and the mark, and the queue is empty', {
+    ok: true, record: 0, empty: true, mark: 'grant', queued: 0, local: 'Mae'
+  }, { ok: l92.ok, record: ldb.t.deleted_profiles.length, empty: emptyRow(ldb, lp.id), mark: ldb.latest(lp.id, 'forOther'),
+    queued: JSON.parse(devL.store.getItem('incommon_cloud_outbox_v2') || '[]').length, local: (devL.pm.getProfile(lp.id) || {}).name });
+
+  var ndb = memDB(); ndb.noDeleted = true;
+  var NU = 'bbbbbbbb-0000-4000-8000-0000000000c8';
+  var devN = syncDevice(ndb, NU);
+  devN.pm.createProfile({ name: 'Ned', birthDate: '1960-01-01' });
+  var np = devN.pm.createProfile({ name: 'Ora', birthDate: '1961-01-01' });
+  await devN.C.push();
+  devN.pm.deleteProfile(np.id, 'Ora');
+  var n93 = await devN.C.sync();
+  ts('K93', 'against a project without migration 0007 a pull reads as failed and applies nothing, and the deletion stays queued with the row still on the account', {
+    pullOk: false, queued: 1, serverRow: true, localHas: false
+  }, { pullOk: n93.pull.ok, queued: JSON.parse(devN.store.getItem('incommon_cloud_outbox_v2') || '[]').length,
+    serverRow: ndb.t.profiles.some(function (r) { return r.id === np.id; }), localHas: !!devN.pm.getProfile(np.id) });
+
+  /* Marked and taken back again with only pushes between, as the debounce
+     sends them: the account's journal went when the mark landed, so what this
+     device recorded as sent has to go too, or the next pull reads the gap as
+     entries deleted elsewhere and removes them here. */
+  var udb = memDB(); udb.withhold = true;
+  var UU = 'bbbbbbbb-0000-4000-8000-0000000000c9';
+  var devU = syncDevice(udb, UU);
+  devU.pm.createProfile({ name: 'Una', birthDate: '1966-06-06' });
+  var up = devU.pm.createProfile({ name: 'Val', birthDate: '1967-07-07' });
+  devU.pm.setConsent('journal', true, up.id);
+  devU.pm.addMemory({ profileId: up.id, type: 'journal', content: { t: 'about Val' } });
+  await devU.C.sync();
+  devU.pm.setProfileForOther(up.id, true);
+  await devU.C.push();
+  var uGone = udb.t.memories.filter(function (m) { return m.profile_id === up.id; }).length;
+  await new Promise(function (r) { setTimeout(r, 5); });
+  devU.pm.setProfileForOther(up.id, false);
+  await devU.C.push();
+  var u95 = await devU.C.sync();
+  ts('K95', 'a profile marked and taken back with only pushes between keeps its journal on the device, and the journal goes back up to the account', {
+    goneWhileMarked: 0, ok: true, local: 1, server: 1
+  }, { goneWhileMarked: uGone, ok: u95.ok, local: devU.pm.getMemory({ profileId: up.id }).length,
+    server: udb.t.memories.filter(function (m) { return m.profile_id === up.id; }).length });
+
+  ts('K94', 'the people a deleted profile saved go with it on the device it was deleted on and on the device that learned it, and another profile\'s saved people stay', {
+    x: [xo.id], y: [xo.id]
+  }, { x: Object.keys(people(devX)), y: Object.keys(people(devY)) });
 
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
      archive_deleted memory, a type the live table's check constraint
@@ -3152,7 +3342,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 6, bad: [], listedInOrder: true, uncovered: []
+    files: 8, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
@@ -3626,6 +3816,41 @@ async function runCloudTests() {
       keyed: v.every(function (x) { return /^b1\|/.test(x.birth_key || ''); }),
       noStateVersion: v.every(function (x) { return !/\|v\d+\|/.test('|' + x.birth_key + '|') && x.birth_key.indexOf('|v') !== 0; }),
       distinct: v.length === 2 && v[0].birth_key !== v[1].birth_key };
+  }));
+
+  /* ---- O22-O24: deleted everywhere, on the device (the owner, 30 October
+     2026), and the ledger's fifty event cap (the 2.2 review's note). ---- */
+  t('O22', 'a deletion another device made that would leave this device with no profile starts it over with a fresh one, which is active, and the deleted one goes with its keys', {
+    names: ['Default Profile'], active: true, gone: true, keysGone: true
+  }, cv(function () {
+    var d1 = ownerStore(), p1 = pmPage(d1), only = p1.createProfile({ name: 'Uma', birthDate: '1990-01-01' });
+    p1.importSynced({ deletedProfiles: [only.id] });
+    var list = p1.listProfiles();
+    return { names: list.map(function (x) { return x.name; }), active: p1.activeId() === list[0].id,
+      gone: !p1.getProfile(only.id), keysGone: d1.getItem('incommon.consent.' + only.id) === null };
+  }));
+  t('O23', 'the ledger keeps its last fifty events and never drops the latest event of a consent to do it, here and when another device\'s events are merged in', {
+    hasForOther: true, hasBirthData: true, length: 52, merged: true
+  }, cv(function () {
+    var d2 = ownerStore(), p2 = pmPage(d2), lg = p2.createProfile({ name: 'Lee', birthDate: '1990-01-01' });
+    p2.setConsent('forOther', true, lg.id);
+    for (var i = 0; i < 60; i++) p2.setConsent('journal', i % 2 === 0, lg.id);
+    var ev = JSON.parse(d2.getItem('incommon.consent.' + lg.id)).events;
+    p2.importSynced({ consents: (function () { var o = {}; o[lg.id] = [{ ts: '2099-01-01T00:00:00.000Z', id: 'mood', granted: true }]; return o; })() });
+    var ev2 = JSON.parse(d2.getItem('incommon.consent.' + lg.id)).events;
+    return { hasForOther: ev.some(function (e) { return e.id === 'forOther'; }), hasBirthData: ev.some(function (e) { return e.id === 'birthData'; }),
+      length: ev.length, merged: ev2.some(function (e) { return e.id === 'forOther'; }) && ev2.some(function (e) { return e.id === 'mood'; }) };
+  }));
+  t('O24', 'deleting a profile here forgets the people it saved, without people-library.js loaded, and keeps another profile\'s', {
+    keys: ['other']
+  }, cv(function () {
+    var d3 = ownerStore(), p3 = pmPage(d3);
+    p3.createProfile({ name: 'Vic', birthDate: '1990-01-01' });
+    var dp = p3.createProfile({ name: 'Wes', birthDate: '1991-01-01' });
+    var all = { other: [{ id: 'x' }] }; all[dp.id] = [{ id: 'y' }];
+    d3.setItem('incommon.people.v1', JSON.stringify(all));
+    p3.deleteProfile(dp.id, 'Wes');
+    return { keys: Object.keys(JSON.parse(d3.getItem('incommon.people.v1'))) };
   }));
 
   /* A cover client whose sign ins come back owing a code or not, and whose

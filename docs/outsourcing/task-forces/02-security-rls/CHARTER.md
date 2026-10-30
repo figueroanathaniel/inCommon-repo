@@ -150,3 +150,23 @@ were approved; from 28 October 2026 that work is committed here.
   too"): 0006 drops a memory, Throughline entry or Oki message that arrives
   for a profile marked as somebody else's and deletes the ones held when the
   mark arrives (WH17, WH18, red without the file; the harness 34 of 34).
+- 30 October 2026: the 2.2 reviewer reviewed the standing pull requests at
+  7e317dd and fd745a1, at the owner's request: not ready on both, with RV1
+  (marking a profile deleted the account's copy before a push that could
+  fail, so another device dropped its copy and journal) and RV3 (a deleted
+  profile came back; the owner decided in that session "if a profile is
+  deleted, delete it everywhere", and confirmed here with saved people
+  included). Both fixed on this branch, because both rest on its migrations:
+  marking deletes nothing (K88, K92, K95); migration 0007 records a deletion
+  in `deleted_profiles` and drops whatever arrives for it later, 0008 lets a
+  reader read and add their own records only (DP1 to DP13, the harness 47 of
+  47); every pull deletes a recorded profile, the first pull and local
+  changes included (K89 to K91, K93); the people a profile saved go with it
+  (people-library.js 1.1.0, profile-manager.js 1.8.0, P30, K94, O24); the
+  ledger keeps the latest event of every consent past its cap of fifty (O23).
+  Module tests 515 of 515. Model section 15, DATA-MAP.md, SECURITY.md and
+  Privacy Policy section 5 updated. **Handed to workstream 3**: Delete account
+  with "erase this device" still leaves the account's saved people, because
+  the erase loop is in the app file; it needs `PM._forgetPeople(id)` for each
+  of the account's profiles before `accountStorageKeys()` is removed. Nothing
+  applied to the live project.

@@ -47,7 +47,7 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   /* Bumped whenever the shape or the arithmetic of computed_state changes, so
      stored records can be recognised as stale and recomputed. It is also what
      invalidates the pair cache. 2: the ten astral bodies moved from the
@@ -351,6 +351,18 @@
     return { ok: true, removed: id, notesDestroyed: gone.notes != null };
   }
 
+  /* Every record a profile saved goes, in one write, when that profile is
+     deleted, here or on another device (G6, the owner, 30 October 2026: "if
+     a profile is deleted, delete it everywhere"). profile-manager.js asks
+     for it; nothing else does. */
+  function forgetOwner(owner) {
+    var o = String(owner), all = read();
+    if (!Object.prototype.hasOwnProperty.call(all, o)) return { ok: true, removed: 0 };
+    var n = (all[o] || []).length;
+    delete all[o]; write(all);
+    return { ok: true, removed: n };
+  }
+
   /* Turning notes off destroys them. The switch is not a visibility toggle:
      a reader who turns notes off for somebody has said they do not want them
      held, and holding them anyway while hiding them is the opposite of what
@@ -432,7 +444,7 @@
     configure: configure, sha256hex: sha256hex,
     normalize: normalize, chartHash: chartHash, computeStateFor: computeStateFor,
     list: list, count: count, room: room, get: get,
-    add: add, update: update, remove: remove,
+    add: add, update: update, remove: remove, forgetOwner: forgetOwner,
     enableNotes: enableNotes, setNotes: setNotes, display: display,
     migrateLegacy: migrateLegacy
   };

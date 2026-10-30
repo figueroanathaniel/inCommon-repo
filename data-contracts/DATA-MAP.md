@@ -93,13 +93,13 @@ write the same record, `incommon.consent.<pid>`.
 | Item | Log Out | Delete account, server | Delete account, device "erase" | Delete account, device "keep" | Clear birth data | Delete profile |
 |---|---|---|---|---|---|---|
 | Session `sb-...-auth-token` | gone (local scope) | auth user deleted | signed out locally | signed out locally | stays | stays |
-| Profile store and its profile keys | stay, under `.u.<uid>` | every row of every cloud table above, then the auth user | `accountStorageKeys()` removes them | moved to the guest (`releaseToGuest`) | birth date, time, place, coordinates and zone blanked, time question unanswered; pushed when signed in | removed, and the server row by `del-profile` |
+| Profile store and its profile keys | stay, under `.u.<uid>` | every row of every cloud table above, then the auth user | `accountStorageKeys()` removes them | moved to the guest (`releaseToGuest`) | birth date, time, place, coordinates and zone blanked, time question unanswered; pushed when signed in | removed, here and on every device signed in to the account; the server records it in `deleted_profiles` (0007), which removes the row and everything under it and drops what arrives for it later |
 | `cast_counters`, `entitlements` rows | stay | **not deleted** (G4) | | | | |
 | `support_requests` | stay | kept, `user_id` set null (by design, Privacy Policy) | | | | |
 | `contact_phone`, newsletter metadata | stay | go with the auth user | | | | |
 | `incommon.p.<pid>.birthName` | stays | | removed | stays, under its profile id, now the guest's | **stays** (G5) | **stays** (G5) |
 | `incommon.theme.<pid>` | stays | | removed | stays | stays | **stays** (G5) |
-| `incommon.people.v1` rows for the profile | stay | | **stay** (G6) | stay | stay | **stay** (G6) |
+| `incommon.people.v1` rows for the profile | stay | | **stay** (G6) | stay | stay | removed here and on every device that syncs (`forgetOwner`) |
 | `incommon.p.<pid>.oracle` readings | stay | server copies deleted | removed | stay | stay (no longer match the chart) | removed |
 | `incommon.voice.marks`, `incommon.geocache`, `incommon.practice.sleep7` | stay | | **stay** (G7) | stay | stay | stay |
 | Sync map and outbox | stay, and are shared with the next account (G3) | | removed | removed | stay | outbox gains `del-profile` |
@@ -194,7 +194,10 @@ and Soul Urge go on being drawn from it. `accountStorageKeys()` does find both, 
 matches on the profile id.
 
 **G6. Saved people survive deleting their profile and erasing the account
-(follow-up, client).** `incommon.people.v1` holds every profile's saved people
+(follow-up, client).** **Deleting the profile: fixed** on 30 October 2026
+(`forgetOwner()`, P30, K94, O24). **Erasing the account: open**, because the
+erase loop is in the app file (workstream 3); it needs one call per profile
+before the keys go. `incommon.people.v1` holds every profile's saved people
 in one key, keyed inside by profile id, so neither `_dropProfileKeys()` nor
 `accountStorageKeys()` (which match key names) reaches them. These are other
 people's birth details. `incommon.paircache.v1` is the same shape and holds

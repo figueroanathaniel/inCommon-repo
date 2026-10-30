@@ -50,6 +50,8 @@
      claims it, along with the ACCOUNT_KEYS below. Every account after that
      starts on a blank page, and the guest store starts blank once claimed. */
   var ACCOUNT_KEYS = ['incommon.firstrun', 'incommon.sample', 'incommon.friends', 'incommon.adverse.log', 'incommon.mem.archived'];
+  /* people-library.js's store, device wide, { <profile id>: [records] }. */
+  var PEOPLE_KEY = 'incommon.people.v1';
   var SCOPE = null;
   function owesCode(st) {
     try {
@@ -141,6 +143,19 @@
     return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   }
   function nowISO() { return new Date().toISOString(); }
+  /* The ledger keeps its last fifty events, and never drops the latest event
+     of a consent to do it: the sync module sends the ledger from this list,
+     and a mark (forOther, birthData, birthCleared) pushed out of it would
+     never reach the account again (the 2.2 review's note, 30 October 2026). */
+  function keepEvents(list) {
+    var tail = list.slice(-50), last = {};
+    list.forEach(function (e, i) { if (e && e.id) last[e.id] = i; });
+    var start = list.length - tail.length;
+    var extra = Object.keys(last).map(function (k) { return last[k]; })
+      .filter(function (i) { return i < start; }).sort(function (a, b) { return a - b; })
+      .map(function (i) { return list[i]; });
+    return extra.concat(tail);
+  }
   function read(k, fb) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function drop(k) { try { localStorage.removeItem(k); } catch (e) {} }
@@ -249,7 +264,7 @@
   }
 
   var PM = {
-    VERSION: '1.7.1',
+    VERSION: '1.8.0',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -581,8 +596,31 @@
       if (s.activeId === id) { s.activeId = s.profiles[0].id; this.clearOkiContext(); }
       this._save(s);
       this._dropProfileKeys(id);
+      this._forgetPeople(id);
       this._emit('profile:deleted', { id: id });
       return this.getActiveProfile();
+    },
+
+    /* The people this profile saved go with it (G6, the owner, 30 October
+       2026: "if a profile is deleted, delete it everywhere"). The saved
+       people store is people-library.js's and device wide, keyed inside by
+       the profile that saved them, so neither this module's keys nor the
+       account's cascade reach it. Its own forgetOwner() is asked when the
+       module is loaded; without it the one entry is removed directly, so the
+       deletion does not depend on a module having loaded. Called for a
+       deletion made here and for one another device made, never for the
+       sample giving way to the account's own profile. */
+    _forgetPeople: function (id) {
+      var PL = null;
+      try { PL = typeof window !== 'undefined' && window.PeopleLibrary; } catch (e) { PL = null; }
+      if (PL && typeof PL.forgetOwner === 'function') { PL.forgetOwner(id); return; }
+      try {
+        var all = JSON.parse(localStorage.getItem(PEOPLE_KEY) || 'null');
+        if (all && typeof all === 'object' && Object.prototype.hasOwnProperty.call(all, String(id))) {
+          delete all[String(id)];
+          localStorage.setItem(PEOPLE_KEY, JSON.stringify(all));
+        }
+      } catch (e) {}
     },
 
     /* Cascade: every scoped key for this profile is removed. Shared by a
@@ -797,7 +835,7 @@
       if (!rec || !rec.consents) { this.initConsents(pid); rec = read(k, null); }
       rec.consents[type] = { granted: !!granted, updatedAt: ts };
       rec.updatedAt = ts;
-      rec.events = (rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]).slice(-50);
+      rec.events = keepEvents((rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]));
       write(k, rec);
       this._emit('consent:changed', { profileId: pid, type: type, granted: !!granted });
       return this.getConsents(pid);
@@ -1045,7 +1083,39 @@
        d.recalc          ids whose birth data changed */
     importSynced: function (d) {
       d = d || {};
-      var s = this._store(), self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      var self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      /* Deleted on another device, and so deleted here, whatever this device
+         did to it since (the owner, 30 October 2026: "if a profile is
+         deleted, delete it everywhere"). Every screen reads a profile, so a
+         device the deletion would leave with none starts over with a fresh
+         one first, as the delete dialog does on the device it was deleted on;
+         that one is new here and goes up like any other. */
+      var dead = {};
+      (d.deletedProfiles || []).forEach(function (id) { dead[id] = 1; });
+      var s0 = this._store();
+      if ((d.deletedProfiles || []).length && !s0.profiles.some(function (p) { return !dead[p.id]; }) &&
+          !(d.profiles || []).some(function (p) { return p && !dead[p.id]; })) {
+        try {
+          var fresh = this.createProfile({ name: 'Default Profile' });
+          var s1 = this._store(); s1.activeId = fresh.id; s1.defaultId = fresh.id; this._save(s1);
+        } catch (e) {
+          /* Six profiles, all deleted elsewhere: no room for the fresh one,
+             so one of them stays until the next pull, which makes it. */
+          var keep = d.deletedProfiles.filter(function (id) { return s0.profiles.some(function (p) { return p.id === id; }); })[0];
+          if (keep) delete dead[keep];
+        }
+      }
+      var s = this._store();
+      (d.deletedProfiles || []).forEach(function (id) {
+        if (!dead[id]) return;
+        self._forgetPeople(id);
+        var before = s.profiles.length;
+        s.profiles = s.profiles.filter(function (p) { return p.id !== id; });
+        if (s.profiles.length === before) return;
+        s.pairs = s.pairs.filter(function (pr) { return pr.a !== id && pr.b !== id; });
+        self._dropProfileKeys(id);
+        out.removed++;
+      });
       (d.removeProfiles || []).forEach(function (id) {
         if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
         var before = s.profiles.length;
@@ -1099,7 +1169,7 @@
         /* The latest event for each consent is its state, whichever device it
            was made on. */
         all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
-        rec.events = all.slice(-50);
+        rec.events = keepEvents(all);
         if (all.length) rec.updatedAt = all[all.length - 1].ts;
         write(k, rec);
         out.consents++;

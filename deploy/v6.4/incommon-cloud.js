@@ -240,8 +240,9 @@
            forOther ledger events, nothing else: no name, no birth, no
            memory. The row is what lets the account's other devices learn the
            mark, because the ledger hangs off it (the follow-up review's
-           finding 2). Marking it queued del-profile first, so the cascade has
-           already taken what the account held. */
+           finding 2). Migration 0006 empties the row and deletes the
+           profile's journal, Throughline and Oki rows when the mark arrives,
+           so nothing is deleted from here (RV1). */
         plan.profiles.push({ _key: p.id, _hash: hashOf({ tomb: p.id }), row: tombRow(p, userId) });
         var trec = readJSON('incommon.consent.' + p.id, null);
         ((trec && trec.events) || []).forEach(function (e) {
@@ -443,11 +444,11 @@
        record. It waits; the pull's own sync:pulled event schedules it anyway. */
     if (pulling) return pulling.then(function () { return push(); });
 
-    /* Deletions first, as the pull does. Marking a profile for somebody else
-       queues the deletion of the account's copy, and on the live schema that
-       deletion takes the profile's ledger with it, so flushed after this push
-       it would take the mark the push had just sent (K85). A deletion that
-       fails here stays queued and the push goes on, as before. */
+    /* Deletions first, as the pull does: a deleted profile's record must be
+       on the account before anything else goes up, and an older build's
+       queued deletion of a marked profile, flushed after this push, would
+       take the mark the push had just sent (K85). A deletion that fails here
+       stays queued and the push goes on, as before. */
     return flushOutbox().then(function () {
       var plan = buildPlan();
       return pushPlan(userId, plan);
@@ -495,6 +496,36 @@
 
   /* ---------- outbox: deletions cannot be outrun ---------- */
 
+  /* What a ProfileManager event asks of the account. A deletion is queued,
+     never pushed, so a wipe is not re-uploaded by the debounce after it.
+
+     A PROFILE MARKED FOR SOMEBODY ELSE IS NOT DELETED (the 2.2 review's RV1,
+     30 October 2026). Marking it used to queue the deletion of the account's
+     copy, flushed before the push; a push that then failed left the account
+     with neither the row nor the mark, and another device read the absence as
+     a deletion and dropped its own copy and journal. The push sends the empty
+     row and the mark instead, and migration 0006 empties the row and deletes
+     the profile's journal, Throughline and Oki rows when the mark arrives. A
+     push that fails leaves the account as it was, which every device reads
+     correctly. What this device recorded as sent for those rows is forgotten
+     either way the mark moves, because the server no longer holds them once
+     the mark lands, and unmarking must send them all again. */
+  function routeEvent(name, detail) {
+    var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
+    if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
+    else if (name === 'profile:for-other' && detail && detail.id) forgetChildRows(detail.id);
+    else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
+    else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+  }
+  function forgetChildRows(pid) {
+    var map = loadMap();
+    ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+      var c = hashCache(map, t);
+      Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+    });
+    saveMap(map);
+  }
+
   function opSig(x) { return x.op + ':' + (x.pid || '') + ':' + (x.type || '') + ':' + (x.id || ''); }
   function queueOp(op) {
     var o = loadOutbox();
@@ -517,10 +548,27 @@
       chain = chain.then(function (acc) {
         if (!acc.ok) { remaining.push(op); return acc; }
         if (op.op === 'del-profile') {
-          return client.from('profiles').delete().eq('id', op.pid).then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
-            else if (stillOther(op.pid)) { forgetRow(op.pid); resendAfter = true; }
-            return acc;
+          /* A profile this device still holds was not deleted: the op is one
+             an older build queued when the profile was marked for somebody
+             else (RV1). It is dropped rather than carried out, and what was
+             recorded as sent for the row and its ledger is forgotten, so the
+             push sends the empty row and the mark. */
+          if (stillHeld(op.pid)) { forgetRow(op.pid); forgetChildRows(op.pid); resendAfter = true; return acc; }
+          /* DELETED EVERYWHERE (the owner, 30 October 2026: "if a profile is
+             deleted, delete it everywhere"). The deletion is recorded first,
+             in deleted_profiles (migration 0007), which outlives the row: the
+             row's cascade takes its ledger, so without the record nothing on
+             the server says the profile was deleted and any device still
+             holding it could bring it back. The record carries the two ids
+             and nothing else. Then the row goes, which on 0007 the record's
+             own trigger has already done. */
+          return client.from('deleted_profiles').upsert({ account_id: userId, profile_id: op.pid },
+            { onConflict: 'account_id,profile_id', ignoreDuplicates: true }).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); return acc; }
+            return client.from('profiles').delete().eq('id', op.pid).then(function (res2) {
+              if (res2.error) { acc.ok = false; acc.error = res2.error.message; remaining.push(op); }
+              return acc;
+            });
           });
         }
         /* One entry, by the id it carries both here and on the server. Before
@@ -550,13 +598,8 @@
       return acc;
     });
   }
-  /* A profile the device still holds, marked for somebody else: its deletion
-     took the account's copy and that copy's ledger, so what the device
-     recorded as sent for its row and its ledger is forgotten, and the next
-     push sends the empty row and the mark again. That is what keeps the mark
-     on the account whichever way round the push and the deletion ran. */
-  function stillOther(pid) {
-    try { return (cfg.pm._store().profiles || []).some(function (p) { return p.id === pid && forOther(p); }); } catch (e) { return false; }
+  function stillHeld(pid) {
+    try { return (cfg.pm._store().profiles || []).some(function (p) { return p.id === pid; }); } catch (e) { return false; }
   }
   function forgetRow(pid) {
     var map = loadMap();
@@ -590,7 +633,13 @@
 
      A PENDING LOCAL DELETION WINS. The outbox is flushed before reading, and
      anything still queued is skipped on the way in, so a deletion made offline
-     is not undone by the pull that runs when the signal comes back. */
+     is not undone by the pull that runs when the signal comes back.
+
+     A RECORDED DELETION OVERRIDES ALL OF THE ABOVE. A profile in the
+     account's deleted_profiles (migration 0007) goes from this device on
+     every pull, the first included, whether or not it was changed here since,
+     and the server drops anything that arrives for it afterwards. That record
+     is the one absence the pull does not have to guess at. */
   function fetchAll(table, filter) {
     var rows = [];
     function page(from) {
@@ -658,6 +707,12 @@
     if (pulling) return pulling;
     var remote = {};
     pulling = flushOutbox().catch(function () {}).then(function () {
+      /* The account's deleted profiles, read first. A server without
+         migration 0007 has no such table, and that fails the pull like any
+         other read: a failed read applies nothing. */
+      return fetchAll('deleted_profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+    }).then(function (rows) {
+      remote.deleted_profiles = rows;
       return fetchAll('profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
     }).then(function (rows) {
       remote.profiles = rows;
@@ -704,7 +759,7 @@
     if (cfg.placeholders) { try { placeholders = cfg.placeholders() || []; } catch (e) { placeholders = []; } }
     var isPlaceholder = function (id) { return placeholders.indexOf(id) !== -1; };
 
-    var d = { profiles: [], removeProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
+    var d = { profiles: [], removeProfiles: [], deletedProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
     var res = { ok: true, changed: false, adopted: false, firstPull: firstPull,
       profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
 
@@ -749,7 +804,14 @@
     var hashFor = function (p, saved) { return saved ? hashOf(p) : hashOf(withoutBirth(p)); };
     var localById = {};
     store.profiles.forEach(function (p) { localById[p.id] = p; });
-    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
+    /* DELETED EVERYWHERE. A profile the account recorded as deleted goes
+       from this device whatever else is true of it: on a first pull, when it
+       was changed here since, and when it is marked for somebody else. The
+       record outlives the row, so this is the one absence that is never a
+       guess. */
+    var deleted = {};
+    (remote.deleted_profiles || []).forEach(function (r) { if (r && r.profile_id) deleted[r.profile_id] = 1; });
+    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id] && !deleted[r.id]; });
     var remoteById = {};
     remoteRows.forEach(function (r) { remoteById[r.id] = r; });
     var ownBefore = store.profiles.filter(function (p) { return !isPlaceholder(p.id); });
@@ -783,6 +845,13 @@
       res.profilesAdded++;
     });
     store.profiles.forEach(function (L) {
+      if (deleted[L.id]) {
+        d.deletedProfiles.push(L.id);
+        delete cP[L.id];
+        forgetSent(L.id);
+        res.profilesRemoved++;
+        return;
+      }
       if (remoteById[L.id] || !serverHas) return;
       if (isPlaceholder(L.id)) return;
       if (otherEff(L.id)) { delete cP[L.id]; forgetSent(L.id); return; }  // its absence on the account is not a deletion
@@ -798,7 +867,7 @@
        too. */
     if (remoteRows.some(function (r) { return !isPlaceholder(r.id); })) {
       placeholders.forEach(function (id) {
-        if (!localById[id] || remoteById[id]) return;
+        if (!localById[id] || remoteById[id] || deleted[id]) return;
         d.removeProfiles.push(id);
         delete cP[id];
       });
@@ -812,7 +881,7 @@
     }
     /* Profiles that will exist once this lands. */
     var gone = {};
-    d.removeProfiles.forEach(function (id) { gone[id] = 1; });
+    d.removeProfiles.concat(d.deletedProfiles).forEach(function (id) { gone[id] = 1; });
     var present = {};
     store.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
     d.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
@@ -924,7 +993,7 @@
       cR[key] = hashOf(pr);
     });
 
-    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
+    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.deletedProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
       res.entriesAdded || Object.keys(d.consents).some(function (pid) { return consentNews(pid, d.consents[pid]); }));
     if (res.changed) pm.importSynced(d);
     map.pulled[userId] = new Date().toISOString();
@@ -2020,13 +2089,7 @@
        a wipe is never re-uploaded by the debounce that follows it. */
     try {
       opts.pm.subscribe(function (name, detail) {
-        var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
-        if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
-        /* Marked as made for somebody else: the account's copy goes, with its
-           memories by the cascade, and the profile stays on this device. */
-        else if (name === 'profile:for-other' && detail && detail.id && detail.forOther) queueOp({ op: 'del-profile', pid: detail.id });
-        else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
-        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+        routeEvent(name, detail);
         schedule();
       });
     } catch (e) {}
@@ -2130,7 +2193,8 @@
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
     _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
-    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; }
+    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; },
+    _routeForTests: function (name, detail) { routeEvent(name, detail); }
   };
 
   return api;

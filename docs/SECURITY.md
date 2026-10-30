@@ -308,10 +308,31 @@ for it and deletes the ones the account held when the mark arrives (WH17,
 WH18). Saving turned off or a clear does not touch them, because memories keep
 their own consents. The harness is 34 of 34.
 
-**Apply order for the owner**: deploy the Oracle function and the app from
-this branch, then run 0006 after `server/oracle/schema.sql`. 0006 before the
-app means a reader who turns saving back on keeps no account copy until the
-profile next changes (the migration says why).
+**The review of the standing pull requests** (30 October 2026, at 7e317dd
+and fd745a1) returned two required changes, recorded in model section 15.
+RV1: marking a profile for somebody else queued the deletion of the account's
+copy, and a push that failed after it left the account with neither the row
+nor the mark, so another device dropped its copy and journal. Marking deletes
+nothing now; 0006 already empties the row and the journal when the mark lands
+(K88, K92, K95). RV3, the owner's decision "if a profile is deleted, delete it
+everywhere": nothing on the server recorded a deletion, so a device that still
+held the profile could send it back. **0007** adds `deleted_profiles`, which
+holds the account, the profile's id and the server's time and nothing else;
+recording a deletion removes the profile's row and everything under it and
+withdraws its kept readings, and whatever arrives for it later is dropped.
+**0008** lets a reader read and add their own records and nothing else, so a
+record cannot be removed to bring a profile back, and every rule in 0007 acts
+inside the record's own account, so a record written for somebody else's
+profile id reaches nothing of theirs (DP8). The table is on the two-step list
+and in the account function's deletion. The harness is 47 of 47.
+
+**Apply order for the owner**, all in one window: run 0006 after
+`server/oracle/schema.sql`, then 0007, 0008 and `server/mfa-policies.sql`
+again, then deploy the Oracle, account and app from this branch together. The
+app must not go out before 0007: its pull reads `deleted_profiles` and fails
+without it, so nothing syncs (K93). Between 0006 and the app, a reader who
+turns saving back on keeps no account copy until the profile next changes (the
+migration says why), which is why the window should be short.
 
 ### Who may touch a chart version (Task 2)
 

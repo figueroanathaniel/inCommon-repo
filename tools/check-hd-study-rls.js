@@ -18,10 +18,18 @@
  * back, and an Oracle reading of a withheld profile is not kept. So this
  * applies server/oracle/schema.sql too.
  *
+ * Rows DP1 to DP13 are migrations 0007 and 0008: a profile deleted on one
+ * device stays deleted on every device (the owner, 30 October 2026; the 2.2
+ * review's RV3). Recording the deletion removes everything of the profile on
+ * the account, anything sent for it afterwards lands nothing, and the record
+ * is the account's own: nobody else reads it, adds to it or reaches through
+ * it, and nobody removes it.
+ *
  * It runs the cases five times, in five databases:
- *   before          without 0005, 0006 and chart_versions in the two-step
+ *   before          without 0005 to 0008 and chart_versions in the two-step
  *                   list: the table must be unreachable, so the reader's own
- *                   writes fail, and nothing withholds a birth;
+ *                   writes fail, nothing withholds a birth, and a deleted
+ *                   profile can come back;
  *   nomfa           0005 without the two-step entry: an aal1 session is still
  *                   refused, because owns_profile() reads profiles under that
  *                   table's own two-step rule; only CV14 (the rule on the
@@ -186,6 +194,27 @@ function childCount(db, pid) {
     (select count(*) from public.throughline_entries where profile_id = '${pid}') || '|' ||
     (select count(*) from public.oki_messages where profile_id = '${pid}');`).out;
 }
+const PF = 'c0000000-0000-4000-8000-0000000000f1', PG = 'c0000000-0000-4000-8000-0000000000f2', PH = 'c0000000-0000-4000-8000-0000000000f3';
+function rec(user, pid, extra) {
+  return `insert into public.deleted_profiles (account_id, profile_id${extra ? ', deleted_at' : ''}) values ('${user}', '${pid}'${extra ? ', ' + extra : ''})
+    on conflict (account_id, profile_id) do nothing;`;
+}
+function recCount(db, where) { return psql(db, `select count(*) from public.deleted_profiles${where ? ' where ' + where : ''};`).out; }
+function allOf(db, pid) {
+  return psql(db, `select (select count(*) from public.profiles where id = '${pid}') || '|' ||
+    (select count(*) from public.memories where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.throughline_entries where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.oki_messages where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.consent_events where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.chart_versions where profile_id = '${pid}') || '|' ||
+    (select count(*) from public.pairs where profile_a = '${pid}' or profile_b = '${pid}');`).out;
+}
+function everything(pid, tag) {
+  return childRows(pid, tag) + `
+    insert into public.consent_events (profile_id, scope, action, ts) values ('${pid}', 'journal', 'grant', '2026-10-30T11:00:0${tag.slice(-1)}Z');
+    ${ins(tag, pid)}
+    insert into public.pairs (account_id, profile_a, profile_b, enabled) values ('${A}', '${pid}', '${PA}', true);`;
+}
 function versionsOf(db, pid) { return psql(db, `select count(*) from public.chart_versions where profile_id = '${pid}';`).out; }
 function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(content::text, '') from public.oracle_readings where chart_key = '${key}';`).out; }
 
@@ -232,7 +261,7 @@ const CASES = [
     db => psql(db, `select string_agg(cmd || ':' || array_to_string(roles, ','), ' ' order by cmd)
       from pg_policies where tablename = 'chart_versions' and policyname like 'own chart versions%';`).out
       === 'DELETE:authenticated INSERT:authenticated SELECT:authenticated'],
-  ['CV15', 'applying 0004 and 0005 again changes nothing, the DOWN of 0005 removes its rules and 0004 its table, and both apply cleanly after, with 0006 put back on the new table',
+  ['CV15', 'applying 0004 and 0005 again changes nothing, the DOWN of 0005 removes its rules and 0004 its table, and both apply cleanly after, with 0006 and 0007 put back on the new table',
     db => {
       const file = n => fs.readFileSync(path.join(repo, 'server', 'migrations', n), 'utf8');
       const down = n => file(n).split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
@@ -241,10 +270,12 @@ const CASES = [
       const again = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3';
       const d5 = psql(db, down('0005-chart-versions-policies.sql')).ok && pol() === '0';
       const d4 = psql(db, down('0004-chart-versions.sql')).ok && psql(db, `select to_regclass('public.chart_versions') is null;`).out === 't';
-      // 0006 hangs a trigger on chart_versions, which 0004's DOWN drops with
-      // the table, so it is applied again with the other two.
+      // 0006 and 0007 hang triggers on chart_versions, which 0004's DOWN
+      // drops with the table, so they are applied again with the other two.
+      const had7 = psql(db, `select to_regclass('public.deleted_profiles') is not null;`).out === 't';
       const back = psql(db, file('0004-chart-versions.sql')).ok && psql(db, file('0005-chart-versions-policies.sql')).ok && pol() === '3'
-        && (!had6 || psql(db, file('0006-server-holds-the-switch.sql')).ok);
+        && (!had6 || psql(db, file('0006-server-holds-the-switch.sql')).ok)
+        && (!had7 || psql(db, file('0007-profiles-deleted-everywhere.sql')).ok);
       return again && d5 && d4 && back;
     }],
 
@@ -331,6 +362,58 @@ const CASES = [
       psql(db, evAt(PE, 'forOther', 'revoke', "'2026-10-30T10:00:32Z'"));
       const back = psql(db, childRows(PE, 'e3')).ok && childCount(db, PE) === '1|1|1';
       return sent && back; }],
+  /* ---- migrations 0007 and 0008: a deleted profile is deleted
+     everywhere (the owner, 30 October 2026; the 2.2 review's RV3). A fresh
+     profile with something in every table that names it. ---- */
+  ['DP1', 'a reader recording that their profile was deleted removes its row, journal, Throughline, Oki log, ledger, chart versions and two person records, and withdraws its kept readings',
+    db => { psql(db, `insert into public.profiles (id, account_id, name, birth_date) values ('${PF}', '${A}', 'Fay', '1990-01-01');`);
+      psql(db, everything(PF, 'f1'));
+      psql(db, reading(A, 'kF', PF));
+      const before = allOf(db, PF);
+      const ok = psql(db, as(A, 'aal1', rec(A, PF))).ok;
+      return before === '1|1|1|1|1|1|1' && ok && allOf(db, PF) === '0|0|0|0|0|0|0' && readingOf(db, 'kF') === 'withdrawn|'; }],
+  ['DP2', 'the record holds the server\'s time, whatever the device sends, and recording it twice is accepted without a second row',
+    db => psql(db, as(A, 'aal1', rec(A, PG, "'2099-01-01T00:00:00Z'"))).ok && psql(db, as(A, 'aal1', rec(A, PF))).ok
+      && recCount(db, `account_id = '${A}'`) === '2'
+      && psql(db, `select bool_and(deleted_at <= now()) from public.deleted_profiles;`).out === 't'],
+  ['DP3', 'an older build sending the deleted profile again lands nothing, without an error',
+    db => psql(db, as(A, 'aal1', `insert into public.profiles (id, account_id, name, birth_date) values ('${PF}', '${A}', 'Fay', '1990-01-01')
+      on conflict (id) do update set name = excluded.name;`)).ok && allOf(db, PF) === '0|0|0|0|0|0|0'],
+  ['DP4', 'and its journal, Throughline, Oki log, ledger, chart versions and two person records land nothing either, without an error',
+    db => psql(db, as(A, 'aal1', everything(PF, 'f2'))).ok && allOf(db, PF) === '0|0|0|0|0|0|0'],
+  ['DP5', 'a reading finished for the deleted profile afterwards is stored as served with no content',
+    db => { psql(db, reading(A, 'kF2', PF)); return readingOf(db, 'kF2') === 'served|'; }],
+  ['DP6', 'the owner cannot remove or rewrite a record: there is no update or delete rule',
+    db => { psql(db, as(A, 'aal1', `delete from public.deleted_profiles;`));
+      psql(db, as(A, 'aal1', `update public.deleted_profiles set profile_id = '${PH}';`));
+      return recCount(db, `account_id = '${A}' and profile_id in ('${PF}', '${PG}')`) === '2'; }],
+  ['DP7', 'another reader sees none of the records and cannot add one for this account',
+    db => { const r1 = psql(db, as(B, 'aal1', `select count(*) from public.deleted_profiles;`));
+      const w = psql(db, as(B, 'aal1', rec(A, PH)));
+      return r1.ok && r1.out === '0' && !w.ok && recCount(db, `profile_id = '${PH}'`) === '0'; }],
+  ['DP8', 'a record another reader writes under their own account for this account\'s profile id removes nothing of it, and drops nothing this account sends for it',
+    db => { psql(db, `insert into public.profiles (id, account_id, name) values ('${PH}', '${A}', 'Hal');`);
+      const w = psql(db, as(B, 'aal1', rec(B, PH))).ok;
+      const sent = psql(db, as(A, 'aal1', childRows(PH, 'h1'))).ok;
+      return w && allOf(db, PH).indexOf('1|1|1|1|') === 0; }],
+  ['DP9', 'a visitor with no session reads no record and writes none',
+    db => { const r1 = psql(db, as(null, null, `select count(*) from public.deleted_profiles;`)); const w = psql(db, as(null, null, rec(A, PH)));
+      return (!r1.ok || r1.out === '0') && !w.ok && recCount(db, `account_id = '${A}' and profile_id = '${PH}'`) === '0'; }],
+  ['DP10', 'with a verified authenticator on the account, a password only (aal1) session reads no record, and with the code it reads them',
+    db => { psql(db, `insert into auth.mfa_factors (user_id, status) values ('${A}', 'verified');`);
+      const x = psql(db, as(A, 'aal1', `select count(*) from public.deleted_profiles;`));
+      const y = psql(db, as(A, 'aal2', `select count(*) from public.deleted_profiles;`));
+      psql(db, `delete from auth.mfa_factors;`);
+      return (!x.ok || x.out === '0') && y.ok && y.out === '2'; }],
+  ['DP11', 'a record carries the account, the profile id and the time, and nothing else, and the table carries exactly two rules, both for authenticated',
+    db => psql(db, `select string_agg(column_name, ',' order by ordinal_position) from information_schema.columns where table_name = 'deleted_profiles';`).out
+        === 'account_id,profile_id,deleted_at'
+      && psql(db, `select string_agg(cmd || ':' || array_to_string(roles, ','), ' ' order by cmd)
+        from pg_policies where tablename = 'deleted_profiles' and policyname like 'own deleted profiles%';`).out === 'INSERT:authenticated SELECT:authenticated'],
+  ['DP12', 'nobody signed in or not can ask the API whether a profile id was deleted',
+    db => psql(db, `select to_regprocedure('public.profile_deleted(uuid, uuid)') is not null;`).out === 't'
+      && !psql(db, as(A, 'aal1', `select public.profile_deleted('${A}', '${PF}');`)).ok
+      && !psql(db, as(null, null, `select public.profile_deleted('${A}', '${PF}');`)).ok],
   ['WH12', 'applying 0006 again changes nothing, its DOWN removes it and turns served and withdrawn rows to failed, and it applies cleanly after',
     db => {
       const file = fs.readFileSync(path.join(repo, 'server', 'migrations', '0006-server-holds-the-switch.sql'), 'utf8');
@@ -341,6 +424,19 @@ const CASES = [
         && psql(db, `select count(*) from public.oracle_readings where status in ('served', 'withdrawn');`).out === '0'
         && psql(db, `select count(*) from information_schema.columns where table_name = 'oracle_readings' and column_name = 'profile_id';`).out === '0';
       const back = psql(db, file).ok && trig() === '8';
+      return again && d && back;
+    }],
+  ['DP13', 'applying 0007 and 0008 again changes nothing, their DOWN removes the record and every rule, and both apply cleanly after',
+    db => {
+      const file = n => fs.readFileSync(path.join(repo, 'server', 'migrations', n), 'utf8');
+      const down = n => file(n).split('\n').filter(l => /^--   \S/.test(l)).map(l => l.slice(5)).join('\n');
+      const trig = () => psql(db, `select count(*) from pg_trigger where not tgisinternal and tgname in ('deleted_profiles_stamp', 'deleted_profiles_apply', 'profiles_deleted_drop', 'memories_deleted_drop', 'throughline_entries_deleted_drop', 'oki_messages_deleted_drop', 'consent_events_deleted_drop', 'chart_versions_deleted_drop', 'pairs_deleted_drop', 'oracle_readings_deleted');`).out;
+      const n7 = '0007-profiles-deleted-everywhere.sql', n8 = '0008-deleted-profiles-policies.sql';
+      const kept = recCount(db);
+      const again = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10' && recCount(db) === kept;
+      const d = psql(db, down(n8)).ok && psql(db, down(n7)).ok && trig() === '0'
+        && psql(db, `select to_regclass('public.deleted_profiles') is null;`).out === 't';
+      const back = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10';
       return again && d && back;
     }],
 ];
@@ -374,9 +470,10 @@ function runCases(db) {
 }
 
 const RUNS = [
-  { name: 'before', skip: ['0005', '0006'], mfa: false,
+  { name: 'before', skip: ['0005', '0006', '0007', '0008'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
-      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16', 'WH17', 'WH18'] },
+      'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16', 'WH17', 'WH18',
+      'DP1', 'DP2', 'DP3', 'DP4', 'DP5', 'DP6', 'DP7', 'DP8', 'DP9', 'DP10', 'DP11', 'DP12'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

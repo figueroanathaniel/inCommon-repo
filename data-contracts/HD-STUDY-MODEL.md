@@ -716,15 +716,23 @@ Built, `profile-manager.js` 1.7.0 and the sync:
   hash is unchanged); `createProfile({ forOther: true })`,
   `setProfileForOther(id, on)`, `isForOther(id)`, and `forOther` on every
   profile the module hands out.
-- **One made for somebody else stays on the device**: no row, no memories, no
-  ledger, no pair is sent (K79). Marking one that was already synced queues
-  `del-profile`, so the account's copy goes, with its memories by the schema's
-  cascade; nothing written afterwards goes up, and the profile and its journal
-  stay on the device through the pulls after (K80). Unmarking it sends it again
-  with every entry it holds, because what the device recorded as sent for it is
-  forgotten when it is marked (K81, red without that). Another device that held the account's copy loses it at its
-  next pull, by the existing rule that a row the server no longer holds was
-  deleted elsewhere, unless it changed it since.
+- **One made for somebody else stays on the device**: no memories, no pair and
+  none of its own ledger but the mark is sent, only an empty row (K79).
+  Marking one that was already synced sends the empty row and the mark, and
+  migration 0006 empties the account's copy and deletes its journal,
+  Throughline and Oki rows when the mark arrives; nothing written afterwards
+  goes up, and the profile and its journal stay on the device through the
+  pulls after (K80). **Marking deletes nothing** (the 2.2 review's RV1, 30
+  October 2026): it used to queue `del-profile`, and a push that failed after
+  that deletion left the account with neither the row nor the mark, so
+  another device read the absence as a deletion and dropped its own copy and
+  journal (K88, red on the old code). A deletion an older build queued on
+  marking is dropped for a profile the device still holds (K92). Unmarking it
+  sends it again with every entry it holds, because what the device recorded
+  as sent for its journal, Throughline and Oki rows is forgotten whenever the
+  mark moves (K81, and K95 with only pushes between, red without that).
+  Another device that held the account's copy learns the mark and keeps its
+  own copy and journal (K84).
 - **The two are listed apart**: `ownProfiles()` and `otherProfiles()`. That
   is (c)'s data half: the reader's primary profiles and the friends' are never
   one list.
@@ -830,3 +838,30 @@ What finding 2's empty row still costs, said plainly: the account keeps a row
 with an id and nothing else for each profile made for somebody else, so that
 the mark can reach the account's other devices. A build older than this one
 does not know the mark, and is finding 4.
+
+## 15. The review of the standing pull requests (30 October 2026)
+
+The 2.2 reviewer reviewed both standing pull requests at 7e317dd and fd745a1
+and returned two required changes, RV1 and RV3, and four notes. It wrote the
+privacy review these answer, so it said the review was not blind. The owner
+decided RV3 in the reviewer's session ("if a profile is deleted, delete it
+everywhere") and confirmed it here on the same day, with saved people
+included ("yes, go ahead with all of it"). Built on the security branch:
+
+| | Finding | Now |
+|---|---|---|
+| RV1 | marking a profile queued `del-profile`, flushed before the push; a push that failed after it left the account with neither row nor mark, and another device dropped its copy and journal, against section 13 | **fixed**: marking deletes nothing. The empty row and the mark go up, and 0006 empties the row and deletes the profile's journal, Throughline and Oki rows when the mark lands, so a failed push leaves the account as it was. What the device recorded as sent for those rows is forgotten whenever the mark moves. An older build's queued deletion is dropped for a profile the device still holds. K88, K92, K95 |
+| RV3 | a deleted profile came back: a device that changed it since its last sync kept and resent it, and a device on its first pull resent it with its journal, because nothing on the server recorded the deletion | **fixed**: migration 0007 adds `deleted_profiles` (the account, the profile's id and the server's time, nothing else) and 0008 its rules (read and add your own, no update, no delete). Recording a deletion removes the profile's row and everything under it and withdraws its kept Oracle readings; anything sent for it afterwards is dropped without an error, and a reading finished for it is stored as `served`. Every pull reads the records and deletes the profile on that device, the first pull included and over changes made there since. Postgres rows DP1 to DP13, module rows K89 to K91, K93 |
+| RV3, saved people (G6) | the people a profile saved, in `incommon.people.v1`, outlived it | **fixed for profile deletion**: `people-library.js` 1.1.0 `forgetOwner()`, called by `profile-manager.js` 1.8.0 for a deletion made here and one another device made, with a direct fallback when the module is not loaded. P30, K94, O24. **Not done: account erasure** (Delete account with "erase this device"), because the erase loop is in the app file, which is workstream 3's: it needs one call to `PM._forgetPeople(id)` for each of the account's profiles before the keys go, handed over in the security branch's charter |
+| note | the ledger's fifty event cap could drop an old `forOther` grant, so a resend and `profile_withheld()` would miss the mark | **fixed**: the ledger keeps its last fifty events and the latest event of every consent beyond them. O23 |
+| note | the F12 wording reads as coming before 0004 | **stands**: F12 is specified, waiting on step 3, and the migrations README gives the order |
+| note | Privacy Policy sections 5 and 6 are true only once 0006 is applied | **true, and now 0007 too**: the migrations README says the app ships after 0006 to 0008 in one window, and section 5 now says a deleted profile is deleted from every device |
+| note | `share-rules.js` is not loaded by the app yet | **true**, workstream 3's |
+
+What it costs, said plainly. The account keeps a row for every profile ever
+deleted, holding two ids and a time, until the account is deleted; that is
+what makes the deletion hold on a device that has not synced since. A pull
+that cannot read `deleted_profiles` fails and applies nothing, so the app must
+not ship before 0007 is applied. And a device the deletion would leave with no
+profile starts over with a blank one, as the delete dialog does.
+

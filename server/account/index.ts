@@ -20,7 +20,8 @@
 //      chart_versions),
 //      then pairs and profiles (keyed by account), oracle_readings,
 //      subscriptions, store_subscriptions and luminary_unlocks (keyed by user),
-//      then the accounts row itself. Between Stripe and the rows, RevenueCat's record
+//      deleted_profiles (the record that a profile was deleted, keyed by
+//      account; migration 0007), then the accounts row itself. Between Stripe and the rows, RevenueCat's record
 //      of the reader is deleted too when RevenueCat is set up (see
 //      closeRevenueCat below); a subscription bought in an app is the store's
 //      to cancel, and the page says so before the reader deletes.
@@ -170,6 +171,7 @@ Deno.serve(async (req) => {
     await del("subscriptions", "user_id", uid);
     await del("store_subscriptions", "user_id", uid);
     await del("luminary_unlocks", "user_id", uid);
+    await del("deleted_profiles", "account_id", uid);
     await del("accounts", "id", uid);
   } catch (e) {
     console.error("account: a table could not be cleared", (e as Error).message);
