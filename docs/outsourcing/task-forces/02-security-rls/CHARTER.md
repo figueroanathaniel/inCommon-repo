@@ -9,7 +9,7 @@ everything to do with Delegation 2.
 | | |
 |---|---|
 | Branch | `taskforce/02-security-rls` |
-| Standing pull request | #117 (earlier ones under "History" below) |
+| Standing pull request | #129 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/02-security-rls/` |
 
 Every commit for Delegation 2 lands on this branch. Work that was already
@@ -124,3 +124,8 @@ were approved; from 28 October 2026 that work is committed here.
   (K29d), share-rules.js 1.3.0 (T12 to T14), Privacy Policy sections 5 and 6.
   The schema branch's K85 fix (a push lost the mark) and K86 resend are merged
   here. Nothing applied to the live project.
+- 30 October 2026: #129 opened as the standing pull request, at the owner's
+  request. #117 had merged into main on 28 October at aab2c41; main is an
+  ancestor of this branch. It is stacked on `taskforce/01-data-schema`, so
+  until #128 lands its diff includes that branch's 1.2 commits, and it merges
+  after #128.
