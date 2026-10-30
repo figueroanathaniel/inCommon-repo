@@ -24408,6 +24408,9 @@ class Component extends DCLogic {
     const shut = { adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '' };
     const wipe = () => {
       const PM = this.PM();
+      /* The people this account saved first (G6): they live in one device wide
+         key, keyed by profile, which accountStorageKeys() cannot name. */
+      try { if (PM && PM.forgetAccountPeople) PM.forgetAccountPeople(); } catch (e) {}
       try { (PM && PM.accountStorageKeys ? PM.accountStorageKeys() : []).forEach(k => localStorage.removeItem(k)); } catch (e) {}
     };
     const keep = () => { const PM = this.PM(); if (PM && PM.releaseToGuest) PM.releaseToGuest(); };

@@ -264,7 +264,7 @@
   }
 
   var PM = {
-    VERSION: '1.8.1',
+    VERSION: '1.8.2',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -310,6 +310,17 @@
       } catch (e) {}
       ACCOUNT_KEYS.forEach(function (k) { var a = scoped(k, sc.owner); if (out.indexOf(a) === -1) out.push(a); });
       return out;
+    },
+
+    /* The people this account's profiles saved, removed from people-library's
+       device wide store (G6). accountStorageKeys() matches key names, and that
+       store is one key holding every profile's people, so erasing the keys
+       leaves them: "erase this device" calls this first. Another account's
+       people, and the guest's, stay. */
+    forgetAccountPeople: function () {
+      var self = this, n = 0;
+      this._store().profiles.forEach(function (p) { self._forgetPeople(p.id); n++; });
+      return n;
     },
 
     /* The account is gone and the reader kept what was on the device: it

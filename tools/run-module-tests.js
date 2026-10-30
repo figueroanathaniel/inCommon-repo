@@ -3840,6 +3840,16 @@ async function runCloudTests() {
       gone: ids.filter(function (id) { return !p4.getProfile(id); }).length,
       keysGone: ids.every(function (id) { return d4.getItem('incommon.consent.' + id) === null; }), removed: r4.removed };
   }));
+  t('O26', 'erasing an account from the device forgets the people its profiles saved and leaves another account\'s and the guest\'s', {
+    count: 2, keys: ['guest-p', 'other-p']
+  }, cv(function () {
+    var d5 = ownerStore(), p5 = pmPage(d5);
+    var a = p5.createProfile({ name: 'Ann', birthDate: '1990-01-01' }), b = p5.createProfile({ name: 'Bo', birthDate: '1991-01-01' });
+    var all = { 'guest-p': [{ id: 'g' }], 'other-p': [{ id: 'o' }] }; all[a.id] = [{ id: 'x' }]; all[b.id] = [{ id: 'y' }];
+    d5.setItem('incommon.people.v1', JSON.stringify(all));
+    var n = p5.forgetAccountPeople();
+    return { count: n, keys: Object.keys(JSON.parse(d5.getItem('incommon.people.v1'))).sort() };
+  }));
   t('O23', 'the ledger keeps its last fifty events and never drops the latest event of a consent to do it, here and when another device\'s events are merged in', {
     hasForOther: true, hasBirthData: true, length: 52, merged: true
   }, cv(function () {

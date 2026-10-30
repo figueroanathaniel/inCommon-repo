@@ -206,3 +206,13 @@ were approved; from 28 October 2026 that work is committed here.
   source shell and the rebuilt bundle: each boots, `window.ShareRules` is
   there with its six functions, and the page throws nothing. Nothing calls it
   yet; the handout and export screens are still workstream 3's to build.
+- 30 October 2026: the saved people half of G6 that was handed to workstream
+  3 is done here instead, at the owner's request ("fix the saved people erase
+  in the app"). `profile-manager.js` 1.8.2 adds `forgetAccountPeople()`, which
+  forgets the saved people of every profile in the signed in account's store
+  and leaves another account's and the guest's (O26). The app's "erase this
+  device" path calls it before it removes the account's keys; that is the
+  only change in the app file. Driven in Chromium against the rebuilt bundle:
+  the method forgets the account's profiles' people, keeps another key's, and
+  the page throws nothing. The delete account flow itself was not driven end
+  to end, because it needs the account function to answer.
