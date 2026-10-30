@@ -134,3 +134,8 @@ were approved; from 28 October 2026 that work is committed here.
   `reviews/2.2-task1-privacy-review.md`. Written by a session that wrote
   none of the model; the answers to the follow-up are in model section 14 and
   were not checked by it.
+- 30 October 2026: a second follow-up added to
+  `reviews/2.2-task1-privacy-review.md` at the owner's request: the review
+  session read and tested the answers in model section 14 at 101eb4b (module
+  tests 502 of 502, the study RLS harness 28 of 28) and found seven gaps, two
+  of them to fix before step 3.
