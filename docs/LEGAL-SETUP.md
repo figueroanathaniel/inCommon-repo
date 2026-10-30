@@ -51,6 +51,20 @@ the address in the row, then set `status` to `answered`.
   `subscriptions` delete themselves with the user. If they subscribed, cancel
   the subscription in Stripe first, and delete the Stripe customer if they asked
   for everything to go (Stripe keeps payment records it is required to keep).
+- **Somebody whose details another reader added** (Privacy Policy section
+  14): find the profile in `profiles` by what they tell you, confirm it is
+  theirs and not the account holder's own, then in the SQL Editor run
+  ```sql
+  insert into public.deleted_profiles (account_id, profile_id)
+  select account_id, id from public.profiles where id = '<profile id>';
+  ```
+  That is migration 0007's record of a deletion. It removes the profile and
+  everything under it on the server (its journal, consents, Throughline, Oki
+  log, chart versions and two person records) and withdraws its kept Oracle
+  readings. Every device signed in to that account deletes the profile at its
+  next sync, and nothing an older app sends for it afterwards is kept. Check
+  afterwards that the profile row is gone. The record holds only the two ids
+  and the time.
 - **A copy of their data**: export their rows from those tables as CSV or JSON
   and send them. Data that only ever lived on their device is not yours to
   export; Settings, Export gives them that themselves.

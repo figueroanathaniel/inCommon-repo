@@ -636,7 +636,7 @@ across days was not measured), so it is rough:
 | F9 | Medium | a profile made for another person syncs, feeds the Oracle and makes cards | **decided** (section 13): the data and sync half built, the screens specified for workstream 3 |
 | F10 | Medium | `chart_hash` is an unsalted hash of a birth and links a person across files | **fixed**: versions carry `birth_key`, the birth written out, never exported; 0004's column renamed |
 | F11 | Low | export files are plaintext with generic names; people-library rule 5 becomes false | **specified**, 6.4: named for contents, plaintext said plainly, rule 5's sentence in step 4 |
-| F12 | Low | Privacy Policy sections 5 and 14 must name the version history | **a precondition** of applying 0004, step 2 |
+| F12 | Low | Privacy Policy sections 5 and 14 must name the version history | **section 3 built** (the device history, true since 1.7.1) and the operator path for section 14 written (`docs/LEGAL-SETUP.md`); **sections 5 and 14 drafted and held** for step 3, text in section 15. The owner applied 0004 ahead of it on 30 October 2026, since `chart_versions` stays empty until step 3 |
 | F13 | Low | `mfa-policies.sql` must be re-run and the account function must name `chart_versions` | **met** by 2.2 Task 2 (0005, the list, the account function, K74) |
 | F14 | Low | `chart_hash` carries STATE_VERSION, so the same birth reads as new after a bump | **built** (O21): `birth_key` |
 
@@ -873,4 +873,26 @@ what makes the deletion hold on a device that has not synced since. A pull
 that cannot read `deleted_profiles` fails and applies nothing, so the app must
 not ship before 0007 is applied. And a device the deletion would leave with no
 profile starts over with a blank one, as the delete dialog does.
+
+**F12, the wording held for step 3** (drafted 30 October 2026 at the owner's
+request). Ship both in the change that syncs versions, with the policy's date
+moved, and not before, because each describes syncing that does not exist yet.
+
+Section 5, a paragraph after the "Save my profile to my account" one:
+
+> The copy kept with your account also includes each profile's earlier birth
+> details, the dated versions described in section 3, but only while "Save my
+> profile to my account" is on. Switch it off and they are removed from your
+> account and stay on your device. Clearing a profile's birth details removes
+> them from your device and your account, and deleting the profile or your
+> account deletes them everywhere.
+
+Section 14, after "contact us.":
+
+> We will delete that profile and everything kept with it, including its
+> earlier birth details, and the devices signed in to that account will remove
+> it the next time they sync.
+
+Section 3's bullet says the app can show what a reading or a note was written
+against. That screen is workstream 3's; if it does not, the clause goes.
 
