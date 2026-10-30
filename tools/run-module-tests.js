@@ -3829,6 +3829,17 @@ async function runCloudTests() {
     return { names: list.map(function (x) { return x.name; }), active: p1.activeId() === list[0].id,
       gone: !p1.getProfile(only.id), keysGone: d1.getItem('incommon.consent.' + only.id) === null };
   }));
+  t('O25', 'a device whose six profiles were all deleted elsewhere ends on one fresh, active profile in that one pull, with the six and their keys gone', {
+    names: ['Default Profile'], active: true, gone: 6, keysGone: true, removed: 6
+  }, cv(function () {
+    var d4 = ownerStore(), p4 = pmPage(d4), ids = [];
+    for (var i = 0; i < 6; i++) ids.push(p4.createProfile({ name: 'P' + i, birthDate: '1990-01-0' + (i + 1) }).id);
+    var r4 = p4.importSynced({ deletedProfiles: ids });
+    var list = p4.listProfiles();
+    return { names: list.map(function (x) { return x.name; }), active: p4.activeId() === list[0].id,
+      gone: ids.filter(function (id) { return !p4.getProfile(id); }).length,
+      keysGone: ids.every(function (id) { return d4.getItem('incommon.consent.' + id) === null; }), removed: r4.removed };
+  }));
   t('O23', 'the ledger keeps its last fifty events and never drops the latest event of a consent to do it, here and when another device\'s events are merged in', {
     hasForOther: true, hasBirthData: true, length: 52, merged: true
   }, cv(function () {
