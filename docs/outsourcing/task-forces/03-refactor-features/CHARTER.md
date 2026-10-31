@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #127 (earlier ones under "History" below) |
+| Standing pull request | #143 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
