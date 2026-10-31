@@ -45,11 +45,15 @@
  * memory_type check for chart notes and tarot readings, and withholds a
  * note's "resolved" as birth data.
  *
- * It runs the cases eight times, in eight databases:
+ * Rows AT1 to AT8 are migration 0017 (the owner, 31 October 2026): the
+ * account row carries the reader's tier, worked out from the payment tables
+ * and never taken from a request. So this applies server/store/schema.sql too.
+ *
+ * It runs the cases nine times, in nine databases:
  *   live_before     the live project as it was read: the drift, the legacy
  *                   rows, 0004 to 0008, and none of 0001 to 0003 or 0009:
  *                   every LV row is red;
- *   live_after      the same, then 0009, 0001, 0002, 0003 and 0010 to 0016
+ *   live_after      the same, then 0009, 0001, 0002, 0003 and 0010 to 0017
  *                   in that order, as the README gives it for the live
  *                   project: all pass;
  *   before          without 0005 to 0009 and chart_versions in the two-step
@@ -58,6 +62,7 @@
  *                   profile can come back;
  *   before_2_3      everything but 0012 to 0016: every 2.3 row but HR4 is
  *                   red, so each one tells the rule from its absence;
+ *   before_tier     everything but 0017: every AT row is red;
  *   nomfa           0005 without the two-step entry: an aal1 session is still
  *                   refused, because owns_profile() reads profiles under that
  *                   table's own two-step rule; only CV14 (the rule on the
@@ -234,6 +239,7 @@ function ins(local, profile) {
 }
 
 const PC = 'c0000000-0000-4000-8000-0000000000c1';
+const T = 'eeeeeeee-0000-4000-8000-0000000000e1';
 function upP(name, date) {
   return `insert into public.profiles (id, account_id, name, birth_date, birth_lat, location_resolved)
     values ('${PC}', '${A}', '${name}', '${date}', 41.88, true)
@@ -769,6 +775,59 @@ const CASES = [
         where has_function_privilege(r, f.fn, 'execute');`).out === '0';
       return closed && psql(db, f).ok && trigs(db, names) === '2' && psql(db, downOf(f)).ok && trigs(db, names) === '0'
         && psql(db, f).ok && trigs(db, names) === '2'; }],
+  /* ---- 0017: the tier on the account row (the owner, 31 October 2026). Its
+     own sign in, T, because earlier rows leave an unlock on A. ---- */
+  ['AT1', 'a new account with nothing paid reads free, with no source and no end, whatever its insert asked for, and says when it was worked out (0017)',
+    db => psql(db, `insert into auth.users (id, email) values ('${T}', 't@test.invalid'); insert into public.accounts (id, tier, tier_source) values ('${T}', 'luminary', 'unlock');`).ok
+      && psql(db, `select tier || '|' || coalesce(tier_source, '-') || '|' || coalesce(tier_until::text, '-') || '|' || (tier_updated_at is not null) from public.accounts where id = '${T}';`).out === 'free|-|-|true'],
+  ['AT2', 'a reader who writes luminary to their own account row reads free back, and another reader cannot see it',
+    db => { const w = psql(db, as(T, 'aal1', `update public.accounts set tier = 'luminary', tier_source = 'unlock', tier_until = null where id = '${T}';`)).ok;
+      const back = psql(db, `select tier || '|' || coalesce(tier_source, '-') from public.accounts where id = '${T}';`).out === 'free|-';
+      const b = psql(db, as(A, 'aal1', `select count(*) from public.accounts where id = '${T}';`));
+      return w && back && b.ok && b.out === '0'; }],
+  ['AT3', 'a one time unlock makes the account luminary with no end, and removing it makes it free again',
+    db => { psql(db, `insert into public.luminary_unlocks (user_id, stripe_session_id, amount, currency) values ('${T}', 'cs_at3', 300, 'usd');`);
+      const on = psql(db, `select tier || '|' || tier_source || '|' || coalesce(tier_until::text, '-') from public.accounts where id = '${T}';`).out === 'luminary|unlock|-';
+      psql(db, `delete from public.luminary_unlocks where user_id = '${T}';`);
+      const off = psql(db, `select tier || '|' || coalesce(tier_source, '-') from public.accounts where id = '${T}';`).out === 'free|-';
+      return on && off; }],
+  ['AT4', 'a live subscription makes it luminary until the period ends; cancelled, or past its end, it is free',
+    db => { psql(db, `insert into public.subscriptions (user_id, stripe_customer_id, status, current_period_end) values ('${T}', 'cus_at4', 'active', now() + interval '30 days');`);
+      const on = psql(db, `select tier || '|' || tier_source || '|' || (tier_until > now()) from public.accounts where id = '${T}';`).out === 'luminary|subscription|true';
+      psql(db, `update public.subscriptions set status = 'canceled' where user_id = '${T}';`);
+      const cancelled = psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free';
+      psql(db, `update public.subscriptions set status = 'trialing', current_period_end = now() - interval '1 day' where user_id = '${T}';`);
+      const past = psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free';
+      psql(db, `delete from public.subscriptions where user_id = '${T}';`);
+      return on && cancelled && past; }],
+  ['AT5', 'an active app store subscription makes it luminary from the store, and removing it makes it free',
+    db => { psql(db, `insert into public.store_subscriptions (user_id, source, status, current_period_end) values ('${T}', 'apple', 'active', now() + interval '30 days');`);
+      const on = psql(db, `select tier || '|' || tier_source from public.accounts where id = '${T}';`).out === 'luminary|store';
+      psql(db, `delete from public.store_subscriptions where user_id = '${T}';`);
+      return on && psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free'; }],
+  ['AT6', 'the three tier functions are closed to the API, and the four triggers are in place',
+    db => psql(db, `select count(*) from unnest(array['anon', 'authenticated']) r,
+        unnest(array['public.accounts_tier()', 'public.account_tier_touch()', 'public.account_tier_refresh_all()']) f(fn)
+        where has_function_privilege(r, f.fn, 'execute');`).out === '0'
+      && psql(db, `select count(*) from pg_trigger where tgname in ('accounts_tier', 'luminary_unlocks_tier', 'subscriptions_tier', 'store_subscriptions_tier');`).out === '4'],
+  ['AT7', 'deleting a sign in that holds an unlock and a subscription removes the account and both, without an error',
+    db => { const C = 'eeeeeeee-0000-4000-8000-0000000000e2';
+      const made = psql(db, `insert into auth.users (id, email) values ('${C}', 'c@test.invalid'); insert into public.accounts (id) values ('${C}');
+        insert into public.luminary_unlocks (user_id, stripe_session_id, amount, currency) values ('${C}', 'cs_at7', 1200, 'usd');
+        insert into public.subscriptions (user_id, stripe_customer_id, status) values ('${C}', 'cus_at7', 'active');`).ok
+        && psql(db, `select tier from public.accounts where id = '${C}';`).out === 'luminary';
+      const gone = psql(db, `delete from auth.users where id = '${C}';`).ok
+        && psql(db, `select (select count(*) from public.accounts where id = '${C}') + (select count(*) from public.luminary_unlocks where user_id = '${C}') + (select count(*) from public.subscriptions where user_id = '${C}');`).out === '0';
+      return made && gone; }],
+  ['AT8', '0017 applies again, undoes by its DOWN, and applied after counts an unlock written while it was gone',
+    db => { const f = mfile('0017');
+      const again = psql(db, f).ok && psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free';
+      const d = psql(db, downOf(f)).ok && psql(db, `select count(*) from information_schema.columns where table_name = 'accounts' and column_name like 'tier%';`).out === '0'
+        && psql(db, `select count(*) from pg_trigger where tgname like '%tier';`).out === '0';
+      psql(db, `insert into public.luminary_unlocks (user_id, stripe_session_id, amount, currency) values ('${T}', 'cs_at8', 300, 'usd');`);
+      const back = psql(db, f).ok && psql(db, `select tier || '|' || tier_source from public.accounts where id = '${T}';`).out === 'luminary|unlock';
+      psql(db, `delete from public.luminary_unlocks where user_id = '${T}';`);
+      return again && d && back && psql(db, `select tier from public.accounts where id = '${T}';`).out === 'free'; }],
 ];
 
 /* owns_profile() runs as the caller, so it reads profiles under that table's
@@ -784,14 +843,15 @@ function prepare(name, skipMig, mfaWith, definer, live) {
     return [f, fs.readFileSync(path.join(repo, 'server', 'migrations', f), 'utf8')]; };
   const base = [['stub', STUB], ['cloud-schema v2', cloudV2()],
     ['support.sql', fs.readFileSync(path.join(repo, 'server', 'support.sql'), 'utf8')],
-    ['oracle schema', fs.readFileSync(path.join(repo, 'server', 'oracle', 'schema.sql'), 'utf8')]];
+    ['oracle schema', fs.readFileSync(path.join(repo, 'server', 'oracle', 'schema.sql'), 'utf8')],
+    ['store schema', fs.readFileSync(path.join(repo, 'server', 'store', 'schema.sql'), 'utf8')]];
   /* live: the drift, its rows, the five migrations the live project had,
      then (after) 0009 and the three it never had, in the order the README
      gives for it. */
   const steps = live
     ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
         ['0004', '0005', '0006', '0007', '0008'].map(mig),
-        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011', '0012', '0013', '0014', '0015', '0016'].map(mig) : [],
+        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017'].map(mig) : [],
         [['mfa-policies', mfa(true)]])
     : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
@@ -814,7 +874,7 @@ const RUNS = [
   /* The live project as it was: every LV row red, and the shape broken
      enough that much else is red too, which is not what this run asserts. */
   { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9', 'LV10', 'LV11'] },
-  /* The live project once 0009, 0001, 0002, 0003 and 0010 to 0016 have run: everything. */
+  /* The live project once 0009, 0001, 0002, 0003 and 0010 to 0017 have run: everything. */
   { name: 'live_after', live: 'after', mustFail: [] },
   { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009', '0013', '0015', '0016'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
@@ -827,6 +887,9 @@ const RUNS = [
     mustFail: ['HR1', 'HR2', 'HR3', 'HR5', 'BN1', 'BN2', 'BN3', 'BN4', 'BN5',
       'PL1', 'PL2', 'PL3', 'PL4', 'PL5', 'PL6', 'PL7', 'PL8', 'PL9', 'PL10', 'PL11',
       'CN1', 'CN2', 'CN3', 'CN4', 'CN5', 'CN6'] },
+  /* Everything but 0017: each tier row must go red without it. */
+  { name: 'before_tier', skip: ['0017'], mfa: true,
+    mustFail: ['AT1', 'AT2', 'AT3', 'AT4', 'AT5', 'AT6', 'AT7', 'AT8'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

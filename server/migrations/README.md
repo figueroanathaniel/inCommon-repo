@@ -156,7 +156,7 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    `server/mfa-policies.sql` again, which lists `people`. Deploy the account
    function (`server/account`) in the same window: it now deletes `people`
    with an account. Its trigger uses 0007's `deleted_rows_drop()`, so **to
-   undo 0007, run this file's DOWN first**. Tested by rows PL1 to PL10.
+   undo 0007, run this file's DOWN first**. Tested by rows PL1 to PL11.
 
 16. `0016-memories-chart-notes-and-tarot.sql`: assignment 2.3. Widens the
    `memory_type` check on `memories` to admit `chart_note` and
@@ -166,6 +166,19 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    its `resolved` value while 0006 withholds the profile's birth, and the
    account's notes lose it when saving is turned off or the birth cleared.
    Run after 0006. Tested by rows CN1 to CN6.
+
+17. `0017-accounts-tier.sql`: the owner, 31 October 2026. `accounts` gains
+   `tier` (`free` or `luminary`), `tier_source` (`unlock`, `subscription` or
+   `store`), `tier_until` and `tier_updated_at`, worked out by a trigger from
+   `luminary_unlocks`, `subscriptions` and `store_subscriptions` on every
+   write to the account row and whenever one of those tables changes, never
+   taken from a request. It is a label for reading and reporting; the Oracle
+   function's `opened()` is still the paywall, and it also lets in the admin
+   addresses and the store apps, which the label does not see. A
+   subscription that ends with no write from Stripe reads `luminary` until
+   `select public.account_tier_refresh_all();` is run. Run after
+   `server/oracle/schema.sql`; no new table, so `server/mfa-policies.sql`
+   need not run again. Tested by rows AT1 to AT8.
 
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in, 0007 does, once
