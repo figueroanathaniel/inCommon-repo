@@ -26,7 +26,9 @@
  * it, and nobody removes it.
  *
  * Row LV10 is migration 0010: cast_counters, a table only live has, took
- * writes from its readers through the API.
+ * writes from its readers through the API. Row LV11 is migration 0011: the
+ * two old profile_id columns are dropped, and cast_counters loses its write
+ * and truncate grants.
  *
  * Rows LV1 to LV9 are migration 0009: the live project's pairs and
  * luminary_unlocks had drifted from the repository (pairs keyed by profile_id
@@ -190,7 +192,7 @@ create policy "Users can manage their own profiles." on public.profiles for all 
 create policy "Users can manage memories of their profiles." on public.memories for all to authenticated
   using (profile_id in (select id from public.profiles where account_id = auth.uid()))
   with check (profile_id in (select id from public.profiles where account_id = auth.uid()));
-create table public.cast_counters (profile_id uuid not null, cast_day date not null, casts integer not null default 0);
+create table public.cast_counters (profile_id uuid not null references public.profiles(id) on delete cascade, cast_day date not null, casts integer not null default 0);
 alter table public.cast_counters enable row level security;
 create policy "own counter select" on public.cast_counters for select to authenticated
   using (profile_id in (select profiles.id from public.profiles where profiles.account_id = auth.uid()));
@@ -564,6 +566,16 @@ const CASES = [
       psql(db, `delete from public.cast_counters where profile_id = '${PK}'; delete from public.profiles where id = '${PK}';`);
       return !ins.ok && own.ok && own.out === '1' && kept === '1|1';
     }],
+  ['LV11', 'neither old profile_id column is left, and nobody may insert, update, delete or truncate cast_counters by privilege, where the table exists (0011)',
+    db => {
+      const cols = psql(db, `select count(*) from information_schema.columns where table_schema = 'public'
+        and table_name in ('pairs', 'luminary_unlocks') and column_name = 'profile_id';`).out;
+      if (cols !== '0') return false;
+      if (psql(db, `select to_regclass('public.cast_counters') is null;`).out === 't') return true;
+      return psql(db, `select count(*) from (values ('anon'), ('authenticated')) r(role), unnest(array['INSERT', 'UPDATE', 'DELETE', 'TRUNCATE']) p(priv)
+        where has_table_privilege(r.role, 'public.cast_counters', p.priv)
+           or not has_table_privilege(r.role, 'public.cast_counters', 'SELECT');`).out === '0';
+    }],
   ['LV9', 'applying 0009 again changes no column, key or policy on the two tables, and its DOWN applies',
     db => {
       const f = fs.readFileSync(path.join(repo, 'server', 'migrations', '0009-live-schema-reconcile.sql'), 'utf8');
@@ -599,7 +611,7 @@ function prepare(name, skipMig, mfaWith, definer, live) {
   const steps = live
     ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
         ['0004', '0005', '0006', '0007', '0008'].map(mig),
-        live === 'after' ? ['0009', '0001', '0002', '0003', '0010'].map(mig) : [],
+        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011'].map(mig) : [],
         [['mfa-policies', mfa(true)]])
     : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
@@ -621,8 +633,8 @@ function runCases(db) {
 const RUNS = [
   /* The live project as it was: every LV row red, and the shape broken
      enough that much else is red too, which is not what this run asserts. */
-  { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9', 'LV10'] },
-  /* The live project once 0009, 0001, 0002, 0003 and 0010 have run: everything. */
+  { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9', 'LV10', 'LV11'] },
+  /* The live project once 0009, 0001, 0002, 0003, 0010 and 0011 have run: everything. */
   { name: 'live_after', live: 'after', mustFail: [] },
   { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',

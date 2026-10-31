@@ -34,7 +34,7 @@
 -- to LV9). It is not the repository's shape exactly: the two old profile_id
 -- columns stay, nullable, written by nothing, each still carrying its foreign
 -- key to profiles with on delete cascade, which the repository has neither of.
--- Dropping them is a later change, once nothing is confirmed to read them.
+-- 0011 drops them, once it was confirmed nothing reads them.
 -- * pairs: adds account_id (to accounts, on delete cascade), filled from the
 --  profile each row names, the old profile_id first and profile_a after it;
 --  makes it not null once no row lacks it; lets profile_id be null, since no

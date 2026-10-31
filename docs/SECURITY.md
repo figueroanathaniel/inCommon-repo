@@ -226,7 +226,9 @@ logs) after the 1.2 and 2.2 merges. Three faults, all live at once:
    `luminary_unlocks.user_id`. Fixed by `server/migrations/0009`, applied
    live on 31 October 2026. The two old `profile_id` columns stay there,
    nullable and written by nothing, each still with its foreign key to
-   `profiles` (on delete cascade); the repository has neither.
+   `profiles` (on delete cascade), until 0011 drops them; the repository has
+   neither. 0010 and 0011 make `cast_counters`, a table only live has, read
+   only: no write policy and no write or truncate grant.
 3. **Four policies no file made.** One of them, "Users can manage luminary
    unlocks of their profiles.", let a signed in reader write their own unlock
    row: inert only while `user_id` was missing, and Codex Luminary for nothing
