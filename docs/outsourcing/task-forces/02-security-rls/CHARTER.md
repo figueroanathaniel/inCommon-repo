@@ -198,6 +198,21 @@ were approved; from 28 October 2026 that work is committed here.
   against git: both were the 9f237d4 versions, so nothing made in the
   dashboard was overwritten. This corrects the entry above that says neither
   function was redeployed.
+- 30 October 2026: F12 of the 2.2 Task 1 privacy review. The Privacy
+  Policy's section 3 says a profile's earlier birth details are kept on the
+  device, and that a note stays matched to the birth details it was written
+  against; the bundle's `privacy.html` was rebuilt with it. Sections 5 and 14
+  describe version syncing, which is not built, so their wording is held in
+  model section 15 for the step 3 change. `docs/LEGAL-SETUP.md` gains the
+  operator path that section 14 needs: a `deleted_profiles` record removes
+  another person's profile and its versions everywhere, found by birth date
+  and a first name compared without case, confirmed as exactly one row
+  before the insert and checked after it, with a proportionate identity
+  check first and the answer kept on the `support_requests` row. By the
+  owner's decision of 30 October 2026, the account holder is not told of
+  such a deletion: the profile leaves their devices at the next sync. The
+  review's two required changes and its re-review's note are in. Merged into
+  main in #132 at b2779f4.
 - 30 October 2026: `share-rules.js` is loaded by the app, at the owner's
   request ("load share-rules.js in the app"). The app file is workstream 3's;
   the change there is one script tag beside `people-library.js` and nothing
@@ -206,6 +221,7 @@ were approved; from 28 October 2026 that work is committed here.
   source shell and the rebuilt bundle: each boots, `window.ShareRules` is
   there with its six functions, and the page throws nothing. Nothing calls it
   yet; the handout and export screens are still workstream 3's to build.
+  Merged into main in #133 at f09ba8d.
 - 30 October 2026: the saved people half of G6 that was handed to workstream
   3 is done here instead, at the owner's request ("fix the saved people erase
   in the app"). `profile-manager.js` 1.8.2 adds `forgetAccountPeople()`, which
@@ -216,6 +232,7 @@ were approved; from 28 October 2026 that work is committed here.
   the method forgets the account's profiles' people, keeps another key's, and
   the page throws nothing. The delete account flow itself was not driven end
   to end, because it needs the account function to answer.
+  Merged into main in #134 at f9c385b.
 - 30 October 2026: at the owner's request ("identify everything that needs
   to be addressed"), this session read the live project and found the pull
   failing on every device, payments unrecordable and a stray policy one
