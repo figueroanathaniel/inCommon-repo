@@ -198,6 +198,7 @@ were approved; from 28 October 2026 that work is committed here.
   against git: both were the 9f237d4 versions, so nothing made in the
   dashboard was overwritten. This corrects the entry above that says neither
   function was redeployed.
+  Merged into main in #131 at d38cd71.
 - 30 October 2026: F12 of the 2.2 Task 1 privacy review. The Privacy
   Policy's section 3 says a profile's earlier birth details are kept on the
   device, and that a note stays matched to the birth details it was written
