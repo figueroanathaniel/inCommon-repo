@@ -9,7 +9,7 @@ everything to do with Delegation 2.
 | | |
 |---|---|
 | Branch | `taskforce/02-security-rls` |
-| Standing pull request | #129 (earlier ones under "History" below) |
+| Standing pull request | none open: #136 merged into main at 2d35c82 on 31 October 2026 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/02-security-rls/` |
 
 Every commit for Delegation 2 lands on this branch. Work that was already
@@ -225,3 +225,18 @@ were approved; from 28 October 2026 that work is committed here.
   check-hd-study-rls.js are on this branch for review. Nothing has been
   applied to the live project for it yet: that waits on the review and the
   owner's merge.
+- 31 October 2026: #135 (the client fix and 0009) merged at the owner's
+  decision, and at the owner's request this session applied 0009, then 0001
+  to 0003, to the live project. #136 followed, in three commits: 0009's
+  description of live corrected (live `pairs.id` was already an identity),
+  the module tests' column guard made to fail closed (K96); 0010, which drops
+  the `cast_counters` insert, update and delete policies; and 0011, which
+  drops `pairs.profile_id` and `luminary_unlocks.profile_id` and revokes the
+  `cast_counters` write grants. The owner ran 0010 and 0011 in the SQL Editor,
+  and both were verified as a signed in reader, the writes rolled back. #136
+  merged into main at 2d35c82 at the owner's decision ("merge it"); its last
+  commit, 93ecc43 (0011), was not reviewed. After the merge, a real device
+  pull and push were confirmed in the live logs: the owner's phone pulled
+  with every read answering 200, pushed a journal entry, and their laptop
+  pulled it. Stripe was checked: no Luminary payment had ever been taken, so
+  none went unrecorded.

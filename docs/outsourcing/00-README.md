@@ -59,6 +59,7 @@ this block updates every brief.
 | Last full gate run on main | c259e80, 27 October 2026: every README gate green (drift-check M, E, F, G, T, R, N; drive-cover 3/3, drive-routes 2/2, drive-swipe 4/4; run-module-tests 435/435), plus the 23 other check-*.js gates. H not run. |
 | Browser gate runner (Helpers, item 1) | the owner's Claude Code cloud session, which has Chromium and Playwright; ask the owner to start one |
 | Workstream 4's merged work so far | PR #92, PR #93, PR #97 |
+| Workstream 2's merged work so far | PR #129 to PR #136, the last merged into main at 2d35c82 on 31 October 2026 |
 | Merged fixes since the briefs were written | PR #94 (H11 untimed), PR #98 (Back after a routed arrival), PR #99 (swipes mid move) |
 
 File sizes and token counts quoted in the briefs and below are a snapshot
@@ -412,3 +413,5 @@ doc here rather than working around the difference.
   its end (E11); deferred modules are cached on first use (E12); 6.3 runs
   H only when the cover or a scene changes (E15); 6.4 moved to workstream 4
   as 4.3, and docs/WEBGL_ENGINE.md with it (E16).
+- 31 October 2026: #136 merged at the owner's decision; Workstream 2's
+  merged work recorded under "Current values".
