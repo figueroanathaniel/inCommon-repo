@@ -76,7 +76,7 @@ the delivery record, and this board mirrors the status.
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
 | 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | DONE | in its brief, "Secondary and tertiary" | DONE | first round done, PR #96 merged; Task 4 continues as 1.4 |
-| 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | not started |
+| 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | 2.1 not started; the workstream has been on 2.2, PR #129 to #136 merged |
 | 3 | task-forces/03-refactor-features/3.1-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
 | 4 | task-forces/04-visuals-webgl/4.1-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
 | 5 | task-forces/05-performance/5.1-performance-first-assignment.txt (5.1) | READY | in its brief, "Secondary and tertiary" | READY | reviewing |
@@ -415,3 +415,5 @@ doc here rather than working around the difference.
   as 4.3, and docs/WEBGL_ENGINE.md with it (E16).
 - 31 October 2026: #136 merged at the owner's decision; Workstream 2's
   merged work recorded under "Current values".
+- 31 October 2026: row 2's "Workstream reported" notes that the workstream
+  has been on 2.2, at the owner's request.
