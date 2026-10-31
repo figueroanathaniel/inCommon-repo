@@ -1,5 +1,9 @@
 # Task Force 6: QA, Unit Testing & Documentation
 
+Shared foundation: [FOUNDATION.md](../../FOUNDATION.md) and
+[role prompts](../../BOT-PROMPTS.md), routed by the central roster.
+Use their startup/completion receipts. Approval and delivery remain separate.
+
 Constituted by the owner on 28 October 2026, when every workstream became a
 task force (see `../README.md`). This folder and the branch below hold
 everything to do with Delegation 6.
@@ -9,7 +13,7 @@ everything to do with Delegation 6.
 | | |
 |---|---|
 | Branch | `taskforce/06-qa-tests-docs` |
-| Standing pull request | #121 (earlier ones under "History" below) |
+| Standing pull request | none open at the instruction review; see Current values in ../../00-README.md and refresh GitHub before work |
 | Folder | `docs/outsourcing/task-forces/06-qa-tests-docs/` |
 
 Every commit for Delegation 6 lands on this branch. Work that was already
@@ -100,3 +104,8 @@ were approved; from 28 October 2026 that work is committed here.
   only when the cover or a scene changes. E16: 6.4 moved to Task Force 4 as
   4.3, with this task force reviewing. E10: commits on this branch.
 - 28 October 2026: #121 opened as the standing pull request.
+
+- 31 October 2026: owner-requested alignment with the standing strategy.
+  Linked the shared foundation and role prompts; the central roster records
+  current labels and helper scopes. No new bot delivery is claimed.
+  Preserve this branch's unique sleep-test work named in Current values.

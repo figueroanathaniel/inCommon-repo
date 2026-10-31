@@ -1,5 +1,15 @@
 # Brief 5: Load Time & Performance Tuning
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+Measure fetched current main, with historical comparisons labeled. Complete
+5.1 before dependent 5.2 work and re-measure after integration. Verify actual
+allowance. E12 caches deferred modules on first use, not at install.
+
 Agents: named in the roster in 00-README.md, workstream 5 (Task Force 5).
 Read 00-README.md, CHARTER.md and CLAUDE.md first.
 
@@ -83,8 +93,9 @@ For each change:
      Otherwise: revert the change completely, note why in
      docs/PERF-BASELINE.md, and move to the next item.
 Hard rules:
-  - Anything deferred must still be precached by the service worker
-    (sw.js), so the app keeps working offline.
+  - Follow E12: cache deferred modules on first use, not during service
+    worker installation. Verify later offline reuse and show the existing
+    unavailable state if a module has never been cached.
   - If you change what build-bundle.js inlines, add a refusal to
     build-bundle.js that fails the build when a deferred module has no
     loader.
@@ -98,7 +109,7 @@ STEP 5: FINISH
   1. Run "node tools/drift-check.js --force --with-h". The H phase can take
      over ten minutes under software rendering; that is normal.
   2. Add a section to CLAUDE.md: what is deferred, how it loads, how it is
-     precached, and how to rerun tools/measure-load.js.
+     cached on first use, and how to rerun tools/measure-load.js.
   3. Push the branch and open a pull request. Its description must contain
      the final before and after table, every reverted attempt and why, and
      the full check results.
@@ -113,12 +124,14 @@ rather than trusting them:
   1. On the primary's branch, it runs tools/measure-load.js itself, in its
      own session, five times, and compares the medians with the primary's
      table. A gap over 15% on any row is reported on the pull request before
-     it merges. Baseline A is checked the same way, on main c259e80.
+     it merges. The current baseline uses the recorded fetched main SHA;
+     the historical baseline remains explicitly labeled as historical.
   2. For each "safe now" PR, "git diff --name-only" shows none of workstream
      4's files and no stage code in the app file.
-  3. It confirms every deferred module is still precached by sw.js: load the
-     app once online, go offline, and open every screen that needs a
-     deferred module.
+  3. It confirms deferred modules are cached on first use, not precached at
+     install (E12). Open the relevant screen online, go offline and revisit
+     it. Before first use, offline access shows the documented unavailable
+     state rather than a false loading success.
   4. It reviews each loader's failure path: what the screen shows if the
      deferred file fails to load. Block the file and look.
   5. For the JPL deferral (assignment 5.1, Task 2a), compare every planetary
@@ -130,3 +143,8 @@ rather than trusting them:
 
 TERTIARY: none, by the owner's decision. Browser runs come from the primary,
 the secondary, or the runner named in "Helpers".
+
+BOUNDED OPTIMIZATION SUPPORT. The support-column helper gets one measured
+hotspot and public/sanitized evidence. It suggests a small change; the primary
+integrates it and the secondary re-measures independently. It is not a new
+tertiary seat or an independent approval seat.

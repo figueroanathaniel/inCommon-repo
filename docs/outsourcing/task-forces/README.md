@@ -1,5 +1,10 @@
 # Task forces: how a delegation is organised
 
+All six task forces share [FOUNDATION.md](../FOUNDATION.md) and
+[BOT-PROMPTS.md](../BOT-PROMPTS.md), routed by the central roster. Read them
+at startup and return the shared completion receipt. Historical PR examples
+do not override current GitHub state.
+
 Decided by the owner on 28 October 2026, starting with Task Force 1. Each
 workstream in `../00-README.md` becomes a task force: one team, one branch,
 one folder, and everything to do with that delegation in those two places.

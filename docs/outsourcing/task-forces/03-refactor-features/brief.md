@@ -1,5 +1,16 @@
 # Brief 3: Refactoring & Feature Additions
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+Preserve merged sleep, register and account-erasure fixes. Continue
+unfinished 3.2 work. Approved study-model screen/sharing handoffs are separate
+ranges. A loaded sharing module does not mean its screens exist. Preserve
+QA's unmerged sleep work instead of duplicating it.
+
 Agents: named in the roster in 00-README.md, workstream 3 (Task Force 3).
 Branch: the Task Force 3 branch named in CHARTER.md (since 28 October 2026).
 Read 00-README.md, CHARTER.md and CLAUDE.md first.

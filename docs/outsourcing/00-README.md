@@ -2,45 +2,78 @@
 
 Six workstreams run in parallel on figueroanathaniel/inCommon-repo, each as a
 task force with its own branch and folder (`task-forces/`). Every agent reads
-THIS FILE first, then its task force's CHARTER.md and brief.md. What comes
+THIS FILE, FOUNDATION.md and PROGRAMME.md first, then its task force's
+CHARTER.md, brief.md and numbered assignment. BOT-PROMPTS.md supplies the
+role prompts and FOUNDATION.md supplies the common startup/completion receipts. What comes
 next across all six is `PROGRAMME.md`.
 
 ## The roster
 
-**This table is the only place an agent is named.** The briefs speak of
+**This file is the only place agent names are mapped to roles.** The briefs speak of
 "the primary", "the secondary" and "the tertiary" and never name a model, so
 reassigning a seat is a one cell edit here and nothing else. See "Changing
 these docs" at the end.
 
-| # | Workstream | Primary | Secondary | Tertiary | Brief |
-|---|---|---|---|---|---|
-| 1 | Data Mapping & Schema Architecture | Claude Opus 5.5 | Gemini Argon 4 | Free Perplexity | task-forces/01-data-schema/brief.md |
-| 2 | Security Hardening & RLS | Claude Opus 5.5 | Claude Opus 5.5 (separate session) | Meta AI | task-forces/02-security-rls/brief.md |
-| 3 | Refactoring & Feature Additions | DeepSeek V4.0 Flash | Kimi K3 | Nemotron 3.5 Lightening | task-forces/03-refactor-features/brief.md |
-| 4 | Interactive Visuals (WebGL / three.js) | GPT Sol 6.1 | Haiku 5.5 | Nemotron 3.5 Lightening | task-forces/04-visuals-webgl/brief.md |
-| 5 | Load Time & Performance Tuning | MiMo v2.6 Flash Slow | DeepSeek V4.1 Flash Bot | none | task-forces/05-performance/brief.md |
-| 6 | QA, Unit Testing & Documentation | Nemotron 3.5 Lightening | Haiku 5.5 | Free Gemini / WhatsApp Bot | task-forces/06-qa-tests-docs/brief.md |
+| # | Workstream | Primary | Secondary | Tertiary | Bounded support / fallback | Brief |
+|---|---|---|---|---|---|---|
+| 1 | Data Mapping & Schema Architecture | Claude Opus 5.5 | Gemini Argon 4 | Free Perplexity | none | task-forces/01-data-schema/brief.md |
+| 2 | Security Hardening & RLS | Claude Opus 5.5 | Claude Opus 5.5 (separate blind session) | Meta AI (public questions only) | Haiku 5.5 or Nemotron 3.5 Lightning: policy drafts under the primary | task-forces/02-security-rls/brief.md |
+| 3 | Refactoring & Feature Additions | DeepSeek V4.1 Flash | Kimi (Instant) | Nemotron 3.5 Lightning | GPT-6.1 Sol: bounded mathematics through the file owner | task-forces/03-refactor-features/brief.md |
+| 4 | Interactive Visuals (WebGL / three.js) | GPT-6.1 Sol | Haiku 5.5 | Meta AI (descriptions only) | Claude Opus 5.5: cap fallback; Nemotron 3.5 Lightning: execution evidence | task-forces/04-visuals-webgl/brief.md |
+| 5 | Load Time & Performance Tuning | MiMo Slow | DeepSeek V4.1 Flash | none | Merlin basic models: bounded optimization suggestions | task-forces/05-performance/brief.md |
+| 6 | QA, Unit Testing & Documentation | Nemotron 3.5 Lightning | Haiku 5.5 | Free Gemini | none | task-forces/06-qa-tests-docs/brief.md |
+
+Owner direction: standing strategy of 30 October 2026, synchronized on
+31 October. Support does not acquire file ownership or independent sign-off.
+Preserve the repository-capable schema secondary and the visual secondary;
+the named visual fallback takes over only with an actual handoff.
+
 
 ### What each agent can do
 
-The briefs decide how a helper is used from these traits, not from its name,
-so a new agent only needs a row here. An agent with no row is treated as
-repo access, full context, no limit on use.
+The briefs use roles and access limits, not capability assumed from a model
+name. Confirm the actual session's tools and budget. An unlisted agent receives
+no repository or private-data access by default.
 
-| Agent | Repo access | Context | Use |
+| Agent | Repo access | Context / budget handling | Use |
 |---|---|---|---|
-| Claude Opus 5.5 | yes | full | normal |
-| Gemini Argon 4 | yes | full | normal |
-| DeepSeek V4.0 Flash | yes | full | normal |
-| DeepSeek V4.1 Flash Bot | yes | full | normal |
-| GPT Sol 6.1 | yes | full | normal |
-| MiMo v2.6 Flash Slow | yes | full | normal |
-| Nemotron 3.5 Lightening | yes | full | normal |
-| Kimi K3 | yes | full | sparingly: see brief 3's trigger list |
-| Haiku 5.5 | yes | about 100k tokens | normal |
-| Free Perplexity | no, chat only | n/a | lookups only |
-| Meta AI | no, chat only | n/a | lookups only |
-| Free Gemini / WhatsApp Bot | no, chat only | n/a | proofreading only |
+| Claude Opus 5.5 | authorized repo session; verify tools | verify actual limit | architecture, security, approved fallback |
+| Gemini Argon 4 | authorized repo session; verify tools | verify actual limit | independent schema review |
+| DeepSeek V4.1 Flash | authorized repo session; verify tools | bounded ranges | features; independent performance re-measurement when not its author |
+| GPT-6.1 Sol | authorized repo session; verify tools | targeted reads; checkpoint at caps | visuals and mathematical implementation |
+| MiMo Slow | authorized repo session; verify tools | checkpoint within reported allowance | measured performance audits |
+| Nemotron 3.5 Lightning | authorized repo session; verify tools | actual limits checked | QA, structural review, execution evidence |
+| Kimi (Instant) | authorized repo session; verify tools | sparingly; existing consult limits apply | bounded precision decisions |
+| Haiku 5.5 | authorized repo session; verify tools | one file per pass when needed | independent QA/visual review, short edits, policy drafts |
+| Free Perplexity | no, chat only | public questions only | source and convention research |
+| Meta AI | no, chat only | public or sanitized packet | visual descriptions; public documentation questions |
+| Free Gemini | no, chat only | approved sanitized prose | draft learning documentation and editorial QA |
+| Merlin basic models | chat only unless separately authorized | one measured hotspot | optimization suggestions |
+
+Free/unlimited access and the reported 30-hour allowance are owner budgeting
+assumptions, not verified platform guarantees. Listing a role does not
+schedule it, dispatch it or record delivery.
+
+### Prompt routing
+
+Every repository prompt inherits FOUNDATION.md and the current programme.
+Prompt bodies use roles; this is the only model-to-prompt mapping.
+
+| Agent / use | Prompt IDs in BOT-PROMPTS.md |
+|---|---|
+| GPT-6.1 Sol | V1; scoped mathematics from Features |
+| Claude Opus 5.5 | A1, S1, H1; blind security secondary under brief 2 |
+| Gemini Argon 4 | A3 |
+| DeepSeek V4.1 Flash | F1; performance secondary under brief 5 |
+| Kimi (Instant) | F2 |
+| Nemotron 3.5 Lightning | F3, Q1, S2; bounded visual execution support |
+| Haiku 5.5 | Q2, S2 |
+| MiMo Slow | P1 |
+| Merlin basic models | P2 |
+| Meta AI | V2; public questions under brief 2 |
+| Free Perplexity | A2 |
+| Free Gemini | Q3 |
+
 
 "Chat only" puts an agent under the second row of "What may be shared with
 whom". A context under about 150k tokens puts it under "Working inside a
@@ -55,8 +88,16 @@ this block updates every brief.
 | Name | Value |
 |---|---|
 | Base branch | main |
+| Shared foundation | FOUNDATION.md, revision 2026-10-31.1; role prompts in BOT-PROMPTS.md |
+| Instruction review baseline | main 7ccc5e0be88e53061147eb4a1a16ef8fb2789012, 31 October 2026, after #141; refresh before work |
+| Standing PR lookup | No task-force PR open at this review. Refresh GitHub; prior charter numbers are history |
+| Remote branch check | Task Forces 1 to 5 are behind main with no unique commits at this review. Task Force 6 is diverged: two unique commits, bc43557 and 07f97a2. Preserve them and reconcile main; do not reset |
+| QA work outside main | tools/check-hd-sleep.js and 6.2-task1-sleep-qa-record.md on taskforce/06-qa-tests-docs at 07f97a2. Old-tree Node/module evidence is recorded; current integration/browser and secondary review are owed |
+| Existing study policy harness | tools/check-hd-study-rls.js; requires its local/test database for actual policy evidence |
+| Shared tools absent from reviewed main | tools/run-gates.js, tools/dump-render-vals.js, tools/measure-load.js, tools/check-hd-reference.js, tools/fixtures/hd-reference.json; recheck before creating |
+| Scope of instruction review | Repository/branch/document evidence; no new full application gate run or production audit |
 | `<current>` deploy folder | deploy/v6.4/ (so `deploy/<current>/` is deploy/v6.4/) |
-| Last full gate run on main | c259e80, 27 October 2026: every README gate green (drift-check M, E, F, G, T, R, N; drive-cover 3/3, drive-routes 2/2, drive-swipe 4/4; run-module-tests 435/435), plus the 23 other check-*.js gates. H not run. |
+| Last recorded full gate run on main (historical) | c259e80, 27 October 2026: every README gate green (drift-check M, E, F, G, T, R, N; drive-cover 3/3, drive-routes 2/2, drive-swipe 4/4; run-module-tests 435/435), plus the 23 other check-*.js gates. H not run. |
 | Browser gate runner (Helpers, item 1) | the owner's Claude Code cloud session, which has Chromium and Playwright; ask the owner to start one |
 | Workstream 4's merged work so far | PR #92, PR #93, PR #97 |
 | Workstream 2's merged work so far | PR #129 to PR #136, the last merged into main at 2d35c82 on 31 October 2026 |
@@ -76,7 +117,7 @@ the delivery record, and this board mirrors the status.
 | # | Primary assignment | Status | Secondary and tertiary instructions | Status | Workstream reported |
 |---|---|---|---|---|---|
 | 1 | task-forces/01-data-schema/1.1-schema-first-assignment.txt (1.1) | DONE | in its brief, "Secondary and tertiary" | DONE | first round done, PR #96 merged; Task 4 continues as 1.4 |
-| 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | 2.1 not started; the workstream has been on 2.2, PR #129 to #136 merged |
+| 2 | task-forces/02-security-rls/2.1-security-first-assignment.txt (2.1) | READY | in its brief, "Secondary and tertiary" | READY | 2.1 not started; 2.2 separately DONE by the owner, with #129 to #136 merged |
 | 3 | task-forces/03-refactor-features/3.1-refactor-first-assignment.txt (3.1) | READY | in its brief, "Secondary and tertiary" | READY | ready to work |
 | 4 | task-forces/04-visuals-webgl/4.1-visuals-first-assignment.txt (4.1) | READY | in its brief, "Secondary and tertiary" | READY | large graphics update in flight |
 | 5 | task-forces/05-performance/5.1-performance-first-assignment.txt (5.1) | READY | in its brief, "Secondary and tertiary" | READY | reviewing |
@@ -90,8 +131,8 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 | # | Assignment | Status | Can start |
 |---|---|---|---|
 | 3 | task-forces/03-refactor-features/3.2-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
-| 6 | task-forces/06-qa-tests-docs/6.2-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
-| 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | now |
+| 6 | task-forces/06-qa-tests-docs/6.2-qa-hd-assignment.txt (6.2) | READY | after 6.1 Task 1; preserve existing sleep QA work in Current values |
+| 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | partial implementation merged through #129; reconcile remaining rollout; 2.2 is DONE |
 | 2 | task-forces/02-security-rls/2.2-security-hd-assignment.txt (2.2) | DONE | done; PR #129 to #136 merged |
 | 4 | task-forces/04-visuals-webgl/4.2-visuals-hd-assignment.txt (4.2) | READY | once 4.1 posts that the graphics update has merged |
 | 5 | task-forces/05-performance/5.2-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
@@ -121,8 +162,9 @@ mirror the status.
 schema definitions as an Obsidian vault (data-contracts/hd-vault/), and
 cross verify the positions through the tertiary.
 
-1.3 can start now, beside 1.2: its Chart address note is what 1.2's notes
-attach to. 1.4 is 1.1's Task 4, reissued. 6.3 is priority 9 on
+1.3 is concluded by the owner; its Chart address note is what 1.2's notes
+attach to. Preserve its review exception and named follow-ups; do not repeat
+the completed mapping. 1.4 is 1.1's Task 4, reissued. 6.3 is priority 9 on
 `PROGRAMME.md` and 4.3 (6.4 until E16 moved it) is priority 1; their
 secondaries and tertiaries work as each brief's "Secondary and tertiary"
 says, and 4.3 is reviewed by the workstream 6 secondary.
@@ -156,7 +198,7 @@ are used.
 Decided by the owner on 27 October 2026. These apply to every workstream
 and every brief's "Secondary and tertiary" section.
 
-1. **Who runs the browser gates.** Every helper confirms on its first task
+1. **Who runs the browser gates.** Every repository-capable helper confirms on its first task
    that "node tools/drive-swipe.js" runs on its machine. When none of a
    workstream's agents can run the browser gates (drive-*.js, drift-check,
    the H phase), the PR is labelled "needs browser gates" and goes to the
@@ -173,7 +215,8 @@ and every brief's "Secondary and tertiary" section.
    receive the private addendum until its own list is written.
 4. **Workstream 5 has no tertiary.** Its secondary re-measures
    independently, and the browser runner covers any gate its agents cannot
-   run.
+   run. The support-column optimization helper is bounded assistance, not
+   a new tertiary or independent approval seat.
 5. **Every PR ends with a "Helpers" section, the helper log.** It lists
    each secondary review and each tertiary consult: who, when, the question
    as asked (word for word for a chat only helper), the answer's source,
@@ -244,6 +287,10 @@ tokens each, app/cover.html about 31k, app/incommon-cloud.js about 24k.
 9. Stay inside the files your workstream owns (table below). If you need a
    change in a file another workstream owns, describe it in your pull
    request instead of making it.
+
+10. Use FOUNDATION.md's startup and completion receipts. Reconcile current
+    main, branch work, delivery and owner status. BOT-PROMPTS.md is the role
+    prompt set; older pasted prompts are historical.
 
 ## The gates (all must pass before any pull request)
 
@@ -418,3 +465,10 @@ doc here rather than working around the difference.
 - 31 October 2026: row 2's "Workstream reported" notes that the workstream
   has been on 2.2, at the owner's request.
 - 31 October 2026: 2.2 moved to DONE by the owner.
+
+- 31 October 2026: owner-requested alignment with the standing bot strategy.
+  Added FOUNDATION.md and BOT-PROMPTS.md; synchronized labels/helper scopes;
+  preserved the schema secondary and visual reviewer; linked all six briefs
+  and charters; reconciled the nine priorities and 2.2 DONE versus 2.1 READY.
+  Preserved the QA branch's two unmerged sleep commits. Publication is not
+  delivery to bots.

@@ -1,5 +1,15 @@
 # Brief 4: Interactive Visuals (WebGL / three.js)
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+Reconcile 4.3's engine document and remaining 4.1 work. 4.2 follows its
+required graphics-completion evidence. Use current chart addresses and the
+application model. Description help does not replace review or execution.
+
 Agents: named in the roster in 00-README.md, workstream 4 (Task Force 4).
 Branch: the Task Force 4 branch named in CHARTER.md (since 28 October 2026).
 Read 00-README.md, CHARTER.md and CLAUDE.md first. This workstream's merged work so far
@@ -101,18 +111,22 @@ rules that are not negotiable"; "Zero em dash"; and "Swiping on the phone is
 one chain, read left to right". If it takes the branch over, it keeps
 working one file at a time.
 
-**Tertiary** (repo access). The browser runner for this workstream when it
-has a working browser, otherwise the runner named in "Helpers":
+**Tertiary** (chat only). Drafts descriptions from supplied public or
+sanitized visual evidence. Use actual labels, distinguish implemented from
+proposed behavior, and mark missing evidence. A filename does not prove
+appearance. No private charts, server files, data contracts or unresolved
+findings are shared. This helper does not run gates.
 
-1. On every graphics PR, run "node tools/drift-check.js --force --with-h",
-   "node tools/drive-swipe.js", "node tools/drive-routes.js" and
-   "node tools/drive-cover.js", and post the full output.
-2. Post screenshots of each 3D stage at 390x844 and 1440x900, and of the
-   cover at the bottom ladder rung.
-3. Under SwiftShader the H phase takes about ten minutes (CLAUDE.md, group
-   H). Raise the budget rather than reading a timeout as a failure, and say
-   on the PR that it ran on SwiftShader, not a GPU.
-4. A browser row that flips between runs is reported on the graphics PR and
-   never "stabilised" (assignment 6.1 tells QA the same).
+**Bounded execution support**, named in the roster, or the browser runner:
 
-It does not change rendering code.
+1. Run required graphics gates including H and drive checks on the exact
+   range. Report unavailable checks as not run.
+2. Record the worked journey at the assignment's phone and desktop sizes,
+   selection consistency, keyboard access and resource cleanup.
+3. Label software rendering and physical-device gaps honestly. Investigate
+   inconsistent rows instead of hiding them.
+
+**Cap fallback**, named in the roster, receives the branch, exact diff,
+completed checks and smallest unfinished step. It preserves ownership and
+independent secondary review. An author cannot approve its own change;
+no takeover is recorded before an actual handoff.

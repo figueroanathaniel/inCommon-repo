@@ -1,5 +1,9 @@
 # Task Force 1: Data Mapping & Schema Architecture
 
+Shared foundation: [FOUNDATION.md](../../FOUNDATION.md) and
+[role prompts](../../BOT-PROMPTS.md), routed by the central roster.
+Use their startup/completion receipts. Approval and delivery remain separate.
+
 Constituted by the owner on 28 October 2026. This folder and the branch below
 hold everything to do with Delegation 1. The shape is the one every task
 force follows: see `../README.md`.
@@ -9,7 +13,7 @@ force follows: see `../README.md`.
 | | |
 |---|---|
 | Branch | `taskforce/01-data-schema` |
-| Standing pull request | #128 (earlier ones under "History" below) |
+| Standing pull request | none open at the instruction review; see Current values in ../../00-README.md and refresh GitHub before work |
 | Folder | `docs/outsourcing/task-forces/01-data-schema/` |
 
 Every commit for Delegation 1 lands on this branch: documents, data model,
@@ -44,7 +48,7 @@ context, check its duties still fit ("What each agent can do" in
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/01-data-schema.md`) | approved | |
 | `1.1-schema-first-assignment.txt` | round 1: the data map (PR #96, merged); its Task 4 continues as 1.4 | DONE | not recorded |
-| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | primary 29 Oct, pasted by the owner into a Claude Code session; Task 1 drafted as `data-contracts/HD-STUDY-MODEL.md`; model approved by the owner 29 Oct, awaiting 2.2 Task 1 |
+| `1.2-schema-hd-assignment.txt` | the Human Design study model: notes, chart versions, other people's charts, import and export | READY | primary 29 Oct, pasted by the owner into a Claude Code session; Task 1 drafted as `data-contracts/HD-STUDY-MODEL.md`; model approved by the owner 29 Oct; later review/implementation records below supersede the original wait for 2.2 Task 1; 1.2 remains partial |
 | `1.3-hd-mapping-primary.txt` | the Human Design logic map: research, reconcile, map into the vault, cross verify | DONE | primary, pasted by the owner (date not recorded); delivered as #124 |
 | `1.3-hd-mapping-secondary.txt` | the independent review of 1.3 | DONE | secondary 29 Oct, pasted by the owner; that pass was sent back, and the primary's evidence on #125 was accepted in its place |
 | `1.3-hd-mapping-tertiary.txt` | the lookups the tertiary answers for 1.3, pasted into its chat | DONE | not delivered; closed without a consult (the vault's Tertiary log) |
@@ -189,3 +193,8 @@ October 2026, so it is left alone; the file is here now.
   everywhere only with 0007's record. So this branch's sync code still has
   both faults on its own, and it must not ship without #129; the release
   order in the migrations README already ships the app after 0006 to 0008.
+
+- 31 October 2026: owner-requested alignment with the standing strategy.
+  Linked the shared foundation and role prompts; the central roster records
+  current labels and helper scopes. No new bot delivery is claimed.
+  1.3 stays DONE; 1.2 stays READY with partial implementation.

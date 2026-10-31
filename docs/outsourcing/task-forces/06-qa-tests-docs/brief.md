@@ -1,5 +1,16 @@
 # Brief 6: QA, Unit Testing & Documentation
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+Preserve the unique sleep commits named in Current values. Reconcile main
+without resetting them, rerun their checks and retain historical limits.
+Complete 6.1 Task 1 before new 6.2 reference work. Counts below are historical.
+Reuse the study RLS harness; distinguish remaining 2.1 from completed 2.2.
+
 Agents: named in the roster in 00-README.md, workstream 6 (Task Force 6).
 Branch: the Task Force 6 branch named in CHARTER.md (since 28 October 2026).
 Read 00-README.md, CHARTER.md and CLAUDE.md first.
@@ -111,9 +122,10 @@ app/handoff/tests-v6.0.js (about 44k) together with tools/run-module-tests.js
 Each new test must also fake every outside service, and its name and
 expected values must say what the behaviour is, in plain words.
 
-**Tertiary** (chat only, no repo). Proofreading only. Paste one paragraph of
-a README or doc at a time, ask for plainer wording, and apply the result by
-hand. The result must still follow the repository's rules: no em or en
+**Tertiary** (chat only, no repo). Draft learning documentation and
+proofread approved public or sanitized prose, under the standing strategy.
+Supply actual labels and confirmed behavior. Keep planned features separate;
+the repository owner verifies each claim against the build before applying it. The result must still follow the repository's rules: no em or en
 dashes, no disclaimers, and nothing that explains a screen before it is
 opened. Never paste test code, server/ code, data-contracts/, anything about
 workstream 2's work, or any address or key.

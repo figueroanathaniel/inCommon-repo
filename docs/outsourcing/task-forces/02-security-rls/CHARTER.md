@@ -1,5 +1,9 @@
 # Task Force 2: Security Hardening & RLS
 
+Shared foundation: [FOUNDATION.md](../../FOUNDATION.md) and
+[role prompts](../../BOT-PROMPTS.md), routed by the central roster.
+Use their startup/completion receipts. Approval and delivery remain separate.
+
 Constituted by the owner on 28 October 2026, when every workstream became a
 task force (see `../README.md`). This folder and the branch below hold
 everything to do with Delegation 2.
@@ -9,7 +13,7 @@ everything to do with Delegation 2.
 | | |
 |---|---|
 | Branch | `taskforce/02-security-rls` |
-| Standing pull request | none open: #136 merged into main at 2d35c82 on 31 October 2026 (earlier ones under "History" below) |
+| Standing pull request | none open at the instruction review; see Current values in ../../00-README.md and refresh GitHub before work |
 | Folder | `docs/outsourcing/task-forces/02-security-rls/` |
 
 Every commit for Delegation 2 lands on this branch. Work that was already
@@ -261,3 +265,8 @@ were approved; from 28 October 2026 that work is committed here.
 - 31 October 2026: 2.2 moved to DONE by the owner ("move 2.2 to DONE on
   the board"), on the board, in this table and in the assignment's own
   status line.
+
+- 31 October 2026: owner-requested alignment with the standing strategy.
+  Linked the shared foundation and role prompts; the central roster records
+  current labels and helper scopes. No new bot delivery is claimed.
+  2.2 stays DONE; 2.1 stays READY/not started.

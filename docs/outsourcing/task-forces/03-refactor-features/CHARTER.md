@@ -1,5 +1,9 @@
 # Task Force 3: Refactoring & Feature Additions
 
+Shared foundation: [FOUNDATION.md](../../FOUNDATION.md) and
+[role prompts](../../BOT-PROMPTS.md), routed by the central roster.
+Use their startup/completion receipts. Approval and delivery remain separate.
+
 Constituted by the owner on 28 October 2026, when every workstream became a
 task force (see `../README.md`). This folder and the branch below hold
 everything to do with Delegation 3.
@@ -9,7 +13,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #127 (earlier ones under "History" below) |
+| Standing pull request | none open at the instruction review; see Current values in ../../00-README.md and refresh GitHub before work |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -104,3 +108,8 @@ were approved; from 28 October 2026 that work is committed here.
   D-08 and the app half of D-03, in d6e8000, with the bundle rebuilt in
   3ee7d28. D-02 waits on the Human Design reviewer, D-06 on the owner, and
   D-07 on 3.2 Task 3. #127 opened as the standing pull request.
+
+- 31 October 2026: owner-requested alignment with the standing strategy.
+  Linked the shared foundation and role prompts; the central roster records
+  current labels and helper scopes. No new bot delivery is claimed.
+  Formal assignment statuses are unchanged.

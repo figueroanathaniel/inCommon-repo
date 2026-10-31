@@ -1,5 +1,9 @@
 # Task Force 5: Load Time & Performance Tuning
 
+Shared foundation: [FOUNDATION.md](../../FOUNDATION.md) and
+[role prompts](../../BOT-PROMPTS.md), routed by the central roster.
+Use their startup/completion receipts. Approval and delivery remain separate.
+
 Constituted by the owner on 28 October 2026, when every workstream became a
 task force (see `../README.md`). This folder and the branch below hold
 everything to do with Delegation 5.
@@ -9,7 +13,7 @@ everything to do with Delegation 5.
 | | |
 |---|---|
 | Branch | `taskforce/05-performance` |
-| Standing pull request | #120 (earlier ones under "History" below) |
+| Standing pull request | none open at the instruction review; see Current values in ../../00-README.md and refresh GitHub before work |
 | Folder | `docs/outsourcing/task-forces/05-performance/` |
 
 Every commit for Delegation 5 lands on this branch. Work that was already
@@ -92,3 +96,8 @@ were approved; from 28 October 2026 that work is committed here.
   install. E11: "after graphics" means after workstream 4 posts that the
   graphics update has merged. E10: commits on this branch.
 - 28 October 2026: #120 opened as the standing pull request.
+
+- 31 October 2026: owner-requested alignment with the standing strategy.
+  Linked the shared foundation and role prompts; the central roster records
+  current labels and helper scopes. No new bot delivery is claimed.
+  Formal assignment statuses are unchanged.

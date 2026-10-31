@@ -1,5 +1,15 @@
 # Brief 2: Security Hardening & RLS Setup
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+2.2 is DONE. 2.1 is READY/not started; use its private packet and actual
+delivery record. Reuse existing study policy tests. Applied migration
+records do not authorize replaying live changes. Inventory current source.
+
 Agents: named in the roster in 00-README.md, workstream 2 (Task Force 2).
 Branch: the Task Force 2 branch named in CHARTER.md (since 28 October 2026).
 Read 00-README.md, CHARTER.md and CLAUDE.md first. Start after workstream 1 has merged,
@@ -31,10 +41,11 @@ Current state:
 
 ## The job
 
-1. Audit every table in server/ for: RLS enabled, a policy for each of
-   select, insert, update and delete, policies that test auth.uid() against
-   the row's owner column, no policy that trusts a value the client sends,
-   and no grant to anon beyond what the app needs.
+1. Inventory current tables and their intended operations. Check RLS,
+   grants and permitted operations; explicitly test refusal of prohibited
+   operations. Do not add all four CRUD policies indiscriminately. Verify
+   actual ownership/consent predicates and reject authorization based on
+   user-editable claims.
 2. Write policies for every table workstream 1 added (they ship deny all).
 3. Write an automated two-user isolation test: tools/check-rls.js. It reads
    SUPABASE_URL and two throwaway test accounts from environment variables,
@@ -67,7 +78,8 @@ Current state:
 
 ## Done means
 
-- Policies for every table, as migration files, with a down migration each.
+- An access matrix for current tables, with tested allowed and denied
+  operations; changed policies as migration files with a rollback.
 - tools/check-rls.js, documented, refusing production by default.
 - docs/SECURITY.md updated with every finding, fix and owner action.
 - Every gate in 00-README.md passes.
@@ -117,3 +129,9 @@ Until a fix is deployed, never mention its subject: no named function, no
 outside service, nothing like "a function anyone can call". Every answer is
 checked against official documentation before use, and the check is
 recorded in the helper log.
+
+**Bounded policy-drafting support.** The support seat in the roster may
+produce rule sheets from the agreed current schema in an authorized repository
+session. The primary reviews them; the security secondary independently
+reviews changes. Draft authors do not approve their own work. Chat-only
+helpers receive generic public questions, not schema files.

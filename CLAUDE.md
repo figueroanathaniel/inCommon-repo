@@ -6746,6 +6746,14 @@ docs" at the end of the README says how to make every other kind of change
 without spreading names and numbers back into the briefs. Where a brief and
 this file disagree, this file wins, and the brief is the one corrected.
 
+**Every bot begins from the same foundation** (owner, 31 October 2026).
+`docs/outsourcing/FOUNDATION.md` defines the startup check, evidence boundaries
+and completion receipt; `BOT-PROMPTS.md` carries role prompts routed by the
+roster. They read the programme and charter rather than replacing their
+records. Check main and unmerged branch work before starting. A completed
+assignment, merged commit, independent review and deployment are separate
+facts. Publishing instructions is not delivering them to another agent.
+
 **Each workstream is a task force** (the owner, 28 October 2026): one
 branch, `taskforce/<nn>-<slug>`, and one folder,
 `docs/outsourcing/task-forces/<nn>-<slug>/`, holding its charter, its brief
@@ -6822,8 +6830,8 @@ say the field's word for it.
 versions, other people's charts and import and export. The owner approved its
 nine decisions on 29 October 2026. Workstream 2's privacy review came back on
 30 October as not ready for migrations, and section 12 of the model answers it
-finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js` 1.7.1,
-held by O9 to O21:
+finding by finding; the owner decided F2 and F9 the same day (section 13). The device half is built in `profile-manager.js`; its initial and review
+behavior is held by O9 to O21, with later changes and rows recorded below:
 
 - **The profile keeps the current birth where it always has**, and
   `incommon.p.<pid>.chartVersions.v1` holds the history beside it. A version
@@ -6895,8 +6903,10 @@ does now (model section 13, K75 to K78):
 
 ## A handout is a crowd, and anything past it is birth data (2.2)
 Assignment 2.2, Tasks 2 and 3, on `taskforce/02-security-rls`; `docs/SECURITY.md`
-has the whole account. Task 1, the privacy review of the 1.2 model, is owed by
-a session that did not write the model.
+has the whole account. Task 1, the privacy review of the 1.2 model, was performed by a session that
+did not write the model. The owner has concluded 2.2, as recorded in its
+charter and the central board. This does not complete 1.2's remaining client
+rollout or establish independent review of every implementation commit.
 
 - **`chart_versions` has no update rule**, because a version is history. The
   push must use `ignoreDuplicates`. `tools/check-hd-study-rls.js` proves the

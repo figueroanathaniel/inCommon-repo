@@ -1,5 +1,15 @@
 # Brief 1: Data Mapping & Schema Architecture
 
+Shared entry: [FOUNDATION.md](../../FOUNDATION.md) and the current
+[role prompts](../../BOT-PROMPTS.md), with the central roster and programme.
+Use the same startup and completion receipts as every other role.
+
+## Current handoff
+
+1.3 is concluded. 1.2 remains READY with partial implementation in main;
+2.2 is DONE. Reconcile remaining rollout and later owner decisions. Keep
+1.4 separate. The PR #96 checklist below is a historical review method.
+
 Agents: named in the roster in 00-README.md, workstream 1 (Task Force 1).
 Branch: the Task Force 1 branch named in CHARTER.md (since 28 October 2026).
 Read 00-README.md, CHARTER.md and CLAUDE.md first.
@@ -77,8 +87,9 @@ Approved by the owner on 27 October 2026. "Helpers" in 00-README.md applies
 to every block below: the browser runner, shared seats, and the helper log
 every pull request ends with. Who holds each seat is in the roster.
 
-**Secondary** (repo access, full context). Reviews PR #96 once the primary
-has rebased it (assignment 1.1, Task 1), then each follow-up PR. For PR #96:
+**Secondary** (repo access, full context). Reviews current follow-up ranges.
+The checklist for PR #96 below is the historical 1.1 method; 1.1 is DONE.
+Reuse relevant checks for new changes without repeating that assignment:
 
 1. Rebase hygiene. deploy/ was rebuilt, not hand-merged: run
    "node tools/build-bundle.js" and confirm git shows no diff afterwards.
