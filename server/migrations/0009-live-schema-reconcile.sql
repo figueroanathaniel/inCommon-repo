@@ -27,10 +27,14 @@
 --  in effect. Dropped so the policies on a table are the ones this
 --  repository states.
 --
--- WHAT THIS DOES. It brings a project of that shape to the repository's, and
--- on a project already of the repository's shape it changes nothing (proven
--- both ways by tools/check-hd-study-rls.js, the live_before and live_after
--- runs, rows LV1 to LV9).
+-- WHAT THIS DOES. It gives a project of that shape every column, key and
+-- policy the repository has for these two tables, and on a project already
+-- of the repository's shape it changes nothing (proven both ways by
+-- tools/check-hd-study-rls.js, the live_before and live_after runs, rows LV1
+-- to LV9). It is not the repository's shape exactly: the two old profile_id
+-- columns stay, nullable, written by nothing, each still carrying its foreign
+-- key to profiles with on delete cascade, which the repository has neither of.
+-- Dropping them is a later change, once nothing is confirmed to read them.
 -- * pairs: adds account_id (to accounts, on delete cascade), filled from the
 --  profile each row names, the old profile_id first and profile_a after it;
 --  makes it not null once no row lacks it; lets profile_id be null, since no

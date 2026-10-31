@@ -3404,7 +3404,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 9, bad: [], listedInOrder: true, uncovered: []
+    files: 10, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 

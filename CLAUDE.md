@@ -6960,8 +6960,10 @@ The live project had also drifted: `pairs` keyed by `profile_id` with no
 `account_id`, `luminary_unlocks` keyed by `profile_id`
 with no `user_id` and no key, and four policies no file made, one of which
 lets a reader write their own unlock once `user_id` exists.
-`server/migrations/0009` brings it to the repository's shape and is a no op
-on that shape. **On the live project it runs before 0001 to 0003**, which
+`server/migrations/0009` gives it every column, key and policy the
+repository has, keeps the two old `profile_id` columns (nullable, written by
+nothing, still cascading from `profiles`), and is a no op on the repository's
+shape. **On the live project it runs before 0001 to 0003**, which
 were never applied there. `tools/check-hd-study-rls.js` builds that live shape
 (`live_before`, `live_after`, rows LV1 to LV9). The fake matches the
 repository, not the live project, so a later drift there would pass the module
