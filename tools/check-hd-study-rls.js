@@ -36,16 +36,28 @@
  * and no key) and carried four policies no file made, one of which would hand
  * a reader a free unlock once user_id existed. Found 30 October 2026.
  *
- * It runs the cases seven times, in seven databases:
+ * Rows HR1 to HR5, BN1 to BN5, PL1 to PL10 and CN1 to CN6 are assignment
+ * 2.3 (the owner, 31 October 2026: the account is the true copy for signed in
+ * readers, and what the device alone held syncs): 0012 makes the seven own
+ * rules again for authenticated with the caller read once; 0013 gives a
+ * profile its birth name, withheld as its birth is; 0014 and 0015 give saved
+ * people a table only a relationships grant fills; 0016 widens the
+ * memory_type check for chart notes and tarot readings, and withholds a
+ * note's "resolved" as birth data.
+ *
+ * It runs the cases eight times, in eight databases:
  *   live_before     the live project as it was read: the drift, the legacy
  *                   rows, 0004 to 0008, and none of 0001 to 0003 or 0009:
  *                   every LV row is red;
- *   live_after      the same, then 0009, 0001, 0002 and 0003 in that order,
- *                   as the README gives it for the live project: all pass;
+ *   live_after      the same, then 0009, 0001, 0002, 0003 and 0010 to 0016
+ *                   in that order, as the README gives it for the live
+ *                   project: all pass;
  *   before          without 0005 to 0009 and chart_versions in the two-step
  *                   list: the table must be unreachable, so the reader's own
  *                   writes fail, nothing withholds a birth, and a deleted
  *                   profile can come back;
+ *   before_2_3      everything but 0012 to 0016: every 2.3 row but HR4 is
+ *                   red, so each one tells the rule from its absence;
  *   nomfa           0005 without the two-step entry: an aal1 session is still
  *                   refused, because owns_profile() reads profiles under that
  *                   table's own two-step rule; only CV14 (the rule on the
@@ -276,6 +288,36 @@ function everything(pid, tag) {
 }
 function versionsOf(db, pid) { return psql(db, `select count(*) from public.chart_versions where profile_id = '${pid}';`).out; }
 function readingOf(db, key) { return psql(db, `select status || '|' || coalesce(content::text, '') from public.oracle_readings where chart_key = '${key}';`).out; }
+
+/* ---------- assignment 2.3 (0012 to 0016) ------------------------------- */
+const PN = '90000000-0000-4000-8000-000000000091', PP = '90000000-0000-4000-8000-000000000092',
+  PP2 = '90000000-0000-4000-8000-000000000093', PQ = '90000000-0000-4000-8000-000000000094';
+function mfile(n) { const d = path.join(repo, 'server', 'migrations');
+  return fs.readFileSync(path.join(d, fs.readdirSync(d).filter(x => x.indexOf(n + '-') === 0)[0]), 'utf8'); }
+/* Only the DOWN block: the runnable lines under "-- DOWN" (its heading may run on). */
+function downOf(file) { const ls = file.split('\n'), at = ls.findIndex(l => /^-- DOWN/.test(l)); const out = [];
+  let i = at + 1; while (i < ls.length && /^--/.test(ls[i]) && !/^--   \S/.test(ls[i])) i++;
+  for (; i < ls.length && /^--   \S/.test(ls[i]); i++) out.push(ls[i].slice(5));
+  return out.join('\n'); }
+function trigs(db, names) { return psql(db, `select count(*) from pg_trigger where not tgisinternal and tgname in (${names.map(n => `'${n}'`).join(', ')});`).out; }
+function polShape(db) { return psql(db, `select string_agg(tablename || ':' || policyname || ':' || array_to_string(roles, ',') || ':' || coalesce(qual, '') || ':' || coalesce(with_check, ''), ' ' order by tablename, policyname)
+  from pg_policies where tablename in ('accounts', 'profiles', 'memories', 'throughline_entries', 'oki_messages', 'consent_events', 'pairs');`).out; }
+function upN(name) {
+  return `insert into public.profiles (id, account_id, name, birth_date, birth_name) values ('${PN}', '${A}', 'Ana', '1985-03-10', '${name}')
+    on conflict (id) do update set name = excluded.name, birth_date = excluded.birth_date, birth_name = excluded.birth_name;`;
+}
+function nameOf(db) { return psql(db, `select coalesce(birth_name, '') from public.profiles where id = '${PN}';`).out; }
+function person(pid, local, name) {
+  return `insert into public.people (profile_id, local_id, record) values ('${pid}', '${local}',
+    '{"id": "${local}", "display_name": "${name}", "birth_date": "1990-05-01", "notes_enabled": false}'::jsonb)
+    on conflict (profile_id, local_id) do update set record = excluded.record;`;
+}
+function peopleOf(db, pid) { return psql(db, `select count(*) from public.people where profile_id = '${pid}';`).out; }
+function note(local, type) {
+  return `insert into public.memories (profile_id, local_id, memory_type, content, created_at) values ('${PQ}', '${local}', '${type}',
+    '{"text": "kept words", "address": "gate 41.3", "resolved": {"gate": 41, "line": 3}}'::jsonb, now());`;
+}
+function resolvedOf(db, local) { return psql(db, `select content -> 'resolved' from public.memories where profile_id = '${PQ}' and local_id = '${local}';`).out; }
 
 /* Each case: a name, what it checks, and a function of the database that
    answers true when the rule holds. The cases run in order on one database,
@@ -544,9 +586,13 @@ const CASES = [
       const n7 = '0007-profiles-deleted-everywhere.sql', n8 = '0008-deleted-profiles-policies.sql';
       const kept = recCount(db);
       const again = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10' && recCount(db) === kept;
-      const d = psql(db, down(n8)).ok && psql(db, down(n7)).ok && trig() === '0'
+      /* 0015 hangs a trigger on 0007's function, so where it is in, its DOWN
+         goes first and it is applied again last, as the README says. */
+      const has15 = trigs(db, ['people_deleted_drop']) === '1';
+      const d = (!has15 || psql(db, downOf(mfile('0015'))).ok) && psql(db, down(n8)).ok && psql(db, down(n7)).ok && trig() === '0'
         && psql(db, `select to_regclass('public.deleted_profiles') is null;`).out === 't';
-      const back = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10';
+      const back = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10'
+        && (!has15 || psql(db, mfile('0015')).ok);
       return again && d && back;
     }],
   ['LV10', 'a reader cannot add, change or remove a cast counter, and still reads their own, where the table exists (0010)',
@@ -587,8 +633,136 @@ const CASES = [
         union all select indexname from pg_indexes where tablename in ('pairs', 'luminary_unlocks')
         union all select tablename || ':' || policyname from pg_policies where tablename in ('pairs', 'luminary_unlocks', 'oracle_readings', 'profiles', 'memories')) s;`).out;
       const was = shape();
-      return psql(db, f).ok && shape() === was && psql(db, down).ok && psql(db, f).ok;
+      /* 0009 makes "own pairs" in its older form, so where 0012 is in, it is
+         run again after, as 0012's header says. */
+      const has12 = psql(db, `select to_regclass('public.memories_by_profile_type_time') is not null;`).out === 't';
+      return psql(db, f).ok && shape() === was && psql(db, down).ok && psql(db, f).ok && (!has12 || psql(db, mfile('0012')).ok);
     }],
+
+  /* ---- assignment 2.3: migrations 0012 to 0016 ---- */
+  ['HR1', 'each of the seven own rules is for authenticated alone, one per table, and reads the caller once per statement (0012)',
+    db => psql(db, `select count(*) || '|' || count(*) filter (where roles = '{authenticated}')
+        || '|' || count(*) filter (where policyname in ('own account', 'own profiles', 'own pairs') and qual ilike '%select auth.uid()%' and with_check ilike '%select auth.uid()%')
+      from pg_policies where policyname in ('own account', 'own profiles', 'own memories', 'own throughline',
+        'own oki messages', 'own consent ledger', 'own pairs');`).out === '7|7|3'],
+  ['HR2', 'owns_profile() keeps a fixed search_path (0012)',
+    db => psql(db, `select array_to_string(proconfig, ',') from pg_proc where proname = 'owns_profile';`).out === 'search_path=public'],
+  ['HR3', 'memories has its index on profile, type and time, newest first (0012)',
+    db => /\(profile_id, memory_type, created_at DESC\)/.test(psql(db, `select indexdef from pg_indexes where indexname = 'memories_by_profile_type_time';`).out)],
+  ['HR4', 'under the rules as made again, a reader reads their own memories, another reader and a visitor read none of them',
+    db => { psql(db, `insert into public.profiles (id, account_id, name) values ('${PQ}', '${A}', 'Quin') on conflict (id) do nothing;
+        insert into public.memories (profile_id, local_id, memory_type, content, created_at) values ('${PQ}', 'hr4', 'journal', '{"t": "x"}'::jsonb, now()) on conflict do nothing;`);
+      const q = `select count(*) from public.memories where profile_id = '${PQ}';`;
+      const a = psql(db, as(A, 'aal1', q)), b = psql(db, as(B, 'aal1', q)), v = psql(db, as(null, null, q));
+      return a.ok && a.out === '1' && b.ok && b.out === '0' && (!v.ok || v.out === '0'); }],
+  ['HR5', 'applying 0012 again changes no rule, its DOWN applies, and it applies cleanly after',
+    db => { const f = mfile('0012'); const was = polShape(db);
+      return psql(db, f).ok && polShape(db) === was && psql(db, downOf(f)).ok && psql(db, f).ok && polShape(db) === was; }],
+
+  ['BN1', 'a profile with no switch or mark keeps the birth name its reader sends (0013)',
+    db => psql(db, as(A, 'aal1', upN('Ana Maria Lopez'))).ok && nameOf(db) === 'Ana Maria Lopez'],
+  ['BN2', 'saving turned off (a birthData revoke) empties the birth name the account held',
+    db => psql(db, as(A, 'aal1', evAt(PN, 'birthData', 'revoke', `'2026-10-31T10:00:01Z'`))).ok && nameOf(db) === ''],
+  ['BN3', 'an older build sending the birth name while saving is off is stored without it, without an error',
+    db => psql(db, as(A, 'aal1', upN('Ana Maria Lopez'))).ok && nameOf(db) === ''],
+  ['BN4', 'saving back on keeps it, Clear birth data and a mark for somebody else each empty it, and another reader never reads it',
+    db => { const on = psql(db, as(A, 'aal1', evAt(PN, 'birthData', 'grant', `'2026-10-31T10:00:02Z'`) + upN('Ana Maria Lopez'))).ok && nameOf(db) === 'Ana Maria Lopez';
+      const cl = psql(db, as(A, 'aal1', evAt(PN, 'birthCleared', 'grant', `'2026-10-31T10:00:03Z'`))).ok && nameOf(db) === '';
+      const back = psql(db, as(A, 'aal1', evAt(PN, 'birthCleared', 'revoke', `'2026-10-31T10:00:04Z'`) + upN('Ana Maria Lopez'))).ok && nameOf(db) === 'Ana Maria Lopez';
+      const b = psql(db, as(B, 'aal1', `select count(*) from public.profiles where birth_name is not null;`));
+      const ot = psql(db, as(A, 'aal1', evAt(PN, 'forOther', 'grant', `'2026-10-31T10:00:05Z'`))).ok && nameOf(db) === '';
+      return on && cl && back && b.ok && b.out === '0' && ot; }],
+  ['BN5', 'the trigger function is closed to the API, and applying 0013 again, its DOWN, and 0013 again all apply',
+    db => { const f = mfile('0013');
+      return psql(db, `select bool_or(has_function_privilege(r, 'public.profiles_withhold_birth_name()', 'execute')) from unnest(array['anon', 'authenticated']) r;`).out === 'f'
+        && psql(db, f).ok && psql(db, downOf(f)).ok
+        && psql(db, `select count(*) from information_schema.columns where table_name = 'profiles' and column_name = 'birth_name';`).out === '0'
+        && psql(db, f).ok && trigs(db, ['profiles_withhold_birth_name']) === '1'; }],
+
+  ['PL1', 'with no relationships decision on the profile, a saved person sent for it lands nothing, without an error (0015: silence is not consent)',
+    db => { psql(db, `insert into public.profiles (id, account_id, name) values ('${PP}', '${A}', 'Pat'), ('${PP2}', '${A}', 'Pip') on conflict (id) do nothing;`);
+      return psql(db, as(A, 'aal1', person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '0'; }],
+  ['PL2', 'after a relationships grant, the reader adds a saved person and reads it back as sent',
+    db => psql(db, as(A, 'aal1', evAt(PP, 'relationships', 'grant', `'2026-10-31T11:00:01Z'`) + person(PP, 'p0000000000000001', 'Rae'))).ok
+      && psql(db, as(A, 'aal1', `select record ->> 'display_name' from public.people where profile_id = '${PP}';`)).out === 'Rae'],
+  ['PL3', 'the reader changes a record in place, with the server\'s time, and deletes one',
+    db => { const ch = psql(db, as(A, 'aal1', person(PP, 'p0000000000000001', 'Rae Ann') + person(PP, 'p0000000000000002', 'Sol'))).ok;
+      const del = psql(db, as(A, 'aal1', `delete from public.people where profile_id = '${PP}' and local_id = 'p0000000000000002';`)).ok;
+      return ch && del && psql(db, `select count(*) || '|' || min(record ->> 'display_name') || '|' || bool_and(updated_at <= now()) from public.people where profile_id = '${PP}';`).out === '1|Rae Ann|true'; }],
+  ['PL4', 'another reader reads none of them, and cannot add, change or delete one',
+    db => { const r1 = psql(db, as(B, 'aal1', `select count(*) from public.people;`));
+      const w = psql(db, as(B, 'aal1', person(PP, 'p00000000000000b1', 'Eve')));
+      psql(db, as(B, 'aal1', `update public.people set record = '{}'::jsonb; delete from public.people;`));
+      return r1.ok && r1.out === '0' && !w.ok && peopleOf(db, PP) === '1'
+        && psql(db, `select record ->> 'display_name' from public.people where profile_id = '${PP}';`).out === 'Rae Ann'; }],
+  ['PL5', 'a visitor with no session reads none and writes none',
+    db => { const r1 = psql(db, as(null, null, `select count(*) from public.people;`)); const w = psql(db, as(null, null, person(PP, 'p00000000000000a1', 'Ann')));
+      return (!r1.ok || r1.out === '0') && !w.ok && peopleOf(db, PP) === '1'; }],
+  ['PL6', 'with a verified authenticator on the account, a password only (aal1) session reads none, and with the code it reads them',
+    db => { psql(db, `insert into auth.mfa_factors (user_id, status) values ('${A}', 'verified');`);
+      const x = psql(db, as(A, 'aal1', `select count(*) from public.people;`));
+      const y = psql(db, as(A, 'aal1', person(PP, 'p00000000000000c1', 'Cy')));
+      const z = psql(db, as(A, 'aal2', `select count(*) from public.people;`));
+      psql(db, `delete from auth.mfa_factors;`);
+      return (!x.ok || x.out === '0') && !y.ok && z.ok && z.out === '1'; }],
+  ['PL7', 'a relationships revoke deletes every saved person of the profile, and one sent while it stands lands nothing',
+    db => psql(db, as(A, 'aal1', evAt(PP, 'relationships', 'revoke', `'2026-10-31T11:00:02Z'`))).ok && peopleOf(db, PP) === '0'
+      && psql(db, as(A, 'aal1', person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '0'],
+  ['PL8', 'a profile marked for somebody else keeps no saved person even with relationships granted, and taken back it may again',
+    db => { const g = psql(db, as(A, 'aal1', evAt(PP, 'relationships', 'grant', `'2026-10-31T11:00:03Z'`) + person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '1';
+      const m = psql(db, as(A, 'aal1', evAt(PP, 'forOther', 'grant', `'2026-10-31T11:00:04Z'`))).ok && peopleOf(db, PP) === '0';
+      const s = psql(db, as(A, 'aal1', person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '0';
+      const t = psql(db, as(A, 'aal1', evAt(PP, 'forOther', 'revoke', `'2026-10-31T11:00:05Z'`) + person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '1';
+      return g && m && s && t; }],
+  ['PL9', 'deleting a profile everywhere deletes its saved people, and one sent for it afterwards lands nothing, without an error',
+    db => { const g = psql(db, as(A, 'aal1', evAt(PP2, 'relationships', 'grant', `'2026-10-31T11:00:06Z'`) + person(PP2, 'p0000000000000009', 'Ida'))).ok && peopleOf(db, PP2) === '1';
+      const d = psql(db, as(A, 'aal1', rec(A, PP2))).ok && peopleOf(db, PP2) === '0';
+      const s = psql(db, as(A, 'aal1', person(PP2, 'p0000000000000009', 'Ida'))).ok && peopleOf(db, PP2) === '0';
+      return g && d && s; }],
+  ['PL10', 'four rules for authenticated, the rule closed to the API, and 0014 and 0015 apply again, undo by their DOWN, and apply cleanly after',
+    db => { const f14 = mfile('0014'), f15 = mfile('0015');
+      const rules = psql(db, `select string_agg(cmd || ':' || array_to_string(roles, ','), ' ' order by cmd) from pg_policies where tablename = 'people' and policyname like 'own people%';`).out
+        === 'DELETE:authenticated INSERT:authenticated SELECT:authenticated UPDATE:authenticated';
+      const closed = psql(db, `select count(*) from unnest(array['anon', 'authenticated']) r, unnest(array['public.people_consented(uuid)', 'public.people_withhold()', 'public.consent_people_apply()']) f(fn)
+        where has_function_privilege(r, f.fn, 'execute');`).out === '0';
+      const kept = peopleOf(db, PP);
+      const again = psql(db, f14).ok && psql(db, f15).ok && peopleOf(db, PP) === kept && trigs(db, ['people_withhold', 'people_deleted_drop', 'consent_people_apply']) === '3';
+      const d = psql(db, downOf(f15)).ok && psql(db, downOf(f14)).ok && psql(db, `select to_regclass('public.people') is null;`).out === 't'
+        && trigs(db, ['people_withhold', 'people_deleted_drop', 'consent_people_apply']) === '0';
+      /* The table's DOWN takes its two-step rule with it; mfa-policies.sql is run again after, as the README says. */
+      const back = psql(db, f14).ok && psql(db, f15).ok && psql(db, mfa(true).replace(/array\[[\s\S]*?\] loop/, "array['people'] loop")).ok
+        && psql(db, `select count(*) from pg_policies where tablename = 'people';`).out === '5';
+      return rules && closed && again && d && back; }],
+
+  ['CN1', 'the memory_type check admits a chart note and a tarot reading beside the four types it named, and still refuses a type nobody named (0016)',
+    db => { const d = psql(db, `select pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.memories'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%memory_type%';`).out;
+      return ['journal', 'mood', 'practice_completion', 'stella_conversation', 'chart_note', 'tarot_reading'].every(t => d.includes(`'${t}'`))
+        && !psql(db, as(A, 'aal1', note('x1', 'made_up'))).ok; }],
+  ['CN2', 'a chart note for a saved profile keeps what its address resolved to (0016)',
+    db => psql(db, as(A, 'aal1', note('n1', 'chart_note'))).ok && resolvedOf(db, 'n1') === '{"gate": 41, "line": 3}'],
+  ['CN3', 'saving turned off empties "resolved" on the notes the account held, keeps their words and address, and touches no other memory type',
+    db => { psql(db, as(A, 'aal1', note('j1', 'journal')));
+      return psql(db, as(A, 'aal1', evAt(PQ, 'birthData', 'revoke', `'2026-10-31T12:00:01Z'`))).ok
+        && resolvedOf(db, 'n1') === 'null' && resolvedOf(db, 'j1') === '{"gate": 41, "line": 3}'
+        && psql(db, `select content ->> 'text' || '|' || (content ->> 'address') from public.memories where profile_id = '${PQ}' and local_id = 'n1';`).out === 'kept words|gate 41.3'; }],
+  ['CN4', 'a note sent while saving is off is stored unresolved, without an error; saving back on keeps the next one; Clear birth data empties it again',
+    db => { const off = psql(db, as(A, 'aal1', note('n2', 'chart_note'))).ok && resolvedOf(db, 'n2') === 'null';
+      const on = psql(db, as(A, 'aal1', evAt(PQ, 'birthData', 'grant', `'2026-10-31T12:00:02Z'`) + note('n3', 'chart_note'))).ok && resolvedOf(db, 'n3') === '{"gate": 41, "line": 3}';
+      const cl = psql(db, as(A, 'aal1', evAt(PQ, 'birthCleared', 'grant', `'2026-10-31T12:00:03Z'`))).ok && resolvedOf(db, 'n3') === 'null';
+      return off && on && cl; }],
+  ['CN5', 'a kept tarot reading lands as structured content and reads back card by card, for its reader only',
+    db => { const t = `insert into public.memories (profile_id, local_id, memory_type, content, consent_required, created_at) values ('${PQ}', 't1', 'tarot_reading',
+        '{"title": "Morning", "spread": "three", "cards": [{"name": "The Star", "position": "past", "reversed": false}, {"name": "Two of Cups", "position": "present", "reversed": true}], "passages": ["x"]}'::jsonb, 'journal', now());`;
+      const w = psql(db, as(A, 'aal1', t)).ok;
+      const a = psql(db, as(A, 'aal1', `select jsonb_array_length(content -> 'cards') || '|' || (content -> 'cards' -> 1 ->> 'reversed') from public.memories where local_id = 't1';`));
+      const b = psql(db, as(B, 'aal1', `select count(*) from public.memories where local_id = 't1';`));
+      return w && a.out === '2|true' && b.ok && b.out === '0'; }],
+  ['CN6', 'both trigger functions are closed to the API, and 0016 applies again, undoes by its DOWN, and applies cleanly after',
+    db => { const f = mfile('0016'), names = ['memories_notes_withhold', 'consent_notes_apply'];
+      const closed = psql(db, `select count(*) from unnest(array['anon', 'authenticated']) r, unnest(array['public.memories_notes_withhold()', 'public.consent_notes_apply()']) f(fn)
+        where has_function_privilege(r, f.fn, 'execute');`).out === '0';
+      return closed && psql(db, f).ok && trigs(db, names) === '2' && psql(db, downOf(f)).ok && trigs(db, names) === '0'
+        && psql(db, f).ok && trigs(db, names) === '2'; }],
 ];
 
 /* owns_profile() runs as the caller, so it reads profiles under that table's
@@ -611,7 +785,7 @@ function prepare(name, skipMig, mfaWith, definer, live) {
   const steps = live
     ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
         ['0004', '0005', '0006', '0007', '0008'].map(mig),
-        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011'].map(mig) : [],
+        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011', '0012', '0013', '0014', '0015', '0016'].map(mig) : [],
         [['mfa-policies', mfa(true)]])
     : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
@@ -634,12 +808,19 @@ const RUNS = [
   /* The live project as it was: every LV row red, and the shape broken
      enough that much else is red too, which is not what this run asserts. */
   { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9', 'LV10', 'LV11'] },
-  /* The live project once 0009, 0001, 0002, 0003, 0010 and 0011 have run: everything. */
+  /* The live project once 0009, 0001, 0002, 0003 and 0010 to 0016 have run: everything. */
   { name: 'live_after', live: 'after', mustFail: [] },
-  { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009'], mfa: false,
+  { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009', '0013', '0015', '0016'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',
       'WH2', 'WH3', 'WH5', 'WH6', 'WH8', 'WH9', 'WH10', 'WH11', 'WH13', 'WH14', 'WH15', 'WH16', 'WH17', 'WH18',
       'DP1', 'DP2', 'DP3', 'DP4', 'DP5', 'DP6', 'DP7', 'DP8', 'DP9', 'DP10', 'DP11', 'DP12'] },
+  /* Everything but assignment 2.3's five files: each of its rows that tests
+     something those files add must go red. HR4 holds on the older rules too,
+     which is its point: 0012 refuses nothing that was allowed. */
+  { name: 'before_2_3', skip: ['0012', '0013', '0014', '0015', '0016'], mfa: true,
+    mustFail: ['HR1', 'HR2', 'HR3', 'HR5', 'BN1', 'BN2', 'BN3', 'BN4', 'BN5',
+      'PL1', 'PL2', 'PL3', 'PL4', 'PL5', 'PL6', 'PL7', 'PL8', 'PL9', 'PL10',
+      'CN1', 'CN2', 'CN3', 'CN4', 'CN5', 'CN6'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },
   { name: 'full_definer', skip: [], mfa: true, definer: true, mustFail: [] },

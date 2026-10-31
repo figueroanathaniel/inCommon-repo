@@ -239,6 +239,15 @@ archive. Saved people (`incommon.people.v1`) are device only on purpose
 (`people-library.js` rule 5, and the Privacy Policy). Whether any of the rest
 should sync is a product and privacy choice, so no table is created for them.
 
+*Update, 31 October 2026 (assignment 2.3).* The owner decided that device only
+data syncs for signed in readers ("Cloud for accounts, device for guests").
+The server side is on taskforce/02-security-rls, not yet applied: `birthName`
+gets `profiles.birth_name` (0013), saved people get `public.people` (0014,
+0015, kept only under a relationships grant), and chart notes and tarot
+readings become `memories` types (0016). The client half, including
+`people-library.js` rule 5 and the Privacy Policy line, is Features' work, and
+until it ships this gap stands as written above.
+
 **G11. Throughline and Oki rows have no deletion path (follow-up, client).** No
 outbox operation exists for `throughline_entries` or `oki_messages`. Nothing in
 the app deletes a single manual Throughline entry today, so nothing is lost
