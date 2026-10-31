@@ -47,7 +47,7 @@ Its secondary is the same model as its primary, so it reviews blind (Helpers, it
 | `CHARTER.md` | this page | | |
 | `brief.md` | how the workstream works (was `docs/outsourcing/02-security-rls.md`) | approved | |
 | `2.1-security-first-assignment.txt` | round 1: the private addendum (kept out of this repository), the policies workstream 1 handed over in PR #96, two housekeeping items | READY | not recorded |
-| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | READY (starts after 1.2's model is agreed) | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model. Tasks 2 and 3 done there at the owner's choice; Task 1 owed by a fresh session, because its author may not review the model |
+| `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | DONE | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model. Tasks 2 and 3 done there at the owner's choice; Task 1 done by a fresh session on 30 Oct, because its author may not review the model. Merged as #129 to #136 |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
@@ -258,3 +258,6 @@ were approved; from 28 October 2026 that work is committed here.
   with every read answering 200, pushed a journal entry, and their laptop
   pulled it. Stripe was checked: no Luminary payment had ever been taken, so
   none went unrecorded.
+- 31 October 2026: 2.2 moved to DONE by the owner ("move 2.2 to DONE on
+  the board"), on the board, in this table and in the assignment's own
+  status line.

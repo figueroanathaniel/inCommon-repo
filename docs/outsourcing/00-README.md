@@ -92,7 +92,7 @@ study; 02, the delegation plan and the owner's decisions D1 to D6).
 | 3 | task-forces/03-refactor-features/3.2-features-hd-assignment.txt (3.2) | READY | now, beside 3.1 |
 | 6 | task-forces/06-qa-tests-docs/6.2-qa-hd-assignment.txt (6.2) | READY | now, beside 6.1 |
 | 1 | task-forces/01-data-schema/1.2-schema-hd-assignment.txt (1.2) | READY | now |
-| 2 | task-forces/02-security-rls/2.2-security-hd-assignment.txt (2.2) | READY | after 1.2's model is agreed |
+| 2 | task-forces/02-security-rls/2.2-security-hd-assignment.txt (2.2) | DONE | done; PR #129 to #136 merged |
 | 4 | task-forces/04-visuals-webgl/4.2-visuals-hd-assignment.txt (4.2) | READY | once 4.1 posts that the graphics update has merged |
 | 5 | task-forces/05-performance/5.2-performance-hd-assignment.txt (5.2) | READY | after the JPL deferral (5.1) merges |
 
@@ -417,3 +417,4 @@ doc here rather than working around the difference.
   merged work recorded under "Current values".
 - 31 October 2026: row 2's "Workstream reported" notes that the workstream
   has been on 2.2, at the owner's request.
+- 31 October 2026: 2.2 moved to DONE by the owner.
