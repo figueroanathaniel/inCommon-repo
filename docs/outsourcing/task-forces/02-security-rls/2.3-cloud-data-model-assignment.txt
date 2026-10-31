@@ -1,0 +1,102 @@
+ASSIGNMENT 2.3   Workstream 2: Security Hardening & RLS Setup
+Programme:       the cloud move ("Big Switch"), Priority 6: Data Model & Privacy Review
+Status:          ISSUED by the owner directly, 31 October 2026, in the
+                 project thread (not drafted here first). The owner numbered
+                 it 2.3 and approved the Privacy Policy change it needs.
+Issued against:  main 269bb49, 31 October 2026
+Who:             the workstream 2 primary owns taskforce/02-security-rls for
+                 it and keeps the final security review and the
+                 architectural mapping. Haiku and Nemotron draft rule sheets
+                 from the model. Sign off is by a separate reviewer: the
+                 author may not review their own security work.
+Read first:      CHARTER.md, brief.md, data-contracts/DATA-MAP.md,
+                 data-contracts/HD-STUDY-MODEL.md, server/migrations/README.md
+
+THE OUTCOME (the owner's words, 31 October 2026)
+Design the migration strategy to move the multi-profile local architecture
+into a cloud native relational schema on Supabase: a profiles table, a
+centralised memories table using native JSONB for journals, tarot spreads and
+logs, and explicit row level security mapping access exclusively to
+auth.uid(), preserving the app's core data safety guarantee. Halt and ask
+the owner if any data contract boundary is ambiguous.
+
+THE OWNER'S DECISIONS ON THE BOUNDARIES (31 October 2026)
+  1. The true copy: "Cloud for accounts, device for guests." A signed in
+     reader's account copy is the true copy; a guest's device is.
+  2. "Tarot moves into memories as structured data, device-only data should
+     sync." A kept tarot reading becomes a memories row of type
+     tarot_reading. What only the device held (saved people, the birth name)
+     gets a cloud home.
+  3. Approved: number this 2.3, and change the Privacy Policy so saved
+     people can go to the account.
+
+WHAT EXISTED ALREADY
+profiles, memories (JSONB content), throughline_entries, oki_messages,
+consent_events, pairs, chart_versions and deleted_profiles, all with row
+level security tied to auth.uid() through owns_profile() or account_id, and
+the restrictive two-step rule (server/mfa-policies.sql). 0006 and 0007 hold
+the consent switches and deletions on the server. So 2.3 adds to that model;
+it does not replace it.
+
+WHAT 2.3 ADDS (server/migrations/, run in number order)
+  0012  memories index (profile_id, memory_type, created_at desc); the seven
+        older own rules made again for authenticated only, reading
+        (select auth.uid()) once per statement; owns_profile() with a fixed
+        search_path, still SECURITY INVOKER. Refuses nothing allowed before.
+  0013  profiles.birth_name, emptied by trigger while 0006 withholds the
+        profile (saving off, birth cleared, marked as somebody else's).
+  0014  public.people: one row per saved person, the device's record as
+        JSONB. Row level security on, no policy.
+  0015  people's rules: the profile's own account only; the account keeps a
+        saved person only while the profile's latest relationships consent
+        is a grant (silence is not consent) and never for a profile marked
+        as somebody else's or deleted. A revoke deletes them. Rows that may
+        not be kept are dropped, never refused.
+  0016  the memory_type check widened to admit chart_note and tarot_reading
+        (today the server refuses both, which would end a whole push); a
+        chart note's "resolved" withheld as birth data.
+Also: people added to server/mfa-policies.sql and to the account function's
+deletion list (server/account/index.ts). Proven by
+tools/check-hd-study-rls.js rows HR1 to HR5, BN1 to BN5, PL1 to PL10, CN1
+to CN6, in eight runs, one of which (before_2_3) shows every new row but
+HR4 red without these files.
+
+ONE PROPOSAL DROPPED, AND WHY
+  P1 in the blueprint (a trigger refusing a seventh profile per account) is
+  not built. A refused profile row ends the whole push (K69, migration rule
+  3), and dropping it silently would lose a profile the reader made. The
+  six profile limit stays on the device. M1 (pin memory_type) is built as
+  0016, which widens the existing check rather than adding one, and replaces
+  whatever the live check is named, since the live name was not confirmed.
+
+ORDER FOR THE OWNER (SQL Editor, after review and merge)
+  1. 0012, 0013, 0016. Then server/mfa-policies.sql.
+  2. 0014 and 0015 only once the Privacy Policy change below is live. Then
+     server/mfa-policies.sql again, and redeploy the account function.
+  The app does not send birth_name, people, chart notes or tarot readings
+  yet. Each needs the server change live first, then the client change.
+
+THE PRIVACY POLICY CHANGE (approved; held until the sync ships)
+The policy must not say something is synced before the app syncs it, so
+app/privacy.html changes in the same release as the client sync, not now.
+Draft for section 5, replacing "People you have saved on your device are not
+copied to your account.":
+
+  People you save are copied to your account only while Relationships is
+  switched on under Memory &amp; Privacy for that profile, and never for a
+  profile you have marked as someone else's. Switch it off and they are
+  removed from your account the next time the app syncs; our server deletes
+  them when it receives the change, and does not keep any sent while it is
+  off.
+
+And the birth name, which the policy does not mention at all today: add to
+section 3's profile details "the full birth name, if you give one for
+Numbers", and to section 5's list of what the account copy includes "the
+birth name", covered by the same "Save my profile to my account" switch.
+Section 3's "people you save on the device" stays true for guests.
+
+NOT 2.3'S WORK (Features, task force 3)
+The client half: people-library.js rule 5 ("nothing leaves") changes,
+SYNC_MEMORY_TYPES and K69 gain chart_note and tarot_reading, the push and
+pull for people and birth_name, and the tarot screen writing a
+tarot_reading memory. The app refactor (the Big Switch) is not authorised.

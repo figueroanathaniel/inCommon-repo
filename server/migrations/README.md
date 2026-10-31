@@ -132,9 +132,44 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    them. Guarded and safe to run twice. Decided by the owner on 31 October
    2026. Tested by `tools/check-hd-study-rls.js`, row LV11.
 
+12. `0012-memories-index-and-rules-hardened.sql`: assignment 2.3. Indexes
+   `memories (profile_id, memory_type, created_at desc)`, and makes the seven
+   older policies again as the same rules for `authenticated` only, reading
+   the caller once per statement; `owns_profile()` gets a fixed search path
+   and stays SECURITY INVOKER. Nothing that was allowed is refused. **If 0009
+   is ever run again, run this after it.** Tested by
+   `tools/check-hd-study-rls.js`, rows HR1 to HR5.
+
+13. `0013-profiles-birth-name.sql`: assignment 2.3. `profiles.birth_name`,
+   emptied by its own trigger whenever 0006 withholds the profile. Run after
+   0006. Tested by rows BN1 to BN5.
+
+14. `0014-people.sql`: assignment 2.3. The saved people table, row level
+   security on and no policy. **Do not apply before the Privacy Policy says
+   saved people can go to the account**, and apply it with 0015.
+
+15. `0015-people-policies.sql`: who may touch a saved person (the profile's
+   own account, through `owns_profile()`), and when the account may hold one
+   at all: only while the profile's latest `relationships` consent is a
+   grant, never for a profile marked as somebody else's or recorded as
+   deleted. A revoke deletes them. Run after 0014, 0006 and 0007, then run
+   `server/mfa-policies.sql` again, which lists `people`. Deploy the account
+   function (`server/account`) in the same window: it now deletes `people`
+   with an account. Its trigger uses 0007's `deleted_rows_drop()`, so **to
+   undo 0007, run this file's DOWN first**. Tested by rows PL1 to PL10.
+
+16. `0016-memories-chart-notes-and-tarot.sql`: assignment 2.3. Widens the
+   `memory_type` check on `memories` to admit `chart_note` and
+   `tarot_reading` (until it runs, the server refuses both, and a refused
+   upsert ends the whole push, K69; the app may start sending either only
+   after this is live). A `chart_note` keeps its words and address but loses
+   its `resolved` value while 0006 withholds the profile's birth, and the
+   account's notes lose it when saving is turned off or the birth cleared.
+   Run after 0006. Tested by rows CN1 to CN6.
+
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
-run again for them. 0004 does, once its policies are in, and 0007 does, once
-0008 is in.
+run again for them. 0004 does, once its policies are in, 0007 does, once
+0008 is in, and 0014 does, once 0015 is in.
 
 Proven on 27 October 2026 against Postgres 16 with `server/cloud-schema.sql`
 (from its v2 section), `server/oracle/schema.sql`, `server/store/schema.sql`,
