@@ -105,3 +105,4 @@ were approved; from 28 October 2026 that work is committed here.
   3ee7d28. D-02 waits on the Human Design reviewer, D-06 on the owner, and
   D-07 on 3.2 Task 3. #127 opened as the standing pull request.
 - 31 October 2026: the branch restarted from main at 7ccc5e0, ahead of the platform switch. No Features work is open on it.
+- 31 October 2026: #142 merged into main by the owner. The branch restarted from main at 269bb49.
