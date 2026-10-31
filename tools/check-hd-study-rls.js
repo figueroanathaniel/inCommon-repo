@@ -25,9 +25,14 @@
  * is the account's own: nobody else reads it, adds to it or reaches through
  * it, and nobody removes it.
  *
+ * Row LV10 is migration 0010: cast_counters, a table only live has, took
+ * writes from its readers through the API. Row LV11 is migration 0011: the
+ * two old profile_id columns are dropped, and cast_counters loses its write
+ * and truncate grants.
+ *
  * Rows LV1 to LV9 are migration 0009: the live project's pairs and
  * luminary_unlocks had drifted from the repository (pairs keyed by profile_id
- * with no account_id and no identity id, unlocks by profile_id with no user_id
+ * with no account_id, unlocks by profile_id with no user_id
  * and no key) and carried four policies no file made, one of which would hand
  * a reader a free unlock once user_id existed. Found 30 October 2026.
  *
@@ -163,14 +168,14 @@ insert into public.accounts (id) values ('${A}'), ('${B}');
 insert into public.profiles (id, account_id, name) values ('${PA}', '${A}', 'Ana'), ('${PB}', '${B}', 'Bea');
 `;
 /* The live project's shape as it was read on 30 October 2026, made from the
-   repository's: pairs keyed by a profile_id with no account_id and an id with
-   no identity, luminary_unlocks keyed by a profile_id with no user_id and no
-   key, and four policies no file in the repository made. Applied before any
+   repository's: pairs keyed by a profile_id with no account_id (its id is an
+   identity, as live has it), luminary_unlocks keyed by a profile_id with no
+   user_id and no key, cast_counters (a table only live has) with write rules
+   for its readers, and four policies no file in the repository made. Applied before any
    migration in the live runs, with 0001 to 0003 absent, as they were there. */
 const DRIFT = `
 drop policy if exists "own pairs" on public.pairs;
 alter table public.pairs drop column account_id;
-alter table public.pairs alter column id drop identity;
 alter table public.pairs add column profile_id uuid not null references public.profiles(id) on delete cascade;
 create policy "own pairs" on public.pairs for all to authenticated
   using (profile_id in (select id from public.profiles where account_id = auth.uid()));
@@ -187,12 +192,22 @@ create policy "Users can manage their own profiles." on public.profiles for all 
 create policy "Users can manage memories of their profiles." on public.memories for all to authenticated
   using (profile_id in (select id from public.profiles where account_id = auth.uid()))
   with check (profile_id in (select id from public.profiles where account_id = auth.uid()));
+create table public.cast_counters (profile_id uuid not null references public.profiles(id) on delete cascade, cast_day date not null, casts integer not null default 0);
+alter table public.cast_counters enable row level security;
+create policy "own counter select" on public.cast_counters for select to authenticated
+  using (profile_id in (select profiles.id from public.profiles where profiles.account_id = auth.uid()));
+create policy "own counter insert" on public.cast_counters for insert to authenticated
+  with check (profile_id in (select profiles.id from public.profiles where profiles.account_id = auth.uid()));
+create policy "own counter update" on public.cast_counters for update to authenticated
+  using (profile_id in (select profiles.id from public.profiles where profiles.account_id = auth.uid()));
+create policy "own counter delete" on public.cast_counters for delete to authenticated
+  using (profile_id in (select profiles.id from public.profiles where profiles.account_id = auth.uid()));
 `;
 /* A pair and an unlock written in the drifted shape, so 0009's fill is proven
    on rows rather than on an empty table. */
 const PX = 'c0000000-0000-4000-8000-0000000000c1';
 const LEGACY = `
-insert into public.pairs (id, profile_id, profile_a, profile_b, enabled) values (7, '${PA}', '${PA}', '${PX}', true);
+insert into public.pairs (profile_id, profile_a, profile_b, enabled) values ('${PA}', '${PA}', '${PX}', true);
 insert into public.luminary_unlocks (profile_id, stripe_session_id, amount, currency) values ('${PB}', 'cs_legacy', 300, 'usd');
 `;
 function as(user, aal, body) {
@@ -534,6 +549,33 @@ const CASES = [
       const back = psql(db, file(n7)).ok && psql(db, file(n8)).ok && trig() === '10';
       return again && d && back;
     }],
+  ['LV10', 'a reader cannot add, change or remove a cast counter, and still reads their own, where the table exists (0010)',
+    db => {
+      if (psql(db, `select to_regclass('public.cast_counters') is null;`).out === 't') return true;
+      /* A profile of its own: earlier cases delete PA, and a counter on a
+         profile the reader no longer owns is refused for the wrong reason. */
+      const PK = 'e0000000-0000-4000-8000-0000000000e1', day = '2026-01-02';
+      psql(db, `insert into public.profiles (id, account_id, name) values ('${PK}', '${A}', 'Kit') on conflict (id) do nothing;
+        delete from public.cast_counters where profile_id = '${PK}';
+        insert into public.cast_counters (profile_id, cast_day, casts) values ('${PK}', '${day}', 1);`);
+      const ins = psql(db, as(A, 'aal1', `insert into public.cast_counters (profile_id, cast_day, casts) values ('${PK}', '2026-01-03', 1);`));
+      psql(db, as(A, 'aal1', `update public.cast_counters set casts = 99 where profile_id = '${PK}';`));
+      psql(db, as(A, 'aal1', `delete from public.cast_counters where profile_id = '${PK}';`));
+      const own = psql(db, as(A, 'aal1', `select count(*) from public.cast_counters where profile_id = '${PK}';`));
+      const kept = psql(db, `select count(*) || '|' || coalesce(max(casts), 0) from public.cast_counters where profile_id = '${PK}';`).out;
+      psql(db, `delete from public.cast_counters where profile_id = '${PK}'; delete from public.profiles where id = '${PK}';`);
+      return !ins.ok && own.ok && own.out === '1' && kept === '1|1';
+    }],
+  ['LV11', 'neither old profile_id column is left, and nobody may insert, update, delete or truncate cast_counters by privilege, where the table exists (0011)',
+    db => {
+      const cols = psql(db, `select count(*) from information_schema.columns where table_schema = 'public'
+        and table_name in ('pairs', 'luminary_unlocks') and column_name = 'profile_id';`).out;
+      if (cols !== '0') return false;
+      if (psql(db, `select to_regclass('public.cast_counters') is null;`).out === 't') return true;
+      return psql(db, `select count(*) from (values ('anon'), ('authenticated')) r(role), unnest(array['INSERT', 'UPDATE', 'DELETE', 'TRUNCATE']) p(priv)
+        where has_table_privilege(r.role, 'public.cast_counters', p.priv)
+           or not has_table_privilege(r.role, 'public.cast_counters', 'SELECT');`).out === '0';
+    }],
   ['LV9', 'applying 0009 again changes no column, key or policy on the two tables, and its DOWN applies',
     db => {
       const f = fs.readFileSync(path.join(repo, 'server', 'migrations', '0009-live-schema-reconcile.sql'), 'utf8');
@@ -569,7 +611,7 @@ function prepare(name, skipMig, mfaWith, definer, live) {
   const steps = live
     ? base.concat([['drift', DRIFT], ['seed', SEED], ['legacy rows', LEGACY]],
         ['0004', '0005', '0006', '0007', '0008'].map(mig),
-        live === 'after' ? ['0009', '0001', '0002', '0003'].map(mig) : [],
+        live === 'after' ? ['0009', '0001', '0002', '0003', '0010', '0011'].map(mig) : [],
         [['mfa-policies', mfa(true)]])
     : base
     .concat(migrations(skipMig).map(s => [s.split('\n')[0].slice(3), s]))
@@ -591,8 +633,8 @@ function runCases(db) {
 const RUNS = [
   /* The live project as it was: every LV row red, and the shape broken
      enough that much else is red too, which is not what this run asserts. */
-  { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9'] },
-  /* The live project once 0009, 0001, 0002 and 0003 have run: everything. */
+  { name: 'live_before', live: 'before', mustFail: ['LV1', 'LV2', 'LV3', 'LV4', 'LV5', 'LV6', 'LV7', 'LV8', 'LV9', 'LV10', 'LV11'] },
+  /* The live project once 0009, 0001, 0002, 0003, 0010 and 0011 have run: everything. */
   { name: 'live_after', live: 'after', mustFail: [] },
   { name: 'before', skip: ['0005', '0006', '0007', '0008', '0009'], mfa: false,
     mustFail: ['CV1', 'CV2', 'CV7', 'CV10b', 'CV13', 'CV14',

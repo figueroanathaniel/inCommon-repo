@@ -96,12 +96,15 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    back. Then run `server/mfa-policies.sql` again, which lists
    `deleted_profiles`.
 
-9. `0009-live-schema-reconcile.sql`: brings a project whose `pairs` and
-   `luminary_unlocks` drifted from the repository back to its shape, and
-   drops four policies no file here made. It changes nothing on a project
-   already of the repository's shape. Found on the live project on 30 October
-   2026: `pairs` had `profile_id` in place of `account_id` and an id with no
-   identity, so every pull and every pair write failed; `luminary_unlocks`
+9. `0009-live-schema-reconcile.sql`: gives a project whose `pairs` and
+   `luminary_unlocks` drifted from the repository every column, key and
+   policy the repository has for them, and drops four policies no file here
+   made. It changes nothing on a project already of the repository's shape.
+   The two old `profile_id` columns stay, nullable and written by nothing,
+   each with its foreign key to `profiles` (on delete cascade), until 0011
+   drops them. Found on the live project on
+   30 October 2026: `pairs` had `profile_id` in place of `account_id`, so
+   every pull and every pair write failed; `luminary_unlocks`
    had `profile_id` in place of `user_id` and no key, so no payment could be
    recorded or recognised; and one stray policy would have let a reader write
    their own unlock the moment `user_id` existed, so it is dropped in the same
@@ -110,6 +113,24 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    Then run `server/mfa-policies.sql` again. Tested by
    `tools/check-hd-study-rls.js`, rows LV1 to LV9, against the live shape
    before and after.
+
+10. `0010-cast-counters-read-only.sql`: drops the insert, update and delete
+   policies on `cast_counters`, a table only the live project has (made in
+   the dashboard, used by nothing in the app or any deployed function). A
+   reader keeps reading their own rows; nothing writes through the API.
+   Guarded, so it does nothing where the table does not exist. Decided by the
+   owner on 31 October 2026. Tested by `tools/check-hd-study-rls.js`, row
+   LV10.
+
+11. `0011-drop-old-columns-and-counter-grants.sql`: drops `pairs.profile_id`
+   and `luminary_unlocks.profile_id`, the live tables' old keys that 0009 kept
+   (nullable, written by nothing, each with a foreign key cascading from
+   `profiles`), and revokes insert, update, delete and truncate on
+   `cast_counters` from anon and authenticated. Checked before dropping: the
+   only thing depending on either column was its own foreign key, no row held
+   a value, and neither the app nor any deployed function reads or writes
+   them. Guarded and safe to run twice. Decided by the owner on 31 October
+   2026. Tested by `tools/check-hd-study-rls.js`, row LV11.
 
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in, and 0007 does, once

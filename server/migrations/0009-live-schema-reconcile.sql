@@ -4,11 +4,13 @@
 -- 2026 (information_schema and pg_policies), two tables had another shape
 -- and five policies were there that no file in this repository made, and the
 -- server logs showed what it cost:
--- * public.pairs had profile_id (not null) in place of account_id, and an id
---  with no identity. Every pull failed asking for pairs.account_id (11 times
---  in a day), and every pair a device sent was refused, three times over:
---  no account_id column, a profile_id the client never sends, and no id.
---  0007's pairs_deleted_drop trigger reads new.account_id, so it failed too.
+-- * public.pairs had profile_id (not null) in place of account_id. Every pull
+--  failed asking for pairs.account_id (11 times in a day), and every pair a
+--  device sent was refused twice over: no account_id column, and a
+--  profile_id the client never sends. 0007's pairs_deleted_drop trigger
+--  reads new.account_id, so it failed too. Its id is an identity column, as
+--  the repository's is (a first reading of this said otherwise, and was
+--  wrong: an identity column has no column_default to show).
 -- * public.luminary_unlocks had profile_id (not null) in place of user_id,
 --  and no primary key. The billing function writes and reads by user_id, so
 --  no payment could be recorded and no reader could be found to have paid
@@ -25,15 +27,20 @@
 --  in effect. Dropped so the policies on a table are the ones this
 --  repository states.
 --
--- WHAT THIS DOES. It brings a project of that shape to the repository's, and
--- on a project already of the repository's shape it changes nothing (proven
--- both ways by tools/check-hd-study-rls.js, the live_before and live_after
--- runs, rows LV1 to LV9).
+-- WHAT THIS DOES. It gives a project of that shape every column, key and
+-- policy the repository has for these two tables, and on a project already
+-- of the repository's shape it changes nothing (proven both ways by
+-- tools/check-hd-study-rls.js, the live_before and live_after runs, rows LV1
+-- to LV9). It is not the repository's shape exactly: the two old profile_id
+-- columns stay, nullable, written by nothing, each still carrying its foreign
+-- key to profiles with on delete cascade, which the repository has neither of.
+-- 0011 drops them, once it was confirmed nothing reads them.
 -- * pairs: adds account_id (to accounts, on delete cascade), filled from the
 --  profile each row names, the old profile_id first and profile_a after it;
 --  makes it not null once no row lacks it; lets profile_id be null, since no
---  build sends it; gives id its identity; and states "own pairs" on
---  account_id, as cloud-schema.sql does.
+--  build sends it; gives id an identity only on a project where it has
+--  none (not the live one); and states "own pairs" on account_id, as
+--  cloud-schema.sql does.
 -- * luminary_unlocks: adds user_id (to auth.users, on delete cascade), filled
 --  from the account the old profile_id names; lets profile_id be null; and
 --  makes user_id the primary key when the table has none and no row lacks

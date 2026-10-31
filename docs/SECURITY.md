@@ -218,11 +218,17 @@ logs) after the 1.2 and 2.2 merges. Three faults, all live at once:
    Fixed in `incommon-cloud.js`, and the fake now refuses a column the
    repository's schema does not declare, with Postgres's own 42703 (K96).
 2. **Pairs could not be read or written, and payments could not be recorded
-   or recognised.** Live `pairs` had `profile_id` in place of `account_id` and
-   an id with no identity; live `luminary_unlocks` had `profile_id` in place
+   or recognised.** Live `pairs` had `profile_id` in place of `account_id`
+   (its id is an identity, as the repository's is; the first reading said
+   otherwise and was wrong); live `luminary_unlocks` had `profile_id` in place
    of `user_id` and no key. The repository's schema of record never said
    either. Logs over one day: 11 refusals for `pairs.account_id`, 6 for
-   `luminary_unlocks.user_id`. Fixed by `server/migrations/0009`.
+   `luminary_unlocks.user_id`. Fixed by `server/migrations/0009`, applied
+   live on 31 October 2026. The two old `profile_id` columns stay there,
+   nullable and written by nothing, each still with its foreign key to
+   `profiles` (on delete cascade), until 0011 drops them; the repository has
+   neither. 0010 and 0011 make `cast_counters`, a table only live has, read
+   only: no write policy and no write or truncate grant.
 3. **Four policies no file made.** One of them, "Users can manage luminary
    unlocks of their profiles.", let a signed in reader write their own unlock
    row: inert only while `user_id` was missing, and Codex Luminary for nothing
@@ -234,9 +240,10 @@ logs) after the 1.2 and 2.2 merges. Three faults, all live at once:
 never applied there, then `server/mfa-policies.sql` again.
 `tools/check-hd-study-rls.js` proves the order on a copy of the live shape:
 `live_before` turns all nine LV rows red, `live_after` passes all 56 cases.
-Each of four sabotages of 0009 turns a row red (the free unlock policy kept,
-the read policy missing, the pair id left without identity, the pair fill
-removed).
+Each of three sabotages of 0009 turns a row red there (the free unlock
+policy kept, the read policy missing, the pair fill removed). Its identity
+branch is a guard for a project whose pair id has none, which live does not
+need.
 
 **What it does not settle.** The fake now matches the repository's columns,
 not the live project's; a future drift of the live project would pass it

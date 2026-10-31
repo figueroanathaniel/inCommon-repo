@@ -2587,9 +2587,16 @@ async function runCloudTests() {
       q.range = function (a, b) { q._range = [a, b]; return q; };
       q.then = function (res, rej) {
         var rows = db.t[table], out = { data: null, error: null };
+        /* Fail closed: a table whose columns the schema did not yield is
+           refused like a table that does not exist, so a parse that loses a
+           table cannot quietly switch the column check off for it. */
         var known = SCHEMA_COLS[table];
+        if (!known || !known.length) {
+          out.error = { code: '42P01', message: 'relation "public.' + table + '" does not exist' };
+          return Promise.resolve(out).then(res, rej);
+        }
         var asked = q._cols.concat(q._row ? Object.keys(q._row) : [], q._op === 'upsert' ? q._on : []);
-        var unknown = known ? asked.filter(function (c) { return known.indexOf(c) === -1; })[0] : null;
+        var unknown = asked.filter(function (c) { return known.indexOf(c) === -1; })[0];
         if (unknown) {
           out.error = { code: '42703', message: 'column ' + table + '.' + unknown + ' does not exist' };
           return Promise.resolve(out).then(res, rej);
@@ -3267,11 +3274,15 @@ async function runCloudTests() {
   var k96Dev = syncDevice(memDB(), 'k96-user');
   k96Dev.pm.createProfile({ name: 'K', birthDate: '1990-01-01' });
   var k96Sync = await k96Dev.C.sync();
-  ts('K96', 'the fake database knows the schema\'s columns, refuses one it does not have as Postgres does, and a whole sync asks for none', {
-    deletedCols: ['account_id', 'profile_id', 'deleted_at'], pairsHasAccount: true, refused: '42703', synced: true
+  var k96Tables = Object.keys(k96.t), k96Unknown = await k96.client.from('no_such_table').select('*');
+  ts('K96', 'the fake database knows every one of its tables\' columns from the schema, refuses a column or a table it does not have as Postgres does, and a whole sync asks for neither', {
+    deletedCols: ['account_id', 'profile_id', 'deleted_at'], pairsHasAccount: true, refused: '42703', unknownTable: '42P01',
+    tablesWithoutColumns: [], synced: true
   }, {
     deletedCols: SCHEMA_COLS.deleted_profiles, pairsHasAccount: (SCHEMA_COLS.pairs || []).indexOf('account_id') !== -1,
-    refused: k96Read.error && k96Read.error.code, synced: !!(k96Sync && k96Sync.ok)
+    refused: k96Read.error && k96Read.error.code, unknownTable: k96Unknown.error && k96Unknown.error.code,
+    tablesWithoutColumns: k96Tables.filter(function (t) { return !(SCHEMA_COLS[t] || []).length; }),
+    synced: !!(k96Sync && k96Sync.ok)
   });
 
   /* ---- K69: the Archive cannot stop a sync. Deleting an entry writes an
@@ -3393,7 +3404,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 9, bad: [], listedInOrder: true, uncovered: []
+    files: 11, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
