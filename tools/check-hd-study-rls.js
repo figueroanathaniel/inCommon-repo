@@ -36,7 +36,7 @@
  * and no key) and carried four policies no file made, one of which would hand
  * a reader a free unlock once user_id existed. Found 30 October 2026.
  *
- * Rows HR1 to HR5, BN1 to BN5, PL1 to PL10 and CN1 to CN6 are assignment
+ * Rows HR1 to HR5, BN1 to BN5, PL1 to PL11 and CN1 to CN6 are assignment
  * 2.3 (the owner, 31 October 2026: the account is the true copy for signed in
  * readers, and what the device alone held syncs): 0012 makes the seven own
  * rules again for authenticated with the caller read once; 0013 gives a
@@ -719,6 +719,12 @@ const CASES = [
       const d = psql(db, as(A, 'aal1', rec(A, PP2))).ok && peopleOf(db, PP2) === '0';
       const s = psql(db, as(A, 'aal1', person(PP2, 'p0000000000000009', 'Ida'))).ok && peopleOf(db, PP2) === '0';
       return g && d && s; }],
+  ['PL11', 'with relationships granted, turning saving off deletes every saved person and one sent while it is off lands nothing; turned on again they may be kept',
+    db => { const g = peopleOf(db, PP) === '1';
+      const r = psql(db, as(A, 'aal1', evAt(PP, 'birthData', 'revoke', `'2026-10-31T11:00:07Z'`))).ok && peopleOf(db, PP) === '0';
+      const s = psql(db, as(A, 'aal1', person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '0';
+      const t = psql(db, as(A, 'aal1', evAt(PP, 'birthData', 'grant', `'2026-10-31T11:00:08Z'`) + person(PP, 'p0000000000000001', 'Rae'))).ok && peopleOf(db, PP) === '1';
+      return g && r && s && t; }],
   ['PL10', 'four rules for authenticated, the rule closed to the API, and 0014 and 0015 apply again, undo by their DOWN, and apply cleanly after',
     db => { const f14 = mfile('0014'), f15 = mfile('0015');
       const rules = psql(db, `select string_agg(cmd || ':' || array_to_string(roles, ','), ' ' order by cmd) from pg_policies where tablename = 'people' and policyname like 'own people%';`).out
@@ -819,7 +825,7 @@ const RUNS = [
      which is its point: 0012 refuses nothing that was allowed. */
   { name: 'before_2_3', skip: ['0012', '0013', '0014', '0015', '0016'], mfa: true,
     mustFail: ['HR1', 'HR2', 'HR3', 'HR5', 'BN1', 'BN2', 'BN3', 'BN4', 'BN5',
-      'PL1', 'PL2', 'PL3', 'PL4', 'PL5', 'PL6', 'PL7', 'PL8', 'PL9', 'PL10',
+      'PL1', 'PL2', 'PL3', 'PL4', 'PL5', 'PL6', 'PL7', 'PL8', 'PL9', 'PL10', 'PL11',
       'CN1', 'CN2', 'CN3', 'CN4', 'CN5', 'CN6'] },
   { name: 'nomfa', skip: [], mfa: false, mustFail: ['CV14'] },
   { name: 'nomfa_definer', skip: [], mfa: false, definer: true, mustFail: ['CV10a', 'CV14'] },

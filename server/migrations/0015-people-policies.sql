@@ -15,12 +15,14 @@
 -- 0006, where never decided reads as saved: these records are about people
 -- who never decided anything, so silence is not consent. Concretely:
 -- * A record that arrives while the latest relationships event is not a
---  grant, or for a profile marked as somebody else's (0006's 'other'), or
---  for a profile recorded as deleted (0007), is dropped without an error,
+--  grant, or while "Save my profile to my account" is off (0006's
+--  'unsaved'), or for a profile marked as somebody else's (0006's 'other'),
+--  or for a profile recorded as deleted (0007), is dropped without an error,
 --  as every withheld row is, because one refused upsert ends the whole push.
--- * When a relationships revoke arrives, or a profile is marked as somebody
---  else's, every saved person of that profile is deleted. There is no
---  tombstone (people-library.js rule 2).
+-- * When a relationships revoke arrives, or saving is turned off (a
+--  birthData revoke), or a profile is marked as somebody else's, every saved
+--  person of that profile is deleted. There is no tombstone
+--  (people-library.js rule 2).
 --
 -- Run in the Supabase dashboard: SQL Editor, paste, Run, after 0014 and after
 -- 0006 and 0007 (it calls profile_withheld() and deleted_rows_drop()). Then
@@ -28,7 +30,7 @@
 -- Its trigger uses 0007's deleted_rows_drop(), so to undo 0007, run this
 -- file's DOWN first.
 -- Proven on a throwaway Postgres 16 by tools/check-hd-study-rls.js (rows PL1
--- to PL10).
+-- to PL11).
 --
 -- DOWN (run to undo; the table goes back to reachable by nobody):
 --   drop trigger if exists people_withhold on public.people;
@@ -68,7 +70,7 @@ language sql stable security definer set search_path = public as $consented$
   select coalesce((select e.action = 'grant' from public.consent_events e
                     where e.profile_id = pid and e.scope = 'relationships'
                     order by e.ts desc, e.id desc limit 1), false)
-     and coalesce(public.profile_withheld(pid), '') <> 'other'
+     and coalesce(public.profile_withheld(pid), '') not in ('other', 'unsaved')
 $consented$;
 
 revoke execute on function public.people_consented(uuid) from public, anon, authenticated;
@@ -113,7 +115,7 @@ revoke execute on function public.consent_people_apply() from public, anon, auth
 drop trigger if exists consent_people_apply on public.consent_events;
 create trigger consent_people_apply
   after insert or update on public.consent_events
-  for each row when (new.scope in ('relationships', 'forOther'))
+  for each row when (new.scope in ('relationships', 'forOther', 'birthData'))
   execute function public.consent_people_apply();
 
 -- To check it took: four policies, all for authenticated, none for anon; three
