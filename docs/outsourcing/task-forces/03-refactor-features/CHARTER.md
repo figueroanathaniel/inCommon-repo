@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #127 (earlier ones under "History" below) |
+| Standing pull request | #143 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -105,3 +105,4 @@ were approved; from 28 October 2026 that work is committed here.
   3ee7d28. D-02 waits on the Human Design reviewer, D-06 on the owner, and
   D-07 on 3.2 Task 3. #127 opened as the standing pull request.
 - 31 October 2026: the branch restarted from main at 7ccc5e0, ahead of the platform switch. No Features work is open on it.
+- 31 October 2026: #142 merged into main by the owner. The branch restarted from main at 269bb49.
