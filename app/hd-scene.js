@@ -1325,12 +1325,10 @@
     var n = this.local(e), pk = this.pickAt(n.px, n.py);
     if (e.pointerType !== 'mouse') { this.ptr.on = false; this.hideTip(); }
     this.lift(0.2);
-    var first = !this.responded;
     this.respond();
     if (!pk) { this.kick(); return; }
-    /* The first press brings a thing forward and names it; a second press on
-       the same thing opens its reading. A Generator's first press is the
-       response the body was waiting for, so it wakes the body and names. */
+    /* A single press selects and opens the reading. For a Generator it also
+       counts as the response that wakes the body. */
     /* A single deliberate pick selects and opens the matching study entry.
        The host owns the panel and shared selection state; the renderer makes
        no DOM panel, database or network requests. */
