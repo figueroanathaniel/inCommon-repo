@@ -1331,8 +1331,14 @@
     /* The first press brings a thing forward and names it; a second press on
        the same thing opens its reading. A Generator's first press is the
        response the body was waiting for, so it wakes the body and names. */
-    if (pk.key === this.focusKey && !first) { if (this.o.onOpen) this.o.onOpen(pk.key); }
-    else { this.setFocus(pk.key); if (this.o.onFocus) this.o.onFocus(pk.key, 'tap'); }
+    /* A single deliberate pick selects and opens the matching study entry.
+       The host owns the panel and shared selection state; the renderer makes
+       no DOM panel, database or network requests. */
+    if (pk.key !== this.focusKey) {
+      this.setFocus(pk.key);
+      if (this.o.onFocus) this.o.onFocus(pk.key, 'tap');
+    }
+    if (this.o.onOpen) this.o.onOpen(pk.key);
     this.kick();
   };
   P.onWheel = function (e) {
