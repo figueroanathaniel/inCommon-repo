@@ -191,6 +191,10 @@ const MODULES = [
   'chart-scene.js',
   /* The wiring drawn in depth, the same way and on the same three.js. */
   'hd-scene.js',
+  /* The study pane's host controller. The helmet loads it immediately after
+     the scene whose picks it turns into a reading, and before the logic class
+     that installs its hostMethods on Component.prototype. */
+  'hd-study-pane.js',
   /* The store, then the cache that takes its digest from it. */
   'people-library.js',
   'pair-cache.js',

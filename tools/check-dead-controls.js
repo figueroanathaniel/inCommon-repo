@@ -17,6 +17,8 @@
  *   3. no control renders a handler hole that is only ever set to a constant
  *   4. every dialog sits at the same structural level in both shells
  *   5. no control opens a dialog that cannot render from where the control is
+ *   6. a handler hole in the study pane's namespace is produced by the host
+ *      module the app installs, not only by the logic class
  *
  * WHAT IT CANNOT CHECK. Whether the handler does the right thing. That is what
  * the runtime walk is for. This only proves nothing is wired to nothing.
@@ -64,6 +66,45 @@ for (const m of logic.matchAll(/([A-Za-z_$][\w$]*)\s*:/g)) produced.add(m[1]);
 for (const m of logic.matchAll(/\b([A-Za-z_$][\w$]*)\s*[,}]/g)) produced.add(m[1]);
 for (const m of logic.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g)) produced.add(m[1]);
 
+/* ---------- the host module's own handler bindings ---------- */
+/* The study pane is host-only: app/hd-study-pane.js returns `hostMethods`,
+   which the app installs on Component.prototype at the end of the logic class,
+   and its hdPaneVals() builds the keys the pane's own controls wear. Those
+   names exist in that module and nowhere in the logic class, so reading the
+   logic alone reports every one of them as wired to nothing.
+
+   Read the module instead of trusting a hand written list, and only for holes
+   in the pane's namespace. A typo stays dead, and nothing outside hdPane /
+   hdStage can be excused by this file. If the template wears such a hole and
+   the module, its script tag or its installation is missing, this gate says
+   it cannot see rather than reporting the build clean. */
+const HOST = {
+  file: 'hd-study-pane.js',
+  hole: /^hd(?:Pane|Stage)[A-Z][\w$]*$/,
+  keys: new Set(),
+  problems: [],
+};
+{
+  const hostPath = path.join(repo, 'app', HOST.file);
+  const declared = (src.slice(0, helmetEnd).match(/<script\s+src="\.\/hd-study-pane\.js"><\/script>/g) || []).length;
+  const installed = /Object\.assign\(\s*Component\.prototype\s*,\s*window\.HDPane\.hostMethods\s*\)/.test(src);
+  if (!fs.existsSync(hostPath)) {
+    HOST.problems.push('app/' + HOST.file + ' is missing');
+  } else if (declared !== 1) {
+    HOST.problems.push('the helmet declares app/' + HOST.file + ' ' + declared + ' times, expected 1');
+  } else if (!installed) {
+    HOST.problems.push('the logic class no longer installs window.HDPane.hostMethods on Component.prototype');
+  } else {
+    const host = fs.readFileSync(hostPath, 'utf8');
+    /* hostMethods carries method shorthand and plain properties; hdPaneVals
+       carries the rest as object keys on `out`. Both are the module's own
+       spelling of a handler the template may wear. */
+    for (const m of host.matchAll(/(?:^|,)\s*(hd(?:Pane|Stage)[A-Z][\w$]*)\s*(?::|\()/gm)) HOST.keys.add(m[1]);
+    for (const m of host.matchAll(/\bout\.(hd(?:Pane|Stage)[A-Z][\w$]*)\s*=/g)) HOST.keys.add(m[1]);
+    if (!HOST.keys.size) HOST.problems.push('no hdPane or hdStage binding was found in app/' + HOST.file);
+  }
+}
+
 /* ---------- sc-for scopes, so alias fields resolve to their array ---------- */
 function loops() {
   const out = [];
@@ -94,6 +135,8 @@ const aliasAt = idx => {
 
 const dead = [];
 const constant = [];
+const hostHoles = [];
+let hostWired = 0;
 let checked = 0;
 
 for (const ev of EVENTS) {
@@ -123,8 +166,13 @@ for (const ev of EVENTS) {
        has to exist. Testing the object instead reported every one of them
        broken while all six worked. */
     const wanted = tail ? tail.split('.').pop() : head;
+    if (HOST.hole.test(wanted)) hostHoles.push({ line: lineAt(abs), expr, key: wanted });
     if (!produced.has(wanted)) {
-      dead.push({ line: lineAt(abs), ev, expr, why: 'the logic class never produces "' + wanted + '"' });
+      if (HOST.hole.test(wanted) && HOST.keys.has(wanted)) { hostWired++; continue; }
+      const why = HOST.hole.test(wanted)
+        ? 'neither the logic class nor app/' + HOST.file + ' produces "' + wanted + '"'
+        : 'the logic class never produces "' + wanted + '"';
+      dead.push({ line: lineAt(abs), ev, expr, why });
       continue;
     }
 
@@ -146,6 +194,19 @@ for (const ev of EVENTS) {
       }
     }
   }
+}
+
+/* A template wearing the host namespace while the host cannot be read is a
+   blind gate, not a clean build. Do not let a missing module read as dead
+   controls, and do not let a missing install read as healthy ones. */
+if (hostHoles.length && HOST.problems.length) {
+  console.error('check-dead-controls: FAIL');
+  console.error('  the template uses ' + hostHoles.length + ' handler holes in the study pane namespace:');
+  hostHoles.forEach(h => console.error('    line ' + h.line + '  ' + h.key));
+  console.error('  but the host bindings cannot be read:');
+  HOST.problems.forEach(p => console.error('    ' + p));
+  console.error('  Restore the module, its one script tag, or the install line.');
+  process.exit(1);
 }
 
 /* ---------- can the panel a control opens actually render there? ----------
@@ -294,8 +355,9 @@ if (checked < 100 || LOOPS.length < 20 || produced.size < 200) {
 }
 
 const summary = { handlersChecked: checked, scForLoops: LOOPS.length,
-  keysProduced: produced.size, wiredToNothing: dead.length, notCallable: constant.length,
-  dialogsFound: panels.length, shellsDiverged: diverged.length, strandedTriggers: stranded.length };
+  keysProduced: produced.size, hostModuleBindings: hostWired, wiredToNothing: dead.length,
+  notCallable: constant.length, dialogsFound: panels.length, shellsDiverged: diverged.length,
+  strandedTriggers: stranded.length };
 
 if (dead.length || constant.length || diverged.length || stranded.length) {
   console.error('check-dead-controls: FAIL');
@@ -328,5 +390,6 @@ if (dead.length || constant.length || diverged.length || stranded.length) {
 
 console.log('check-dead-controls: ok');
 console.log('  ' + checked + ' handler holes across ' + LOOPS.length + ' loops, every one of them wired');
+console.log('  ' + hostWired + ' study pane handler holes bound by app/' + HOST.file);
 console.log('  ' + panels.length + ' dialogs, level-matched across both shells, each reachable from every control that opens it');
 if (verbose) console.log('  ' + produced.size + ' keys produced by the logic class');

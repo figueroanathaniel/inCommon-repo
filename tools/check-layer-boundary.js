@@ -118,6 +118,10 @@ const LAYERS = {
     /* The wiring's 3D and Wheel views. Draws the model the app hands it;
        the sky now arrives from the app's own hd-transit reading. */
     'hd-scene.js',
+    /* The study pane's host controller. Focus, sheet state and the Vals keys
+       for the reading the scene opens. It draws nothing, computes no position
+       and touches no storage or network. */
+    'hd-study-pane.js',
 
     /* THE DUAL-BACKEND EPHEMERIS SYSTEM (V1.0.0), unwired like the Oki
        modules above rather than mechanics like ephemeris-cache.js just
