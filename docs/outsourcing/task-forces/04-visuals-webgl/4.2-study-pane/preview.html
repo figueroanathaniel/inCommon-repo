@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Study pane preview</title>
+<!--
+  4.2 study pane: a standalone PREVIEW of pane.css and pane-controller.js,
+  for check-pane.js and for looking at. It is not the app.
+  - The stage is a flat 2D canvas standing in for hd-scene.js. Its press
+    handling copies the two-press rule from 18e341a (first press names,
+    second press on the same element opens) and the scene's keys (arrows
+    step, Enter opens). It draws nothing real.
+  - The shells are reduced to what the pane touches: the phone header, the
+    Get Help dock and the nav; the desktop right column.
+  - The reading text is placeholder copy for the layout, not Atlas text.
+-->
+<link rel="stylesheet" href="pane.css">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#05060a}
+  #root{--bg:#05060a;--sf:rgba(20,22,39,.84);--sf2:rgba(29,32,53,.84);--sf-g:rgba(25,29,51,.84);--atmc:47,79,214;--bd:rgba(var(--atmc),.38);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--onac:#05060a;--ac2:#8b5cf6;--ac2-hi:#b79bff;--crisis:#e5534d;--fd:'Marcellus',Georgia,serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--rad:18px;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;position:fixed;inset:0;color:var(--tx);font-family:var(--fu)}
+  .stagecard{position:relative;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),linear-gradient(180deg,var(--sf2),var(--sf))}
+  [data-hs-scene]{position:relative;width:100%;outline:none;display:block}
+  [data-hs-scene]:focus-visible{box-shadow:inset 0 0 0 2px var(--ac2-hi)}
+  [data-hs-scene] canvas{position:absolute;inset:0;width:100%;height:100%}
+  .hud{border:1px solid var(--bd);border-radius:var(--rad);background:var(--sf2);padding:12px 14px;font:600 11px/1.45 var(--fu);color:var(--dim)}
+  .hud b{display:block;font:400 19px/1.25 var(--fd);color:var(--tx)}
+  .filler{border:1px solid var(--bd);border-radius:var(--rad);background:var(--sf);padding:16px;font:400 13px/1.6 var(--fb);color:var(--mut)}
+  /* phone shell, reduced */
+  [data-vt]{position:absolute;inset:0}
+  [data-vt-scroll]{position:absolute;inset:0;overflow-y:scroll;padding:72px 16px calc(var(--nav) + var(--dock) + 24px);box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+  [data-vt-scroll] > *{flex:none}
+  [data-vt] [data-hs-scene]{aspect-ratio:3/4;max-height:68vh;min-height:380px}
+  [data-app-header="vertical"]{position:absolute;top:0;left:0;right:0;z-index:60;height:60px;display:flex;align-items:center;padding:0 18px;background:linear-gradient(rgba(0,0,0,.9),rgba(0,0,0,.4));font:400 18px var(--fd)}
+  .dock{position:absolute;left:0;right:0;bottom:var(--nav);z-index:62;height:var(--dock);display:flex;align-items:center;justify-content:flex-end;padding:0 18px;pointer-events:none}
+  .dock button{all:unset;pointer-events:auto;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1.5px solid var(--crisis);color:var(--crisis);font:700 11px var(--fu)}
+  .nav{position:absolute;left:0;right:0;bottom:0;height:var(--nav);z-index:63;background:#000;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-around;font:600 10px var(--fu);color:var(--dim)}
+  /* desktop shell, reduced */
+  main[data-shell="desktop"]{position:absolute;inset:0 0 0 72px;display:flex;flex-direction:column}
+  .side{position:absolute;left:0;top:0;bottom:0;width:72px;border-right:1px solid var(--bd);background:#000}
+  .page{flex:1;min-height:0;overflow-y:auto;padding:32px 36px 48px}
+  .row{max-width:1560px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-start;gap:28px}
+  .colA{flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px}
+  .colB{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px}
+  main[data-shell="desktop"] [data-hs-scene]{aspect-ratio:6/5;max-height:78vh;min-height:460px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="pane-controller.js"></script>
+<script>
+(function () {
+  'use strict';
+  var KEYS = ['c:Head', 'c:Ajna', 'c:Throat', 'c:G', 'c:Heart', 'c:Spleen', 'c:Sacral', 'c:Solar Plexus', 'c:Root', 'ch:20-34', 'g:34'];
+  var POS = { 'c:Head': [.5, .1], 'c:Ajna': [.5, .22], 'c:Throat': [.5, .36], 'c:G': [.5, .5], 'c:Heart': [.64, .56], 'c:Spleen': [.22, .7],
+    'c:Sacral': [.5, .72], 'c:Solar Plexus': [.78, .7], 'c:Root': [.5, .9], 'ch:20-34': [.36, .55], 'g:34': [.42, .66] };
+  function nameOf(k) { var p = k.split(':'); return p[0] === 'c' ? p[1] : p[0] === 'ch' ? 'Channel ' + p[1] : 'Gate ' + p[1]; }
+
+  /* ---- the host: state, setState, and the pane methods from pane-controller.js ---- */
+  var host = { state: { hdPane: null, hsFocus: null, dtW: window.innerWidth } };
+  Object.assign(host, HDPane.hostMethods);
+  host.setState = function (patch) { Object.assign(this.state, patch); render(); };
+  host.hdSelOf = function (key) { var p = key.split(':'); return p[0] === 'c' ? { kind: 'center', name: p[1] } : p[0] === 'ch' ? { kind: 'channel', key: p[1] } : { kind: 'gate', gate: +p[1] }; };
+  /* Stand-in for hdPopVals(sel): placeholder copy, same value names. */
+  function popVals(sel) {
+    var t = sel.kind === 'center' ? sel.name + ' centre' : sel.kind === 'channel' ? 'Channel ' + sel.key : 'Gate ' + sel.gate;
+    return { hdPopOpen: true, hdPopTitle: t, hdPopKicker: sel.kind === 'center' ? 'Centre' : sel.kind === 'channel' ? 'Channel' : 'Gate', hdPopEdge: 'rgba(139,92,246,.4)',
+      hdPopTabs: [{ label: 'In general', on: 'true' }, { label: 'In yours', on: 'false' }],
+      hdPopLines: [{ head: 'What the system holds', text: 'Placeholder reading text for ' + t + '. The Atlas entry appears here in the app.' },
+        { head: 'What your chart shows', text: 'A second placeholder paragraph, long enough to show how the body scrolls inside the pane when the reading runs past the space it is given. '.repeat(3) },
+        { head: 'The lesson', text: 'A third placeholder paragraph.' }],
+      hdPopAtlas: function () {} };
+  }
+
+  /* ---- a stand-in scene: the 18e341a press rule and the scene's keys ---- */
+  var scene = { focusKey: null, responded: false };
+  function pick(stage, ev) {
+    var r = stage.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height, best = null, bd = 0.06;
+    KEYS.forEach(function (k) { var d = Math.hypot(POS[k][0] - x, POS[k][1] - y); if (d < bd) { bd = d; best = k; } });
+    return best;
+  }
+  function onFocus(key, how) { host.state.hsFocus = key; host.hdPaneSelect(key, how); render(); }
+  function onOpen(key, how) { host.hdPaneOpen(key, how); }
+  function stageUp(ev) {
+    var pk = pick(ev.currentTarget, ev), first = !scene.responded; scene.responded = true;
+    if (!pk) return;
+    if (pk === scene.focusKey && !first) onOpen(pk, 'tap');
+    else { scene.focusKey = pk; onFocus(pk, 'tap'); }
+  }
+  function stageKey(ev) {
+    if (ev.target !== ev.currentTarget) return;
+    var k = ev.key, i = KEYS.indexOf(scene.focusKey);
+    if (k === 'ArrowRight' || k === 'ArrowLeft') { ev.preventDefault(); scene.focusKey = i < 0 ? KEYS[k === 'ArrowRight' ? 0 : KEYS.length - 1] : KEYS[(i + (k === 'ArrowRight' ? 1 : KEYS.length - 1)) % KEYS.length]; onFocus(scene.focusKey, 'key'); }
+    else if ((k === 'Enter' || k === ' ') && scene.focusKey) { ev.preventDefault(); onOpen(scene.focusKey, 'key'); }
+  }
+  function draw(c) {
+    var w = c.clientWidth, h = c.clientHeight, dpr = window.devicePixelRatio || 1; if (!w || !h) return;
+    c.width = w * dpr; c.height = h * dpr; var g = c.getContext('2d'); g.scale(dpr, dpr);
+    for (var s = 0; s < 70; s++) { g.fillStyle = 'rgba(238,240,248,' + (0.2 + (s * 37 % 10) / 20) + ')'; g.fillRect((s * 97 % 1000) / 1000 * w, (s * 61 % 1000) / 1000 * h, 1.4, 1.4); }
+    KEYS.forEach(function (k) { var p = POS[k], on = k === scene.focusKey; g.beginPath(); g.arc(p[0] * w, p[1] * h, on ? 13 : 9, 0, 7);
+      g.fillStyle = on ? '#2fff8f' : 'rgba(139,92,246,.75)'; g.fill(); });
+  }
+
+  /* ---- documented Escape on document, as vtBind and dtBind do: the pane must stop it ---- */
+  window.__docEscape = 0;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') window.__docEscape++; });
+
+  /* ---- render: the template, by hand ---- */
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (a) {
+      if (a === 'onClick') n.addEventListener('click', attrs[a]);
+      else if (a === 'onKeyDown') n.addEventListener('keydown', attrs[a]);
+      else if (a === 'text') n.textContent = attrs[a];
+      else n.setAttribute(a, attrs[a]);
+    });
+    (kids || []).forEach(function (k) { if (k) n.appendChild(k); });
+    return n;
+  }
+  function pane(v, vertical) {
+    if (!v.hdPaneOn) return null;
+    var id = 'incommon-hd-pane-title-' + (vertical ? 'v' : 'd');
+    var head = el('div', { 'data-hd-pane-head': '1' }, [
+      el('div', { style: 'flex:1;min-width:0;display:flex;flex-direction:column;gap:3px' + (vertical ? ';padding-top:6px' : '') }, [
+        el('div', { 'data-hd-pane-kicker': '1', text: v.hdPaneKicker }),
+        el('div', { 'data-hd-pane-title': '1', id: id, tabindex: '-1', text: v.hdPaneTitle })]),
+      vertical ? el('button', { 'data-hd-pane-low': '1', onClick: v.hdPaneLowGo, 'aria-expanded': v.hdPaneLowExpanded, 'aria-label': v.hdPaneLowLabel, text: '↕' }) : null,
+      el('button', { 'data-hd-pane-close': '1', onClick: v.hdPaneCloseGo, 'aria-label': 'Close the reading', text: '×' })]);
+    var body = el('div', { 'data-hd-pane-body': '1' }, [
+      el('div', { role: 'tablist', 'aria-label': 'Detail views', style: 'display:flex;gap:8px' }, v.hdPaneTabs.map(function (t) {
+        return el('button', { role: 'tab', 'aria-selected': t.on, style: 'all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--bd);font:700 11.5px var(--fu);color:var(--tx)', text: t.label }); })),
+      el('div', {}, v.hdPaneLines.map(function (l) { return el('div', { style: 'display:flex;flex-direction:column;gap:4px;margin-bottom:12px' }, [
+        el('div', { style: 'font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)', text: l.head }),
+        el('div', { style: 'font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch', text: l.text })]); })),
+      el('div', { style: 'display:flex;gap:8px;border-top:1px solid var(--bd);padding-top:12px' }, [
+        el('button', { onClick: v.hdPaneAtlas, style: 'all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)', text: 'Learn more in the Atlas' })])]);
+    return el('section', { 'data-hd-pane': '1', 'data-hd-pane-state': v.hdPaneState, role: 'region', 'aria-labelledby': id, 'aria-keyshortcuts': 'Escape', onKeyDown: v.hdPaneKeys, style: v.hdPaneEdgeVar }, [
+      vertical ? el('span', { 'data-hd-pane-grab': '1', 'aria-hidden': 'true' }) : null, head, body]);
+  }
+  function stage(v) {
+    var s = el('div', { 'data-chart': 'wiring', 'data-hs-scene': '1', tabindex: '0', role: 'group', 'aria-roledescription': 'human design wiring', 'aria-label': 'The wiring (preview stand-in)' }, [el('canvas', { 'aria-hidden': 'true' })]);
+    s.addEventListener('pointerup', stageUp); s.addEventListener('keydown', stageKey);
+    return el('div', { class: 'stagecard', onKeyDown: v.hdStageKeys }, [s]);
+  }
+  function hud() { var k = host.state.hsFocus; return el('div', { class: 'hud', 'data-hud': '1' }, [el('b', { text: k ? nameOf(k) : 'Your type' }), document.createTextNode(k ? 'Named. Press it again, or Enter, to open its reading.' : 'Nothing named')]); }
+  var scrollKeep = {}, lastShell = null;
+  function render() {
+    var root = document.getElementById('root'), vertical = window.innerWidth < 820, a = document.activeElement;
+    var keepId = a && a.getAttribute && (a.hasAttribute('data-hs-scene') ? 'stage' : a.hasAttribute('data-hd-pane-close') ? 'close' : a.hasAttribute('data-hd-pane-low') ? 'low' : a.hasAttribute('data-hd-pane-title') ? 'title' : null);
+    var sc = root.querySelector('[data-vt-scroll],.page'); if (sc) scrollKeep[lastShell] = sc.scrollTop;
+    var v = host.hdPaneVals(function (sel) { return popVals(sel); });
+    root.innerHTML = '';
+    if (vertical) {
+      root.appendChild(el('div', { 'data-vt': '1', 'data-hd-pane-open': v.hdPaneOpenAttr }, [
+        el('div', { 'data-vt-scroll': '1', role: 'main' }, [
+          el('div', { class: 'filler', text: 'Your Human Design. Content above the stage on the phone page.' }), stage(v), hud(),
+          el('div', { class: 'filler', text: 'Type card and lists continue below.' }), el('div', { class: 'filler', style: 'height:600px' })]),
+        el('header', { 'data-app-header': 'vertical', 'data-shell': 'vertical', text: 'inCommon' }),
+        el('div', { class: 'dock' }, [el('button', { 'aria-label': 'Get help now', 'data-gethelp': '1', text: 'Help' })]),
+        pane(v, true),
+        el('nav', { class: 'nav', 'aria-label': 'Sections' }, [document.createTextNode('Today   My Charts   Library   Oracle   Settings')])]));
+    } else {
+      root.appendChild(el('div', { class: 'side' }));
+      root.appendChild(el('main', { 'data-shell': 'desktop', role: 'main' }, [el('div', { class: 'page' }, [el('div', { class: 'row' }, [
+        el('div', { class: 'colA' }, [stage(v), hud()]),
+        el('div', { class: 'colB' }, [pane(v, false), el('div', { class: 'filler', style: 'height:420px', text: 'Type card (stays under the pane).' }), el('div', { class: 'filler', style: 'height:900px' })])])])]));
+    }
+    lastShell = vertical ? 'v' : 'd';
+    var sc2 = root.querySelector('[data-vt-scroll],.page'); if (sc2 && scrollKeep[lastShell]) sc2.scrollTop = scrollKeep[lastShell];
+    root.querySelectorAll('[data-hs-scene] canvas').forEach(draw);
+    var back = keepId === 'stage' ? root.querySelector('[data-hs-scene]') : keepId === 'close' ? root.querySelector('[data-hd-pane-close]') : keepId === 'low' ? root.querySelector('[data-hd-pane-low]') : keepId === 'title' ? root.querySelector('[data-hd-pane-title]') : null;
+    if (host._hdPaneReturn && host._hdPaneReturn.hasAttribute && host._hdPaneReturn.hasAttribute('data-hs-scene')) host._hdPaneReturn = root.querySelector('[data-hs-scene]');
+    if (back) back.focus({ preventScroll: true });
+    host.hdPaneSync();
+  }
+  window.addEventListener('resize', function () { host.hdPaneSet({ type: 'shell' }); render(); });
+  window.__host = host; window.__scene = scene;
+  render();
+}());
+</script>
+</body>
+</html>

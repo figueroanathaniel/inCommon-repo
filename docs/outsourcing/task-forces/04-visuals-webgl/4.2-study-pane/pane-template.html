@@ -1,0 +1,91 @@
+<!--
+  4.2 study pane: DRAFT markup for app/inCommonApp v2.dc.html, in the app's
+  own template dialect (sc-if, sc-for, {{ holes }}). Written by Task Force 6
+  at the owner's request, 2 November 2026. Not in the app yet.
+
+  The content blocks below are the hdPop sheet's own markup (lines 7001 to
+  7045 on taskforce/04-visuals-webgl at 18e341a) with hdPop renamed hdPane, so
+  the pane carries the same reading the sheet carries. The content itself
+  stays workstream 3's.
+
+  Four insertions, nothing removed. The hdPop sheet stays for every other
+  caller of hdSel until the primary moves the wiring's callers to the pane.
+-->
+
+<!-- ===== 1. PHONE SHELL: the [data-vt] root (line 748) gains one attribute ===== -->
+<!--   data-hd-pane-open="{{ hdPaneOpenAttr }}"
+       It lets pane.css fit the stage into the top reserve while the sheet is up. -->
+
+<!-- ===== 2. PHONE SHELL: the sheet, directly after the Get Help dock (line 5229) ===== -->
+<!--   Not inside [data-vt-modals]: that wrapper turns its children into modal
+       sheets with a full-screen overlay. This is not a dialog and has no overlay. -->
+<sc-if value="{{ hdPaneOn }}" hint-placeholder-val="{{ false }}">
+  <section data-hd-pane="1" data-hd-pane-state="{{ hdPaneState }}" role="region" aria-labelledby="incommon-hd-pane-title-v" aria-keyshortcuts="Escape" onKeyDown="{{ hdPaneKeys }}" style="{{ hdPaneEdgeVar }}">
+    <span data-hd-pane-grab="1" aria-hidden="true"></span>
+    <div data-hd-pane-head="1">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding-top:6px">
+        <div data-hd-pane-kicker="1">{{ hdPaneKicker }}</div>
+        <div data-hd-pane-title="1" id="incommon-hd-pane-title-v" tabindex="-1">{{ hdPaneTitle }}</div>
+      </div>
+      <button data-hd-pane-low="1" onClick="{{ hdPaneLowGo }}" aria-expanded="{{ hdPaneLowExpanded }}" aria-label="{{ hdPaneLowLabel }}">&#8597;</button>
+      <button data-hd-pane-close="1" onClick="{{ hdPaneCloseGo }}" aria-label="Close the reading">&#215;</button>
+    </div>
+    <div data-hd-pane-body="1">
+      <!-- CONTENT: identical in both shells -->
+      <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Detail views" style="display:flex;gap:8px">
+        <sc-for list="{{ hdPaneTabs }}" as="t" hint-placeholder-count="2">
+          <button data-lift onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.c }};font:700 11.5px var(--fu);letter-spacing:.04em">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ hdPaneLines }}" as="l" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+          </sc-if>
+          <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ hdPaneHasSoco }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
+          <div style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
+          <sc-for list="{{ hdPaneSoco }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
+              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
+              <sc-for list="{{ s.items }}" as="i" hint-placeholder-count="2">
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ i.text }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+        <button data-lift onClick="{{ hdPaneAtlas }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Learn more in the Atlas</button>
+      </div>
+      <!-- /CONTENT -->
+    </div>
+  </section>
+</sc-if>
+
+<!-- ===== 3. DESKTOP SHELL: first child of the right column (line 8341) ===== -->
+<!--   <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+         ...this block goes here, above the type heading... -->
+<sc-if value="{{ hdPaneOn }}" hint-placeholder-val="{{ false }}">
+  <section data-hd-pane="1" data-hd-pane-state="{{ hdPaneState }}" role="region" aria-labelledby="incommon-hd-pane-title-d" aria-keyshortcuts="Escape" onKeyDown="{{ hdPaneKeys }}" style="{{ hdPaneEdgeVar }}">
+    <div data-hd-pane-head="1">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <div data-hd-pane-kicker="1">{{ hdPaneKicker }}</div>
+        <div data-hd-pane-title="1" id="incommon-hd-pane-title-d" tabindex="-1">{{ hdPaneTitle }}</div>
+      </div>
+      <button data-hd-pane-close="1" onClick="{{ hdPaneCloseGo }}" aria-label="Close the reading">&#215;</button>
+    </div>
+    <div data-hd-pane-body="1">
+      <!-- CONTENT: paste the block between CONTENT and /CONTENT above, unchanged -->
+    </div>
+  </section>
+</sc-if>
+
+<!-- ===== 4. BOTH SHELLS: the stage's wrapper card gains Escape ===== -->
+<!--   The data-lift="card" that wraps [data-hs-scene] (phone near line 1213,
+       desktop near line 8258) gains   onKeyDown="{{ hdStageKeys }}"
+       hd-scene.js does not handle Escape, so the key bubbles to it from the
+       stage. Nothing is added inside the scene. -->
