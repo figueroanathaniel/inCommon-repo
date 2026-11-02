@@ -428,6 +428,15 @@ input[type="date"]{color-scheme:dark}
 }
 
 
+/* On the readable 2D view the SVG is the stage. Size it to the same
+   top reserve used by the WebGL host while the mobile sheet is expanded. */
+[data-vt][data-hd-pane-open="1"] [data-chart="bodygraph"] {
+  width:auto!important;
+  height:calc(var(--hd-top-reserve) - var(--hd-stage-inset,72px))!important;
+  aspect-ratio:300 / 520;
+  max-width:100%!important;
+}
+
 /* 4.2: narrow desktop shells still place the study pane beside the stage.
    Wide desktops keep their original stage size and Haiku's sticky panel. */
 @media (min-width:820px) and (max-width:1180px) {
