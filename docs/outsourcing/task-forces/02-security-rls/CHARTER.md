@@ -48,6 +48,7 @@ Its secondary is the same model as its primary, so it reviews blind (Helpers, it
 | `brief.md` | how the workstream works (was `docs/outsourcing/02-security-rls.md`) | approved | |
 | `2.1-security-first-assignment.txt` | round 1: the private addendum (kept out of this repository), the policies workstream 1 handed over in PR #96, two housekeeping items | READY | not recorded |
 | `2.2-security-hd-assignment.txt` | other people's charts: privacy review of 1.2's model, policies for what 1.2 adds, sharing and handouts | DONE | primary 29 Oct, pasted by the owner with 1.2 into the session that wrote 1.2's model. Tasks 2 and 3 done there at the owner's choice; Task 1 done by a fresh session on 30 Oct, because its author may not review the model. Merged as #129 to #136 |
+| `2.3-cloud-data-model-assignment.txt` | the cloud data model (Priority 6): profiles, memories and saved people on the account, rules tied to auth.uid() | ISSUED | primary 31 Oct, given by the owner directly in the project thread and numbered 2.3 by the owner |
 
 Approval and delivery are recorded separately. **Status** is the owner's
 decision (DRAFT, AWAITING OWNER APPROVAL, READY, ISSUED, DONE; only the owner
@@ -261,3 +262,10 @@ were approved; from 28 October 2026 that work is committed here.
 - 31 October 2026: 2.2 moved to DONE by the owner ("move 2.2 to DONE on
   the board"), on the board, in this table and in the assignment's own
   status line.
+- 31 October 2026: the owner issued 2.3 directly (Priority 6, the cloud data
+  model), decided its two boundaries ("Cloud for accounts, device for
+  guests"; tarot becomes structured memories and device only data syncs),
+  numbered it, and approved the Privacy Policy change it needs. Migrations
+  0012 to 0016 and their test rows are on this branch for a separate
+  reviewer. Found while testing: the memory_type check refuses chart_note
+  today, which 0016 widens. Nothing has been applied to the live project.
