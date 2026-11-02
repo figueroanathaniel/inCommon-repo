@@ -170,8 +170,16 @@
       var head = document.querySelector('[data-app-header="vertical"]');
       var off = head ? head.getBoundingClientRect().height : 0;
       var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - off - 8;
-      if (typeof this.vtSettle === 'function' && this.HD_PANE_USE_SETTLE) this.vtSettle(sc, 'y', Math.max(0, top), 'P');
-      else sc.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+      var target = Math.max(0, top);
+      /* vtSettle watches an already-started scroll. Without scrollTo first
+         it cannot bring the stage into the mobile sheet's top reserve. Only
+         use the snap restorer for a scroller that already snaps. */
+      var snapping = /mandatory/.test(getComputedStyle(sc).scrollSnapType || '');
+      if (snapping && typeof this.vtSettle === 'function' && this.HD_PANE_USE_SETTLE) {
+        sc.style.scrollSnapType = 'none';
+        sc.scrollTo({ top: target, behavior: 'auto' });
+        this.vtSettle(sc, 'y', target, 'P');
+      } else sc.scrollTo({ top: target, behavior: 'auto' });
     },
 
     /* Template values. selVals is the existing hdPopVals, made to take a sel
