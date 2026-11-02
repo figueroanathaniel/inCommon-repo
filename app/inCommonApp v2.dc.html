@@ -427,6 +427,16 @@ input[type="date"]{color-scheme:dark}
   max-height: none !important;
 }
 
+
+/* 4.2: narrow desktop shells still place the study pane beside the stage.
+   Wide desktops keep their original stage size and Haiku's sticky panel. */
+@media (min-width:820px) and (max-width:1180px) {
+  [data-shell="desktop"] [data-hd-study-columns][data-hd-pane-open="1"] {
+    display:grid!important;
+    grid-template-columns:minmax(0,1.15fr) minmax(240px,.85fr);
+    align-items:start;
+  }
+}
 </style>
 </head>
 <body>
@@ -8440,8 +8450,8 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
       </sc-if>
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
-        <div style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
+      <div data-hd-study-columns="1" data-hd-pane-open="{{ hdPaneOpenAttr }}" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
+        <div data-hd-study-chart="1" style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
@@ -8540,7 +8550,7 @@ input[type="date"]{color-scheme:dark}
             </sc-if>
           </div>
         </div>
-        <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+        <div data-hd-study-detail="1" style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
 <sc-if value="{{ hdPaneOn }}" hint-placeholder-val="{{ false }}">
   <section data-hd-pane="1" data-hd-pane-state="{{ hdPaneState }}" role="region" aria-labelledby="incommon-hd-pane-title-d" aria-keyshortcuts="Escape" onKeyDown="{{ hdPaneKeys }}" style="{{ hdPaneEdgeVar }}">
     <div data-hd-pane-head="1">
