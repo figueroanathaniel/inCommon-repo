@@ -370,6 +370,7 @@
     this.k = 0; this.kGoal = 0;
     this.ptr = { x: 0, y: 0, px: 0, py: 0, on: false, moved: false };
     this.down = null; this.pinch = null; this.hover = null; this.focusKey = null;
+    this.readingKey = null; this.readBlend = 0; this.readGoal = 0;
     this.sky = null; this.skyK = 0;
     this.rig = null; this.user = { yaw: 0, pitch: null, zoom: 1 };
     this.wakeKey = null; this.wakeAt = null; this.responded = false;
@@ -520,6 +521,23 @@
     this.focusKey = key || null;
     if (key && turn !== false) this.turnTo(key);
     this.kick();
+  };
+  /* The host owns the reading panel. The scene owns only its camera rail and
+     selection highlight, so closing the panel never tears down a live canvas. */
+  P.setReadingOpen = function (on, key) {
+    var wanted = on && key ? key : null;
+    if (this.readingKey === wanted && this.readGoal === (wanted ? 1 : 0)) return;
+    this.readingKey = wanted;
+    this.readGoal = wanted ? 1 : 0;
+    if (wanted) { this.setFocus(wanted); this.turnTo(wanted); }
+    this.lift(0.4);
+    this.kick();
+  };
+  /* Reuse the scene's existing idle-target policy. Live stages keep their
+     render targets; a parked stage releases them after shader warm-up. */
+  P.trimUnusedResources = function () {
+    if (!this.ready || this.failed || this.destroyed) return;
+    this.postSleep(!!(this.visible && this.host && this.el.root.isConnected && !document.hidden));
   };
   P.setTheme = function () {
     if (!this.ready) return;
@@ -1166,7 +1184,7 @@
     return {
       yaw: this.user.yaw + drift + (mouse ? this.ptr.x * 0.12 : 0),
       pitch: clamp(pitch - 0.03 * c + (mouse ? this.ptr.y * 0.05 : 0), -0.25, 1.35),
-      dist: this.fit() / this.user.zoom * (1 - 0.04 * c) * (tgt ? 0.9 : 1),
+      dist: this.fit() / this.user.zoom * (1 - 0.04 * c) * (tgt ? 0.9 : 1) * (1 - 0.11 * (this.readBlend || 0)),
       ty: mix(ty, RING_Y, e), tx: tx * (1 - e)
     };
   };
@@ -1331,7 +1349,8 @@
     /* First press highlights and identifies; a second press on the same
        element opens its study reading. Panel layout belongs to the host. */
     if (pk.key === this.focusKey && !first) {
-      if (this.o.onOpen) this.o.onOpen(pk.key);
+      this.setReadingOpen(true, pk.key);
+      if (this.o.onOpen) this.o.onOpen(pk.key, 'tap');
     } else {
       this.setFocus(pk.key);
       if (this.o.onFocus) this.o.onFocus(pk.key, 'tap');
@@ -1359,7 +1378,10 @@
     else if (k === '+' || k === '=') this.zoom(-1);
     else if (k === '-' || k === '_') this.zoom(1);
     else if (k === '0' || k === 'Home') this.zoom(0);
-    else if ((k === 'Enter' || k === ' ') && this.focusKey) { if (this.o.onOpen) this.o.onOpen(this.focusKey); }
+    else if ((k === 'Enter' || k === ' ') && this.focusKey) {
+      this.setReadingOpen(true, this.focusKey);
+      if (this.o.onOpen) this.o.onOpen(this.focusKey, 'key');
+    }
     else done = false;
     if (done) { e.preventDefault(); this.respond(); this.lift(0.08); this.kick(); }
   };
@@ -1468,7 +1490,7 @@
     if (!this.host || !this.el.root.isConnected) { this.stop(); return; }
     var dt = this.last ? Math.min(this.isFlying() ? 0.25 : 0.1, (ts - this.last) / 1000) : 0.016;
     var waking = this.wakeAt == null || now() - this.wakeAt < this.wakeSpan + 0.5;
-    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001 ||
+    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || Math.abs(this.readBlend - this.readGoal) > 0.001 || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001 ||
       (this.flyOk() && this.flyBusy());
     /* the flow and the breathing never stop, so the rest rate is only a rate */
     if (!busy && ts - this.lastDraw < 31) return;
@@ -1505,6 +1527,8 @@
     this.dustMat.uniforms.uAlpha.value = 0.3 + 0.4 * c;
     this.k = rm ? this.kGoal : damp(this.k, this.kGoal, 1 - Math.exp(-dt * 2.2));
     if (Math.abs(this.k - this.kGoal) < 0.0008) this.k = this.kGoal;
+    this.readBlend = rm ? this.readGoal : damp(this.readBlend, this.readGoal, 1 - Math.exp(-dt * 5));
+    if (Math.abs(this.readBlend - this.readGoal) < 0.0008) this.readBlend = this.readGoal;
     var sg = this.sky ? 1 : 0;
     this.skyK = rm ? sg : damp(this.skyK, sg, 1 - Math.exp(-dt * 3));
     /* A body that waits for a response asks for one: after a while it wakes
