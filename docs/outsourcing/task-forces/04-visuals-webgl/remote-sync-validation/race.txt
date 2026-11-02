@@ -1,0 +1,8 @@
+Testing exact sandbox origin: https://taejnlrhfitqhqmijvxa.supabase.co
+PASS throughline_entries: 10 races, one stable row per key; replay and tenant isolation.
+PASS throughline_entries: two NULL-key legacy rows preserved.
+PASS throughline_entries: cross-owner insert rejected with PostgreSQL 42501.
+PASS oki_messages: 10 races, one stable row per key; replay and tenant isolation.
+PASS oki_messages: two NULL-key legacy rows preserved.
+PASS oki_messages: cross-owner insert rejected with PostgreSQL 42501.
+PASS concurrent race suite, both tables.

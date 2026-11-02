@@ -1,0 +1,10 @@
+Validated two distinct real test sessions.
+PASS Both owners can create and read their own fixtures
+PASS Profile replay updates the same UUID row
+PASS User B cannot read user A fixture
+PASS Anonymous cannot read user A fixture
+PASS User B PATCH touches no user A rows
+PASS User B DELETE touches no user A rows
+PASS Owner cannot reassign a profile to another account
+PASS Cross-owner INSERT is denied by PostgreSQL
+PASS 8 integration checks; profile isolation and UUID upsert only.
