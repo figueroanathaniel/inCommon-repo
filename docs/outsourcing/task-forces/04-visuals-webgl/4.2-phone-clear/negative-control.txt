@@ -1,0 +1,6 @@
+PASS 390 first press only selects null
+PASS 390 second press opens Sacral null
+FAIL 390 stage clears reading {"stage":{"top":214.59375,"bottom":530.59375,"right":369,"height":316},"pane":{"top":388.25,"left":0},"width":390,"height":844}
+FAIL 390 opened element remains visible on stage {"x":195,"y":402.2211128190546,"visible":false}
+FAIL 390 restored sheet still clears stage null
+2/5 browser checks passed

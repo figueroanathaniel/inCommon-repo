@@ -102,6 +102,7 @@
        opened the pane (the stage, normally); 'clear' and 'route' do not move
        focus, because the reader is already somewhere else. */
     hdPaneClose(reason) {
+      this.hdPaneStopFit();
       var back = this._hdPaneReturn;
       this._hdPaneReturn = null; this._hdPaneWantFocus = false;
       this.hdPaneSet({ type: 'close', reason: reason });
@@ -142,7 +143,15 @@
     hdPaneSync() {
       var el = paneEl();
       var vertical = !!(el && el.closest && el.closest('[data-vt]'));
+      if (!el || !vertical || !this.state.hdPane || this.state.hdPane.low) {
+        this.hdPaneStopFit();
+      }
       if (!el) return;
+      if (vertical && this.state.hdPane && !this.state.hdPane.low && !this._hdPaneFitB) {
+        this._hdPaneFitB = this.hdPaneFitStage.bind(this);
+        window.addEventListener('resize', this._hdPaneFitB);
+        document.addEventListener('scroll', this._hdPaneFitB, true);
+      }
       if (this._hdPaneWantFocus) {
         this._hdPaneWantFocus = false;
         var h = el.querySelector('[data-hd-pane-title]') || el;
@@ -152,12 +161,29 @@
         this._hdPaneReveal = false;
         this.hdPaneRevealStage();
       } else this._hdPaneReveal = false;
+      this.hdPaneFitStage();
     },
 
-    /* Phone: bring the stage up under the header so it sits in the open top
-       of the screen. DRAFT: in the app this must go through vtSettle on the
-       element that scrolls the Spirit page, because a programmatic scroll
-       fights mandatory snap (see vtSettle). The preview uses scrollTo. */
+    /* The stage starts below the shell's sample banner and chart tabs. Size
+       from its actual viewport top, leaving the owner's 46% reserve intact.
+       Only host CSS changes; the scene's ResizeObserver resizes the canvas. */
+    hdPaneStopFit() {
+      if (!this._hdPaneFitB) return;
+      window.removeEventListener('resize', this._hdPaneFitB);
+      document.removeEventListener('scroll', this._hdPaneFitB, true);
+      this._hdPaneFitB = null;
+    },
+
+    hdPaneFitStage() {
+      var el = paneEl(), st = stageEl();
+      if (!el || !st || !el.closest('[data-vt]') || !this.state.hdPane || this.state.hdPane.low) return;
+      var top = Math.max(0, st.getBoundingClientRect().top) + 8;
+      var value = top.toFixed(2) + 'px';
+      if (st.style.getPropertyValue('--hd-stage-top') !== value) st.style.setProperty('--hd-stage-top', value);
+    },
+
+    /* Reveal within the Spirit scroller's own viewport. Its header lives
+       outside this scroller and must not be subtracted a second time. */
     hdPaneRevealStage() {
       var st = stageEl(); if (!st) return;
       var sc = st.parentElement;
@@ -167,9 +193,7 @@
         sc = sc.parentElement;
       }
       if (!sc || sc === document.body) return;
-      var head = document.querySelector('[data-app-header="vertical"]');
-      var off = head ? head.getBoundingClientRect().height : 0;
-      var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - off - 8;
+      var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
       var target = Math.max(0, top);
       /* vtSettle watches an already-started scroll. Without scrollTo first
          it cannot bring the stage into the mobile sheet's top reserve. Only

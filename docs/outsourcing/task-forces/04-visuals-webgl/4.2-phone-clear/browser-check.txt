@@ -1,0 +1,15 @@
+PASS 390 first press only selects null
+PASS 390 second press opens Sacral null
+PASS 390 stage clears reading {"stage":{"top":214.59375,"bottom":380.234375,"right":369,"height":165.640625},"pane":{"top":388.25,"left":0},"width":390,"height":844}
+PASS 390 opened element remains visible on stage {"x":195,"y":313.1587546390925,"visible":true}
+PASS 390 restored sheet still clears stage null
+PASS 375 first press only selects null
+PASS 375 second press opens Sacral null
+PASS 375 stage clears reading {"stage":{"top":238.59375,"bottom":298.8125,"right":354,"height":60.21875},"pane":{"top":306.828125,"left":0},"width":375,"height":667}
+PASS 375 opened element remains visible on stage {"x":187.5,"y":274.21965529123827,"visible":true}
+PASS 375 restored sheet still clears stage null
+PASS 1440 first press only selects null
+PASS 1440 second press opens Sacral null
+PASS 1440 stage clears reading {"stage":{"top":357.0625,"bottom":900.03125,"right":943.125,"height":542.96875},"pane":{"top":270.0625,"left":970.03125},"width":1440,"height":900}
+PASS 1440 opened element remains visible on stage {"x":617.6367837259961,"y":689.1528825320936,"visible":true}
+14/14 browser checks passed
