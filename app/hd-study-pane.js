@@ -65,7 +65,7 @@
   }
 
   function paneEl() { return document.querySelector('[data-hd-pane]'); }
-  function stageEl() { return document.querySelector('[data-hs-scene]') || document.querySelector('[data-chart="wiring"]'); }
+  function stageEl() { return document.querySelector('[data-hs-scene]') || document.querySelector('[data-chart="bodygraph"]') || document.querySelector('[data-chart="wiring"]'); }
 
   var hostMethods = {
     HD_PANE_FOLLOW: true,
