@@ -18854,6 +18854,10 @@ class Component extends DCLogic {
     return box[shape];
   }
   fmtDay(d) { const f = this._fmt('day', { month: 'short', day: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+  /* The Archive prints a year where the Throughline prints a day, so it is a
+     second shape rather than a second formatter. Same cache, same reason:
+     one Intl.DateTimeFormat per shape, built once. */
+  fmtArchiveDay(d) { const f = this._fmt('archiveDay', { month: 'short', day: 'numeric', year: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
   weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
   personalWeek(pyV, d) { return this.numKeep(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
@@ -19837,7 +19841,10 @@ class Component extends DCLogic {
     }
     return out;
   }
-  arcDate(m) { try { return new Date(m.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch (e) { return String(m.createdAt || '').slice(0, 10); } }
+  arcDate(m) {
+    const d = new Date(m.createdAt);
+    return isNaN(d.getTime()) ? String(m.createdAt || '').slice(0, 10) : this.fmtArchiveDay(d);
+  }
   releaseMemory(m) {
     const PM = this.PM();
     if (!PM) return;
@@ -19872,16 +19879,22 @@ class Component extends DCLogic {
   }
   arcVals() {
     const st = this.state, f = st.arcFilter || 'all', q = String(st.arcQuery || '').trim().toLowerCase();
-    const rows = this.arcRows();
+    /* Built only while the Library is the screen. The rows are read for the
+       tab count whenever the Library is open; the row objects the template
+       compiles (arcItems) are built only while Archive is the tab, so a state
+       change on Today no longer walks the store and formats a date per entry. */
+    const libOn = this.curTab() === 'library' && !st.selId && !st.libView;
+    const on = libOn && this.libSubOf() === 'archive';
+    const rows = libOn ? this.arcRows() : [];
     const match = m => {
       if (f !== 'all' && m.type !== f) return false;
       if (!q) return true;
       return (this.arcTitle(m) + ' ' + this.arcPreview(m) + ' ' + this.arcDate(m) + ' ' + String(m.createdAt || '')).toLowerCase().indexOf(q) !== -1;
     };
-    const shown = rows.filter(match);
-    const sel = st.arcSel ? rows.find(m => m.id === st.arcSel) : null;
+    const shown = on ? rows.filter(match) : [];
+    const sel = (on && st.arcSel) ? rows.find(m => m.id === st.arcSel) : null;
     const counts = {};
-    rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
+    if (libOn) rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
     return {
       /* Six tabs. Throughline and Archive live here and nowhere else: the Archive
          used to carry a card back to the Throughline, and the desktop Today page a
@@ -19894,24 +19907,24 @@ class Component extends DCLogic {
           go: () => this.setState({ libSub: k, libView: null, selId: null, arcSel: null, apSec: null }) };
       }),
       libTabsShow: this.curTab() === 'library' && !st.selId && !st.libView,
-      libArchive: this.curTab() === 'library' && !st.selId && !st.libView && this.libSubOf() === 'archive',
-      /* Not gated on the tab, the way the Study, Journal and Readings lists are
-         not: the phone draws the Library section whichever section is in view,
-         and a gate on curTab() would leave the section blank behind the reader
-         as they scroll past. */
-      libTL: !st.selId && !st.libView && this.libSubOf() === 'throughline',
+      libArchive: on,
+      /* Gated on the Library as well as the tab. The phone mounts every section,
+         so without the first half the timeline compiled while the reader stood
+         on Today. vtOnScroll commits tab with the section, so the gate is true
+         whenever the Library is the screen in view. */
+      libTL: libOn && this.libSubOf() === 'throughline',
       arcQuery: st.arcQuery || '',
       arcTypeQ: e => this.setState({ arcQuery: e.target.value }),
       arcFilters: [['all', 'All'], ['alignment', 'Alignments'], ['stella_conversation', 'Conversations'], ['journal', 'Journals']].map(([k, label]) => ({
         label: label + (k !== 'all' && counts[k] ? ' ' + counts[k] : ''), on: f === k,
         bg: f === k ? 'rgba(var(--atmc),.34)' : 'transparent', bd: f === k ? 'rgba(47,255,143,.52)' : 'var(--bd)',
         c: f === k ? 'var(--ac)' : 'var(--dim)', go: () => this.setState({ arcFilter: k }) })),
-      arcItems: shown.map(m => ({
+      arcItems: on ? shown.map(m => ({
         typeLabel: this.ARC_LABEL[m.type], tc: this.ARC_CHIP[m.type][0], tb: this.ARC_CHIP[m.type][1],
         date: this.arcDate(m), title: this.arcTitle(m), preview: this.arcPreview(m).slice(0, 130),
         open: () => this.setState({ arcSel: m.id }),
-        release: () => this.setState({ relFor: m.id, relText: '' }) })),
-      arcEmpty: shown.length === 0,
+        release: () => this.setState({ relFor: m.id, relText: '' }) })) : [],
+      arcEmpty: on && shown.length === 0,
       arcEmptyText: rows.length === 0
         ? 'Nothing in the Archive yet. Save an alignment from the Today tab, or keep a journal entry, and it will appear here.'
         : 'Nothing matches that filter. Try All, or a shorter word.',
@@ -29039,9 +29052,16 @@ class Component extends DCLogic {
     /* tlLine(), not tlAll(): the screen shows the record with the sky it
        happened under, while every count and every summary elsewhere keeps
        reading the reader's own entries alone. */
-    const tlAll = ready ? this.tlLine() : [];
-    const tlShown = st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter);
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    const libOn = st.tab === 'library' && !st.selId && !st.libView;
+    const tlOn = libOn && this.libSubOf() === 'throughline';
+    /* Only while the Library is standing on Throughline. This ran on every
+       render, so marking one mood on Today paid for the whole record, a
+       transit window scan and a date format per entry. vtOnScroll commits tab
+       with the section, so on the phone the gate is true exactly while that
+       section is the one in view. */
+    const tlAll = (ready && tlOn) ? this.tlLine() : [];
+    const tlShown = !tlOn ? [] : (st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter));
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       /* Named on every screen, not just Today, because the sample is most
          convincing on the screens that show the most detail. */
@@ -31139,8 +31159,10 @@ class Component extends DCLogic {
     const now = new Date();
     const groups = this.dtSearchGroups();
     const q = String(st.dtQuery || '').trim();
-    const tl = st.ready ? this.tlAll() : [];
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    /* The recent list belongs to the desktop Today page, so only Today pays
+       for it. */
+    const tl = (st.ready && tab === 'today') ? this.tlAll() : [];
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       sideWide: open, sideRail: !open, sideToggle: () => this.dtToggleSide(),
       searchKeyHint: (mac ? '\u2318' : 'Ctrl ') + 'K',

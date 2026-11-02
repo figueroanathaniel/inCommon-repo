@@ -56,7 +56,7 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.4';
+  var VERSION = '2.9.5';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -409,6 +409,81 @@
     return chain.then(function (acc) { saveMap(map); return acc; });
   }
 
+  /* ---------- no remote key: update in place, never append
+
+     memories and consent_events carry a unique key the upsert can name, so a
+     replay lands on the row it already made. throughline_entries and
+     oki_messages carry NO such key: their only unique column is the identity
+     id, which this module never mints. An upsert on 'id' with no id cannot
+     conflict, so every send was an INSERT. The entry a reader edited, and
+     every entry a device re-sent after losing its bookkeeping, became a
+     second row on the account and a repeat on the next pull.
+
+     The local hash cache hid most of it, because it skips what this device
+     already sent. It cannot hide an EDITED entry: different content is a
+     different hash, so it is pending by definition. And it is no help to a
+     device that lost the cache and pushes before it pulls, which re-sends
+     everything it holds.
+
+     So this reads the account's rows for the plan's profiles once per push
+     and matches each pending item to one of them, by local_id (the item's own
+     id) and then by created_at. A match is sent WITH that server id, which is
+     a real conflict on the primary key: that row is corrected, not joined by
+     a second. Only an unmatched item is sent without an id. A matched row is
+     consumed, so two items cannot claim it. One paged SELECT, on the same
+     async path as everything else. */
+  function appendKey(r) { return String(r.profile_id) + '|' + (r.local_id == null ? '' : String(r.local_id)); }
+  function appendTime(r) { return String(r.profile_id) + '|' + (r.created_at == null ? '' : String(r.created_at)); }
+  function appendIndex(table, ids) {
+    var byLocal = {}, byTime = {};
+    if (!ids.length) return Promise.resolve({ byLocal: byLocal, byTime: byTime });
+    return fetchAll(table, function (q) { return typeof q.in === 'function' ? q.in('profile_id', ids) : q; })
+      .then(function (rows) {
+        rows.forEach(function (r) {
+          if (r.local_id != null) { var k = appendKey(r); if (!byLocal[k]) byLocal[k] = r; }
+          var t = appendTime(r); if (!byTime[t]) byTime[t] = r;
+        });
+        return { byLocal: byLocal, byTime: byTime };
+      });
+  }
+  function pushAppendTable(table, items) {
+    var map = loadMap();
+    var cache = hashCache(map, table);
+    var pending = items.filter(function (it) { return cache[it._key] !== it._hash; });
+    var acc = { ok: true, sent: 0, skipped: items.length - pending.length, updated: 0 };
+    if (!pending.length) return Promise.resolve(acc);
+    var ids = [];
+    pending.forEach(function (it) {
+      if (it.row && it.row.profile_id && ids.indexOf(it.row.profile_id) === -1) ids.push(it.row.profile_id);
+    });
+    return appendIndex(table, ids).then(function (idx) {
+      var used = {};
+      var chain = Promise.resolve();
+      pending.forEach(function (item) {
+        chain = chain.then(function () {
+          if (!acc.ok) return acc;
+          var row = item.row, hit = null;
+          var byKey = row.local_id == null ? null : idx.byLocal[appendKey(row)];
+          if (byKey && !used[String(byKey.id)]) hit = byKey;
+          var byTs = byKey ? null : idx.byTime[appendTime(row)];
+          if (!hit && byTs && !used[String(byTs.id)]) hit = byTs;
+          var out = row;
+          if (hit && hit.id != null) { used[String(hit.id)] = 1; out = Object.assign({}, row, { id: hit.id }); }
+          return client.from(table).upsert(out, { onConflict: 'id' }).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
+            cache[item._key] = item._hash;
+            acc.sent++;
+            if (hit) acc.updated++;
+            return acc;
+          });
+        });
+      });
+      return chain.then(function () { saveMap(map); return acc; });
+    }, function (e) {
+      return { ok: false, reason: 'offline', error: (e && e.message) || 'no answer' };
+    });
+  }
+
   /* THE SERVER HOLDS THE SWITCH TOO (server/migrations/0006, the follow-up
      review's finding 4). A profile row is emptied of its birth when it
      arrives while the account's latest birthData event is a revoke or its
@@ -477,9 +552,9 @@
             if (!r3.ok) return r3;
             return pushTable('memories', plan.memories, 'profile_id,local_id').then(function (r4) {
               if (!r4.ok) return r4;
-              return pushTable('throughline_entries', plan.throughline, 'id').then(function (r5) {
+              return pushAppendTable('throughline_entries', plan.throughline).then(function (r5) {
                 if (!r5.ok) return r5;
-                return pushTable('oki_messages', plan.oki, 'id');
+                return pushAppendTable('oki_messages', plan.oki);
               });
             });
           });
