@@ -1325,18 +1325,17 @@
     var n = this.local(e), pk = this.pickAt(n.px, n.py);
     if (e.pointerType !== 'mouse') { this.ptr.on = false; this.hideTip(); }
     this.lift(0.2);
+    var first = !this.responded;
     this.respond();
     if (!pk) { this.kick(); return; }
-    /* A single press selects and opens the reading. For a Generator it also
-       counts as the response that wakes the body. */
-    /* A single deliberate pick selects and opens the matching study entry.
-       The host owns the panel and shared selection state; the renderer makes
-       no DOM panel, database or network requests. */
-    if (pk.key !== this.focusKey) {
+    /* First press highlights and identifies; a second press on the same
+       element opens its study reading. Panel layout belongs to the host. */
+    if (pk.key === this.focusKey && !first) {
+      if (this.o.onOpen) this.o.onOpen(pk.key);
+    } else {
       this.setFocus(pk.key);
       if (this.o.onFocus) this.o.onFocus(pk.key, 'tap');
     }
-    if (this.o.onOpen) this.o.onOpen(pk.key);
     this.kick();
   };
   P.onWheel = function (e) {
