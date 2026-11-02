@@ -24277,6 +24277,15 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   function paneEl() { return document.querySelector('[data-hd-pane]'); }
   function stageEl() { return document.querySelector('[data-hs-scene]') || document.querySelector('[data-chart="bodygraph"]') || document.querySelector('[data-chart="wiring"]'); }
 
+  /* Viewport rectangles share one coordinate system. Validity reports the
+     measured frame, not the proposed height, so an overlap cannot grade itself. */
+  function computeStageBoundaries(stage, pane, page, viewportHeight) {
+    var bottom = Math.min(pane.top, page ? page.bottom : viewportHeight, viewportHeight);
+    return { width: stage.width, height: Math.max(0, bottom - stage.top - 8),
+      top: stage.top, bottom: bottom, paneTop: pane.top,
+      isValid: stage.bottom <= pane.top };
+  }
+
   var hostMethods = {
     HD_PANE_FOLLOW: true,
     HD_PANE_USE_SETTLE: true,
@@ -24353,7 +24362,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     hdPaneSync() {
       var el = paneEl();
       var vertical = !!(el && el.closest && el.closest('[data-vt]'));
-      if (!el || !vertical || !this.state.hdPane || this.state.hdPane.low) {
+      if (!el || !vertical || !this.state.hdPane || this.state.hdPane.low || (this._hdPaneFitEl && this._hdPaneFitEl !== el)) {
         this.hdPaneStopFit();
       }
       if (!el) return;
@@ -24361,6 +24370,14 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         this._hdPaneFitB = this.hdPaneFitStage.bind(this);
         window.addEventListener('resize', this._hdPaneFitB);
         document.addEventListener('scroll', this._hdPaneFitB, true);
+        this._hdPaneFitEl = el;
+        el.addEventListener('animationend', this._hdPaneFitB);
+        if (window.ResizeObserver) {
+          this._hdPaneFitObserver = new ResizeObserver(this._hdPaneFitB);
+          this._hdPaneFitObserver.observe(el);
+          var page = stageEl() && stageEl().closest('[data-vt-page]');
+          if (page) this._hdPaneFitObserver.observe(page);
+        }
       }
       if (this._hdPaneWantFocus) {
         this._hdPaneWantFocus = false;
@@ -24381,15 +24398,21 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       if (!this._hdPaneFitB) return;
       window.removeEventListener('resize', this._hdPaneFitB);
       document.removeEventListener('scroll', this._hdPaneFitB, true);
+      if (this._hdPaneFitEl) this._hdPaneFitEl.removeEventListener('animationend', this._hdPaneFitB);
+      if (this._hdPaneFitObserver) this._hdPaneFitObserver.disconnect();
+      this._hdPaneFitObserver = null; this._hdPaneFitEl = null;
       this._hdPaneFitB = null;
     },
 
     hdPaneFitStage() {
       var el = paneEl(), st = stageEl();
       if (!el || !st || !el.closest('[data-vt]') || !this.state.hdPane || this.state.hdPane.low) return;
-      var top = Math.max(0, st.getBoundingClientRect().top) + 8;
-      var value = top.toFixed(2) + 'px';
-      if (st.style.getPropertyValue('--hd-stage-top') !== value) st.style.setProperty('--hd-stage-top', value);
+      var page = st.closest('[data-vt-page]');
+      var bounds = computeStageBoundaries(st.getBoundingClientRect(), el.getBoundingClientRect(),
+        page && page.getBoundingClientRect(), window.innerHeight);
+      var value = bounds.height.toFixed(2) + 'px';
+      if (st.style.getPropertyValue('--hd-stage-height') !== value) st.style.setProperty('--hd-stage-height', value);
+      return bounds;
     },
 
     /* Reveal within the Spirit scroller's own viewport. Its header lives
@@ -24443,7 +24466,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     }
   };
 
-  return { reduce: reduce, tabWrap: tabWrap, hostMethods: hostMethods, FOCUSABLE: FOCUSABLE };
+  return { computeStageBoundaries: computeStageBoundaries, reduce: reduce, tabWrap: tabWrap, hostMethods: hostMethods, FOCUSABLE: FOCUSABLE };
 }));
 
 </script>
@@ -29816,7 +29839,7 @@ input[type="date"]{color-scheme:dark}
    The inline styles on the stage need !important, as the shell rules do. */
 [data-vt][data-hd-pane-open="1"] [data-hs-scene] {
   aspect-ratio: auto !important;
-  height: max(1px, calc(var(--hd-top-reserve) - var(--hd-stage-top, var(--hd-top-reserve)))) !important;
+  height: var(--hd-stage-height, 0px) !important;
   min-height: 0 !important;
   max-height: none !important;
 }
@@ -29826,7 +29849,7 @@ input[type="date"]{color-scheme:dark}
    top reserve used by the WebGL host while the mobile sheet is expanded. */
 [data-vt][data-hd-pane-open="1"] [data-chart="bodygraph"] {
   width:auto!important;
-  height:max(1px,calc(var(--hd-top-reserve) - var(--hd-stage-top,var(--hd-top-reserve))))!important;
+  height:var(--hd-stage-height,0px)!important;
   min-height:0!important;
   aspect-ratio:300 / 520;
   max-width:100%!important;

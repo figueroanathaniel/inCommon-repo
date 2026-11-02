@@ -10,13 +10,26 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const scene = read('app/hd-scene.js');
 const app = read('app/inCommonApp v2.dc.html');
 const pane = read('app/hd-study-pane.js');
-const R = require('../app/hd-study-pane.js').reduce;
+const paneModule = require('../app/hd-study-pane.js');
+const R = paneModule.reduce;
 let passed = 0;
 function check(name, fn) {
   try { fn(); passed++; console.log('PASS ' + name); }
   catch (e) { console.error('FAIL ' + name + ': ' + e.message); process.exitCode = 1; }
 }
 
+check('measured boundaries reject overlap and fit both phone heights', () => {
+  for (const [height, top] of [[844,231],[667,231],[844,280]]) {
+    const pane = {top: height * .46};
+    const stage = {top, bottom:top + 316, width:348};
+    const bounds = paneModule.computeStageBoundaries(stage, pane, {bottom:height}, height);
+    assert.equal(bounds.isValid, false);
+    assert.ok(top + bounds.height <= pane.top);
+    assert.equal(paneModule.computeStageBoundaries({...stage,bottom:top + bounds.height},pane,{bottom:height},height).isValid,true);
+  }
+  const bounds = paneModule.computeStageBoundaries({top:231,bottom:500,width:348},{top:388},{bottom:300},844);
+  assert.equal(bounds.height,61);
+});
 check('first selection highlights without opening', () => {
   assert.equal(R(null, { type: 'select', key: 'c:Sacral', how: 'tap' }), null);
 });
@@ -86,4 +99,4 @@ check('2D bodygraph gets the mobile stage reserve and reveal target', () => {
 check('scene remains independent of database and network access', () => {
   assert.doesNotMatch(scene, /\bfetch\s*\(|\bXMLHttpRequest\b|\bsupabase\b/i);
 });
-console.log(passed + '/13 source and state checks passed');
+console.log(passed + '/14 source and state checks passed');

@@ -422,7 +422,7 @@ input[type="date"]{color-scheme:dark}
    The inline styles on the stage need !important, as the shell rules do. */
 [data-vt][data-hd-pane-open="1"] [data-hs-scene] {
   aspect-ratio: auto !important;
-  height: max(1px, calc(var(--hd-top-reserve) - var(--hd-stage-top, var(--hd-top-reserve)))) !important;
+  height: var(--hd-stage-height, 0px) !important;
   min-height: 0 !important;
   max-height: none !important;
 }
@@ -432,7 +432,7 @@ input[type="date"]{color-scheme:dark}
    top reserve used by the WebGL host while the mobile sheet is expanded. */
 [data-vt][data-hd-pane-open="1"] [data-chart="bodygraph"] {
   width:auto!important;
-  height:max(1px,calc(var(--hd-top-reserve) - var(--hd-stage-top,var(--hd-top-reserve))))!important;
+  height:var(--hd-stage-height,0px)!important;
   min-height:0!important;
   aspect-ratio:300 / 520;
   max-width:100%!important;
