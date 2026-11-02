@@ -1,0 +1,25 @@
+Validated real owner session and profile; target https://taejnlrhfitqhqmijvxa.supabase.co
+TABLE throughline_entries
+STEP 1 legacy preflight: 0 matching rows
+STEP 2 modern composite upsert: HTTP 201
+STEP 3 legacy stale upsert on id: HTTP 409, PostgreSQL 23505
+Database message: duplicate key value violates unique constraint "unique_profile_local_throughline"
+PASS modern row retained; no duplicate after rejected legacy write
+MATCHED-ID legacy upsert: HTTP 400, PostgreSQL 428C9
+Database message: cannot insert a non-DEFAULT value into column "id"
+CONTROL legacy insert WITHOUT server id: HTTP 201, allocated identity successfully
+LEGACY/LEGACY race: one success, one HTTP 409 / 23505, one stored row
+MODERN/MODERN race: both succeed, same server id, one stored row
+TABLE oki_messages
+STEP 1 legacy preflight: 0 matching rows
+STEP 2 modern composite upsert: HTTP 201
+STEP 3 legacy stale upsert on id: HTTP 409, PostgreSQL 23505
+Database message: duplicate key value violates unique constraint "unique_profile_local_oki"
+PASS modern row retained; no duplicate after rejected legacy write
+MATCHED-ID legacy upsert: HTTP 400, PostgreSQL 428C9
+Database message: cannot insert a non-DEFAULT value into column "id"
+CONTROL legacy insert WITHOUT server id: HTTP 201, allocated identity successfully
+LEGACY/LEGACY race: one success, one HTTP 409 / 23505, one stored row
+MODERN/MODERN race: both succeed, same server id, one stored row
+PASS expected mixed-version failure matrix reproduced on both tables; coexistence is NOT safe.
+PASS fixture profile and cascading rows cleaned up
