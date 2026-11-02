@@ -1351,7 +1351,7 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" aria-pressed="{{ c.selected }}" style="all:unset;cursor:pointer;box-shadow:{{ c.focusRing }};box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
@@ -8480,7 +8480,7 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" aria-pressed="{{ c.selected }}" style="all:unset;cursor:pointer;box-shadow:{{ c.focusRing }};box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
@@ -20235,11 +20235,23 @@ class Component extends DCLogic {
   hdOpen(sel) { return () => {
     const key = this.hdPaneKeyOf(sel);
     if (!key) { this.setState({ hdSel: sel }); return; }
+    /* Explicit reading cards are one action. Wiring hit targets use the
+       separate, deliberate two-press path below. */
     if (key.indexOf('v:') !== 0) {
       this.setState({ hsFocus: key });
       if (this._hsS) this._hsS.setFocus(key);
     }
-    this.hdPaneOpen(key, 'tap');
+    this.hdPaneOpen(key, 'button');
+  }; }
+  hdWiringPress(sel) { return () => {
+    const key = this.hdPaneKeyOf(sel);
+    if (!key) return;
+    if (this.state.hsFocus === key) { this.hdPaneOpen(key, 'tap'); return; }
+    if (this._hsS) this._hsS.setFocus(key);
+    this.setState({ hsFocus: key });
+    this.hdPaneSelect(key, 'tap');
+    const h = this.hdHudOf(key);
+    if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite');
   }; }
   /* AN ADDRESS IS NOT A DESTINATION ON THE PHONE.
 
@@ -30066,24 +30078,26 @@ class Component extends DCLogic {
               const q = this.BG_POS[name], defined = hd.defined.has(name);
               const col = A && A.CENTERS[name] ? A.CENTERS[name].color : 'var(--ac2-hi)';
               const n = shown.filter(g => this.hdCenterOf(g.gate) === name).length;
-              const P = this.hdShape(name);
+              const P = this.hdShape(name), selected = st.hsFocus === 'c:' + name;
               return { pts: P.map(pt => f1(pt[0]) + ',' + f1(pt[1])).join(' '),
                 fill: defined ? col : 'rgba(var(--atmc),.08)', fo: defined ? '.9' : '1',
-                stroke: defined ? col : 'rgba(var(--atmc),.6)', halo: defined ? col : 'transparent',
+                stroke: selected ? 'var(--ac2-hi)' : defined ? col : 'rgba(var(--atmc),.6)', halo: selected ? 'var(--ac2-hi)' : defined ? col : 'transparent',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
                 jc: name === 'Head' || name === 'Heart' ? 'flex-end' : name === 'Ajna' ? 'flex-start' : 'center',
                 pad: name === 'Head' || name === 'Heart' ? '0 0 4px' : name === 'Ajna' ? '3px 0 0' : '0',
                 name: name, short: this.BG_SHORT[name],
+                selected: selected, focusRing: selected ? 'inset 0 0 0 2px var(--ac2-hi),0 0 18px rgba(var(--atmc2),.35)' : 'none',
                 labelC: defined ? 'rgba(5,6,10,.88)' : 'var(--mut)',
                 subC: defined ? 'rgba(5,6,10,.7)' : 'var(--mut)',
                 count: n ? n + (n === 1 ? ' gate' : ' gates') : '',
-                go: this.hdOpen({ kind: 'center', name: name }) };
+                go: this.hdWiringPress({ kind: 'center', name: name }) };
             });
             const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], L = layer[n];
-              return { x: f1(sp.x), y: f1(sp.y), r: L ? '3.3' : '1.7',
+              const selected = st.hsFocus === 'g:' + n;
+              return { x: f1(sp.x), y: f1(sp.y), r: selected ? '4.1' : L ? '3.3' : '1.7',
                 fill: L === 'design' ? ink.design : L ? ink.personality : 'rgba(var(--atmc),.75)',
-                ring: L === 'both' ? ink.design : 'none', rw: L === 'both' ? '1.8' : '0' }; });
+                ring: selected ? 'var(--ac2-hi)' : L === 'both' ? ink.design : 'none', rw: selected ? '2.4' : L === 'both' ? '1.8' : '0' }; });
             const byCenter = {};
             shown.forEach(g => { (byCenter[this.hdCenterOf(g.gate)] = byCenter[this.hdCenterOf(g.gate)] || []).push(g); });
             const inChannel = new Set();
@@ -30096,10 +30110,10 @@ class Component extends DCLogic {
                 tagBg: defined ? 'rgba(89,179,125,.16)' : 'rgba(238,240,248,.08)',
                 gates: byCenter[c].sort((a, b) => a.gate - b.gate).map(g => ({
                   n: g.gate, line: '.' + g.line,
-                  bd: inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
+                  bd: st.hsFocus === 'g:' + g.gate ? 'var(--ac2-hi)' : inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
                   bg: inChannel.has(g.gate) ? 'rgba(var(--atmc),.28)' : 'var(--sf2)',
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
-                  go: this.hdOpen({ kind: 'gate', gate: g.gate, line: g.line }) })) };
+                  go: this.hdWiringPress({ kind: 'gate', gate: g.gate, line: g.line }) })) };
             });
             return { bgModes: modes, bgChannels: lines, bgGlows: glows, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
               hdGateCount: shown.length + (mode === 'both' ? ' in total' : ' in the ' + mode + ' chart'),
@@ -30204,16 +30218,16 @@ class Component extends DCLogic {
             const A = this.A(), info = A ? A.channel(ch[0], ch[1]) : null;
             return { pair: ch[0] + '-' + ch[1], name: info ? info.name : 'Channel ' + ch[0] + '-' + ch[1],
               route: (info ? info.theme + ' \u00b7 ' : '') + ch[2] + ' to ' + ch[3],
-              go: this.hdOpen({ kind: 'channel', a: ch[0], b: ch[1] }) };
+              go: this.hdWiringPress({ kind: 'channel', a: ch[0], b: ch[1] }) };
           }),
           hdChanCount: hd.activeChannels.length + (hd.activeChannels.length === 1 ? ' channel' : ' channels'),
           hdNoChannels: hd.activeChannels.length === 0,
           hdDefined: this.HD_CENTERS.filter(c => hd.defined.has(c[0])).map(c => ({ name: c[0], role: c[2], desc: c[1],
             gates: 'Channels ' + hd.activeChannels.filter(ch => ch[2] === c[0] || ch[3] === c[0]).map(ch => ch[0] + '-' + ch[1]).join(', '),
-            go: this.hdOpen({ kind: 'center', name: c[0] }) })),
+            go: this.hdWiringPress({ kind: 'center', name: c[0] }) })),
           hdUndefined: this.HD_CENTERS.filter(c => !hd.defined.has(c[0])).map(c => ({ name: c[0], role: c[2],
             desc: 'Open here. You take ' + c[1] + ' in from the people around you, and it is not consistently yours.',
-            go: this.hdOpen({ kind: 'center', name: c[0] }) })),
+            go: this.hdWiringPress({ kind: 'center', name: c[0] }) })),
           /* Learn from Atlas lands on the section that answers the HD tab the
              reader is on, and on the reader's own entry inside it where the tab
              has one. hdTab is the teachings strip. */
