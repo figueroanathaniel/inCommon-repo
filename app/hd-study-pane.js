@@ -188,7 +188,7 @@
        sheet's markup with the prefix changed. */
     hdPaneVals(selVals) {
       var p = this.state.hdPane, out = { hdPaneOn: !!p, hdPaneState: p ? (p.low ? 'low' : 'open') : 'closed',
-        hdPaneOpenAttr: p ? '1' : '0', hdPaneLowLabel: p && p.low ? 'Show the reading' : 'Show the chart',
+        hdPaneOpenAttr: p && !p.low ? '1' : '0', hdPaneLowLabel: p && p.low ? 'Show the reading' : 'Show the chart',
         hdPaneLowExpanded: p && !p.low ? 'true' : 'false',
         hdPaneKeys: this._hdPaneKeysB || (this._hdPaneKeysB = this.hdPaneKeys.bind(this)),
         hdStageKeys: this._hdStageKeysB || (this._hdStageKeysB = this.hdStageKeys.bind(this)),
