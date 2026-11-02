@@ -2730,6 +2730,34 @@ async function runCloudTests() {
     rows: before59, aChanged: false, bChanged: false, bTl: 1
   }, { rows: counts(sdb), aChanged: a2.pull.changed, bChanged: b2.pull.changed, bTl: tl(devB, nate.id).length });
 
+  /* ---- K97: the entry is corrected, never appended twice. Its table has no
+     unique key but the identity id, so an upsert naming 'id' and carrying no
+     id cannot conflict: it inserts. The cache hid that for a device that kept
+     its bookkeeping, and hid nothing for one that lost it, or for an entry
+     whose content changed. Both must land on the row already there. ---- */
+  var rdb = memDB();
+  var devR = syncDevice(rdb, '97979797-0000-4000-8000-000000000097');
+  var rp = devR.pm.createProfile({ name: 'Repeater', birthDate: '1984-04-04' });
+  devR.pm.setConsent('journal', true, rp.id);
+  var entry97 = { id: 'm1790000000097', date: '2026-10-01', type: 'event', title: 'First', manual: true };
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify([entry97]));
+  var r97a = await devR.C.sync();
+  var first97 = rdb.t.throughline_entries.length;
+  /* The device loses its bookkeeping and sends the same entry again. */
+  devR.store.removeItem('incommon_cloud_map_v2');
+  var r97b = await devR.C.sync();
+  var repeat97 = rdb.t.throughline_entries.length;
+  /* The reader edits it: a new content hash, the same entry. */
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify([Object.assign({}, entry97, { title: 'First, amended' })]));
+  var r97c = await devR.C.sync();
+  var rows97 = rdb.t.throughline_entries;
+  ts('K97', 'an entry re-sent after the device lost its bookkeeping, and an entry the reader edited, each correct the row the account already holds for it instead of appending a second one', {
+    ok: true, afterFirst: 1, afterRepeat: 1, afterEdit: 1, title: 'First, amended', local: 1
+  }, {
+    ok: r97a.ok && r97b.ok && r97c.ok, afterFirst: first97, afterRepeat: repeat97, afterEdit: rows97.length,
+    title: rows97[0] && rows97[0].payload && rows97[0].payload.title, local: tl(devR, rp.id).length
+  });
+
   devB.pm.updateProfile(nate.id, { birthTime: '09:15' });
   await devB.C.sync();
   var a3 = await devA.C.sync();
