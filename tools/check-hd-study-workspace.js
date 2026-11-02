@@ -79,7 +79,11 @@ check('mobile stage reveal starts a scroll before snap settlement', () => {
   assert.match(pane, /sc\.scrollTo\(\{ top: target, behavior: 'auto' \}\);\s*this\.vtSettle/);
   assert.match(pane, /hdPaneOpenAttr: p && !p\.low \? '1' : '0'/);
 });
+check('2D bodygraph gets the mobile stage reserve and reveal target', () => {
+  assert.match(pane, /querySelector\('\[data-chart="bodygraph"\]'\)/);
+  assert.match(app, /\[data-vt\]\[data-hd-pane-open="1"\] \[data-chart="bodygraph"\]/);
+});
 check('scene remains independent of database and network access', () => {
   assert.doesNotMatch(scene, /\bfetch\s*\(|\bXMLHttpRequest\b|\bsupabase\b/i);
 });
-console.log(passed + '/12 source and state checks passed');
+console.log(passed + '/13 source and state checks passed');
