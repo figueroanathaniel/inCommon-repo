@@ -516,9 +516,25 @@
     this.lift(0.2);
     this.kick();
   };
+  /* Focus badges are canvas textures. Keep at most the badge for the current
+     activation; old selections must not accumulate GPU textures or sprites. */
+  P.pruneFocusSprites = function (retainKey) {
+    if (!this.acts) return;
+    var self = this;
+    this.acts.forEach(function (a) {
+      if (!a.sprF || retainKey === 'a:' + a.a.key) return;
+      var sprite = a.sprF;
+      a.sprF = null;
+      if (sprite.parent) sprite.parent.remove(sprite);
+      /* dispose() handles canvas texture, material, label bookkeeping and
+         deferred release while asynchronous shader warm-up is active. */
+      self.dispose(sprite);
+    });
+  };
   P.setFocus = function (key, turn) {
     if (this.focusKey === key) return;
     this.focusKey = key || null;
+    this.pruneFocusSprites(this.focusKey);
     if (key && turn !== false) this.turnTo(key);
     this.kick();
   };
@@ -537,6 +553,10 @@
      render targets; a parked stage releases them after shader warm-up. */
   P.trimUnusedResources = function () {
     if (!this.ready || this.failed || this.destroyed) return;
+    /* Do not destroy a live stage when its reading pane closes. Release its
+       unused emphasis textures, then let the existing stage idle policy own
+       transient bloom render targets when the stage is genuinely parked. */
+    this.pruneFocusSprites(this.focusKey);
     this.postSleep(!!(this.visible && this.host && this.el.root.isConnected && !document.hidden));
   };
   P.setTheme = function () {
