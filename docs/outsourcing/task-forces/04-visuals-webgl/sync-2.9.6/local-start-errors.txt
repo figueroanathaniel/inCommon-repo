@@ -1,0 +1,3 @@
+failed to display json stream: failed to register layer: mkdir /var/lib/docker/vfs/dir/7ca7eab0d25acf415917baedafe99150e1343a351803271f7997110d82312a55/var/spool/cron: no space left on device
+failed to display json stream: failed to register layer: mkdir /usr/lib/postgresql/share: no space left on device
+Startup retries stopped after these failures; no local DB container exists.

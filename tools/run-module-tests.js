@@ -2579,6 +2579,7 @@ async function runCloudTests() {
       q.select = function () { q._op = 'select'; return q; };
       q.insert = function (row) { q._op = 'insert'; q._row = row; return q; };
       q.upsert = function (row, o) { q._op = 'upsert'; q._row = row; q._on = String((o && o.onConflict) || 'id').split(','); return q; };
+      q.update = function (row) { q._op = 'update'; q._row = row; return q; };
       q.delete = function () { q._op = 'delete'; return q; };
       q._cols = [];
       q.eq = function (c, v) { q._cols.push(c); q._f.push(function (r) { return r[c] === v; }); return q; };
@@ -2604,6 +2605,16 @@ async function runCloudTests() {
         if (table === 'deleted_profiles' && db.noDeleted) {
           /* A project without migration 0007, as PostgREST answers it. */
           out.error = { code: 'PGRST205', message: "Could not find the table 'public.deleted_profiles' in the schema cache" };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if ((q._op === 'upsert' || q._op === 'insert') && q._row.id != null &&
+            (table === 'throughline_entries' || table === 'oki_messages')) {
+          out.error = { code: '428C9', message: 'cannot insert a non-DEFAULT value into GENERATED ALWAYS id' };
+          return Promise.resolve(out).then(res, rej);
+        }
+        if (q._op === 'upsert' && q._on.join(',') === 'profile_id,local_id' && db.noAppendComposite &&
+            (table === 'throughline_entries' || table === 'oki_messages')) {
+          out.error = { code: '42P10', message: 'no matching composite constraint' };
           return Promise.resolve(out).then(res, rej);
         }
         if ((q._op === 'upsert' || q._op === 'insert') && db.failUpsert === table) {
@@ -2638,6 +2649,8 @@ async function runCloudTests() {
             var rowA = clone(q._row), hitA = rows.filter(function (x) { return x.id === rowA.id; })[0];
             if (hitA) Object.assign(hitA, rowA); else rows.push(rowA);
           }
+        } else if (q._op === 'update') {
+          rows.filter(match).forEach(function (x) { Object.assign(x, clone(q._row)); });
         } else if (q._op === 'upsert') {
           var row = clone(q._row);
           var hit = rows.filter(function (x) { return q._on.every(function (c) { return row[c] !== undefined && x[c] === row[c]; }); })[0];
@@ -2757,6 +2770,40 @@ async function runCloudTests() {
     ok: r97a.ok && r97b.ok && r97c.ok, afterFirst: first97, afterRepeat: repeat97, afterEdit: rows97.length,
     title: rows97[0] && rows97[0].payload && rows97[0].payload.title, local: tl(devR, rp.id).length
   });
+
+  /* Legacy null-key entries update GENERATED ALWAYS ids without inserting
+     those ids. Keyed writes never borrow a timestamp's different identity. */
+  var legacy97 = { created_at: '2026-10-01T12:00:00.000Z', title: 'Legacy', manual: true };
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify([legacy97]));
+  await devR.C.sync();
+  var legacyRows97 = rdb.t.throughline_entries.length;
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify([Object.assign({}, legacy97, { title: 'Legacy amended' })]));
+  var legacyRes97 = await devR.C.sync();
+  ts('K98', 'null-key legacy edits update the existing server identity',
+    { ok: true, rows: legacyRows97, title: 'Legacy amended' },
+    { ok: legacyRes97.ok, rows: rdb.t.throughline_entries.length,
+      title: rdb.t.throughline_entries.filter(x => x.local_id == null)[0]?.payload.title });
+
+  rdb.noAppendComposite = true;
+  var before99 = rdb.t.throughline_entries.length;
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify([Object.assign({}, entry97, { title: 'After migration' })]));
+  var missing99 = await devR.C.sync();
+  rdb.noAppendComposite = false;
+  var retry99 = await devR.C.sync();
+  ts('K99', 'a missing composite constraint fails closed and leaves the item pending for a successful retry',
+    { refused: true, recovered: true, rows: before99, title: 'After migration' },
+    { refused: !missing99.ok, recovered: retry99.ok, rows: rdb.t.throughline_entries.length,
+      title: rdb.t.throughline_entries.filter(x => x.local_id === entry97.id)[0]?.payload.title });
+
+  var keyed100 = [
+    { id: 'different-key-a', created_at: '2026-10-02T10:00:00Z', title: 'First identity', manual: true },
+    { id: 'different-key-b', created_at: '2026-10-02T10:00:00Z', title: 'Second identity', manual: true }
+  ];
+  devR.store.setItem('incommon.p.' + rp.id + '.throughline', JSON.stringify(keyed100));
+  var result100 = await devR.C.sync();
+  ts('K100', 'different stable local identities never collapse merely because timestamps match',
+    { ok: true, identities: ['different-key-a', 'different-key-b'] },
+    { ok: result100.ok, identities: rdb.t.throughline_entries.filter(x => /^different-key-/.test(x.local_id)).map(x => x.local_id).sort() });
 
   devB.pm.updateProfile(nate.id, { birthTime: '09:15' });
   await devB.C.sync();

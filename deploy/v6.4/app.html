@@ -25937,7 +25937,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.5';
+  var VERSION = '2.9.6';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -26290,31 +26290,19 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return chain.then(function (acc) { saveMap(map); return acc; });
   }
 
-  /* ---------- no remote key: update in place, never append
-
-     memories and consent_events carry a unique key the upsert can name, so a
-     replay lands on the row it already made. throughline_entries and
-     oki_messages carry NO such key: their only unique column is the identity
-     id, which this module never mints. An upsert on 'id' with no id cannot
-     conflict, so every send was an INSERT. The entry a reader edited, and
-     every entry a device re-sent after losing its bookkeeping, became a
-     second row on the account and a repeat on the next pull.
-
-     The local hash cache hid most of it, because it skips what this device
-     already sent. It cannot hide an EDITED entry: different content is a
-     different hash, so it is pending by definition. And it is no help to a
-     device that lost the cache and pushes before it pulls, which re-sends
-     everything it holds.
-
-     So this reads the account's rows for the plan's profiles once per push
-     and matches each pending item to one of them, by local_id (the item's own
-     id) and then by created_at. A match is sent WITH that server id, which is
-     a real conflict on the primary key: that row is corrected, not joined by
-     a second. Only an unmatched item is sent without an id. A matched row is
-     consumed, so two items cannot claim it. One paged SELECT, on the same
-     async path as everything else. */
+  /* Keyed entries use the database's (profile_id, local_id) uniqueness.
+     Never send a server-generated id on this path: concurrent clients must
+     conflict on the same local identity, without replacing the server id.
+     Legacy null-key entries still match a previously fetched timestamp and
+     update by its server id; an unmatched legacy row is inserted. Null-key
+     writes have no cross-device concurrency guarantee until identities are
+     backfilled. A missing composite constraint is an error, never a silent
+     fallback to append. Apply the reviewed database migration first. */
   function appendKey(r) { return String(r.profile_id) + '|' + (r.local_id == null ? '' : String(r.local_id)); }
-  function appendTime(r) { return String(r.profile_id) + '|' + (r.created_at == null ? '' : String(r.created_at)); }
+  function appendTime(r) {
+    var time = r.created_at == null ? '' : String(r.created_at), parsed = Date.parse(time);
+    return String(r.profile_id) + '|' + (isNaN(parsed) ? time : String(parsed));
+  }
   function appendIndex(table, ids) {
     var byLocal = {}, byTime = {};
     if (!ids.length) return Promise.resolve({ byLocal: byLocal, byTime: byTime });
@@ -26343,14 +26331,25 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       pending.forEach(function (item) {
         chain = chain.then(function () {
           if (!acc.ok) return acc;
-          var row = item.row, hit = null;
-          var byKey = row.local_id == null ? null : idx.byLocal[appendKey(row)];
+          var row = item.row, keyed = row.local_id != null, hit = null;
+          var byKey = keyed ? idx.byLocal[appendKey(row)] : null;
+          var byTs = keyed ? null : idx.byTime[appendTime(row)];
           if (byKey && !used[String(byKey.id)]) hit = byKey;
-          var byTs = byKey ? null : idx.byTime[appendTime(row)];
           if (!hit && byTs && !used[String(byTs.id)]) hit = byTs;
-          var out = row;
-          if (hit && hit.id != null) { used[String(hit.id)] = 1; out = Object.assign({}, row, { id: hit.id }); }
-          return client.from(table).upsert(out, { onConflict: 'id' }).then(function (res) {
+          var out = Object.assign({}, row), operation;
+          delete out.id;
+          if (hit && hit.id != null) used[String(hit.id)] = 1;
+          if (keyed) {
+            operation = client.from(table).upsert(out, { onConflict: 'profile_id,local_id', ignoreDuplicates: false });
+          } else if (hit && hit.id != null) {
+            /* Keep any stable key already assigned to this historical row.
+               GENERATED ALWAYS identities cannot be supplied to INSERT. */
+            out.local_id = hit.local_id;
+            operation = client.from(table).update(out).eq('id', hit.id);
+          } else {
+            operation = client.from(table).upsert(out, { onConflict: 'id', ignoreDuplicates: false });
+          }
+          return operation.then(function (res) {
             if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
             cache[item._key] = item._hash;
             acc.sent++;
