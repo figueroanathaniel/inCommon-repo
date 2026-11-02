@@ -1,4 +1,4 @@
-<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-10-27  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-11-02  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22323,6 +22323,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.k = 0; this.kGoal = 0;
     this.ptr = { x: 0, y: 0, px: 0, py: 0, on: false, moved: false };
     this.down = null; this.pinch = null; this.hover = null; this.focusKey = null;
+    this.readingKey = null; this.readBlend = 0; this.readGoal = 0;
     this.sky = null; this.skyK = 0;
     this.rig = null; this.user = { yaw: 0, pitch: null, zoom: 1 };
     this.wakeKey = null; this.wakeAt = null; this.responded = false;
@@ -22468,11 +22469,48 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.lift(0.2);
     this.kick();
   };
+  /* Focus badges are canvas textures. Keep at most the badge for the current
+     activation; old selections must not accumulate GPU textures or sprites. */
+  P.pruneFocusSprites = function (retainKey) {
+    if (!this.acts) return;
+    var self = this;
+    this.acts.forEach(function (a) {
+      if (!a.sprF || retainKey === 'a:' + a.a.key) return;
+      var sprite = a.sprF;
+      a.sprF = null;
+      if (sprite.parent) sprite.parent.remove(sprite);
+      /* dispose() handles canvas texture, material, label bookkeeping and
+         deferred release while asynchronous shader warm-up is active. */
+      self.dispose(sprite);
+    });
+  };
   P.setFocus = function (key, turn) {
     if (this.focusKey === key) return;
     this.focusKey = key || null;
+    this.pruneFocusSprites(this.focusKey);
     if (key && turn !== false) this.turnTo(key);
     this.kick();
+  };
+  /* The host owns the reading panel. The scene owns only its camera rail and
+     selection highlight, so closing the panel never tears down a live canvas. */
+  P.setReadingOpen = function (on, key) {
+    var wanted = on && key ? key : null;
+    if (this.readingKey === wanted && this.readGoal === (wanted ? 1 : 0)) return;
+    this.readingKey = wanted;
+    this.readGoal = wanted ? 1 : 0;
+    if (wanted) { this.setFocus(wanted); this.turnTo(wanted); }
+    this.lift(0.4);
+    this.kick();
+  };
+  /* Reuse the scene's existing idle-target policy. Live stages keep their
+     render targets; a parked stage releases them after shader warm-up. */
+  P.trimUnusedResources = function () {
+    if (!this.ready || this.failed || this.destroyed) return;
+    /* Do not destroy a live stage when its reading pane closes. Release its
+       unused emphasis textures, then let the existing stage idle policy own
+       transient bloom render targets when the stage is genuinely parked. */
+    this.pruneFocusSprites(this.focusKey);
+    this.postSleep(!!(this.visible && this.host && this.el.root.isConnected && !document.hidden));
   };
   P.setTheme = function () {
     if (!this.ready) return;
@@ -23119,7 +23157,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return {
       yaw: this.user.yaw + drift + (mouse ? this.ptr.x * 0.12 : 0),
       pitch: clamp(pitch - 0.03 * c + (mouse ? this.ptr.y * 0.05 : 0), -0.25, 1.35),
-      dist: this.fit() / this.user.zoom * (1 - 0.04 * c) * (tgt ? 0.9 : 1),
+      dist: this.fit() / this.user.zoom * (1 - 0.04 * c) * (tgt ? 0.9 : 1) * (1 - 0.11 * (this.readBlend || 0)),
       ty: mix(ty, RING_Y, e), tx: tx * (1 - e)
     };
   };
@@ -23281,11 +23319,15 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var first = !this.responded;
     this.respond();
     if (!pk) { this.kick(); return; }
-    /* The first press brings a thing forward and names it; a second press on
-       the same thing opens its reading. A Generator's first press is the
-       response the body was waiting for, so it wakes the body and names. */
-    if (pk.key === this.focusKey && !first) { if (this.o.onOpen) this.o.onOpen(pk.key); }
-    else { this.setFocus(pk.key); if (this.o.onFocus) this.o.onFocus(pk.key, 'tap'); }
+    /* First press highlights and identifies; a second press on the same
+       element opens its study reading. Panel layout belongs to the host. */
+    if (pk.key === this.focusKey && !first) {
+      this.setReadingOpen(true, pk.key);
+      if (this.o.onOpen) this.o.onOpen(pk.key, 'tap');
+    } else {
+      this.setFocus(pk.key);
+      if (this.o.onFocus) this.o.onFocus(pk.key, 'tap');
+    }
     this.kick();
   };
   P.onWheel = function (e) {
@@ -23309,7 +23351,10 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     else if (k === '+' || k === '=') this.zoom(-1);
     else if (k === '-' || k === '_') this.zoom(1);
     else if (k === '0' || k === 'Home') this.zoom(0);
-    else if ((k === 'Enter' || k === ' ') && this.focusKey) { if (this.o.onOpen) this.o.onOpen(this.focusKey); }
+    else if ((k === 'Enter' || k === ' ') && this.focusKey) {
+      this.setReadingOpen(true, this.focusKey);
+      if (this.o.onOpen) this.o.onOpen(this.focusKey, 'key');
+    }
     else done = false;
     if (done) { e.preventDefault(); this.respond(); this.lift(0.08); this.kick(); }
   };
@@ -23418,7 +23463,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (!this.host || !this.el.root.isConnected) { this.stop(); return; }
     var dt = this.last ? Math.min(this.isFlying() ? 0.25 : 0.1, (ts - this.last) / 1000) : 0.016;
     var waking = this.wakeAt == null || now() - this.wakeAt < this.wakeSpan + 0.5;
-    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001 ||
+    var busy = this.c > 0.04 || this.down || this.pinch || !this._settled || Math.abs(this.readBlend - this.readGoal) > 0.001 || waking || Math.abs(this.k - this.kGoal) > 0.001 || Math.abs(this.skyK - (this.sky ? 1 : 0)) > 0.001 ||
       (this.flyOk() && this.flyBusy());
     /* the flow and the breathing never stop, so the rest rate is only a rate */
     if (!busy && ts - this.lastDraw < 31) return;
@@ -23455,6 +23500,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.dustMat.uniforms.uAlpha.value = 0.3 + 0.4 * c;
     this.k = rm ? this.kGoal : damp(this.k, this.kGoal, 1 - Math.exp(-dt * 2.2));
     if (Math.abs(this.k - this.kGoal) < 0.0008) this.k = this.kGoal;
+    this.readBlend = rm ? this.readGoal : damp(this.readBlend, this.readGoal, 1 - Math.exp(-dt * 5));
+    if (Math.abs(this.readBlend - this.readGoal) < 0.0008) this.readBlend = this.readGoal;
     var sg = this.sky ? 1 : 0;
     this.skyK = rm ? sg : damp(this.skyK, sg, 1 - Math.exp(-dt * 3));
     /* A body that waits for a response asks for one: after a while it wakes
@@ -23722,6 +23769,218 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     _layoutGates: layoutGates, _outline: outline
   };
 })(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+/* 4.2 study pane: host methods used by app/inCommonApp v2.dc.html.
+   Drafted by Task Force 6 and integrated by Task Force 4. The host installs
+   the methods on Component.prototype; the scene contains no panel markup.
+
+   The renderer stays a renderer: app/hd-scene.js keeps calling its existing
+   onFocus(key, how) and onOpen(key) callbacks and gains no DOM, panel or
+   state code. Everything below runs in the host, where hdSel and the old
+   hdPop sheet already live.
+
+   Entry keys are the scene's own keys: c:<Centre>, ch:<a>-<b>, g:<gate>,
+   a:<activation>. The host's hdSelOf(key) turns one into the sel object the
+   existing hdPopVals reads, so the pane shows exactly the content the sheet
+   shows today; that content stays workstream 3's.
+
+   State: this.state.hdPane is null (closed) or { key, how, low }. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.HDPane = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /* The same selector the app's trap uses (FOCUSABLE on the app class). */
+  var FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+  /* Pure. Every visibility change goes through here, so the states can be
+     checked without a browser. opts.follow: while open, a first press or an
+     arrow step elsewhere on the chart moves the pane to it (recommended; an
+     owner decision, see README "Decisions"). */
+  function reduce(s, ev, opts) {
+    var follow = !opts || opts.follow !== false;
+    s = s || null;
+    switch (ev && ev.type) {
+      case 'select':
+        if (!ev.key) return null;                 /* Whole chart: nothing named, pane closes */
+        if (s && follow) return s.key === ev.key ? s : { key: ev.key, how: ev.how || 'tap', low: s.low };
+        return s;                                  /* closed stays closed: the first press only names */
+      case 'open':
+        if (!ev.key) return s;
+        return { key: ev.key, how: ev.how || 'tap', low: false };
+      case 'close':
+        return null;
+      case 'low':
+        if (!s) return s;
+        return { key: s.key, how: s.how, low: ev.low == null ? !s.low : !!ev.low };
+      case 'view':                                 /* 2D, Wheel, 3D: the pane and its entry carry across */
+      case 'shell':                                /* crossing 820px: same state, other presentation */
+        return s;
+      default:
+        return s;
+    }
+  }
+
+  /* Tab and Shift+Tab stay inside the pane while focus is in it. Returns true
+     when it moved focus. Mirrors trapAttach's loop so the two behave alike. */
+  function tabWrap(el, e) {
+    if (!el || e.key !== 'Tab') return false;
+    var f = [].slice.call(el.querySelectorAll(FOCUSABLE)).filter(function (n) {
+      return n.offsetWidth || n.offsetHeight || n === document.activeElement;
+    });
+    if (!f.length) { e.preventDefault(); return true; }
+    var first = f[0], last = f[f.length - 1], at = document.activeElement;
+    if (e.shiftKey && (at === first || !el.contains(at) || at === el.querySelector('[data-hd-pane-title]'))) { e.preventDefault(); last.focus(); return true; }
+    if (!e.shiftKey && (at === last || !el.contains(at))) { e.preventDefault(); first.focus(); return true; }
+    return false;
+  }
+
+  function paneEl() { return document.querySelector('[data-hd-pane]'); }
+  function stageEl() { return document.querySelector('[data-hs-scene]') || document.querySelector('[data-chart="bodygraph"]') || document.querySelector('[data-chart="wiring"]'); }
+
+  var hostMethods = {
+    HD_PANE_FOLLOW: true,
+    HD_PANE_USE_SETTLE: true,
+
+    hdPaneSet(ev) {
+      var next = reduce(this.state.hdPane, ev, { follow: this.HD_PANE_FOLLOW });
+      if (next !== this.state.hdPane) this.setState({ hdPane: next });
+      return next;
+    },
+
+    /* The selection-change hook. Call it from the scene's onFocus, beside
+       the existing setState({ hsFocus }), and from Whole chart with null. */
+    hdPaneSelect(key, how) {
+      var next = this.hdPaneSet({ type: 'select', key: key || null, how: how });
+      if (this._hsS) this._hsS.setReadingOpen(!!next, next && next.key);
+      return next;
+    },
+
+    /* open(entry). Call it from the scene's onOpen and from the 2D wiring's
+       presses. how is 'key' when Enter or Space opened it (focus then moves
+       into the pane), anything else leaves focus where the reader put it. */
+    hdPaneOpen(key, how) {
+      if (!key) return this.state.hdPane;
+      var a = document.activeElement;
+      if (!this.state.hdPane) this._hdPaneReturn = a && a !== document.body ? a : stageEl();
+      this._hdPaneWantFocus = how === 'key';
+      this._hdPaneReveal = true;
+      if (this._hsS) this._hsS.setReadingOpen(true, key);
+      return this.hdPaneSet({ type: 'open', key: key, how: how });
+    },
+
+    /* close(). reason 'escape' or 'button' hands focus back to whatever
+       opened the pane (the stage, normally); 'clear' and 'route' do not move
+       focus, because the reader is already somewhere else. */
+    hdPaneClose(reason) {
+      var back = this._hdPaneReturn;
+      this._hdPaneReturn = null; this._hdPaneWantFocus = false;
+      this.hdPaneSet({ type: 'close', reason: reason });
+      if (this._hsS) {
+        this._hsS.setReadingOpen(false);
+        this._hsS.trimUnusedResources();
+      }
+      if ((reason === 'escape' || reason === 'button') ) {
+        var t = back && document.contains(back) ? back : stageEl();
+        if (t && t.focus) { try { t.focus({ preventScroll: true }); } catch (x) { t.focus(); } }
+      }
+    },
+
+    /* Phone only: the sheet's head row alone, or the head and body. */
+    hdPaneLow(low) { return this.hdPaneSet({ type: 'low', low: low }); },
+
+    /* onKeyDown on the pane element. */
+    hdPaneKeys(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation();   /* or vtBind's Escape leaves the Spirit page */
+        this.hdPaneClose('escape');
+        return;
+      }
+      tabWrap(e.currentTarget || paneEl(), e);
+    },
+
+    /* onKeyDown on the stage's wrapper (not inside hd-scene.js). The scene
+       ignores Escape, so it bubbles here. Only acts while the pane is open. */
+    hdStageKeys(e) {
+      if (e.key !== 'Escape' || !this.state.hdPane) return;
+      e.preventDefault(); e.stopPropagation();
+      this.hdPaneClose('escape');
+    },
+
+    /* Runs once the pane has actually landed in the document. sc-if commits
+       a tick after componentDidUpdate (see trapWatch in the app), so call
+       this from syncTrap() as well as componentDidUpdate. */
+    hdPaneSync() {
+      var el = paneEl();
+      var vertical = !!(el && el.closest && el.closest('[data-vt]'));
+      if (!el) return;
+      if (this._hdPaneWantFocus) {
+        this._hdPaneWantFocus = false;
+        var h = el.querySelector('[data-hd-pane-title]') || el;
+        try { h.focus({ preventScroll: true }); } catch (x) { h.focus(); }
+      }
+      if (this._hdPaneReveal && vertical) {
+        this._hdPaneReveal = false;
+        this.hdPaneRevealStage();
+      } else this._hdPaneReveal = false;
+    },
+
+    /* Phone: bring the stage up under the header so it sits in the open top
+       of the screen. DRAFT: in the app this must go through vtSettle on the
+       element that scrolls the Spirit page, because a programmatic scroll
+       fights mandatory snap (see vtSettle). The preview uses scrollTo. */
+    hdPaneRevealStage() {
+      var st = stageEl(); if (!st) return;
+      var sc = st.parentElement;
+      while (sc && sc !== document.body) {
+        var oy = getComputedStyle(sc).overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break;
+        sc = sc.parentElement;
+      }
+      if (!sc || sc === document.body) return;
+      var head = document.querySelector('[data-app-header="vertical"]');
+      var off = head ? head.getBoundingClientRect().height : 0;
+      var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - off - 8;
+      var target = Math.max(0, top);
+      /* vtSettle watches an already-started scroll. Without scrollTo first
+         it cannot bring the stage into the mobile sheet's top reserve. Only
+         use the snap restorer for a scroller that already snaps. */
+      var snapping = /mandatory/.test(getComputedStyle(sc).scrollSnapType || '');
+      if (snapping && typeof this.vtSettle === 'function' && this.HD_PANE_USE_SETTLE) {
+        sc.style.scrollSnapType = 'none';
+        sc.scrollTo({ top: target, behavior: 'auto' });
+        this.vtSettle(sc, 'y', target, 'P');
+      } else sc.scrollTo({ top: target, behavior: 'auto' });
+    },
+
+    /* Template values. selVals is the existing hdPopVals, made to take a sel
+       instead of reading state.hdSel (a one-line change for the primary).
+       Its hdPop* names come back as hdPane*, so the pane's markup is the
+       sheet's markup with the prefix changed. */
+    hdPaneVals(selVals) {
+      var p = this.state.hdPane, out = { hdPaneOn: !!p, hdPaneState: p ? (p.low ? 'low' : 'open') : 'closed',
+        hdPaneOpenAttr: p && !p.low ? '1' : '0', hdPaneLowLabel: p && p.low ? 'Show the reading' : 'Show the chart',
+        hdPaneLowExpanded: p && !p.low ? 'true' : 'false',
+        hdPaneKeys: this._hdPaneKeysB || (this._hdPaneKeysB = this.hdPaneKeys.bind(this)),
+        hdStageKeys: this._hdStageKeysB || (this._hdStageKeysB = this.hdStageKeys.bind(this)),
+        hdPaneCloseGo: this._hdPaneCloseB || (this._hdPaneCloseB = this.hdPaneClose.bind(this, 'button')),
+        hdPaneLowGo: this._hdPaneLowB || (this._hdPaneLowB = this.hdPaneLow.bind(this, null)) };
+      if (!p) return out;
+      var sel = this.hdSelOf(p.key), v = sel && selVals ? selVals.call(this, sel) : null;
+      if (!v) { out.hdPaneOn = false; out.hdPaneState = 'closed'; out.hdPaneOpenAttr = '0'; return out; }
+      Object.keys(v).forEach(function (k) { if (k.indexOf('hdPop') === 0) out['hdPane' + k.slice(5)] = v[k]; });
+      out.hdPaneClose = out.hdPaneCloseGo;
+      out.hdPaneAtlas = () => { this.hdPaneClose('route'); if (v.hdPopAtlas) v.hdPopAtlas(); };
+      out.hdPaneEdgeVar = '--hd-pane-edge:' + (v.hdPopEdge || 'var(--bd)');
+      return out;
+    }
+  };
+
+  return { reduce: reduce, tabWrap: tabWrap, hostMethods: hostMethods, FOCUSABLE: FOCUSABLE };
+}));
 
 </script>
 <script>
@@ -28301,6 +28560,179 @@ input[type="date"]{color-scheme:dark}
 @media (max-height:640px){.reg-head{flex-direction:row;justify-content:center;gap:.6rem}.app-logo-small{height:26px;width:114px}.reg-title{font-size:16.5px;white-space:nowrap}.input-group label{font-size:.7rem;margin-bottom:.15rem}.reg-foot{gap:.2rem}.reg-check,.reg-later,.reg-acct-toggle{min-height:40px}.reg-foot{padding-top:.3rem}.reg-agree{font-size:10.5px}}
 @media (max-height:600px){.welcome-registration-card{padding-top:.7rem;padding-bottom:.6rem;gap:.35rem}.registration-form-grid{gap:.3rem}.input-group label{margin-bottom:.1rem}.reg-foot{gap:.1rem}}
 @media (max-width:360px){.welcome-registration-card{padding-left:.9rem;padding-right:.9rem}.reg-row{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:.45rem}.input-group input{padding-left:.45rem;padding-right:.45rem}}
+/* 4.2 Human Design study workspace, Haiku draft */
+/* 4.2 study pane: DRAFT for the head stylesheet of app/inCommonApp v2.dc.html.
+   Written by Task Force 6 at the owner's request (2 November 2026) so the
+   visuals primary can wire selection into it. Not loaded by the app yet.
+
+   One pane, two presentations, chosen by the shell that already exists:
+     [data-shell="desktop"] [data-hd-pane]  desktop, beside the chart (right column, sticky)
+     [data-vt] [data-hd-pane]               phone, a sheet docked above Get Help and the nav
+
+   Rules this file keeps:
+   - No backdrop, scrim or dimming layer of any kind. The pane is the only
+     painted surface; everything around it stays live and pressable.
+   - The phone sheet never rises above --hd-top-reserve, so the top of the
+     screen always belongs to the stage.
+   - The phone sheet ends at the top of the dock, so Get Help (in the dock)
+     and the nav are never covered.
+   - No #e5534d. No #8b5cf6 as text: purple text is var(--ac2-hi).
+   - Tokens only, so all four theme identities and the contrast modifier
+     reach the pane through the roots, as every other surface.
+   - Motion is entry only; the global prefers-reduced-motion rule in the head
+     stylesheet already shortens it to nothing. */
+
+[data-hd-pane] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: var(--tx);
+  /* Opaque: the surfaces are translucent tokens, so the page bg sits under them. */
+  background: linear-gradient(170deg, var(--sf), var(--sf-g, var(--sf))), var(--bg);
+  border: 1px solid var(--bd);
+  outline: none;
+}
+[data-hd-pane] [data-hd-pane-head] {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 14px 12px 18px;
+  border-bottom: 1px solid var(--bd);
+}
+[data-hd-pane] [data-hd-pane-title] {
+  font: 400 21px/1.25 var(--fd);
+  color: var(--tx);
+  outline: none;
+}
+[data-hd-pane] [data-hd-pane-kicker] {
+  font: 600 9.5px var(--fu);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ac2-hi);
+}
+[data-hd-pane] [data-hd-pane-body] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px 18px;
+}
+[data-hd-pane] [data-hd-pane-close],
+[data-hd-pane] [data-hd-pane-low] {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font: 400 18px var(--fu);
+  color: var(--dim);
+}
+[data-hd-pane] [data-hd-pane-close]:focus-visible,
+[data-hd-pane] [data-hd-pane-low]:focus-visible,
+[data-hd-pane] [data-hd-pane-title]:focus-visible {
+  box-shadow: 0 0 0 2px var(--ac2-hi);
+}
+
+/* ---------- Desktop: beside the chart ---------- */
+/* The pane is the first child of the right column (the one that holds the
+   type card), so the stage keeps its size and the WebGL canvas is never
+   resized by opening or closing it. Sticky to the Spirit page's own scroller. */
+[data-shell="desktop"] [data-hd-pane] {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  width: 100%;
+  max-height: min(78vh, calc(100dvh - 48px));
+  border-radius: var(--rad);
+  border-left: 3px solid var(--hd-pane-edge, var(--bd));
+  animation: hdPaneSide .28s cubic-bezier(.2, .7, .2, 1) both;
+}
+@keyframes hdPaneSide { from { opacity: 0; transform: translateX(18px); } }
+
+/* ---------- Phone: the sheet ---------- */
+/* Fixed to the shell, docked on the dock's top edge. Its maximum height is
+   whatever is left once the top reserve, the dock and the nav are taken. */
+[data-vt] {
+  --hd-top-reserve: 46dvh;
+}
+@supports not (height: 1dvh) { [data-vt] { --hd-top-reserve: 46vh; } }
+[data-vt] [data-hd-pane] {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--nav) + var(--dock));
+  z-index: 61; /* under the dock (62), so Get Help wins any overlap */
+  max-height: calc(100dvh - var(--hd-top-reserve) - var(--nav) - var(--dock));
+  border-radius: 22px 22px 0 0;
+  border-bottom: 0;
+  border-top: 1px solid var(--hd-pane-edge, var(--bd));
+  background: linear-gradient(180deg, var(--sf2), transparent 70%), var(--bg);
+  box-shadow: 0 -18px 40px -24px rgba(0, 0, 0, .9);
+  animation: hdPaneRise .3s cubic-bezier(.2, .7, .2, 1) both;
+}
+@supports not (height: 1dvh) {
+  [data-vt] [data-hd-pane] { max-height: calc(100vh - var(--hd-top-reserve) - var(--nav) - var(--dock)); }
+}
+@keyframes hdPaneRise { from { opacity: 0; transform: translateY(28px); } }
+/* Low: only the head row shows, so the whole stage is back without losing
+   what was chosen. */
+[data-vt] [data-hd-pane][data-hd-pane-state="low"] [data-hd-pane-body] { display: none; }
+[data-vt] [data-hd-pane][data-hd-pane-state="low"] [data-hd-pane-head] { border-bottom: 0; }
+/* The grabber is the low toggle's visible mark. */
+[data-vt] [data-hd-pane] [data-hd-pane-grab] {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 38px;
+  height: 4px;
+  margin-left: -19px;
+  border-radius: 2px;
+  background: var(--bd);
+  pointer-events: none;
+}
+[data-shell="desktop"] [data-hd-pane] [data-hd-pane-grab],
+[data-shell="desktop"] [data-hd-pane] [data-hd-pane-low] { display: none; }
+
+/* While the sheet is open, the stage fits the top reserve instead of its
+   3:4 box, so the whole chart stays in view above the sheet. hd-scene.js
+   already resizes from its ResizeObserver; nothing in the scene changes.
+   The inline styles on the stage need !important, as the shell rules do. */
+[data-vt][data-hd-pane-open="1"] [data-hs-scene] {
+  aspect-ratio: auto !important;
+  height: calc(var(--hd-top-reserve) - var(--hd-stage-inset, 72px)) !important;
+  min-height: 240px !important;
+  max-height: none !important;
+}
+
+
+/* On the readable 2D view the SVG is the stage. Size it to the same
+   top reserve used by the WebGL host while the mobile sheet is expanded. */
+[data-vt][data-hd-pane-open="1"] [data-chart="bodygraph"] {
+  width:auto!important;
+  height:calc(var(--hd-top-reserve) - var(--hd-stage-inset,72px))!important;
+  aspect-ratio:300 / 520;
+  max-width:100%!important;
+}
+
+/* 4.2: narrow desktop shells still place the study pane beside the stage.
+   Wide desktops keep their original stage size and Haiku's sticky panel. */
+@media (min-width:820px) and (max-width:1180px) {
+  [data-shell="desktop"] [data-hd-study-columns][data-hd-pane-open="1"] {
+    display:grid!important;
+    grid-template-columns:minmax(0,1.15fr) minmax(240px,.85fr);
+    align-items:start;
+  }
+}
 </style>
 </head>
 <body>
@@ -28430,6 +28862,7 @@ input[type="date"]{color-scheme:dark}
 <!-- The People Library, and the cache that stands in front of the composite.
      Order matters here: pair-cache.js takes its digest from people-library.js,
      so the library loads first. -->
+
 
 
 
@@ -28773,7 +29206,7 @@ input[type="date"]{color-scheme:dark}
 </sc-if>
 <sc-if value="{{ shellVertical }}" hint-placeholder-val="{{ false }}">
 
-<div data-vt="1" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--el-fire:#e08d7d;--el-earth:#e0a458;--el-air:#7d9bff;--el-water:#4fb8c4;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--lift-lo:inset 0 1px 0 rgba(255,255,255,.045),0 1px 2px rgba(0,0,0,.28),0 3px 9px rgba(0,0,0,.2);--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
+<div data-vt="1" data-hd-pane-open="{{ hdPaneOpenAttr }}" style="--bg:#000;--sf:rgba(5,6,15,.86);--sf2:rgba(20,22,39,.84);--bd:rgba(var(--atmc),.34);--tx:#eef0f8;--dim:rgba(238,240,248,.6);--mut:rgba(238,240,248,.58);--ac:#2fff8f;--ac2:#8b5cf6;--ac2-hi:#b79bff;--ok:#59b37d;--warn:#e08d7d;--blue:#7d9bff;--mood:#7d9bff;--crisis:#e5534d;--crisis-lo:#c23a35;--cat-ast:#e0a458;--cat-cen:#4fb8c4;--cat-com:#e0793d;--ledger-tax:#e0a458;--ledger-div:#4fb8c4;--hd-des:#df9a5f;--el-fire:#e08d7d;--el-earth:#e0a458;--el-air:#7d9bff;--el-water:#4fb8c4;--fd:'Marcellus',serif;--fb:'Newsreader',Georgia,serif;--fu:'Karla',system-ui,sans-serif;--onac:#05060a;--ac-hi:#7dffb9;--sf-g:rgba(25,29,51,.84);--chl:#262a40;--chl2:#1d2136;--rail1:#0a0e1c;--rail2:#070a16;--atmc:47,79,214;--atmc2:242,214,158;--atmc3:47,79,214;--atmo:.85;--rd:13px;--rdlh:1.7;--rd2:12.5px;--rdlh2:1.7;--rdd:13.5px;--rddlh:1.75;--motion:.2s ease-out;--lift:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.42),0 4px 12px rgba(0,0,0,.3);--lift-hi:inset 0 1px 0 rgba(255,255,255,.1),0 2px 4px rgba(0,0,0,.42),0 9px 22px rgba(0,0,0,.38);--lift-in:inset 0 1px 3px rgba(0,0,0,.42);--lift-lo:inset 0 1px 0 rgba(255,255,255,.045),0 1px 2px rgba(0,0,0,.28),0 3px 9px rgba(0,0,0,.2);--rad:22px;--nav:calc(54px + env(safe-area-inset-bottom));--dock:50px;--hdr:calc(48px + env(safe-area-inset-top));position:relative;width:100%;height:100%;overflow:hidden;background:transparent;color:var(--tx);font-family:var(--fu);-webkit-tap-highlight-color:transparent;{{ themeVtVars }}">
 <sc-if value="{{ booting }}" hint-placeholder-val="{{ true }}">
   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:0 34px;text-align:center">
     <!-- The primary mark, drawn rather than loaded. Two wholes and the lens
@@ -29202,7 +29635,7 @@ input[type="date"]{color-scheme:dark}
           <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;padding:0 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
         </sc-for>
       </div>
-      <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
+      <div data-lift="card" onKeyDown="{{ hdStageKeys }}" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
         <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
@@ -29224,7 +29657,7 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" aria-pressed="{{ c.selected }}" style="all:unset;cursor:pointer;box-shadow:{{ c.focusRing }};box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
@@ -33255,6 +33688,53 @@ input[type="date"]{color-scheme:dark}
   </div>
 </sc-if>
 <div style="position:absolute;left:0;right:0;bottom:var(--nav);z-index:62;height:var(--dock);display:flex;align-items:center;justify-content:flex-end;padding:0 18px;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,.55) 60%,transparent)"><button onClick="{{ helpGo }}" aria-label="Get help now" style="all:unset;cursor:pointer;position:relative;box-sizing:border-box;pointer-events:auto;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:1px solid var(--crisis);border-radius:12px;background-color:var(--bg);background-image:linear-gradient(150deg,rgba(229,83,77,.16),rgba(229,83,77,.16));box-shadow:0 8px 26px rgba(229,83,77,.3)"><span aria-hidden="true" style="flex:none;display:block;width:26px;height:26px;background-color:var(--tx);-webkit-mask:{{ helpIcon }} center/contain no-repeat;mask:{{ helpIcon }} center/contain no-repeat"></span><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Get Help</span></button></div>
+<sc-if value="{{ hdPaneOn }}" hint-placeholder-val="{{ false }}">
+  <section data-hd-pane="1" data-hd-pane-state="{{ hdPaneState }}" role="region" aria-labelledby="incommon-hd-pane-title-v" aria-keyshortcuts="Escape" onKeyDown="{{ hdPaneKeys }}" style="{{ hdPaneEdgeVar }}">
+    <span data-hd-pane-grab="1" aria-hidden="true"></span>
+    <div data-hd-pane-head="1">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding-top:6px">
+        <div data-hd-pane-kicker="1">{{ hdPaneKicker }}</div>
+        <div data-hd-pane-title="1" id="incommon-hd-pane-title-v" tabindex="-1">{{ hdPaneTitle }}</div>
+      </div>
+      <button data-hd-pane-low="1" onClick="{{ hdPaneLowGo }}" aria-expanded="{{ hdPaneLowExpanded }}" aria-label="{{ hdPaneLowLabel }}">&#8597;</button>
+      <button data-hd-pane-close="1" onClick="{{ hdPaneCloseGo }}" aria-label="Close the reading">&#215;</button>
+    </div>
+    <div data-hd-pane-body="1">
+      <!-- CONTENT: identical in both shells -->
+      <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Detail views" style="display:flex;gap:8px">
+        <sc-for list="{{ hdPaneTabs }}" as="t" hint-placeholder-count="2">
+          <button data-lift onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.c }};font:700 11.5px var(--fu);letter-spacing:.04em">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ hdPaneLines }}" as="l" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+          </sc-if>
+          <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ hdPaneHasSoco }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
+          <div style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
+          <sc-for list="{{ hdPaneSoco }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
+              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
+              <sc-for list="{{ s.items }}" as="i" hint-placeholder-count="2">
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ i.text }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+        <button data-lift onClick="{{ hdPaneAtlas }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Learn more in the Atlas</button>
+      </div>
+      <!-- /CONTENT -->
+    </div>
+  </section>
+</sc-if>
+
 <sc-if value="{{ spiritPlacement }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
     <div data-vt-sheet="1" style="width:100%;max-height:92svh;display:flex;flex-direction:column;background:var(--sf);border-top:1px solid var(--bd);border-radius:26px 26px 0 0;animation:vtSheet .26s cubic-bezier(.22,1,.36,1);box-shadow:0 -18px 50px rgba(0,0,0,.6);transform:{{ vtSheetT }}">
@@ -36266,8 +36746,8 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
       </sc-if>
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
-        <div style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
+      <div data-hd-study-columns="1" data-hd-pane-open="{{ hdPaneOpenAttr }}" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
+        <div data-hd-study-chart="1" style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
@@ -36284,7 +36764,7 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
             </div>
-            <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
+            <div data-lift="card" onKeyDown="{{ hdStageKeys }}" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
               <p id="incommon-bg-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">The wiring: nine centres, the channels between them, and sixty four gates. Each defined centre is a part of you that runs consistently.</p>
               <sc-if value="{{ hvFlat }}" hint-placeholder-val="{{ true }}">
           <div style="position:relative;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
@@ -36306,7 +36786,7 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </svg>
               <sc-for list="{{ bgCenters }}" as="c" hint-placeholder-count="9">
-                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
+                <button onClick="{{ c.go }}" aria-label="{{ c.name }} center" aria-pressed="{{ c.selected }}" style="all:unset;cursor:pointer;box-shadow:{{ c.focusRing }};box-sizing:border-box;position:absolute;left:{{ c.lp }};top:{{ c.tp }};width:{{ c.wp }};height:{{ c.hp }};display:flex;flex-direction:column;align-items:center;justify-content:{{ c.jc }};gap:1px;padding:{{ c.pad }};border-radius:8px">
                   <span style="font:700 10.5px var(--fu);letter-spacing:.1em;color:{{ c.labelC }}">{{ c.short }}</span>
                   <span style="font:600 9px var(--fu);color:{{ c.subC }}">{{ c.count }}</span>
                 </button>
@@ -36366,7 +36846,52 @@ input[type="date"]{color-scheme:dark}
             </sc-if>
           </div>
         </div>
-        <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+        <div data-hd-study-detail="1" style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ hdPaneOn }}" hint-placeholder-val="{{ false }}">
+  <section data-hd-pane="1" data-hd-pane-state="{{ hdPaneState }}" role="region" aria-labelledby="incommon-hd-pane-title-d" aria-keyshortcuts="Escape" onKeyDown="{{ hdPaneKeys }}" style="{{ hdPaneEdgeVar }}">
+    <div data-hd-pane-head="1">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+        <div data-hd-pane-kicker="1">{{ hdPaneKicker }}</div>
+        <div data-hd-pane-title="1" id="incommon-hd-pane-title-d" tabindex="-1">{{ hdPaneTitle }}</div>
+      </div>
+      <button data-hd-pane-close="1" onClick="{{ hdPaneCloseGo }}" aria-label="Close the reading">&#215;</button>
+    </div>
+    <div data-hd-pane-body="1">
+      
+      <div onKeyDown="{{ radioKeys }}" role="tablist" aria-label="Detail views" style="display:flex;gap:8px">
+        <sc-for list="{{ hdPaneTabs }}" as="t" hint-placeholder-count="2">
+          <button data-lift onClick="{{ t.go }}" role="tab" aria-selected="{{ t.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.c }};font:700 11.5px var(--fu);letter-spacing:.04em">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ hdPaneLines }}" as="l" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+          </sc-if>
+          <div style="font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ hdPaneHasSoco }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:11px">
+          <div style="font:600 9px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Working with it</div>
+          <sc-for list="{{ hdPaneSoco }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-left:3px solid {{ s.edge }};border-radius:0 12px 12px 0;padding:11px 13px">
+              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:{{ s.edge }}">{{ s.label }}</div>
+              <sc-for list="{{ s.items }}" as="i" hint-placeholder-count="2">
+                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ i.text }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+        <button data-lift onClick="{{ hdPaneAtlas }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 15px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Learn more in the Atlas</button>
+      </div>
+      
+    </div>
+  </section>
+</sc-if>
+
           <div role="heading" aria-level="2" style="display:flex;align-items:center;gap:11px;padding:4px 2px 0"><span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(var(--atmc),.55),rgba(var(--atmc),.12));border:1px solid rgba(var(--atmc),.6);box-shadow:0 0 18px rgba(var(--atmc),.35)"><span style="width:18px;height:18px;background-color:var(--ac2-hi);-webkit-mask:{{ bandIconB }} center/contain no-repeat;mask:{{ bandIconB }} center/contain no-repeat"></span></span><span style="font:400 23px/1.1 var(--fd);letter-spacing:.01em;color:var(--tx)">Bedrock</span><span aria-hidden="true" style="flex:1;min-width:24px;height:1px;background:linear-gradient(90deg,rgba(var(--atmc2),.55),transparent)"></span></div>
           <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:20px">
             <button onClick="{{ hdTypeGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;gap:9px;width:100%;min-height:44px;text-align:left">
@@ -41773,7 +42298,7 @@ class Component extends DCLogic {
     mfOpen: false, mfStep: 'load', mfOn: null, mfCode: '', mfBusy: false, mfMsg: '', mfFactor: null, mfQr: '', mfSecret: '',
     pmenuOpen: false, callOpen: false, cyOpen: false, cyView: '2d', cwSceneFail: false, cwSceneLive: false, gazTick: 0,
     chartView: '2d', csFail: false, csFocus: null, csToday: false,
-    hdView: '2d', hsFail: false, hsFocus: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
+    hdView: '2d', hsFail: false, hsFocus: null, hdPane: null, hsSky: null, hdList: 'gates', hdRead: 'cards', hdCard: 0,
     csLive: false, hsLive: false, csFree: false, hsFree: false, sceneTick: 0,
     csFlying: false, obsTab: 'bodies', obsPanels: true, obsKeys: false, obsDrawer: false, obsHouse: null,
     chgOpen: {}, chgMode: {}, fcFlip: {} };
@@ -42475,7 +43000,7 @@ class Component extends DCLogic {
   openPath(path) {
     const seg = path.split('/').filter(Boolean);
     const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
-      selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null };
+      selId: null, focusToday: false, hdSel: null, hdPane: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null };
     // The arriving path may normalise (a bare /library resolves to practices).
     // That correction is a replace, never a second history entry, or Back has to
     // be pressed twice to leave a screen it only appeared to visit once.
@@ -48005,7 +48530,35 @@ class Component extends DCLogic {
     const prof = A ? A.profileFor(c, u) : { key: c + '/' + u, c: c, u: u, name: '', line: '', how: '' };
     return { c: prof.c || c, u: prof.u || u, key: prof.key, name: prof.name, line: prof.line, how: prof.how };
   }
-  hdOpen(sel) { return () => this.setState({ hdSel: sel }); }
+  hdPaneKeyOf(sel) {
+    if (!sel) return null;
+    if (sel.kind === 'center') return 'c:' + sel.name;
+    if (sel.kind === 'channel') return 'ch:' + sel.a + '-' + sel.b;
+    if (sel.kind === 'gate') return 'g:' + sel.gate;
+    if (['type', 'strategy', 'authority', 'profile'].indexOf(sel.kind) !== -1) return 'v:' + sel.kind;
+    return null;
+  }
+  hdOpen(sel) { return () => {
+    const key = this.hdPaneKeyOf(sel);
+    if (!key) { this.setState({ hdSel: sel }); return; }
+    /* Explicit reading cards are one action. Wiring hit targets use the
+       separate, deliberate two-press path below. */
+    if (key.indexOf('v:') !== 0) {
+      this.setState({ hsFocus: key });
+      if (this._hsS) this._hsS.setFocus(key);
+    }
+    this.hdPaneOpen(key, 'button');
+  }; }
+  hdWiringPress(sel) { return () => {
+    const key = this.hdPaneKeyOf(sel);
+    if (!key) return;
+    if (this.state.hsFocus === key) { this.hdPaneOpen(key, 'tap'); return; }
+    if (this._hsS) this._hsS.setFocus(key);
+    this.setState({ hsFocus: key });
+    this.hdPaneSelect(key, 'tap');
+    const h = this.hdHudOf(key);
+    if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite');
+  }; }
   /* AN ADDRESS IS NOT A DESTINATION ON THE PHONE.
 
      This set tab, libView and atlasSec and stopped, which is the whole of the
@@ -48578,8 +49131,7 @@ class Component extends DCLogic {
       go: () => this.setState({ hdPopTab: id, hdPopTabFor: key }) });
     return { hdPopTab: tab, hdPopYou: tab === 'you', hdPopTabs: [mk('general', 'General'), mk('you', 'For You')] };
   }
-  hdPopVals() {
-    const sel = this.state.hdSel;
+  hdPopVals(sel = this.state.hdSel) {
     if (!sel || !this.state.ready) return { hdPopOpen: false };
     const A = this.A(), hd = this.hdChart();
     if (!A) return { hdPopOpen: false };
@@ -55312,9 +55864,10 @@ class Component extends DCLogic {
       onExploreEnd: () => { if (this.state.hsFree) this.setState({ hsFree: false }); },
       onFocus: (key, how) => {
         this.setState({ hsFocus: key });
+        this.hdPaneSelect(key, how);
         if (how === 'key') { const h = this.hdHudOf(key); if (h) this.speak(h.name + '. ' + h.sub + '.', 'polite'); }
       },
-      onOpen: key => { const sel = this.hdSelOf(key); if (sel) this.setState({ hdSel: sel }); }
+      onOpen: (key, how) => this.hdPaneOpen(key, how)
     });
   }
   hdSceneSync(retry) {
@@ -55337,6 +55890,7 @@ class Component extends DCLogic {
     S.setSky(this.hdSkyOn() ? this.hdSkyList() : null);
     S.setExplore(!!st.hsFree);
     S.setFocus(st.hsFocus || null, false);
+    S.setReadingOpen(!!st.hdPane, st.hdPane && st.hdPane.key);
     S.attach(host);
     const tk = (st.themeKey || '') + (st.themeHC ? '/hc' : '');
     if (this._hsTheme !== tk) { if (this._hsTheme != null) S.setTheme(); this._hsTheme = tk; }
@@ -55345,6 +55899,7 @@ class Component extends DCLogic {
   hdSelOf(key) {
     if (!key) return { kind: 'type' };
     const p = key.split(':');
+    if (p[0] === 'v') return { kind: p[1] };
     if (p[0] === 'c') return { kind: 'center', name: p[1] };
     if (p[0] === 'ch') { const ab = p[1].split('-'); return { kind: 'channel', a: +ab[0], b: +ab[1] }; }
     if (p[0] === 'g') { const n = +p[1], a = this.hdChart().acts.find(x => x.gate === n); return { kind: 'gate', gate: n, line: a ? a.line : 1 }; }
@@ -56771,6 +57326,7 @@ class Component extends DCLogic {
     const top = open.length ? open[open.length - 1] : null;
     if (top) this.trapAttach(top);
     else if (this._trapEl) this.trapRelease();
+    this.hdPaneSync();
   }
   /* One patch closes whichever sheet is open. Only one is ever open at a
      time, and Escape that closed the wrong one would be worse than Escape
@@ -57241,6 +57797,7 @@ class Component extends DCLogic {
           ...this.todayVals(),
           ...this.gnowVals(),
           ...this.hdPopVals(),
+          ...this.hdPaneVals(this.hdPopVals),
           ...this.hdTeachVals(),
           ...this.atlasVals(),
           ...this.apVals(),
@@ -57827,24 +58384,26 @@ class Component extends DCLogic {
               const q = this.BG_POS[name], defined = hd.defined.has(name);
               const col = A && A.CENTERS[name] ? A.CENTERS[name].color : 'var(--ac2-hi)';
               const n = shown.filter(g => this.hdCenterOf(g.gate) === name).length;
-              const P = this.hdShape(name);
+              const P = this.hdShape(name), selected = st.hsFocus === 'c:' + name;
               return { pts: P.map(pt => f1(pt[0]) + ',' + f1(pt[1])).join(' '),
                 fill: defined ? col : 'rgba(var(--atmc),.08)', fo: defined ? '.9' : '1',
-                stroke: defined ? col : 'rgba(var(--atmc),.6)', halo: defined ? col : 'transparent',
+                stroke: selected ? 'var(--ac2-hi)' : defined ? col : 'rgba(var(--atmc),.6)', halo: selected ? 'var(--ac2-hi)' : defined ? col : 'transparent',
                 lp: (q[0] / 300 * 100).toFixed(2) + '%', tp: (q[1] / 520 * 100).toFixed(2) + '%',
                 wp: (q[2] / 300 * 100).toFixed(2) + '%', hp: (q[3] / 520 * 100).toFixed(2) + '%',
                 jc: name === 'Head' || name === 'Heart' ? 'flex-end' : name === 'Ajna' ? 'flex-start' : 'center',
                 pad: name === 'Head' || name === 'Heart' ? '0 0 4px' : name === 'Ajna' ? '3px 0 0' : '0',
                 name: name, short: this.BG_SHORT[name],
+                selected: selected, focusRing: selected ? 'inset 0 0 0 2px var(--ac2-hi),0 0 18px rgba(var(--atmc2),.35)' : 'none',
                 labelC: defined ? 'rgba(5,6,10,.88)' : 'var(--mut)',
                 subC: defined ? 'rgba(5,6,10,.7)' : 'var(--mut)',
                 count: n ? n + (n === 1 ? ' gate' : ' gates') : '',
-                go: this.hdOpen({ kind: 'center', name: name }) };
+                go: this.hdWiringPress({ kind: 'center', name: name }) };
             });
             const gateDots = Object.keys(spots).map(Number).map(n => { const sp = spots[n], L = layer[n];
-              return { x: f1(sp.x), y: f1(sp.y), r: L ? '3.3' : '1.7',
+              const selected = st.hsFocus === 'g:' + n;
+              return { x: f1(sp.x), y: f1(sp.y), r: selected ? '4.1' : L ? '3.3' : '1.7',
                 fill: L === 'design' ? ink.design : L ? ink.personality : 'rgba(var(--atmc),.75)',
-                ring: L === 'both' ? ink.design : 'none', rw: L === 'both' ? '1.8' : '0' }; });
+                ring: selected ? 'var(--ac2-hi)' : L === 'both' ? ink.design : 'none', rw: selected ? '2.4' : L === 'both' ? '1.8' : '0' }; });
             const byCenter = {};
             shown.forEach(g => { (byCenter[this.hdCenterOf(g.gate)] = byCenter[this.hdCenterOf(g.gate)] || []).push(g); });
             const inChannel = new Set();
@@ -57857,10 +58416,10 @@ class Component extends DCLogic {
                 tagBg: defined ? 'rgba(89,179,125,.16)' : 'rgba(238,240,248,.08)',
                 gates: byCenter[c].sort((a, b) => a.gate - b.gate).map(g => ({
                   n: g.gate, line: '.' + g.line,
-                  bd: inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
+                  bd: st.hsFocus === 'g:' + g.gate ? 'var(--ac2-hi)' : inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
                   bg: inChannel.has(g.gate) ? 'rgba(var(--atmc),.28)' : 'var(--sf2)',
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
-                  go: this.hdOpen({ kind: 'gate', gate: g.gate, line: g.line }) })) };
+                  go: this.hdWiringPress({ kind: 'gate', gate: g.gate, line: g.line }) })) };
             });
             return { bgModes: modes, bgChannels: lines, bgGlows: glows, bgGates: gateDots, bgCenters: centers, hdCenterGates: centerGates,
               hdGateCount: shown.length + (mode === 'both' ? ' in total' : ' in the ' + mode + ' chart'),
@@ -57944,9 +58503,9 @@ class Component extends DCLogic {
               hsHudGlyph: hud.glyph, hsHudKind: hud.kind, hsHudName: hud.name, hsHudSub: hud.sub, hsHudMean: hud.mean, hsHudC: hud.c,
               hsHudIdx: at < 0 ? '' : (at + 1) + ' of ' + steps.length, hsHudGlyphPx: hud.glyph.length > 2 ? '12px' : hud.glyph.length > 1 ? '15px' : '19px',
               hsPrev: move(-1), hsNext: move(1),
-              hsOpen: () => { const sel = this.hdSelOf(fk); if (sel) this.setState({ hdSel: sel }); },
+              hsOpen: () => this.hdPaneOpen(fk || 'v:type', 'button'),
               hsOpenLabel: fk ? 'Open the reading' : 'Open your type',
-              hsClear: () => { if (this._hsS) this._hsS.setFocus(null); this.setState({ hsFocus: null }); }, hsClearOn: !!fk,
+              hsClear: () => { if (this._hsS) this._hsS.setFocus(null); this.setState({ hsFocus: null }); this.hdPaneSelect(null); }, hsClearOn: !!fk,
               hsZoomIn: z(-1), hsZoomOut: z(1), hsZoomReset: z(0),
               hdTiles: [
                 { label: 'Strategy', head: sa[0], rest: sa[1], go: this.hdOpen({ kind: 'strategy' }) },
@@ -57965,16 +58524,16 @@ class Component extends DCLogic {
             const A = this.A(), info = A ? A.channel(ch[0], ch[1]) : null;
             return { pair: ch[0] + '-' + ch[1], name: info ? info.name : 'Channel ' + ch[0] + '-' + ch[1],
               route: (info ? info.theme + ' \u00b7 ' : '') + ch[2] + ' to ' + ch[3],
-              go: this.hdOpen({ kind: 'channel', a: ch[0], b: ch[1] }) };
+              go: this.hdWiringPress({ kind: 'channel', a: ch[0], b: ch[1] }) };
           }),
           hdChanCount: hd.activeChannels.length + (hd.activeChannels.length === 1 ? ' channel' : ' channels'),
           hdNoChannels: hd.activeChannels.length === 0,
           hdDefined: this.HD_CENTERS.filter(c => hd.defined.has(c[0])).map(c => ({ name: c[0], role: c[2], desc: c[1],
             gates: 'Channels ' + hd.activeChannels.filter(ch => ch[2] === c[0] || ch[3] === c[0]).map(ch => ch[0] + '-' + ch[1]).join(', '),
-            go: this.hdOpen({ kind: 'center', name: c[0] }) })),
+            go: this.hdWiringPress({ kind: 'center', name: c[0] }) })),
           hdUndefined: this.HD_CENTERS.filter(c => !hd.defined.has(c[0])).map(c => ({ name: c[0], role: c[2],
             desc: 'Open here. You take ' + c[1] + ' in from the people around you, and it is not consistently yours.',
-            go: this.hdOpen({ kind: 'center', name: c[0] }) })),
+            go: this.hdWiringPress({ kind: 'center', name: c[0] }) })),
           /* Learn from Atlas lands on the section that answers the HD tab the
              reader is on, and on the reader's own entry inside it where the tab
              has one. hdTab is the teachings strip. */
@@ -58818,7 +59377,7 @@ class Component extends DCLogic {
          degree, so a jump that did not clear them would open the tarot deck at
          whatever card the last search happened to land on. */
       const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
-        selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
+        selId: null, focusToday: false, hdSel: null, hdPane: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
         ttSec: null, ttCard: null, icSec: null, icHex: null, icQuery: '',
         dlSec: null, dlOpen: null, dlQuery: '', lexSign: null, lexDeg: null, lexQuery: '', tlOpen: null,
         bnSel: null, bnQuery: '', bnCat: 'all', bnRoot: null, apOpen: null, apQuery: '',
@@ -59763,6 +60322,8 @@ class Component extends DCLogic {
   }
 
 }
+/* Host-only reading workspace methods; HDScene has no panel DOM. */
+Object.assign(Component.prototype, window.HDPane.hostMethods);
 </script>
 </body>
 </html>
