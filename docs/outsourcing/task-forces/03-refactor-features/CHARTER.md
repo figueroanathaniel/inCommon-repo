@@ -9,7 +9,7 @@ everything to do with Delegation 3.
 | | |
 |---|---|
 | Branch | `taskforce/03-refactor-features` |
-| Standing pull request | #112 (earlier ones under "History" below) |
+| Standing pull request | #143 (earlier ones under "History" below) |
 | Folder | `docs/outsourcing/task-forces/03-refactor-features/` |
 
 Every commit for Delegation 3 lands on this branch. Work that was already
@@ -85,3 +85,24 @@ were approved; from 28 October 2026 that work is committed here.
   `docs/outsourcing/`. Seats as in the roster, subject to substitution on
   the owner's approval.
 - 28 October 2026: branch created from main at 9356d04, after #109 made this folder, and #112 opened as the standing pull request.
+- 28 October 2026: #112 merged into main by the owner. The branch restarted
+  from main under the same name.
+- 28 October 2026: efficiency edits approved by the owner. E3: 3.2 Task 2
+  owns the three known faults 1.3 lists. E4: 3.2 Task 3 takes its fields
+  from 1.3's Pipeline notes and starts once they are published. E5: 1.3
+  records synGatesOf as unused, for 3.1 to remove. E10: every task is
+  commits on this branch. E11: the graphics update is whatever workstream 4
+  declares on its pull request. E14: the proof dump is workstream 6's
+  tools/dump-render-vals.js.
+- 28 October 2026: #118 opened as the standing pull request.
+- 28 October 2026: 3.2 Task 1, the sleep teaching, worked on this branch
+  from 5977935. Its record is `3.2-task1-sleep-record.md`; it stays marked
+  "needs Human Design review".
+- 28 October 2026: #118 merged into main by the owner.
+- 29 October 2026: the branch restarted from main at 1c02c7c. By the owner's
+  instruction, the app side of the 1.3 register was fixed on it: D-01, D-05,
+  D-08 and the app half of D-03, in d6e8000, with the bundle rebuilt in
+  3ee7d28. D-02 waits on the Human Design reviewer, D-06 on the owner, and
+  D-07 on 3.2 Task 3. #127 opened as the standing pull request.
+- 31 October 2026: the branch restarted from main at 7ccc5e0, ahead of the platform switch. No Features work is open on it.
+- 31 October 2026: #142 merged into main by the owner. The branch restarted from main at 269bb49.

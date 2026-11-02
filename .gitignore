@@ -20,3 +20,6 @@ native/www/
 
 # tools/patch-html.js writes a backup of the app beside it on every run
 *.bak
+
+# Obsidian keeps its own settings beside the Human Design vault; the notes are the source of truth
+data-contracts/hd-vault/.obsidian/

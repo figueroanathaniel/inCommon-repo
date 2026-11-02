@@ -4044,7 +4044,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
 </script>
 <script>
-/* profile-manager.js: inCommon multi-profile data layer. V1.3.0
+/* profile-manager.js: inCommon multi-profile data layer. V1.7.1
    Pure JavaScript, no UI, no framework. Local first: everything lives in
    localStorage, and incommon-cloud.js mirrors it to the reader's account and
    brings other devices' changes back through importSynced().
@@ -4062,6 +4062,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      incommon.p.<pid>.oki         conversation history
      incommon.p.<pid>.oracle      Oracle readings kept on this device, per period
      incommon.p.<pid>.oracleDeep  set once an in-depth reading has been asked for (lets the page prepare the next)
+     incommon.p.<pid>.chartVersions.v1  { v, versions[] } earlier and current births, once one is corrected (1.2)
+     incommon.p.<pid>.chartNotes.v1     { v, notes[] } notes attached to an address in the chart (1.2)
    Legacy (pre-multi-profile) keys are migrated once by migrateLegacyProfile().  */
 (function () {
   'use strict';
@@ -4094,6 +4096,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
      claims it, along with the ACCOUNT_KEYS below. Every account after that
      starts on a blank page, and the guest store starts blank once claimed. */
   var ACCOUNT_KEYS = ['incommon.firstrun', 'incommon.sample', 'incommon.friends', 'incommon.adverse.log', 'incommon.mem.archived'];
+  /* people-library.js's store, device wide, { <profile id>: [records] }. */
+  var PEOPLE_KEY = 'incommon.people.v1';
   var SCOPE = null;
   function owesCode(st) {
     try {
@@ -4185,9 +4189,107 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   }
   function nowISO() { return new Date().toISOString(); }
+  /* The ledger keeps its last fifty events, and never drops the latest event
+     of a consent to do it: the sync module sends the ledger from this list,
+     and a mark (forOther, birthData, birthCleared) pushed out of it would
+     never reach the account again (the 2.2 review's note, 30 October 2026). */
+  function keepEvents(list) {
+    var tail = list.slice(-50), last = {};
+    list.forEach(function (e, i) { if (e && e.id) last[e.id] = i; });
+    var start = list.length - tail.length;
+    var extra = Object.keys(last).map(function (k) { return last[k]; })
+      .filter(function (i) { return i < start; }).sort(function (a, b) { return a - b; })
+      .map(function (i) { return list[i]; });
+    return extra.concat(tail);
+  }
   function read(k, fb) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   function drop(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  /* ---------- chart versions and chart notes (1.2) --------------------------
+     data-contracts/HD-STUDY-MODEL.md, sections 3 and 4, approved by the owner
+     on 29 October 2026. A corrected birth is a new version, never an
+     overwrite: the profile keeps the current birth where it always has, and
+     the history sits beside it under its own key. A version stores the birth,
+     never the chart, because a stored chart outlives the arithmetic that made
+     it. Notes are attached to an address (the vault's Chart address) and the
+     version they were written against, and they are never moved, rewritten or
+     deleted because the chart changed. */
+  var CHART_NOTE_MAX = 4000;
+  function versionsKey(id) { return 'incommon.p.' + id + '.chartVersions.v1'; }
+  function notesKey(id) { return 'incommon.p.' + id + '.chartNotes.v1'; }
+  function birthFields(p) {
+    return { birth_date: p.birth_date || '', birth_time: p.birth_time || '',
+      birth_time_unknown: p.birth_time_unknown === true, birth_location: p.birth_location || '',
+      birth_lat: p.birth_lat == null ? null : p.birth_lat, birth_lon: p.birth_lon == null ? null : p.birth_lon,
+      timezone: p.timezone || '', tz_offset: p.tz_offset == null ? null : p.tz_offset };
+  }
+  /* The birth record of section 2.2, for a profile. A typed profile has no
+     precision, no source rating and no recorded offset, so those are null and
+     the zone check is not_given. offset_used is what birth-time.js draws the
+     chart with, which is the offset the zone had on that date. */
+  function birthRecord(b) {
+    var BT = window.BirthTime, used = b.tz_offset, state = b.birth_time ? 'known' : b.birth_time_unknown ? 'unknown' : 'unanswered';
+    if (BT && BT.instant) {
+      try {
+        var r = BT.instant({ birthDate: b.birth_date, birthTime: b.birth_time, timeUnknown: b.birth_time_unknown,
+          timezone: b.timezone, tzOffset: b.tz_offset });
+        if (r) { if (typeof r.offset === 'number' && !isNaN(r.offset)) used = r.offset; state = r.timeState || state; }
+      } catch (e) {}
+    }
+    return { date: b.birth_date, time: state === 'known' ? b.birth_time : null, time_state: state,
+      time_precision: null, time_window_min: null, time_source: null,
+      place: b.birth_location, lat: b.birth_lat, lon: b.birth_lon, zone: b.timezone,
+      offset_recorded: null, offset_used: used == null ? null : used, zone_check: 'not_given' };
+  }
+  /* The key two versions are compared by: the birth itself, written out.
+     Not PeopleLibrary.chartHash(), which carries STATE_VERSION, so every
+     arithmetic change would make the same birth read as a new version
+     (privacy review F14). Not a hash either: a hash of a birth is the birth
+     to anybody who can enumerate the days and places (F10), so a hash would
+     only look like it hid something. It never leaves the device in an
+     export (share-rules.js), and on the server it sits beside the birth it
+     describes, which the same reader already holds. */
+  function birthKey(b) {
+    var c = function (v) { return v == null || v === '' ? '' : String(v); };
+    var ll = function (v) { return v == null || v === '' || isNaN(+v) ? '' : (+v).toFixed(4); };
+    return ['b1', c(b.birth_date), c(b.birth_time), b.birth_time_unknown === true ? 'u' : '',
+      ll(b.birth_lat), ll(b.birth_lon), c(b.timezone), c(b.tz_offset)].join('|');
+  }
+  function birthReason(a, b) {
+    if (a.birth_date !== b.birth_date) return 'date_corrected';
+    if (a.birth_time !== b.birth_time || a.birth_time_unknown !== b.birth_time_unknown) return 'time_corrected';
+    if (a.birth_lat !== b.birth_lat || a.birth_lon !== b.birth_lon || a.birth_location !== b.birth_location) return 'place_corrected';
+    return 'zone_repaired';
+  }
+  /* An address, as the vault's Chart address note proposes and section 2.3
+     adopts. A channel is checked against the topology's thirty six when that
+     module is loaded, and against the shape alone when it is not. */
+  var CHART_CENTRES = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Sacral', 'Solar Plexus', 'Root'];
+  var CHART_BODIES = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars',
+    'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  var CHART_FACETS = ['type', 'strategy', 'authority', 'profile', 'definition', 'cross'];
+  function gateOk(n) { return /^\d{1,2}$/.test(n) && +n >= 1 && +n <= 64; }
+  function chartAddressOk(a) {
+    var m, s = String(a || '');
+    if ((m = /^centre:(.+)$/.exec(s))) return CHART_CENTRES.indexOf(m[1]) !== -1;
+    if ((m = /^gate:(\d+)$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^line:(\d+)\.([1-6])$/.exec(s))) return gateOk(m[1]);
+    if ((m = /^channel:(\d+)-(\d+)$/.exec(s))) {
+      if (!gateOk(m[1]) || !gateOk(m[2]) || +m[1] >= +m[2]) return false;
+      var T = window.HDTopology;
+      return T && Array.isArray(T.PAIRS) ? T.PAIRS.indexOf(+m[1] + '-' + +m[2]) !== -1 : true;
+    }
+    if ((m = /^activation:(personality|design):(.+)$/.exec(s))) return CHART_BODIES.indexOf(m[2]) !== -1;
+    if ((m = /^facet:(.+)$/.exec(s))) return CHART_FACETS.indexOf(m[1]) !== -1;
+    return false;
+  }
+  /* Key order is not meaning, so the comparison is over sorted keys. */
+  function stable(v) {
+    if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + stable(v[k]); }).join(',') + '}';
+    return JSON.stringify(v);
+  }
 
   /* Non-cryptographic PIN digest. A 4-digit PIN is a courtesy lock on a local
      device, not a security boundary: this is stated plainly in the UI. */
@@ -4208,7 +4310,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   var PM = {
-    VERSION: '1.5.0',
+    VERSION: '1.8.2',
     MAX_PROFILES: MAX_PROFILES,
     COLORS: COLORS,
     CONSENT_TYPES: CONSENT_TYPES,
@@ -4256,6 +4358,17 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       return out;
     },
 
+    /* The people this account's profiles saved, removed from people-library's
+       device wide store (G6). accountStorageKeys() matches key names, and that
+       store is one key holding every profile's people, so erasing the keys
+       leaves them: "erase this device" calls this first. Another account's
+       people, and the guest's, stay. */
+    forgetAccountPeople: function () {
+      var self = this, n = 0;
+      this._store().profiles.forEach(function (p) { self._forgetPeople(p.id); n++; });
+      return n;
+    },
+
     /* The account is gone and the reader kept what was on the device: it
        becomes the guest's, which is what the delete dialog promises ("you can
        keep using inCommon without an account"). Left under the account's key
@@ -4299,8 +4412,40 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         return { id: p.id, name: p.name, avatarColor: p.avatar_color, initials: initials(p.name),
           avatarKind: p.avatar_kind || 'initials', avatarImage: p.avatar_image || '', avatarSign: p.avatar_sign || '',
           isActive: p.id === s.activeId, isDefault: p.id === s.defaultId, birthDate: p.birth_date, birthTime: p.birth_time,
-          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at };
+          birthLocation: p.birth_location, hasPin: !!p.pin_hash, createdAt: p.created_at, forOther: p.for_other === true };
       });
+    },
+    /* The reader's own profiles and the ones made for somebody else, apart
+       (privacy review F9, the owner's (c) of 30 October 2026). A screen that
+       lists profiles shows the two as two groups, never one list. */
+    ownProfiles: function () { return this.listProfiles().filter(function (p) { return !p.forOther; }); },
+    otherProfiles: function () { return this.listProfiles().filter(function (p) { return p.forOther; }); },
+    /* A profile made for somebody else stays on this device: the sync module
+       sends nothing of it and asks the server to delete any copy it already
+       holds, which the 'profile:for-other' event queues. It is the owner's (b)
+       of 30 October 2026, the rule section 5 of HD-STUDY-MODEL.md keeps for
+       every other person's chart. The Oracle and the card are the app's to
+       refuse for it, through isForOther(). */
+    isForOther: function (id) {
+      var s = this._store(), pid = id || s.activeId, hit = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.for_other === true) hit = true; });
+      return hit;
+    },
+    setProfileForOther: function (id, on) {
+      var s = this._store(), target = null;
+      s.profiles.forEach(function (p) { if (p.id === id) target = p; });
+      if (!target) throw new Error('No such profile');
+      if (!!on === (target.for_other === true)) return this.getProfile(id);
+      /* The key is absent rather than false on the reader's own profiles, so
+         a profile that was never marked hashes exactly as it did before. */
+      if (on) target.for_other = true; else delete target.for_other;
+      this._save(s);
+      /* The mark travels in the consent ledger, which every device merges
+         whatever the birth switch says, so the account's other devices learn
+         it and stop sending the profile (the follow-up review's finding 2). */
+      this.setConsent('forOther', !!on, id);
+      this._emit('profile:for-other', { id: id, forOther: !!on });
+      return this.getProfile(id);
     },
     count: function () { return this._store().profiles.length; },
     atCapacity: function () { return this.count() >= MAX_PROFILES; },
@@ -4342,12 +4487,17 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         birthDate: p.birth_date || '', birthTime: p.birth_time || '', birthLocation: p.birth_location || '',
         birthLat: p.birth_lat == null ? null : p.birth_lat, birthLon: p.birth_lon == null ? null : p.birth_lon,
         tzOffset: p.tz_offset == null ? null : p.tz_offset, timezone: p.timezone || '',
-        locationResolved: !!p.location_resolved,
+        locationResolved: !!p.location_resolved, forOther: p.for_other === true,
         /* The stamp is what invalidates every cached chart, so the answer to
            the time question belongs in it: saying "I do not know" changes what
            the app is allowed to draw, and a cache that survived that change
-           would keep drawing the old answer. */
-        birthStamp: [p.birth_date, p.birth_time, p.birth_lat, p.birth_lon, p.birth_time_unknown ? 'u' : ''].join('|')
+           would keep drawing the old answer. The zone and the stored offset
+           belong in it for the same reason: they move the birth instant, and
+           reresolveLocations() changes a zone while keeping the coordinates,
+           so a stamp without them let a kept Oracle reading and the Cycle
+           Audit scan outlive the correction (1.3, D-09). */
+        birthStamp: [p.birth_date, p.birth_time, p.birth_lat, p.birth_lon, p.birth_time_unknown ? 'u' : '',
+          p.timezone || '', p.tz_offset == null ? '' : p.tz_offset].join('|')
       };
       out.isDefault = p.id === (s || this._store()).defaultId;
       out.hasBirthTime = !!(p.birth_time && /^\d{2}:\d{2}$/.test(p.birth_time));
@@ -4418,15 +4568,18 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         location_resolved: geo.resolved,
         birth_time_unknown: opts.timeUnknown === true
       };
+      if (opts.forOther === true) p.for_other = true;
       s.profiles.push(p);
       if (!s.activeId || s.profiles.length === 1) s.activeId = p.id;
       if (!s.defaultId) s.defaultId = p.id;
       this._save(s);
-      /* Memory consents start off. birthData is not a toggle: entering birth data
-         IS the consent for the calculations it feeds, disclosed at creation and
-         revocable only by deleting the profile. */
+      /* Memory consents start off. birthData starts on with a birth date: it
+         is "Save my profile to my account", and since 30 October 2026 the sync
+         module reads it (privacy review F2, the owner: "it serves no purpose
+         if it defaults with no option"). Off keeps the birth on this device. */
       this.initConsents(p.id);
       if (p.birth_date) this.setConsent('birthData', true, p.id);
+      if (p.for_other) this.setConsent('forOther', true, p.id);
       this.invalidateCalculations(p.id);
       this._emit('profile:created', { id: p.id });
       return this.getProfile(p.id);
@@ -4437,7 +4590,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       var s = this._store(), target = null;
       s.profiles.forEach(function (p) { if (p.id === id) target = p; });
       if (!target) throw new Error('No such profile');
-      var birthChanged = false;
+      var birthChanged = false, before = birthFields(target);
       if (patch.name != null && String(patch.name).trim()) target.name = String(patch.name).trim();
       if (patch.avatarColor) target.avatar_color = patch.avatarColor;
       /* Avatar face: 'initials' | 'photo' | 'sign'. The photo is a downscaled data
@@ -4469,6 +4622,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         target.location_resolved = geo.resolved;
       }
       this._save(s);
+      if (birthChanged) this._birthMoved(id, before, birthFields(target));
       /* Birth data drives every calculated system: drop all cached charts. */
       if (birthChanged) { this.invalidateCalculations(id); this._emit('profile:recalculated', { id: id }); }
       return this.getProfile(id);
@@ -4499,8 +4653,31 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       if (s.activeId === id) { s.activeId = s.profiles[0].id; this.clearOkiContext(); }
       this._save(s);
       this._dropProfileKeys(id);
+      this._forgetPeople(id);
       this._emit('profile:deleted', { id: id });
       return this.getActiveProfile();
+    },
+
+    /* The people this profile saved go with it (G6, the owner, 30 October
+       2026: "if a profile is deleted, delete it everywhere"). The saved
+       people store is people-library.js's and device wide, keyed inside by
+       the profile that saved them, so neither this module's keys nor the
+       account's cascade reach it. Its own forgetOwner() is asked when the
+       module is loaded; without it the one entry is removed directly, so the
+       deletion does not depend on a module having loaded. Called for a
+       deletion made here and for one another device made, never for the
+       sample giving way to the account's own profile. */
+    _forgetPeople: function (id) {
+      var PL = null;
+      try { PL = typeof window !== 'undefined' && window.PeopleLibrary; } catch (e) { PL = null; }
+      if (PL && typeof PL.forgetOwner === 'function') { PL.forgetOwner(id); return; }
+      try {
+        var all = JSON.parse(localStorage.getItem(PEOPLE_KEY) || 'null');
+        if (all && typeof all === 'object' && Object.prototype.hasOwnProperty.call(all, String(id))) {
+          delete all[String(id)];
+          localStorage.setItem(PEOPLE_KEY, JSON.stringify(all));
+        }
+      } catch (e) {}
     },
 
     /* Cascade: every scoped key for this profile is removed. Shared by a
@@ -4510,9 +4687,148 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
         'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',
-        'incommon.p.' + id + '.study'
+        'incommon.p.' + id + '.study', versionsKey(id), notesKey(id)
       ].forEach(function (base) { drop(base.indexOf(id) === -1 ? base + '.' + id : base); });
       delete (this._calcCache || {})[id];
+    },
+
+    /* ---------- chart versions (1.2, HD-STUDY-MODEL.md section 4) ----------
+       Called after a birth field changed and the store was saved. The first
+       birth a profile is given is not a correction, so it makes no version;
+       the first correction writes the old birth as version 1 and the new one
+       as version 2, and every correction after that adds one. The sample
+       chart is nobody's, so replacing it is not a correction either. Clearing
+       the birth date clears the history (O8): a reader who clears their birth
+       data has asked for it to be gone, and a history that kept every earlier
+       birth would defeat the button. Notes stay; they are the reader's own
+       words, and read as unresolved until a birth is given again. */
+    _birthMoved: function (id, before, after) {
+      /* When the birth last moved on this device, and whether it was cleared,
+         so a Clear birth data made on another device can be told from a birth
+         given here since (the follow-up review's finding 1). The clear is a
+         ledger event, which syncs whatever the birth switch says, and it
+         carries no birth data. */
+      if (birthKey(before) !== birthKey(after)) {
+        var st = this._store(), at = nowISO();
+        st.profiles.forEach(function (p) { if (p.id === id) p.birth_at = at; });
+        this._save(st);
+        var bc = this.consentState('birthCleared', id);
+        if (!after.birth_date && before.birth_date) this.setConsent('birthCleared', true, id);
+        else if (after.birth_date && bc.granted) this.setConsent('birthCleared', false, id);
+      }
+      /* Clear birth data (O8). The history goes, and so does every note's
+         record of what its address resolved to, because that is derived from
+         the birth (privacy review F4): a gate and line list kept after the
+         date is cleared is the date by another name. The words stay, and
+         read as unresolved. */
+      if (!after.birth_date) {
+        drop(versionsKey(id));
+        var cr = read(notesKey(id), null);
+        if (cr && Array.isArray(cr.notes) && cr.notes.some(function (n) { return n.resolved != null; })) {
+          cr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(id), cr);
+        }
+        return null;
+      }
+      if (!before.birth_date) return null;
+      if (read(scoped('incommon.sample', scope().owner), '') === id) return null;
+      if (birthKey(before) === birthKey(after)) return null;
+      var rec = read(versionsKey(id), null);
+      if (!rec || !Array.isArray(rec.versions)) rec = { v: 1, versions: [] };
+      var make = function (b, reason) {
+        return { id: uuid(), subject: 'profile:' + id, seq: rec.versions.length + 1, reason: reason,
+          birth: birthRecord(b), birth_key: birthKey(b), created_at: nowISO() };
+      };
+      var first = null;
+      if (!rec.versions.length) { first = make(before, 'initial'); rec.versions.push(first); }
+      var v = make(after, birthReason(before, after));
+      rec.versions.push(v);
+      if (!write(versionsKey(id), rec)) return null;
+      /* A note written before any correction was written against the birth
+         that is now version 1, so it is given that version's id. */
+      if (first) {
+        var nr = read(notesKey(id), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.version == null; })) {
+          nr.notes.forEach(function (n) { if (n.version == null) n.version = first.id; });
+          write(notesKey(id), nr);
+        }
+      }
+      this._emit('chart:versioned', { id: id, version: v.id, reason: v.reason });
+      return v;
+    },
+    listChartVersions: function (id) {
+      var pid = id || this.activeId();
+      var rec = pid ? read(versionsKey(pid), null) : null;
+      return rec && Array.isArray(rec.versions) ? rec.versions.slice() : [];
+    },
+    /* The version a note written now belongs to: the latest, or null while
+       the birth has never been corrected. */
+    currentChartVersion: function (id) {
+      var list = this.listChartVersions(id);
+      return list.length ? list[list.length - 1] : null;
+    },
+
+    /* ---------- chart notes (1.2, HD-STUDY-MODEL.md section 3) ---------------
+       The reader's own words about a part of their own chart. Kept on the
+       device whatever the consent switches say; the journal consent (O1)
+       decides only whether they leave it, once sync is built. */
+    chartAddressOk: function (a) { return chartAddressOk(a); },
+    listChartNotes: function (id, filter) {
+      var pid = id || this.activeId(), f = filter || {};
+      var rec = pid ? read(notesKey(pid), null) : null;
+      var out = rec && Array.isArray(rec.notes) ? rec.notes.slice() : [];
+      if (f.address) out = out.filter(function (n) { return n.address === f.address; });
+      if (f.version !== undefined) out = out.filter(function (n) { return n.version === f.version; });
+      return out;
+    },
+    addChartNote: function (id, o) {
+      var pid = id || this.activeId();
+      if (!this.getProfile(pid)) throw new Error('No such profile');
+      o = o || {};
+      if (!chartAddressOk(o.address)) throw new Error('Not a chart address: ' + o.address);
+      var text = String(o.text == null ? '' : o.text);
+      if (!text.trim()) throw new Error('A note needs some words');
+      if (text.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      var cur = this.currentChartVersion(pid), at = nowISO();
+      var note = { id: uuid(), subject: 'profile:' + pid, address: o.address, version: cur ? cur.id : null,
+        resolved: o.resolved == null ? null : o.resolved, text: text, created_at: at, updated_at: at };
+      var rec = read(notesKey(pid), null);
+      if (!rec || !Array.isArray(rec.notes)) rec = { v: 1, notes: [] };
+      rec.notes.push(note);
+      if (!write(notesKey(pid), rec)) throw new Error('The note could not be saved on this device');
+      this._emit('chart:note', { id: pid, note: note.id, action: 'added' });
+      return note;
+    },
+    /* Editing changes the words only. What the address resolved to when the
+       note was written stays as it was, because that is what a later reading
+       is compared with. */
+    updateChartNote: function (id, noteId, text) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null), hit = null;
+      var t = String(text == null ? '' : text);
+      if (!t.trim()) throw new Error('A note needs some words');
+      if (t.length > CHART_NOTE_MAX) throw new Error('A note holds at most ' + CHART_NOTE_MAX + ' characters');
+      ((rec && rec.notes) || []).forEach(function (n) { if (n.id === noteId) { n.text = t; n.updated_at = nowISO(); hit = n; } });
+      if (!hit) throw new Error('No such note');
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'updated' });
+      return hit;
+    },
+    deleteChartNote: function (id, noteId) {
+      var pid = id || this.activeId(), rec = read(notesKey(pid), null);
+      var list = (rec && rec.notes) || [], kept = list.filter(function (n) { return n.id !== noteId; });
+      if (kept.length === list.length) return false;
+      rec.notes = kept;
+      write(notesKey(pid), rec);
+      this._emit('chart:note', { id: pid, note: noteId, action: 'deleted' });
+      return true;
+    },
+    /* Section 3.2: the note's address resolved again against the current
+       chart, compared with what it resolved to when written. The caller
+       resolves (it holds the chart); this only compares. */
+    chartNoteStatus: function (note, resolvedNow) {
+      if (!note || resolvedNow == null) return 'unresolved';
+      if (note.resolved == null) return 'unresolved';
+      return stable(note.resolved) === stable(resolvedNow) ? 'same' : 'changed';
     },
 
     /* ---------- PIN ---------- */
@@ -4546,14 +4862,37 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     getConsents: function (id) {
       var rec = read(this.keyFor('incommon.consent', id), null), out = {};
       CONSENT_TYPES.forEach(function (t) { out[t] = !!(rec && rec.consents && rec.consents[t] && rec.consents[t].granted); });
+      if (!out.birthData && this._birthUndecided(id, rec)) out.birthData = true;
       return out;
+    },
+    /* birthData that was never decided reads as on while the profile holds a
+       birth date, because that is what createProfile has always recorded and
+       what every profile given its birth later was synced as. Only a decision,
+       the switch turned off, reads as off. Without this a profile given its
+       birth after it was made would show the switch off while it synced, and
+       would stop syncing the moment the push started reading the switch. */
+    _birthUndecided: function (id, rec) {
+      var c = rec && rec.consents && rec.consents.birthData;
+      if (c && c.updatedAt) return false;
+      var s = this._store(), pid = id || s.activeId, has = false;
+      s.profiles.forEach(function (p) { if (p.id === pid && p.birth_date) has = true; });
+      return has;
+    },
+    /* One consent as the sync module needs it to merge with the account's
+       ledger: what it reads now, and when it was decided (null if never). */
+    consentState: function (type, id) {
+      var rec = read(this.keyFor('incommon.consent', id), null);
+      var c = rec && rec.consents && rec.consents[type];
+      var granted = !!(c && c.granted);
+      if (type === 'birthData' && !granted && this._birthUndecided(id, rec)) granted = true;
+      return { granted: granted, at: c && c.updatedAt ? c.updatedAt : null };
     },
     setConsent: function (type, granted, id) {
       var pid = id || this.activeId(), k = this.keyFor('incommon.consent', pid), rec = read(k, null), ts = nowISO();
       if (!rec || !rec.consents) { this.initConsents(pid); rec = read(k, null); }
       rec.consents[type] = { granted: !!granted, updatedAt: ts };
       rec.updatedAt = ts;
-      rec.events = (rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]).slice(-50);
+      rec.events = keepEvents((rec.events || []).concat([{ ts: ts, id: type, granted: !!granted }]));
       write(k, rec);
       this._emit('consent:changed', { profileId: pid, type: type, granted: !!granted });
       return this.getConsents(pid);
@@ -4563,7 +4902,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        Single write path for everything the app remembers about a person.
        Each memory type is bound to the consent flag that governs it: a write
        with consent off is refused and reported, never silently dropped. */
-    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation' },
+    MEMORY_CONSENT: { journal: 'journal', mood: 'mood', practice_completion: 'assessments', stella_conversation: 'conversation', chart_note: 'journal' },
     ENFORCE_ON_WRITE: { stella_conversation: true },
     consentFor: function (type) { return this.MEMORY_CONSENT[type] || null; },
 
@@ -4724,7 +5063,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        smaller gazetteer, or that were placed in Puerto Rico with the wrong
        zone. Returns the ids whose charts must be recomputed. */
     reresolveLocations: function () {
-      var s = this._store(), fixed = [], self = this;
+      var s = this._store(), fixed = [], self = this, before = {};
+      s.profiles.forEach(function (p) { before[p.id] = birthFields(p); });
       s.profiles.forEach(function (p) {
         /* A Puerto Rico place saved while the list filed the island under New
            York's zone carries New_York: an hour out every winter. Its
@@ -4744,6 +5084,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       });
       if (fixed.length) {
         this._save(s);
+        /* A repair moves the instant, so it is a version like a correction
+           the reader made (the owner's decision O7). */
+        s.profiles.forEach(function (p) { if (fixed.indexOf(p.id) !== -1) self._birthMoved(p.id, before[p.id], birthFields(p)); });
         fixed.forEach(function (id) { self.invalidateCalculations(id); });
         this._emit('profile:recalculated', { ids: fixed });
       }
@@ -4797,7 +5140,32 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
        d.recalc          ids whose birth data changed */
     importSynced: function (d) {
       d = d || {};
-      var s = this._store(), self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      var self = this, out = { profiles: 0, removed: 0, memories: 0, consents: 0, entries: 0 };
+      /* Deleted on another device, and so deleted here, whatever this device
+         did to it since (the owner, 30 October 2026: "if a profile is
+         deleted, delete it everywhere"). The deleted profiles go first, and
+         then, if that leaves this device with none and the pull brings none,
+         it starts over with a fresh one, as the delete dialog does on the
+         device it was deleted on; that one is new here and goes up like any
+         other. Removing first is what lets a device whose six profiles were
+         all deleted end on the fresh one in this pull: made first, it had no
+         room. */
+      var dead = {};
+      (d.deletedProfiles || []).forEach(function (id) { dead[id] = 1; });
+      var s0 = this._store();
+      var gone = s0.profiles.filter(function (p) { return dead[p.id]; }).map(function (p) { return p.id; });
+      if (gone.length) {
+        s0.profiles = s0.profiles.filter(function (p) { return !dead[p.id]; });
+        s0.pairs = (s0.pairs || []).filter(function (pr) { return !dead[pr.a] && !dead[pr.b]; });
+        write(scope().root, s0);
+        gone.forEach(function (id) { self._dropProfileKeys(id); out.removed++; });
+        if (!s0.profiles.length && !(d.profiles || []).some(function (p) { return p && !dead[p.id]; })) {
+          var fresh = this.createProfile({ name: 'Default Profile' });
+          var s1 = this._store(); s1.activeId = fresh.id; s1.defaultId = fresh.id; write(scope().root, s1);
+        }
+      }
+      (d.deletedProfiles || []).forEach(function (id) { self._forgetPeople(id); });
+      var s = this._store();
       (d.removeProfiles || []).forEach(function (id) {
         if (s.profiles.length <= 1 && !(d.profiles || []).length) return;
         var before = s.profiles.length;
@@ -4807,10 +5175,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         self._dropProfileKeys(id);
         out.removed++;
       });
+      var arrived = {};
       (d.profiles || []).forEach(function (p) {
         if (!p || !p.id) return;
         var i = -1;
         s.profiles.forEach(function (x, j) { if (x.id === p.id) i = j; });
+        if (i !== -1 && p.birth_date && birthKey(s.profiles[i]) !== birthKey(p)) arrived[p.id] = 1;
         if (i !== -1) s.profiles[i] = p;
         else if (s.profiles.length < MAX_PROFILES) s.profiles.push(p);
         else return;
@@ -4830,6 +5200,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       write(scope().root, s);
 
       var when = function (x) { var t = Date.parse(x); return isNaN(t) ? 0 : t; };
+      var clearAt = {};
       Object.keys(d.consents || {}).forEach(function (pid) {
         if (!has(pid)) return;
         self.initConsents(pid);
@@ -4841,13 +5212,61 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           seen[sig] = 1; all.push({ ts: e.ts, id: e.id, granted: !!e.granted });
         });
         all.sort(function (a, b) { return when(a.ts) - when(b.ts); });
+        /* The newest Clear birth data, whatever came after it: a clear and
+           then a new birth leaves the ledger on the revoke the new birth
+           writes, and a device that missed both still owes the clear. */
+        all.forEach(function (e) { if (e.id === 'birthCleared' && e.granted) clearAt[pid] = e.ts; });
         /* The latest event for each consent is its state, whichever device it
            was made on. */
         all.forEach(function (e) { rec.consents[e.id] = { granted: e.granted, updatedAt: e.ts }; });
-        rec.events = all.slice(-50);
+        rec.events = keepEvents(all);
         if (all.length) rec.updatedAt = all[all.length - 1].ts;
         write(k, rec);
         out.consents++;
+      });
+      /* Two marks the account's other devices made, read from the merged
+         ledger: a profile made for somebody else, and a Clear birth data.
+         Neither carries any birth data, so both travel whatever the birth
+         switch says. The newest clear is acted on whether or not a new birth
+         followed it (the ledger then ends on that birth's revoke), and only
+         when the birth this device held is older than the clear: then this
+         device's history and what its notes resolved to are of the cleared
+         birth, and go. The birth fields go too while the clear is still in
+         force; after a new birth the pulled row has already brought it. A
+         birth that arrives in a pull is this device's birth from then on, so
+         its birth_at moves to now and a later pull does not clear what is
+         written about it. */
+      var st2 = this._store(), moved = false, dropped = [];
+      st2.profiles.forEach(function (p) {
+        if (!d.consents || !d.consents[p.id]) return;
+        var rec2 = read('incommon.consent.' + p.id, null), c2 = (rec2 && rec2.consents) || {};
+        var fo = c2.forOther;
+        if (fo && fo.updatedAt && !!fo.granted !== (p.for_other === true)) {
+          if (fo.granted) p.for_other = true; else delete p.for_other;
+          moved = true;
+        }
+        var bc = c2.birthCleared, cut = clearAt[p.id];
+        var older = !!cut && (!p.birth_at || when(p.birth_at) < when(cut));
+        if (older && bc && bc.granted && (p.birth_date || p.birth_time || p.birth_location)) {
+          p.birth_date = ''; p.birth_time = ''; p.birth_location = ''; p.birth_lat = null; p.birth_lon = null;
+          p.timezone = ''; p.tz_offset = null; p.location_resolved = false; p.birth_time_unknown = false;
+          p.birth_at = bc.updatedAt;
+          moved = true;
+        } else if (arrived[p.id]) {
+          p.birth_at = nowISO();
+          moved = true;
+        }
+        if (older) dropped.push(p.id);
+      });
+      if (moved) write(scope().root, st2);
+      dropped.forEach(function (pid) {
+        drop(versionsKey(pid));
+        var nr = read(notesKey(pid), null);
+        if (nr && Array.isArray(nr.notes) && nr.notes.some(function (n) { return n.resolved != null; })) {
+          nr.notes.forEach(function (n) { n.resolved = null; });
+          write(notesKey(pid), nr);
+        }
+        self.invalidateCalculations(pid);
       });
       Object.keys(d.memories || {}).forEach(function (pid) {
         if (!has(pid)) return;
@@ -4903,6 +5322,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           return all - shown;
         })(this),
         throughline: read('incommon.p.' + pid + '.throughline', []),
+        /* 1.2: the birth's history and the notes on the chart. The notes are
+           withheld while the journal consent is off, as journal entries are,
+           and counted so the export says something was left out. */
+        chartVersions: this.listChartVersions(pid),
+        chartNotes: this.getConsents(pid).journal ? this.listChartNotes(pid) : [],
+        chartNotesWithheld: this.getConsents(pid).journal ? 0 : this.listChartNotes(pid).length,
         sharedWith: this.sharedPartners(pid).map(function (x) { return x.name; })
       };
     },
@@ -14318,9 +14743,9 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     Sacral: {
       defined: {
         work: 'Real, renewable life force, on the condition that it is spent on work you actually responded to. Work you talked yourself into drains it instead.',
-        sleep: 'The rule the tradition is most insistent about: go to bed before you are tired, and let the last of the energy burn off lying down.',
+        sleep: 'The tradition is specific about this center: a defined Sacral goes to bed once the day\u2019s energy has been spent. Sleep is the close of the expenditure rather than the place it gets finished.',
         body: 'The body wants to be used. A day without physical effort makes for a poor night.',
-        health: 'The tradition watches burnout here above all, and the specific damage of going to bed already exhausted, night after night.',
+        health: 'The tradition watches burnout here above all, and it points at the same thing the sleep entry does: a day that ends with the energy still running because nothing the gut agreed to spent it.',
         S: 'Sustainable energy, and the capacity to work at something long after others have stopped.',
         C: 'Saying yes from the mind rather than the gut, and paying for it for months.',
         O: 'Mastery. This design is built to become genuinely good at something over time.',
@@ -14393,13 +14818,13 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     },
     Generator: {
       work: 'Built to respond. Work you said yes to from the gut renews you; work you argued yourself into empties you, slowly and then all at once.',
-      sleep: 'Go to bed before you are tired and let the last of the day burn off lying down. The tradition repeats this more than any other instruction.',
+      sleep: 'The tradition puts sleep after the day\u2019s energy has been spent, not before it. What spends it is work the gut actually responded to, and the night follows that rather than completing it.',
       body: 'The body wants to be used every day. Satisfaction after physical work is the signal that the energy was spent correctly.',
       health: 'Frustration is the signature to watch. The tradition ties chronic frustration to work the gut never actually agreed to.'
     },
     'Manifesting Generator': {
       work: 'Response first, then speed. Skipping steps is native to this design, and the correction is usually informing people rather than slowing down.',
-      sleep: 'The same rule as the Generator, made harder by the number of things still open at the end of a day. Closing loops on paper helps the body close too.',
+      sleep: 'The same rule as the Generator, with more threads still open at the end of a day. The tradition still puts sleep after the spending, and putting the open loops on paper lets the body settle once it is down.',
       body: 'Fast, multi-directional energy. Variety in movement suits this design better than a single discipline.',
       health: 'Both frustration and anger are named here. The tradition reads them as evidence of a yes that was skipped or a person who was not informed.'
     },
@@ -14458,7 +14883,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       X: 'Deciding at the peak, or at the bottom, and calling either one certainty.' },
     { match: 'sacral',
       work: 'The gut answers before the mind does, in sound rather than in words. The task is to hear it and not to translate it away.',
-      sleep: 'Go to bed before the energy runs out, so the last of it discharges lying down.',
+      sleep: 'The center and the authority agree on this: the tradition puts sleep after the energy has been spent, not before it. A Sacral yes is a yes to spending the energy, and the night closes that rather than finishing it.',
       body: 'The body says yes and no to food the same way it says yes and no to work. It is worth listening at the table.',
       health: 'The tradition ties burnout here to a life of yeses the gut never gave.',
       S: 'An immediate and reliable answer, available in the moment.',
@@ -14902,7 +15327,9 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
 
     var CLOSE = {
       work: 'So the whole of it comes to one question, asked before anything is agreed to: was this responded to, or was this reasoned into? Answer honestly and act on the answer. The tradition promises nothing more dramatic than that the answer, kept for long enough, changes what a working life feels like from the inside.',
-      sleep: 'Take one thing from this and let the rest wait. Get horizontal before you are finished, and let the end of the day happen lying down rather than sitting up. It is a small instruction and the one the tradition repeats most, which is usually a sign that it was hard-won.',
+      sleep: c.defined.indexOf('Sacral') !== -1
+        ? 'Take one thing from this and let the rest wait. The tradition puts sleep after the day\u2019s energy has been spent, not before it, so the practice is knowing whether the day was actually used before asking the night to finish it. It is the instruction it returns to most for a defined Sacral, and usually the one that was hardest won.'
+        : 'Take one thing from this and let the rest wait. The tradition asks a design without a defined Sacral to take a horizontal position long before sleep, and to let the end of the day happen lying down rather than sitting up. That is the instruction it returns to most for these designs, and usually the one that was hardest won.',
       body: 'The teaching ends where it began. No food is named and no regimen is given, because the tradition holds that your body already answers these questions and has simply not been asked in a way it can hear. Ask once, quietly, before the thinking starts. Then do what it said.',
       health: 'Close this with the caution it opened with. None of this diagnoses anything, none of it should displace a doctor, and none of it is a reason to delay care. What it offers is a place to look and a vocabulary for what you find there. Bring what you notice to someone qualified to interpret it.'
     };
@@ -15016,9 +15443,9 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
       C: [['def:Head', 'Mental pressure does not switch off because the day ended.'],
           ['open:Head', 'The evening racing mind is usually the day\u2019s borrowed questions.'],
           ['def:Root', 'Adrenal pressure keeps running after everything else has stopped.'],
-          ['gen', 'Going to bed already exhausted, night after night.'],
+          ['gen', 'A day spent on things the gut never agreed to, and a night spent with the engine still running.', 'strict'],
           ['open:Sacral', 'Needing more rest than the people around you, and arguing with it.']],
-      O: [['gen', 'Lying down before you are finished, and letting the last of it burn off there.'],
+      O: [['gen', 'Ending the day with the energy spent on something the gut said yes to, so sleep arrives on its own.', 'strict'],
           ['def:Head', 'Emptying the questions onto paper before the light goes out.'],
           ['open:Solar Plexus', 'A real transition after an absorbing day, rather than a screen.'],
           ['type:Reflector', 'Sleeping alone in your own space, which the tradition asks for directly.'],
@@ -15155,12 +15582,17 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     return false;
   }
 
+  /* A row marked 'strict' is never used to fill a reading its condition does
+     not match. Without it the backfill below hands a claim about one design to
+     a chart it is not true of, which is how a design without a defined Sacral
+     was reading the defined-Sacral sleep instruction while the closing beneath
+     it said the opposite. A short list is honest; a padded one is not. */
   function pick(bank, c) {
     var out = [];
     (bank || []).forEach(function (row) { if (matches(row[0], c)) out.push(row[1]); });
     if (out.length < 3) {
       (bank || []).forEach(function (row) {
-        if (out.length < 3 && out.indexOf(row[1]) === -1) out.push(row[1]);
+        if (out.length < 3 && row[2] !== 'strict' && out.indexOf(row[1]) === -1) out.push(row[1]);
       });
     }
     return out.slice(0, 5);
@@ -23648,7 +24080,11 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
   P.resize = function () {
     if (!this.r || !this.el.root.isConnected) return;
-    var b = this.el.root.getBoundingClientRect(), W = Math.max(2, Math.round(b.width)), H = Math.max(2, Math.round(b.height));
+    /* The host fits the phone frame above its reading sheet using measured
+       page bounds. Consume that frame here, through ResizeObserver, without
+       assuming a viewport margin or writing host layout from the renderer. */
+    var b = this.el.root.getBoundingClientRect();
+    var W = Math.max(2, Math.round(b.width)), H = Math.max(2, Math.round(b.height));
     var dpr = window.devicePixelRatio || 1, L = [Math.min(dpr, 2), Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1, 0.75][this.level];
     var bloom = this.level <= 1 && !GFX.direct;
     if (W === this.W && H === this.H && L === this.pr && bloom === this.bloom) return;
@@ -23960,14 +24396,18 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        outside this scroller and must not be subtracted a second time. */
     hdPaneRevealStage() {
       var st = stageEl(); if (!st) return;
-      var sc = st.parentElement;
-      while (sc && sc !== document.body) {
+      var page = st.closest('[data-vt-page]');
+      var sc = page || st.parentElement;
+      while (!page && sc && sc !== document.body) {
         var oy = getComputedStyle(sc).overflowY;
         if ((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break;
         sc = sc.parentElement;
       }
       if (!sc || sc === document.body) return;
-      var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
+      /* The measured page top includes the sample banner, title and tabs.
+         Their combined height varies with viewport and profile state. */
+      var visibleTop = sc.getBoundingClientRect().top + sc.clientTop;
+      var top = sc.scrollTop + st.getBoundingClientRect().top - visibleTop - 8;
       var target = Math.max(0, top);
       /* vtSettle watches an already-started scroll. Without scrollTo first
          it cannot bring the stage into the mobile sheet's top reserve. Only
@@ -24057,7 +24497,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   /* Bumped whenever the shape or the arithmetic of computed_state changes, so
      stored records can be recognised as stale and recomputed. It is also what
      invalidates the pair cache. 2: the ten astral bodies moved from the
@@ -24066,8 +24506,13 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      3: a birth with no time is drawn at noon where it happened rather than
      noon at Greenwich, and the angles take the apparent sidereal time and the
      true obliquity, both as the Celestial Codex did, so a stored untimed
-     longitude and a stored Ascendant are each from arithmetic that is gone. */
-  var STATE_VERSION = 3;
+     longitude and a stored Ascendant are each from arithmetic that is gone.
+     4: the stored instant is the one the reader's own chart is drawn for,
+     from birth-time.js: a summer birth takes the offset its zone had on that
+     date rather than the stored standard one, and a birth with no time is
+     noon where it happened rather than midnight at Greenwich (1.3, D-03 and
+     D-04), so every stored record and every cached composite moves. */
+  var STATE_VERSION = 4;
   var KEY = 'incommon.people.v1';
   var LEGACY_KEY = 'incommon.friends';
   var MAX_PEOPLE = 12;
@@ -24125,7 +24570,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   }
 
   /* ---------- wiring ------------------------------------------------------- */
-  var store = null, compute = null, clock = null;
+  var store = null, compute = null, clock = null, birthTimeMod = null;
   /* The app injects the chart engine; the tests inject a plain object and a
      stub. Nothing in this file knows how to compute a chart, which is what
      keeps the store testable without a browser. */
@@ -24134,6 +24579,17 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (opts.store !== undefined) store = opts.store;
     if (opts.compute !== undefined) compute = opts.compute;
     if (opts.now !== undefined) clock = opts.now;
+    if (opts.birthTime !== undefined) birthTimeMod = opts.birthTime;
+  }
+  /* birth-time.js decides what instant a birth is drawn for, everywhere. The
+     store asks it rather than doing its own arithmetic, so a saved person and
+     the reader's own chart cannot be drawn for two different moments. It is
+     found the way the app finds it, on the global, unless a caller hands one
+     in; without it the store falls back to the same rule written out. */
+  function birthTimeModule() {
+    if (birthTimeMod) return birthTimeMod;
+    try { if (typeof self !== 'undefined' && self.BirthTime) return self.BirthTime; } catch (e) {}
+    return null;
   }
   function backing() {
     if (store) return store;
@@ -24166,12 +24622,27 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var time = String(b.birth_time || b.birthTime || '');
     var known = /^\d{2}:\d{2}$/.test(time);
     var offset = b.tz_offset != null ? +b.tz_offset : (b.tzOffset != null ? +b.tzOffset : 0);
+    var tz = String(b.birth_tz || b.timezone || '');
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-    var hh = known ? +time.slice(0, 2) : 0, mi = known ? +time.slice(3, 5) : 0;
-    /* An unknown time has no instant. It gets the date at 00:00 UTC as its
-       canonical marker and a flag, so two unknown-time records for the same
-       day and place are the same record and neither pretends to a moment. */
-    var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], known ? hh : 0, known ? mi : 0) - (known ? offset * 36e5 : 0);
+    /* THE INSTANT IS THE ONE THE READER'S OWN CHART IS DRAWN FOR. A known time
+       takes the offset the zone had on the birth date, not the stored one,
+       because a gazetteer stores the standard offset and a summer birth would
+       otherwise be an hour late. An unknown time is drawn at 12:00 noon where
+       it happened, exactly as birth-time.js draws it for the reader; the flag
+       still says the time is unknown, and every time dependent field is still
+       null (rule 3), so the noon is where the time independent part is read
+       from, never a claim about the hour. Two unknown-time records for the
+       same day and zone are still the same record. */
+    var BT = birthTimeModule(), ms = null;
+    if (BT && BT.instant) {
+      var r = BT.instant({ birthDate: date, birthTime: known ? time : '', timeUnknown: !known,
+        timezone: tz, tzOffset: offset });
+      if (r && r.date && isFinite(r.date.getTime())) ms = r.date.getTime();
+    }
+    if (ms == null) {
+      var hh = known ? +time.slice(0, 2) : 12, mi = known ? +time.slice(3, 5) : 0;
+      ms = Date.UTC(+m[1], +m[2] - 1, +m[3], hh, mi) - offset * 36e5;
+    }
     var lat = b.birth_lat != null ? +b.birth_lat : (b.birthLat != null ? +b.birthLat : null);
     var lon = b.birth_lon != null ? +b.birth_lon : (b.birthLon != null ? +b.birthLon : null);
     return {
@@ -24330,6 +24801,18 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return { ok: true, removed: id, notesDestroyed: gone.notes != null };
   }
 
+  /* Every record a profile saved goes, in one write, when that profile is
+     deleted, here or on another device (G6, the owner, 30 October 2026: "if
+     a profile is deleted, delete it everywhere"). profile-manager.js asks
+     for it; nothing else does. */
+  function forgetOwner(owner) {
+    var o = String(owner), all = read();
+    if (!Object.prototype.hasOwnProperty.call(all, o)) return { ok: true, removed: 0 };
+    var n = (all[o] || []).length;
+    delete all[o]; write(all);
+    return { ok: true, removed: n };
+  }
+
   /* Turning notes off destroys them. The switch is not a visibility toggle:
      a reader who turns notes off for somebody has said they do not want them
      held, and holding them anyway while hiding them is the opposite of what
@@ -24411,7 +24894,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     configure: configure, sha256hex: sha256hex,
     normalize: normalize, chartHash: chartHash, computeStateFor: computeStateFor,
     list: list, count: count, room: room, get: get,
-    add: add, update: update, remove: remove,
+    add: add, update: update, remove: remove, forgetOwner: forgetOwner,
     enableNotes: enableNotes, setNotes: setNotes, display: display,
     migrateLegacy: migrateLegacy
   };
@@ -24594,6 +25077,264 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   return { VERSION: VERSION, KEY: KEY, MAX_ENTRIES: MAX_ENTRIES,
     configure: configure, pairKey: pairKey, get: get, put: put,
     openOne: openOne, stats: stats, invalidate: invalidate, resetMetrics: resetMetrics };
+}));
+
+</script>
+<script>
+/*! share-rules.js: what a chart handout and a chart export may carry. V1.3.0 (UMD)
+ *
+ * Assignment 2.2, Task 3. A birth date, time and place together identify a
+ * person, and the person on a handout is often not the reader: a client, a
+ * partner, a child. This module is the one place a handout or an export file
+ * is shaped, so the rules cannot drift between the screens that build them.
+ *
+ * THE SHAPE IS THE PROMISE, as in analytics.js. Nothing here spreads the chart
+ * it is given. Every field a payload carries is named below and copied one at
+ * a time, so a chart object that carries a latitude, a zone, an email or a
+ * stored hash cannot leak any of them by accident.
+ *
+ * WHAT A HANDOUT CARRIES BY DEFAULT is Type, Strategy, Authority, Profile and
+ * Definition, and, on the reader's own chart, their first name and the notes
+ * they picked. That is all, because that is all that was measured to be
+ * a crowd rather than a fingerprint (tools/measure-handout-identifiability.js,
+ * 29 October 2026: over 3,000 random births from 1950 to 2010, those five put
+ * a birth among a median of 23 others; adding only the defined centres left
+ * 39% of births alone, the channels 88%, and every activation with its line
+ * named the date to one day in two centuries and the time to about an hour).
+ * So the centres, the channels, the gates and the activations are treated as
+ * birth data here, exactly as the date, time and place are: each one is off
+ * until the reader turns it on.
+ *
+ * ANOTHER PERSON'S CHART needs that person's word for anything beyond the
+ * default, their first name and the reader's notes about them included,
+ * because a note is free text and can name them (the follow-up review's
+ * finding 10). A client's chart needs it for any handout at all, because a
+ * practitioner's handout is the thing a client is asked about
+ * (data-contracts/HD-STUDY-MODEL.md, section 5). The word is the record the
+ * reader keeps, subject_consent with basis stated and handout in its scope,
+ * not withdrawn. A card is not a word: it is sent from the sender's active
+ * profile, which may be somebody else's chart, so it says where a record came
+ * from and nothing about who agreed (privacy review F7, 30 October 2026).
+ *
+ * A WORD IS A RECORD, NOT A PROOF (finding 12). The reader ticks it and the
+ * app cannot verify it, and this file does not pretend to: it refuses to go
+ * further than the record says, and it makes the record say more. A word
+ * counts only with the day it was given (stated_at), never dated after the
+ * moment the handout is made, and for a year after it (WORD_DAYS), after
+ * which the reader asks again. The moment is the caller's opts.now, because
+ * this file reads no clock; a handout made without one honours no word.
+ *
+ * A BACKUP KEEPS WHAT THE RECORD SAID AND ASKS AGAIN (finding 11). The export
+ * carries, for each person it holds, consent_noted: the scope, the day and
+ * any withdrawal, never a basis. restoreConsent() turns that into
+ * subject_consent with basis restored, which keeps the person's record and
+ * notes where the scope held store and notes (consentKeeps) and opens no
+ * handout until the reader states the word again (confirmWord). A file is
+ * not the person, so it cannot open a handout; it can stop a restore from
+ * throwing away what the reader was told. That makes a file a second way a
+ * person's notes come in besides the reader's own hand, and a hand edited
+ * file can use it; it brings in only the notes the file itself carries, which
+ * an import brings in anyway. The owner was told of this trade-off.
+ *
+ * A NAME ON A HANDOUT IS A FIRST NAME, and it is off by default for anybody
+ * but the reader.
+ *
+ * NOTES travel as their words. What an address resolved to when a note was
+ * written (gate and line values) never travels, and a note's address goes only
+ * when the part it names is on the handout too.
+ *
+ * AN EXPORT is the reader's own backup, made and kept on the device. It carries
+ * their own birth data and notes by default and other people only when the
+ * reader ticks it (the owner's decision O5), and its includes header says what
+ * is in it. It carries no subject_consent and no basis, because a file's claim
+ * about consent is not the person's (F6); it carries consent_noted, above,
+ * which no import honours as a word. It carries no birth key or hash, which
+ * links one person across files and is the birth to anybody who can
+ * enumerate days and places (F10); an import computes its own.
+ *
+ * NOTHING HERE SENDS ANYTHING. There is no share link (O6): a handout or an
+ * export leaves the device only through the reader's own download or share
+ * sheet. An unknown option is refused rather than ignored, so a caller that
+ * misspells one finds out instead of shipping what it meant to leave out.
+ *
+ * No dash characters.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ShareRules = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var VERSION = '1.3.0';
+  var HANDOUT_SCHEMA = 'incommon.handout.v1';
+  var EXPORT_SCHEMA = 'incommon.charts.v1';
+  var KINDS = ['self', 'person', 'client'];
+  var BASE = ['type', 'strategy', 'authority', 'profile', 'definition'];
+  /* Every option a handout takes. All but name are birth data for the purpose
+     of consent: see the header. */
+  var OPTIONS = ['name', 'centres', 'channels', 'gates', 'activations', 'birthDate', 'birthTime', 'birthPlace'];
+  var NEEDS_WORD = ['centres', 'channels', 'gates', 'activations', 'birthDate', 'birthTime', 'birthPlace'];
+  var CENTRES = ['Head', 'Ajna', 'Throat', 'G', 'Heart', 'Spleen', 'Sacral', 'Solar Plexus', 'Root'];
+  var SIDES = ['personality', 'design'];
+  var BODIES = ['Sun', 'Earth', 'Moon', 'North Node', 'South Node', 'Mercury', 'Venus', 'Mars',
+    'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  var EXPORT_OPTIONS = ['birthData', 'notes', 'people'];
+  var BIRTH_FIELDS = ['date', 'time', 'time_state', 'time_precision', 'time_window_min', 'time_source',
+    'place', 'lat', 'lon', 'zone', 'offset_recorded', 'offset_used', 'zone_check'];
+  var NOTE_MAX = 4000;
+  var SCOPES = ['store', 'notes', 'handout'];
+  var WORD_DAYS = 365;
+
+  function fail(reason, detail) { return detail === undefined ? { ok: false, reason: reason } : { ok: false, reason: reason, detail: detail }; }
+  function text(v, max) { return v == null ? null : String(v).slice(0, max || 80); }
+  function firstName(n) { var w = String(n == null ? '' : n).trim().split(/\s+/)[0]; return w ? w.slice(0, 40) : null; }
+  function gateNo(v) { var n = +v; return n >= 1 && n <= 64 && Math.floor(n) === n ? n : null; }
+  function lineNo(v) { var n = +v; return n >= 1 && n <= 6 && Math.floor(n) === n ? n : null; }
+  function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function when(v) { var t = typeof v === 'number' ? v : Date.parse(v); return isFinite(t) ? t : null; }
+  function scopeOf(sc) { return (sc && Array.isArray(sc.scope) ? sc.scope : []).filter(function (x) { return SCOPES.indexOf(x) !== -1; }); }
+  /* Why a word does or does not count for an act, as one of: ok, none,
+     withdrawn, restored (from a file, not stated again), undated, expired. */
+  function wordState(sc, what, now) {
+    if (!sc || scopeOf(sc).indexOf(what) === -1) return 'none';
+    if (sc.withdrawn_at) return 'withdrawn';
+    if (sc.basis === 'restored') return 'restored';
+    if (sc.basis !== 'stated') return 'none';
+    var at = when(sc.stated_at), n = when(now);
+    if (at == null || n == null || at > n) return 'undated';
+    return n - at <= WORD_DAYS * 864e5 ? 'ok' : 'expired';
+  }
+  function hasWord(sc, what, now) { return wordState(sc, what, now) === 'ok'; }
+  /* Whether a person's record, or the notes about them, may be kept: stated
+     or restored, the act in scope, not withdrawn. Keeping is not handing
+     out, so it does not age. */
+  function consentKeeps(sc, what) {
+    return !!(sc && !sc.withdrawn_at && (sc.basis === 'stated' || sc.basis === 'restored') &&
+      (what === 'store' || what === 'notes') && scopeOf(sc).indexOf(what) !== -1);
+  }
+  function restoreConsent(noted) {
+    var n = noted && typeof noted === 'object' ? noted : null, scope = scopeOf(n);
+    if (!n || !scope.length) return { basis: 'none', scope: [], stated_at: null, withdrawn_at: null };
+    return { basis: 'restored', scope: scope, stated_at: when(n.noted_at) == null ? null : String(n.noted_at),
+      withdrawn_at: n.withdrawn_at ? String(n.withdrawn_at) : null };
+  }
+  /* The reader stating the word again, today, for what the record holds. */
+  function confirmWord(sc, now) {
+    var n = when(now);
+    if (!sc || n == null || sc.withdrawn_at || !scopeOf(sc).length) return null;
+    return { basis: 'stated', scope: scopeOf(sc), stated_at: new Date(n).toISOString(), withdrawn_at: null };
+  }
+
+  /* Which handout option an address belongs to, so a note's address travels
+     only beside the part of the chart it names. A facet is always on the
+     handout; anything unrecognised never travels. */
+  function addressNeeds(a) {
+    var s = String(a || '');
+    if (/^facet:/.test(s)) return 'base';
+    if (/^centre:/.test(s)) return 'centres';
+    if (/^channel:/.test(s)) return 'channels';
+    if (/^(gate|line):/.test(s)) return 'gates';
+    if (/^activation:/.test(s)) return 'activations';
+    return null;
+  }
+
+  function handout(chart, opts) {
+    var c = chart || {}, o = opts || {}, inc = o.include || {}, k;
+    /* A profile the reader marked as made for somebody else is that person's
+       chart, not the reader's, whatever kind the caller passed (the
+       follow-up review's finding 3). */
+    if (c.kind === 'self' && c.forOther === true) c = Object.assign({}, c, { kind: 'person' });
+    if (KINDS.indexOf(c.kind) === -1) return fail('kind');
+    for (k in inc) if (own(inc, k) && OPTIONS.indexOf(k) === -1) return fail('unknown_option', k);
+    for (k in o) if (own(o, k) && k !== 'include' && k !== 'notes' && k !== 'now') return fail('unknown_option', k);
+    var on = {};
+    OPTIONS.forEach(function (x) { on[x] = inc[x] === true; });
+    if (inc.name === undefined) on.name = c.kind === 'self';
+    var pick = Array.isArray(o.notes) ? o.notes : [];
+    var picked = (Array.isArray(c.notes) ? c.notes : []).filter(function (n) { return n && pick.indexOf(n.id) !== -1; });
+    var state = c.kind === 'self' ? 'ok' : wordState(c.subject_consent, 'handout', o.now), word = state === 'ok';
+    if (c.kind === 'client' && !word) return fail('no_consent', state);
+    if (!word && (on.name || picked.length || NEEDS_WORD.some(function (x) { return on[x]; }))) return fail('no_consent', state);
+
+    var p = { schema: HANDOUT_SCHEMA, kind: c.kind };
+    BASE.forEach(function (x) { p[x] = text(c[x], 60); });
+    if (on.name) p.name = firstName(c.name);
+    if (on.centres) p.centres = (Array.isArray(c.centres) ? c.centres : []).filter(function (x) { return CENTRES.indexOf(x) !== -1; });
+    if (on.channels) p.channels = (Array.isArray(c.channels) ? c.channels : []).map(String)
+      .filter(function (x) { var m = /^(\d{1,2})-(\d{1,2})$/.exec(x); return !!m && gateNo(m[1]) && gateNo(m[2]); });
+    if (on.gates) p.gates = (Array.isArray(c.gates) ? c.gates : []).map(gateNo).filter(function (x) { return x != null; });
+    if (on.activations) p.activations = (Array.isArray(c.activations) ? c.activations : [])
+      .filter(function (a) { return a && SIDES.indexOf(a.side) !== -1 && BODIES.indexOf(a.body) !== -1 && gateNo(a.gate) && lineNo(a.line); })
+      .map(function (a) { return { side: a.side, body: a.body, gate: gateNo(a.gate), line: lineNo(a.line) }; });
+    if (on.birthDate || on.birthTime || on.birthPlace) {
+      var b = c.birth || {};
+      p.birth = {};
+      if (on.birthDate) p.birth.date = /^\d{4}-\d{2}-\d{2}$/.test(String(b.date)) ? String(b.date) : null;
+      if (on.birthTime) p.birth.time = /^\d{2}:\d{2}$/.test(String(b.time)) ? String(b.time) : null;
+      if (on.birthPlace) p.birth.place = text(b.place, 90);
+    }
+    p.notes = picked.map(function (n) {
+        var out = { text: text(n.text, NOTE_MAX) }, need = addressNeeds(n.address);
+        if (need === 'base' || (need && on[need])) out.address = String(n.address);
+        return out;
+      });
+    p.includes = {};
+    OPTIONS.forEach(function (x) { p.includes[x] = on[x]; });
+    p.includes.notes = p.notes.length;
+    return { ok: true, payload: p };
+  }
+
+  function birthOf(b) {
+    if (!b || typeof b !== 'object') return null;
+    var out = {};
+    BIRTH_FIELDS.forEach(function (k) { if (own(b, k)) out[k] = b[k]; });
+    return out;
+  }
+
+  /* subjects: [{ kind, id, display_name, birth, versions, notes, subject_consent }]
+     opts: { birthData, notes, people }, the first two on unless set false, the
+     last off unless set true. */
+  /* A profile made for somebody else is exported as a person, so it goes
+     only under O5's tick. */
+  function exportFile(subjects, opts, now) {
+    var o = opts || {}, k;
+    for (k in o) if (own(o, k) && EXPORT_OPTIONS.indexOf(k) === -1) return fail('unknown_option', k);
+    var inc = { birth_data: o.birthData !== false, notes: o.notes !== false, people: o.people === true };
+    subjects = (Array.isArray(subjects) ? subjects : []).map(function (s) {
+      return s && s.kind === 'self' && s.forOther === true ? Object.assign({}, s, { kind: 'person' }) : s;
+    });
+    var list = subjects.filter(function (s) {
+      return s && KINDS.indexOf(s.kind) !== -1 && (s.kind === 'self' || inc.people);
+    }).map(function (s) {
+      var out = { kind: s.kind, id: text(s.id, 80), display_name: text(s.display_name, 80) };
+      /* What the reader recorded about this person's agreement, for a
+         restore to keep and ask again about (finding 11): never a basis. */
+      var sc = s.kind === 'self' ? null : s.subject_consent;
+      if (sc && (sc.basis === 'stated' || sc.basis === 'restored') && scopeOf(sc).length) {
+        out.consent_noted = { scope: scopeOf(sc), noted_at: text(sc.stated_at, 40), withdrawn_at: sc.withdrawn_at ? text(sc.withdrawn_at, 40) : null };
+      }
+      out.birth = inc.birth_data ? birthOf(s.birth) : null;
+      out.versions = inc.birth_data ? (Array.isArray(s.versions) ? s.versions : []).map(function (v) {
+        return { id: text(v.id, 80), seq: +v.seq || null, reason: text(v.reason, 40), birth: birthOf(v.birth),
+          created_at: text(v.created_at, 40) };
+      }) : [];
+      out.notes = inc.notes ? (Array.isArray(s.notes) ? s.notes : []).map(function (n) {
+        var nn = { id: text(n.id, 80), address: text(n.address, 80), version: n.version == null ? null : text(n.version, 80),
+          text: text(n.text, NOTE_MAX), created_at: text(n.created_at, 40), updated_at: text(n.updated_at, 40) };
+        /* What the address meant when written is derived from the birth, so
+           it goes only where the birth goes. */
+        if (inc.birth_data && n.resolved != null) nn.resolved = JSON.parse(JSON.stringify(n.resolved));
+        return nn;
+      }) : [];
+      return out;
+    });
+    return { ok: true, file: { schema: EXPORT_SCHEMA, exported_at: (now ? new Date(now) : new Date()).toISOString(), includes: inc, subjects: list } };
+  }
+
+  return { VERSION: VERSION, HANDOUT_SCHEMA: HANDOUT_SCHEMA, EXPORT_SCHEMA: EXPORT_SCHEMA,
+    OPTIONS: OPTIONS.slice(), NEEDS_WORD: NEEDS_WORD.slice(), EXPORT_OPTIONS: EXPORT_OPTIONS.slice(), WORD_DAYS: WORD_DAYS,
+    handout: handout, exportFile: exportFile, wordState: wordState, consentKeeps: consentKeeps,
+    restoreConsent: restoreConsent, confirmWord: confirmWord };
 }));
 
 </script>
@@ -25173,7 +25914,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.4';
+  var VERSION = '2.9.5';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -25296,6 +26037,48 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     return false;
   }
 
+  /* ---------- "Save my profile to my account" ----------
+
+     The birthData consent is that switch, and until 30 October 2026 the push
+     never read it: profile rows went up whatever it said, so the switch
+     changed nothing that was sent (privacy review F2; the owner: "it serves
+     no purpose if it defaults with no option"). Now, while it is off, the
+     profile row still goes up, because memories and the consent ledger hang
+     off it, but every birth field goes up empty, so the account stops holding
+     the birth and the next push takes away what it held. The device keeps its
+     own copy, and a pull never empties it (see the pull's profiles). Never
+     decided reads as on: ProfileManager's consentState() says why. A
+     ProfileManager older than that method is treated as on, which is the
+     behaviour it was written against. */
+  var BIRTH_ROW = ['birth_date', 'birth_time', 'birth_location', 'birth_lat', 'birth_lon', 'timezone', 'tz_offset',
+    'location_resolved', 'birth_time_unknown'];
+  function birthSaved(pm, pid) {
+    if (typeof pm.consentState !== 'function') return true;
+    try { return !!pm.consentState('birthData', pid).granted; } catch (e) { return true; }
+  }
+  function withoutBirth(p) {
+    var o = Object.assign({}, p);
+    BIRTH_ROW.forEach(function (k) { o[k] = null; });
+    o._birthNotSaved = 1;
+    return o;
+  }
+  /* The hash a profile is cached under. With the birth saved it is exactly
+     hashOf(p), so nothing cached before this changes; with it not saved it
+     is the hash of what was sent, so switching the setting either way is a
+     change the next push sends. */
+  function profileHash(pm, p) {
+    return birthSaved(pm, p.id) ? hashOf(p) : hashOf(withoutBirth(p));
+  }
+  /* A profile made for somebody else never leaves the device (privacy review
+     F9, the owner's (b)): no row, no memories, no ledger, no pair. */
+  function forOther(p) { return !!(p && p.for_other === true); }
+  function tombRow(p, userId) {
+    var r = { id: p.id, account_id: userId, is_active: false, is_default: false, name: null, avatar_color: null,
+      avatar_kind: null, avatar_image: null, avatar_sign: null, pin_hash: null, updated_at: new Date().toISOString() };
+    BIRTH_ROW.forEach(function (k) { r[k] = (k === 'location_resolved' || k === 'birth_time_unknown') ? false : null; });
+    return r;
+  }
+
   /* ---------- plan building: ProfileManager state to remote rows ---------- */
 
   /* RAW PROFILE ROWS. pm._store() is named private by convention, not
@@ -25310,9 +26093,27 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var plan = { profiles: [], memories: [], throughline: [], oki: [], consent: [], pairs: [], map: map };
 
     store.profiles.forEach(function (p) {
+      if (forOther(p)) {
+        /* A profile made for somebody else goes up as an empty row and its
+           forOther ledger events, nothing else: no name, no birth, no
+           memory. The row is what lets the account's other devices learn the
+           mark, because the ledger hangs off it (the follow-up review's
+           finding 2). Migration 0006 empties the row and deletes the
+           profile's journal, Throughline and Oki rows when the mark arrives,
+           so nothing is deleted from here (RV1). */
+        plan.profiles.push({ _key: p.id, _hash: hashOf({ tomb: p.id }), row: tombRow(p, userId) });
+        var trec = readJSON('incommon.consent.' + p.id, null);
+        ((trec && trec.events) || []).forEach(function (e) {
+          if (!e || e.id !== 'forOther') return;
+          plan.consent.push({ _key: p.id + '/' + e.id + '/' + e.ts, _hash: hashOf(e),
+            row: { profile_id: p.id, scope: 'forOther', action: e.granted ? 'grant' : 'revoke', via: 'user', ts: e.ts || new Date().toISOString() } });
+        });
+        return;
+      }
+      var saved = birthSaved(pm, p.id);
       plan.profiles.push({
         _key: p.id,
-        _hash: hashOf(p),
+        _hash: profileHash(pm, p),
         row: {
           id: p.id,
           account_id: userId,
@@ -25323,15 +26124,15 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
           avatar_kind: p.avatar_kind || null,
           avatar_image: p.avatar_image || null,
           avatar_sign: p.avatar_sign || null,
-          birth_date: p.birth_date || null,
-          birth_time: p.birth_time || null,
-          birth_location: p.birth_location || null,
-          birth_lat: p.birth_lat == null ? null : p.birth_lat,
-          birth_lon: p.birth_lon == null ? null : p.birth_lon,
-          timezone: p.timezone || null,
-          tz_offset: p.tz_offset == null ? null : p.tz_offset,
-          location_resolved: !!p.location_resolved,
-          birth_time_unknown: !!p.birth_time_unknown,
+          birth_date: saved ? (p.birth_date || null) : null,
+          birth_time: saved ? (p.birth_time || null) : null,
+          birth_location: saved ? (p.birth_location || null) : null,
+          birth_lat: !saved || p.birth_lat == null ? null : p.birth_lat,
+          birth_lon: !saved || p.birth_lon == null ? null : p.birth_lon,
+          timezone: saved ? (p.timezone || null) : null,
+          tz_offset: !saved || p.tz_offset == null ? null : p.tz_offset,
+          location_resolved: saved && !!p.location_resolved,
+          birth_time_unknown: saved && !!p.birth_time_unknown,
           pin_hash: p.pin_hash || null,
           updated_at: new Date().toISOString()
         }
@@ -25411,7 +26212,10 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     /* Two-person consent binds profiles, not the account, but the row is
        account scoped in the schema because both parties are this user's
        profiles or cards held by them. */
+    var away = {};
+    store.profiles.forEach(function (p) { if (forOther(p)) away[p.id] = 1; });
     (store.pairs || []).forEach(function (pr) {
+      if (away[pr.a] || away[pr.b]) return;
       plan.pairs.push({
         _key: pr.key,
         _hash: hashOf(pr),
@@ -25444,7 +26248,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   /* Upsert one table. The schema's unique constraints do the dedupe, and the
      hash cache skips rows that have not changed, so a push after a quiet
      week touches nothing. */
-  function pushTable(table, items, onConflict) {
+  function pushTable(table, items, onConflict, onSent) {
     var map = loadMap();
     var cache = hashCache(map, table);
     var chain = Promise.resolve({ ok: true, sent: 0, skipped: 0 });
@@ -25455,11 +26259,114 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
           if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
           cache[item._key] = item._hash;
           acc.sent++;
+          if (onSent) onSent(item);
           return acc;
         });
       });
     });
     return chain.then(function (acc) { saveMap(map); return acc; });
+  }
+
+  /* ---------- no remote key: update in place, never append
+
+     memories and consent_events carry a unique key the upsert can name, so a
+     replay lands on the row it already made. throughline_entries and
+     oki_messages carry NO such key: their only unique column is the identity
+     id, which this module never mints. An upsert on 'id' with no id cannot
+     conflict, so every send was an INSERT. The entry a reader edited, and
+     every entry a device re-sent after losing its bookkeeping, became a
+     second row on the account and a repeat on the next pull.
+
+     The local hash cache hid most of it, because it skips what this device
+     already sent. It cannot hide an EDITED entry: different content is a
+     different hash, so it is pending by definition. And it is no help to a
+     device that lost the cache and pushes before it pulls, which re-sends
+     everything it holds.
+
+     So this reads the account's rows for the plan's profiles once per push
+     and matches each pending item to one of them, by local_id (the item's own
+     id) and then by created_at. A match is sent WITH that server id, which is
+     a real conflict on the primary key: that row is corrected, not joined by
+     a second. Only an unmatched item is sent without an id. A matched row is
+     consumed, so two items cannot claim it. One paged SELECT, on the same
+     async path as everything else. */
+  function appendKey(r) { return String(r.profile_id) + '|' + (r.local_id == null ? '' : String(r.local_id)); }
+  function appendTime(r) { return String(r.profile_id) + '|' + (r.created_at == null ? '' : String(r.created_at)); }
+  function appendIndex(table, ids) {
+    var byLocal = {}, byTime = {};
+    if (!ids.length) return Promise.resolve({ byLocal: byLocal, byTime: byTime });
+    return fetchAll(table, function (q) { return typeof q.in === 'function' ? q.in('profile_id', ids) : q; })
+      .then(function (rows) {
+        rows.forEach(function (r) {
+          if (r.local_id != null) { var k = appendKey(r); if (!byLocal[k]) byLocal[k] = r; }
+          var t = appendTime(r); if (!byTime[t]) byTime[t] = r;
+        });
+        return { byLocal: byLocal, byTime: byTime };
+      });
+  }
+  function pushAppendTable(table, items) {
+    var map = loadMap();
+    var cache = hashCache(map, table);
+    var pending = items.filter(function (it) { return cache[it._key] !== it._hash; });
+    var acc = { ok: true, sent: 0, skipped: items.length - pending.length, updated: 0 };
+    if (!pending.length) return Promise.resolve(acc);
+    var ids = [];
+    pending.forEach(function (it) {
+      if (it.row && it.row.profile_id && ids.indexOf(it.row.profile_id) === -1) ids.push(it.row.profile_id);
+    });
+    return appendIndex(table, ids).then(function (idx) {
+      var used = {};
+      var chain = Promise.resolve();
+      pending.forEach(function (item) {
+        chain = chain.then(function () {
+          if (!acc.ok) return acc;
+          var row = item.row, hit = null;
+          var byKey = row.local_id == null ? null : idx.byLocal[appendKey(row)];
+          if (byKey && !used[String(byKey.id)]) hit = byKey;
+          var byTs = byKey ? null : idx.byTime[appendTime(row)];
+          if (!hit && byTs && !used[String(byTs.id)]) hit = byTs;
+          var out = row;
+          if (hit && hit.id != null) { used[String(hit.id)] = 1; out = Object.assign({}, row, { id: hit.id }); }
+          return client.from(table).upsert(out, { onConflict: 'id' }).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
+            cache[item._key] = item._hash;
+            acc.sent++;
+            if (hit) acc.updated++;
+            return acc;
+          });
+        });
+      });
+      return chain.then(function () { saveMap(map); return acc; });
+    }, function (e) {
+      return { ok: false, reason: 'offline', error: (e && e.message) || 'no answer' };
+    });
+  }
+
+  /* THE SERVER HOLDS THE SWITCH TOO (server/migrations/0006, the follow-up
+     review's finding 4). A profile row is emptied of its birth when it
+     arrives while the account's latest birthData event is a revoke or its
+     latest birthCleared a grant, and emptied whole while its latest forOther
+     is a grant, so a build older than the switch cannot put back what the
+     reader took off. The rule reads the ledger as it stands when the row
+     arrives, and rows go up before their events (an event needs its row), so
+     a row whose own switch or mark moved in this push would be judged by the
+     old word: turning saving back on would send the birth, see the revoke,
+     and keep nothing. So each such row is sent once more after its events.
+     The cache is not touched: it already holds what was sent. */
+  var MARK_SCOPES = ['birthData', 'birthCleared', 'forOther'];
+  function resendMarked(items, marked) {
+    var chain = Promise.resolve({ ok: true });
+    items.forEach(function (item) {
+      if (!marked[item._key]) return;
+      chain = chain.then(function (acc) {
+        if (!acc.ok) return acc;
+        return client.from('profiles').upsert(item.row, { onConflict: 'id' }).then(function (res) {
+          if (res.error) { acc.ok = false; acc.error = res.error.message; }
+          return acc;
+        });
+      });
+    });
+    return chain;
   }
 
   function push() {
@@ -25470,30 +26377,47 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        record. It waits; the pull's own sync:pulled event schedules it anyway. */
     if (pulling) return pulling.then(function () { return push(); });
 
-    var plan = buildPlan();
-    return ensureAccountRow(userId).then(function (acc) {
-      if (!acc.ok) return acc;
-      return pushTable('profiles', plan.profiles, 'id').then(function (r) {
-        if (!r.ok) return r;
-        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts').then(function (r2) {
-          if (!r2.ok) return r2;
-          return pushTable('pairs', plan.pairs, 'profile_a,profile_b').then(function (r3) {
-            if (!r3.ok) return r3;
-            return pushTable('memories', plan.memories, 'profile_id,local_id').then(function (r4) {
-              if (!r4.ok) return r4;
-              return pushTable('throughline_entries', plan.throughline, 'id').then(function (r5) {
-                if (!r5.ok) return r5;
-                return pushTable('oki_messages', plan.oki, 'id');
-              });
-            });
-          });
-        });
-      });
+    /* Deletions first, as the pull does: a deleted profile's record must be
+       on the account before anything else goes up, and an older build's
+       queued deletion of a marked profile, flushed after this push, would
+       take the mark the push had just sent (K85). A deletion that fails here
+       stays queued and the push goes on, as before. */
+    return flushOutbox().then(function () {
+      var plan = buildPlan();
+      return pushPlan(userId, plan);
     }).then(function (acc) {
       if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
       return acc;
     }).catch(function (e) {
       return { ok: false, reason: 'offline', error: e && e.message };
+    });
+  }
+
+  function pushPlan(userId, plan) {
+    return ensureAccountRow(userId).then(function (acc) {
+      if (!acc.ok) return acc;
+      var marked = {};
+      return pushTable('profiles', plan.profiles, 'id').then(function (r) {
+        if (!r.ok) return r;
+        return pushTable('consent_events', plan.consent, 'profile_id,scope,ts', function (item) {
+          if (MARK_SCOPES.indexOf(item.row.scope) !== -1) marked[item.row.profile_id] = 1;
+        }).then(function (r2) {
+          if (!r2.ok) return r2;
+          return resendMarked(plan.profiles, marked);
+        }).then(function (r2) {
+          if (!r2.ok) return r2;
+          return pushTable('pairs', plan.pairs, 'profile_a,profile_b').then(function (r3) {
+            if (!r3.ok) return r3;
+            return pushTable('memories', plan.memories, 'profile_id,local_id').then(function (r4) {
+              if (!r4.ok) return r4;
+              return pushAppendTable('throughline_entries', plan.throughline).then(function (r5) {
+                if (!r5.ok) return r5;
+                return pushAppendTable('oki_messages', plan.oki);
+              });
+            });
+          });
+        });
+      });
     });
   }
 
@@ -25504,6 +26428,36 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   }
 
   /* ---------- outbox: deletions cannot be outrun ---------- */
+
+  /* What a ProfileManager event asks of the account. A deletion is queued,
+     never pushed, so a wipe is not re-uploaded by the debounce after it.
+
+     A PROFILE MARKED FOR SOMEBODY ELSE IS NOT DELETED (the 2.2 review's RV1,
+     30 October 2026). Marking it used to queue the deletion of the account's
+     copy, flushed before the push; a push that then failed left the account
+     with neither the row nor the mark, and another device read the absence as
+     a deletion and dropped its own copy and journal. The push sends the empty
+     row and the mark instead, and migration 0006 empties the row and deletes
+     the profile's journal, Throughline and Oki rows when the mark arrives. A
+     push that fails leaves the account as it was, which every device reads
+     correctly. What this device recorded as sent for those rows is forgotten
+     either way the mark moves, because the server no longer holds them once
+     the mark lands, and unmarking must send them all again. */
+  function routeEvent(name, detail) {
+    var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
+    if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
+    else if (name === 'profile:for-other' && detail && detail.id) forgetChildRows(detail.id);
+    else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
+    else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+  }
+  function forgetChildRows(pid) {
+    var map = loadMap();
+    ['memories', 'throughline_entries', 'oki_messages'].forEach(function (t) {
+      var c = hashCache(map, t);
+      Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+    });
+    saveMap(map);
+  }
 
   function opSig(x) { return x.op + ':' + (x.pid || '') + ':' + (x.type || '') + ':' + (x.id || ''); }
   function queueOp(op) {
@@ -25522,14 +26476,32 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var o = loadOutbox();
     if (!o.length) return Promise.resolve({ ok: true });
     var chain = Promise.resolve({ ok: true });
-    var remaining = [];
+    var remaining = [], resendAfter = false;
     o.forEach(function (op) {
       chain = chain.then(function (acc) {
         if (!acc.ok) { remaining.push(op); return acc; }
         if (op.op === 'del-profile') {
-          return client.from('profiles').delete().eq('id', op.pid).then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
-            return acc;
+          /* A profile this device still holds was not deleted: the op is one
+             an older build queued when the profile was marked for somebody
+             else (RV1). It is dropped rather than carried out, and what was
+             recorded as sent for the row and its ledger is forgotten, so the
+             push sends the empty row and the mark. */
+          if (stillHeld(op.pid)) { forgetRow(op.pid); forgetChildRows(op.pid); resendAfter = true; return acc; }
+          /* DELETED EVERYWHERE (the owner, 30 October 2026: "if a profile is
+             deleted, delete it everywhere"). The deletion is recorded first,
+             in deleted_profiles (migration 0007), which outlives the row: the
+             row's cascade takes its ledger, so without the record nothing on
+             the server says the profile was deleted and any device still
+             holding it could bring it back. The record carries the two ids
+             and nothing else. Then the row goes, which on 0007 the record's
+             own trigger has already done. */
+          return client.from('deleted_profiles').upsert({ account_id: userId, profile_id: op.pid },
+            { onConflict: 'account_id,profile_id', ignoreDuplicates: true }).then(function (res) {
+            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); return acc; }
+            return client.from('profiles').delete().eq('id', op.pid).then(function (res2) {
+              if (res2.error) { acc.ok = false; acc.error = res2.error.message; remaining.push(op); }
+              return acc;
+            });
           });
         }
         /* One entry, by the id it carries both here and on the server. Before
@@ -25553,7 +26525,21 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         return acc;
       });
     });
-    return chain.then(function (acc) { saveOutbox(remaining); return acc; });
+    return chain.then(function (acc) {
+      saveOutbox(remaining);
+      if (resendAfter) schedule();
+      return acc;
+    });
+  }
+  function stillHeld(pid) {
+    try { return (cfg.pm._store().profiles || []).some(function (p) { return p.id === pid; }); } catch (e) { return false; }
+  }
+  function forgetRow(pid) {
+    var map = loadMap();
+    delete hashCache(map, 'profiles')[pid];
+    var cc = hashCache(map, 'consent_events');
+    Object.keys(cc).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete cc[k]; });
+    saveMap(map);
   }
 
   /* ---------- pull: the account, brought down and merged in ----------
@@ -25580,14 +26566,27 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
      A PENDING LOCAL DELETION WINS. The outbox is flushed before reading, and
      anything still queued is skipped on the way in, so a deletion made offline
-     is not undone by the pull that runs when the signal comes back. */
+     is not undone by the pull that runs when the signal comes back.
+
+     A RECORDED DELETION OVERRIDES ALL OF THE ABOVE. A profile in the
+     account's deleted_profiles (migration 0007) goes from this device on
+     every pull, the first included, whether or not it was changed here since,
+     and the server drops anything that arrives for it afterwards. That record
+     is the one absence the pull does not have to guess at. */
+  /* Pages are read in a stable order, by a column the table has. Every
+     synced table has an id except deleted_profiles, whose key is the account
+     and the profile; ordering it by id was refused by the server on every
+     pull (column deleted_profiles.id does not exist), so no device could pull
+     from 30 October 2026 until this was fixed. The module tests now refuse a
+     column the repository's schema does not declare. */
+  var ORDER_BY = { deleted_profiles: 'profile_id' };
   function fetchAll(table, filter) {
     var rows = [];
     function page(from) {
       var q = client.from(table).select('*');
       if (filter) q = filter(q);
       var paged = typeof q.range === 'function';
-      if (paged && typeof q.order === 'function') q = q.order('id', { ascending: true });
+      if (paged && typeof q.order === 'function') q = q.order(ORDER_BY[table] || 'id', { ascending: true });
       if (paged) q = q.range(from, from + PAGE - 1);
       return Promise.resolve(q).then(function (res) {
         if (!res || res.error) throw new Error((res && res.error && res.error.message) || 'no answer');
@@ -25648,6 +26647,12 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (pulling) return pulling;
     var remote = {};
     pulling = flushOutbox().catch(function () {}).then(function () {
+      /* The account's deleted profiles, read first. A server without
+         migration 0007 has no such table, and that fails the pull like any
+         other read: a failed read applies nothing. */
+      return fetchAll('deleted_profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
+    }).then(function (rows) {
+      remote.deleted_profiles = rows;
       return fetchAll('profiles', function (q) { return typeof q.eq === 'function' ? q.eq('account_id', userId) : q; });
     }).then(function (rows) {
       remote.profiles = rows;
@@ -25694,14 +26699,59 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (cfg.placeholders) { try { placeholders = cfg.placeholders() || []; } catch (e) { placeholders = []; } }
     var isPlaceholder = function (id) { return placeholders.indexOf(id) !== -1; };
 
-    var d = { profiles: [], removeProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
+    var d = { profiles: [], removeProfiles: [], deletedProfiles: [], pairs: [], memories: {}, consents: {}, lists: {}, recalc: [] };
     var res = { ok: true, changed: false, adopted: false, firstPull: firstPull,
       profilesAdded: 0, profilesUpdated: 0, profilesRemoved: 0, memoriesAdded: 0, memoriesRemoved: 0, entriesAdded: 0 };
 
     /* ---- profiles ---- */
+    /* Whether each profile's birth is saved to the account, from this
+       device's decision and the account's ledger, the later one deciding,
+       because the ledger arrives in this same pull and is merged below. A row
+       whose birth was not saved comes down empty, and that must never empty
+       the birth this device holds. */
+    var latest = {};
+    (remote.consent_events || []).forEach(function (r) {
+      if (!r || !r.profile_id || (r.scope !== 'birthData' && r.scope !== 'forOther')) return;
+      var bag = latest[r.scope] = latest[r.scope] || {};
+      var t = iso(r.ts), cur = bag[r.profile_id];
+      if (!cur || t > cur.ts) bag[r.profile_id] = { ts: t, granted: r.action === 'grant' };
+    });
+    var ledgerEff = function (scope, pid, fallback) {
+      var here = typeof pm.consentState === 'function' ? pm.consentState(scope, pid) : { granted: fallback, at: null };
+      var there = (latest[scope] || {})[pid];
+      if (there && (!here.at || there.ts > iso(here.at))) return there.granted;
+      return here.at ? here.granted : fallback;
+    };
+    var savedEff = function (pid) {
+      var there = (latest.birthData || {})[pid], here = typeof pm.consentState === 'function' ? pm.consentState('birthData', pid) : null;
+      if (there && (!here || !here.at || there.ts > iso(here.at))) return there.granted;
+      return birthSaved(pm, pid);
+    };
+    /* Made for somebody else, here or on another device. Its rows on this
+       device are its own: nothing is taken from the account's empty row,
+       nothing here is removed because the account no longer holds it, and
+       what this device recorded as sent is forgotten, so unmarking sends it
+       all again. */
+    var otherEff = function (pid) {
+      var L0 = localById[pid];
+      return forOther(L0) || ledgerEff('forOther', pid, false);
+    };
+    var forgetSent = function (pid) {
+      [cM, cC, cT, cO].forEach(function (c) {
+        Object.keys(c).forEach(function (k) { if (k.indexOf(pid + '/') === 0) delete c[k]; });
+      });
+    };
+    var hashFor = function (p, saved) { return saved ? hashOf(p) : hashOf(withoutBirth(p)); };
     var localById = {};
     store.profiles.forEach(function (p) { localById[p.id] = p; });
-    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id]; });
+    /* DELETED EVERYWHERE. A profile the account recorded as deleted goes
+       from this device whatever else is true of it: on a first pull, when it
+       was changed here since, and when it is marked for somebody else. The
+       record outlives the row, so this is the one absence that is never a
+       guess. */
+    var deleted = {};
+    (remote.deleted_profiles || []).forEach(function (r) { if (r && r.profile_id) deleted[r.profile_id] = 1; });
+    var remoteRows = remote.profiles.filter(function (r) { return r && r.id && !pendingProfile[r.id] && !deleted[r.id]; });
     var remoteById = {};
     remoteRows.forEach(function (r) { remoteById[r.id] = r; });
     var ownBefore = store.profiles.filter(function (p) { return !isPlaceholder(p.id); });
@@ -25709,15 +26759,20 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     var room = (pm.MAX_PROFILES || 6) - ownBefore.length;
     remoteRows.forEach(function (r) {
       var L = localById[r.id];
+      if (otherEff(r.id)) { if (L) forgetSent(r.id); return; }  // stays on its device; never made from the empty row
       if (L) {
         /* Changed here since the last sync: the local copy wins and the push
            sends it. Untouched here: the server's copy is the newer one. */
-        if (cP[r.id] !== hashOf(L)) return;
-        var m = profileFromRow(r, L);
-        if (!m.changed) return;
+        if (cP[r.id] !== profileHash(pm, L)) return;
+        var m = profileFromRow(r, L), saved = savedEff(r.id);
+        if (!saved) {
+          BIRTH_ROW.forEach(function (k) { m.profile[k] = L[k]; });
+          m.changed = hashOf(m.profile) !== hashOf(L);
+        }
+        if (!m.changed) { if (!saved) cP[r.id] = hashFor(L, false); return; }
         d.profiles.push(m.profile);
         if (birthMoved(L, m.profile)) d.recalc.push(r.id);
-        cP[r.id] = hashOf(m.profile);
+        cP[r.id] = hashFor(m.profile, saved);
         res.profilesUpdated++;
         return;
       }
@@ -25725,16 +26780,24 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       if (room <= 0) return;
       var made = profileFromRow(r, null).profile;
       d.profiles.push(made);
-      cP[r.id] = hashOf(made);
+      cP[r.id] = hashFor(made, savedEff(r.id));
       room--;
       res.profilesAdded++;
     });
     store.profiles.forEach(function (L) {
+      if (deleted[L.id]) {
+        d.deletedProfiles.push(L.id);
+        delete cP[L.id];
+        forgetSent(L.id);
+        res.profilesRemoved++;
+        return;
+      }
       if (remoteById[L.id] || !serverHas) return;
       if (isPlaceholder(L.id)) return;
+      if (otherEff(L.id)) { delete cP[L.id]; forgetSent(L.id); return; }  // its absence on the account is not a deletion
       if (cP[L.id] === undefined) return;          // never synced: new here, the push sends it
       if (firstPull) { delete cP[L.id]; return; }   // send it again rather than trust an absence
-      if (cP[L.id] !== hashOf(L)) return;           // changed here since: keep it, the push restores it
+      if (cP[L.id] !== profileHash(pm, L)) return;  // changed here since: keep it, the push restores it
       d.removeProfiles.push(L.id);
       delete cP[L.id];
       res.profilesRemoved++;
@@ -25744,7 +26807,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        too. */
     if (remoteRows.some(function (r) { return !isPlaceholder(r.id); })) {
       placeholders.forEach(function (id) {
-        if (!localById[id] || remoteById[id]) return;
+        if (!localById[id] || remoteById[id] || deleted[id]) return;
         d.removeProfiles.push(id);
         delete cP[id];
       });
@@ -25758,7 +26821,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     }
     /* Profiles that will exist once this lands. */
     var gone = {};
-    d.removeProfiles.forEach(function (id) { gone[id] = 1; });
+    d.removeProfiles.concat(d.deletedProfiles).forEach(function (id) { gone[id] = 1; });
     var present = {};
     store.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
     d.profiles.forEach(function (p) { if (!gone[p.id]) present[p.id] = 1; });
@@ -25778,6 +26841,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       (remoteMem[r.profile_id] = remoteMem[r.profile_id] || {})[String(r.local_id)] = r;
     });
     Object.keys(present).forEach(function (pid) {
+      if (otherEff(pid)) return;
       var local = localById[pid] ? pm.getMemory({ profileId: pid, respectConsent: false }) : [];
       var have = {}, rm = remoteMem[pid] || {}, add = [], remove = [];
       local.forEach(function (m) { have[m.id] = m; });
@@ -25796,7 +26860,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       /* Only for a profile the server still holds: one it no longer holds is
          either deleted (and goes whole, above) or changed here and kept, and
          its rows are not the server's to remove. */
-      if (localById[pid] && remoteById[pid]) {
+      if (localById[pid] && remoteById[pid] && !otherEff(pid)) {
         local.forEach(function (m) {
           var key = pid + '/' + m.id;
           if (rm[m.id] || cM[key] === undefined) return;
@@ -25824,6 +26888,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         (byPid[r.profile_id] = byPid[r.profile_id] || []).push(r.payload);
       });
       Object.keys(byPid).forEach(function (pid) {
+        if (otherEff(pid)) return;
         var arr = localById[pid] ? readJSON('incommon.p.' + pid + '.' + spec[1], []) : [];
         if (!Array.isArray(arr)) arr = arr ? [arr] : [];
         var count = {}, ids = {}, add = [];
@@ -25868,7 +26933,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       cR[key] = hashOf(pr);
     });
 
-    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
+    res.changed = !!(d.profiles.length || d.removeProfiles.length || d.deletedProfiles.length || d.pairs.length || res.memoriesAdded || res.memoriesRemoved ||
       res.entriesAdded || Object.keys(d.consents).some(function (pid) { return consentNews(pid, d.consents[pid]); }));
     if (res.changed) pm.importSynced(d);
     map.pulled[userId] = new Date().toISOString();
@@ -26613,18 +27678,35 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
      chapters to add) answers the first with them already in, and the second
      call is skipped. The page may pass onFirst, called with the first half as
      soon as it arrives, so it can be shown while the second is written. */
+  /* THE PROFILE THE DOSSIER WAS WRITTEN FROM travels with it, the active one
+     unless the page names another (server/migrations/0006). The server
+     stores it beside the reading so it can withdraw what was written from a
+     profile that stops being saved to the account or is marked as somebody
+     else's, and keeps no reading of such a profile; it refuses one marked as
+     somebody else's outright, which reads as forOther here. The id is the
+     random one the device made; it carries nothing of the birth. */
+  function activeProfileId() {
+    try { return (cfg && cfg.pm && cfg.pm.activeId()) || null; } catch (e) { return null; }
+  }
   function oracleRead(req) {
     if (!req) return oracleCall(req);
     var onFirst = typeof req.onFirst === 'function' ? req.onFirst : null;
     var body = Object.assign({}, req);
     delete body.onFirst;
+    if (body.profileId == null) { var pid = activeProfileId(); if (pid) body.profileId = pid; else delete body.profileId; }
     if (body.depth !== 'deep') return oracleCall(body);
     return oracleCall(Object.assign({}, body, { part: 'a' })).then(function (a) {
       if (!a.ok || (a.reading && Array.isArray(a.reading.chapters))) return a;
       /* The first half is on its way to the page before the second is asked
          for, so the reader has something to read while it is written. */
       if (onFirst) { try { onFirst(a); } catch (e) { /* a page that throws must not cost the reading */ } }
-      return oracleCall(Object.assign({}, body, { part: 'b' }));
+      /* The server joins the two halves when it kept the first. When it did
+         not (the birth is not saved to the account, so nothing of the reading
+         is kept there), the second comes back alone and is joined here. */
+      return oracleCall(Object.assign({}, body, { part: 'b' })).then(function (b) {
+        if (b.ok && a.reading && b.reading) b.reading = Object.assign({}, a.reading, b.reading);
+        return b;
+      });
     });
   }
   function oracleCall(req) {
@@ -26642,6 +27724,9 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         /* The code decides first, because two failures share a status: the
            daily limit and the provider's rate limit are both 429. */
         if (st === 402 || code === 'PREMIUM_REQUIRED') return { ok: false, reason: 'premium' };
+        /* A profile the reader marked as made for somebody else: the Oracle
+           writes for the reader, and the server refused before asking. */
+        if (code === 'FOR_OTHER') return { ok: false, reason: 'forOther' };
         if (code === 'RATE_LIMITED') return { ok: false, reason: 'busy' };
         if (code === 'OUT_OF_CREDITS') return { ok: false, reason: 'silent' };
         /* The function gave up on Kimi (504 TIMEOUT). Kimi was writing, so it
@@ -26944,10 +28029,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        a wipe is never re-uploaded by the debounce that follows it. */
     try {
       opts.pm.subscribe(function (name, detail) {
-        var mpid = detail && (detail.profileId || (cfg.pm.activeId && cfg.pm.activeId()));
-        if (name === 'profile:deleted' && detail && detail.id) queueOp({ op: 'del-profile', pid: detail.id });
-        else if (name === 'memory:deleted' && detail && detail.id) queueOp({ op: 'del-memory', pid: mpid, id: String(detail.id) });
-        else if (name === 'memory:deleted' && detail) queueOp({ op: 'del-memories', pid: mpid, type: detail.type || null });
+        routeEvent(name, detail);
         schedule();
       });
     } catch (e) {}
@@ -27051,7 +28133,8 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        library and a live ProfileManager, so every gate and outbox path runs
        in Node. */
     _setClientForTests: function (c, s) { client = c; session = s || null; held = null; },
-    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; }
+    _setConfigForTests: function (o) { cfg = o; pulling = null; syncing = null; lastPullAt = 0; },
+    _routeForTests: function (name, detail) { routeEvent(name, detail); }
   };
 
   return api;
@@ -28888,6 +29971,9 @@ input[type="date"]{color-scheme:dark}
      Order matters here: pair-cache.js takes its digest from people-library.js,
      so the library loads first. -->
 
+
+<!-- What a chart handout and a chart export may carry (2.2, Task 3). Reads
+     nothing; the screens that make a handout or an export hand it their data. -->
 
 
 
@@ -42435,9 +43521,14 @@ class Component extends DCLogic {
       const t = this.t2000(new Date(o.instant));
       const lons = {};
       this.PLNS.forEach(([n]) => { const v = this.lonOf(n, t); if (v != null) lons[n] = Math.round(v * 1000) / 1000; });
-      const gates = [...this.hdGatesFor({ birthDate: new Date(o.instant).toISOString().slice(0, 10),
-        birthTime: o.timeKnown ? new Date(o.instant).toISOString().slice(11, 16) : '',
-        timeUnknown: !o.timeKnown, timezone: '', tzOffset: 0 })];
+      /* The gates are read at the same instant as the longitudes, which is
+         the instant the store settled on: for an unknown time that is noon
+         where the birth happened, as the reader's own chart is drawn. Handing
+         hdGatesFor() an unknown time here used to put the gates at noon at
+         Greenwich and the longitudes at midnight (1.3, D-03). */
+      const iso = new Date(o.instant).toISOString();
+      const gates = [...this.hdGatesFor({ birthDate: iso.slice(0, 10), birthTime: iso.slice(11, 16),
+        timeUnknown: false, timezone: 'UTC', tzOffset: 0 })];
       const chans = (this.HD_CHANNELS || []).filter(c => gates.indexOf(c[0]) > -1 && gates.indexOf(c[1]) > -1)
         .map(c => c[0] + '-' + c[1]);
       const centers = [...new Set(chans.map(k => k.split('-')).flat().map(g => this.gateCenter(+g)).filter(Boolean))];
@@ -45778,7 +46869,9 @@ class Component extends DCLogic {
       const lon = this.lonOf(n, t), g = this.gateOf(lon);
       acts.push({ body: n, kind: kind, gate: g.gate, line: g.line });
       if (n === 'Sun') { const e = this.gateOf(lon + 180); acts.push({ body: 'Earth', kind: kind, gate: e.gate, line: e.line }); }
-      if (n === 'North Node') { const s = this.gateOf(lon + 180); acts.push({ body: 'South Node', kind: kind, gate: s.gate, line: s.line }); }
+      /* No South Node here: PLNS carries it already, and adding it from the
+         North Node as well made fourteen activations a side where the
+         tradition has thirteen (1.3, D-01). */
     });
     collect(tP, 'personality'); collect(tD, 'design');
     const gset = new Set(acts.map(a => a.gate));
@@ -45804,7 +46897,13 @@ class Component extends DCLogic {
     const counted = new Set(); let parts = 0;
     defined.forEach(c => { if (counted.has(c)) return; parts++; piece(c).forEach(x => counted.add(x)); });
     const definition = this.HD_DEFINITION[Math.min(parts, 4)];
-    const gates = [...gset].sort((a, b) => a - b).map(g => { const a = acts.find(x => x.gate === g); return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '' }; });
+    /* One row per gate, and every way the gate is held on it: a slow body or
+       the node can sit in one gate at both instants on two different lines,
+       and the row used to keep only the first (1.3, D-08). line, body and kind
+       stay the first holding, for the readers that want one. */
+    const gates = [...gset].sort((a, b) => a - b).map(g => { const held = acts.filter(x => x.gate === g), a = held[0];
+      return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '',
+        holds: held.map(x => ({ kind: x.kind, line: x.line, body: x.body })) }; });
     this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts,
       definition: definition, definitionParts: parts };
     return this._hd;
@@ -47417,6 +48516,10 @@ class Component extends DCLogic {
     return box[shape];
   }
   fmtDay(d) { const f = this._fmt('day', { month: 'short', day: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+  /* The Archive prints a year where the Throughline prints a day, so it is a
+     second shape rather than a second formatter. Same cache, same reason:
+     one Intl.DateTimeFormat per shape, built once. */
+  fmtArchiveDay(d) { const f = this._fmt('archiveDay', { month: 'short', day: 'numeric', year: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
   weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
   personalWeek(pyV, d) { return this.numKeep(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
@@ -48400,7 +49503,10 @@ class Component extends DCLogic {
     }
     return out;
   }
-  arcDate(m) { try { return new Date(m.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch (e) { return String(m.createdAt || '').slice(0, 10); } }
+  arcDate(m) {
+    const d = new Date(m.createdAt);
+    return isNaN(d.getTime()) ? String(m.createdAt || '').slice(0, 10) : this.fmtArchiveDay(d);
+  }
   releaseMemory(m) {
     const PM = this.PM();
     if (!PM) return;
@@ -48435,16 +49541,22 @@ class Component extends DCLogic {
   }
   arcVals() {
     const st = this.state, f = st.arcFilter || 'all', q = String(st.arcQuery || '').trim().toLowerCase();
-    const rows = this.arcRows();
+    /* Built only while the Library is the screen. The rows are read for the
+       tab count whenever the Library is open; the row objects the template
+       compiles (arcItems) are built only while Archive is the tab, so a state
+       change on Today no longer walks the store and formats a date per entry. */
+    const libOn = this.curTab() === 'library' && !st.selId && !st.libView;
+    const on = libOn && this.libSubOf() === 'archive';
+    const rows = libOn ? this.arcRows() : [];
     const match = m => {
       if (f !== 'all' && m.type !== f) return false;
       if (!q) return true;
       return (this.arcTitle(m) + ' ' + this.arcPreview(m) + ' ' + this.arcDate(m) + ' ' + String(m.createdAt || '')).toLowerCase().indexOf(q) !== -1;
     };
-    const shown = rows.filter(match);
-    const sel = st.arcSel ? rows.find(m => m.id === st.arcSel) : null;
+    const shown = on ? rows.filter(match) : [];
+    const sel = (on && st.arcSel) ? rows.find(m => m.id === st.arcSel) : null;
     const counts = {};
-    rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
+    if (libOn) rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
     return {
       /* Six tabs. Throughline and Archive live here and nowhere else: the Archive
          used to carry a card back to the Throughline, and the desktop Today page a
@@ -48457,24 +49569,24 @@ class Component extends DCLogic {
           go: () => this.setState({ libSub: k, libView: null, selId: null, arcSel: null, apSec: null }) };
       }),
       libTabsShow: this.curTab() === 'library' && !st.selId && !st.libView,
-      libArchive: this.curTab() === 'library' && !st.selId && !st.libView && this.libSubOf() === 'archive',
-      /* Not gated on the tab, the way the Study, Journal and Readings lists are
-         not: the phone draws the Library section whichever section is in view,
-         and a gate on curTab() would leave the section blank behind the reader
-         as they scroll past. */
-      libTL: !st.selId && !st.libView && this.libSubOf() === 'throughline',
+      libArchive: on,
+      /* Gated on the Library as well as the tab. The phone mounts every section,
+         so without the first half the timeline compiled while the reader stood
+         on Today. vtOnScroll commits tab with the section, so the gate is true
+         whenever the Library is the screen in view. */
+      libTL: libOn && this.libSubOf() === 'throughline',
       arcQuery: st.arcQuery || '',
       arcTypeQ: e => this.setState({ arcQuery: e.target.value }),
       arcFilters: [['all', 'All'], ['alignment', 'Alignments'], ['stella_conversation', 'Conversations'], ['journal', 'Journals']].map(([k, label]) => ({
         label: label + (k !== 'all' && counts[k] ? ' ' + counts[k] : ''), on: f === k,
         bg: f === k ? 'rgba(var(--atmc),.34)' : 'transparent', bd: f === k ? 'rgba(47,255,143,.52)' : 'var(--bd)',
         c: f === k ? 'var(--ac)' : 'var(--dim)', go: () => this.setState({ arcFilter: k }) })),
-      arcItems: shown.map(m => ({
+      arcItems: on ? shown.map(m => ({
         typeLabel: this.ARC_LABEL[m.type], tc: this.ARC_CHIP[m.type][0], tb: this.ARC_CHIP[m.type][1],
         date: this.arcDate(m), title: this.arcTitle(m), preview: this.arcPreview(m).slice(0, 130),
         open: () => this.setState({ arcSel: m.id }),
-        release: () => this.setState({ relFor: m.id, relText: '' }) })),
-      arcEmpty: shown.length === 0,
+        release: () => this.setState({ relFor: m.id, relText: '' }) })) : [],
+      arcEmpty: on && shown.length === 0,
       arcEmptyText: rows.length === 0
         ? 'Nothing in the Archive yet. Save an alignment from the Today tab, or keep a journal entry, and it will appear here.'
         : 'Nothing matches that filter. Try All, or a shorter word.',
@@ -50260,7 +51372,10 @@ class Component extends DCLogic {
     open: '◌', terms: '◇', example: '✎' };
   HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
     Projector: ['G', 'Ajna'], Reflector: [] };
-  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', self: 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
+  /* Keyed by the first word of an authority's name as authOf() splits it, so
+     Self-projected (G) is 'self-projected': keyed 'self', it lit no centre
+     (1.3, D-05). */
+  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', 'self-projected': 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
   hdShape(name) {
     const q = this.BG_POS[name], x = q[0], y = q[1], w = q[2], h = q[3], cx = x + w / 2, cy = y + h / 2;
     if (name === 'Head' || name === 'Heart') return [[cx, y], [x + w, y + h], [x, y + h]];
@@ -52995,6 +54110,9 @@ class Component extends DCLogic {
     const shut = { adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '' };
     const wipe = () => {
       const PM = this.PM();
+      /* The people this account saved first (G6): they live in one device wide
+         key, keyed by profile, which accountStorageKeys() cannot name. */
+      try { if (PM && PM.forgetAccountPeople) PM.forgetAccountPeople(); } catch (e) {}
       try { (PM && PM.accountStorageKeys ? PM.accountStorageKeys() : []).forEach(k => localStorage.removeItem(k)); } catch (e) {}
     };
     const keep = () => { const PM = this.PM(); if (PM && PM.releaseToGuest) PM.releaseToGuest(); };
@@ -57627,9 +58745,16 @@ class Component extends DCLogic {
     /* tlLine(), not tlAll(): the screen shows the record with the sky it
        happened under, while every count and every summary elsewhere keeps
        reading the reader's own entries alone. */
-    const tlAll = ready ? this.tlLine() : [];
-    const tlShown = st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter);
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    const libOn = st.tab === 'library' && !st.selId && !st.libView;
+    const tlOn = libOn && this.libSubOf() === 'throughline';
+    /* Only while the Library is standing on Throughline. This ran on every
+       render, so marking one mood on Today paid for the whole record, a
+       transit window scan and a date format per entry. vtOnScroll commits tab
+       with the section, so on the phone the gate is true exactly while that
+       section is the one in view. */
+    const tlAll = (ready && tlOn) ? this.tlLine() : [];
+    const tlShown = !tlOn ? [] : (st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter));
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       /* Named on every screen, not just Today, because the sample is most
          convincing on the screens that show the most detail. */
@@ -58379,7 +59504,11 @@ class Component extends DCLogic {
             const modes = [['personality', 'Personality'], ['design', 'Design'], ['both', 'Both']].map(([k, label]) => ({
               label: label, on: mode === k, bg: mode === k ? 'var(--ac)' : 'transparent', c: mode === k ? '#05060a' : 'var(--dim)',
               go: () => this.setState({ bgMode: k }) }));
-            const shown = hd.gates.filter(g => mode === 'both' ? true : g.kind === mode);
+            /* A gate shows on a side when that side holds it, not only when
+               its first holding is on that side, and its chip names every
+               line that side holds it at (1.3, D-08). */
+            const sideLines = g => [...new Set((g.holds || [g]).filter(h => mode === 'both' || h.kind === mode).map(h => h.line))].sort((a, b) => a - b);
+            const shown = hd.gates.filter(g => sideLines(g).length > 0);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
             /* The 2D wiring is drawn as the Atlas draws it: the centres in their
@@ -58441,7 +59570,7 @@ class Component extends DCLogic {
                 tag: defined ? 'DEFINED' : 'OPEN', tagC: defined ? 'var(--ok)' : 'var(--dim)',
                 tagBg: defined ? 'rgba(89,179,125,.16)' : 'rgba(238,240,248,.08)',
                 gates: byCenter[c].sort((a, b) => a.gate - b.gate).map(g => ({
-                  n: g.gate, line: '.' + g.line,
+                  n: g.gate, line: sideLines(g).map(l => '.' + l).join(' '),
                   bd: st.hsFocus === 'g:' + g.gate ? 'var(--ac2-hi)' : inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
                   bg: inChannel.has(g.gate) ? 'rgba(var(--atmc),.28)' : 'var(--sf2)',
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
@@ -59726,8 +60855,10 @@ class Component extends DCLogic {
     const now = new Date();
     const groups = this.dtSearchGroups();
     const q = String(st.dtQuery || '').trim();
-    const tl = st.ready ? this.tlAll() : [];
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    /* The recent list belongs to the desktop Today page, so only Today pays
+       for it. */
+    const tl = (st.ready && tab === 'today') ? this.tlAll() : [];
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       sideWide: open, sideRail: !open, sideToggle: () => this.dtToggleSide(),
       searchKeyHint: (mac ? '\u2318' : 'Ctrl ') + 'K',

@@ -578,6 +578,9 @@ input[type="date"]{color-scheme:dark}
      so the library loads first. -->
 <script src="./people-library.js"></script>
 <script src="./pair-cache.js"></script>
+<!-- What a chart handout and a chart export may carry (2.2, Task 3). Reads
+     nothing; the screens that make a handout or an export hand it their data. -->
+<script src="./share-rules.js"></script>
 <script src="./hd-composite.js"></script>
 <script src="./hd-circle.js"></script>
 <script src="./flight.js"></script>
@@ -14124,9 +14127,14 @@ class Component extends DCLogic {
       const t = this.t2000(new Date(o.instant));
       const lons = {};
       this.PLNS.forEach(([n]) => { const v = this.lonOf(n, t); if (v != null) lons[n] = Math.round(v * 1000) / 1000; });
-      const gates = [...this.hdGatesFor({ birthDate: new Date(o.instant).toISOString().slice(0, 10),
-        birthTime: o.timeKnown ? new Date(o.instant).toISOString().slice(11, 16) : '',
-        timeUnknown: !o.timeKnown, timezone: '', tzOffset: 0 })];
+      /* The gates are read at the same instant as the longitudes, which is
+         the instant the store settled on: for an unknown time that is noon
+         where the birth happened, as the reader's own chart is drawn. Handing
+         hdGatesFor() an unknown time here used to put the gates at noon at
+         Greenwich and the longitudes at midnight (1.3, D-03). */
+      const iso = new Date(o.instant).toISOString();
+      const gates = [...this.hdGatesFor({ birthDate: iso.slice(0, 10), birthTime: iso.slice(11, 16),
+        timeUnknown: false, timezone: 'UTC', tzOffset: 0 })];
       const chans = (this.HD_CHANNELS || []).filter(c => gates.indexOf(c[0]) > -1 && gates.indexOf(c[1]) > -1)
         .map(c => c[0] + '-' + c[1]);
       const centers = [...new Set(chans.map(k => k.split('-')).flat().map(g => this.gateCenter(+g)).filter(Boolean))];
@@ -17467,7 +17475,9 @@ class Component extends DCLogic {
       const lon = this.lonOf(n, t), g = this.gateOf(lon);
       acts.push({ body: n, kind: kind, gate: g.gate, line: g.line });
       if (n === 'Sun') { const e = this.gateOf(lon + 180); acts.push({ body: 'Earth', kind: kind, gate: e.gate, line: e.line }); }
-      if (n === 'North Node') { const s = this.gateOf(lon + 180); acts.push({ body: 'South Node', kind: kind, gate: s.gate, line: s.line }); }
+      /* No South Node here: PLNS carries it already, and adding it from the
+         North Node as well made fourteen activations a side where the
+         tradition has thirteen (1.3, D-01). */
     });
     collect(tP, 'personality'); collect(tD, 'design');
     const gset = new Set(acts.map(a => a.gate));
@@ -17493,7 +17503,13 @@ class Component extends DCLogic {
     const counted = new Set(); let parts = 0;
     defined.forEach(c => { if (counted.has(c)) return; parts++; piece(c).forEach(x => counted.add(x)); });
     const definition = this.HD_DEFINITION[Math.min(parts, 4)];
-    const gates = [...gset].sort((a, b) => a - b).map(g => { const a = acts.find(x => x.gate === g); return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '' }; });
+    /* One row per gate, and every way the gate is held on it: a slow body or
+       the node can sit in one gate at both instants on two different lines,
+       and the row used to keep only the first (1.3, D-08). line, body and kind
+       stay the first holding, for the readers that want one. */
+    const gates = [...gset].sort((a, b) => a - b).map(g => { const held = acts.filter(x => x.gate === g), a = held[0];
+      return { gate: g, name: this.GATE_NAMES[g] || '', line: a ? a.line : 1, body: a ? a.body : '', kind: a ? a.kind : '',
+        holds: held.map(x => ({ kind: x.kind, line: x.line, body: x.body })) }; });
     this._hd = { type: type, authority: authority, strategy: this.HD_STRATEGY[type], desc: this.HD_TYPE_DESC[type], defined: defined, activeChannels: active, gates: gates, acts: acts,
       definition: definition, definitionParts: parts };
     return this._hd;
@@ -19106,6 +19122,10 @@ class Component extends DCLogic {
     return box[shape];
   }
   fmtDay(d) { const f = this._fmt('day', { month: 'short', day: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
+  /* The Archive prints a year where the Throughline prints a day, so it is a
+     second shape rather than a second formatter. Same cache, same reason:
+     one Intl.DateTimeFormat per shape, built once. */
+  fmtArchiveDay(d) { const f = this._fmt('archiveDay', { month: 'short', day: 'numeric', year: 'numeric' }); return f ? f.format(d) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
   weekNo(d) { const s = new Date(d.getFullYear(), 0, 1); return Math.ceil((((d - s) / 86400000) + s.getDay() + 1) / 7); }
   personalWeek(pyV, d) { return this.numKeep(pyV + (d.getMonth() + 1) + this.weekNo(d)); }
   sunOn(date) { return this.chartAt(date)[0]; }
@@ -20089,7 +20109,10 @@ class Component extends DCLogic {
     }
     return out;
   }
-  arcDate(m) { try { return new Date(m.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch (e) { return String(m.createdAt || '').slice(0, 10); } }
+  arcDate(m) {
+    const d = new Date(m.createdAt);
+    return isNaN(d.getTime()) ? String(m.createdAt || '').slice(0, 10) : this.fmtArchiveDay(d);
+  }
   releaseMemory(m) {
     const PM = this.PM();
     if (!PM) return;
@@ -20124,16 +20147,22 @@ class Component extends DCLogic {
   }
   arcVals() {
     const st = this.state, f = st.arcFilter || 'all', q = String(st.arcQuery || '').trim().toLowerCase();
-    const rows = this.arcRows();
+    /* Built only while the Library is the screen. The rows are read for the
+       tab count whenever the Library is open; the row objects the template
+       compiles (arcItems) are built only while Archive is the tab, so a state
+       change on Today no longer walks the store and formats a date per entry. */
+    const libOn = this.curTab() === 'library' && !st.selId && !st.libView;
+    const on = libOn && this.libSubOf() === 'archive';
+    const rows = libOn ? this.arcRows() : [];
     const match = m => {
       if (f !== 'all' && m.type !== f) return false;
       if (!q) return true;
       return (this.arcTitle(m) + ' ' + this.arcPreview(m) + ' ' + this.arcDate(m) + ' ' + String(m.createdAt || '')).toLowerCase().indexOf(q) !== -1;
     };
-    const shown = rows.filter(match);
-    const sel = st.arcSel ? rows.find(m => m.id === st.arcSel) : null;
+    const shown = on ? rows.filter(match) : [];
+    const sel = (on && st.arcSel) ? rows.find(m => m.id === st.arcSel) : null;
     const counts = {};
-    rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
+    if (libOn) rows.forEach(m => { counts[m.type] = (counts[m.type] || 0) + 1; });
     return {
       /* Six tabs. Throughline and Archive live here and nowhere else: the Archive
          used to carry a card back to the Throughline, and the desktop Today page a
@@ -20146,24 +20175,24 @@ class Component extends DCLogic {
           go: () => this.setState({ libSub: k, libView: null, selId: null, arcSel: null, apSec: null }) };
       }),
       libTabsShow: this.curTab() === 'library' && !st.selId && !st.libView,
-      libArchive: this.curTab() === 'library' && !st.selId && !st.libView && this.libSubOf() === 'archive',
-      /* Not gated on the tab, the way the Study, Journal and Readings lists are
-         not: the phone draws the Library section whichever section is in view,
-         and a gate on curTab() would leave the section blank behind the reader
-         as they scroll past. */
-      libTL: !st.selId && !st.libView && this.libSubOf() === 'throughline',
+      libArchive: on,
+      /* Gated on the Library as well as the tab. The phone mounts every section,
+         so without the first half the timeline compiled while the reader stood
+         on Today. vtOnScroll commits tab with the section, so the gate is true
+         whenever the Library is the screen in view. */
+      libTL: libOn && this.libSubOf() === 'throughline',
       arcQuery: st.arcQuery || '',
       arcTypeQ: e => this.setState({ arcQuery: e.target.value }),
       arcFilters: [['all', 'All'], ['alignment', 'Alignments'], ['stella_conversation', 'Conversations'], ['journal', 'Journals']].map(([k, label]) => ({
         label: label + (k !== 'all' && counts[k] ? ' ' + counts[k] : ''), on: f === k,
         bg: f === k ? 'rgba(var(--atmc),.34)' : 'transparent', bd: f === k ? 'rgba(47,255,143,.52)' : 'var(--bd)',
         c: f === k ? 'var(--ac)' : 'var(--dim)', go: () => this.setState({ arcFilter: k }) })),
-      arcItems: shown.map(m => ({
+      arcItems: on ? shown.map(m => ({
         typeLabel: this.ARC_LABEL[m.type], tc: this.ARC_CHIP[m.type][0], tb: this.ARC_CHIP[m.type][1],
         date: this.arcDate(m), title: this.arcTitle(m), preview: this.arcPreview(m).slice(0, 130),
         open: () => this.setState({ arcSel: m.id }),
-        release: () => this.setState({ relFor: m.id, relText: '' }) })),
-      arcEmpty: shown.length === 0,
+        release: () => this.setState({ relFor: m.id, relText: '' }) })) : [],
+      arcEmpty: on && shown.length === 0,
       arcEmptyText: rows.length === 0
         ? 'Nothing in the Archive yet. Save an alignment from the Today tab, or keep a journal entry, and it will appear here.'
         : 'Nothing matches that filter. Try All, or a shorter word.',
@@ -21949,7 +21978,10 @@ class Component extends DCLogic {
     open: '◌', terms: '◇', example: '✎' };
   HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
     Projector: ['G', 'Ajna'], Reflector: [] };
-  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', self: 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
+  /* Keyed by the first word of an authority's name as authOf() splits it, so
+     Self-projected (G) is 'self-projected': keyed 'self', it lit no centre
+     (1.3, D-05). */
+  HD_AUTH_CENTRE = { emotional: 'Solar Plexus', sacral: 'Sacral', splenic: 'Spleen', ego: 'Heart', 'self-projected': 'G', mental: 'Ajna', environmental: 'Ajna', lunar: null };
   hdShape(name) {
     const q = this.BG_POS[name], x = q[0], y = q[1], w = q[2], h = q[3], cx = x + w / 2, cy = y + h / 2;
     if (name === 'Head' || name === 'Heart') return [[cx, y], [x + w, y + h], [x, y + h]];
@@ -24684,6 +24716,9 @@ class Component extends DCLogic {
     const shut = { adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '' };
     const wipe = () => {
       const PM = this.PM();
+      /* The people this account saved first (G6): they live in one device wide
+         key, keyed by profile, which accountStorageKeys() cannot name. */
+      try { if (PM && PM.forgetAccountPeople) PM.forgetAccountPeople(); } catch (e) {}
       try { (PM && PM.accountStorageKeys ? PM.accountStorageKeys() : []).forEach(k => localStorage.removeItem(k)); } catch (e) {}
     };
     const keep = () => { const PM = this.PM(); if (PM && PM.releaseToGuest) PM.releaseToGuest(); };
@@ -29316,9 +29351,16 @@ class Component extends DCLogic {
     /* tlLine(), not tlAll(): the screen shows the record with the sky it
        happened under, while every count and every summary elsewhere keeps
        reading the reader's own entries alone. */
-    const tlAll = ready ? this.tlLine() : [];
-    const tlShown = st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter);
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    const libOn = st.tab === 'library' && !st.selId && !st.libView;
+    const tlOn = libOn && this.libSubOf() === 'throughline';
+    /* Only while the Library is standing on Throughline. This ran on every
+       render, so marking one mood on Today paid for the whole record, a
+       transit window scan and a date format per entry. vtOnScroll commits tab
+       with the section, so on the phone the gate is true exactly while that
+       section is the one in view. */
+    const tlAll = (ready && tlOn) ? this.tlLine() : [];
+    const tlShown = !tlOn ? [] : (st.tlFilter === 'all' ? tlAll : tlAll.filter(e => e.type === st.tlFilter));
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       /* Named on every screen, not just Today, because the sample is most
          convincing on the screens that show the most detail. */
@@ -30068,7 +30110,11 @@ class Component extends DCLogic {
             const modes = [['personality', 'Personality'], ['design', 'Design'], ['both', 'Both']].map(([k, label]) => ({
               label: label, on: mode === k, bg: mode === k ? 'var(--ac)' : 'transparent', c: mode === k ? '#05060a' : 'var(--dim)',
               go: () => this.setState({ bgMode: k }) }));
-            const shown = hd.gates.filter(g => mode === 'both' ? true : g.kind === mode);
+            /* A gate shows on a side when that side holds it, not only when
+               its first holding is on that side, and its chip names every
+               line that side holds it at (1.3, D-08). */
+            const sideLines = g => [...new Set((g.holds || [g]).filter(h => mode === 'both' || h.kind === mode).map(h => h.line))].sort((a, b) => a - b);
+            const shown = hd.gates.filter(g => sideLines(g).length > 0);
             const shownSet = new Set(shown.map(g => g.gate));
             const A = this.A();
             /* The 2D wiring is drawn as the Atlas draws it: the centres in their
@@ -30130,7 +30176,7 @@ class Component extends DCLogic {
                 tag: defined ? 'DEFINED' : 'OPEN', tagC: defined ? 'var(--ok)' : 'var(--dim)',
                 tagBg: defined ? 'rgba(89,179,125,.16)' : 'rgba(238,240,248,.08)',
                 gates: byCenter[c].sort((a, b) => a.gate - b.gate).map(g => ({
-                  n: g.gate, line: '.' + g.line,
+                  n: g.gate, line: sideLines(g).map(l => '.' + l).join(' '),
                   bd: st.hsFocus === 'g:' + g.gate ? 'var(--ac2-hi)' : inChannel.has(g.gate) ? 'rgba(47,255,143,.52)' : 'var(--bd)',
                   bg: inChannel.has(g.gate) ? 'rgba(var(--atmc),.28)' : 'var(--sf2)',
                   c: inChannel.has(g.gate) ? 'var(--ac)' : 'var(--tx)',
@@ -31415,8 +31461,10 @@ class Component extends DCLogic {
     const now = new Date();
     const groups = this.dtSearchGroups();
     const q = String(st.dtQuery || '').trim();
-    const tl = st.ready ? this.tlAll() : [];
-    const fmtD = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); } catch (e) { return d; } };
+    /* The recent list belongs to the desktop Today page, so only Today pays
+       for it. */
+    const tl = (st.ready && tab === 'today') ? this.tlAll() : [];
+    const fmtD = d => { const x = new Date(d + 'T12:00:00'); return isNaN(x.getTime()) ? d : this.fmtDay(x); };
     return {
       sideWide: open, sideRail: !open, sideToggle: () => this.dtToggleSide(),
       searchKeyHint: (mac ? '\u2318' : 'Ctrl ') + 'K',

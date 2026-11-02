@@ -41,8 +41,148 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    two-person consent records that name it, as the device already does.
    Needs 0001's `pairs (profile_b)` index to stay a lookup.
 
-None of them creates a table, so `server/mfa-policies.sql` does not need to be
-run again for them.
+4. `0004-chart-versions.sql`: the chart version history (1.2,
+   `data-contracts/HD-STUDY-MODEL.md` section 4), row level security on and
+   no policy. **Do not apply until workstream 2's privacy review of the model
+   (2.2 Task 1) is resolved**, and apply it with its policies, which are
+   workstream 2's.
+
+5. `0005-chart-versions-policies.sql`: who may touch a chart version
+   (workstream 2, assignment 2.2): read, add and delete on the reader's own
+   profiles, no update, nothing for anon. Then run `server/mfa-policies.sql`
+   again, which lists `chart_versions`. Tested by
+   `tools/check-hd-study-rls.js`.
+
+6. `0006-server-holds-the-switch.sql`: the server holds "Save my profile to
+   my account" and "this profile is for someone else" (the follow-up review's
+   findings 4, 5 and 9, decided by the owner on 30 October 2026). A profile
+   row is emptied of its birth while the account's latest `birthData` event
+   is a revoke or its latest `birthCleared` a grant, and emptied whole while
+   its latest `forOther` is a grant, so a build older than the switch cannot
+   put the birth back. A chart version follows the same rule; a profile
+   marked as somebody else's keeps no memory, Throughline entry or Oki
+   message; and an event dated more than five minutes ahead of the server is
+   stored at its time. An Oracle reading gains `profile_id`; one finished for
+   such a profile is stored as `served` with no content, and the kept readings
+   of a profile that becomes withheld turn `withdrawn`. Apply after
+   `server/oracle/schema.sql`. **Deploy the Oracle function and the app that
+   go with it (taskforce/02-security-rls) with this file, in the same window,
+   once 0007 and 0008 are applied too (see 7)**: the app
+   resends a row after its events so that turning saving back on keeps the
+   birth (K86), and without that a reader who turns it back on loses the
+   account copy until the next change to the profile. Tested by
+   `tools/check-hd-study-rls.js`, rows WH1 to WH18. It also hangs a trigger
+   on `chart_versions`, so it runs after 0004, and **if 0004 is ever undone
+   and applied again, run 0006 again too**: dropping the table drops the
+   trigger with it.
+
+7. `0007-profiles-deleted-everywhere.sql`: a deleted profile stays deleted
+   on every device (the owner, 30 October 2026: "if a profile is deleted,
+   delete it everywhere"; the 2.2 review's RV3). `deleted_profiles` holds the
+   account, the profile's id and the server's time, and nothing else. A record
+   arriving deletes the profile's row (and by the cascades its journal,
+   ledger, Throughline, Oki log, chart versions and two person records) and
+   turns its kept Oracle readings `withdrawn`; anything that arrives for that
+   profile afterwards is dropped, and a reading finished for it is stored as
+   `served`. Every rule acts inside the record's own account. Row level
+   security on, no policy. Apply after 0006. **The app from
+   taskforce/02-security-rls ships after this file and 0008, never before**:
+   it records deletions here, and its pull reads this table and fails without
+   it. Tested by `tools/check-hd-study-rls.js`, rows DP1 to DP13.
+
+8. `0008-deleted-profiles-policies.sql`: a signed in reader may read and add
+   records for their own account, and nothing else: no update and no delete,
+   because a record that could be removed would let a deleted profile come
+   back. Then run `server/mfa-policies.sql` again, which lists
+   `deleted_profiles`.
+
+9. `0009-live-schema-reconcile.sql`: gives a project whose `pairs` and
+   `luminary_unlocks` drifted from the repository every column, key and
+   policy the repository has for them, and drops four policies no file here
+   made. It changes nothing on a project already of the repository's shape.
+   The two old `profile_id` columns stay, nullable and written by nothing,
+   each with its foreign key to `profiles` (on delete cascade), until 0011
+   drops them. Found on the live project on
+   30 October 2026: `pairs` had `profile_id` in place of `account_id`, so
+   every pull and every pair write failed; `luminary_unlocks`
+   had `profile_id` in place of `user_id` and no key, so no payment could be
+   recorded or recognised; and one stray policy would have let a reader write
+   their own unlock the moment `user_id` existed, so it is dropped in the same
+   file. **On the live project this file runs first, then 0001, 0002 and
+   0003**, which were never applied there (0001 indexes `pairs.account_id`).
+   Then run `server/mfa-policies.sql` again. Tested by
+   `tools/check-hd-study-rls.js`, rows LV1 to LV9, against the live shape
+   before and after.
+
+10. `0010-cast-counters-read-only.sql`: drops the insert, update and delete
+   policies on `cast_counters`, a table only the live project has (made in
+   the dashboard, used by nothing in the app or any deployed function). A
+   reader keeps reading their own rows; nothing writes through the API.
+   Guarded, so it does nothing where the table does not exist. Decided by the
+   owner on 31 October 2026. Tested by `tools/check-hd-study-rls.js`, row
+   LV10.
+
+11. `0011-drop-old-columns-and-counter-grants.sql`: drops `pairs.profile_id`
+   and `luminary_unlocks.profile_id`, the live tables' old keys that 0009 kept
+   (nullable, written by nothing, each with a foreign key cascading from
+   `profiles`), and revokes insert, update, delete and truncate on
+   `cast_counters` from anon and authenticated. Checked before dropping: the
+   only thing depending on either column was its own foreign key, no row held
+   a value, and neither the app nor any deployed function reads or writes
+   them. Guarded and safe to run twice. Decided by the owner on 31 October
+   2026. Tested by `tools/check-hd-study-rls.js`, row LV11.
+
+12. `0012-memories-index-and-rules-hardened.sql`: assignment 2.3. Indexes
+   `memories (profile_id, memory_type, created_at desc)`, and makes the seven
+   older policies again as the same rules for `authenticated` only, reading
+   the caller once per statement; `owns_profile()` gets a fixed search path
+   and stays SECURITY INVOKER. Nothing that was allowed is refused. **If 0009
+   is ever run again, run this after it.** Tested by
+   `tools/check-hd-study-rls.js`, rows HR1 to HR5.
+
+13. `0013-profiles-birth-name.sql`: assignment 2.3. `profiles.birth_name`,
+   emptied by its own trigger whenever 0006 withholds the profile. Run after
+   0006. Tested by rows BN1 to BN5.
+
+14. `0014-people.sql`: assignment 2.3. The saved people table, row level
+   security on and no policy. **Do not apply before the Privacy Policy says
+   saved people can go to the account**, and apply it with 0015.
+
+15. `0015-people-policies.sql`: who may touch a saved person (the profile's
+   own account, through `owns_profile()`), and when the account may hold one
+   at all: only while the profile's latest `relationships` consent is a
+   grant, never for a profile marked as somebody else's or recorded as
+   deleted. A revoke deletes them. Run after 0014, 0006 and 0007, then run
+   `server/mfa-policies.sql` again, which lists `people`. Deploy the account
+   function (`server/account`) in the same window: it now deletes `people`
+   with an account. Its trigger uses 0007's `deleted_rows_drop()`, so **to
+   undo 0007, run this file's DOWN first**. Tested by rows PL1 to PL11.
+
+16. `0016-memories-chart-notes-and-tarot.sql`: assignment 2.3. Widens the
+   `memory_type` check on `memories` to admit `chart_note` and
+   `tarot_reading` (until it runs, the server refuses both, and a refused
+   upsert ends the whole push, K69; the app may start sending either only
+   after this is live). A `chart_note` keeps its words and address but loses
+   its `resolved` value while 0006 withholds the profile's birth, and the
+   account's notes lose it when saving is turned off or the birth cleared.
+   Run after 0006. Tested by rows CN1 to CN6.
+
+17. `0017-accounts-tier.sql`: the owner, 31 October 2026. `accounts` gains
+   `tier` (`free` or `luminary`), `tier_source` (`unlock`, `subscription` or
+   `store`), `tier_until` and `tier_updated_at`, worked out by a trigger from
+   `luminary_unlocks`, `subscriptions` and `store_subscriptions` on every
+   write to the account row and whenever one of those tables changes, never
+   taken from a request. It is a label for reading and reporting; the Oracle
+   function's `opened()` is still the paywall, and it also lets in the admin
+   addresses and the store apps, which the label does not see. A
+   subscription that ends with no write from Stripe reads `luminary` until
+   `select public.account_tier_refresh_all();` is run. Run after
+   `server/oracle/schema.sql`; no new table, so `server/mfa-policies.sql`
+   need not run again. Tested by rows AT1 to AT8.
+
+0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
+run again for them. 0004 does, once its policies are in, 0007 does, once
+0008 is in, and 0014 does, once 0015 is in.
 
 Proven on 27 October 2026 against Postgres 16 with `server/cloud-schema.sql`
 (from its v2 section), `server/oracle/schema.sql`, `server/store/schema.sql`,

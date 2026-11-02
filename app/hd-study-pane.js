@@ -186,14 +186,18 @@
        outside this scroller and must not be subtracted a second time. */
     hdPaneRevealStage() {
       var st = stageEl(); if (!st) return;
-      var sc = st.parentElement;
-      while (sc && sc !== document.body) {
+      var page = st.closest('[data-vt-page]');
+      var sc = page || st.parentElement;
+      while (!page && sc && sc !== document.body) {
         var oy = getComputedStyle(sc).overflowY;
         if ((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break;
         sc = sc.parentElement;
       }
       if (!sc || sc === document.body) return;
-      var top = sc.scrollTop + st.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
+      /* The measured page top includes the sample banner, title and tabs.
+         Their combined height varies with viewport and profile state. */
+      var visibleTop = sc.getBoundingClientRect().top + sc.clientTop;
+      var top = sc.scrollTop + st.getBoundingClientRect().top - visibleTop - 8;
       var target = Math.max(0, top);
       /* vtSettle watches an already-started scroll. Without scrollTo first
          it cannot bring the stage into the mobile sheet's top reserve. Only

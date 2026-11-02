@@ -2,6 +2,7 @@ ASSIGNMENT 1.3, SECONDARY   Workstream 1: Data Mapping & Schema Architecture
 Programme:       Delegation 1, the Human Design logic map
 Status:          READY (approved by the owner, 28 October 2026)
 Issued against:  main f9d0251, 28 October 2026
+Updated:         28 October 2026, efficiency edit E2 (approved by the owner)
 Who:             the workstream 1 SECONDARY (named in the roster, 00-README.md)
 Reviews:         the primary's 1.3 commits on the Task Force 1 branch
                  (CHARTER.md), from the start sha the primary posts on the
@@ -56,21 +57,24 @@ STEP 2. TRUTH: DOES EACH NOTE SAY WHAT THE CODE DOES
     tools/check-layer-boundary.js.
 
 
-STEP 3. RECOMPUTE: AN INDEPENDENT IMPLEMENTATION
-  This is the step that tests the map rather than the prose. In your own
-  scratch directory, write a small implementation of the chart FROM THE
-  VAULT'S NOTES ALONE (Gate and line, Channels, Centres, Definition, Type,
-  Authority, Profile), feed it activations lifted from the app's lonOf() and
-  designT() (the way tools/check-astral-bodies.js lifts lonRaw()), and run it
-  beside the app's hdChart() on at least 2,000 instants from 1950 to 2010,
-  plus the boundary cases the primary names (302.0, 301.999, a line edge, 0
-  and 360). Every difference is one of three things, and the review says
-  which: the vault is wrong, the app is wrong, or the rule is genuinely
-  ambiguous in the tradition. Paste your script and its output into the
-  review. Do not commit it: tools/ belongs to workstream 6; if it should
-  become a gate, say so as a request.
-  Then run the primary's reconciliation script from the pull request and
-  confirm its counts.
+STEP 3. RECOMPUTE: RERUN, THEN RE-IMPLEMENT THE DERIVATIONS
+  This is the step that tests the map rather than the prose.
+  a. Run the primary's reconciliation script from the pull request on the
+     recorded commit, and confirm its counts. The gate and line arithmetic
+     and the positions are already held by hd-wheel.js's own rows and by
+     check-astral-bodies.js against Horizons, and 6.2's reference charts
+     will hold them again, so they are not re-implemented here.
+  b. In your own scratch directory, write a small implementation of
+     Definition, Type and Authority FROM THE VAULT'S NOTES ALONE (Centres,
+     Channels, Definition, Type, Authority). Feed it the activations the app
+     itself produces (lifted from the app the way tools/check-astral-
+     bodies.js lifts lonRaw()), and run it beside the app's hdChart() on at
+     least 2,000 instants from 1950 to 2010. Every difference is one of
+     three things, and the review says which: the vault is wrong, the app is
+     wrong, or the rule is genuinely ambiguous in the tradition.
+  Paste your script and its output into the review. Do not commit it:
+  tools/ belongs to workstream 6; if it should become a gate, say so as a
+  request.
 
 
 STEP 4. THE DISCREPANCY REGISTER

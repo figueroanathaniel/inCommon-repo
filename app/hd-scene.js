@@ -1695,7 +1695,11 @@
 
   P.resize = function () {
     if (!this.r || !this.el.root.isConnected) return;
-    var b = this.el.root.getBoundingClientRect(), W = Math.max(2, Math.round(b.width)), H = Math.max(2, Math.round(b.height));
+    /* The host fits the phone frame above its reading sheet using measured
+       page bounds. Consume that frame here, through ResizeObserver, without
+       assuming a viewport margin or writing host layout from the renderer. */
+    var b = this.el.root.getBoundingClientRect();
+    var W = Math.max(2, Math.round(b.width)), H = Math.max(2, Math.round(b.height));
     var dpr = window.devicePixelRatio || 1, L = [Math.min(dpr, 2), Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1, 0.75][this.level];
     var bloom = this.level <= 1 && !GFX.direct;
     if (W === this.W && H === this.H && L === this.pr && bloom === this.bloom) return;

@@ -1,7 +1,7 @@
 ASSIGNMENT 2.2   Workstream 2: Security Hardening & RLS Setup
 Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
-Status:          READY (approved by the owner, 27 October 2026).
-                 Starts after 1.2's model is agreed.
+Status:          DONE (moved by the owner, 31 October 2026; merged as PR
+                 #129 to #136). Approved by the owner, 27 October 2026.
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 2 primary (named in the roster, 00-README.md)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,

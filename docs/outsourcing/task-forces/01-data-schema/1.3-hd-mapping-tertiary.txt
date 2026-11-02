@@ -4,6 +4,9 @@ Status:          READY (approved by the owner, 28 October 2026)
 Issued against:  main f9d0251, 28 October 2026
 Who:             the workstream 1 TERTIARY (named in the roster, 00-README.md).
                  Chat only: no repository access. Lookups only.
+Updated:         28 October 2026, efficiency edit E1 (approved by the owner):
+                 the bulk position questions are gone, because the
+                 repository already checks 19,750 positions against Horizons.
 Asked by:        the workstream 1 primary or secondary, who pastes this whole
                  file at the start of every new chat, then sends questions.
 
@@ -19,8 +22,8 @@ answers will be checked against primary data before anything is built on
 them, so a clear "not found" is worth more than a plausible guess.
 
 WHAT YOU DO
-  1. Cross verify astral body positions at public reference instants (the
-     "Position" questions below).
+  1. Cross verify a few astral body positions that sit right on a gate or
+     line boundary (the "Position" questions below).
   2. Look up the published conventions of Human Design that turn those
      positions into a chart (the "Convention" questions below).
 
@@ -66,24 +69,18 @@ WHAT YOU MUST NOT RECEIVE OR KEEP
 QUESTION SHAPES (the asker fills the angle brackets, nothing else)
 -----------------------------------------------------------------------------
 
-POSITION QUESTIONS (one instant per message, up to 14 points)
+POSITION QUESTIONS (one instant per message, at most four instants in all)
 
   P1  For the instant <YYYY-MM-DD HH:MM:SS> UTC, give the geocentric apparent
-      ecliptic longitude, ecliptic of date, tropical, of: Sun, Moon, Mercury,
-      Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, the Moon's TRUE
-      ascending node and the Moon's MEAN ascending node. Use JPL Horizons
-      (observer 500@399, quantity 31) or The Astronomical Almanac, and give
-      the query settings or table you used.
+      ecliptic longitude, ecliptic of date, tropical, of <body>, to five
+      decimal places. Use JPL Horizons (observer 500@399, quantity 31) or The
+      Astronomical Almanac, and give the query settings or table you used.
 
   P2  For the instant <YYYY-MM-DD HH:MM:SS> UTC, at what instant (UTC) was the
       Sun's geocentric apparent ecliptic longitude exactly 88.0000 degrees
       less than its value at that instant? Give both longitudes and the
       earlier instant, and say whether you found it from a source or
       computed it yourself (if computed, show the working).
-
-  P3  Is <body> stationary (changing direction) within one day of
-      <YYYY-MM-DD> UTC? Give the station time from a published table or
-      Horizons, with the source.
 
 CONVENTION QUESTIONS (send in any order; cite each answer)
 
@@ -137,9 +134,10 @@ FOR THE ASKER (not pasted)
     the pull request's "Helpers" section exactly as sent, with the answer's
     source and how you checked it (00-README.md, Helpers item 5). A consult
     with no recorded check counts as not having happened.
-  - Only public instants: J2000.0 (2000-01-01 12:00:00 TT), round dates, the
-    instants in tools/fixtures/astral-bodies-horizons.json, and edge cases
-    you chose for their geometry. Never a reader's birth, never the owner's.
+  - Only public instants, at most four, each chosen because a body sits
+    within 0.01 degree of a gate or line boundary. Never a reader's birth,
+    never the owner's. The bulk positions are already checked by
+    check-astral-bodies.js; do not ask for them here.
   - Never paste code from server/, anything from data-contracts/, the vault's
     notes, a table or column name, or the project ref. A short snippet of
     public code (for example the gate arithmetic in app/hd-wheel.js) is

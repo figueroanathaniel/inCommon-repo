@@ -3,11 +3,14 @@ Programme:       Human Design upgrade, phase 1 (docs/hd-upgrade/)
 Status:          READY (approved by the owner, 27 October 2026)
 Issued against:  main 53d792a, 27 October 2026
 Who:             the workstream 3 primary (named in the roster, 00-README.md)
+Updated:         28 October 2026, efficiency edits E3, E4, E10 and E14
+                 (approved by the owner)
 Read first:      00-README.md, CHARTER.md, brief.md, CLAUDE.md,
                  docs/hd-upgrade/01-competitive-study.txt (sections 5 and 6)
-Runs beside:     assignment 3.1. Keep each task on its own branch. If 3.1's
-                 renderVals split is in flight, put new values in their own
-                 bag methods so the two never edit the same lines.
+Runs beside:     assignment 3.1. Every task is commits prefixed "3.2:" on the
+                 Task Force 3 branch (CHARTER.md), one task at a time. If
+                 3.1's renderVals split is in flight, put new values in
+                 their own bag methods so the two never edit the same lines.
 
 THE OUTCOME
 Every Human Design chart inCommon draws says how it was made and never passes
@@ -15,7 +18,7 @@ a guess off as a fact. Then the first layer below the line, Color, is
 computed with its confidence, and a reader with an uncertain birth time can
 see exactly what that uncertainty changes.
 
-TASK 1. FIX THE SLEEP TEACHING (branch feature/hd-sleep)
+TASK 1. FIX THE SLEEP TEACHING
   Four passages in app/hd-life.js give a defined Sacral the advice the
   tradition gives to those WITHOUT one ("go to bed before you are tired, let
   the energy burn off lying down"): line 163 (the defined Sacral), 238
@@ -28,7 +31,9 @@ TASK 1. FIX THE SLEEP TEACHING (branch feature/hd-sleep)
   inCommon follows the tradition here (D2). Mark the PR "needs Human
   Design review" so the reviewer confirms it once appointed (D1).
 
-TASK 2. NO SILENT FALLBACKS (branch feature/hd-provisional)
+TASK 2. NO SILENT FALLBACKS
+  These three are known faults. 1.3 lists them as "known, owned by 3.2 Task
+  2" and does not re-derive them, so this task is their only owner.
   a. designT(): when the arc solver is missing or fails, the chart is drawn
      from the flat 88.36 day offset. Keep the fallback, and carry a flag on
      the chart (for example hd.provisional = ['design']) that the chart
@@ -47,16 +52,22 @@ TASK 2. NO SILENT FALLBACKS (branch feature/hd-provisional)
   harness (coordinate with workstream 6) for (a) and (b) with the solver
   removed and a Sun missing. Each shown red against the current code.
 
-TASK 3. THE INSPECTION PANEL (branch feature/hd-inspect)
+TASK 3. THE INSPECTION PANEL (after 1.3 publishes its Pipeline notes)
+  The panel's fields, their types and units come from 1.3's Pipeline notes
+  (data-contracts/hd-vault/, Birth instant and Design moment), so the panel
+  and the map cannot disagree. Start once 1.3 posts on this task force's
+  pull request that those notes are checked.
   One panel, opened from the chart in both shells, that shows how this chart
   was made: the birth date and time as given, the zone and its offset on
   that date, UT, the personality instant, the design instant and the solar
   arc it was solved to, the iterations, the ephemeris used, and any
   provisional flags from Task 2. Numbers and labels only; no explanation of
   what a reading means (CLAUDE.md, "Discovery belongs to the reader"). It is
-  a dialog, so it follows the focus trap and announcement rules.
+  a dialog, so it follows the focus trap and announcement rules. Show that
+  every value outside the panel is unchanged with tools/dump-render-vals.js
+  (6.1 Task 5).
 
-TASK 4. COLOR, WITH ITS CONFIDENCE (branch feature/hd-color, after Tasks 2
+TASK 4. COLOR, WITH ITS CONFIDENCE (after Tasks 2
 and 3 merge and after workstream 6 has landed its reference cases)
   A new mechanics module, app/hd-subline.js, classified in
   check-layer-boundary.js as mechanics, computing color (and only color in
@@ -71,7 +82,7 @@ and 3 merge and after workstream 6 has landed its reference cases)
   like hd-wheel's twelve rows, and a row that moves the birth time by one
   minute and checks the Moon's confidence drops.
 
-TASK 5. THE BIRTH TIME SCANNER (branch feature/hd-scanner, after Task 4)
+TASK 5. THE BIRTH TIME SCANNER (after Task 4)
   For a chart, scan the hours either side of the given time (default 12,
   as Maia does) and list every moment a major property changes: Type,
   Authority, Profile, definition, any defined channel, and the Ascendant's
@@ -87,7 +98,7 @@ FILES THIS ASSIGNMENT OWNS
   panel markup in both shells. Not the 3D scenes (workstream 4).
 
 DONE MEANS
-  Each task merged on its own PR, every README gate green, new rows shown red
+  Each task reviewed as its own range on the Task Force pull request, every README gate green, new rows shown red
   first, both shells, CLAUDE.md sections for Tasks 2 to 5, and Task 1 marked
   for the Human Design reviewer.
 
