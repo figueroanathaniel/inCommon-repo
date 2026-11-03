@@ -48,6 +48,7 @@
      exactly two. -->
 <html lang="en">
 <head>
+<script>Object.defineProperty(window, '__INCOMMON_RELEASE_TOKEN__', { value: '2.9.7', writable: false, configurable: false });</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05060a">
@@ -1064,7 +1065,7 @@
      is not the module's own. */
   function cloud() {
     return loading || (loading = load('./supabase-js-2.57.1.umd.min.js')
-      .then(function () { return load('./incommon-cloud.js?v=2.9.6'); })
+      .then(function () { return load('./incommon-cloud.js?v=2.9.7'); })
       .then(function () {
         if (!window.supabase || !window.InCommonCloud) throw new Error('sign in files missing');
         return (Cmod = window.InCommonCloud);

@@ -100,6 +100,8 @@ const LAYERS = {
     'today-integration.js',        /* takes structured elements and writes the passage */
   ],
   shell: [
+    'ui-registry.js', 'reload-guard.js', 'bootstrap-handshake.js',
+    'cloud-update-drafts.js', 'cloud-update-ui.js',
     'profile-manager.js', 'memory-store.js', 'people-library.js', 'pair-cache.js',
     'analytics.js', 'geocode-online.js', 'safety-router.js', 'evaluation-suite.js',
     /* What a chart handout and a chart export may carry (2.2, Task 3).

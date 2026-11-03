@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script>Object.defineProperty(window, '__INCOMMON_RELEASE_TOKEN__', { value: '2.9.7', writable: false, configurable: false });</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- The app is not a page to be found. Every address but the bare one and the
@@ -527,6 +528,11 @@ input[type="date"]{color-scheme:dark}
 <script src="./supabase-js-2.57.1.umd.min.js"></script>
 <script src="./incommon-core.js"></script>
 <script src="./practice-library.js"></script>
+<script src="./ui-registry.js"></script>
+<script src="./reload-guard.js"></script>
+<script src="./bootstrap-handshake.js"></script>
+<script src="./cloud-update-drafts.js"></script>
+<script src="./cloud-update-ui.js"></script>
 <script src="./profile-manager.js"></script>
 <script src="./sabian-symbols.js"></script>
 <script src="./sabian-symbols-data.js"></script>
@@ -624,6 +630,23 @@ input[type="date"]{color-scheme:dark}
 <div style="position:absolute;inset:0;z-index:1">
 <div data-live="polite" role="status" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0"></div>
 <div data-live="assertive" role="alert" aria-live="assertive" aria-atomic="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0"></div>
+<sc-if value="{{ cloudNoticeOn }}" hint-placeholder-val="{{ false }}">
+  <section data-cloud-update-notice="1" aria-label="Sync update" style="position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:170;width:calc(100% - 24px);max-width:640px;max-height:40dvh;overflow:auto;box-sizing:border-box;padding:12px 16px;border:1px solid var(--bd);border-radius:var(--rad);background:var(--bg);box-shadow:var(--lift-hi)">
+    <div style="font:600 14px/1.4 var(--fu);color:var(--tx)">{{ cloudNoticeTitle }}</div>
+    <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudDraftMsg }}</p>
+    <sc-if value="{{ cloudFormGuardOn }}" hint-placeholder-val="{{ false }}">
+      <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudFormGuardMsg }}</p>
+    </sc-if>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <sc-if value="{{ cloudDraftAvailable }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cloudDraftRestoreGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Restore writing drafts</button>
+      </sc-if>
+      <button onClick="{{ cloudDraftSaveGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Save draft copy</button>
+      <button onClick="{{ cloudFormCheckGo }}" disabled="{{ cloudFormChecking }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Check open forms</button>
+      <button onClick="{{ cloudNoticeDismissGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep working</button>
+    </div>
+  </section>
+</sc-if>
 <sc-if value="{{ authGate }}" hint-placeholder-val="{{ false }}">
   <!-- role and aria-modal are what engage the focus trap, which watches for
        [role="dialog"]. Without them this screen was a full page overlay with
@@ -673,7 +696,7 @@ input[type="date"]{color-scheme:dark}
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:26px;min-width:0">
               <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Your name</span>
-              <input data-lift="in" value="{{ afBname }}" onChange="{{ typeBname }}" placeholder="Full birth name" autoComplete="name" aria-label="Full birth name" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
+              <input data-reload-sensitive="true" data-lift="in" value="{{ afBname }}" onChange="{{ typeBname }}" placeholder="Full birth name" autoComplete="name" aria-label="Full birth name" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
             </div>
           </div>
           <!-- STATION TWO: the moment. Two columns when the card is wide
@@ -689,7 +712,7 @@ input[type="date"]{color-scheme:dark}
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:10px 14px">
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
                   <span style="font:400 12px var(--fu);color:var(--mut)">Date of birth</span>
-                  <input data-lift="in" value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" min="1900-01-01" aria-label="Date of birth" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu);color-scheme:dark">
+                  <input data-reload-sensitive="true" data-lift="in" value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" min="1900-01-01" aria-label="Date of birth" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px;color:var(--tx);font:400 15px var(--fu);color-scheme:dark">
                   <div style="min-height:18px"><sc-if value="{{ afBdateHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bdate" style="font:400 12px/1.5 var(--fu);color:var(--warn)">{{ afBdateErr }}</div></sc-if></div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
@@ -699,9 +722,9 @@ input[type="date"]{color-scheme:dark}
                       <!-- The two halves fill the box and meet at the colon, so
                            a click anywhere on the box focuses a half. -->
                       <div data-lift="card" role="group" aria-label="Time of birth, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0">
-                        <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:10px 0 0 10px;text-align:right;color:var(--tx);font:400 16px var(--fu)">
+                        <input data-reload-sensitive="true" value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:10px 0 0 10px;text-align:right;color:var(--tx);font:400 16px var(--fu)">
                         <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--mut)">:</span>
-                        <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:0 10px 10px 0;text-align:left;color:var(--tx);font:400 16px var(--fu)">
+                        <input data-reload-sensitive="true" value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:44px;background:transparent;border:none;border-radius:0 10px 10px 0;text-align:left;color:var(--tx);font:400 16px var(--fu)">
                       </div>
                       <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="display:flex;gap:4px">
                         <sc-for list="{{ afBmerRows }}" as="m" hint-placeholder-count="3">
@@ -732,7 +755,7 @@ input[type="date"]{color-scheme:dark}
               <span style="font:600 10.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">The place</span>
               <div style="position:relative">
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ac2-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none"><path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                <input data-lift="in" value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="City of birth" autoComplete="off" aria-label="Place of birth" aria-describedby="incommon-place-list" aria-invalid="{{ afBplaceBad }}" aria-errormessage="incommon-err-bplace" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px 0 38px;color:var(--tx);font:400 15px var(--fu)">
+                <input data-reload-sensitive="true" data-lift="in" value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="City of birth" autoComplete="off" aria-label="Place of birth" aria-describedby="incommon-place-list" aria-invalid="{{ afBplaceBad }}" aria-errormessage="incommon-err-bplace" style="box-sizing:border-box;width:100%;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 14px 0 38px;color:var(--tx);font:400 15px var(--fu)">
                 <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
                 <ul id="incommon-place-list" aria-label="Places that match" style="position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;list-style:none;margin:0;padding:4px;border:1px solid var(--bd);border-radius:10px;background-color:var(--bg);background-image:linear-gradient(var(--sf2),var(--sf2));max-height:260px;overflow-y:auto;box-shadow:0 14px 34px rgba(0,0,0,.5)">
                   <sc-for list="{{ cxPlaceHits }}" as="p" hint-placeholder-count="3">
@@ -789,8 +812,8 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ authBirth }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:13px">
           <div style="font:400 14px/1.7 var(--fb);color:var(--tx)">This is what every chart is drawn from. The date alone is enough to begin; a time and a city make the houses real.</div>
-          <input data-lift="in" value="{{ afBname }}" onChange="{{ typeBname }}" placeholder="What should we call you?" aria-label="Name" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
-          <input data-lift="in" value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" aria-label="Birth date" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ afBname }}" onChange="{{ typeBname }}" placeholder="What should we call you?" aria-label="Name" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ afBdate }}" onChange="{{ typeBdate }}" type="date" aria-label="Birth date" aria-invalid="{{ afBdateBad }}" aria-errormessage="incommon-err-bdate" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
           <sc-if value="{{ afBdateHasErr }}" hint-placeholder-val="{{ false }}"><div id="incommon-err-bdate" style="font:400 11px/1.5 var(--fu);color:var(--warn)">{{ afBdateErr }}</div></sc-if>
           <!-- A TEXT FIELD AND AN EXPLICIT CLOCK, not an input of type time.
                A native time control is a different control on every platform:
@@ -802,9 +825,9 @@ input[type="date"]{color-scheme:dark}
           <sc-if value="{{ afBtimeShow }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;gap:8px">
               <div data-lift="card" role="group" aria-label="Birth time, if you know it" style="box-sizing:border-box;flex:1;min-width:0;min-height:50px;display:flex;align-items:center;justify-content:center;gap:4px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0">
-                <input value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:12px 0 0 12px;text-align:right;color:var(--tx);font:400 17px var(--fu)">
+                <input data-reload-sensitive="true" value="{{ afBtimeH }}" onChange="{{ typeBtimeH }}" inputMode="numeric" maxLength="2" placeholder="hh" aria-label="Birth hour" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:12px 0 0 12px;text-align:right;color:var(--tx);font:400 17px var(--fu)">
                 <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--mut)">:</span>
-                <input value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:0 12px 12px 0;text-align:left;color:var(--tx);font:400 17px var(--fu)">
+                <input data-reload-sensitive="true" value="{{ afBtimeM }}" onChange="{{ typeBtimeM }}" inputMode="numeric" maxLength="2" placeholder="mm" aria-label="Birth minute" aria-invalid="{{ afBtimeBad }}" aria-errormessage="incommon-err-btime" style="box-sizing:border-box;flex:1 1 0;min-width:0;align-self:stretch;min-height:46px;background:transparent;border:none;border-radius:0 12px 12px 0;text-align:left;color:var(--tx);font:400 17px var(--fu)">
               </div>
               <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="display:flex;gap:5px">
                 <sc-for list="{{ afBmerRows }}" as="m" hint-placeholder-count="3">
@@ -820,7 +843,7 @@ input[type="date"]{color-scheme:dark}
             <span style="flex:none;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:1px solid {{ afBtimeUnknownBd }};border-radius:5px;font:700 11px var(--fu);color:var(--ac)">{{ afBtimeUnknownMark }}</span>
             <span style="flex:1;font:400 12px/1.5 var(--fu);color:var(--tx)">I do not know my birth time</span>
           </button>
-          <input data-lift="in" value="{{ afBplace }}" onChange="{{ typeBplace }}" placeholder="City of birth" aria-label="Birth city" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ afBplace }}" onChange="{{ typeBplace }}" placeholder="City of birth" aria-label="Birth city" style="box-sizing:border-box;width:100%;min-height:50px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 15px var(--fu)">
           <!-- WHAT THE ARITHMETIC ACTUALLY RESOLVED, shown before any chart is
                drawn from it. The offset is the one that applied on the birth
                DATE, not today: a zone changes its rules, and an hour of error
@@ -861,21 +884,21 @@ input[type="date"]{color-scheme:dark}
       <div class="registration-form-grid">
         <div class="input-group">
           <label for="reg-name">Full name at birth <span class="reg-opt">middle name included</span></label>
-          <input id="reg-name" data-lift="in" autocomplete="name" autocapitalize="words" spellcheck="false" value="{{ regName }}" onChange="{{ regTypeName }}" aria-invalid="{{ regNameBad }}" aria-describedby="reg-msg" required>
+          <input data-reload-sensitive="true" id="reg-name" data-lift="in" autocomplete="name" autocapitalize="words" spellcheck="false" value="{{ regName }}" onChange="{{ regTypeName }}" aria-invalid="{{ regNameBad }}" aria-describedby="reg-msg" required>
         </div>
         <div class="reg-row">
           <div class="input-group">
             <label for="reg-date">Date of birth</label>
-            <input id="reg-date" data-lift="in" type="date" min="1900-01-01" value="{{ regDate }}" onChange="{{ regTypeDate }}" aria-invalid="{{ regDateBad }}" aria-describedby="reg-msg" required>
+            <input data-reload-sensitive="true" id="reg-date" data-lift="in" type="date" min="1900-01-01" value="{{ regDate }}" onChange="{{ regTypeDate }}" aria-invalid="{{ regDateBad }}" aria-describedby="reg-msg" required>
           </div>
           <div class="input-group">
             <label for="reg-time">Time of birth <span class="reg-opt">if known</span></label>
-            <input id="reg-time" data-lift="in" type="time" value="{{ regTime }}" onChange="{{ regTypeTime }}" aria-invalid="{{ regTimeBad }}" aria-describedby="reg-msg">
+            <input data-reload-sensitive="true" id="reg-time" data-lift="in" type="time" value="{{ regTime }}" onChange="{{ regTypeTime }}" aria-invalid="{{ regTimeBad }}" aria-describedby="reg-msg">
           </div>
         </div>
         <div class="input-group" style="position:relative">
           <label for="reg-place">Place of birth</label>
-          <input id="reg-place" data-lift="in" value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="City of birth" autoComplete="off" aria-invalid="{{ regPlaceBad }}" aria-describedby="reg-msg reg-place-list">
+          <input data-reload-sensitive="true" id="reg-place" data-lift="in" value="{{ afBplace }}" onChange="{{ cxTypePlace }}" placeholder="City of birth" autoComplete="off" aria-invalid="{{ regPlaceBad }}" aria-describedby="reg-msg reg-place-list">
           <sc-if value="{{ cxPlaceHasHits }}" hint-placeholder-val="{{ false }}">
             <ul id="reg-place-list" aria-label="Places that match" class="reg-hits">
               <sc-for list="{{ cxPlaceHits }}" as="p" hint-placeholder-count="3">
@@ -900,7 +923,7 @@ input[type="date"]{color-scheme:dark}
         </div>
         <div class="input-group">
           <label for="reg-pass">Choose a password <span class="reg-opt">8 or more characters</span></label>
-          <input id="reg-pass" data-lift="in" type="password" autocomplete="new-password" value="{{ regPass }}" onChange="{{ regTypePass }}" aria-invalid="{{ regPassBad }}" aria-describedby="reg-msg" required>
+          <input data-reload-sensitive="true" id="reg-pass" data-lift="in" type="password" autocomplete="new-password" value="{{ regPass }}" onChange="{{ regTypePass }}" aria-invalid="{{ regPassBad }}" aria-describedby="reg-msg" required>
         </div>
         <button type="button" onClick="{{ regNewsGo }}" role="checkbox" aria-checked="{{ regNewsOn }}" class="reg-check">
           <span aria-hidden="true" style="flex:none;box-sizing:border-box;width:20px;height:20px;border-radius:6px;border:1.5px solid {{ regNewsBd }};background:{{ regNewsBg }};display:flex;align-items:center;justify-content:center;font:700 12px/1 var(--fu);color:var(--onac)">{{ regNewsMark }}</span>
@@ -998,7 +1021,7 @@ input[type="date"]{color-scheme:dark}
           <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:0 8px">
             <span style="font:600 13px var(--fu);color:var(--tx);text-align:center">{{ horoDateShort }}</span>
             <span style="font:400 9.5px var(--fu);letter-spacing:.04em;color:var(--mut);text-align:center">{{ horoDateMeta }}</span>
-            <input type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
+            <input data-reload-ui="horoDate" type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
           </div>
           <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 17px var(--fb);color:var(--ac)">›</button>
         </div>
@@ -2135,7 +2158,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ noBirthName }}" hint-placeholder-val="{{ true }}">
         <div data-lift="box" style="display:flex;flex-direction:column;gap:10px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:14px 15px">
           <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">Expression and Soul Urge are drawn from the full name on your birth certificate. Add it to see them. It stays on this device, with your profile.</div>
-          <input data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
           <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
         </div>
       </sc-if>
@@ -2198,7 +2221,7 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libArchive }}" hint-placeholder-val="{{ false }}">
       <div style="flex:none;display:flex;flex-direction:column;gap:9px;padding:12px 18px 6px" role="search" aria-label="Search the archive">
-        <input data-lift="in" value="{{ arcQuery }}" onChange="{{ arcTypeQ }}" placeholder="Search the archive by word or date…" aria-label="Search the archive" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="arcQuery" data-lift="in" value="{{ arcQuery }}" onChange="{{ arcTypeQ }}" placeholder="Search the archive by word or date…" aria-label="Search the archive" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
         <div onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:6px" role="radiogroup" aria-label="Filter the archive">
           <sc-for list="{{ arcFilters }}" as="f" hint-placeholder-count="4">
             <button data-lift onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 13px;border:1px solid {{ f.bd }};border-radius:999px;background:{{ f.bg }};font:600 11px var(--fu);color:{{ f.c }}">{{ f.label }}</button>
@@ -2317,7 +2340,7 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libJournal }}" hint-placeholder-val="{{ false }}">
       <div style="flex:none;padding:12px 18px 4px">
-        <input data-lift="in" value="{{ q }}" onChange="{{ typeQ }}" placeholder="Search practices. Try 'no' or 'sleep'…" aria-label="Search practices" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="q" data-lift="in" value="{{ q }}" onChange="{{ typeQ }}" placeholder="Search practices. Try 'no' or 'sleep'…" aria-label="Search practices" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:12px 18px 24px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .22s ease">
         <div style="flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
@@ -2795,7 +2818,7 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ lexBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;font:600 12px var(--fu);color:var(--ac)">‹ All practices</button>
           <div style="font:400 24px/1.25 var(--fd)">Sabian Lexicon</div>
         </div>
-        <input data-lift="in" value="{{ lexQuery }}" onChange="{{ lexType }}" placeholder="Search a degree or keyword: “Leo 15”, “emergence”" aria-label="Search the lexicon" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="lexQuery" data-lift="in" value="{{ lexQuery }}" onChange="{{ lexType }}" placeholder="Search a degree or keyword: “Leo 15”, “emergence”" aria-label="Search the lexicon" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
         <sc-if value="{{ lexSearching }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px">
             <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ lexHitLabel }}</div>
@@ -2895,8 +2918,8 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
         <sc-if value="{{ libFollow }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:10px">
-            <textarea data-lift="in" value="{{ shifted }}" onChange="{{ typeShifted }}" rows="2" placeholder="What shifted?" aria-label="What shifted" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
-            <textarea data-lift="in" value="{{ notShifted }}" onChange="{{ typeNot }}" rows="2" placeholder="What didn't?" aria-label="What didn't shift" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="shifted" data-lift="in" value="{{ shifted }}" onChange="{{ typeShifted }}" rows="2" placeholder="What shifted?" aria-label="What shifted" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="notShifted" data-lift="in" value="{{ notShifted }}" onChange="{{ typeNot }}" rows="2" placeholder="What didn't?" aria-label="What didn't shift" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
             <div data-lift="card" onKeyDown="{{ radioKeys }}" style="display:flex;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Should this be remembered">
               <sc-for list="{{ rememberOpts }}" as="r" hint-placeholder-count="2">
                 <button data-lift onClick="{{ r.go }}" role="radio" aria-checked="{{ r.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 11.5px var(--fu);color:{{ r.c }};background:{{ r.bg }}">{{ r.t }}</button>
@@ -3149,7 +3172,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="atlasQuery" data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ hdSearching }}" hint-placeholder-val="{{ false }}">
           <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ hdHitLine }}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
@@ -3440,7 +3463,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ apQuery }}" onChange="{{ apType }}" placeholder="Search the Astropedia: Scorpio, threshold, Saturn" aria-label="Search the Astropedia" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="apQuery" data-lift="in" value="{{ apQuery }}" onChange="{{ apType }}" placeholder="Search the Astropedia: Scorpio, threshold, Saturn" aria-label="Search the Astropedia" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ apSearching }}" hint-placeholder-val="{{ false }}">
           <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apHitLine }}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
@@ -3671,7 +3694,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="bnQuery" data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ bnFlat }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:9px">
             <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ bnHitLine }}</div>
@@ -3749,7 +3772,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ spiritIChing }}" hint-placeholder-val="{{ false }}">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Ask it something</div>
-          <input data-lift="in" value="{{ icQuestion }}" onChange="{{ icType }}" placeholder="What am I not seeing about this?" aria-label="Your question" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
+          <input data-recovery-field="icQuestion" data-lift="in" value="{{ icQuestion }}" onChange="{{ icType }}" placeholder="What am I not seeing about this?" aria-label="Your question" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How to cast" style="display:flex;gap:7px">
             <sc-for list="{{ icMethods }}" as="m" hint-placeholder-count="2">
               <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ m.bd }};border-radius:12px;background:{{ m.bg }};color:{{ m.c }};font:600 11.5px var(--fu)">{{ m.label }}</button>
@@ -3817,7 +3840,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
       <!-- THE SIXTY FOUR, as reference. Nobody casts down here. -->
-      <input data-lift="in" value="{{ ilQuery }}" onChange="{{ ilType }}" placeholder="Look one up: 49, revolution, Ding" aria-label="Search the hexagrams" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-ui="ilQuery" data-lift="in" value="{{ ilQuery }}" onChange="{{ ilType }}" placeholder="Look one up: 49, revolution, Ding" aria-label="Search the hexagrams" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ ilSearching }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ ilHitCount }}</div>
@@ -3901,7 +3924,7 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ dlBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">Dream Symbols</div>
       </div>
-      <input data-lift="in" value="{{ dlQuery }}" onChange="{{ dlType }}" placeholder="Look up an image: tornado, water, a door" aria-label="Search dream symbols" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-ui="dlQuery" data-lift="in" value="{{ dlQuery }}" onChange="{{ dlType }}" placeholder="Look up an image: tornado, water, a door" aria-label="Search dream symbols" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ dlSearching }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ dlHitCount }}</div>
@@ -4233,10 +4256,10 @@ input[type="date"]{color-scheme:dark}
         <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Write it down</div>
           <div style="display:flex;flex-wrap:wrap;gap:9px">
-            <input data-lift="in" value="{{ dreamTitleVal }}" onChange="{{ dreamTitleType }}" placeholder="Give it a name" aria-label="A name for this dream" style="box-sizing:border-box;flex:1 1 180px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 15px var(--fb)">
-            <input data-lift="in" value="{{ dreamDateVal }}" onChange="{{ dreamDateType }}" type="date" aria-label="The night it happened" style="box-sizing:border-box;flex:0 1 168px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
+            <input data-recovery-field="dreamTitle" data-lift="in" value="{{ dreamTitleVal }}" onChange="{{ dreamTitleType }}" placeholder="Give it a name" aria-label="A name for this dream" style="box-sizing:border-box;flex:1 1 180px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 15px var(--fb)">
+            <input data-recovery-field="dreamDate" data-lift="in" value="{{ dreamDateVal }}" onChange="{{ dreamDateType }}" type="date" aria-label="The night it happened" style="box-sizing:border-box;flex:0 1 168px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
           </div>
-          <textarea data-lift="in" value="{{ dreamTextVal }}" onChange="{{ dreamTextType }}" rows="8" placeholder="{{ dreamPlaceholder }}" aria-label="The dream itself" style="box-sizing:border-box;width:100%;resize:vertical;min-height:170px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="dreamText" data-lift="in" value="{{ dreamTextVal }}" onChange="{{ dreamTextType }}" rows="8" placeholder="{{ dreamPlaceholder }}" aria-label="The dream itself" style="box-sizing:border-box;width:100%;resize:vertical;min-height:170px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;flex-wrap:wrap;gap:14px">
             <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:7px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">How you slept</div>
@@ -4256,8 +4279,8 @@ input[type="date"]{color-scheme:dark}
             </div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:9px">
-            <input data-lift="in" value="{{ dreamMoodBVal }}" onChange="{{ dreamMoodBType }}" placeholder="How you felt going to bed" aria-label="How you felt going to bed" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
-            <input data-lift="in" value="{{ dreamMoodAVal }}" onChange="{{ dreamMoodAType }}" placeholder="How you felt waking up" aria-label="How you felt waking up" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
+            <input data-recovery-field="dreamMoodB" data-lift="in" value="{{ dreamMoodBVal }}" onChange="{{ dreamMoodBType }}" placeholder="How you felt going to bed" aria-label="How you felt going to bed" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
+            <input data-recovery-field="dreamMoodA" data-lift="in" value="{{ dreamMoodAVal }}" onChange="{{ dreamMoodAType }}" placeholder="How you felt waking up" aria-label="How you felt waking up" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
           </div>
           <button data-lift onClick="{{ dreamRecurGo }}" role="switch" aria-checked="{{ dreamRecurOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ dreamRecurBd }};background:{{ dreamRecurBg }};color:{{ dreamRecurC }};font:600 12px var(--fu)">{{ dreamRecurLabel }}</button>
         </div>
@@ -4384,7 +4407,7 @@ input[type="date"]{color-scheme:dark}
         <sc-if value="{{ dreamHasText }}" hint-placeholder-val="{{ false }}">
           <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
             <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What you make of it</div>
-            <textarea data-lift="in" value="{{ dreamInterpVal }}" onChange="{{ dreamInterpType }}" rows="3" placeholder="{{ dreamInterpPh }}" aria-label="Your own interpretation" style="box-sizing:border-box;width:100%;resize:vertical;min-height:72px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="dreamInterp" data-lift="in" value="{{ dreamInterpVal }}" onChange="{{ dreamInterpType }}" rows="3" placeholder="{{ dreamInterpPh }}" aria-label="Your own interpretation" style="box-sizing:border-box;width:100%;resize:vertical;min-height:72px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:11px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">One small thing to do with it</div>
               <div style="font:italic 400 var(--rd)/var(--rdlh) var(--fb);color:var(--tx)">{{ dreamRitual }}</div>
@@ -4497,7 +4520,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What number keeps appearing?</div>
-          <input data-lift="in" value="{{ angelInput }}" onChange="{{ angelType }}" onKeyDown="{{ angelKey }}" placeholder="111" inputMode="numeric" aria-label="The number you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 22px var(--fd)">
+          <input data-recovery-field="angelInput" data-lift="in" value="{{ angelInput }}" onChange="{{ angelType }}" onKeyDown="{{ angelKey }}" placeholder="111" inputMode="numeric" aria-label="The number you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 22px var(--fd)">
           <button data-lift onClick="{{ angelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">Find meaning</button>
         </div>
         <sc-if value="{{ angelHas }}" hint-placeholder-val="{{ false }}">
@@ -4553,7 +4576,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What animal keeps appearing?</div>
-          <input data-lift="in" value="{{ animInput }}" onChange="{{ animType }}" onKeyDown="{{ animKey }}" placeholder="crow" autoCapitalize="none" aria-label="The animal you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 20px var(--fd)">
+          <input data-recovery-field="animInput" data-lift="in" value="{{ animInput }}" onChange="{{ animType }}" onKeyDown="{{ animKey }}" placeholder="crow" autoCapitalize="none" aria-label="The animal you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 20px var(--fd)">
           <sc-if value="{{ animHasChips }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:7px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ animChipsLabel }}</div>
@@ -4661,7 +4684,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What else keeps appearing?</div>
-          <input data-lift="in" value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
+          <input data-recovery-field="otherInput" data-lift="in" value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <sc-if value="{{ otherComposing }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
               <sc-for list="{{ otherAsk }}" as="a" hint-placeholder-count="4">
@@ -5153,7 +5176,7 @@ input[type="date"]{color-scheme:dark}
               </div>
               <sc-if value="{{ s.needsPin }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:8px;align-items:center">
-                  <input data-lift="in" value="{{ s.pin }}" onChange="{{ s.typePin }}" inputMode="numeric" maxLength="4" placeholder="{{ s.pinPh }}" aria-label="PIN for {{ s.name }}" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
+                  <input data-reload-sensitive="true" data-lift="in" value="{{ s.pin }}" onChange="{{ s.typePin }}" inputMode="numeric" maxLength="4" placeholder="{{ s.pinPh }}" aria-label="PIN for {{ s.name }}" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
                   <button data-lift onClick="{{ s.confirm }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Activate</button>
                 </div>
               </sc-if>
@@ -5212,7 +5235,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 11.5px/1.6 var(--fb);color:var(--tx)">{{ delGateText }}</div>
           <sc-if value="{{ delNeedsPin }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;gap:8px;align-items:center">
-              <input data-lift="in" value="{{ delPin }}" onChange="{{ delPinType }}" type="password" inputMode="numeric" maxLength="4" placeholder="PIN" aria-label="PIN to open deleted memories" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
+              <input data-reload-sensitive="true" data-lift="in" value="{{ delPin }}" onChange="{{ delPinType }}" type="password" inputMode="numeric" maxLength="4" placeholder="PIN" aria-label="PIN to open deleted memories" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
               <button data-lift onClick="{{ delUnlock }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Open</button>
             </div>
           </sc-if>
@@ -5849,7 +5872,7 @@ input[type="date"]{color-scheme:dark}
           <div data-lift="box" class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
               <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
-                <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                <input data-reload-ui="chartExpandSearch" data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
                 <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
                   <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
                   <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
@@ -6044,7 +6067,7 @@ input[type="date"]{color-scheme:dark}
               <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
                   <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
-                    <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                    <input data-reload-ui="chartExpandSearch" data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
                     <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
                       <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
                       <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
@@ -6166,7 +6189,7 @@ input[type="date"]{color-scheme:dark}
     <div onClick="{{ swallow }}" role="dialog" aria-modal="true" aria-label="Search" style="width:100%;max-height:88svh;display:flex;flex-direction:column;background:var(--sf);border-top:1px solid rgba(47,255,143,.32);border-radius:26px 26px 0 0;animation:vtSheet .24s cubic-bezier(.22,1,.36,1)">
       <div style="flex:none;display:flex;align-items:center;gap:11px;padding:18px 20px 14px;border-bottom:1px solid var(--bd)">
         <span aria-hidden="true" style="font:400 18px var(--fb);color:var(--ac)">⚲</span>
-        <input value="{{ searchQuery }}" onChange="{{ searchType }}" ref="{{ searchRef }}" placeholder="Anything: a screen, a card, a gate, a dream…" aria-label="Search" style="flex:1;min-width:0;min-height:44px;background:transparent;border:none;font:400 17px var(--fu);color:var(--tx)">
+        <input data-reload-ui="searchQuery" value="{{ searchQuery }}" onChange="{{ searchType }}" ref="{{ searchRef }}" placeholder="Anything: a screen, a card, a gate, a dream…" aria-label="Search" style="flex:1;min-width:0;min-height:44px;background:transparent;border:none;font:400 17px var(--fu);color:var(--tx)">
         <button onClick="{{ searchClose }}" aria-label="Close search" style="all:unset;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fu);color:var(--mut)">✕</button>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom))">
@@ -6204,9 +6227,9 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
       </div>
-      <input data-lift="in" value="{{ draftTitle }}" onChange="{{ typeTitle }}" placeholder="{{ draftTitlePh }}" aria-label="Title" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-      <textarea data-lift="in" value="{{ draftNote }}" onChange="{{ typeNote }}" rows="2" placeholder="{{ draftNotePh }}" aria-label="Note" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:italic 400 13px/1.55 var(--fb);color:var(--tx)"></textarea>
-      <input data-lift="in" value="{{ draftDate }}" onChange="{{ typeDate }}" type="date" aria-label="Date" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+      <input data-recovery-field="draft.title" data-lift="in" value="{{ draftTitle }}" onChange="{{ typeTitle }}" placeholder="{{ draftTitlePh }}" aria-label="Title" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <textarea data-recovery-field="draft.note" data-lift="in" value="{{ draftNote }}" onChange="{{ typeNote }}" rows="2" placeholder="{{ draftNotePh }}" aria-label="Note" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:italic 400 13px/1.55 var(--fb);color:var(--tx)"></textarea>
+      <input data-recovery-field="draft.date" data-lift="in" value="{{ draftDate }}" onChange="{{ typeDate }}" type="date" aria-label="Date" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
       <button data-lift onClick="{{ draftSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ draftBg }};color:{{ draftC }};font:700 13.5px var(--fu)">{{ draftLabel }}</button>
       <button data-lift onClick="{{ voiceGo }}" aria-label="Record your voice" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(139,92,246,.5);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"></path><path d="M12 18v3"></path></svg>Speak it instead</button>
     </div>
@@ -6860,7 +6883,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ switchName }}’s PIN</div>
           <div style="display:flex;gap:10px">
             <sc-for list="{{ pinBoxes }}" as="b" hint-placeholder-count="4">
-              <input value="{{ b.v }}" onChange="{{ b.type }}" ref="{{ b.ref }}" inputMode="numeric" maxLength="1" aria-label="PIN digit {{ b.n }}" style="box-sizing:border-box;width:46px;height:52px;text-align:center;background:transparent;border:none;border-bottom:2px solid {{ b.bd }};font:400 22px var(--fd);color:var(--tx)">
+              <input data-reload-sensitive="true" value="{{ b.v }}" onChange="{{ b.type }}" ref="{{ b.ref }}" inputMode="numeric" maxLength="1" aria-label="PIN digit {{ b.n }}" style="box-sizing:border-box;width:46px;height:52px;text-align:center;background:transparent;border:none;border-bottom:2px solid {{ b.bd }};font:400 22px var(--fd);color:var(--tx)">
             </sc-for>
           </div>
           <sc-if value="{{ hasPinErr }}" hint-placeholder-val="{{ false }}">
@@ -6880,11 +6903,11 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ formClose }}" style="position:fixed;inset:0;background:rgba(5,4,8,.78);display:flex;align-items:flex-end;z-index:84">
     <div role="dialog" aria-label="{{ formTitle }}" onClick="{{ swallow }}" style="width:100%;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:11px;animation:fadeUp .25s ease">
       <div style="font:400 21px var(--fd)">{{ formTitle }}</div>
-      <input data-lift="in" value="{{ formName }}" onChange="{{ formTypeName }}" placeholder="Name" aria-label="Profile name" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ formName }}" onChange="{{ formTypeName }}" placeholder="Name" aria-label="Profile name" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
-        <input data-lift="in" value="{{ formDate }}" onChange="{{ formTypeDate }}" type="date" aria-label="Birth date" style="box-sizing:border-box;flex:1;min-width:0;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ formDate }}" onChange="{{ formTypeDate }}" type="date" aria-label="Birth date" style="box-sizing:border-box;flex:1;min-width:0;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
         <sc-if value="{{ formTimeShow }}" hint-placeholder-val="{{ true }}">
-          <input data-lift="in" value="{{ formTime }}" onChange="{{ formTypeTime }}" inputMode="numeric" placeholder="2:05" aria-label="Birth time" style="box-sizing:border-box;flex:none;width:96px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ formTime }}" onChange="{{ formTypeTime }}" inputMode="numeric" placeholder="2:05" aria-label="Birth time" style="box-sizing:border-box;flex:none;width:96px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
           <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="flex:none;display:flex;gap:4px">
             <sc-for list="{{ formMerRows }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:46px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid {{ m.bd }};border-radius:12px;background:{{ m.bg }};color:{{ m.c }};font:600 10.5px var(--fu)">{{ m.label }}</button>
@@ -6901,7 +6924,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ formTimeNoteShow }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 10.5px/1.55 var(--fu);color:{{ formTimeNoteC }}">{{ formTimeNote }}</div>
       </sc-if>
-      <input data-lift="in" value="{{ formLoc }}" onChange="{{ formTypeLoc }}" placeholder="City, region, country" aria-label="Birth location" autoComplete="off" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ formLoc }}" onChange="{{ formTypeLoc }}" placeholder="City, region, country" aria-label="Birth location" autoComplete="off" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ geoHasHits }}" hint-placeholder-val="{{ false }}">
         <div data-lift="card" role="listbox" aria-label="Matching places" style="display:flex;flex-direction:column;background:var(--sf2);border:1px solid rgba(47,255,143,.32);border-radius:12px;overflow:hidden">
           <sc-for list="{{ geoHits }}" as="g" hint-placeholder-count="5">
@@ -6931,8 +6954,8 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <sc-if value="{{ geoManualOpen }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;gap:9px">
-          <input data-lift="in" value="{{ geoLat }}" onChange="{{ geoTypeLat }}" placeholder="Latitude" inputMode="decimal" aria-label="Latitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
-          <input data-lift="in" value="{{ geoLon }}" onChange="{{ geoTypeLon }}" placeholder="Longitude" inputMode="decimal" aria-label="Longitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ geoLat }}" onChange="{{ geoTypeLat }}" placeholder="Latitude" inputMode="decimal" aria-label="Latitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ geoLon }}" onChange="{{ geoTypeLon }}" placeholder="Longitude" inputMode="decimal" aria-label="Longitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
         </div>
       </sc-if>
       <button onClick="{{ geoManualGo }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);color:var(--ac)">{{ geoManualLabel }}</button>
@@ -6961,7 +6984,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:600 12.5px var(--fu)">PIN</div>
               <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ pinState }}</div>
             </div>
-            <input data-lift="in" value="{{ formPin }}" onChange="{{ formTypePin }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="Set PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
+            <input data-reload-sensitive="true" data-lift="in" value="{{ formPin }}" onChange="{{ formTypePin }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="Set PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
             <button data-lift onClick="{{ pinSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fu);color:var(--ac)">{{ pinBtnLabel }}</button>
           </div>
         </div>
@@ -7069,7 +7092,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ phStepCode }}" hint-placeholder-val="{{ false }}">
-        <input data-lift="in" value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ phBackGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Back</button>
@@ -7100,7 +7123,7 @@ input[type="date"]{color-scheme:dark}
           <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ adWipeX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
         </span>
       </button>
-      <input data-lift="in" value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
       <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ adMsg }}</div>
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ adClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
@@ -7180,7 +7203,7 @@ input[type="date"]{color-scheme:dark}
           <button data-lift onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
         </div>
         <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
-        <input data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
@@ -7190,7 +7213,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
         <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
-        <input data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
@@ -7214,7 +7237,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">It is the only profile on this device, so inCommon starts over with a fresh one and the birth page opens.</div>
       </sc-if>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Type the name to confirm.</div>
-      <input data-lift="in" value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ delClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Keep it</button>
         <button data-lift onClick="{{ delGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ delBg }};color:{{ delC }};font:700 13px var(--fu)">Delete</button>
@@ -7296,7 +7319,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 21px/1.3 var(--fd);color:var(--tx)">Release this memory?</div>
       <div style="font:400 12.5px/1.6 var(--fb);color:var(--dim)">{{ relTitle }}</div>
       <div style="font:400 12.5px/1.6 var(--fb);color:var(--warn)">This will move the memory to deleted items. You can recover it for seven days.</div>
-      <input data-lift="in" value="{{ relText }}" onChange="{{ relType }}" placeholder="Type Release to confirm" aria-label="Type Release to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ relText }}" onChange="{{ relType }}" placeholder="Type Release to confirm" aria-label="Type Release to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:8px">
         <button data-lift onClick="{{ relConfirm }}" disabled="{{ relBlocked }}" style="all:unset;cursor:{{ relCursor }};box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ relBg }};color:{{ relC }};font:700 12.5px var(--fu)">Release</button>
         <button data-lift onClick="{{ relCancel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep it</button>
@@ -7317,7 +7340,7 @@ input[type="date"]{color-scheme:dark}
       <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTpTitle }}</span>
       <span style="font:500 10px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTitle }}</span>
     </button>
-    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
+    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input data-reload-ui="orTpPermille" type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
     <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
   </div>
 </sc-if>
@@ -7339,7 +7362,7 @@ input[type="date"]{color-scheme:dark}
       <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,var(--bg),transparent)"></div>
       <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:52px;background:linear-gradient(0deg,var(--bg),transparent)"></div>
     </div>
-    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
+    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input data-reload-ui="orTpPermille" type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
     <div style="flex:none;text-align:center;font:600 11px var(--fu);color:var(--dim);padding-top:7px">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</div>
     <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px">
       <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
@@ -7388,7 +7411,7 @@ input[type="date"]{color-scheme:dark}
         <div onClick="{{ swallow }}" role="dialog" aria-label="A note on this reading" style="width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
           <div style="font:400 18px var(--fd);color:var(--tx)">A note on this reading</div>
           <div style="font:500 11px var(--fu);color:var(--mut)">Kept in your journal, under &lsquo;{{ orTpTitle }}&rsquo;.</div>
-          <textarea value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="orNoteText" value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;gap:8px">
             <button data-lift onClick="{{ orNoteSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orNoteBg }};color:{{ orNoteC }};font:700 12.5px var(--fu)">Save to journal</button>
             <button data-lift onClick="{{ orNoteOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep listening</button>
@@ -7401,7 +7424,7 @@ input[type="date"]{color-scheme:dark}
         <div onClick="{{ swallow }}" role="dialog" aria-label="Mark this moment" style="width:100%;box-sizing:border-box;max-height:72%;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
           <div style="font:400 18px var(--fd);color:var(--tx)">Mark this moment</div>
           <div style="font:500 11px var(--fu);color:var(--mut)">{{ orCmtAtLine }}. Tapping a mark later returns the voice to its spot.</div>
-          <textarea value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="orCmtText" value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;gap:8px">
             <button data-lift onClick="{{ orCmtSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orCmtBg }};color:{{ orCmtC }};font:700 12.5px var(--fu)">Save mark</button>
             <button data-lift onClick="{{ orCmtOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Close</button>
@@ -7599,7 +7622,7 @@ input[type="date"]{color-scheme:dark}
               <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:44px;padding:0 14px">
                 <span style="font:600 14px var(--fu);color:var(--tx);text-align:center;white-space:nowrap">{{ horoDateLabel }}</span>
                 <span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--mut);text-align:center;white-space:nowrap">{{ horoDateMeta }}</span>
-                <input type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
+                <input data-reload-ui="horoDate" type="date" aria-label="Choose a date" value="{{ horoDate }}" min="{{ horoDateMin }}" max="{{ horoDateMax }}" onChange="{{ horoDatePick }}" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;background:transparent;color:transparent">
               </div>
               <button data-lift onClick="{{ horoNext }}" aria-label="Next day" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 18px var(--fb);color:var(--ac)">›</button>
               <button data-lift onClick="{{ horoNextWk }}" aria-label="Forward one week" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:400 15px var(--fb);color:var(--mut)">››</button>
@@ -8895,7 +8918,7 @@ input[type="date"]{color-scheme:dark}
         <sc-if value="{{ noBirthName }}" hint-placeholder-val="{{ true }}">
           <div data-lift="box" style="display:flex;flex-direction:column;gap:11px;background:rgba(47,255,143,.08);border:1px solid rgba(47,255,143,.36);border-radius:14px;padding:16px 18px;max-width:720px">
             <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx)">Expression and Soul Urge are drawn from the full name on your birth certificate. Add it to see them. It stays on this device, with your profile.</div>
-            <input data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
+            <input data-reload-sensitive="true" data-lift="in" value="{{ nameDraft }}" onChange="{{ nameType }}" placeholder="Full name at birth" aria-label="Full name at birth" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
             <button data-lift onClick="{{ nameSave }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Calculate my name numbers</button>
           </div>
         </sc-if>
@@ -9013,7 +9036,7 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libArchive }}" hint-placeholder-val="{{ false }}">
       <div style="flex:none;display:flex;flex-direction:column;gap:9px;padding:12px 18px 6px" role="search" aria-label="Search the archive">
-        <input data-lift="in" value="{{ arcQuery }}" onChange="{{ arcTypeQ }}" placeholder="Search the archive by word or date…" aria-label="Search the archive" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="arcQuery" data-lift="in" value="{{ arcQuery }}" onChange="{{ arcTypeQ }}" placeholder="Search the archive by word or date…" aria-label="Search the archive" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
         <div onKeyDown="{{ radioKeys }}" style="display:flex;flex-wrap:wrap;gap:6px" role="radiogroup" aria-label="Filter the archive">
           <sc-for list="{{ arcFilters }}" as="f" hint-placeholder-count="4">
             <button data-lift onClick="{{ f.go }}" role="radio" aria-checked="{{ f.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 13px;border:1px solid {{ f.bd }};border-radius:999px;background:{{ f.bg }};font:600 11px var(--fu);color:{{ f.c }}">{{ f.label }}</button>
@@ -9132,7 +9155,7 @@ input[type="date"]{color-scheme:dark}
     </sc-if>
     <sc-if value="{{ libJournal }}" hint-placeholder-val="{{ false }}">
       <div style="flex:none;padding:12px 18px 4px">
-        <input data-lift="in" value="{{ q }}" onChange="{{ typeQ }}" placeholder="Search practices. Try 'no' or 'sleep'…" aria-label="Search practices" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="q" data-lift="in" value="{{ q }}" onChange="{{ typeQ }}" placeholder="Search practices. Try 'no' or 'sleep'…" aria-label="Search practices" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:12px 18px 24px;display:flex;flex-direction:column;gap:10px;animation:fadeUp .22s ease">
         <div style="flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
@@ -9612,7 +9635,7 @@ input[type="date"]{color-scheme:dark}
           <button onClick="{{ lexBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;font:600 12px var(--fu);color:var(--ac)">‹ All practices</button>
           <div style="font:400 24px/1.25 var(--fd)">Sabian Lexicon</div>
         </div>
-        <input data-lift="in" value="{{ lexQuery }}" onChange="{{ lexType }}" placeholder="Search a degree or keyword: “Leo 15”, “emergence”" aria-label="Search the lexicon" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-ui="lexQuery" data-lift="in" value="{{ lexQuery }}" onChange="{{ lexType }}" placeholder="Search a degree or keyword: “Leo 15”, “emergence”" aria-label="Search the lexicon" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:0 18px;font:400 13px var(--fu);color:var(--tx)">
         <sc-if value="{{ lexSearching }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:6px">
             <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ lexHitLabel }}</div>
@@ -9712,8 +9735,8 @@ input[type="date"]{color-scheme:dark}
         </sc-if>
         <sc-if value="{{ libFollow }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:10px">
-            <textarea data-lift="in" value="{{ shifted }}" onChange="{{ typeShifted }}" rows="2" placeholder="What shifted?" aria-label="What shifted" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
-            <textarea data-lift="in" value="{{ notShifted }}" onChange="{{ typeNot }}" rows="2" placeholder="What didn't?" aria-label="What didn't shift" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="shifted" data-lift="in" value="{{ shifted }}" onChange="{{ typeShifted }}" rows="2" placeholder="What shifted?" aria-label="What shifted" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="notShifted" data-lift="in" value="{{ notShifted }}" onChange="{{ typeNot }}" rows="2" placeholder="What didn't?" aria-label="What didn't shift" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:400 13px/1.5 var(--fu);color:var(--tx)"></textarea>
             <div data-lift="card" onKeyDown="{{ radioKeys }}" style="display:flex;background:var(--sf);border:1px solid var(--bd);border-radius:999px;padding:3px" role="radiogroup" aria-label="Should this be remembered">
               <sc-for list="{{ rememberOpts }}" as="r" hint-placeholder-count="2">
                 <button data-lift onClick="{{ r.go }}" role="radio" aria-checked="{{ r.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 11.5px var(--fu);color:{{ r.c }};background:{{ r.bg }}">{{ r.t }}</button>
@@ -9974,7 +9997,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="atlasQuery" data-lift="in" value="{{ atlasQuery }}" onChange="{{ atlasType }}" placeholder="Search the Atlas: 34, Sacral, response" aria-label="Search the Atlas" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ hdSearching }}" hint-placeholder-val="{{ false }}">
           <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ hdHitLine }}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
@@ -10265,7 +10288,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ apQuery }}" onChange="{{ apType }}" placeholder="Search the Astropedia: Scorpio, threshold, Saturn" aria-label="Search the Astropedia" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="apQuery" data-lift="in" value="{{ apQuery }}" onChange="{{ apType }}" placeholder="Search the Astropedia: Scorpio, threshold, Saturn" aria-label="Search the Astropedia" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ apSearching }}" hint-placeholder-val="{{ false }}">
           <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ apHitLine }}</div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
@@ -10496,7 +10519,7 @@ input[type="date"]{color-scheme:dark}
             </button>
           </sc-for>
         </div>
-        <input data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+        <input data-reload-ui="bnQuery" data-lift="in" value="{{ bnQuery }}" onChange="{{ bnType }}" placeholder="Find a number or a word: 23, teacher, wheel" aria-label="Search the Book of Numbers" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
         <sc-if value="{{ bnFlat }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:9px">
             <div role="status" style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)">{{ bnHitLine }}</div>
@@ -10759,10 +10782,10 @@ input[type="date"]{color-scheme:dark}
         <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Write it down</div>
           <div style="display:flex;flex-wrap:wrap;gap:9px">
-            <input data-lift="in" value="{{ dreamTitleVal }}" onChange="{{ dreamTitleType }}" placeholder="Give it a name" aria-label="A name for this dream" style="box-sizing:border-box;flex:1 1 180px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 15px var(--fb)">
-            <input data-lift="in" value="{{ dreamDateVal }}" onChange="{{ dreamDateType }}" type="date" aria-label="The night it happened" style="box-sizing:border-box;flex:0 1 168px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
+            <input data-recovery-field="dreamTitle" data-lift="in" value="{{ dreamTitleVal }}" onChange="{{ dreamTitleType }}" placeholder="Give it a name" aria-label="A name for this dream" style="box-sizing:border-box;flex:1 1 180px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 15px var(--fb)">
+            <input data-recovery-field="dreamDate" data-lift="in" value="{{ dreamDateVal }}" onChange="{{ dreamDateType }}" type="date" aria-label="The night it happened" style="box-sizing:border-box;flex:0 1 168px;min-height:48px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 14px var(--fu)">
           </div>
-          <textarea data-lift="in" value="{{ dreamTextVal }}" onChange="{{ dreamTextType }}" rows="8" placeholder="{{ dreamPlaceholder }}" aria-label="The dream itself" style="box-sizing:border-box;width:100%;resize:vertical;min-height:170px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="dreamText" data-lift="in" value="{{ dreamTextVal }}" onChange="{{ dreamTextType }}" rows="8" placeholder="{{ dreamPlaceholder }}" aria-label="The dream itself" style="box-sizing:border-box;width:100%;resize:vertical;min-height:170px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 13px;font:400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;flex-wrap:wrap;gap:14px">
             <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:7px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">How you slept</div>
@@ -10782,8 +10805,8 @@ input[type="date"]{color-scheme:dark}
             </div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:9px">
-            <input data-lift="in" value="{{ dreamMoodBVal }}" onChange="{{ dreamMoodBType }}" placeholder="How you felt going to bed" aria-label="How you felt going to bed" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
-            <input data-lift="in" value="{{ dreamMoodAVal }}" onChange="{{ dreamMoodAType }}" placeholder="How you felt waking up" aria-label="How you felt waking up" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
+            <input data-recovery-field="dreamMoodB" data-lift="in" value="{{ dreamMoodBVal }}" onChange="{{ dreamMoodBType }}" placeholder="How you felt going to bed" aria-label="How you felt going to bed" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
+            <input data-recovery-field="dreamMoodA" data-lift="in" value="{{ dreamMoodAVal }}" onChange="{{ dreamMoodAType }}" placeholder="How you felt waking up" aria-label="How you felt waking up" style="box-sizing:border-box;flex:1 1 160px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;color:var(--tx);font:400 13.5px var(--fu)">
           </div>
           <button data-lift onClick="{{ dreamRecurGo }}" role="switch" aria-checked="{{ dreamRecurOn }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ dreamRecurBd }};background:{{ dreamRecurBg }};color:{{ dreamRecurC }};font:600 12px var(--fu)">{{ dreamRecurLabel }}</button>
         </div>
@@ -10910,7 +10933,7 @@ input[type="date"]{color-scheme:dark}
         <sc-if value="{{ dreamHasText }}" hint-placeholder-val="{{ false }}">
           <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
             <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What you make of it</div>
-            <textarea data-lift="in" value="{{ dreamInterpVal }}" onChange="{{ dreamInterpType }}" rows="3" placeholder="{{ dreamInterpPh }}" aria-label="Your own interpretation" style="box-sizing:border-box;width:100%;resize:vertical;min-height:72px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
+            <textarea data-recovery-field="dreamInterp" data-lift="in" value="{{ dreamInterpVal }}" onChange="{{ dreamInterpType }}" rows="3" placeholder="{{ dreamInterpPh }}" aria-label="Your own interpretation" style="box-sizing:border-box;width:100%;resize:vertical;min-height:72px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;font:400 13.5px/1.65 var(--fb);color:var(--tx)"></textarea>
             <div style="display:flex;flex-direction:column;gap:3px;border-top:1px solid var(--bd);padding-top:11px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">One small thing to do with it</div>
               <div style="font:italic 400 var(--rdd)/var(--rddlh) var(--fb);color:var(--tx)">{{ dreamRitual }}</div>
@@ -11023,7 +11046,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ spiritIChing }}" hint-placeholder-val="{{ false }}">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Ask it something</div>
-          <input data-lift="in" value="{{ icQuestion }}" onChange="{{ icType }}" placeholder="What am I not seeing about this?" aria-label="Your question" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
+          <input data-recovery-field="icQuestion" data-lift="in" value="{{ icQuestion }}" onChange="{{ icType }}" placeholder="What am I not seeing about this?" aria-label="Your question" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="How to cast" style="display:flex;gap:7px">
             <sc-for list="{{ icMethods }}" as="m" hint-placeholder-count="2">
               <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border:1px solid {{ m.bd }};border-radius:12px;background:{{ m.bg }};color:{{ m.c }};font:600 11.5px var(--fu)">{{ m.label }}</button>
@@ -11091,7 +11114,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
       <!-- THE SIXTY FOUR, as reference. Nobody casts down here. -->
-      <input data-lift="in" value="{{ ilQuery }}" onChange="{{ ilType }}" placeholder="Look one up: 49, revolution, Ding" aria-label="Search the hexagrams" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-ui="ilQuery" data-lift="in" value="{{ ilQuery }}" onChange="{{ ilType }}" placeholder="Look one up: 49, revolution, Ding" aria-label="Search the hexagrams" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ ilSearching }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ ilHitCount }}</div>
@@ -11175,7 +11198,7 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ dlBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);color:var(--ac);transition:color .2s ease"><span style="font:400 14px var(--fb)">&#8592;</span> Library</button>
         <div style="font:400 24px/1.25 var(--fd)">Dream Symbols</div>
       </div>
-      <input data-lift="in" value="{{ dlQuery }}" onChange="{{ dlType }}" placeholder="Look up an image: tornado, water, a door" aria-label="Search dream symbols" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-ui="dlQuery" data-lift="in" value="{{ dlQuery }}" onChange="{{ dlType }}" placeholder="Look up an image: tornado, water, a door" aria-label="Search dream symbols" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ dlSearching }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ dlHitCount }}</div>
@@ -11413,7 +11436,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What number keeps appearing?</div>
-          <input data-lift="in" value="{{ angelInput }}" onChange="{{ angelType }}" onKeyDown="{{ angelKey }}" placeholder="111" inputMode="numeric" aria-label="The number you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 22px var(--fd)">
+          <input data-recovery-field="angelInput" data-lift="in" value="{{ angelInput }}" onChange="{{ angelType }}" onKeyDown="{{ angelKey }}" placeholder="111" inputMode="numeric" aria-label="The number you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 22px var(--fd)">
           <button data-lift onClick="{{ angelGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12.5px var(--fu);letter-spacing:.03em">Find meaning</button>
         </div>
         <sc-if value="{{ angelHas }}" hint-placeholder-val="{{ false }}">
@@ -11469,7 +11492,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What animal keeps appearing?</div>
-          <input data-lift="in" value="{{ animInput }}" onChange="{{ animType }}" onKeyDown="{{ animKey }}" placeholder="crow" autoCapitalize="none" aria-label="The animal you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 20px var(--fd)">
+          <input data-recovery-field="animInput" data-lift="in" value="{{ animInput }}" onChange="{{ animType }}" onKeyDown="{{ animKey }}" placeholder="crow" autoCapitalize="none" aria-label="The animal you keep seeing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;color:var(--tx);font:400 20px var(--fd)">
           <sc-if value="{{ animHasChips }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:7px">
               <div style="font:600 9.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ animChipsLabel }}</div>
@@ -11577,7 +11600,7 @@ input[type="date"]{color-scheme:dark}
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 16px">
           <div style="font:600 10.5px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">What else keeps appearing?</div>
-          <input data-lift="in" value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
+          <input data-recovery-field="otherInput" data-lift="in" value="{{ otherInput }}" onChange="{{ otherType }}" onKeyDown="{{ otherKey }}" placeholder="A green pickup truck" aria-label="What you keep noticing" style="box-sizing:border-box;width:100%;min-height:52px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 15px var(--fu);color:var(--tx)">
           <sc-if value="{{ otherComposing }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
               <sc-for list="{{ otherAsk }}" as="a" hint-placeholder-count="4">
@@ -11970,7 +11993,7 @@ input[type="date"]{color-scheme:dark}
               </div>
               <sc-if value="{{ s.needsPin }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:8px;align-items:center">
-                  <input data-lift="in" value="{{ s.pin }}" onChange="{{ s.typePin }}" inputMode="numeric" maxLength="4" placeholder="{{ s.pinPh }}" aria-label="PIN for {{ s.name }}" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
+                  <input data-reload-sensitive="true" data-lift="in" value="{{ s.pin }}" onChange="{{ s.typePin }}" inputMode="numeric" maxLength="4" placeholder="{{ s.pinPh }}" aria-label="PIN for {{ s.name }}" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
                   <button data-lift onClick="{{ s.confirm }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Activate</button>
                 </div>
               </sc-if>
@@ -12029,7 +12052,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 11.5px/1.6 var(--fb);color:var(--tx)">{{ delGateText }}</div>
           <sc-if value="{{ delNeedsPin }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;gap:8px;align-items:center">
-              <input data-lift="in" value="{{ delPin }}" onChange="{{ delPinType }}" type="password" inputMode="numeric" maxLength="4" placeholder="PIN" aria-label="PIN to open deleted memories" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
+              <input data-reload-sensitive="true" data-lift="in" value="{{ delPin }}" onChange="{{ delPinType }}" type="password" inputMode="numeric" maxLength="4" placeholder="PIN" aria-label="PIN to open deleted memories" style="box-sizing:border-box;flex:1;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.3em;color:var(--tx)">
               <button data-lift onClick="{{ delUnlock }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 12px var(--fu)">Open</button>
             </div>
           </sc-if>
@@ -12276,7 +12299,7 @@ input[type="date"]{color-scheme:dark}
           <div data-lift="box" class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;overflow:hidden">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
               <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
-                <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                <input data-reload-ui="chartExpandSearch" data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
                 <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
                   <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
                   <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
@@ -12471,7 +12494,7 @@ input[type="date"]{color-scheme:dark}
               <div class="obs-glass" style="flex:1;min-height:0;display:flex;flex-direction:column">
 <sc-if value="{{ obsBodiesOn }}" hint-placeholder-val="{{ true }}">
                   <div style="flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--bd)">
-                    <input data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
+                    <input data-reload-ui="chartExpandSearch" data-lift="in" value="{{ chartExpandSearch }}" onChange="{{ chartExpandSearchGo }}" placeholder="Search the manifest" aria-label="Search the manifest" style="min-height:44px;box-sizing:border-box;padding:0 12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:400 13px var(--fu);border-radius:12px">
                     <div style="display:flex;flex-wrap:wrap;gap:4px 10px">
                       <button onClick="{{ chartExpandGroupGo }}" role="checkbox" aria-checked="{{ chartExpandGroup }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandGroupMark }}</span>Group</button>
                       <button onClick="{{ chartExpandCometsGo }}" role="checkbox" aria-checked="{{ chartExpandShowComets }}" class="obs-chk"><span aria-hidden="true" class="obs-box">{{ chartExpandCometsMark }}</span>Comets</button>
@@ -12593,7 +12616,7 @@ input[type="date"]{color-scheme:dark}
     <div onClick="{{ swallow }}" role="dialog" aria-modal="true" aria-label="Search" style="box-sizing:border-box;width:100%;max-width:680px;max-height:74vh;display:flex;flex-direction:column;background:var(--sf);border:1px solid rgba(47,255,143,.36);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:dtIn .18s ease">
       <div style="flex:none;display:flex;align-items:center;gap:11px;padding:16px 18px;border-bottom:1px solid var(--bd)">
         <span aria-hidden="true" style="font:400 15px var(--fb);color:var(--ac)">⚲</span>
-        <input value="{{ searchQuery }}" onChange="{{ searchType }}" ref="{{ searchRef }}" placeholder="Search anything: screens, readings, your record, the atlases…" aria-label="Search" style="flex:1;min-width:0;min-height:44px;background:transparent;border:none;font:400 16px var(--fu);color:var(--tx)">
+        <input data-reload-ui="searchQuery" value="{{ searchQuery }}" onChange="{{ searchType }}" ref="{{ searchRef }}" placeholder="Search anything: screens, readings, your record, the atlases…" aria-label="Search" style="flex:1;min-width:0;min-height:44px;background:transparent;border:none;font:400 16px var(--fu);color:var(--tx)">
         <button data-lift onClick="{{ searchClose }}" aria-label="Close search" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:30px;display:flex;align-items:center;padding:0 9px;border:1px solid var(--bd);border-radius:7px;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--dim)">ESC</button>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;padding:8px 0 12px">
@@ -12632,9 +12655,9 @@ input[type="date"]{color-scheme:dark}
           </sc-for>
         </div>
       </div>
-      <input data-lift="in" value="{{ draftTitle }}" onChange="{{ typeTitle }}" placeholder="{{ draftTitlePh }}" aria-label="Title" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
-      <textarea data-lift="in" value="{{ draftNote }}" onChange="{{ typeNote }}" rows="2" placeholder="{{ draftNotePh }}" aria-label="Note" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:italic 400 13px/1.55 var(--fb);color:var(--tx)"></textarea>
-      <input data-lift="in" value="{{ draftDate }}" onChange="{{ typeDate }}" type="date" aria-label="Date" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+      <input data-recovery-field="draft.title" data-lift="in" value="{{ draftTitle }}" onChange="{{ typeTitle }}" placeholder="{{ draftTitlePh }}" aria-label="Title" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <textarea data-recovery-field="draft.note" data-lift="in" value="{{ draftNote }}" onChange="{{ typeNote }}" rows="2" placeholder="{{ draftNotePh }}" aria-label="Note" style="box-sizing:border-box;width:100%;resize:none;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 13px;font:italic 400 13px/1.55 var(--fb);color:var(--tx)"></textarea>
+      <input data-recovery-field="draft.date" data-lift="in" value="{{ draftDate }}" onChange="{{ typeDate }}" type="date" aria-label="Date" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
       <button data-lift onClick="{{ draftSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ draftBg }};color:{{ draftC }};font:700 13.5px var(--fu)">{{ draftLabel }}</button>
       <button data-lift onClick="{{ voiceGo }}" aria-label="Record your voice" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(139,92,246,.5);border-radius:999px;font:600 12.5px var(--fu);color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"></path><path d="M12 18v3"></path></svg>Speak it instead</button>
     </div>
@@ -13288,7 +13311,7 @@ input[type="date"]{color-scheme:dark}
           <div style="font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">{{ switchName }}’s PIN</div>
           <div style="display:flex;gap:10px">
             <sc-for list="{{ pinBoxes }}" as="b" hint-placeholder-count="4">
-              <input value="{{ b.v }}" onChange="{{ b.type }}" ref="{{ b.ref }}" inputMode="numeric" maxLength="1" aria-label="PIN digit {{ b.n }}" style="box-sizing:border-box;width:46px;height:52px;text-align:center;background:transparent;border:none;border-bottom:2px solid {{ b.bd }};font:400 22px var(--fd);color:var(--tx)">
+              <input data-reload-sensitive="true" value="{{ b.v }}" onChange="{{ b.type }}" ref="{{ b.ref }}" inputMode="numeric" maxLength="1" aria-label="PIN digit {{ b.n }}" style="box-sizing:border-box;width:46px;height:52px;text-align:center;background:transparent;border:none;border-bottom:2px solid {{ b.bd }};font:400 22px var(--fd);color:var(--tx)">
             </sc-for>
           </div>
           <sc-if value="{{ hasPinErr }}" hint-placeholder-val="{{ false }}">
@@ -13308,11 +13331,11 @@ input[type="date"]{color-scheme:dark}
   <div onClick="{{ formClose }}" style="position:absolute;inset:0;background:rgba(5,4,8,.78);display:flex;align-items:flex-end;z-index:14">
     <div role="dialog" aria-label="{{ formTitle }}" onClick="{{ swallow }}" style="width:100%;max-height:92%;overflow-y:auto;box-sizing:border-box;background:var(--sf);border-top:1px solid var(--bd);border-radius:22px 22px 0 0;padding:20px 20px 28px;display:flex;flex-direction:column;gap:11px;animation:fadeUp .25s ease">
       <div style="font:400 21px var(--fd)">{{ formTitle }}</div>
-      <input data-lift="in" value="{{ formName }}" onChange="{{ formTypeName }}" placeholder="Name" aria-label="Profile name" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ formName }}" onChange="{{ formTypeName }}" placeholder="Name" aria-label="Profile name" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
-        <input data-lift="in" value="{{ formDate }}" onChange="{{ formTypeDate }}" type="date" aria-label="Birth date" style="box-sizing:border-box;flex:1;min-width:0;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ formDate }}" onChange="{{ formTypeDate }}" type="date" aria-label="Birth date" style="box-sizing:border-box;flex:1;min-width:0;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
         <sc-if value="{{ formTimeShow }}" hint-placeholder-val="{{ true }}">
-          <input data-lift="in" value="{{ formTime }}" onChange="{{ formTypeTime }}" inputMode="numeric" placeholder="2:05" aria-label="Birth time" style="box-sizing:border-box;flex:none;width:96px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ formTime }}" onChange="{{ formTypeTime }}" inputMode="numeric" placeholder="2:05" aria-label="Birth time" style="box-sizing:border-box;flex:none;width:96px;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 13px var(--fu);color:var(--tx)">
           <div onKeyDown="{{ radioKeys }}" role="radiogroup" aria-label="Which clock that time is written in" style="flex:none;display:flex;gap:4px">
             <sc-for list="{{ formMerRows }}" as="m" hint-placeholder-count="3">
               <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-width:46px;min-height:46px;display:flex;align-items:center;justify-content:center;border:1px solid {{ m.bd }};border-radius:12px;background:{{ m.bg }};color:{{ m.c }};font:600 10.5px var(--fu)">{{ m.label }}</button>
@@ -13329,7 +13352,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ formTimeNoteShow }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 10.5px/1.55 var(--fu);color:{{ formTimeNoteC }}">{{ formTimeNote }}</div>
       </sc-if>
-      <input data-lift="in" value="{{ formLoc }}" onChange="{{ formTypeLoc }}" placeholder="City, region, country" aria-label="Birth location" autoComplete="off" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ formLoc }}" onChange="{{ formTypeLoc }}" placeholder="City, region, country" aria-label="Birth location" autoComplete="off" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <sc-if value="{{ geoHasHits }}" hint-placeholder-val="{{ false }}">
         <div data-lift="card" role="listbox" aria-label="Matching places" style="display:flex;flex-direction:column;background:var(--sf2);border:1px solid rgba(47,255,143,.32);border-radius:12px;overflow:hidden">
           <sc-for list="{{ geoHits }}" as="g" hint-placeholder-count="5">
@@ -13359,8 +13382,8 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
       <sc-if value="{{ geoManualOpen }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;gap:9px">
-          <input data-lift="in" value="{{ geoLat }}" onChange="{{ geoTypeLat }}" placeholder="Latitude" inputMode="decimal" aria-label="Latitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
-          <input data-lift="in" value="{{ geoLon }}" onChange="{{ geoTypeLon }}" placeholder="Longitude" inputMode="decimal" aria-label="Longitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ geoLat }}" onChange="{{ geoTypeLat }}" placeholder="Latitude" inputMode="decimal" aria-label="Latitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
+          <input data-reload-sensitive="true" data-lift="in" value="{{ geoLon }}" onChange="{{ geoTypeLon }}" placeholder="Longitude" inputMode="decimal" aria-label="Longitude" style="box-sizing:border-box;flex:1;min-width:0;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 13px var(--fu);color:var(--tx)">
         </div>
       </sc-if>
       <button onClick="{{ geoManualGo }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);color:var(--ac)">{{ geoManualLabel }}</button>
@@ -13389,7 +13412,7 @@ input[type="date"]{color-scheme:dark}
               <div style="font:600 12.5px var(--fu)">PIN</div>
               <div style="font:400 10.5px var(--fu);color:var(--dim)">{{ pinState }}</div>
             </div>
-            <input data-lift="in" value="{{ formPin }}" onChange="{{ formTypePin }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="Set PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
+            <input data-reload-sensitive="true" data-lift="in" value="{{ formPin }}" onChange="{{ formTypePin }}" inputMode="numeric" maxLength="4" placeholder="4 digits" aria-label="Set PIN" style="box-sizing:border-box;flex:none;width:100px;min-height:44px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:0 12px;font:400 14px var(--fu);letter-spacing:.25em;color:var(--tx)">
             <button data-lift onClick="{{ pinSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;display:flex;align-items:center;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 11.5px var(--fu);color:var(--ac)">{{ pinBtnLabel }}</button>
           </div>
         </div>
@@ -13551,7 +13574,7 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <sc-if value="{{ phStepCode }}" hint-placeholder-val="{{ false }}">
-        <input data-lift="in" value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ phCode }}" onChange="{{ phCodeType }}" onKeyDown="{{ phCodeKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Code from the text" aria-label="Code from the text" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ phMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ phBackGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Back</button>
@@ -13582,7 +13605,7 @@ input[type="date"]{color-scheme:dark}
           <span style="width:22px;height:22px;border-radius:50%;background:var(--tx);margin:2px;transform:translateX({{ adWipeX }});transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)"></span>
         </span>
       </button>
-      <input data-lift="in" value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ adText }}" onChange="{{ adType }}" onKeyDown="{{ adKey }}" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="delete" aria-label="Type delete to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ adBd }};border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx)">
       <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ adMsg }}</div>
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ adClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
@@ -13662,7 +13685,7 @@ input[type="date"]{color-scheme:dark}
           <button data-lift onClick="{{ mfCopyGo }}" aria-label="Copy the setup key" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:44px;min-width:44px;padding:0 12px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:600 12px var(--fu);color:var(--tx);border:1px solid var(--bd)">Copy</button>
         </div>
         <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">Keep the setup key somewhere safe, such as a password manager. If this phone is lost, the key puts the account on a new authenticator. Without it, signing in again needs inCommon's help to turn two-step sign in off.</div>
-        <input data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfConfirmKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Cancel</button>
@@ -13672,7 +13695,7 @@ input[type="date"]{color-scheme:dark}
       <sc-if value="{{ mfStepOn }}" hint-placeholder-val="{{ false }}">
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">On for this account. Signing in asks for the password and then a code from your authenticator app.</div>
         <div style="font:400 12px/1.6 var(--fb);color:var(--mut)">To turn it off, enter the code your authenticator app is showing now.</div>
-        <input data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
+        <input data-reload-sensitive="true" data-lift="in" value="{{ mfCode }}" onChange="{{ mfCodeType }}" onKeyDown="{{ mfDisableKey }}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digit code" aria-label="Code from your authenticator app" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 13px;font:400 16px var(--fu);color:var(--tx);letter-spacing:.12em">
         <div role="status" aria-live="polite" style="min-height:1.5em;font:400 12px/1.5 var(--fb);color:var(--mut)">{{ mfMsg }}</div>
         <div style="display:flex;gap:10px">
           <button data-lift onClick="{{ mfClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Close</button>
@@ -13696,7 +13719,7 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 12px/1.6 var(--fb);color:var(--tx)">It is the only profile on this device, so inCommon starts over with a fresh one and the birth page opens.</div>
       </sc-if>
       <div style="font:400 11px/1.5 var(--fu);color:var(--dim)">Type the name to confirm.</div>
-      <input data-lift="in" value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ delName }}" onChange="{{ delType }}" placeholder="{{ formName }}" aria-label="Type the profile name to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid {{ delBd }};border-radius:12px;padding:0 13px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:10px">
         <button data-lift onClick="{{ delClose }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:600 13px var(--fu);color:var(--tx)">Keep it</button>
         <button data-lift onClick="{{ delGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ delBg }};color:{{ delC }};font:700 13px var(--fu)">Delete</button>
@@ -13778,7 +13801,7 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 21px/1.3 var(--fd);color:var(--tx)">Release this memory?</div>
       <div style="font:400 12.5px/1.6 var(--fb);color:var(--dim)">{{ relTitle }}</div>
       <div style="font:400 12.5px/1.6 var(--fb);color:var(--warn)">This will move the memory to deleted items. You can recover it for seven days.</div>
-      <input data-lift="in" value="{{ relText }}" onChange="{{ relType }}" placeholder="Type Release to confirm" aria-label="Type Release to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
+      <input data-reload-sensitive="true" data-lift="in" value="{{ relText }}" onChange="{{ relType }}" placeholder="Type Release to confirm" aria-label="Type Release to confirm" style="box-sizing:border-box;width:100%;min-height:46px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:0 14px;font:400 14px var(--fu);color:var(--tx)">
       <div style="display:flex;gap:8px">
         <button data-lift onClick="{{ relConfirm }}" disabled="{{ relBlocked }}" style="all:unset;cursor:{{ relCursor }};box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ relBg }};color:{{ relC }};font:700 12.5px var(--fu)">Release</button>
         <button data-lift onClick="{{ relCancel }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep it</button>
@@ -13799,7 +13822,7 @@ input[type="date"]{color-scheme:dark}
       <span style="font:600 12.5px var(--fu);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTpTitle }}</span>
       <span style="font:500 10px var(--fu);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw">{{ orTitle }}</span>
     </button>
-    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
+    <div style="position:relative;flex:1 1 90px;min-width:64px;height:34px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input data-reload-ui="orTpPermille" type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div>
     <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
   </div>
 </sc-if>
@@ -13821,7 +13844,7 @@ input[type="date"]{color-scheme:dark}
       <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,var(--bg),transparent)"></div>
       <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:52px;background:linear-gradient(0deg,var(--bg),transparent)"></div>
     </div>
-    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
+    <div style="flex:none;display:flex;align-items:center;padding:12px 20px 0"><div style="position:relative;flex:1 1 90px;min-width:64px;height:52px;display:flex;align-items:center;gap:1.5px"><sc-for list="{{ orWaveBars }}" as="b" hint-placeholder-count="48"><span style="flex:1;min-width:1px;height:{{ b.h }}%;border-radius:1px;background:{{ b.c }}"></span></sc-for><span style="position:absolute;left:{{ orTpFill }}%;top:3px;bottom:3px;width:2.5px;border-radius:2px;background:rgb(var(--atmc2));transform:translateX(-50%);pointer-events:none"></span><input data-reload-ui="orTpPermille" type="range" min="0" max="1000" value="{{ orTpPermille }}" onInput="{{ orScryIn }}" onPointerUp="{{ orScryDrop }}" onTouchEnd="{{ orScryDrop }}" onKeyUp="{{ orScryDrop }}" aria-label="Scry through this section" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0"></div></div>
     <div style="flex:none;text-align:center;font:600 11px var(--fu);color:var(--dim);padding-top:7px">{{ orTpPosLabel }} / {{ orTpTotalLabel }}</div>
     <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px">
       <button data-lift onClick="{{ orShareGo }}" aria-label="Share this reading" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mut)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
@@ -13870,7 +13893,7 @@ input[type="date"]{color-scheme:dark}
         <div onClick="{{ swallow }}" role="dialog" aria-label="A note on this reading" style="width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
           <div style="font:400 18px var(--fd);color:var(--tx)">A note on this reading</div>
           <div style="font:500 11px var(--fu);color:var(--mut)">Kept in your journal, under &lsquo;{{ orTpTitle }}&rsquo;.</div>
-          <textarea value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="orNoteText" value="{{ orNoteText }}" onInput="{{ orNoteIn }}" rows="4" placeholder="What stayed with you&#8230;" aria-label="Your note" style="box-sizing:border-box;width:100%;min-height:110px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;gap:8px">
             <button data-lift onClick="{{ orNoteSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orNoteBg }};color:{{ orNoteC }};font:700 12.5px var(--fu)">Save to journal</button>
             <button data-lift onClick="{{ orNoteOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep listening</button>
@@ -13883,7 +13906,7 @@ input[type="date"]{color-scheme:dark}
         <div onClick="{{ swallow }}" role="dialog" aria-label="Mark this moment" style="width:100%;box-sizing:border-box;max-height:72%;display:flex;flex-direction:column;gap:10px;background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:16px 16px calc(14px + env(safe-area-inset-bottom))">
           <div style="font:400 18px var(--fd);color:var(--tx)">Mark this moment</div>
           <div style="font:500 11px var(--fu);color:var(--mut)">{{ orCmtAtLine }}. Tapping a mark later returns the voice to its spot.</div>
-          <textarea value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
+          <textarea data-recovery-field="orCmtText" value="{{ orCmtText }}" onInput="{{ orCmtIn }}" rows="3" placeholder="What struck you here&#8230;" aria-label="Your mark" style="box-sizing:border-box;width:100%;min-height:80px;resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font:400 14px/1.6 var(--fb);color:var(--tx)"></textarea>
           <div style="display:flex;gap:8px">
             <button data-lift onClick="{{ orCmtSaveGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ orCmtBg }};color:{{ orCmtC }};font:700 12.5px var(--fu)">Save mark</button>
             <button data-lift onClick="{{ orCmtOff }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;min-height:46px;display:flex;align-items:center;padding:0 18px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Close</button>
@@ -14009,6 +14032,8 @@ class Component extends DCLogic {
     synWith: null, synManual: null, synForm: null, circleWith: [], cardIn: null, cardOut: null, stLang: null, stTurn: 0,
     auth: undefined, af: {}, authErr: '', afErr: {}, uiLang: 'en',
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
+    cloudNoticeOpen: false, cloudDraftAvailable: false, cloudDraftBusy: false, cloudDraftMsg: '',
+    cloudFormsReady: false, cloudFormGuardMsg: '', cloudFormChecking: false,
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
@@ -14495,9 +14520,16 @@ class Component extends DCLogic {
     this._onPageShow = e => { if (e && e.persisted && this.state.lumBusy) this.setState({ lumBusy: null }); };
     window.addEventListener('pageshow', this._onPageShow);
     const IC = typeof window !== 'undefined' && window.InCommonCloud;
+    this._onDraftCleanupFailed = () => this.setState({ cloudNoticeOpen: true,
+      cloudDraftMsg: 'A recovery copy could not be removed from this device.' });
+    window.addEventListener('drafts:cleanup-failed', this._onDraftCleanupFailed);
+    this._onReloadGuardInput = () => this.cloudRecoveryInvalidateForms();
+    document.addEventListener('input', this._onReloadGuardInput, true);
+    document.addEventListener('change', this._onReloadGuardInput, true);
     if (IC && window.ProfileManager && window.InCommonCore) {
       this.cloud = IC.init({ core: window.InCommonCore, pm: window.ProfileManager, storage: window.localStorage,
-        placeholders: () => this.cloudPlaceholders(), onPulled: r => this.cloudPulled(r) }) || null;
+        placeholders: () => this.cloudPlaceholders(), onPulled: r => this.cloudPulled(r),
+        onUpgradeRequired: () => this.cloudUpgradeRequired() }) || null;
       if (this.cloud) {
         this.cloud.onSessionChange(s => this.setState({ cloudStatus: s }));
         this.setState({ cloudStatus: this.cloud.status() });
@@ -14608,6 +14640,8 @@ class Component extends DCLogic {
     this.syncChartExpandPersist();
     this.lumAuto();
     this.oracleAutoAsk();
+    this.cloudRecoveryTrack();
+    this.cloudRecoveryGuardTrack();
     this.oraclePrepareAuto();
     this.cycleSheetAutoAsk();
     this.cycleSceneSync();
@@ -14638,6 +14672,12 @@ class Component extends DCLogic {
     }
   }
   componentWillUnmount() {
+    this.cloudRecoveryStop();
+    if (this._onReloadGuardInput) {
+      document.removeEventListener('input', this._onReloadGuardInput, true);
+      document.removeEventListener('change', this._onReloadGuardInput, true);
+    }
+    if (this._onDraftCleanupFailed) window.removeEventListener('drafts:cleanup-failed', this._onDraftCleanupFailed);
     this.hdPaneStopFit();
     if (this._cyS) { this._cyS.destroy(); this._cyS = null; }
     if (this._csS) { this._csS.destroy(); this._csS = null; }
@@ -14946,7 +14986,7 @@ class Component extends DCLogic {
   cloudSignOut() {
     if (!this.cloud || this.state.cloudBusy) return;
     this.setState({ cloudBusy: true });
-    this.cloud.signOut().then(() => {
+    this.cloudRecoveryForgetAccount().then(() => this.cloud.signOut()).then(() => {
       this.setState({ cloudBusy: false, cloudMsg: '', cloudEmail: '', cloudPassword: '', cloudRecoveryPin: '', cloudRecoveryPending: false });
     });
   }
@@ -14954,7 +14994,8 @@ class Component extends DCLogic {
     if (!this.cloud || this.state.cloudBusy) return;
     this.setState({ cloudBusy: true, cloudMsg: '' });
     this.cloud.push().then(res => {
-      this.setState({ cloudBusy: false, cloudMsg: (res && res.ok === false) ? (res.error || 'Sync failed.') : 'Synced.' });
+      this.setState({ cloudBusy: false, cloudMsg: (res && res.ok === false) ? (res.error || 'Sync failed.') : 'Synced.',
+        ...(res && res.reason === 'upgradeRequired' ? { cloudNoticeOpen: true } : {}) });
     });
   }
   cloudStartRecovery() {
@@ -24572,8 +24613,10 @@ class Component extends DCLogic {
        owner wants it to bring the home screen up again (11 October 2026). */
     try { sessionStorage.setItem('incommon.signin.out', '1'); } catch (e) {}
     const go = () => { location.href = this.coverHref(); };
-    if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
-    else go();
+    this.cloudRecoveryForgetAccount().then(() => {
+      if (this.cloud && this.cloud.signOut) this.cloud.signOut().then(go, go);
+      else go();
+    }, go);
   }
   /* A PHONE ON THE ACCOUNT, FROM THE PROFILE MENU. The owner asked on 30
      September 2026 for signing in by phone and for recovering a password by
@@ -24726,7 +24769,7 @@ class Component extends DCLogic {
       if (!C || typeof C.accountDelete !== 'function' || st.adBusy) return;
       if (!ready) { this.setState({ adMsg: WHY.confirm }); return; }
       this.setState({ adBusy: true, adMsg: 'Deleting your account.' });
-      C.accountDelete(st.adText).then(r => {
+      this.cloudRecoveryForgetAccount().then(() => C.accountDelete(st.adText)).then(r => {
         if (!r || !r.ok) {
           this.setState({ adBusy: false, adMsg: WHY[r && r.reason] || 'That did not finish. Try again in a moment; nothing more will be deleted than you asked for.' });
           return;
@@ -29373,6 +29416,11 @@ class Component extends DCLogic {
       
       hasErrBanner: !!st.errBanner, errBanner: st.errBanner, errDismiss: () => this.setState({ errBanner: '' }),
       offline: this.effOffline(),
+      ...this.cloudRecoveryVals(),
+      cloudDraftSaveGo: () => this.cloudRecoverySave(),
+      cloudFormCheckGo: () => this.cloudRecoveryCheckForms(),
+      cloudDraftRestoreGo: () => this.cloudRecoveryRestore(),
+      cloudNoticeDismissGo: () => this.setState({ cloudNoticeOpen: false }),
       typingLabel: this.effOffline() ? 'answering from the library \u00b7 live reply queued\u2026' : (st.flushing ? 'connection back \u00b7 working through the queue\u2026' : 'Oki is thinking\u2026'),
       /* Derived, never stored: opening Oki by any path (tab bar, bubble, peek,
          hash route, browser back or forward) titles the header “Oki”, because it
@@ -32087,6 +32135,7 @@ class Component extends DCLogic {
 }
 /* Host-only reading workspace methods; HDScene has no panel DOM. */
 Object.assign(Component.prototype, window.HDPane.hostMethods);
+Object.assign(Component.prototype, window.CloudUpdateUI.hostMethods);
 </script>
 </body>
 </html>

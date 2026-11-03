@@ -1,0 +1,96 @@
+LIVE SANDBOX WRITE-CONTRACT RECEIPT
+Date: 2026-11-02 UTC
+Target: https://taejnlrhfitqhqmijvxa.supabase.co only.
+Client draft: 2.9.7, starting branch tip 1b2aa0c plus local changes.
+Production: no queries, mutations, migrations, deployments or hook changes.
+
+RESULT
+tools/test-contract-gate.mjs exited 0 against a temporary real PostgREST hook.
+48 logged cases: 40 HTTP 423 rejections, 2 HTTP 201 creates, 6 HTTP 200
+replay/PATCH/DELETE successes. Full sanitized stdout: sandbox-contract-output.txt.
+The test obtained the contract header by driving the actual app module init.
+HTTP requests used the real Supabase Auth session of a disposable fixture user,
+not a service-role token, fabricated JWT or privileged assertion session.
+
+CASES, IDENTICAL ON BOTH CHILD TABLES
+Valid v2-composite-upsert header:
+- Composite upsert: HTTP 201, one returned row, server ID allocated.
+- Keyed replay/edit: HTTP 200, same server ID, one stored row.
+- PATCH: HTTP 200, same ID, payload verified by read-back.
+- DELETE: HTTP 200, returned ID verified, read-back found zero rows.
+
+Missing, empty, v1, malformed suffix and combined header values:
+- Each tested with POST, PATCH, PUT and DELETE, 20 rejections per table.
+- Every response: HTTP 423, code PT423, details CLIENT_UPGRADE_REQUIRED.
+- POST used the legacy on_conflict=id plus explicit numeric ID shape,
+  demonstrating contract rejection instead of identity failure.
+- After every rejected mutation, authenticated GET without the contract
+  header succeeded and returned the unchanged row ID and replay payload.
+
+CONFIGURATION AND SCOPE
+Applied the definition-only sandbox-hook-draft.sql logic in a dedicated,
+non-exposed incommon_contract_probe schema instead of reusing private.
+No application tables were renamed or structurally changed.
+The function used SECURITY INVOKER and function-level search_path=pg_catalog.
+PUBLIC execute revoked; anon/authenticated schema usage and execution granted.
+It reads documented request.headers JSON and checks the lowercased header
+name by exact value, only on the two child mutation paths.
+Temporary registration used ALTER ROLE authenticator and NOTIFY config reload.
+No prior stored hook override existed in inspected role/database scopes.
+Daemon environment/file configuration was not assumed absent from that result.
+The prior HTTP behavior was established before registration and proved again
+after removal. Unknown production hooks still require separate composition.
+
+BEFORE/AFTER CONTROLS
+Before registration, explicit-ID upserts without the contract returned
+HTTP 400 / 428C9 on both tables, with a readable real owner-profile control.
+After registration was removed, the same control requests again returned
+HTTP 400 / 428C9 on both tables. Auth and owner reads remained available.
+
+CLEANUP
+The harness deleted its owner profile and cascading children in finally and
+verified their absence. A separate bootstrap owner profile used for the
+baseline controls was removed with the disposable account and Auth user.
+Session signed out globally before user deletion. Access-token cryptographic
+expiry remains distinct from signout; no immediate JWT invalidation claim.
+Removed temporary hook override, function and dedicated schema, requested
+reload, then verified original HTTP behavior and aggregate counts.
+Final read-back: auth.users 0, auth.sessions 0, accounts 0, profiles 0,
+throughline_entries 0, oki_messages 0, probe schemas 0, hook overrides 0.
+Removed temporary credentials and launcher. Generated password/session data
+stayed in process memory and a mode-0600 temporary file, never source/output.
+No MFA policy was changed. Fixture had no enrolled MFA factor.
+
+The first cleanup tool confirmation expired. A premature restored control
+therefore still returned 423; it did not establish restoration. Cleanup was
+retried successfully, followed by new passing 400/428C9 controls on BOTH tables.
+Two setup/cleanup migration history entries remain:
+sandbox_contract_gate_probe_setup
+sandbox_contract_gate_probe_cleanup
+The sandbox was temporarily changed; it is not described as wholly unchanged.
+
+ADVISORS
+Existing support_requests_throttle() SECURITY DEFINER execute warnings for
+anon and authenticated appeared before and after, unchanged by this probe.
+Leaked-password protection warning appeared in the pre-run response, as in
+older project receipts; it was not changed or claimed resolved. It was not
+included in the final advisor response. No new warning class appeared there.
+https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
+https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+LIMITS AND REMAINING RELEASE WORK
+This validates request-shape behavior and replay, not a complete browser or
+real client push-loop journey through the gate. It does not simulate network
+response loss. The header is client-controlled, not authentication or proof
+of payload validity; valid-header bad payloads may still fail SQL validation.
+PUT was tested only for denied contracts, not as a valid modern sync operation.
+No anon, cross-owner, verified-MFA, RPC/other writer, in-flight transaction,
+load/concurrency, browser asset-staging or service-worker upgrade sign-off.
+Local preservation tests remain bounded by their mock storage and PM fixtures.
+Host update notification, unsaved-form persistence, user-confirmed reload,
+legacy manual recovery, independent review, exact production hook chaining,
+schema readiness and rollback remain release requirements.
+This gate refuses old writes; it does not translate legacy requests into
+successful modern writes. No zero-downtime coexistence guarantee is made.
+No production action is approved or scheduled by this receipt.

@@ -1,0 +1,62 @@
+INCOMMON 2.9.7 DRAFT - PRESERVED SOURCE
+Date: 2026-11-03 UTC
+Branch: draft/recovery-2.9.7-20261103
+Base: 1b2aa0c43e031f017edde46338fd6009a71426c4
+
+This branch preserves the recovered source, tests, modified full CLAUDE.md,
+review drafts, historical receipts and generated bundles. It is not a release,
+merge approval, deployment request or zero-data-loss signoff.
+
+NEW SESSION
+Clone figueroanathaniel/inCommon-repo and check out the branch above.
+Read full applicable repository instructions, then docs/contract-gate/README.md,
+bootstrap-handshake.md, form-coverage.md, host-ui.md and recovery.md.
+No local archive transfer is needed once this branch is available on GitHub.
+The original standalone standing strategy remains unavailable.
+
+NEXT WORK
+Asset availability/staging and user-confirmed reload/restoration are pending.
+Run a fresh form guard immediately before any future navigation. Sensitive,
+unsupported, stale or uncommitted data blocks it. A local document/module/
+transport handshake does not authorize abandoning current work or clear a
+same-page server rejection. Do not serialize arbitrary inputs or erase all
+caches as a shortcut. Already-running legacy code cannot acquire new handlers
+retroactively. Preserve RLS and ownership enforcement independently of the
+caller-controlled compatibility header.
+
+PRESERVATION PREFLIGHT
+The owner supplied Netlify dashboard screenshots showing production branch
+main, branch deploys limited to production only, Deploy Previews on PRs against
+production/branch-deploy branches, and builds Active. This preservation push
+uses a new non-main branch and opens no PR. No Netlify settings were changed.
+Live Netlify public metadata confirms the GitHub repository connection;
+private build/hook reads returned 401. Supabase management branch listing
+showed only default main mapped to main. The GitHub App may still post a check
+on a push. No Supabase branch, hook, SQL, migration or deployment is requested.
+Historical sandbox receipts document temporary probes and verified cleanup;
+they are not fresh production/sandbox inspections. Do not duplicate the
+existing hourly monitor.
+
+LOCAL CHECKS RERUN FOR PRESERVATION
+- Bootstrap handshake: 9/9
+- Recovery: 7/7
+- Form coverage: 9/9
+- Storage/UI: 9/9
+- Actual vendored SDK transport mock: passed
+- Module tests: 522/522
+- Dead controls, layer boundary, sandbox-target safety, diff whitespace: passed
+- Credential-pattern scan of pending files: no findings
+- All 45 recovered file hashes matched the original handoff manifest
+Chromium and real sandbox receipts are historical; neither was rerun here.
+The sandbox-target check uses deliberately invalid fixture credentials and
+unsafe-override rejection before network transmission. Its first invocation
+was blocked by local child-process permissions; the permitted rerun passed.
+Test-only fake-indexeddb 6.0.0 was installed outside the repository. See
+host-ui.md for dependency setup, replacing /tmp paths for the new session.
+
+RELEASE REMAINS BLOCKED
+Review production schema compatibility and exact effective hook composition,
+other writers, in-flight requests, recovery UX and rollback independently.
+Never apply raw production db push from the incomplete migration baseline.
+Production deployment and merge remain unauthorized. This preservation step
+does not modify the production database or request a hosting deployment.

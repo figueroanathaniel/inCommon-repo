@@ -11,7 +11,7 @@ for(const url of ['https://lkzcybzhjjxdqetwwdrx.supabase.co',
 assert.throws(()=>validate('https://lkzcybzhjjxdqetwwdrx.supabase.co',{
   ...config,project_ref:'lkzcybzhjjxdqetwwdrx',api_origin:'https://lkzcybzhjjxdqetwwdrx.supabase.co'}));
 assert.throws(()=>validate(config.api_origin,{...config,project_ref:null}));
-for(const script of ['test-remote-sandbox-race.js','test-mixed-concurrency.js']) {
+for(const script of ['test-remote-sandbox-race.js','test-mixed-concurrency.js','test-contract-gate.mjs']) {
 const run=spawnSync(process.execPath,[path.join(__dirname,script)],{
   env:{...process.env,SUPABASE_URL:config.api_origin,SUPABASE_ANON_KEY:'guard-only-not-a-key',
     SUPABASE_TEST_USER_A_JWT:'guard-only-not-a-token',SUPABASE_TEST_USER_B_JWT:'guard-only-not-a-token',ALLOW_UNSAFE_TARGET:'true'},encoding:'utf8'});

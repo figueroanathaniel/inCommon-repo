@@ -1,0 +1,33 @@
+BOOTSTRAP HANDSHAKE LOCAL VALIDATION
+Date: 2026-11-02 UTC
+Branch base: 1b2aa0c plus uncommitted local 2.9.7 draft.
+No sandbox or production changes, deployments, commits or pushes in this step.
+
+PASS tools/test-bootstrap-handshake.mjs: 9/9
+PASS tools/test-recovery-scenarios.mjs: 7/7
+PASS tools/test-form-coverage.mjs: 9/9
+PASS tools/test-cloud-update-ui.js: 9/9
+PASS tools/check-write-contract.js: actual vendored SDK with mocked fetch
+PASS tools/run-module-tests.js: 522/522
+PASS tools/check-dead-controls.js
+PASS tools/check-layer-boundary.js
+PASS git diff --check
+PASS bundle build: 68/68 modules included
+
+Browser: Chromium, phone 390x844 and desktop 1440x900.
+Actual source page/verifier/core init; SDK constructor fixture, synthetic
+host authentication status, all external browser traffic blocked.
+Both views: matching token and local handshake passed, existing scoped
+IndexedDB copy/restore, sensitive exclusion and unknown-input guard passed.
+This does not verify real browser server acceptance or every startup feature.
+
+Missing/stale token, missing verifier, bad module/transport/interface and
+same-page reinit fail closed. Fresh runtime replays unacknowledged records
+through actual sync source against a stateful mock. A matching local token
+never resets a live server rejection. Storage and acknowledgment maps retained.
+No persistent sync_state was invented or erased.
+
+No reload button, eviction, staged asset availability check or production
+readiness claim. Earlier bundle receipts are historical snapshots.
+Current deploy/v6.4/app.html bytes: 11986238
+SHA256: 4cf4c263a81f51fdaf7fdf6ec6263d8a3b9af110d2ffe016533fb5cf05ebaeb8

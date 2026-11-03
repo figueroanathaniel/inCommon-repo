@@ -1,0 +1,75 @@
+HOST UI RECOVERY VERIFICATION
+Date: 2026-11-02 UTC
+Local draft 2.9.7 on taskforce/04-visuals-webgl, base 1b2aa0c plus local work.
+No commits or push. No production/sandbox queries, mutations or deployments
+in this UI implementation turn. Browser external traffic was fully blocked.
+
+IMPLEMENTED
+Real host onUpgradeRequired connection, one shared non-modal notice, explicit
+copy/restore actions and Keep working. A focused non-credential text input is
+read-only during its snapshot write, with release on completion/failure/unmount
+and a one-second ceiling. Other local edits remain available.
+IndexedDB copies use account/profile/tab-ID scope, a writing-field allowlist,
+24-hour logical expiry and conflict-safe explicit restore. Storage errors do
+not produce a saved claim. New writing after restore is tracked; empty writing
+removes the copy. Profile and account lifecycle cleanup hooks are included.
+No product reload, asset staging, cache deletion or full-form persistence.
+
+TEST RESULTS
+NODE_PATH=/tmp/incommon-ui-test-deps/node_modules node tools/test-cloud-update-ui.js
+  9 tests passed, 0 failed. fake-indexeddb@6.0.0 as test-only IndexedDB model.
+node tools/test-recovery-scenarios.mjs
+  7 tests passed, 0 failed, using actual sync module and mocked transport.
+node tools/check-write-contract.js
+  Passed actual init and vendored SDK, header preservation, HTTP 423
+  classification and suppression of further HTTP pushes after rejection.
+node tools/run-module-tests.js --quiet
+  Exit 0 for existing module suite after the host changes.
+node tools/check-dead-controls.js
+  Passed all 1,460 handlers, including the new notice actions.
+node tools/check-layer-boundary.js
+  Passed 71 modules, no forbidden crossings.
+node tools/check-purple-text.js
+node tools/token-compare.js
+node tools/check-three-lifecycle.js
+  Exit 0, including 103 lifecycle checks.
+git diff --check
+  Exit 0.
+
+ACTUAL BROWSER CHECK
+Test-only Playwright 1.56.0 and Chromium 141 installed outside repository.
+NODE_PATH=/tmp/incommon-ui-test-deps/node_modules
+PLAYWRIGHT_BROWSERS_PATH=/tmp/incommon-playwright-browsers
+node tools/drive-cloud-update.js
+  Passed at phone 390x844 and desktop 1440x900.
+  Actual canonical source app and real Chromium IndexedDB. Synthetic host
+  signed-in status fixture; no real authentication or Supabase traffic.
+  Verified visible non-modal notice, persisted copy, no password field in
+  record, no automatic restore, explicit restore after test-driven reload,
+  44px action controls, preserved source text and no page errors.
+  The first driver attempt used an incomplete cloud fixture; it was corrected
+  to inherit the real API methods before passing. No product checks were
+  weakened. Screenshots exposed translucent-background bleed; the notice
+  was changed to opaque var(--bg) and phone/desktop checks rerun successfully.
+  Final retry after the user's Retry message also passed both viewports.
+Screenshots: browser-ui/phone-notice.png, phone-restored.png,
+desktop-notice.png, desktop-restored.png.
+
+BUILD
+node tools/build-bundle.js exited 0; 65/65 modules inlined, 355 Learn pages.
+deploy/v6.4/app.html final bytes: 11,970,222
+SHA-256: 888de82bbcb75900387bb9af9a97376ba09522db06a92fde61ec659510fca50e
+The compiler's unrelated removal of Netlify preview settings was restored.
+No publish or Netlify CLI call occurred.
+
+REMAINING LIMITS
+Writing-field allowlist excludes birth/auth/support forms, recording buffers
+and other editors. It must not authorize reload while unsupported drafts exist.
+No verified update manifest, asset staging, user-confirmed product reload,
+cache eviction, native app update or legacy-runtime intervention is shipped.
+No iOS/WebKit, real-device failure, IME, duplicated-tab token inheritance,
+full browser gate/H sweep, independent review or release sign-off.
+Expiration is enforced on access, not guaranteed physical erasure while the
+browser is closed. Deletion/storage failures are real limits and surfaced as
+local cleanup-failed events; no absolute no-data-loss guarantee is asserted.
+See host-ui.md for the exact storage, lifecycle and recovery boundaries.

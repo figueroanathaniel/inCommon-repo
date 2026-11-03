@@ -56,7 +56,10 @@
      module's own try/catches, until the integration harness rewrite drove
      PIN recovery end to end and found it always failing. */
   var root = typeof self !== 'undefined' ? self : this;
-  var VERSION = '2.9.6';
+  var VERSION = '2.9.7';
+  /* A write-shape declaration, not an authorization credential. Cached
+     clients without this contract must retain pending data when refused. */
+  var WRITE_CONTRACT = 'v2-composite-upsert';
 
   /* The project's own url and anon key, as data rather than machinery: no
      environment file, no build-time injection, no separate secrets module.
@@ -136,12 +139,47 @@
   var lastPullAt = 0;
   var pulling = null;   // the pull in flight, which a push waits behind
   var syncing = null;   // the sync in flight, so two never overlap
+  /* Page-local latch. Only a fresh runtime can retry a rejected contract;
+     no storage key or acknowledgment is cleared to make an update happen. */
+  var upgradeRequired = false;
+  var upgradeNotified = false;
+  var assetHandshake = null;
 
   function lib() { return (root && root.supabase) || null; }
   function uid() { return session && session.user ? session.user.id : null; }
   function notify() {
     var s = status();
     listeners.forEach(function (cb) { try { cb(s); } catch (e) {} });
+  }
+
+  function upgradeRefusal(acc) {
+    return Object.assign({}, acc || {}, { ok: false, reason: 'upgradeRequired',
+      status: 423, code: 'PT423', details: 'CLIENT_UPGRADE_REQUIRED',
+      error: 'Update the app to resume syncing.' });
+  }
+  function writeError(res, acc) {
+    if (!res || !res.error) return false;
+    acc.ok = false;
+    acc.error = res.error.message;
+    /* Maintenance and ordinary 423 responses are not an upgrade decision.
+       Require the complete contract-gate signature, never message matching. */
+    if (res.status === 423 && res.error.code === 'PT423' &&
+        res.error.details === 'CLIENT_UPGRADE_REQUIRED') {
+      upgradeRequired = true;
+      if (timer != null) { clearTimeout(timer); timer = null; }
+      Object.assign(acc, upgradeRefusal());
+    }
+    return true;
+  }
+  function publishUpgrade() {
+    if (!upgradeRequired || upgradeNotified) return;
+    upgradeNotified = true;
+    notify();
+    /* Host UI may check for an update and offer a saved-state reload. Never
+       evict caches or reload here: unsaved forms are owned by the host UI. */
+    if (cfg && cfg.onUpgradeRequired) {
+      try { cfg.onUpgradeRequired(upgradeRefusal()); } catch (e) {}
+    }
   }
 
   /* ---------- the memory types the server accepts ----------
@@ -378,8 +416,11 @@
   /* ---------- push ---------- */
 
   function ensureAccountRow(userId) {
+    if (upgradeRequired) return Promise.resolve(upgradeRefusal());
     return client.from('accounts').insert({ id: userId }).then(function (res) {
       if (res.error) {
+        var refusal = {};
+        if (res.status === 423) { writeError(res, refusal); if (upgradeRequired) return refusal; }
         var dup = res.error.code === '409' || /duplicate|exists/i.test(res.error.message || '');
         if (!dup) return { ok: false, error: res.error.message };
       }
@@ -396,9 +437,10 @@
     var chain = Promise.resolve({ ok: true, sent: 0, skipped: 0 });
     items.forEach(function (item) {
       chain = chain.then(function (acc) {
+        if (upgradeRequired) return upgradeRefusal(acc);
         if (cache[item._key] === item._hash) { acc.skipped++; return acc; }
         return client.from(table).upsert(item.row, { onConflict: onConflict }).then(function (res) {
-          if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
+          if (writeError(res, acc)) return acc;
           cache[item._key] = item._hash;
           acc.sent++;
           if (onSent) onSent(item);
@@ -449,6 +491,7 @@
       var chain = Promise.resolve();
       pending.forEach(function (item) {
         chain = chain.then(function () {
+          if (upgradeRequired) { acc = upgradeRefusal(acc); return acc; }
           if (!acc.ok) return acc;
           var row = item.row, keyed = row.local_id != null, hit = null;
           var byKey = keyed ? idx.byLocal[appendKey(row)] : null;
@@ -469,7 +512,7 @@
             operation = client.from(table).upsert(out, { onConflict: 'id', ignoreDuplicates: false });
           }
           return operation.then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; return acc; }
+            if (writeError(res, acc)) return acc;
             cache[item._key] = item._hash;
             acc.sent++;
             if (hit) acc.updated++;
@@ -500,9 +543,10 @@
     items.forEach(function (item) {
       if (!marked[item._key]) return;
       chain = chain.then(function (acc) {
+        if (upgradeRequired) return upgradeRefusal(acc);
         if (!acc.ok) return acc;
         return client.from('profiles').upsert(item.row, { onConflict: 'id' }).then(function (res) {
-          if (res.error) { acc.ok = false; acc.error = res.error.message; }
+          writeError(res, acc);
           return acc;
         });
       });
@@ -512,6 +556,7 @@
 
   function push() {
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (upgradeRequired) return Promise.resolve(upgradeRefusal());
     var userId = uid();
     if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
     /* A push that ran while a pull was writing would hash a half merged
@@ -524,12 +569,18 @@
        take the mark the push had just sent (K85). A deletion that fails here
        stays queued and the push goes on, as before. */
     return flushOutbox().then(function () {
+      if (upgradeRequired) return upgradeRefusal();
       var plan = buildPlan();
       return pushPlan(userId, plan);
     }).then(function (acc) {
-      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () { return acc; }); }
+      if (upgradeRequired) { publishUpgrade(); return upgradeRefusal(acc); }
+      if (acc.ok) { lastPushAt = Date.now(); return flushOutbox().then(function () {
+        if (upgradeRequired) { publishUpgrade(); return upgradeRefusal(acc); }
+        return acc;
+      }); }
       return acc;
     }).catch(function (e) {
+      if (upgradeRequired) { publishUpgrade(); return upgradeRefusal(); }
       return { ok: false, reason: 'offline', error: e && e.message };
     });
   }
@@ -563,7 +614,7 @@
   }
 
   function schedule() {
-    if (!client) return;
+    if (!client || upgradeRequired) return;
     if (timer != null) clearTimeout(timer);
     timer = setTimeout(function () { timer = null; push(); }, DEBOUNCE_MS);
   }
@@ -612,6 +663,7 @@
 
   function flushOutbox() {
     if (!client) return Promise.resolve({ ok: false, reason: 'off' });
+    if (upgradeRequired) return Promise.resolve(upgradeRefusal());
     var userId = uid();
     if (!userId) return Promise.resolve({ ok: false, reason: 'no-session' });
     var o = loadOutbox();
@@ -620,7 +672,10 @@
     var remaining = [], resendAfter = false;
     o.forEach(function (op) {
       chain = chain.then(function (acc) {
-        if (!acc.ok) { remaining.push(op); return acc; }
+        if (!acc.ok || upgradeRequired) {
+          remaining.push(op);
+          return upgradeRequired ? upgradeRefusal(acc) : acc;
+        }
         if (op.op === 'del-profile') {
           /* A profile this device still holds was not deleted: the op is one
              an older build queued when the profile was marked for somebody
@@ -638,9 +693,10 @@
              own trigger has already done. */
           return client.from('deleted_profiles').upsert({ account_id: userId, profile_id: op.pid },
             { onConflict: 'account_id,profile_id', ignoreDuplicates: true }).then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); return acc; }
+            if (writeError(res, acc)) { remaining.push(op); return acc; }
+            if (upgradeRequired) { remaining.push(op); return upgradeRefusal(acc); }
             return client.from('profiles').delete().eq('id', op.pid).then(function (res2) {
-              if (res2.error) { acc.ok = false; acc.error = res2.error.message; remaining.push(op); }
+              if (writeError(res2, acc)) remaining.push(op);
               return acc;
             });
           });
@@ -651,7 +707,7 @@
            had on the server. */
         if (op.op === 'del-memory') {
           return client.from('memories').delete().eq('profile_id', op.pid).eq('local_id', op.id).then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
+            if (writeError(res, acc)) remaining.push(op);
             return acc;
           });
         }
@@ -659,7 +715,7 @@
           var q = client.from('memories').delete().eq('profile_id', op.pid);
           if (op.type) q = q.eq('memory_type', op.type);
           return q.then(function (res) {
-            if (res.error) { acc.ok = false; acc.error = res.error.message; remaining.push(op); }
+            if (writeError(res, acc)) remaining.push(op);
             return acc;
           });
         }
@@ -667,7 +723,14 @@
       });
     });
     return chain.then(function (acc) {
+      /* A local edit may enqueue another deletion during the request. Keep
+         operations added after this flush snapshot as well as failed ones. */
+      loadOutbox().forEach(function (op) {
+        if (!o.some(function (old) { return opSig(old) === opSig(op); }) &&
+            !remaining.some(function (left) { return opSig(left) === opSig(op); })) remaining.push(op);
+      });
       saveOutbox(remaining);
+      publishUpgrade();
       if (resendAfter) schedule();
       return acc;
     });
@@ -1096,7 +1159,11 @@
   function sync() {
     if (syncing) return syncing;
     syncing = pull().then(function (pr) {
-      return push().then(function (ps) { return { ok: !!(pr.ok && ps.ok), pull: pr, push: ps }; });
+      return push().then(function (ps) {
+        var result = { ok: !!(pr.ok && ps.ok), pull: pr, push: ps };
+        if (ps.reason === 'upgradeRequired') result.reason = 'upgradeRequired';
+        return result;
+      });
     }).then(function (r) { syncing = null; return r; }, function (e) { syncing = null; return { ok: false, reason: 'error', error: e && e.message }; });
     return syncing;
   }
@@ -2137,6 +2204,9 @@
          purchase is filed under the same reader the server knows. */
       userId: uid(),
       owesCode: !!held,
+      upgradeRequired: upgradeRequired,
+      assetHandshake: assetHandshake,
+      writeState: upgradeRequired ? 'upgradeRequired' : 'ready',
       lastPushAt: lastPushAt || null,
       lastPullAt: lastPullAt || null,
       pendingOps: loadOutbox().length,
@@ -2159,11 +2229,30 @@
          sample a blank device invents), which give way to the account's own.
          onPulled(result): told after every pull that read the server. */
       placeholders: typeof opts.placeholders === 'function' ? opts.placeholders : null,
-      onPulled: typeof opts.onPulled === 'function' ? opts.onPulled : null };
+      onPulled: typeof opts.onPulled === 'function' ? opts.onPulled : null,
+      onUpgradeRequired: typeof opts.onUpgradeRequired === 'function' ? opts.onUpgradeRequired : null };
     /* Before the client reads the stored session: a sign in that asked not to
        be remembered ends with the browser session it was made in. */
     ephemeralSweep(url, opts.storage);
-    client = l.createClient(url, anonKey);
+    var transport = {
+      global: { headers: { 'X-InCommon-Write-Contract': WRITE_CONTRACT } }
+    };
+    /* Browser boot is checked before the SDK can restore a session and start
+       sync. A live server rejection is never cleared by this local evidence.
+       Headless test seams have no delivery document to attest. */
+    if (root.document && !assetHandshake) {
+      try {
+        assetHandshake = root.BootstrapHandshake.verify(root.__INCOMMON_RELEASE_TOKEN__,
+          { version: VERSION, contract: WRITE_CONTRACT, push: push, pull: pull }, transport);
+      } catch (e) {
+        assetHandshake = Object.freeze({ ok: false, reason: 'BOOTSTRAP_VERIFIER_UNAVAILABLE' });
+      }
+      if (!assetHandshake.ok) {
+        upgradeRequired = true;
+        if (timer != null) { clearTimeout(timer); timer = null; }
+      }
+    }
+    client = l.createClient(url, anonKey, transport);
 
     /* THE SEAM. Any ProfileManager event means the local record changed, and
        every change is a push candidate. Deletions are queued, not pushed, so
@@ -2182,6 +2271,7 @@
       notify();
       if (session && !had) sync();
     });
+    publishUpgrade();
     return api;
   }
 

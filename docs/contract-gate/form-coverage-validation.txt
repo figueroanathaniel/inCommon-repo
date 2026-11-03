@@ -1,0 +1,28 @@
+FORM GUARD LOCAL VERIFICATION
+Date: 2026-11-02 UTC
+Base: 1b2aa0c plus local uncommitted draft work.
+No sandbox or production configuration changed in this implementation.
+
+PASS tools/test-form-coverage.mjs: 9/9
+PASS tools/test-cloud-update-ui.js: 9/9
+PASS tools/test-recovery-scenarios.mjs: 7/7
+PASS tools/check-write-contract.js: actual vendored SDK mocked transport
+PASS tools/run-module-tests.js: 522/522
+PASS tools/check-dead-controls.js
+PASS tools/check-layer-boundary.js
+PASS git diff --check
+PASS build: 67/67 modules included; preview Netlify context preserved.
+
+Chromium source-app integration: phone 390x844 and desktop 1440x900.
+External browser traffic blocked. Synthetic signed-in presentation fixture.
+Committed mapped copy -> formsReady true, allowed false, ASSETS_NOT_VERIFIED.
+Injected unmapped textarea -> readiness invalidated, retained text unchanged.
+Existing IndexedDB restore, credential exclusion and 44px controls passed.
+Screenshots: browser-ui/ (updated by the driver).
+
+This supersedes earlier UI bundle hashes, not earlier sandbox receipts.
+No product reload, asset staging, release-token handshake or gate unpause.
+No full device/WebKit/form coverage or production readiness claim.
+
+Current deploy/v6.4/app.html bytes: 11984100
+SHA256: f777e770ade9cbfe010d4ff70f3fa541a78c3b81ab9b3c64ab3f526c8a4388cc

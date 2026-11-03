@@ -1903,8 +1903,8 @@ async function runCloudTests() {
   }, { reasons: none.map(function (r) { return r.reason; }) });
   var gApp = oauthHarness();
   gApp.C.init({ url: 'https://k20-test.invalid', anonKey: 'k20-fake-anon', core: {}, pm: pmG, storage: clStore() });
-  t('K20', 'init() still makes the app client with the library defaults, so the email links it sends stay on the implicit flow', {
-    clients: 1, opts: null
+  t('K20', 'init() declares the composite write contract without overriding the library auth defaults', {
+    clients: 1, opts: { global: { headers: { 'X-InCommon-Write-Contract': 'v2-composite-upsert' } } }
   }, { clients: gApp.created.length, opts: gApp.created[0] ? gApp.created[0].opts : 'none' });
 
   var gUp = oauthHarness();

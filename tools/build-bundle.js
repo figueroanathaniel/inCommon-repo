@@ -127,6 +127,11 @@ const MODULES = [
   'ephemeris-integration.js',
   'incommon-core.js',
   'practice-library.js',
+  'ui-registry.js',
+  'reload-guard.js',
+  'bootstrap-handshake.js',
+  'cloud-update-drafts.js',
+  'cloud-update-ui.js',
   'profile-manager.js',
   'sabian-symbols.js',
   'sabian-symbols-data.js',
@@ -330,6 +335,18 @@ function swapFonts(page, label) {
 }
 
 let html = fs.readFileSync(srcPath, 'utf8');
+/* Every delivery document must agree with the actual sync and verifier
+   sources. Do not stamp a new version over an older runtime. */
+const syncRelease = fs.readFileSync(path.join(appDir, 'incommon-cloud.js'), 'utf8').match(/var VERSION = '([^']+)'/);
+const bootRelease = fs.readFileSync(path.join(appDir, 'bootstrap-handshake.js'), 'utf8').match(/var RELEASE = '([^']+)'/);
+function assertReleaseToken(page, name) {
+  const tokens = [...page.matchAll(/Object\.defineProperty\(window, '__INCOMMON_RELEASE_TOKEN__', \{ value: '([^']+)'/g)];
+  if (!syncRelease || !bootRelease || tokens.length !== 1 ||
+      tokens[0][1] !== syncRelease[1] || tokens[0][1] !== bootRelease[1]) {
+    die(name + ': release token, sync module and bootstrap verifier must agree');
+  }
+}
+assertReleaseToken(html, 'app');
 const report = { react: [], support: false, modules: [], lang: false, style: false };
 html = swapFonts(html, 'the app');
 {
@@ -577,6 +594,7 @@ try {
 const coverSrc = path.join(appDir, 'cover.html');
 if (!fs.existsSync(coverSrc)) die('cannot find ' + coverSrc + '; the site has no cover to serve at /');
 let cover = fs.readFileSync(coverSrc, 'utf8');
+assertReleaseToken(cover, 'cover');
 
 const APP_ADDR = './inCommonApp%20v2.dc.html';
 const addrCount = cover.split(APP_ADDR).length - 1;

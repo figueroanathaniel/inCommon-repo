@@ -638,6 +638,14 @@
        deletion here and a deletion another device made, which importSynced
        applies. */
     _dropProfileKeys: function (id) {
+      /* Recovery copies are local writing drafts, never a second profile.
+         A deleted profile must not be brought back by restoring its copy. */
+      if (window.CloudUpdateDrafts) {
+        var pm = this;
+        window.CloudUpdateDrafts.store().removeProfile(id).catch(function () {
+          pm._emit('drafts:cleanup-failed', { profileId: id });
+        });
+      }
       ['incommon.consent', 'incommon.consent.data', 'incommon.p.' + id + '.memories',
         'incommon.p.' + id + '.throughline', 'incommon.p.' + id + '.oki', 'incommon.charts',
         'incommon.p.' + id + '.oracle', 'incommon.p.' + id + '.oracleConsent', 'incommon.p.' + id + '.oracleDeep',

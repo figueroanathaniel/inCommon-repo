@@ -2972,6 +2972,39 @@ opened on the account's profile with its journal, consent and Throughline, sent
 no sample up, and picked up an entry written elsewhere when it came back into
 view.
 
+## Sync writes declare their contract (2.9.7 draft)
+The sync client's Supabase global headers now include
+`X-InCommon-Write-Contract: v2-composite-upsert`. This declares its keyed
+write shape, not identity or permission. Auth defaults and RLS still apply.
+Unchanged 2.9.6, like 2.9.5, has no declaration. Do not enable a server gate
+until cached clients have an upgrade and retry path. The review draft and
+sandbox-only harness are in `docs/contract-gate/` and
+`tools/test-contract-gate.mjs`; neither registers a hook. The header transport
+check uses the real init seam and vendored SDK, with fetch mocked.
+The recovery draft recognizes only HTTP 423 plus PT423 and
+CLIENT_UPGRADE_REQUIRED. It pauses further sync writes, retains source records,
+hashes and pending deletions, and leaves pull available. An optional
+onUpgradeRequired callback can ask the host UI to check for an update; the
+module never reloads or evicts caches itself. See
+`docs/contract-gate/recovery.md` before wiring a reload or clearing state.
+The host now shows a non-modal notice and stores an allowlisted writing copy
+in IndexedDB through cloud-update-drafts.js. Copies are account/profile/tab-ID
+scoped, logically expire after 24 hours, and have profile/account deletion
+cleanup. No password, PIN, MFA or birth form is copied. The host refuses to
+overwrite different current writing on restore. See
+`docs/contract-gate/host-ui.md`: the partial allowlist is not permission to reload
+or clear caches, and asset staging is still unimplemented.
+The explicit writing schema is shared in app/ui-registry.js. Before any future
+reload, require a fresh app/reload-guard.js check of current controls and a
+committed scoped copy. Sensitive and unmapped retained inputs block. A passing
+form check still returns allowed false until assets are independently verified;
+never substitute a static release token or a cached UI flag for that check.
+Browser init now checks the delivery token, actual sync version, configured
+write-contract header and sync interfaces through bootstrap-handshake.js.
+Mismatch pauses writes before session-triggered sync. A valid local handshake
+never clears a live server rejection. There is no persisted sync_state flag.
+See docs/contract-gate/bootstrap-handshake.md; staging and reload remain open.
+
 ## Each account has its own profiles on a device
 The owner reported on 12 October 2026 that three accounts signed in on one
 browser all opened onto the same birth data. The profile list was one device

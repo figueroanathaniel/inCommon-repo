@@ -1,0 +1,58 @@
+LOCAL RECOVERY IMPLEMENTATION RECEIPT
+Date: 2026-11-02 UTC
+Base: 1b2aa0c, taskforce/04-visuals-webgl, with earlier local header draft.
+Draft version: 2.9.7. No commits, pushes, deployments or remote tests this turn.
+The sandbox and production were not queried or changed.
+
+IMPLEMENTED
+Exact status/code/details classification for write-contract rejection.
+Page-local upgradeRequired latch, structured push/sync results and status.
+Cancel push debounce and suppress subsequent sync writes/deletion flushes.
+Keep GET pull and local editing paths available. Preserve source records,
+partial acknowledgment hashes and pending deletion operations. Preserve
+deletions added while an outbox request is in flight.
+Notify existing status subscribers and optional onUpgradeRequired callback
+after bookkeeping save paths complete. No forced reload or cache clearing.
+
+TESTS PASSED
+node tools/test-recovery-scenarios.mjs
+  7 tests passed, 0 failed. Actual init and module code in isolated runtimes,
+  fixture ProfileManager, stateful mocked transport and serialized storage.
+  Both child tables: 201 then contract rejection; one hash acknowledged,
+  both source records retained, no later automatic writes; reads and local
+  edits continue; fresh runtime retries only the unacknowledged row and
+  retains server IDs. Final acknowledged replay sends no child writes.
+  Also tests queued deletions, concurrent deletion event, generic batch stop,
+  maintenance/ordinary error non-classification and throwing host callback.
+node tools/check-write-contract.js
+  Actual vendored SDK with mocked fetch confirms contract header and unchanged
+  auth/API key/Prefer, HTTP 423 JSON classification and no subsequent HTTP push.
+node tools/run-module-tests.js --quiet
+  Exit 0 for existing module suite.
+node tools/build-bundle.js
+  Exit 0, 63/63 modules inlined, 355 Learn pages.
+node tools/check-layer-boundary.js
+node tools/check-dead-controls.js
+node tools/check-purple-text.js
+node tools/token-compare.js
+node tools/check-three-lifecycle.js
+  Exit 0, including 103 lifecycle checks.
+node --check app/incommon-cloud.js
+git diff --check
+
+CURRENT BUNDLE
+deploy/v6.4/app.html: 11,951,918 final bytes.
+SHA-256: 9b7cbcf07d6fe3bed1b77bc066ca9cf0e71cd45dce13723ba8cbb1efca625a7c
+Compiler reports pre-header size of 11,951,791 bytes.
+Unrelated Netlify preview configuration removed by the compiler was restored.
+
+LIMITS
+No actual browser, service-worker asset update, unsaved-form persistence,
+rendered prompt, manual reload or legacy browser recovery was tested.
+Playwright remains unavailable as recorded in the header-only receipt.
+The host UI callback is a seam, not a completed update flow. Actual cached
+2.9.5/2.9.6 code cannot acquire this handler without loading a newer bundle.
+Storage quota failures, remote durability, concurrent devices, full real PM,
+RLS/MFA, alternative writers and in-flight server transactions remain outside
+these tests. Acknowledged records are never popped from their source arrays.
+Remote contract-gate activation/testing and production remain paused.

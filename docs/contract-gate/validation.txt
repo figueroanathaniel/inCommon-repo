@@ -1,0 +1,71 @@
+WRITE CONTRACT IMPLEMENTATION RECEIPT
+Header-only snapshot. See recovery-validation.txt for the later recovery
+implementation, additional tests and current generated artifact hash.
+Date: 2026-11-02 UTC
+Checkout: /workspace/inCommon-repo
+Base commit: 1b2aa0c43e031f017edde46338fd6009a71426c4
+Branch: taskforce/04-visuals-webgl. Local changes only, no commits or push.
+
+SOURCE CHANGE
+app/incommon-cloud.js draft version 2.9.7; Supabase sync client global header
+X-InCommon-Write-Contract: v2-composite-upsert. App auth options remain unset.
+app/cover.html loader changed to v=2.9.7. Generated deploy/v6.4 artifacts rebuilt.
+No writes were made to Supabase, Netlify, any other remote application or
+production. No messages, PR comments, merge, deployment or monitor change.
+
+LOCAL CHECKS PASSED
+node tools/check-write-contract.js
+  Actual init seam and vendored Supabase SDK with mocked fetch, both child
+  tables, POST/PATCH/DELETE/GET, header propagation, API key and authorization,
+  Prefer and URL conflict target. No external requests from this test.
+node tools/run-module-tests.js --quiet
+  Exit 0. K20 updated for the intentional header option; auth defaults retained.
+node tools/build-bundle.js
+  Exit 0, 63/63 modules inlined, Google fonts, 355 Learn pages.
+  app.html final bytes: 11,949,030
+  SHA-256: de193071571ff90493a717db82114b5a2c7a1af5234545ce17cf2106c8a140a5
+  Build tool also rewrote netlify.toml; unrelated preview configuration restored.
+node tools/run-tests-node.js
+  9/9 calculation fixtures passed; declared non-executable reference blocks
+  remain unexecuted as reported by the runner.
+node tools/run-fixtures.js
+  43 passed; 12 browser-only checks skipped.
+node tools/check-dead-controls.js
+node tools/check-purple-text.js
+node tools/token-compare.js
+node tools/check-layer-boundary.js
+node tools/check-three-lifecycle.js
+  103 lifecycle checks passed.
+node tools/check-remote-sandbox-target.js
+  Exact sandbox guard and production/invalid URL/unsafe override checks passed.
+  New remote harness included in unsafe override rejection checks.
+  Subprocess checks needed supported per-command network permission here.
+node --check tools/test-contract-gate.mjs
+git diff --check
+
+INITIAL CHECK LIMITATIONS RESOLVED
+The sparse checkout initially omitted data-contracts, so calculation checks
+could not find their fixtures. Added the existing tracked directory to the
+checkout; both calculation suites then passed without changing their fixtures.
+
+UNRUN VALIDATION
+Playwright was unavailable even with NODE_PATH pointing at global modules.
+Browser gates, physical devices and service-worker upgrade journeys were not
+run and are not reported as passed. No independent review occurred.
+The contract gate integration suite was generated, not run against live API
+writes. No hook has been registered for this draft. SQL file is definition-only
+and requires security/schema owner review and configuration composition.
+
+READ-ONLY SANDBOX CORS CHECK
+OPTIONS to taejnlrhfitqhqmijvxa /rest/v1/throughline_entries, origin
+https://incommonspace.com, POST request headers authorization, apikey,
+content-type and x-incommon-write-contract returned HTTP 200.
+Access-Control-Allow-Headers explicitly included all requested headers.
+This does not prove actual browser execution or production CORS settings.
+
+RELEASE LIMITS
+A header can be forged and is not authorization. Unchanged 2.9.5 and 2.9.6
+clients lack it. This draft rejects unsupported contracts rather than translating
+them; a safe upgrade/retry experience for cached/offline clients is still owed.
+Composite schema readiness, in-flight writes, alternate writers, independent
+review and production authorization remain separate release gates.
