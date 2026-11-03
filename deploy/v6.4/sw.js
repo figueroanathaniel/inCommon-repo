@@ -9,6 +9,7 @@
  * separate requests and a cover without them is the SIGNAL LOST message on a
  * machine that could have drawn the render.
  */
+importScripts('./update-assets.js');
 var CACHE = 'incommon-v6.4-oraplayer1';
 var PRECACHE = [
   './', './index.html', './app.html', './manifest.json',
@@ -42,9 +43,25 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.map(function (k) { return k === CACHE ? null : caches.delete(k); }));
+      return Promise.all(keys.map(function (k) { return /^incommon-v/.test(k) && k !== CACHE ? caches.delete(k) : null; }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+/* This cache contains only a public, digest-verified compiled shell. It is
+   isolated from ordinary cache lookup and never stores account data. */
+var updates = self.UpdateAssets.create(self, self.registration.scope);
+var staging = Promise.resolve();
+self.addEventListener('message', function (event) {
+  if (!event.data || !['IC_STAGE', 'IC_VERIFY'].includes(event.data.type) || !event.ports[0]) return;
+  var source = event.source, port = event.ports[0];
+  if (!source || !source.url || new URL(source.url).origin !== location.origin || !source.url.startsWith(self.registration.scope)) return;
+  var data = event.data;
+  var work = data.type === 'IC_STAGE'
+    ? (staging = staging.catch(function () {}).then(function () { return updates.stage(data.currentBuild, data.recoverBoot === true); }))
+    : updates.shell(data.build).then(function () { return { build: data.build }; });
+  event.waitUntil(work.then(function (result) { port.postMessage({ ok: true, result: result }); },
+    function () { port.postMessage({ ok: false }); }));
 });
 
 self.addEventListener('fetch', function (e) {
@@ -64,6 +81,25 @@ self.addEventListener('fetch', function (e) {
   }
 
   if (url.origin !== location.origin) return;
+
+  if (req.mode === 'navigate' && url.searchParams.has('ic_update') &&
+      url.pathname === new URL('app.html', self.registration.scope).pathname) {
+    e.respondWith(updates.shell(url.searchParams.get('ic_update')).then(function (response) {
+      /* Replace this shell only, after explicit reload navigation. Unrelated
+         caches, source records and draft storage are never evicted. */
+      return caches.open(CACHE).then(function (cache) {
+        return cache.put(new URL('app.html', self.registration.scope).href, response.clone()).then(function () { return response; });
+      });
+    }).catch(function () {
+      /* Never execute an unknown old cached program as a confirmed update.
+         Back can recover the previous page; committed local data is retained. */
+      return new Response('The update could not be verified. Use your browser Back button to return. Your local data has not been cleared.',
+        { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store', 'Content-Security-Policy': "default-src 'none'" } });
+    }));
+    return;
+  }
+
 
   /* THE SHELL IS FETCHED FRESH, EVERYTHING ELSE IS CACHE FIRST.
 
@@ -88,7 +124,7 @@ self.addEventListener('fetch', function (e) {
         }
         return res;
       }).catch(function () {
-        return caches.match(req).then(function (hit) { return hit || caches.match(shellFor(url)); });
+        return caches.open(CACHE).then(function (c) { return c.match(req).then(function (hit) { return hit || c.match(shellFor(url)); }); });
       })
     );
     return;
@@ -96,7 +132,7 @@ self.addEventListener('fetch', function (e) {
 
   // Same-origin: cache first, then network, then the app shell for navigations.
   e.respondWith(
-    caches.match(req).then(function (hit) {
+    caches.open(CACHE).then(function (c) { return c.match(req); }).then(function (hit) {
       if (hit) return hit;
       return fetch(req).then(function (res) {
         if (res && res.ok && res.type === 'basic') {
@@ -105,7 +141,7 @@ self.addEventListener('fetch', function (e) {
         }
         return res;
       }).catch(function () {
-        return req.mode === 'navigate' ? caches.match(shellFor(url)) : Response.error();
+        return req.mode === 'navigate' ? caches.open(CACHE).then(function (c) { return c.match(shellFor(url)); }) : Response.error();
       });
     })
   );

@@ -86,6 +86,7 @@ function runtime(snapshot, db, onUpgrade, boot) {
     } } };
   context.self = context;
   if (boot) { context.document = {}; context.__INCOMMON_RELEASE_TOKEN__ = boot.token; }
+  if (boot && boot.context) Object.assign(context, boot.context);
   vm.createContext(context);
   if (boot && !boot.missingVerifier) vm.runInContext(fs.readFileSync(new URL('../../app/bootstrap-handshake.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);

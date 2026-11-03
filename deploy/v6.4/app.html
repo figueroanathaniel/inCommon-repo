@@ -1,8 +1,9 @@
-<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-11-02  |  deploy this together with a sw.js showing the same version -->
+<!-- inCommon incommon-v6.4-oraplayer1  |  built 2026-11-03  |  deploy this together with a sw.js showing the same version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <script>Object.defineProperty(window, '__INCOMMON_RELEASE_TOKEN__', { value: '2.9.7', writable: false, configurable: false });</script>
+<script>Object.defineProperty(window, '__INCOMMON_BUILD_ID__', { value: '73e70006d85b7797366ad31183171ecc442cab7c75239a4868ba0a862042ccd4', writable: false, configurable: false });</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- The app is not a page to be found. Every address but the bare one and the
@@ -4181,7 +4182,34 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return Object.freeze({ ok: !reason, reason: reason || 'LOCAL_BOOT_VERIFIED',
       release: RELEASE, contract: CONTRACT });
   }
-  return Object.freeze({ verify: verify });
+  var INTENT = 'incommon.update.intent.v1';
+  function verifyBrowser(env, runtime, transport) {
+    var local = verify(env.__INCOMMON_RELEASE_TOKEN__, runtime, transport);
+    if (!local.ok) return local;
+    try {
+      var url = env.location ? new URL(env.location.href) : null;
+      var raw = env.sessionStorage && env.sessionStorage.getItem(INTENT);
+      if (!raw && !(url && url.searchParams.has('ic_update'))) return local;
+      var intent = JSON.parse(raw || 'null');
+      if (!intent || !/^[a-f0-9]{64}$/.test(intent.build || '') || !intent.attempt ||
+          !Number.isFinite(intent.expires) || intent.expires <= Date.now() ||
+          !url || url.searchParams.get('ic_update') !== intent.build ||
+          url.searchParams.get('ic_attempt') !== intent.attempt || env.__INCOMMON_BUILD_ID__ !== intent.build) {
+        return Object.freeze({ ok: false, reason: 'RELOAD_BUILD_MISMATCH' });
+      }
+      return Object.freeze({ ok: true, reason: 'STAGED_BOOT_VERIFIED', build: intent.build, reload: true });
+    } catch (e) { return Object.freeze({ ok: false, reason: 'RELOAD_CONTEXT_UNAVAILABLE' }); }
+  }
+  function acknowledge(env, result) {
+    if (!result.ok || !result.reload) return;
+    /* Only navigation bookkeeping is removed. The core's server-rejection
+       latch, record arrays, hashes, deletion outbox and copies are untouched. */
+    var url = new URL(env.location.href);
+    url.searchParams.delete('ic_update'); url.searchParams.delete('ic_attempt');
+    env.history.replaceState(env.history.state, '', url.href);
+    env.sessionStorage.removeItem(INTENT);
+  }
+  return Object.freeze({ verify: verify, verifyBrowser: verifyBrowser, acknowledge: acknowledge });
 }));
 
 </script>
@@ -4294,7 +4322,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
 </script>
 <script>
-/* Host-only recovery notice and local writing-copy orchestration. No reload. */
+/* Host recovery notice, scoped writing copies and guarded confirmed reload. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.CloudUpdateUI = factory(root);
@@ -4317,6 +4345,47 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           cloudFormGuardMsg: 'Open forms must be checked before updating.',
           cloudDraftMsg: 'Sync needs an app update. You can keep working here.' });
         this.cloudRecoveryTrack();
+        if (!this._cloudStageStarted) this.cloudRecoveryStage();
+      },
+      cloudRecoveryStage: function (confirmed) {
+        var self = this;
+        if (this._cloudDraftStopped || this._cloudStageRunning) return;
+        this._cloudStageStarted = true;
+        if (!env.CloudUpdateDelivery || (this.nativeApp && this.nativeApp())) {
+          this.setState({ cloudUpdateMsg: 'Use your browser or app store update. Keep this tab open.' }); return;
+        }
+        this._cloudStageRunning = true;
+        this._cloudDelivery = this._cloudDelivery || env.CloudUpdateDelivery.create(env);
+        this.setState({ cloudUpdateWaiting: true, cloudUpdateReady: false, cloudUpdateMsg: 'Checking for an update. You can keep working.' });
+        this._cloudDelivery.stage({ confirmed: confirmed === true }).then(function (receipt) {
+          self._cloudStageRunning = false;
+          if (self._cloudDraftStopped) return;
+          self._cloudStaged = receipt;
+          self.setState({ cloudUpdateWaiting: false, cloudUpdateReady: true,
+            cloudUpdateMsg: 'Update saved on this device. Reload checks your open work again.' });
+        }, function () {
+          self._cloudStageRunning = false;
+          if (!self._cloudDraftStopped) self.setState({ cloudUpdateWaiting: false, cloudUpdateReady: false,
+            cloudUpdateMsg: 'No new verified update is available. Keep this tab open and try again later.' });
+        });
+      },
+      cloudRecoveryReload: function () {
+        var self = this;
+        if (this._cloudReloadRunning || !this._cloudStaged || !this._cloudDelivery || this._cloudDraftStopped) return;
+        this._cloudReloadRunning = true;
+        this.setState({ cloudUpdateWaiting: true });
+        this._cloudDelivery.reload(this._cloudStaged, {
+          scope: function () { return self.cloudRecoveryScope(); },
+          load: function (scope) { return env.CloudUpdateDrafts.store().load(scope); },
+          active: function () { return !self._cloudDraftStopped; },
+          guard: function (scope, snapshot) { return env.ReloadGuard.evaluate({ state: self.state,
+            document: env.document, scope: scope, snapshot: snapshot, saving: self._cloudDraftSaving }); }
+        }).catch(function () {
+          self._cloudReloadRunning = false;
+          if (!self._cloudDraftStopped) self.setState({ cloudUpdateWaiting: false,
+            cloudFormsReady: false,
+            cloudUpdateMsg: 'Reload blocked. Save or finish open forms, keep this tab open, and check again.' });
+        });
       },
       cloudRecoveryTrack: function () {
         if (!this.state.ready || this._cloudDraftStopped) return;
@@ -4497,12 +4566,162 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           cloudDraftBusy: !!this.state.cloudDraftBusy,
           cloudFormGuardOn: !!this.state.cloudFormGuardMsg,
           cloudFormGuardMsg: this.state.cloudFormGuardMsg || '',
-          cloudFormChecking: !!this.state.cloudFormChecking
+          cloudFormChecking: !!this.state.cloudFormChecking,
+          cloudUpdateOn: !!this.state.cloudUpdateMsg,
+          cloudUpdateMsg: this.state.cloudUpdateMsg || '',
+          cloudUpdateReady: !!this.state.cloudUpdateReady,
+          cloudUpdateWaiting: !!this.state.cloudUpdateWaiting,
+          cloudReloadDisabled: !!this.state.cloudUpdateWaiting || !this.state.cloudFormsReady
         };
       }
     };
   }
   return { createHostMethods: hostMethods, hostMethods: hostMethods(root) };
+}));
+
+</script>
+<script>
+/* User-confirmed reload coordinator. Never clears sync state or source records. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CloudUpdateDelivery = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var INTENT = 'incommon.update.intent.v1';
+  function create(env) {
+    var registration;
+    function message(type, fields) {
+      return new Promise(function (resolve, reject) {
+        var worker = env.navigator.serviceWorker.controller;
+        if (!registration || !worker || worker !== registration.active) { reject(Error('Update worker is not controlling this tab')); return; }
+        var channel = new env.MessageChannel(), timer = setTimeout(function () { finish(Error('Update worker timed out')); }, 60000);
+        function finish(error, value) {
+          clearTimeout(timer); channel.port1.close(); channel.port2.close();
+          if (error) reject(error); else resolve(value);
+        }
+        channel.port1.onmessage = function (e) { e.data && e.data.ok ? finish(null, e.data.result) : finish(Error('Update could not be verified')); };
+        try { worker.postMessage(Object.assign({ type: type }, fields), [channel.port2]); }
+        catch (e) { finish(e); }
+      });
+    }
+    async function prepare() {
+      if (!env.isSecureContext || !env.navigator.serviceWorker || !env.crypto.subtle ||
+          !/^[a-f0-9]{64}$/.test(env.__INCOMMON_BUILD_ID__ || '')) throw Error('Update staging is unavailable here');
+      registration = await env.navigator.serviceWorker.getRegistration(env.location.href);
+      if (!registration || new URL(registration.scope).origin !== env.location.origin ||
+          !registration.active || !/\/sw\.js$/.test(new URL(registration.active.scriptURL).pathname)) throw Error('No compatible update worker');
+      await registration.update();
+      var installing = registration.installing || registration.waiting;
+      if (installing && installing.state !== 'activated') await new Promise(function (resolve, reject) {
+        var timer = setTimeout(function () { done(Error('Worker activation timed out')); }, 25000);
+        function done(error) { clearTimeout(timer); installing.removeEventListener('statechange', change); error ? reject(error) : resolve(); }
+        function change() { if (installing.state === 'activated') done(); else if (installing.state === 'redundant') done(Error('Worker activation failed')); }
+        installing.addEventListener('statechange', change); change();
+      });
+    }
+    return {
+      stage: async function (options) {
+        await prepare();
+        var boot = env.InCommonCloud && env.InCommonCloud.status().assetHandshake;
+        var recoverBoot = !!(options && options.confirmed && boot && !boot.ok && /^RELOAD_/.test(boot.reason));
+        var receipt = await message('IC_STAGE', { currentBuild: env.__INCOMMON_BUILD_ID__, recoverBoot: recoverBoot });
+        if (!receipt || !/^[a-f0-9]{64}$/.test(receipt.build || '') || receipt.release !== '2.9.7' ||
+            receipt.contract !== 'v2-composite-upsert' || !Number.isFinite(receipt.at) || receipt.at > Date.now()) throw Error('Invalid update receipt');
+        return receipt;
+      },
+      reload: async function (receipt, host) {
+        if (!receipt || (receipt.build === env.__INCOMMON_BUILD_ID__ && !receipt.recoverBoot) || Date.now() - receipt.at > 30 * 60 * 1000) throw Error('Stage a new update first');
+        var scope = host.scope(); if (!scope) throw Error('An active profile is required');
+        var signature = JSON.stringify(scope);
+        var worker = env.navigator.serviceWorker.controller;
+        var verified = await message('IC_VERIFY', { build: receipt.build });
+        if (!verified || verified.build !== receipt.build) throw Error('Update verification changed');
+        var snapshot = await host.load(scope);
+        if (signature !== JSON.stringify(host.scope()) || !host.active() ||
+            env.navigator.serviceWorker.controller !== worker || registration.active !== worker) throw Error('Profile, page or worker changed');
+        var destination = new URL('app.html', registration.scope);
+        var attempt = env.crypto.randomUUID();
+        destination.searchParams.set('ic_update', receipt.build); destination.searchParams.set('ic_attempt', attempt);
+        if (env.location.hash && !/^#\//.test(env.location.hash)) throw Error('Finish signing in before updating');
+        destination.hash = env.location.hash;
+        env.sessionStorage.setItem(INTENT, JSON.stringify({ build: receipt.build, attempt: attempt,
+          account: scope.account, profile: scope.profile, tab: scope.tab, expires: Date.now() + 10 * 60 * 1000 }));
+        /* Nothing async, no state updates and no cache deletion between the
+           final live form check and navigation. A button click is consent. */
+        try {
+          var result = host.guard(scope, snapshot);
+          if (!result.formsReady) throw Error(result.message || 'Save open work before updating');
+          env.location.assign(destination.href);
+        } catch (e) { env.sessionStorage.removeItem(INTENT); throw e; }
+      }
+    };
+  }
+  return { create: create, intentKey: INTENT };
+}));
+
+</script>
+<script>
+/* Same-origin compiled-shell staging. No user records, auth or cache eviction. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.UpdateAssets = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var PREFIX = 'incommon-update-v1-', AGE = 30 * 60 * 1000;
+  function valid(m) {
+    if (!m || m.schema !== 1 || m.release !== '2.9.7' || m.contract !== 'v2-composite-upsert' ||
+        !/^[a-f0-9]{64}$/.test(m.build || '') || !m.app || m.app.path !== 'app.html' ||
+        !/^[a-f0-9]{64}$/.test(m.app.sha256 || '') || !Number.isInteger(m.app.bytes) ||
+        m.app.bytes < 1000 || m.app.bytes > 32 * 1024 * 1024) throw Error('Invalid update manifest');
+    return m;
+  }
+  function create(env, scope) {
+    var base = new URL(scope), appURL = new URL('app.html', base).href;
+    var receiptURL = new URL('__incommon_stage_receipt__', base).href;
+    async function digest(bytes) {
+      var hash = await env.crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(hash)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    async function checked(response, m) {
+      if (!response || !response.ok || !/text\/html/i.test(response.headers.get('content-type') || '')) throw Error('Update shell unavailable');
+      var bytes = await response.clone().arrayBuffer();
+      if (bytes.byteLength !== m.app.bytes || await digest(bytes) !== m.app.sha256) throw Error('Update shell digest mismatch');
+      return response;
+    }
+    async function fresh(url) {
+      var ctrl = new AbortController(), timer = setTimeout(function () { ctrl.abort(); }, 25000);
+      try {
+        var r = await env.fetch(url, { cache: 'no-store', credentials: 'omit', redirect: 'error', signal: ctrl.signal });
+        if (!r.ok || (r.url && new URL(r.url).origin !== base.origin)) throw Error('Update fetch failed');
+        return r;
+      } finally { clearTimeout(timer); }
+    }
+    return {
+      stage: async function (currentBuild, recoverBoot) {
+        var u = new URL('release-manifest.json', base); u.searchParams.set('stage', env.crypto.randomUUID());
+        var response = await fresh(u.href), text = await response.text();
+        if (text.length > 65536) throw Error('Update manifest too large');
+        var m = valid(JSON.parse(text));
+        if (m.build === currentBuild && !recoverBoot) throw Error('This build is already loaded. Keep working here.');
+        var app = new URL(m.app.path, base); app.searchParams.set('stage', m.build);
+        var shell = await checked(await fresh(app.href), m);
+        var cache = await env.caches.open(PREFIX + m.build), at = Date.now();
+        await cache.put(appURL, shell);
+        /* Receipt is written last. An incomplete cache is never eligible. */
+        await cache.put(receiptURL, new Response(JSON.stringify({ manifest: m, at: at }), { headers: { 'content-type': 'application/json' } }));
+        return { build: m.build, release: m.release, contract: m.contract, at: at, recoverBoot: !!recoverBoot };
+      },
+      shell: async function (build) {
+        if (!/^[a-f0-9]{64}$/.test(build || '')) throw Error('Invalid update build');
+        var cache = await env.caches.open(PREFIX + build), receipt = await cache.match(receiptURL);
+        if (!receipt) throw Error('Update is not staged');
+        var saved = await receipt.json(), m = valid(saved.manifest);
+        if (m.build !== build || !Number.isFinite(saved.at) || saved.at > Date.now() || Date.now() - saved.at > AGE) throw Error('Staged update expired');
+        return checked(await cache.match(appURL), m);
+      }
+    };
+  }
+  return { valid: valid, create: create, maxAge: AGE };
 }));
 
 </script>
@@ -28594,7 +28813,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
        Headless test seams have no delivery document to attest. */
     if (root.document && !assetHandshake) {
       try {
-        assetHandshake = root.BootstrapHandshake.verify(root.__INCOMMON_RELEASE_TOKEN__,
+        assetHandshake = root.BootstrapHandshake.verifyBrowser(root,
           { version: VERSION, contract: WRITE_CONTRACT, push: push, pull: pull }, transport);
       } catch (e) {
         assetHandshake = Object.freeze({ ok: false, reason: 'BOOTSTRAP_VERIFIER_UNAVAILABLE' });
@@ -28605,6 +28824,10 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       }
     }
     client = l.createClient(url, anonKey, transport);
+    if (root.document && assetHandshake && assetHandshake.ok) {
+      try { root.BootstrapHandshake.acknowledge(root, assetHandshake); }
+      catch (e) { upgradeRequired = true; assetHandshake = Object.freeze({ ok: false, reason: 'RELOAD_ACK_FAILED' }); }
+    }
 
     /* THE SEAM. Any ProfileManager event means the local record changed, and
        every change is a push candidate. Deletions are queued, not pushed, so
@@ -30425,6 +30648,7 @@ input[type="date"]{color-scheme:dark}
     align-items:start;
   }
 }
+[data-cloud-update-notice] button:disabled{opacity:.5;cursor:not-allowed!important}
 </style>
 </head>
 <body>
@@ -30502,6 +30726,8 @@ input[type="date"]{color-scheme:dark}
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&amp;family=Karla:wght@400..700&amp;display=swap" rel="stylesheet">
 <!-- /fonts:google -->
+
+
 
 
 
@@ -30614,12 +30840,19 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ cloudFormGuardOn }}" hint-placeholder-val="{{ false }}">
       <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudFormGuardMsg }}</p>
     </sc-if>
+    <sc-if value="{{ cloudUpdateOn }}" hint-placeholder-val="{{ false }}">
+      <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudUpdateMsg }}</p>
+    </sc-if>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <sc-if value="{{ cloudDraftAvailable }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ cloudDraftRestoreGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Restore writing drafts</button>
       </sc-if>
       <button onClick="{{ cloudDraftSaveGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Save draft copy</button>
       <button onClick="{{ cloudFormCheckGo }}" disabled="{{ cloudFormChecking }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Check open forms</button>
+      <button onClick="{{ cloudUpdateStageGo }}" disabled="{{ cloudUpdateWaiting }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Check for update</button>
+      <sc-if value="{{ cloudUpdateReady }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cloudUpdateReloadGo }}" disabled="{{ cloudReloadDisabled }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Reload to update</button>
+      </sc-if>
       <button onClick="{{ cloudNoticeDismissGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep working</button>
     </div>
   </section>
@@ -44011,6 +44244,7 @@ class Component extends DCLogic {
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     cloudNoticeOpen: false, cloudDraftAvailable: false, cloudDraftBusy: false, cloudDraftMsg: '',
     cloudFormsReady: false, cloudFormGuardMsg: '', cloudFormChecking: false,
+    cloudUpdateReady: false, cloudUpdateWaiting: false, cloudUpdateMsg: '',
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
@@ -44559,7 +44793,7 @@ class Component extends DCLogic {
     this.setState({ online: navigator.onLine });
     if (this.nativeApp()) this.setState({ sw: 'not used inside the app' });
     else if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
         .then(() => this.setState({ sw: 'active \u00b7 shell + modules cached' }))
         .catch(() => this.setState({ sw: 'unavailable in this preview \u00b7 registers on deploy' }));
     } else this.setState({ sw: 'not supported here' });
@@ -59396,6 +59630,8 @@ class Component extends DCLogic {
       ...this.cloudRecoveryVals(),
       cloudDraftSaveGo: () => this.cloudRecoverySave(),
       cloudFormCheckGo: () => this.cloudRecoveryCheckForms(),
+      cloudUpdateStageGo: () => this.cloudRecoveryStage(true),
+      cloudUpdateReloadGo: () => this.cloudRecoveryReload(),
       cloudDraftRestoreGo: () => this.cloudRecoveryRestore(),
       cloudNoticeDismissGo: () => this.setState({ cloudNoticeOpen: false }),
       typingLabel: this.effOffline() ? 'answering from the library \u00b7 live reply queued\u2026' : (st.flushing ? 'connection back \u00b7 working through the queue\u2026' : 'Oki is thinking\u2026'),

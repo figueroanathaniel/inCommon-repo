@@ -14,8 +14,12 @@ bootstrap-handshake.md, form-coverage.md, host-ui.md and recovery.md.
 No local archive transfer is needed once this branch is available on GitHub.
 The original standalone standing strategy remains unavailable.
 
-NEXT WORK
-Asset availability/staging and user-confirmed reload/restoration are pending.
+FOLLOW-UP LOCAL DRAFT
+Asset staging and user-confirmed reload/restoration are now implemented in
+the follow-up draft. Read asset-delivery.md and delivery-validation.txt for
+current behavior and test scope. The original preservation checks below are
+historical. Deployment, independent review and production readiness remain
+open; no production release is authorized.
 Run a fresh form guard immediately before any future navigation. Sensitive,
 unsupported, stale or uncommitted data blocks it. A local document/module/
 transport handshake does not authorize abandoning current work or clear a

@@ -2242,7 +2242,7 @@
        Headless test seams have no delivery document to attest. */
     if (root.document && !assetHandshake) {
       try {
-        assetHandshake = root.BootstrapHandshake.verify(root.__INCOMMON_RELEASE_TOKEN__,
+        assetHandshake = root.BootstrapHandshake.verifyBrowser(root,
           { version: VERSION, contract: WRITE_CONTRACT, push: push, pull: pull }, transport);
       } catch (e) {
         assetHandshake = Object.freeze({ ok: false, reason: 'BOOTSTRAP_VERIFIER_UNAVAILABLE' });
@@ -2253,6 +2253,10 @@
       }
     }
     client = l.createClient(url, anonKey, transport);
+    if (root.document && assetHandshake && assetHandshake.ok) {
+      try { root.BootstrapHandshake.acknowledge(root, assetHandshake); }
+      catch (e) { upgradeRequired = true; assetHandshake = Object.freeze({ ok: false, reason: 'RELOAD_ACK_FAILED' }); }
+    }
 
     /* THE SEAM. Any ProfileManager event means the local record changed, and
        every change is a push candidate. Deletions are queued, not pushed, so

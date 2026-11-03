@@ -1,4 +1,4 @@
-/* Host-only recovery notice and local writing-copy orchestration. No reload. */
+/* Host recovery notice, scoped writing copies and guarded confirmed reload. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.CloudUpdateUI = factory(root);
@@ -21,6 +21,47 @@
           cloudFormGuardMsg: 'Open forms must be checked before updating.',
           cloudDraftMsg: 'Sync needs an app update. You can keep working here.' });
         this.cloudRecoveryTrack();
+        if (!this._cloudStageStarted) this.cloudRecoveryStage();
+      },
+      cloudRecoveryStage: function (confirmed) {
+        var self = this;
+        if (this._cloudDraftStopped || this._cloudStageRunning) return;
+        this._cloudStageStarted = true;
+        if (!env.CloudUpdateDelivery || (this.nativeApp && this.nativeApp())) {
+          this.setState({ cloudUpdateMsg: 'Use your browser or app store update. Keep this tab open.' }); return;
+        }
+        this._cloudStageRunning = true;
+        this._cloudDelivery = this._cloudDelivery || env.CloudUpdateDelivery.create(env);
+        this.setState({ cloudUpdateWaiting: true, cloudUpdateReady: false, cloudUpdateMsg: 'Checking for an update. You can keep working.' });
+        this._cloudDelivery.stage({ confirmed: confirmed === true }).then(function (receipt) {
+          self._cloudStageRunning = false;
+          if (self._cloudDraftStopped) return;
+          self._cloudStaged = receipt;
+          self.setState({ cloudUpdateWaiting: false, cloudUpdateReady: true,
+            cloudUpdateMsg: 'Update saved on this device. Reload checks your open work again.' });
+        }, function () {
+          self._cloudStageRunning = false;
+          if (!self._cloudDraftStopped) self.setState({ cloudUpdateWaiting: false, cloudUpdateReady: false,
+            cloudUpdateMsg: 'No new verified update is available. Keep this tab open and try again later.' });
+        });
+      },
+      cloudRecoveryReload: function () {
+        var self = this;
+        if (this._cloudReloadRunning || !this._cloudStaged || !this._cloudDelivery || this._cloudDraftStopped) return;
+        this._cloudReloadRunning = true;
+        this.setState({ cloudUpdateWaiting: true });
+        this._cloudDelivery.reload(this._cloudStaged, {
+          scope: function () { return self.cloudRecoveryScope(); },
+          load: function (scope) { return env.CloudUpdateDrafts.store().load(scope); },
+          active: function () { return !self._cloudDraftStopped; },
+          guard: function (scope, snapshot) { return env.ReloadGuard.evaluate({ state: self.state,
+            document: env.document, scope: scope, snapshot: snapshot, saving: self._cloudDraftSaving }); }
+        }).catch(function () {
+          self._cloudReloadRunning = false;
+          if (!self._cloudDraftStopped) self.setState({ cloudUpdateWaiting: false,
+            cloudFormsReady: false,
+            cloudUpdateMsg: 'Reload blocked. Save or finish open forms, keep this tab open, and check again.' });
+        });
       },
       cloudRecoveryTrack: function () {
         if (!this.state.ready || this._cloudDraftStopped) return;
@@ -201,7 +242,12 @@
           cloudDraftBusy: !!this.state.cloudDraftBusy,
           cloudFormGuardOn: !!this.state.cloudFormGuardMsg,
           cloudFormGuardMsg: this.state.cloudFormGuardMsg || '',
-          cloudFormChecking: !!this.state.cloudFormChecking
+          cloudFormChecking: !!this.state.cloudFormChecking,
+          cloudUpdateOn: !!this.state.cloudUpdateMsg,
+          cloudUpdateMsg: this.state.cloudUpdateMsg || '',
+          cloudUpdateReady: !!this.state.cloudUpdateReady,
+          cloudUpdateWaiting: !!this.state.cloudUpdateWaiting,
+          cloudReloadDisabled: !!this.state.cloudUpdateWaiting || !this.state.cloudFormsReady
         };
       }
     };

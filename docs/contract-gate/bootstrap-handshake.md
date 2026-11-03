@@ -53,3 +53,8 @@ available before leaving the current page. Asset staging, safe user-confirmed
 navigation, restoration and stale-asset recovery UX must be wired and tested
 before exposing a reload action. No cache deletion or automatic reload ships
 with this step. Independent review and production authorization remain open.
+
+The follow-up staged-delivery draft is implemented and documented in
+[asset-delivery.md](asset-delivery.md). The earlier description above records
+the initial bootstrap-only boundary. The form guard still never authorizes
+reload on its own; the delivery coordinator now performs the extra checks.

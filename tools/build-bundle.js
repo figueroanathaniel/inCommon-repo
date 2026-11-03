@@ -45,6 +45,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('node:crypto');
 
 const repo = path.resolve(__dirname, '..');
 const appDir = path.join(repo, 'app');
@@ -132,6 +133,8 @@ const MODULES = [
   'bootstrap-handshake.js',
   'cloud-update-drafts.js',
   'cloud-update-ui.js',
+  'cloud-update-delivery.js',
+  'update-assets.js',
   'profile-manager.js',
   'sabian-symbols.js',
   'sabian-symbols-data.js',
@@ -547,6 +550,15 @@ const NOTE = (PREVIEW ? '  |  PREVIEW, not a release' : '') + (FONTS !== FONTS_D
 const STAMP = '<!-- inCommon ' + VERSION + '  |  built ' + new Date().toISOString().slice(0, 10) + NOTE +
   '  |  deploy this together with a sw.js showing the same version -->';
 html = STAMP + '\n' + html;
+const sourceBuildToken = "Object.defineProperty(window, '__INCOMMON_BUILD_ID__', { value: 'source', writable: false, configurable: false });";
+const buildId = crypto.createHash('sha256').update(html)
+  .update(fs.readFileSync(path.join(appDir, 'cover.html')))
+  .update(fs.readFileSync(path.join(OUT, 'sw.js'))).digest('hex');
+function stampBuild(page) {
+  if (page.split(sourceBuildToken).length !== 2) die('delivery document must declare one source build token');
+  return page.replace(sourceBuildToken, sourceBuildToken.replace("'source'", "'" + buildId + "'"));
+}
+html = stampBuild(html);
 
 /* WRITE BESIDE IT, THEN RENAME. A plain write to outPath truncates the shipped
    bundle to zero the instant it opens the file, so a write that fails part way
@@ -605,7 +617,7 @@ if (addrCount !== 2) {
       '  and whose deep links go nowhere, which nothing on screen would report.');
 }
 cover = cover.split(APP_ADDR).join('./app.html');
-cover = swapFonts(cover, 'the cover');
+cover = stampBuild(swapFonts(cover, 'the cover'));
 if (FONTS === 'self' && GOOGLE_FONT_HOSTS.test(cover)) {
   die('the cover still names a Google Fonts address after the swap');
 }
@@ -949,6 +961,16 @@ function writeNetlifyToml() {
   return { dir: dir, moved: wasDir && wasDir !== dir ? wasDir : null };
 }
 const netlify = PREVIEW ? null : writeNetlifyToml();
+
+fs.copyFileSync(path.join(appDir, 'update-assets.js'), path.join(OUT, 'update-assets.js'));
+const appBytes = fs.readFileSync(outPath);
+const manifestPath = path.join(OUT, 'release-manifest.json');
+fs.writeFileSync(manifestPath + '.building', JSON.stringify({ schema: 1,
+  release: syncRelease[1], contract: 'v2-composite-upsert', build: buildId,
+  app: { path: 'app.html', bytes: appBytes.length,
+    sha256: crypto.createHash('sha256').update(appBytes).digest('hex') }
+}, null, 2) + '\n');
+fs.renameSync(manifestPath + '.building', manifestPath);
 
 console.log('build-bundle: wrote ' + outPath + (PREVIEW ? '   (PREVIEW: the bundle folder, the root _redirects and netlify.toml were not touched)' : ''));
 console.log('  fonts:           ' + FONTS + (FONTS === 'self' ? '   (app/fonts/ copied to ' + path.relative(repo, fontsOut) + '/, Google removed from the CSP)' : '   (Google Fonts)'));

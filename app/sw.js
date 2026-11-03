@@ -9,8 +9,8 @@
  * This one is the SOURCE shell: it precaches every module separately, because
  * app/ is flat and the app loads them as separate script tags. The one beside
  * the bundle, deploy/<version>/sw.js, precaches one inlined index.html and
- * nothing else. They must never share a cache name, because activate() deletes
- * every key that is not its own: two workers agreeing on a name means whichever
+ * nothing else. They must never share a cache name. Each now removes only
+ * obsolete caches in its own namespace: two workers agreeing on a name means whichever
  * activated last serves the other's files under its own fetch rules.
  *
  * So the prefix differs and the number does not. `dev` says which shell this
@@ -20,6 +20,8 @@
  */
 var CACHE = 'incommon-dev-v6.4-oraplayer1';
 var PRECACHE = [
+  './ui-registry.js', './reload-guard.js', './bootstrap-handshake.js',
+  './cloud-update-drafts.js', './cloud-update-ui.js', './cloud-update-delivery.js', './update-assets.js',
   /* `./inCommon (offline).html` was here and the file has not existed for a
      long time. It was the standalone offline build, and the thing that does
      that job now is the deploy bundle: one inlined index.html with its own
@@ -66,7 +68,7 @@ self.addEventListener('install', function (e) {
 });
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+    return Promise.all(keys.filter(function (k) { return /^incommon-dev-v/.test(k) && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
 self.addEventListener('fetch', function (e) {

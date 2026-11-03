@@ -2,6 +2,7 @@
 <html>
 <head>
 <script>Object.defineProperty(window, '__INCOMMON_RELEASE_TOKEN__', { value: '2.9.7', writable: false, configurable: false });</script>
+<script>Object.defineProperty(window, '__INCOMMON_BUILD_ID__', { value: 'source', writable: false, configurable: false });</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- The app is not a page to be found. Every address but the bare one and the
@@ -448,6 +449,7 @@ input[type="date"]{color-scheme:dark}
     align-items:start;
   }
 }
+[data-cloud-update-notice] button:disabled{opacity:.5;cursor:not-allowed!important}
 </style>
 </head>
 <body>
@@ -533,6 +535,8 @@ input[type="date"]{color-scheme:dark}
 <script src="./bootstrap-handshake.js"></script>
 <script src="./cloud-update-drafts.js"></script>
 <script src="./cloud-update-ui.js"></script>
+<script src="./cloud-update-delivery.js"></script>
+<script src="./update-assets.js"></script>
 <script src="./profile-manager.js"></script>
 <script src="./sabian-symbols.js"></script>
 <script src="./sabian-symbols-data.js"></script>
@@ -637,12 +641,19 @@ input[type="date"]{color-scheme:dark}
     <sc-if value="{{ cloudFormGuardOn }}" hint-placeholder-val="{{ false }}">
       <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudFormGuardMsg }}</p>
     </sc-if>
+    <sc-if value="{{ cloudUpdateOn }}" hint-placeholder-val="{{ false }}">
+      <p role="status" aria-live="polite" style="margin:4px 0 8px;font:400 13px/1.5 var(--fu);color:var(--mut)">{{ cloudUpdateMsg }}</p>
+    </sc-if>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <sc-if value="{{ cloudDraftAvailable }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ cloudDraftRestoreGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Restore writing drafts</button>
       </sc-if>
       <button onClick="{{ cloudDraftSaveGo }}" disabled="{{ cloudDraftBusy }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Save draft copy</button>
       <button onClick="{{ cloudFormCheckGo }}" disabled="{{ cloudFormChecking }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Check open forms</button>
+      <button onClick="{{ cloudUpdateStageGo }}" disabled="{{ cloudUpdateWaiting }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Check for update</button>
+      <sc-if value="{{ cloudUpdateReady }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cloudUpdateReloadGo }}" disabled="{{ cloudReloadDisabled }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Reload to update</button>
+      </sc-if>
       <button onClick="{{ cloudNoticeDismissGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;padding:0 14px;border:1px solid var(--bd);border-radius:999px;font:600 12px var(--fu);color:var(--tx)">Keep working</button>
     </div>
   </section>
@@ -14034,6 +14045,7 @@ class Component extends DCLogic {
     cloudStatus: null, cloudEmail: '', cloudPassword: '', cloudBusy: false, cloudMsg: '', cloudRecoveryPin: '', cloudRecoveryPending: false,
     cloudNoticeOpen: false, cloudDraftAvailable: false, cloudDraftBusy: false, cloudDraftMsg: '',
     cloudFormsReady: false, cloudFormGuardMsg: '', cloudFormChecking: false,
+    cloudUpdateReady: false, cloudUpdateWaiting: false, cloudUpdateMsg: '',
     phOpen: false, phStep: 'num', phNum: '', phCode: '', phBusy: false, phMsg: '',
     adOpen: false, adText: '', adWipe: false, adBusy: false, adMsg: '',
     supOpen: false, supTopic: 'general', supEmail: '', supText: '', supBusy: false, supMsg: '', supSent: false,
@@ -14582,7 +14594,7 @@ class Component extends DCLogic {
     this.setState({ online: navigator.onLine });
     if (this.nativeApp()) this.setState({ sw: 'not used inside the app' });
     else if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
         .then(() => this.setState({ sw: 'active \u00b7 shell + modules cached' }))
         .catch(() => this.setState({ sw: 'unavailable in this preview \u00b7 registers on deploy' }));
     } else this.setState({ sw: 'not supported here' });
@@ -29419,6 +29431,8 @@ class Component extends DCLogic {
       ...this.cloudRecoveryVals(),
       cloudDraftSaveGo: () => this.cloudRecoverySave(),
       cloudFormCheckGo: () => this.cloudRecoveryCheckForms(),
+      cloudUpdateStageGo: () => this.cloudRecoveryStage(true),
+      cloudUpdateReloadGo: () => this.cloudRecoveryReload(),
       cloudDraftRestoreGo: () => this.cloudRecoveryRestore(),
       cloudNoticeDismissGo: () => this.setState({ cloudNoticeOpen: false }),
       typingLabel: this.effOffline() ? 'answering from the library \u00b7 live reply queued\u2026' : (st.flushing ? 'connection back \u00b7 working through the queue\u2026' : 'Oki is thinking\u2026'),

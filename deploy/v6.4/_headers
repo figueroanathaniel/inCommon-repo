@@ -55,3 +55,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /delete-account.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/release-manifest.json
+  Cache-Control: no-store
+/update-assets.js
+  Cache-Control: public, max-age=0, must-revalidate

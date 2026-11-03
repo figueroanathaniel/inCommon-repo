@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "release": "2.9.7",
+  "contract": "v2-composite-upsert",
+  "build": "73e70006d85b7797366ad31183171ecc442cab7c75239a4868ba0a862042ccd4",
+  "app": {
+    "path": "app.html",
+    "bytes": 12001440,
+    "sha256": "319e28a4690ac1cc47e0f428877f4ef9697f8ded290685cc36194e123df20070"
+  }
+}

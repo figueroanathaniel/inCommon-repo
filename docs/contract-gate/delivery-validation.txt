@@ -1,0 +1,40 @@
+STAGED DELIVERY AND CONFIRMED RELOAD - LOCAL VALIDATION
+Date: 2026-11-03 UTC
+Branch: draft/recovery-2.9.7-20261103
+Starting commit: 9fa15ea3f7ba6f80919195fd6da171c009dba0cd
+No production/sandbox SQL, hook, deployment or monitor changes in this work.
+
+PASS tools/test-update-delivery.mjs: 11/11
+PASS tools/test-bootstrap-handshake.mjs: 9/9
+PASS tools/test-recovery-scenarios.mjs: 7/7
+PASS tools/test-form-coverage.mjs: 9/9
+PASS tools/test-cloud-update-ui.js: 9/9
+PASS tools/check-write-contract.js: actual vendored SDK mocked transport
+PASS tools/run-module-tests.js: 522/522
+PASS tools/check-dead-controls.js
+PASS tools/check-layer-boundary.js
+PASS bundle build: 70/70 modules, receipt bytes/digest match compiled app
+PASS git diff whitespace check
+
+Real Chromium compiled-app/service-worker/IndexedDB driver:
+390x844 and 1440x900 both passed fresh form blocking, offline staged navigation,
+matching build acknowledgment, explicit scoped draft restore and retention of
+an unrelated cache. Screenshot files are under browser-delivery/.
+Missing manifest and corrupt shell cases offered no reload and retained text.
+Host account status is a synthetic presentation fixture. External browser
+requests are blocked; DNS is limited to localhost. No live RLS, Auth user,
+CDN delivery, mobile hardware or real backend sync is verified by this driver.
+Native/store binaries and all optional runtime downloads are not staged.
+The separate VM tests verify actual core init ordering with reload intent,
+stale/missing/expired evidence, same-page rejection preservation, cache
+isolation and static 503 fallback rather than executing an unknown old shell.
+
+No automatic reload, wholesale cache deletion or worker unregistration.
+No queues, source arrays, hashes or scoped writing copies are erased by reload.
+These are bounded local tests, not zero-data-loss or release-readiness signoff.
+Existing test dependencies remain outside the repository under /tmp.
+See asset-delivery.md for setup, behavior and remaining review requirements.
+
+Compiled build ID: 73e70006d85b7797366ad31183171ecc442cab7c75239a4868ba0a862042ccd4
+App bytes: 12001440
+SHA256: 319e28a4690ac1cc47e0f428877f4ef9697f8ded290685cc36194e123df20070

@@ -22,6 +22,7 @@
 /privacy.html                      /deploy/v6.4/privacy.html   200
 /react-18.3.1.production.min.js    /deploy/v6.4/react-18.3.1.production.min.js   200
 /react-dom-18.3.1.production.min.js /deploy/v6.4/react-dom-18.3.1.production.min.js   200
+/release-manifest.json             /deploy/v6.4/release-manifest.json   200
 /robots.txt                        /deploy/v6.4/robots.txt   200
 /sitemap.xml                       /deploy/v6.4/sitemap.xml   200
 /splash.png                        /deploy/v6.4/splash.png   200
@@ -31,6 +32,7 @@
 /thanks.html                       /deploy/v6.4/thanks.html   200
 /three.core.js                     /deploy/v6.4/three.core.js   200
 /three.module.js                   /deploy/v6.4/three.module.js   200
+/update-assets.js                  /deploy/v6.4/update-assets.js   200
 
 # Every other address is a hash route, so it resolves to the app rather
 # than to the cover: an address that names a screen goes to the screen.

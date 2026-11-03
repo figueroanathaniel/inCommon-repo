@@ -3003,7 +3003,15 @@ Browser init now checks the delivery token, actual sync version, configured
 write-contract header and sync interfaces through bootstrap-handshake.js.
 Mismatch pauses writes before session-triggered sync. A valid local handshake
 never clears a live server rejection. There is no persisted sync_state flag.
-See docs/contract-gate/bootstrap-handshake.md; staging and reload remain open.
+See docs/contract-gate/bootstrap-handshake.md. The next draft now stages a
+compiled shell through update-assets.js and the bundle worker, with a strict
+release-manifest.json digest and separate cache namespace. cloud-update-delivery
+requires a user button click, re-verifies the cached shell, reads the committed
+scoped copy and runs the live form guard with no async gap before navigation.
+No blanket cache eviction, worker unregistration or automatic reload is allowed.
+A session-scoped navigation intent must match the booted build before only that
+intent is acknowledged; a server rejection is never cleared. See
+docs/contract-gate/asset-delivery.md for fallback and verification limits.
 
 ## Each account has its own profiles on a device
 The owner reported on 12 October 2026 that three accounts signed in on one

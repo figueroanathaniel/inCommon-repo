@@ -105,3 +105,9 @@ header. In-flight requests, RPC and other writers, RLS negative cases, null
 keys, partial sync, independent review and rollback still need appropriate
 release validation. Never use the incomplete migration directory as a reason
 to run unreviewed production db push.
+
+## Staged delivery draft
+
+[asset-delivery.md](asset-delivery.md) describes the compiled-shell manifest,
+worker staging, guarded confirmation button, post-reload intent and fallback.
+The implementation is local and does not authorize a production release.

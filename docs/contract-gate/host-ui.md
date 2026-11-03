@@ -126,3 +126,7 @@ that cloned browser tabs cannot inherit the same sessionStorage token.
 Already-running legacy bundles cannot acquire these host methods remotely.
 Independent review, production hook chaining, schema readiness and rollout
 authorization remain separate requirements.
+
+The follow-up staged-delivery draft adds the guarded confirmation action; see
+[asset-delivery.md](asset-delivery.md). Earlier UI-only verification above is
+historical. Its writing-copy scope and unsupported-form blocking still apply.
