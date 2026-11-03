@@ -21680,7 +21680,9 @@ class Component extends DCLogic {
      the keyboard's way to every entry. */
   HD_SEC_GLYPH = { intro: '✧', types: '◉', lines: '☰', profiles: '⁄', centers: '◆', gates: '●',
     channels: '⟷', circuitry: '◎', definition: '◫', cross: '✚', strategies: '⤳', authorities: '⚖',
-    open: '◌', terms: '◇', example: '✎' };
+    open: '◌', terms: '◇', example: '✎', bedrock: '▣', weather: '≈', horizon: '◠' };
+  /* The lessons count in roman numerals on their tiles, one to seven a tier. */
+  HD_ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   HD_TYPE_LIGHT = { Generator: ['Sacral'], 'Manifesting Generator': ['Sacral', 'Throat'], Manifestor: ['Throat', 'Heart', 'Solar Plexus', 'Root'],
     Projector: ['G', 'Ajna'], Reflector: [] };
   /* Keyed by the first word of an authority's name as authOf() splits it, so
@@ -21726,6 +21728,7 @@ class Component extends DCLogic {
     const add = (ch, id, name, glyph, sub, d) => out.push({ ch: ch, slug: sl(id), key: ch + ':' + sl(id), name: name, glyph: glyph, sub: sub || '', d: d || {},
       hay: (name + ' ' + (sub || '') + ' ' + this.atlasHay(d)).toLowerCase() });
     add('intro', 0, 'What Human Design is', this.HD_SEC_GLYPH.intro, 'the system in brief', { essay: 'intro' });
+    (A.TIERS || []).forEach(T => (A.LESSONS || []).filter(l => l.tier === T.key).forEach((l, i) => add(T.key, l.name, l.name, this.HD_ROMAN[i] || String(i + 1), l.epi, { lesson: l.name })));
     Object.keys(A.TYPES).forEach(k => add('types', k, k, this.HD_SEC_GLYPH.types, A.TYPES[k].pct + ' of people', { type: k }));
     [1, 2, 3, 4, 5, 6].forEach(n => add('lines', n, 'Line ' + n + ', ' + A.LINES[n].name, String(n), A.LINES[n].theme, { line: n }));
     Object.keys(A.PROFILES).forEach(k => add('profiles', k, k + ', ' + A.PROFILES[k].name, k, A.PROFILES[k].line, { profile: k }));
@@ -21738,7 +21741,7 @@ class Component extends DCLogic {
     A.STRATEGIES.forEach(s => add('strategies', s.name, s.name, this.HD_SEC_GLYPH.strategies, s.who, { strategy: s.name }));
     A.AUTHORITIES.forEach(a => add('authorities', a.name, a.name, this.HD_SEC_GLYPH.authorities, this.apFirst(a.how, 48), { authority: a.name }));
     Object.keys(A.CENTERS).forEach(k => add('open', k, A.CENTERS[k].label + ', open and defined', this.HD_SEC_GLYPH.open, this.apFirst(A.CENTERS[k].wisdom, 48), { openc: k }));
-    (A.TERMS || []).forEach(t => add('terms', t.name, t.name, this.HD_SEC_GLYPH.terms, this.apFirst(t.text, 48), { term: t.name }));
+    (A.TERMS || []).forEach(t => add('terms', t.name, t.name, t.name.charAt(0).toUpperCase(), this.apFirst(t.text, 48), { term: t.name }));
     add('example', 0, 'An example wiring', this.HD_SEC_GLYPH.example, 'a chart that belongs to nobody', { essay: 'example' });
     this._hdEnt = out;
     return out;
@@ -21759,6 +21762,7 @@ class Component extends DCLogic {
     if (d.strategy) return v(A.STRATEGIES.find(x => x.name === d.strategy));
     if (d.authority) return v(A.AUTHORITIES.find(x => x.name === d.authority));
     if (d.term) return v((A.TERMS || []).find(x => x.name === d.term));
+    if (d.lesson) { const L = (A.LESSONS || []).find(x => x.name === d.lesson); return L ? [L.epi, L.lead].concat(L.parts.map(p => p.join(' '))).join(' ') : ''; }
     if (d.essay === 'intro') return A.INTRO.what + ' ' + A.INTRO.history;
     return '';
   }
@@ -21823,6 +21827,10 @@ class Component extends DCLogic {
     if (d.authority) { const c = authOf(d.authority); if (c) litC.add(c); }
     if (d.strategy) { const s = A.STRATEGIES.find(x => x.name === d.strategy); Object.keys(this.HD_TYPE_LIGHT).forEach(t => { if (s && s.who.indexOf(t) !== -1) (this.HD_TYPE_LIGHT[t] || []).forEach(c => litC.add(c)); }); }
     if (d.cross) crossGates.forEach(a => litG.add(a.gate));
+    /* A lesson lights what its shelves light: the centres it points at and a type's centres. */
+    if (d.lesson) { const L = (A.LESSONS || []).find(x => x.name === d.lesson) || { see: [] };
+      (L.see || []).forEach(([c, id]) => { const x = find(c + ':' + this.atlasSlug(id)); if (!x) return;
+        if (x.d.center) litC.add(x.d.center); if (x.d.type) (this.HD_TYPE_LIGHT[x.d.type] || []).forEach(z => litC.add(z)); }); }
     if (d.essay === 'example') { (A.EXAMPLE.definedCenters || []).forEach(c => litC.add(c)); (A.EXAMPLE.channels || []).forEach(k => litK.add(k)); (A.EXAMPLE.gates || []).forEach(g => litG.add(g)); }
     const spots = this.hdGateSpots();
     const chans = Object.keys(A.CHANNELS).map(k => { const p = k.split('-').map(Number), a = spots[p[0]], b = spots[p[1]];
@@ -21916,7 +21924,20 @@ class Component extends DCLogic {
       const c = authOf(d.authority); if (c) link('Its centre, ' + c, '', 'centers:' + this.atlasSlug(c));
       if (/emotional/i.test(d.authority)) term('The emotional wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
-    if (d.term) { lead = A.TERMS.find(x => x.name === d.term).text; dropcap = true; }
+    if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
+      if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
+    if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
+      const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
+      kicker = T.name + ' lesson ' + (at + 1) + ' of ' + tier.length; lead = L.lead; dropcap = true; epi = L.epi;
+      L.parts.forEach(([l, x]) => facets.push({ label: l, text: x }));
+      (L.see || []).forEach(([c, id]) => { const k = c + ':' + this.atlasSlug(id), x = find(k); if (x) link(x.name, x.glyph, k); });
+      (L.words || []).forEach(([c, id]) => { const k = c + ':' + this.atlasSlug(id), x = find(k); if (x) term(x.name, k); });
+      if (mine && L.name === 'Type') yourLine('Your type', hd.type);
+      if (mine && L.name === 'Strategy' && myStrat) yourLine('Your strategy', myStrat.name);
+      if (mine && L.name === 'Inner Authority') yourLine('Your authority', String(hd.authority).split(':')[0]);
+      if (mine && L.name === 'Profile' && pr) yourLine('Your profile', pr.key);
+      if (mine && L.name === 'Definition' && myDef) yourLine('Your definition', myDef);
+      if (mine && L.name === 'Angle') crossGates.forEach(a => yourLine('Your ' + a.kind + ' ' + a.body, 'gate ' + a.gate + '.' + a.line)); }
     if (d.essay) essay = this.atlasBlocks(d.essay).map(b => ({ head: b.head, hasHead: !!b.head, rows: b.rows.map(r => ({ t: r.text })) }));
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = k => sib[(at + k + sib.length) % sib.length];
@@ -31071,6 +31092,8 @@ class Component extends DCLogic {
       if (AT.CROSS) hd.push({ glyph: '☩', title: 'The Incarnation Cross',
         sub: 'the four gates of the two Suns and the two Earths', keys: 'incarnation cross',
         body: AT.CROSS.what + ' ' + AT.CROSS.how, target: to('cross', 'what') });
+      (AT.LESSONS || []).forEach(l => hd.push({ glyph: '▣', title: l.name,
+        sub: 'lesson · ' + l.epi, keys: 'lesson ' + l.tier, body: l.lead, target: to(l.tier, l.name) }));
       (AT.TERMS || []).forEach(t => hd.push({ glyph: '○', title: t.name,
         sub: 'term · ' + cut(t.text, 60), keys: 'term glossary', body: t.text, target: to('terms', t.name) }));
       push('Human Design', this.searchRank(q, hd, 8));

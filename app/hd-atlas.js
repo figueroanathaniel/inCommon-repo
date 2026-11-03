@@ -1,4 +1,4 @@
-/* hd-atlas.js: inCommon Human Design reference. V1.0.0
+/* hd-atlas.js: inCommon Human Design reference. V1.1.0
    Pure data, no UI, no framework. Reference material only: nothing here reads
    or writes a profile. Every claim is the tradition's; the app tags it as such.
    Gendered descriptions are written as tendencies, never as rules, and the app
@@ -8,7 +8,7 @@
   if (typeof module === 'object' && module.exports) { module.exports = factory(); }
   else { root.HDAtlas = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   var INTRO = {
     what: 'Human Design is a synthesis. It takes a birth moment and draws a diagram, which inCommon calls the wiring and the field calls a bodygraph, and reads it as a map of how a person is built to make decisions and spend energy.',
@@ -50,12 +50,12 @@
       obstacles: 'Conditioning to initiate, and the habit of overriding body signals.'
     },
     'Manifesting Generator': {
-      pct: 'about 11 percent',
+      pct: 'about 33 percent',
       aura: 'Open and enveloping with a forward edge. People are drawn in and then find the Manifesting Generator already three steps ahead of the conversation.',
-      signature: 'Satisfaction and peace together, which is why both the response and the informing have to be present for either to arrive.',
-      notSelf: 'Frustration and anger together. Read as the signal of having skipped the response, the informing, or both.',
+      signature: 'Satisfaction, as for the Generator, which is how the published convention gives it. Many teachers add peace, for the informing half.',
+      notSelf: 'Frustration, as for the Generator, in the published convention. Many teachers add anger, read as the signal of having skipped the informing.',
       def: 'A defined Sacral plus a motor-to-Throat connection. A hybrid: response first, then the capacity to act on it quickly.',
-      strategy: 'Wait to respond, then inform. The response comes first; telling people comes second.',
+      strategy: 'Wait to respond. The published convention gives the Generator\u2019s strategy; many teachers add informing once the response has come.',
       authority: 'Sacral, or emotional when the Solar Plexus is defined.',
       male: 'Often reads as fast, energetic, and impatient, prone to skipping a step and doubling back for it.',
       female: 'Often reads as dynamic and highly capable, sometimes too fast for the room, and may feel pressed to slow down.',
@@ -65,13 +65,13 @@
       obstacles: 'Initiating out of urgency, and treating the response step as optional.'
     },
     Projector: {
-      pct: 'about 22 percent',
-      aura: 'Focused and penetrating, aimed at one person at a time. It is felt as being seen, and occasionally as being seen rather too accurately.',
+      pct: 'about 20 percent',
+      aura: 'Focused and absorbing, aimed at one person at a time (some teachers say penetrating). It is felt as being seen, and occasionally as being seen rather too accurately.',
       signature: 'Success. Not status, in the tradition’s sense, but the recognition of having guided something correctly.',
       notSelf: 'Bitterness. Read as the signal of having entered without invitation, or of having gone unrecognized for too long.',
       def: 'No defined Sacral. A non-energy type, read as built to see and guide the energy of others rather than to generate it.',
       strategy: 'Wait for the invitation. Wait to be recognized for the thing you actually are, then enter.',
-      authority: 'Various: self-projected, splenic, mental, or ego.',
+      authority: 'Various: emotional, splenic, ego projected, self-projected, or mental.',
       male: 'Often reads as observant and incisive, and can turn bitter where recognition never arrives. Needs to be seen for a specific gift.',
       female: 'Often reads as penetrating and intuitive, and may struggle with being overlooked. Needs correct invitations in order to lead.',
       strengths: 'Guidance, systems, seeing another person clearly.',
@@ -81,7 +81,7 @@
     },
     Reflector: {
       pct: 'about 1 percent',
-      aura: 'Sampling and resistant. A Reflector takes the room in and gives very little fixed back, which is what makes the read on a community possible.',
+      aura: 'Resistant and sampling. A Reflector takes the room in and gives very little fixed back, which is what makes the read on a community possible.',
       signature: 'Surprise. The delight of a cycle that turned out differently than expected, in a place that suited them.',
       notSelf: 'Disappointment. Read as the signal of a wrong environment, or of having been hurried into deciding.',
       def: 'No defined centers at all. Entirely open, and read as sampling the environment rather than holding a fixed nature.',
@@ -454,7 +454,7 @@
   var CIRCUITS = [
     { name: 'Individual Circuitry', keynote: 'mutation, and the melancholy that carries it',
       text: 'Individual channels are read as mutative: they arrive as something nobody asked for and cannot be reasoned into arriving on time. The tradition attaches melancholy to this circuitry, not as a disorder but as the pressure that precedes a mutation, and it holds that the mutation is only useful if it is expressed rather than sat on. Its gift to others is empowerment; its difficulty is that it cannot be scheduled.',
-      sub: 'Sub-circuits: Knowing, Centering, and Integration.' },
+      sub: 'Within it: the Knowing and Centering circuits, with the Integration channels.' },
     { name: 'Tribal Circuitry', keynote: 'support, and the bargain that makes it work',
       text: 'Tribal channels are read as the machinery of keeping people alive together: resources, touch, loyalty, agreements, who is owed what. The tradition treats the bargain as the honest core of it rather than something to be embarrassed about, and reads tribal pressure as the source of most of what gets called obligation. Its gift is support; its difficulty is that it works by deal rather than by principle.',
       sub: 'Sub-circuits: Ego and Defense.' },
@@ -481,15 +481,423 @@
     { name: 'Compromise', text: 'When one person has a channel fully defined and the other holds only one of its gates. Read as workable but uneven: the half-defined person keeps meeting their own gate in someone else’s fixed circuitry.' },
     { name: 'Companionship', text: 'When both people have the same channel fully defined. Read as easy recognition and, over time, as a shared blind spot, since neither has any distance on what they both hold fixed.' },
     { name: 'Emotional Wave', text: 'The Solar Plexus does not give a clear answer in the moment; the tradition says it moves in a wave and that clarity comes from riding it out rather than reading any single point on it. This is why emotional authority is advice about time before it is advice about feeling.' },
-    { name: 'Variables and the Four Arrows', text: 'The four arrows at the top and bottom of a bodygraph, read as Determination and Environment below, Motivation and Perspective above. They are the system’s advanced layer, covering how a person is said to take in food and information, and where they function best. This build names them and does not compute them.' },
+    { name: 'Variables and the Four Arrows', text: 'The four arrows beside the head of a bodygraph: Determination at top left and Environment at bottom left, both from the Design side; Motivation at top right and Perspective at bottom right, both from the Personality side. They are the system’s advanced layer, covering how a person is said to take in food and information, and where they function best. This build names them and does not compute them.' },
     { name: 'Color, Tone and Base', text: 'Gate and line are the first two layers of the system’s address for a position; color, tone and base are the three finer ones beneath them, and they are what the Variables are derived from. Ra Uru Hu’s full notation is gate.line.color.tone.base. This build reads to gate and line only.' },
     { name: 'Design and Personality Crystals', text: 'The system’s own cosmology: a Personality crystal said to carry who you think you are, a Design crystal said to carry the body and its genetics, and a magnetic monopole holding the two together and pulling them along one trajectory. This is the frame the red and black activations come from, and it is metaphysics rather than mechanics.' },
     { name: 'Transits', text: 'The moving activations of the day laid over a fixed bodygraph, temporarily defining gates and sometimes channels that are not natally defined. The tradition reads a transit as borrowed rather than yours: the useful question is whether a theme leaves when the day does.' }
   ];
 
 
+  /* ---------- the three tiers of lessons ----------
+     Asked for by the owner on 3 November 2026: twenty one lessons in three
+     tiers, Bedrock, Weather and Horizon. A lesson is the full account of one
+     idea and every variant the field names for it; the chapters below it
+     (types, centers, gates and the rest) stay the reference shelves the
+     lessons point into. Every sentence is inCommon's own wording of the
+     field's published convention. Where teachers and the published
+     convention differ, the lesson says so in the part that differs rather
+     than picking silently. The sources each part was checked against, and
+     the parts still open, are in docs/hd-upgrade/03-atlas-lessons-sources.md.
+     `see` and `words` are [chapter, id] pairs; the app slugs the id.  */
+  var TIERS = [
+    { key: 'bedrock', name: 'Bedrock', glyph: '▣',
+      line: 'The seven ideas every reading stands on: how you are built to engage, and how you decide.' },
+    { key: 'weather', name: 'Weather', glyph: '≈',
+      line: 'The seven ideas that describe the particular climate of one chart.' },
+    { key: 'horizon', name: 'Horizon', glyph: '◠',
+      line: 'The seven ideas at the far edge of the system: time, change, and the finest grain of the design.' }
+  ];
+
+  var LESSONS = [
+    /* ---------------- Bedrock ---------------- */
+    { tier: 'bedrock', name: 'Type', epi: 'Five ways of meeting the world',
+      lead: 'Type is the first sort the system makes, and every other idea is read through it. It is not a temperament and it is not chosen. It falls out of the wiring: which centers are defined, and whether a motor reaches the Throat. The Sacral is the hinge. Defined, it makes a Generator of one kind or another. Undefined, a motor wired to the Throat makes a Manifestor, any other definition makes a Projector, and no definition at all makes a Reflector.',
+      parts: [
+        ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate. Published figures put it near 9 percent of people.'],
+        ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with sustainable energy for the work that is correct for it.'],
+        ['Manifesting Generator', 'A defined Sacral plus a motor joined to the Throat. The published convention files it under Generator rather than as a sixth type, with the same strategy, aura, signature and not-self theme. Many teachers treat it as its own type and add informing to its strategy. Generators of both kinds together are given as roughly two thirds to seven tenths of people.'],
+        ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others. Just over 20 percent in published figures.'],
+        ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
+        ['Energy types and non-energy types', 'Manifestors and both kinds of Generator are called energy types. Projectors and Reflectors are non-energy types: the tradition holds they have no consistent working energy of their own and do best when they stop trying to keep pace with those who do.'],
+        ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
+        ['Kinds of Projector', 'Teachers often sort Projectors by where their definition sits. An energy Projector has a motor defined that does not reach the Throat. A mental Projector has definition only at or above the Throat. Some teachers also name a classic Projector, with definition below the Throat and no motor.']
+      ],
+      see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
+      words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
+
+    { tier: 'bedrock', name: 'Strategy', epi: 'How to meet the moment',
+      lead: 'Strategy is the practical instruction each type carries: a way of engaging with life so that decisions have something correct to work on. It is offered as an experiment to try in ordinary days rather than as a rule, and the tradition is candid that the mind will argue with it.',
+      parts: [
+        ['To inform (Manifestor)', 'Tell the people an action will touch before you take it. Informing is not a request for permission. It is said to ease the resistance a closed aura otherwise meets.'],
+        ['To respond (Generator)', 'Wait for life to bring something, an offer, a question, a sound, and let the Sacral answer it before the mind does.'],
+        ['To respond, then inform (Manifesting Generator)', 'The published convention gives the Manifesting Generator the Generator’s strategy. Many teachers add a second step: once the response has come, tell the people the action will touch, as a Manifestor would.'],
+        ['To wait for the invitation (Projector)', 'For the large things, love, work, home and close bonds, wait to be recognised and invited. Everyday exchanges need no formal invitation.'],
+        ['To wait a lunar cycle (Reflector)', 'Give a large decision about 28 days, one pass of the Moon through all 64 gates, and talk it over with people you trust along the way.'],
+        ['Strategy beside authority', 'Strategy says how to meet a moment. Authority says how to decide inside it. The tradition always presents the two together.']
+      ],
+      see: [['strategies', 'Informing'], ['strategies', 'Responding'], ['strategies', 'Waiting for the invitation'], ['strategies', 'Waiting a lunar cycle']],
+      words: [['bedrock', 'Inner Authority'], ['bedrock', 'Signature']] },
+
+    { tier: 'bedrock', name: 'Aura', epi: 'Met before a word is said',
+      lead: 'The aura is the field the tradition says every body carries, reaching about two metres in each direction, through which people meet before anything is spoken. Its quality is set by type, which is why the system calls it mechanical rather than a matter of manners or mood.',
+      parts: [
+        ['Closed and repelling (Manifestor)', 'Said to keep others at a distance and make the Manifestor hard to read from outside, which is part of why informing matters so much.'],
+        ['Open and enveloping (Generator)', 'Said to take in whatever is near, which is how a Generator meets so much to respond to. The Manifesting Generator carries the same aura.'],
+        ['Focused and absorbing (Projector)', 'Aimed at one person at a time and said to take that person in deeply. Some teachers call it focused and penetrating; both describe the same narrow beam.'],
+        ['Resistant and sampling (Reflector)', 'Said to taste everyone present without taking anyone in, which is what lets a Reflector read the health of a group.'],
+        ['Aura and conditioning', 'Two auras overlapping is where conditioning happens: whatever one person defines is felt by the other wherever the other is open.']
+      ],
+      see: [['terms', 'Aura']],
+      words: [['horizon', 'Conditioning'], ['bedrock', 'Type']] },
+
+    { tier: 'bedrock', name: 'Signature', epi: 'The feeling of being on course',
+      lead: 'The signature is the feeling the tradition says arrives when someone lives by their own strategy and authority. It is a check noticed afterwards rather than a target, since it cannot be produced by aiming at it.',
+      parts: [
+        ['Peace (Manifestor)', 'Ease after moving freely, with nobody blindsided.'],
+        ['Satisfaction (Generator)', 'The good tiredness at the end of work that was truly responded to. The published convention gives Manifesting Generators the same signature; some teachers add peace, for the informing half.'],
+        ['Success (Projector)', 'Not status but the quiet recognition of having guided something well, after being invited to.'],
+        ['Surprise (Reflector)', 'Delight at a cycle that turned out differently than expected, in a place that suited it.']
+      ],
+      see: [['terms', 'Signature']],
+      words: [['bedrock', 'Not-Self Theme']] },
+
+    { tier: 'bedrock', name: 'Not-Self Theme', epi: 'The signal to come back',
+      lead: 'The not-self theme is the signature’s counterpart: the feeling reported when someone is living from the mind’s agenda or from borrowed pressure rather than from their design. The tradition treats it as early information, a nudge back toward strategy, and never as a verdict on the person.',
+      parts: [
+        ['Anger (Manifestor)', 'Read as the sign of having been held back, or of having moved without informing.'],
+        ['Frustration (Generator)', 'Read as the sign of having initiated, or of having said yes without the energy for it. The published convention gives Manifesting Generators the same theme; some teachers add anger.'],
+        ['Bitterness (Projector)', 'Read as the sign of having entered without an invitation, or of having gone unrecognised for too long.'],
+        ['Disappointment (Reflector)', 'Read as the sign of the wrong surroundings, or of having been hurried into a decision.'],
+        ['In the open centers', 'Each open center carries a habit the tradition names. The open Head chases questions that belong to others; the open Ajna performs certainty; the open Throat works for attention; the open G searches for love and direction; the open Heart sets out to prove its worth; the open Spleen holds on to what is not good for it; the open Sacral cannot tell when enough is enough; the open Solar Plexus dodges truth to dodge confrontation; the open Root hurries to be free of pressure.'],
+        ['The not-self mind', 'The tradition’s name for the mind trying to run decisions it is not built to make, usually by acting out the habits of the open centers.']
+      ],
+      see: [['terms', 'Not-Self Theme']],
+      words: [['bedrock', 'Signature'], ['horizon', 'Conditioning']] },
+
+    { tier: 'bedrock', name: 'Inner Authority', epi: 'Where a decision is made',
+      lead: 'Inner authority is where the tradition says a reliable decision comes from in a given chart, and it is never the mind. It is found by a fixed order of precedence: the first of the centers below that the chart defines is the authority, and the ones after it are not consulted.',
+      parts: [
+        ['1. Emotional', 'A defined Solar Plexus outranks everything else, and about half of people have one. Clarity comes over time, across the wave. Possible for every type except the Reflector.'],
+        ['2. Sacral', 'A defined Sacral with the Solar Plexus open: a response in the body in the moment, often a sound before a sentence. Generators of both kinds only.'],
+        ['3. Splenic', 'A defined Spleen with the Solar Plexus and Sacral open: a quiet instinct in the present that speaks once. Manifestors and Projectors.'],
+        ['4. Ego manifested', 'A defined Heart joined to the Throat, with the three above open: decisions run through what the will truly wants and can commit to. Manifestors only.'],
+        ['5. Ego projected', 'A defined Heart joined to the G but not to the Throat. The will speaks through what you hear yourself say you want. Projectors only.'],
+        ['6. Self-projected', 'A defined G joined to the Throat, nothing else above it in the order. Direction becomes clear by talking and listening to your own voice. Projectors only.'],
+        ['7. Mental, also called environmental', 'Definition only in the Head, Ajna or Throat, which the published convention calls no inner authority. Clarity comes from the right surroundings and from talking things over with trusted people. Projectors only. Ego, self-projected and mental together are sometimes called the minor authorities, a small share of people.'],
+        ['8. Lunar', 'No definition: the Reflector waits a lunar cycle and lets the decision take shape across it.']
+      ],
+      see: [['authorities', 'Emotional (Solar Plexus)'], ['authorities', 'Sacral'], ['authorities', 'Splenic'], ['authorities', 'Ego (Heart)'], ['authorities', 'Self-projected (G)'], ['authorities', 'Mental (environmental)'], ['authorities', 'Lunar (Reflector)']],
+      words: [['terms', 'Emotional Wave'], ['bedrock', 'Outer Authority']] },
+
+    { tier: 'bedrock', name: 'Outer Authority', epi: 'What the mind is for',
+      lead: 'Outer authority is the tradition’s name for the mind’s proper work. Released from running a person’s own decisions, the mind becomes a source of knowledge, perspective and insight that other people can draw on, offered when it is asked for.',
+      parts: [
+        ['Not a decision maker', 'The mind can compare, research and describe. The tradition holds that it cannot decide for the body it lives in, which is inner authority’s work.'],
+        ['Inner and outer together', 'Inner authority decides for you. Outer authority is what you can give. The two are meant to work side by side rather than compete.'],
+        ['Outer authority is not mental authority', 'Mental authority is one of the inner authorities, the one that decides through surroundings and sounding boards. Outer authority belongs to every type and every chart.'],
+        ['Passenger', 'The tradition pictures the mind as a passenger in the vehicle of the body: free to look out of the window and describe the view, and happiest when it is not reaching for the wheel.']
+      ],
+      see: [],
+      words: [['bedrock', 'Inner Authority'], ['weather', 'Rave Cosmology']] },
+
+    /* ---------------- Weather ---------------- */
+    { tier: 'weather', name: 'Definition', epi: 'What a chart holds fixed',
+      lead: 'Definition is whatever a chart holds constant. A channel is defined when both of its gates are activated, and a defined channel defines the two centers it joins. What is defined is consistent and broadcast to others; what is not is open and takes in others. How the defined areas connect to one another is a category of its own.',
+      parts: [
+        ['Single definition', 'Every defined center joins every other in one unbroken piece. Read as self-contained.'],
+        ['Split definition', 'Two separate areas with nothing joining them. Read as a built-in search for whatever bridges the gap, often felt as an attraction to the people who carry it.'],
+        ['Simple split and wide split', 'Teachers distinguish a simple split, closed by a single bridging gate, from a wide split, which needs a whole channel or more. These two names are teachers’ usage rather than the published four.'],
+        ['Triple split', 'Three separate areas. Read as needing variety and time before settling.'],
+        ['Quadruple split', 'Four separate areas, the rarest pattern. Read as hard to condition and in need of a great deal of variety.'],
+        ['No definition', 'Nothing defined, which is only ever the Reflector.'],
+        ['Defined, undefined and open', 'A defined center is fixed. An undefined center has gates activated but no full channel. A completely open center has no gates activated at all, and teachers read it as the widest openness of the three.'],
+        ['Bridging gates', 'The gates that would join separate areas of definition. Whoever carries them, a person or the day’s transits, completes the chart for a while.']
+      ],
+      see: [['definition', 'Single Definition'], ['definition', 'Split Definition'], ['definition', 'Triple Split Definition'], ['definition', 'Quadruple Split Definition'], ['definition', 'No Definition']],
+      words: [['terms', 'Hanging Gate'], ['weather', 'Centers']] },
+
+    { tier: 'weather', name: 'Profile', epi: 'The role you wear',
+      lead: 'Profile is the role a person plays in the world, taken from two lines: the conscious line of the Personality Sun and the unconscious line of the Design Sun. Only twelve pairs occur, because the Design Sun sits a fixed arc behind the Personality Sun.',
+      parts: [
+        ['The lower lines, 1 to 3', 'The lower trigram of a hexagram. Read as personal and self-directed: building a foundation, guarding a natural gift, learning by trial.'],
+        ['The upper lines, 4 to 6', 'The upper trigram. Read as directed outward: a network, the projections of strangers, an example to others.'],
+        ['Harmonic lines', 'Line 1 pairs with 4, 2 with 5, and 3 with 6, the same position in the lower and upper trigram. Teachers read people whose lines harmonise this way as easily recognisable to one another.'],
+        ['Conscious and unconscious', 'The first number is the line you tend to know about yourself. The second is the one others often see first.'],
+        ['The twelve', '1/3, 1/4, 2/4, 2/5, 3/5, 3/6 and 4/6 are the seven personal profiles; 4/1 stands alone; 5/1, 5/2, 6/2 and 6/3 are the four transpersonal ones.']
+      ],
+      see: [['profiles', '1/3'], ['lines', 1], ['lines', 6]],
+      words: [['weather', 'Angle']] },
+
+    { tier: 'weather', name: 'Angle', epi: 'The geometry of a life’s theme',
+      lead: 'Angle is set by profile, and it decides which of three families of Incarnation Cross a person carries. The cross is the four gates of the Personality and Design Suns and Earths; the angle is the slant at which its theme is lived.',
+      parts: [
+        ['Right Angle', 'The seven personal profiles, from 1/3 to 4/6. The theme is described as personal: lived mostly through your own process, with other people as company rather than as the point.'],
+        ['Juxtaposition', 'The 4/1 profile only. The theme is described as fixed: a narrow line held steadily between the personal and the transpersonal.'],
+        ['Left Angle', 'The four transpersonal profiles: 5/1, 5/2, 6/2 and 6/3. The theme is described as worked out through encounters with other people.'],
+        ['How many crosses', 'The published convention counts 192 general Incarnation Crosses by angle.'],
+        ['The four Quarters', 'The wheel of 64 gates is divided into four Quarters of 16 hexagrams each: Initiation, Civilization, Duality and Mutation. A cross belongs to the Quarter its Personality Sun falls in.'],
+        ['A word on the older names', 'The founding literature gives the three angles older names that read as forecasts. inCommon keeps to personal, fixed and transpersonal, which describe the same geometry without one.']
+      ],
+      see: [['cross', 'what'], ['cross', 'angles'], ['profiles', '4/1']],
+      words: [['weather', 'Profile'], ['horizon', 'Cycles']] },
+
+    { tier: 'weather', name: 'Centers', epi: 'Nine hubs, four kinds of work',
+      lead: 'The nine centers are the hubs of the wiring, drawn from the older seven-chakra picture and split into nine. Each has a defined and an open way of working, and they fall into kinds by what they do: they press, they become aware, they power, they express, and they give identity.',
+      parts: [
+        ['Pressure centers', 'The Head and the Root. The Head presses to know and the Root presses to act; both push energy toward the rest of the chart.'],
+        ['Awareness centers', 'The Spleen, the Ajna and the Solar Plexus: awareness of the body, of the mind, and the emerging awareness the tradition calls spirit.'],
+        ['Motor centers', 'The Sacral, the Heart, the Solar Plexus and the Root. Only these supply energy, and a motor reaching the Throat is what makes a type able to manifest.'],
+        ['The Throat', 'The center of manifestation, where everything becomes speech or action. Eleven gates, more than any other.'],
+        ['The G', 'Identity, love and direction. The tradition seats the magnetic monopole here.'],
+        ['Defined and open', 'A defined center works the same way every day and is what you lend to others. An open center takes in and amplifies what others bring, and is where the tradition locates both conditioning and wisdom.']
+      ],
+      see: [['centers', 'Head'], ['centers', 'Ajna'], ['centers', 'Throat'], ['centers', 'G'], ['centers', 'Heart'], ['centers', 'Spleen'], ['centers', 'Sacral'], ['centers', 'Solar Plexus'], ['centers', 'Root']],
+      words: [['open', 'Sacral'], ['horizon', 'Awareness']] },
+
+    { tier: 'weather', name: 'Circuits', epi: 'Families of channels',
+      lead: 'Channels sort into families called circuits, and the circuits into three groups, each with its own keynote: the individual group empowers, the tribal group supports, the collective group shares. A circuit is read as the purpose the energy of its channels serves.',
+      parts: [
+        ['Knowing circuit (individual)', 'Insight that arrives whole and cannot be argued into being, with uncertainty as its theme and melancholy as its familiar mood. Channels 1-8, 2-14, 3-60, 12-22, 23-43, 24-61, 28-38 and 39-55.'],
+        ['Centering circuit (individual)', 'A minor circuit about the empowerment of personal will. Channels 10-34 and 25-51.'],
+        ['Integration channels (individual)', 'Gates 10, 20, 34 and 57, which can define in several combinations and are the only multi-gate definition in the system. Their theme is personal survival in the present. Channels 10-20, 10-57, 20-34, 20-57 and 34-57, with 10-34 joining the same four gates.'],
+        ['Understanding circuit (collective)', 'Logic: patterns that can be tested and repeated, shared so others need not learn them again. Channels 4-63, 5-15, 7-31, 9-52, 16-48, 17-62 and 18-58.'],
+        ['Sensing circuit (collective)', 'The abstract way: experience lived through and made sense of afterwards. Channels 11-56, 13-33, 29-46, 30-41, 35-36, 42-53 and 47-64.'],
+        ['Ego circuit (tribal)', 'Resources, bargains, belonging and loyalty, and the only circuit whose flow runs to the Heart rather than the Throat. Channels 19-49, 21-45, 26-44, 32-54 and 37-40.'],
+        ['Defense circuit (tribal)', 'Nurture, intimacy and care for the young. Channels 6-59 and 27-50.']
+      ],
+      see: [['circuitry', 'Individual Circuitry'], ['circuitry', 'Tribal Circuitry'], ['circuitry', 'Collective Circuitry']],
+      words: [['weather', 'Streams'], ['terms', 'Integration Channels']] },
+
+    { tier: 'weather', name: 'Streams', epi: 'Currents through awareness',
+      lead: 'A stream is a run of gates carrying a potential from a pressure center through an awareness center toward expression. Each awareness center has three, so the wiring holds nine streams of awareness, and teachers follow each one gate by gate as a story of how that kind of knowing matures.',
+      parts: [
+        ['Spleen: instinct, intuition and taste', 'The three splenic streams rise from the Root. Teachers trace instinct through gates 54, 32 and 44, intuition through 38, 28 and 57, and taste through 58, 18 and 48.'],
+        ['Ajna: abstract, logical, individual', 'The three mental streams fall from the Head. The abstract idea runs 64, 47, 11 and 56; the logical fact runs 63, 4, 17 and 62; the individual insight runs 61, 24, 43 and 23.'],
+        ['Solar Plexus: need, passion, desire', 'The three emotional streams rise from the Root. The tribal stream of need runs from 19 to 49 and on to 37 and 40 or 6 and 59; the individual stream runs 39, 55, 22 and 12; the collective stream of feeling runs 41, 30, 36 and 35.'],
+        ['Why streams matter', 'A stream shows a gate in context: what pressure feeds it, what awareness it carries, and where it wants to come out.']
+      ],
+      see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
+      words: [['horizon', 'Awareness'], ['weather', 'Circuits']] },
+
+    { tier: 'weather', name: 'Rave Cosmology', epi: 'The story behind the chart',
+      lead: 'Rave Cosmology is the system’s account of where a design comes from. It is metaphysics rather than mechanics, the frame the founder gave for the chart, and it is best read as that frame rather than as something the chart demonstrates.',
+      parts: [
+        ['The Biverse', 'The founder’s word for a cosmos that is dual at its root, yin and yang before anything else.'],
+        ['The Maia', 'The world of form, from a Sanskrit root meaning to measure. The system describes itself as the mechanics of the Maia.'],
+        ['The neutrino and the Program', 'The neutrino is held to carry information as it passes through every body. The Program is the patterned, cyclical effect of that stream on all life, carried by the movement of the astral bodies.'],
+        ['The crystals', 'Two crystals of consciousness: the Personality crystal, placed at the Head center, and the Design crystal, placed within the skull. The black activations are the Personality and the red ones the Design.'],
+        ['The magnetic monopole', 'A single-poled magnet the tradition places in the G, at the sternum. It holds the two crystals together and is said to steer the body along its line through space.'],
+        ['Passenger and vehicle', 'The Personality is the passenger and the Design is the vehicle, the body. The passenger rides; the vehicle knows the road.'],
+        ['The Voice', 'The founder’s name for the source of the teaching he reported receiving on Ibiza in January 1987.']
+      ],
+      see: [['terms', 'Design and Personality Crystals'], ['intro', 0]],
+      words: [['horizon', 'Mechanics'], ['horizon', 'Evolution']] },
+
+    /* ---------------- Horizon ---------------- */
+    { tier: 'horizon', name: 'Evolution', epi: 'A body still changing',
+      lead: 'The tradition sets every chart inside a larger story of human change, in which forms of awareness arrive one after another and the body itself goes on mutating. These are the system’s own claims about history, offered as its framework rather than as findings.',
+      parts: [
+        ['Seven centers to nine', 'The tradition holds that humanity was seven-centered until 1781, the year Uranus was discovered, and has been nine-centered since. It calls nine-centered beings Rave.'],
+        ['Awareness in sequence', 'Splenic awareness is described as the oldest, keeping the body alive; mental awareness came next; emotional awareness is described as still arriving.'],
+        ['2027 and the Solar Plexus', 'The tradition expects the Solar Plexus to begin a mutation around 2027, through gates 55 and 49, and calls the children born into it Rave children.'],
+        ['Global cycles', 'History is read as long eras, each carrying the theme of an Incarnation Cross. The tradition dates the present era, the Cross of Planning, from 1615 to 2027, followed by the Cross of the Sleeping Phoenix.'],
+        ['Mutation', 'In the wiring, change enters through the individual circuitry, which is why individual channels are read as arriving before anyone has asked for them.']
+      ],
+      see: [['circuitry', 'Individual Circuitry']],
+      words: [['horizon', 'Cycles'], ['horizon', 'Awareness']] },
+
+    { tier: 'horizon', name: 'Conditioning', epi: 'What is borrowed',
+      lead: 'Conditioning is what the tradition says happens wherever a chart is open: the openness takes in other people’s definition and the day’s transits, and the mind mistakes the borrowed consistency for its own. It is not framed as harm. It is the ordinary mechanics of being open, and the place where the tradition locates both confusion and wisdom.',
+      parts: [
+        ['Open centers', 'An open center amplifies whatever definition is near it, so it can feel the borrowed energy more strongly than the person who lends it.'],
+        ['The transit field', 'The moving astral bodies activate gates for everyone at once, so the whole world is conditioned by the same sky for a while. The tradition calls this the Program.'],
+        ['Homogenization', 'The founder’s word for the pull to be like everyone else, which conditioning makes easy and the not-self mind welcomes.'],
+        ['Deconditioning', 'Living by strategy and authority long enough for the body to sort its own definition from what was borrowed. The published convention calls it a seven-year cellular process and is candid that the middle of it can be uncomfortable.'],
+        ['Conditioning between two charts', 'Where one person is defined and the other open, the defined one conditions the other. The four connection patterns, electromagnetic, companionship, dominance and compromise, name how.']
+      ],
+      see: [['terms', 'Conditioning'], ['terms', 'Deconditioning'], ['terms', 'Transits']],
+      words: [['terms', 'Electromagnetic Connection'], ['bedrock', 'Not-Self Theme']] },
+
+    { tier: 'horizon', name: 'Cycles', epi: 'Returns across a life',
+      lead: 'Cycles are the timed returns the tradition reads across a year, across a life and across history. They describe the weather of a stage rather than an event, and the system presents them as seasons of the design.',
+      parts: [
+        ['The Moon', 'About 28 days to pass through all 64 gates. This is the Reflector’s rhythm.'],
+        ['The Rave New Year', 'When the Sun enters gate 41, around the third week of January, the wheel begins again.'],
+        ['Saturn return', 'Around 29 to 31. The tradition reads it as the end of the first stage of a life.'],
+        ['Uranus opposition', 'Somewhere between 38 and 44: the mid-life point. The tradition says the first half of a life is lived through the South Node’s theme and the second through the North Node’s.'],
+        ['Kiron return', 'Around 50 to 51. The founding texts spell the body Kiron. It opens the last stage of a life.'],
+        ['The sixth line’s three stages', 'Trial and error from birth to the Saturn return; a stage on the roof, observing, until the Kiron return; then coming off the roof as a lived example.'],
+        ['The Uranian life', 'About 84 years, one orbit of Uranus, which the tradition treats as a full human life cycle since 1781.']
+      ],
+      see: [['lines', 6]],
+      words: [['horizon', 'Evolution']] },
+
+    { tier: 'horizon', name: 'Mechanics', epi: 'How it is built',
+      lead: 'Mechanics is the tradition’s word for how the system is put together: what is calculated and how the parts connect, as distinct from what any of it is said to mean. The founding phrase is the mechanics of the Maia.',
+      parts: [
+        ['Two moments', 'The Personality is cast for the birth moment. The Design is cast for the moment the Sun stood 88 degrees of solar arc earlier, roughly 88 days before birth.'],
+        ['Thirteen bodies on each side', 'The Sun, the Earth, the Moon, the North and South Nodes, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune and Pluto, giving 26 activations in all.'],
+        ['The wheel', 'The 64 gates are laid around the zodiac, 5.625 degrees each, beginning with gate 41. Each gate has six lines.'],
+        ['The address of a position', 'Gate, line, color, tone and base: six lines to a gate, six colors to a line, six tones to a color and five bases to a tone.'],
+        ['From gate to type', 'Two gates make a channel, a channel defines two centers, and the pattern of defined centers gives type, authority and definition.'],
+        ['Black and red', 'Personality activations are printed in black and Design activations in red. A gate in both is shown striped.']
+      ],
+      see: [['terms', 'The Wiring'], ['terms', 'Color, Tone and Base']],
+      words: [['weather', 'Definition'], ['horizon', 'Variable']] },
+
+    { tier: 'horizon', name: 'Awareness', epi: 'Three ways of knowing',
+      lead: 'Three of the nine centers are awareness centers, and the tradition describes each as a different kind of knowing: the body’s in the Spleen, the mind’s in the Ajna, and the emerging awareness of spirit in the Solar Plexus. Awareness is distinct from energy. The awareness centers know; the motors move.',
+      parts: [
+        ['Splenic awareness', 'The oldest, concerned with survival and wellbeing, speaking once and only in the present.'],
+        ['Mental awareness', 'The Ajna’s way: concepts, comparisons and research, working across time and best offered to others.'],
+        ['Emotional awareness', 'The Solar Plexus’s way: clarity that comes across the wave, which the tradition expects to deepen after 2027.'],
+        ['Fears, anxieties and nervousness', 'The tradition gives each splenic gate a characteristic fear, each Ajna gate an anxiety, and each Solar Plexus gate a nervousness, and reads them as the shadow side of that awareness.'],
+        ['Streams of awareness', 'Each awareness center carries three streams, nine in all, which follow a potential from pressure to expression.']
+      ],
+      see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
+      words: [['weather', 'Streams'], ['terms', 'Emotional Wave']] },
+
+    { tier: 'horizon', name: 'Variable', epi: 'The finest grain',
+      lead: 'Variable is the system’s advanced layer: four arrows beside the head of the chart, read from the color and tone beneath the Sun and Node activations on each side. Teachers present it as the fine print of how one body and one mind are built to take in the world. inCommon names the four and their variants here and does not yet compute them for a chart.',
+      parts: [
+        ['Determination (top left, Design)', 'Also called digestion: how the body is said to take in nourishment. Six colors: Appetite, consecutive or alternating; Taste, open or closed; Thirst, hot or cold; Touch, calm or nervous; Sound, high or low; Light, direct or indirect.'],
+        ['Environment (bottom left, Design)', 'Where the body is said to do best. Six colors: Caves, selective or blending; Markets, internal or external; Kitchens, wet or dry; Mountains, active or passive; Valleys, narrow or wide; Shores, natural or artificial.'],
+        ['Motivation (top right, Personality)', 'Why the mind does what it does. Some teachers call this arrow awareness. Six colors: Fear, Hope, Desire, Need, Guilt and Innocence.'],
+        ['Perspective (bottom right, Personality)', 'Also called view: what the mind is built to notice. Six colors: Survival, Possibility, Power, Wanting, Probability and Personal.'],
+        ['Cognition and sense', 'The tones name senses. On the Design side, cognition: smell, taste, outer vision, inner vision, feeling and touch. On the Personality side, the sense keys: security, uncertainty, action, meditation, judgment and acceptance.'],
+        ['Transference', 'When the not-self takes over, Motivation and Perspective are said to flip to the color three places away: Fear with Need, Hope with Guilt, Desire with Innocence; Survival with Wanting, Possibility with Probability, Power with Personal. The Design arrows have no transference.']
+      ],
+      see: [['terms', 'Variables and the Four Arrows'], ['terms', 'Color, Tone and Base']],
+      words: [['horizon', 'Left or Right'], ['horizon', 'Mechanics']] },
+
+    { tier: 'horizon', name: 'Left or Right', epi: 'Strategic or receptive',
+      lead: 'Each of the four arrows points left or right, and the direction comes from the tone beneath it: tones 1 to 3 point left, tones 4 to 6 point right. Left is described as strategic, focused and active. Right is described as receptive, peripheral and passive. Neither is better; they are two builds.',
+      parts: [
+        ['Determination', 'Left is active, right is passive: how deliberately the body is said to need to approach nourishment.'],
+        ['Environment', 'Left is described as being observed, right as observing: whether the body does best seen within its setting or watching it.'],
+        ['Motivation', 'Left is strategic, right is receptive: whether the mind is said to drive toward a goal or take in what arrives.'],
+        ['Perspective', 'Left is focused, right is peripheral: whether the mind is said to see best narrowly or take in the wide field.'],
+        ['Sixteen combinations', 'With four arrows and two directions, sixteen configurations are possible. Teachers write them as a short code of letters, Personality pair first, then Design.']
+      ],
+      see: [['terms', 'Variables and the Four Arrows']],
+      words: [['horizon', 'Variable']] }
+  ];
+
+  /* The circuit of each channel, one family per channel. The Integration
+     set takes 10-34 as well in teachers' usage; it is filed here under
+     Centering so every channel has exactly one family, and the lesson says
+     so. M-row tests hold the partition to all 36. */
+  var CIRCUIT_OF = {
+    Knowing: ['1-8', '2-14', '3-60', '12-22', '23-43', '24-61', '28-38', '39-55'],
+    Centering: ['10-34', '25-51'],
+    Integration: ['10-20', '10-57', '20-34', '20-57', '34-57'],
+    Understanding: ['4-63', '5-15', '7-31', '9-52', '16-48', '17-62', '18-58'],
+    Sensing: ['11-56', '13-33', '29-46', '30-41', '35-36', '42-53', '47-64'],
+    Ego: ['19-49', '21-45', '26-44', '32-54', '37-40'],
+    Defense: ['6-59', '27-50']
+  };
+  function circuitOf(key) {
+    var out = null;
+    Object.keys(CIRCUIT_OF).forEach(function (c) { if (CIRCUIT_OF[c].indexOf(key) !== -1) out = c; });
+    return out;
+  }
+
+  /* ---------- the lexicon, beyond the further terms ----------
+     Every other standard term and its variants, one short entry each, in
+     inCommon's own words. These join TERMS and the chapter sorts the whole
+     list alphabetically. `see` points at the lesson or shelf that carries
+     the full account. */
+  var LEXICON = [
+    { name: 'Activation', text: 'One astral body standing in one gate and line, on either the Personality or the Design side. A chart has 26 of them, and they are the raw facts every other idea is read from.', see: ['horizon', 'Mechanics'] },
+    { name: 'Astral Bodies', text: 'The thirteen positions cast on each side of a chart: the Sun, the Earth, the Moon, the North and South Nodes, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune and Pluto. The Sun and Earth together carry most of the weight, about seventy percent of the imprint in the tradition’s own reckoning.', see: ['horizon', 'Mechanics'] },
+    { name: 'Awareness Centers', text: 'The Spleen, the Ajna and the Solar Plexus, the three centers that know rather than move: body, mind and the emerging awareness of spirit.', see: ['horizon', 'Awareness'] },
+    { name: 'Base', text: 'The deepest layer of a position, below color and tone. There are five bases to a tone, and the tradition reads them as the most fundamental orientation of a design.', see: ['terms', 'Color, Tone and Base'] },
+    { name: 'Biverse', text: 'The founder’s word for a cosmos that is dual at its root.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Black and Red', text: 'The two colors of a printed chart. Black marks the Personality, the side you tend to know; red marks the Design, the side that runs below awareness.', see: ['horizon', 'Mechanics'] },
+    { name: 'Bridging Gate', text: 'A gate that would join two separate areas of definition. Whoever carries it completes the chart for as long as they are near.', see: ['weather', 'Definition'] },
+    { name: 'Centering Circuit', text: 'A minor circuit in the individual group about the empowerment of personal will, made of channels 10-34 and 25-51.', see: ['weather', 'Circuits'] },
+    { name: 'Channel', text: 'The line joining two gates in two centers. When both gates are activated the channel is defined, and so are the two centers it joins. There are 36.', see: ['channels', '1-8'] },
+    { name: 'Circuit Group', text: 'The three large families of channels: individual, tribal and collective, with the integration channels counted under the individual group. Their keynotes are empowerment, support and sharing.', see: ['weather', 'Circuits'] },
+    { name: 'Cognition', text: 'The tone beneath the Design Sun, read as the sense through which the body takes in the world: smell, taste, outer vision, inner vision, feeling or touch.', see: ['horizon', 'Variable'] },
+    { name: 'Collective Circuit Group', text: 'The understanding and sensing circuits, whose keynote is sharing: experience and pattern passed on for everyone’s use.', see: ['circuitry', 'Collective Circuitry'] },
+    { name: 'Color', text: 'The layer of a position beneath the line. Six colors to a line; the color of the Sun and Node activations gives the four Variables.', see: ['horizon', 'Variable'] },
+    { name: 'Completely Open Center', text: 'A center with no gates activated at all. Teachers read it as the widest openness, with no theme of its own to lean on.', see: ['weather', 'Definition'] },
+    { name: 'Cross of Planning', text: 'The theme the tradition gives the present era of history, dated from 1615 to 2027.', see: ['horizon', 'Evolution'] },
+    { name: 'Cross of the Sleeping Phoenix', text: 'The theme the tradition gives the era it expects to follow 2027.', see: ['horizon', 'Evolution'] },
+    { name: 'Defense Circuit', text: 'The smaller tribal circuit, of nurture, intimacy and care for the young: channels 6-59 and 27-50.', see: ['weather', 'Circuits'] },
+    { name: 'Defined Center', text: 'A center joined to another by at least one defined channel. It works the same way every day and is what you broadcast to others.', see: ['open', 'Sacral'] },
+    { name: 'Design', text: 'The red side of a chart, cast for the moment the Sun stood 88 degrees of solar arc before birth. Read as the body and its inheritance, running below conscious awareness.', see: ['horizon', 'Mechanics'] },
+    { name: 'Design Sun', text: 'The Sun’s gate and line at the Design moment. It gives the second number of the profile and two of the four gates of the Cross.', see: ['weather', 'Profile'] },
+    { name: 'Determination', text: 'The top left arrow, from the Design side, also called digestion: how the body is said to take in nourishment best. Its six colors are Appetite, Taste, Thirst, Touch, Sound and Light.', see: ['horizon', 'Variable'] },
+    { name: 'Earth', text: 'Always the gate opposite the Sun on the same side. It is read as grounding, and with the Sun it makes the Cross.', see: ['cross', 'what'] },
+    { name: 'Ego Circuit', text: 'The larger tribal circuit, of resources, bargains, belonging and loyalty, and the only circuit that runs to the Heart rather than the Throat: channels 19-49, 21-45, 26-44, 32-54 and 37-40.', see: ['weather', 'Circuits'] },
+    { name: 'Emotional Wave Types', text: 'Three shapes of emotional wave. The tribal wave builds by steps, one forward and one back, until it releases. The individual wave runs level and then spikes. The collective wave climbs gradually and falls sharply. Their themes are given as need, passion and desire; one entry in the published dictionary calls the individual theme uncertainty instead of passion.', see: ['weather', 'Streams'] },
+    { name: 'Energy Type', text: 'Manifestors, Generators and Manifesting Generators: the types with a motor defined in a way that gives consistent access to working energy.', see: ['bedrock', 'Type'] },
+    { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
+    { name: 'Exaltation and Detriment', text: 'Each line of each gate is given an astral body that expresses it at its best, its exaltation, and one that expresses it at its most strained, its detriment. A body sitting in its own exaltation or detriment is said to fix the line that way.', see: ['gates', 'g1'] },
+    { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
+    { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
+    { name: 'Harmonic Gate', text: 'The gate at the other end of a channel. Two harmonic gates make the channel; either alone is a hanging gate.', see: ['terms', 'Hanging Gate'] },
+    { name: 'Hexagram', text: 'A figure of six lines from the I Ching. The system lays the 64 hexagrams around the zodiac as its 64 gates, and each line of a hexagram becomes a line of the gate.', see: ['gates', 'g1'] },
+    { name: 'Homogenization', text: 'The founder’s word for the pull to be like everyone else, which conditioning makes easy.', see: ['horizon', 'Conditioning'] },
+    { name: 'Incarnation Cross', text: 'The four gates of the Personality Sun and Earth and the Design Sun and Earth, read as the theme a life plays out against. The published convention counts 192 by angle.', see: ['cross', 'what'] },
+    { name: 'Individual Circuit Group', text: 'The knowing and centering circuits with the integration channels, whose keynote is empowerment: something new brought in, which the group did not know it needed.', see: ['circuitry', 'Individual Circuitry'] },
+    { name: 'Integration Channels', text: 'The channels among gates 10, 20, 34 and 57, the only place in the wiring where several gates can define together. Their theme is personal survival in the present.', see: ['weather', 'Circuits'] },
+    { name: 'Juxtaposition', text: 'The angle of the 4/1 profile, described as fixed: a narrow line held between the personal and the transpersonal.', see: ['weather', 'Angle'] },
+    { name: 'Kiron Return', text: 'The return of Chiron, which the founding texts spell Kiron, around age 50 to 51. It opens the last stage of a life and brings a sixth line off the roof.', see: ['horizon', 'Cycles'] },
+    { name: 'Knowing Circuit', text: 'The main individual circuit: insight that arrives whole, with uncertainty as its theme and melancholy as its familiar mood.', see: ['weather', 'Circuits'] },
+    { name: 'Left Angle', text: 'The angle of the four transpersonal profiles, 5/1, 5/2, 6/2 and 6/3, where the theme is worked out through other people.', see: ['weather', 'Angle'] },
+    { name: 'Line', text: 'One of the six positions within a gate, from the lines of the hexagram. The lines of the two Suns give the profile.', see: ['lines', 1] },
+    { name: 'Lower and Upper Trigram', text: 'The two halves of a hexagram. Lines 1 to 3 are the lower, read as personal; lines 4 to 6 the upper, read as turned toward others.', see: ['weather', 'Profile'] },
+    { name: 'Lunar Cycle', text: 'The Moon’s passage through all 64 gates, about 28 days, which is the span a Reflector is advised to give a large decision.', see: ['bedrock', 'Strategy'] },
+    { name: 'Magnetic Monopole', text: 'A single-poled magnet the tradition seats in the G. It holds the two crystals of consciousness together and is said to steer the body along its line.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Maia', text: 'The world of form. The system calls itself the mechanics of the Maia.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Manifestation', text: 'Turning energy into action or speech, which only the Throat can do. A motor reaching the Throat is what makes a type able to manifest directly.', see: ['centers', 'Throat'] },
+    { name: 'Mid-Life Point', text: 'The Uranus opposition, between about 38 and 44, when the tradition says a life turns from the South Node’s theme to the North Node’s.', see: ['horizon', 'Cycles'] },
+    { name: 'Minor Authorities', text: 'Ego, self-projected and mental authority, taken together: a small share of people, all Manifestors or Projectors.', see: ['bedrock', 'Inner Authority'] },
+    { name: 'Motivation', text: 'The top right arrow, from the Personality side, read as why the mind does what it does. Its six colors are Fear, Hope, Desire, Need, Guilt and Innocence. Some teachers call this arrow awareness.', see: ['horizon', 'Variable'] },
+    { name: 'Motor Centers', text: 'The Sacral, the Heart, the Solar Plexus and the Root, the four centers that supply energy.', see: ['weather', 'Centers'] },
+    { name: 'Neutrino', text: 'The particle the tradition holds carries information through every body, imprinting the design at the two moments a chart is cast.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Nodes', text: 'The North and South Nodes of the Moon, cast on both sides. They give the two bottom arrows and the themes of the two halves of a life.', see: ['horizon', 'Cycles'] },
+    { name: 'Non-Energy Type', text: 'Projectors and Reflectors, read as having no consistent working energy of their own, and as built to guide and to reflect.', see: ['bedrock', 'Type'] },
+    { name: 'Not-Self Mind', text: 'The mind trying to make decisions it is not built to make, usually by acting out the habits of the open centers.', see: ['bedrock', 'Not-Self Theme'] },
+    { name: 'Outer Authority', text: 'The mind at its proper work: knowledge and perspective offered to others, once it has stopped deciding for you.', see: ['bedrock', 'Outer Authority'] },
+    { name: 'Passenger and Vehicle', text: 'The tradition’s picture of a person: the Personality as a passenger riding in the Design, the body, which knows the road.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Personality', text: 'The black side of a chart, cast for the birth moment. Read as the conscious self, the one you tend to identify with.', see: ['horizon', 'Mechanics'] },
+    { name: 'Personality Sun', text: 'The Sun’s gate and line at birth. It gives the first number of the profile and two of the four gates of the Cross.', see: ['weather', 'Profile'] },
+    { name: 'Perspective', text: 'The bottom right arrow, from the Personality side, also called view: what the mind is built to notice. Its six colors are Survival, Possibility, Power, Wanting, Probability and Personal.', see: ['horizon', 'Variable'] },
+    { name: 'Pressure Centers', text: 'The Head and the Root, which push rather than power: pressure to know and pressure to act.', see: ['weather', 'Centers'] },
+    { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving astral bodies.', see: ['horizon', 'Conditioning'] },
+    { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, Civilization, Duality and Mutation.', see: ['weather', 'Angle'] },
+    { name: 'Rave', text: 'The tradition’s name for nine-centered human beings, which it dates from 1781.', see: ['horizon', 'Evolution'] },
+    { name: 'Rave Children', text: 'The tradition’s name for children it expects to be born with a mutated Solar Plexus after 2027.', see: ['horizon', 'Evolution'] },
+    { name: 'Rave Mandala', text: 'The wheel of 64 gates laid around the zodiac, from which every activation is read.', see: ['horizon', 'Mechanics'] },
+    { name: 'Rave New Year', text: 'The Sun’s entry into gate 41, around the third week of January, where the wheel begins.', see: ['horizon', 'Cycles'] },
+    { name: 'Right Angle', text: 'The angle of the seven personal profiles, from 1/3 to 4/6, where the theme is lived mostly through your own process.', see: ['weather', 'Angle'] },
+    { name: 'Sacral Response', text: 'The Sacral’s answer to a yes or no question, often heard as a sound before words: a rising sound for yes, a falling one for no. It is the decision of a Generator with sacral authority.', see: ['authorities', 'Sacral'] },
+    { name: 'Saturn Return', text: 'Saturn coming back to its birth position, around age 29 to 31, read as the close of the first stage of a life.', see: ['horizon', 'Cycles'] },
+    { name: 'Sense', text: 'The tone beneath the Personality Sun, read as the mind’s key to awareness: security, uncertainty, action, meditation, judgment or acceptance.', see: ['horizon', 'Variable'] },
+    { name: 'Sensing Circuit', text: 'The abstract half of the collective group: experience lived through and made sense of afterwards.', see: ['weather', 'Circuits'] },
+    { name: 'Solar Plexus Mutation', text: 'The change the tradition expects to begin around 2027, through gates 55 and 49, carrying a new emotional awareness.', see: ['horizon', 'Evolution'] },
+    { name: 'Streams of Awareness', text: 'The nine runs of gates, three through each awareness center, that carry a potential from pressure toward expression.', see: ['weather', 'Streams'] },
+    { name: 'Tone', text: 'The layer beneath color. Six tones to a color; tones 1 to 3 point an arrow left and 4 to 6 point it right.', see: ['horizon', 'Left or Right'] },
+    { name: 'Transference', text: 'The flip the tradition says Motivation and Perspective make under the not-self, to the color three places away.', see: ['horizon', 'Variable'] },
+    { name: 'Tribal Circuit Group', text: 'The ego and defense circuits, whose keynote is support: keeping people fed, held and bound by agreement.', see: ['circuitry', 'Tribal Circuitry'] },
+    { name: 'Understanding Circuit', text: 'The logical half of the collective group: patterns tested and repeated, then shared.', see: ['weather', 'Circuits'] },
+    { name: 'Undefined Center', text: 'A center with one or more gates activated but no full channel. It is open to other people’s definition while still carrying its own leanings.', see: ['open', 'Sacral'] },
+    { name: 'Uranian Cycle', text: 'One orbit of Uranus, about 84 years, which the tradition treats as the span of a full human life cycle.', see: ['horizon', 'Cycles'] },
+    { name: 'Voice', text: 'The founder’s name for the source of the teaching he reported receiving in January 1987.', see: ['weather', 'Rave Cosmology'] },
+    { name: 'Wheel', text: 'The circle of 64 gates of 5.625 degrees each, beginning with gate 41, which turns every astral position into a gate and line.', see: ['horizon', 'Mechanics'] }
+  ];
+
+  /* One alphabetical lexicon: the further terms and the rest together. */
+  TERMS = TERMS.concat(LEXICON).sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+
   var SECTIONS = [
     ['intro', 'What Human Design is'],
+    ['bedrock', 'Bedrock'],
+    ['weather', 'Weather'],
+    ['horizon', 'Horizon'],
     ['types', 'The five types'],
     ['lines', 'The six lines'],
     ['profiles', 'The twelve profiles'],
@@ -502,7 +910,7 @@
     ['strategies', 'Strategies'],
     ['authorities', 'Authorities'],
     ['open', 'Defined and undefined'],
-    ['terms', 'Further terms'],
+    ['terms', 'The lexicon'],
     ['example', 'An example bodygraph']
   ];
 
@@ -546,6 +954,7 @@
     CENTERS: CENTERS, AUTHORITIES: AUTHORITIES, STRATEGIES: STRATEGIES, CHANNELS: CHANNELS,
     GATES: GATES, EXAMPLE: EXAMPLE, SECTIONS: SECTIONS,
     DEFINITION: DEFINITION, CROSS: CROSS, CIRCUITS: CIRCUITS, TERMS: TERMS,
+    TIERS: TIERS, LESSONS: LESSONS, CIRCUIT_OF: CIRCUIT_OF, circuitOf: circuitOf,
     CONNECTION_TRADITION: CONNECTION_TRADITION, CONNECTION_ASK: CONNECTION_ASK,
     layers: layers,
     centerOf: centerOf, gateName: gateName, channel: channel, channelKey: channelKey,

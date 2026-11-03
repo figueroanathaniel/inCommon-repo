@@ -4382,6 +4382,62 @@ async function runCloudTests() {
     asked, ['1990-03-15', '17:00', false, 'UTC']);
 })();
 
+/* ---- F: the Atlas lessons and lexicon (hd-atlas.js V1.1) ----------------
+   Asked for by the owner on 3 November 2026: twenty one lessons in three
+   tiers, named exactly as the request listed them. These rows hold the
+   shape of that writing, not its truth: the sources are recorded in
+   docs/hd-upgrade/03-atlas-lessons-sources.md and every open question is listed there. */
+(function () {
+  const A = ATLAS, sl = x => String(x).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const want = {
+    bedrock: ['Type', 'Strategy', 'Aura', 'Signature', 'Not-Self Theme', 'Inner Authority', 'Outer Authority'],
+    weather: ['Definition', 'Profile', 'Angle', 'Centers', 'Circuits', 'Streams', 'Rave Cosmology'],
+    horizon: ['Evolution', 'Conditioning', 'Cycles', 'Mechanics', 'Awareness', 'Variable', 'Left or Right']
+  };
+  t('F1', 'three tiers, Bedrock, Weather and Horizon, each with the seven lessons the owner named, in that order',
+    (A.TIERS || []).map(T => [T.name, (A.LESSONS || []).filter(l => l.tier === T.key).map(l => l.name)]),
+    [['Bedrock', want.bedrock], ['Weather', want.weather], ['Horizon', want.horizon]]);
+  const chapters = A.SECTIONS.map(s => s[0]);
+  t('F2', 'each tier is a chapter of the Atlas, after the introduction and before the reference shelves',
+    chapters.slice(0, 4), ['intro', 'bedrock', 'weather', 'horizon']);
+  /* The same ids atlasEntries() builds, chapter:slug. */
+  const ids = new Set(['intro:0', 'example:0', 'cross:what', 'cross:how', 'cross:angles']);
+  Object.keys(A.TYPES).forEach(k => ids.add('types:' + sl(k)));
+  [1, 2, 3, 4, 5, 6].forEach(n => ids.add('lines:' + n));
+  Object.keys(A.PROFILES).forEach(k => ids.add('profiles:' + sl(k)));
+  Object.keys(A.CENTERS).forEach(k => { ids.add('centers:' + sl(k)); ids.add('open:' + sl(k)); });
+  Object.keys(A.GATES).forEach(n => ids.add('gates:g' + n));
+  Object.keys(A.CHANNELS).forEach(k => ids.add('channels:' + sl(k)));
+  A.CIRCUITS.forEach(c => ids.add('circuitry:' + sl(c.name)));
+  A.DEFINITION.forEach(d => ids.add('definition:' + sl(d.name)));
+  A.STRATEGIES.forEach(x => ids.add('strategies:' + sl(x.name)));
+  A.AUTHORITIES.forEach(x => ids.add('authorities:' + sl(x.name)));
+  A.TERMS.forEach(x => ids.add('terms:' + sl(x.name)));
+  A.LESSONS.forEach(x => ids.add(x.tier + ':' + sl(x.name)));
+  const dangling = [];
+  A.LESSONS.forEach(l => (l.see || []).concat(l.words || []).forEach(([c, id]) => { if (!ids.has(c + ':' + sl(id))) dangling.push(l.name + ' -> ' + c + ':' + id); }));
+  A.TERMS.forEach(x => { if (x.see && !ids.has(x.see[0] + ':' + sl(x.see[1]))) dangling.push(x.name + ' -> ' + x.see.join(':')); });
+  t('F3', 'every link a lesson or a lexicon entry makes lands on a real Atlas entry', dangling, []);
+  const all = [].concat(...Object.values(A.CIRCUIT_OF || {}));
+  t('F4', 'the circuit table files each of the 36 channels exactly once, and only real channels',
+    [all.length, new Set(all).size, Object.keys(A.CHANNELS).filter(k => all.indexOf(k) === -1), all.filter(k => !A.CHANNELS[k])],
+    [36, 36, [], []]);
+  /* Every channel the Circuits lesson lists by number is in the family the table gives it. */
+  const L = A.LESSONS.find(x => x.name === 'Circuits'), wrong = [];
+  L.parts.forEach(([label, text]) => { const fam = label.split(' ')[0];
+    (text.match(/\b\d+-\d+\b/g) || []).forEach(k => { if (A.circuitOf(k) !== fam && !(fam === 'Integration' && k === '10-34')) wrong.push(fam + ' ' + k); }); });
+  t('F5', 'the Circuits lesson and the circuit table agree channel for channel', wrong, []);
+  const dash = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
+  const prose = [].concat(...A.LESSONS.map(l => [l.name, l.epi, l.lead].concat(...l.parts))).concat(...A.TERMS.map(x => [x.name, x.text]));
+  t('F6', 'no dash in any lesson or lexicon entry', prose.filter(x => dash.test(x)), []);
+  const names = A.TERMS.map(x => sl(x.name));
+  t('F7', 'the lexicon is alphabetical and no two entries share a slug',
+    [names.length === new Set(names).size, A.TERMS.every((x, i) => !i || A.TERMS[i - 1].name.toLowerCase() <= x.name.toLowerCase())], [true, true]);
+  t('F8', 'the Projector entry lists emotional authority, and the five types\' shares of people add to a hundred',
+    [/emotional/i.test(A.TYPES.Projector.authority), Object.keys(A.TYPES).reduce((n, k) => n + parseInt(String(A.TYPES[k].pct).replace(/\D+/g, ''), 10), 0)],
+    [true, 100]);
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -4409,7 +4465,7 @@ runCloudTests().then(() => {
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
       ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['T', 'share-rules.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
-      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register']].forEach(([k, name]) => {
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register'], ['F', 'atlas lessons']].forEach(([k, name]) => {
       const g = rows.filter(r => r.id[0] === k);
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
     });
