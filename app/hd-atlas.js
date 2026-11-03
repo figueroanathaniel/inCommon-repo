@@ -35,7 +35,7 @@
       obstacles: 'Other people\u2019s resistance, and their own reactivity to it.'
     },
     Generator: {
-      pct: 'about 37 percent',
+      pct: 'about 35 percent',
       aura: 'Open and enveloping. People come closer than they meant to and stay longer than they planned, which is why a Generator is so often asked for things.',
       signature: 'Satisfaction. The feeling reported at the end of work that was genuinely responded to rather than chased.',
       notSelf: 'Frustration. Read as the signal of having initiated instead of responded, or of having said yes without the energy for it.',
@@ -50,7 +50,7 @@
       obstacles: 'Conditioning to initiate, and the habit of overriding body signals.'
     },
     'Manifesting Generator': {
-      pct: 'about 33 percent',
+      pct: 'about 35 percent',
       aura: 'Open and enveloping with a forward edge. People are drawn in and then find the Manifesting Generator already three steps ahead of the conversation.',
       signature: 'Satisfaction, as for the Generator, which is how the published convention gives it. Many teachers add peace, for the informing half.',
       notSelf: 'Frustration, as for the Generator, in the published convention. Many teachers add anger, read as the signal of having skipped the informing.',
@@ -515,7 +515,7 @@
       parts: [
         ['Manifestor', 'No defined Sacral, and one of the other three motors (Heart, Solar Plexus or Root) joined to the Throat. Read as built to initiate. Published figures put it near 9 percent of people.'],
         ['Generator', 'A defined Sacral with no motor reaching the Throat. Read as built to respond, with sustainable energy for the work that is correct for it.'],
-        ['Manifesting Generator', 'A defined Sacral plus a motor joined to the Throat. The published convention files it under Generator rather than as a sixth type, with the same strategy, aura, signature and not-self theme. Many teachers treat it as its own type and add informing to its strategy. Generators of both kinds together are given as roughly two thirds to seven tenths of people.'],
+        ['Manifesting Generator', 'A defined Sacral plus a motor joined to the Throat. The published convention counts four types and files it under Generator rather than as a fifth, with the same strategy, aura, signature and not-self theme. Many teachers and some reference works treat it as a fifth type and add informing to its strategy. Generators of both kinds together are given as roughly two thirds to seven tenths of people, about half of them Manifesting Generators.'],
         ['Projector', 'No defined Sacral and no motor to the Throat, with at least one channel defined. Read as built to see and guide the energy of others. Just over 20 percent in published figures.'],
         ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
         ['Energy types and non-energy types', 'Manifestors and both kinds of Generator are called energy types. Projectors and Reflectors are non-energy types: the tradition holds they have no consistent working energy of their own and do best when they stop trying to keep pace with those who do.'],
@@ -836,6 +836,7 @@
     { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
     { name: 'Exaltation and Detriment', text: 'Each line of each gate is given an astral body that expresses it at its best, its exaltation, and one that expresses it at its most strained, its detriment. A body sitting in its own exaltation or detriment is said to fix the line that way.', see: ['gates', 'g1'] },
     { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
+    { name: 'Generator', text: 'The type with a defined Sacral. In the published convention it is an umbrella with two kinds, the Pure Generator and the Manifesting Generator, together about seven in ten people. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
     { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
     { name: 'Harmonic Gate', text: 'The gate at the other end of a channel. Two harmonic gates make the channel; either alone is a hanging gate.', see: ['terms', 'Hanging Gate'] },
     { name: 'Hexagram', text: 'A figure of six lines from the I Ching. The system lays the 64 hexagrams around the zodiac as its 64 gates, and each line of a hexagram becomes a line of the gate.', see: ['gates', 'g1'] },
@@ -853,6 +854,7 @@
     { name: 'Magnetic Monopole', text: 'A single-poled magnet the tradition seats in the G. It holds the two crystals of consciousness together and is said to steer the body along its line.', see: ['weather', 'Rave Cosmology'] },
     { name: 'Maia', text: 'The world of form. The system calls itself the mechanics of the Maia.', see: ['weather', 'Rave Cosmology'] },
     { name: 'Manifestation', text: 'Turning energy into action or speech, which only the Throat can do. A motor reaching the Throat is what makes a type able to manifest directly.', see: ['centers', 'Throat'] },
+    { name: 'Manifesting Generator', text: 'A Generator whose Throat is joined to a motor, by a channel or through other defined centers; the motor may be the Sacral itself. The published convention calls it a kind of Generator, not a separate type, while many teachers and some reference works count it as a fifth. Given as about half of all Generators, roughly a third of people. Often shortened to MG.', see: ['types', 'Manifesting Generator'] },
     { name: 'Mid-Life Point', text: 'The Uranus opposition, between about 38 and 44, when the tradition says a life turns from the South Node’s theme to the North Node’s.', see: ['horizon', 'Cycles'] },
     { name: 'Minor Authorities', text: 'Ego, self-projected and mental authority, taken together: a small share of people, all Manifestors or Projectors.', see: ['bedrock', 'Inner Authority'] },
     { name: 'Motivation', text: 'The top right arrow, from the Personality side, read as why the mind does what it does. Its six colors are Fear, Hope, Desire, Need, Guilt and Innocence. Some teachers call this arrow awareness.', see: ['horizon', 'Variable'] },
@@ -867,6 +869,7 @@
     { name: 'Personality Sun', text: 'The Sun’s gate and line at birth. It gives the first number of the profile and two of the four gates of the Cross.', see: ['weather', 'Profile'] },
     { name: 'Perspective', text: 'The bottom right arrow, from the Personality side, also called view: what the mind is built to notice. Its six colors are Survival, Possibility, Power, Wanting, Probability and Personal.', see: ['horizon', 'Variable'] },
     { name: 'Pressure Centers', text: 'The Head and the Root, which push rather than power: pressure to know and pressure to act.', see: ['weather', 'Centers'] },
+    { name: 'Pure Generator', text: 'A Generator whose Throat is not joined to any motor. The published convention names it beside the Manifesting Generator as the two kinds of Generator, with the same strategy, signature and not-self theme. Given as about half of all Generators.', see: ['types', 'Generator'] },
     { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving astral bodies.', see: ['horizon', 'Conditioning'] },
     { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, Civilization, Duality and Mutation.', see: ['weather', 'Angle'] },
     { name: 'Rave', text: 'The tradition’s name for nine-centered human beings, which it dates from 1781.', see: ['horizon', 'Evolution'] },

@@ -24,7 +24,7 @@ or deployed, and `deploy/` was not rebuilt.
 | Where | Was | Now | Evidence |
 |---|---|---|---|
 | Projector authority | self-projected, splenic, mental, or ego | adds emotional; ego named as ego projected | Authority rule in the vault (Solar Plexus first for every type with it defined); the published dictionary: "A defined Solar Plexus is always the Inner Authority" |
-| Manifesting Generator share | about 11 percent | about 33 percent | the five shares summed to 80; the app's own 2,000-birth sample gives 692 of 2,000 (34.6%) |
+| Manifesting Generator share | about 11 percent | about 35 percent (Generator also about 35) | the five shares summed to 80; Jovian product page: Generators about 70%, "half of which are pure Generators, the other half are Manifesting Generators"; the app's own 2,000-birth sample gives MG 692 (34.6%) and Generator 716 (35.8%). See "Type shares" below |
 | Projector share | about 22 percent | about 20 percent | published "just over 20%"; app sample 412 of 2,000 (20.6%) |
 | Manifesting Generator strategy, signature, not-self | respond then inform; satisfaction and peace; frustration and anger | the published convention (same as Generator) first, with the teachers' addition named as such | published dictionary: "the Strategy, Aura, Not-Self Theme, and Signature are the same" as the Generator |
 | Projector aura | focused and penetrating | focused and absorbing (penetrating noted) | published dictionary: Projectors "absorb and take in the other in a very focused way"; "penetrating" appears only in product copy |
@@ -57,7 +57,7 @@ system is valid; the intro's caution stands.
 4. **Which arrows come from the Sun and which from the Nodes.** Not mapped in full by
    any source; they conflict. The lessons do not state it.
 5. **Uranus opposition.** 38 to 44 in one dictionary entry, 38 to 43 in another. Written 38 to 44.
-6. **Generator share.** 65% (dictionary) or almost 70% (statistics). Written as two thirds to seven tenths.
+6. **Generator share.** 65% (dictionary) or almost 70% (statistics). Written as two thirds to seven tenths. See "Type shares" below.
 7. **10-34.** Counted in the Centering circuit by teachers and among the Integration
    gates by the dictionary. Filed under Centering so each channel has one family; the lesson says it joins the Integration gates.
 8. **Simple and wide split.** Teachers' names, not in the published four; the lesson says so.
@@ -101,3 +101,41 @@ a scratch folder with `build-bundle.js --preview` and walked in Chromium at 390x
 and 1440x900: 12 entries each, no page errors, no horizontal overflow.
 Not run: the browser harness gates (drift-check, drive-*), contrast and tap-target
 sweeps over the new chapters, and `check-hd-study-rls`.
+
+
+## Type shares, checked 3 November 2026
+
+Asked for by the owner: the Manifesting Generator share, every respected source.
+V is a verbatim quotation from the page; nothing below is copied into the app.
+
+| Source | Generator incl. MG | MG alone | Projector | Manifestor | Reflector | Method stated |
+|---|---|---|---|---|---|---|
+| Jovian Archive, Human Design Dictionary | "roughly 65%" (V) | not given | "a little over 20%", and "Projectors (23%)" in the Non-Energy entry (V) | "roughly 10%" (V) | "approximately 1-2%" (V) | none |
+| Jovian Archive, Type and Strategy page | "about 70%" (V) | not given | "about 20%" (V) | "about 9%" (V) | "just over 1%" (V) | none |
+| Jovian Archive, Statistics page and its blurbs | "almost 70%" (V) | not given | "just over 20%" (V) | "about 9%" (V) | "around 1.3 or 1.4%" (V) | the page names its dataset (nearly 50 million charts since the mid 2000s, plus over 2 million saved charts) but ties no figure to it in its own text |
+| Jovian Archive, Generator and MG product page | "around 70%" (V) | "Half of which are pure Generators, the other half are Manifesting Generators" (V), so about 35% | n/a | n/a | n/a | none |
+| Jovian Archive, MG page | no figure | no figure | | | | "There are only four Human Design types. Manifesting Generators are not a fifth type." (V) |
+| Jovian Archive, Generator page | no figure | no figure | | | | "two variations under the Generator umbrella": Pure Generators and Manifesting Generators (V) |
+| IHDS, Genetic Matrix, myBodyGraph, Human Design America listing | no figure on any page reached | | | | | |
+| Wikipedia, Human Design | no figure | | | | | MG "sometimes designated a fifth energy type" (V) |
+| inCommon's own engine, 2,000 random births 1950 to 2010 | 70.4% (1,408) | 34.6% (692) | 20.6% | 8.2% | 0.8% | computed here; an independent check of the published figures, not a source |
+
+**What the app says now.** Generator about 35 percent, Manifesting Generator about
+35 percent, Projector about 20, Manifestor about 9, Reflector about 1, which sums to
+100 and sits within about a point of both the half and half split Jovian publishes
+and the engine's own sample.
+
+**Disagreements, all left visible rather than resolved:**
+1. Generators together are 65% in the dictionary and about 70% everywhere else Jovian publishes. The engine sample agrees with 70.
+2. Projectors are 20% in most places and 23% in one dictionary entry. The engine gives 20.6.
+3. Reflectors are given as just over 1%, 1.3 to 1.4%, and 1 to 2%. The engine gives 0.8 on 2,000 births, too small a sample to separate these.
+4. Whether MG is a type. Jovian says it is not a fifth type; Wikipedia and many teachers treat it as one. The lexicon says both.
+5. No source states how any share was derived. No computed population study was found.
+
+**Not reached:** the full text of The Definitive Book of Human Design, humandesign.ai,
+and any peer reviewed or computed population study (none located).
+
+**Terms added to the lexicon on the strength of this:** Generator, Pure Generator
+(named on Jovian's Generator and MG pages and in its dictionary) and Manifesting
+Generator. "Classic Generator" was looked for and found on no source read, so it is
+not used.
