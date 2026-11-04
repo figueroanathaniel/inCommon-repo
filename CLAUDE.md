@@ -3301,6 +3301,30 @@ C5, C6, and D5/D6/S5/S6 at the wider sizes) were the only thing saying so.
 `build-bundle.js` refuses to ship a bundle whose head has no sheet, or whose
 helmet has one again.
 
+## Today is the reading, and each chart carries its own forecast
+Asked for by the owner on 4 November 2026. Today's Forecast and the three
+"Show your working" rows left Today in both shells, and the horoscope pager is
+the page now: on the desktop it spans the column (at most 980px) and Your
+charts and Recent activity sit under it. Each chart page opens with a
+Today's Forecast banner read for that chart, which is the alignment's own row
+for it (`fbAstro`, `fbHd`, `fbNum`, picked out of `alignRows` in the
+`todayVals()` wrapper), so the banner and the alignment cannot disagree. Its
+open state is the same `alignOpen` key, its open half scrolls inside itself at
+`min(56vh, 520px)`, and the astrology banner carries what the forecast block
+held (the sky, the casts, the retrogrades, the next two days). The Cycle Audit's
+line left Today too and sits under the wheel in the astrology panel, opening the
+same sheet.
+
+**The chart's own controls live inside its card** (same day): the view switch,
+the layer or detail switch and the expand button are a bar at the top of the
+wheel and wiring cards, and everything under the bar sits in a
+`position: relative` box, so the stage's absolute controls (Today's sky, Free
+look, the brackets, zoom) anchor to the drawing and not to the bar. The Human
+Design page opens on the wiring; Gates in the sky now is a smaller card under
+it, and Today's Alignment sits under the astrology chart. The titles are Your
+Natal Chart, Your Wiring (the owner's pick over Your Bodygraph, for the mark)
+and Your Numerology.
+
 ## The hole is the middle of the screen, and the ring hugs it
 Asked for by the owner on 4 November 2026 ("The event horizon should fit
 perfectly center"). The cover's camera looked at a point wandering half a unit

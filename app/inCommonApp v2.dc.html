@@ -946,118 +946,7 @@ input[type="date"]{color-scheme:dark}
                     </sc-if>
                   </div>
                 </sc-if>
-                <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
-                  <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:10px">
-                    <button onClick="{{ fcToggle }}" aria-expanded="{{ fcOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
-                      <span style="flex:1;min-width:0;text-align:left;font:400 16px var(--fd);color:var(--tx)">Today’s Forecast</span>
-                      <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--ac)">{{ fcSign }}</span>
-                    </button>
-                    <sc-if value="{{ fcOpen }}" hint-placeholder-val="{{ false }}">
-                      <div style="display:flex;flex-direction:column;gap:12px;animation:fadeUp .22s ease">
-                        <div style="display:flex;flex-direction:column;gap:10px">
-                          <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the sky is doing</span>
-                          <sc-for list="{{ horoSky }}" as="s" hint-placeholder-count="2">
-                            <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid var(--bd);padding-left:11px">
-                              <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px">
-                                <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ s.head }}</span>
-                                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ s.when }}</span>
-                              </div>
-                              <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ s.text }}</span>
-                              <span style="font:400 12.5px/1.65 var(--fb);color:var(--ac2-hi);text-wrap:pretty">{{ s.hook }}</span>
-                            </div>
-                          </sc-for>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:11px">
-                          <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
-                          <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
-                            <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:11px 13px">
-                              <span style="font:600 12.5px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
-                              <div style="display:flex;flex-wrap:wrap;gap:10px">
-                                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
-                                <span style="font:400 10px var(--fu);color:var(--mut)">{{ c.orb }}</span>
-                              </div>
-                              <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.body }}</span>
-                              <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ c.land }}</span>
-                              <span style="font:400 12.5px/1.65 var(--fb);color:var(--ac2-hi);text-wrap:pretty">{{ c.act }}</span>
-                              <sc-if value="{{ c.hasSpan }}" hint-placeholder-val="{{ true }}">
-                                <span style="font:400 10.5px var(--fu);color:var(--mut)">Loudest {{ c.span }}</span>
-                              </sc-if>
-                              <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--ac)">{{ c.cta }}</button>
-                            </div>
-                          </sc-for>
-                          <sc-if value="{{ horoNoCasts }}" hint-placeholder-val="{{ false }}">
-                            <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ horoNoCastText }}</span>
-                          </sc-if>
-                        </div>
-                        <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
-                          <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd);padding-top:11px">
-                            <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px">
-                              <span style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Under review</span>
-                              <span style="flex:none;font:600 9px var(--fu);letter-spacing:.06em;color:var(--mut)">{{ horoRetroCount }}</span>
-                            </div>
-                            <sc-for list="{{ horoRetros }}" as="r" hint-placeholder-count="2">
-                              <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--bd);padding-left:11px">
-                                <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px">
-                                  <span style="font:600 12px var(--fu);color:var(--tx)">{{ r.name }}</span>
-                                  <span style="font:400 10px var(--fu);color:var(--mut)">{{ r.meta }}</span>
-                                </div>
-                                <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
-                              </div>
-                            </sc-for>
-                          </div>
-                        </sc-if>
-                        <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
-                          <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The next two days</span>
-                          <span style="font:400 12.5px/1.65 var(--fb);color:var(--tx);text-wrap:pretty">{{ horoMoon }}</span>
-                          <span style="font:400 11.5px/1.6 var(--fu);color:var(--mut)">{{ horoTail }}</span>
-                        </div>
-                      </div>
-                    </sc-if>
-                  </div>
-                </sc-if>
               </div>
-              <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Show your working</span>
-              <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
-                <div data-lift="box" style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:7px 10px">
-                  <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;width:100%">
-                    <span aria-hidden="true" style="flex:none;display:block;width:15px;height:15px;background-color:{{ r.edge }};-webkit-mask:{{ r.icon }} center/contain no-repeat;mask:{{ r.icon }} center/contain no-repeat"></span>
-                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left">
-                      <span style="font:600 9px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ r.name }}</span>
-                      <span style="font:400 9.5px var(--fu);color:var(--mut)">{{ r.meta }}</span>
-                    </span>
-                    <span aria-hidden="true" style="flex:none;font:400 15px var(--fu);color:var(--ac)">{{ r.sign }}</span>
-                  </button>
-                  <span style="font:400 11.5px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
-                  <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
-                    <div style="display:flex;flex-direction:column;gap:11px">
-                      <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
-                        <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:10px">
-                          <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
-                            <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
-                              <span style="flex:1;min-width:0;font:600 11px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
-                              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
-                            </button>
-                          </sc-if>
-                          <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
-                            <div style="display:flex;flex-direction:column;gap:4px">
-                              <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
-                                <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
-                              </sc-if>
-                              <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
-                                <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
-                              </sc-if>
-                              <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:58ch;text-wrap:pretty">{{ l.text }}</div>
-                            </div>
-                          </sc-for>
-                        </div>
-                      </sc-for>
-                    </div>
-                  </sc-if>
-                  <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
-                    <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.06em;color:var(--ac)">{{ r.srcLabel }}</button>
-                  </sc-if>
-                </div>
-              </sc-for>
             </div>
           </sc-if>
           <sc-if value="{{ noAlignBrief }}" hint-placeholder-val="{{ false }}">
@@ -1065,25 +954,6 @@ input[type="date"]{color-scheme:dark}
           </sc-if>
         </div>
     </div>
-    <!-- THE LONG WEATHER, DEMOTED (owner, 24 October 2026): Today opens straight
-         into the reading now; the audit keeps one quiet line at the foot of the
-         page. The sheet it opens still carries the scene, the charts and the
-         full lists. -->
-    <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:14px">
-        <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-          <div role="status" style="font:italic 400 13px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
-        </sc-if>
-        <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:2px">
-            <span style="font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
-            <span style="font:400 16px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
-            <span style="font:400 11.5px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-          </div>
-          <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px;font:600 11px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
-        </sc-if>
-      </div>
-    </sc-if>
   </div>
 </sc-if>
 
@@ -1108,6 +978,52 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:400 24px/1.25 var(--fd)">Your Wiring</div>
     </div>
+    <sc-if value="{{ fbHdOn }}" hint-placeholder-val="{{ false }}">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
+          <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+            <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+          </button>
+          <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+          <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+          </sc-if>
+        </sc-for>
+        <sc-if value="{{ fbHdOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                      <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                          <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                        </button>
+                      </sc-if>
+                      <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                            <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                          </sc-if>
+                          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                          </sc-if>
+                          <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">The Wiring</div>
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
@@ -1472,6 +1388,111 @@ input[type="date"]{color-scheme:dark}
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="font:400 24px/1.25 var(--fd)">Your Natal Chart</div>
     </div>
+    <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
+          <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+            <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+          </button>
+          <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+          <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+          </sc-if>
+        </sc-for>
+        <sc-if value="{{ fbAstroOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                      <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                          <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                        </button>
+                      </sc-if>
+                      <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                            <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                          </sc-if>
+                          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                          </sc-if>
+                          <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </sc-for>
+            <div style="display:flex;flex-direction:column;gap:13px;animation:dtIn .22s ease">
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the sky is doing</span>
+                <sc-for list="{{ horoSky }}" as="s" hint-placeholder-count="2">
+                  <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid var(--bd);padding-left:12px">
+                    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                      <span style="font:600 13px var(--fu);color:var(--tx)">{{ s.head }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ s.when }}</span>
+                    </div>
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ s.text }}</span>
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ s.hook }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
+                <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
+                  <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
+                    <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:11px">
+                      <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
+                      <span style="font:400 10px var(--fu);color:var(--mut)">{{ c.orb }}</span>
+                    </div>
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.body }}</span>
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.land }}</span>
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ c.act }}</span>
+                    <sc-if value="{{ c.hasSpan }}" hint-placeholder-val="{{ true }}">
+                      <span style="font:400 10.5px var(--fu);color:var(--mut)">Loudest {{ c.span }}</span>
+                    </sc-if>
+                    <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.cta }}</button>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ horoNoCasts }}" hint-placeholder-val="{{ false }}">
+                  <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoNoCastText }}</span>
+                </sc-if>
+              </div>
+              <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
+                  <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                    <span style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Under review</span>
+                    <span style="flex:none;font:600 9px var(--fu);letter-spacing:.06em;color:var(--mut)">{{ horoRetroCount }}</span>
+                  </div>
+                  <sc-for list="{{ horoRetros }}" as="r" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--bd);padding-left:12px">
+                      <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                        <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                        <span style="font:400 10px var(--fu);color:var(--mut)">{{ r.meta }}</span>
+                      </div>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ r.text }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The next two days</span>
+                <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoMoon }}</span>
+                <span style="font:400 11.5px/1.6 var(--fu);color:var(--mut);max-width:62ch">{{ horoTail }}</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
     <div style="display:flex;flex-direction:column;gap:9px">
       <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)">Birth Chart</div>
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
@@ -1573,6 +1594,23 @@ input[type="date"]{color-scheme:dark}
         </div>
       </sc-if>
       <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
+      <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
+           Today and opens from the chart it reads. -->
+      <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+        <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+          <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="font:italic 400 14px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
+          </sc-if>
+          <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+              <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+              <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+            </div>
+            <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
+          </sc-if>
+        </div>
+      </sc-if>
     </div>
     <sc-if value="{{ astroFocusToday }}" hint-placeholder-val="{{ false }}">
       <div data-lift="card" style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid rgba(47,255,143,.42);border-left:3px solid var(--ac);border-radius:var(--rad);padding:15px 16px;animation:fadeUp .25s ease">
@@ -1887,6 +1925,52 @@ input[type="date"]{color-scheme:dark}
       <div style="font:400 24px/1.25 var(--fd)">Your Numerology</div>
       <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
     </div>
+    <sc-if value="{{ fbNumOn }}" hint-placeholder-val="{{ false }}">
+      <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+        <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
+          <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+            <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+            <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+            <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+          </button>
+          <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+          <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+          </sc-if>
+        </sc-for>
+        <sc-if value="{{ fbNumOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+            <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                      <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                          <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                          <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                        </button>
+                      </sc-if>
+                      <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                            <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                          </sc-if>
+                          <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                            <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                          </sc-if>
+                          <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
     <div data-lift="card" role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
       <div data-lift="box" onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:128px;position:relative;height:370px;overflow:hidden;perspective:760px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
         <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
@@ -7718,55 +7802,13 @@ input[type="date"]{color-scheme:dark}
   <div style="flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow-x:hidden">
 <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
   <div data-screen-label="Today" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:clamp(22px,2.6vw,44px) clamp(20px,2.4vw,40px) 48px;animation:dtIn .25s ease">
-    <div style="width:100%;max-width:1520px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(20px,2vw,34px)">
-      <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:22px">
+    <div style="width:100%;max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(20px,2vw,34px)">
+      <div style="flex:1 1 100%;min-width:0;max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:22px">
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="font:600 10px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac)">{{ dtWeekday }}</div>
           <div style="font:400 clamp(38px,3.6vw,58px)/1.04 var(--fd);color:var(--tx)">{{ dtDateBig }}</div>
           <div style="font:400 15px var(--fu);color:var(--dim)">{{ greetWord }}, {{ actName }}.</div>
         </div>
-        <sc-if value="{{ hasProfile }}" hint-placeholder-val="{{ false }}">
-          
-        </sc-if>
-        <div style="display:flex;flex-direction:column;gap:11px">
-          <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Your charts</div>
-          <sc-for list="{{ chartCards }}" as="c" hint-placeholder-count="3">
-            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 17px;transition:transform .2s ease,border-color .2s ease">
-              <span aria-hidden="true" style="flex:none;width:42px;height:42px;border-radius:12px;background:{{ c.chipBg }};border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;background-color:{{ c.glyphC }};-webkit-mask:{{ c.icon }} center/contain no-repeat;mask:{{ c.icon }} center/contain no-repeat"></span></span>
-              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
-                <span style="font:600 14.5px var(--fu);color:var(--tx)">{{ c.name }}</span>
-                <span style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ c.desc }}</span>
-                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi)">{{ c.meta }}</span>
-              </span>
-              <span style="flex:none;font:400 15px var(--fb);color:var(--blue)">→</span>
-            </button>
-          </sc-for>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Recent activity</span>
-          </div>
-          <div style="position:relative;padding-left:22px">
-            <div style="position:absolute;left:5px;top:6px;bottom:4px;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(211,173,110,.06))"></div>
-            <sc-for list="{{ dtRecent }}" as="e" hint-placeholder-count="4">
-              <div style="position:relative;margin-bottom:14px">
-                <span style="position:absolute;left:-21px;top:6px;width:8px;height:8px;border-radius:50%;background:{{ e.dot }}"></span>
-                <div style="display:flex;align-items:baseline;gap:9px">
-                  <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
-                  <span style="flex:1"></span>
-                  <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
-                </div>
-                <div style="font:400 15.5px/1.4 var(--fd);color:var(--tx);margin-top:2px">{{ e.title }}</div>
-                <div style="font:italic 400 12px/1.55 var(--fb);color:var(--dim);margin-top:2px">{{ e.preview }}</div>
-              </div>
-            </sc-for>
-            <sc-if value="{{ dtRecentEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="font:italic 400 13px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment on the Throughline.</div>
-            </sc-if>
-          </div>
-        </div>
-      </div>
-      <div style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:22px">
         <div style="display:flex;flex-direction:column;gap:18px">
           <div role="group" aria-label="Date this alignment is drawn for" style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:2px 0 6px">
             <div style="display:flex;align-items:center;gap:4px">
@@ -7896,118 +7938,7 @@ input[type="date"]{color-scheme:dark}
                       </sc-if>
                     </div>
                   </sc-if>
-                  <sc-if value="{{ hpIsHoro }}" hint-placeholder-val="{{ true }}">
-                    <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:11px">
-                      <button onClick="{{ fcToggle }}" aria-expanded="{{ fcOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
-                        <span style="flex:1;min-width:0;text-align:left;font:400 18px var(--fd);color:var(--tx)">Today’s Forecast</span>
-                        <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ fcSign }}</span>
-                      </button>
-                      <sc-if value="{{ fcOpen }}" hint-placeholder-val="{{ false }}">
-                        <div style="display:flex;flex-direction:column;gap:13px;animation:dtIn .22s ease">
-                          <div style="display:flex;flex-direction:column;gap:11px">
-                            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the sky is doing</span>
-                            <sc-for list="{{ horoSky }}" as="s" hint-placeholder-count="2">
-                              <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid var(--bd);padding-left:12px">
-                                <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
-                                  <span style="font:600 13px var(--fu);color:var(--tx)">{{ s.head }}</span>
-                                  <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ s.when }}</span>
-                                </div>
-                                <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ s.text }}</span>
-                                <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ s.hook }}</span>
-                              </div>
-                            </sc-for>
-                          </div>
-                          <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
-                            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
-                            <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
-                              <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
-                                <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
-                                <div style="display:flex;flex-wrap:wrap;gap:11px">
-                                  <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
-                                  <span style="font:400 10px var(--fu);color:var(--mut)">{{ c.orb }}</span>
-                                </div>
-                                <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.body }}</span>
-                                <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.land }}</span>
-                                <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ c.act }}</span>
-                                <sc-if value="{{ c.hasSpan }}" hint-placeholder-val="{{ true }}">
-                                  <span style="font:400 10.5px var(--fu);color:var(--mut)">Loudest {{ c.span }}</span>
-                                </sc-if>
-                                <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.cta }}</button>
-                              </div>
-                            </sc-for>
-                            <sc-if value="{{ horoNoCasts }}" hint-placeholder-val="{{ false }}">
-                              <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoNoCastText }}</span>
-                            </sc-if>
-                          </div>
-                          <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
-                            <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
-                              <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
-                                <span style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Under review</span>
-                                <span style="flex:none;font:600 9px var(--fu);letter-spacing:.06em;color:var(--mut)">{{ horoRetroCount }}</span>
-                              </div>
-                              <sc-for list="{{ horoRetros }}" as="r" hint-placeholder-count="2">
-                                <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--bd);padding-left:12px">
-                                  <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
-                                    <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
-                                    <span style="font:400 10px var(--fu);color:var(--mut)">{{ r.meta }}</span>
-                                  </div>
-                                  <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ r.text }}</span>
-                                </div>
-                              </sc-for>
-                            </div>
-                          </sc-if>
-                          <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
-                            <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The next two days</span>
-                            <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoMoon }}</span>
-                            <span style="font:400 11.5px/1.6 var(--fu);color:var(--mut);max-width:62ch">{{ horoTail }}</span>
-                          </div>
-                        </div>
-                      </sc-if>
-                    </div>
-                  </sc-if>
                 </div>
-                <span style="font:600 9px var(--fu);letter-spacing:.15em;text-transform:uppercase;color:var(--dim)">Show your working</span>
-                <sc-for list="{{ alignRows }}" as="r" hint-placeholder-count="3">
-                  <div data-lift="box" style="display:flex;flex-direction:column;gap:5px;border:1px solid var(--bd);border-left:3px solid {{ r.edge }};border-radius:0 10px 10px 0;background:rgba(0,0,0,.2);padding:8px 12px">
-                    <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
-                      <span aria-hidden="true" style="flex:none;display:block;width:15px;height:15px;background-color:{{ r.edge }};-webkit-mask:{{ r.icon }} center/contain no-repeat;mask:{{ r.icon }} center/contain no-repeat"></span>
-                      <span style="flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;text-align:left">
-                        <span style="font:600 9px var(--fu);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">{{ r.name }}</span>
-                        <span style="font:400 9.5px var(--fu);color:var(--mut)">{{ r.meta }}</span>
-                      </span>
-                      <span aria-hidden="true" style="flex:none;font:400 16px var(--fu);color:var(--ac)">{{ r.sign }}</span>
-                    </button>
-                    <span style="font:400 11.5px/1.55 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ r.text }}</span>
-                    <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
-                      <div style="display:flex;flex-direction:column;gap:12px">
-                        <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
-                          <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
-                            <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
-                              <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
-                                <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
-                                <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
-                              </button>
-                            </sc-if>
-                            <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
-                              <div style="display:flex;flex-direction:column;gap:4px">
-                                <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
-                                  <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
-                                </sc-if>
-                                <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
-                                  <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
-                                </sc-if>
-                                <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
-                              </div>
-                            </sc-for>
-                          </div>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                    <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
-                      <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
-                    </sc-if>
-                  </div>
-                </sc-for>
               </div>
             </div>
           </sc-if>
@@ -8015,25 +7946,6 @@ input[type="date"]{color-scheme:dark}
             <div style="font:italic 400 13.5px/1.7 var(--fb);color:var(--dim)">{{ dropTeaser }}</div>
           </sc-if>
         </div>
-        <!-- THE LONG WEATHER, DEMOTED (owner, 24 October 2026): Today opens straight
-             into the reading now; the audit keeps one quiet line at the foot of the
-             page. The sheet it opens still carries the scene, the charts and the
-             full lists. -->
-        <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--bd);padding-top:16px">
-            <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
-              <div role="status" style="font:italic 400 14px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
-            </sc-if>
-            <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:3px">
-                <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
-                <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
-                <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
-              </div>
-              <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
-            </sc-if>
-          </div>
-        </sc-if>
         <div data-lift="card" style="display:flex;flex-direction:column;gap:12px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:17px 18px">
             <button onClick="{{ pracToggle }}" aria-expanded="{{ pracOpen }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:9px;min-height:44px">
               <span style="flex:1;font:400 18px var(--fd);color:var(--tx);text-align:left">Practices to look through</span>
@@ -8050,6 +7962,48 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <button data-lift onClick="{{ goLibrary }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(47,255,143,.42);border-radius:999px;font:600 12px var(--fu);color:var(--ac)">All practices<span style="font:400 14px var(--fb)">→</span></button>
+        </div>
+      </div>
+      <div style="flex:1 1 100%;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));align-items:start;gap:22px;border-top:1px solid var(--bd);padding-top:26px">
+        <sc-if value="{{ hasProfile }}" hint-placeholder-val="{{ false }}">
+          
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="font:600 10px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)">Your charts</div>
+          <sc-for list="{{ chartCards }}" as="c" hint-placeholder-count="3">
+            <button data-lift onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:15px 17px;transition:transform .2s ease,border-color .2s ease">
+              <span aria-hidden="true" style="flex:none;width:42px;height:42px;border-radius:12px;background:{{ c.chipBg }};border:1px solid var(--bd);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;background-color:{{ c.glyphC }};-webkit-mask:{{ c.icon }} center/contain no-repeat;mask:{{ c.icon }} center/contain no-repeat"></span></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                <span style="font:600 14.5px var(--fu);color:var(--tx)">{{ c.name }}</span>
+                <span style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ c.desc }}</span>
+                <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac2-hi)">{{ c.meta }}</span>
+              </span>
+              <span style="flex:none;font:400 15px var(--fb);color:var(--blue)">→</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rad);padding:20px 22px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="flex:1;font:400 20px var(--fd);color:var(--tx)">Recent activity</span>
+          </div>
+          <div style="position:relative;padding-left:22px">
+            <div style="position:absolute;left:5px;top:6px;bottom:4px;width:1px;background:linear-gradient(to bottom,rgba(47,255,143,.42),rgba(211,173,110,.06))"></div>
+            <sc-for list="{{ dtRecent }}" as="e" hint-placeholder-count="4">
+              <div style="position:relative;margin-bottom:14px">
+                <span style="position:absolute;left:-21px;top:6px;width:8px;height:8px;border-radius:50%;background:{{ e.dot }}"></span>
+                <div style="display:flex;align-items:baseline;gap:9px">
+                  <span style="font:600 9.5px var(--fu);letter-spacing:.08em;color:{{ e.typeC }}">{{ e.typeT }}</span>
+                  <span style="flex:1"></span>
+                  <span style="font:600 10px var(--fu);color:var(--dim)">{{ e.date }}</span>
+                </div>
+                <div style="font:400 15.5px/1.4 var(--fd);color:var(--tx);margin-top:2px">{{ e.title }}</div>
+                <div style="font:italic 400 12px/1.55 var(--fb);color:var(--dim);margin-top:2px">{{ e.preview }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ dtRecentEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="font:italic 400 13px/1.6 var(--fb);color:var(--dim);border:1.5px dashed var(--bd);border-radius:12px;padding:16px">The line grows as you live with the app. Finish a practice, log a mood, or mark a moment on the Throughline.</div>
+            </sc-if>
+          </div>
         </div>
       </div>
     </div>
@@ -8086,6 +8040,111 @@ input[type="date"]{color-scheme:dark}
           <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Natal Chart</div>
         </div>
       </div>
+      <sc-if value="{{ fbAstroOn }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+          <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
+            <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+            </button>
+            <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+            <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+            </sc-if>
+          </sc-for>
+          <sc-if value="{{ fbAstroOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+              <sc-for list="{{ fbAstro }}" as="r" hint-placeholder-count="1">
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                        <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                            <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                            <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                          </button>
+                        </sc-if>
+                        <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                          <div style="display:flex;flex-direction:column;gap:4px">
+                            <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                              <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                            </sc-if>
+                            <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                            </sc-if>
+                            <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-for>
+              <div style="display:flex;flex-direction:column;gap:13px;animation:dtIn .22s ease">
+                <div style="display:flex;flex-direction:column;gap:11px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What the sky is doing</span>
+                  <sc-for list="{{ horoSky }}" as="s" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:5px;border-left:2px solid var(--bd);padding-left:12px">
+                      <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                        <span style="font:600 13px var(--fu);color:var(--tx)">{{ s.head }}</span>
+                        <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ s.when }}</span>
+                      </div>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ s.text }}</span>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ s.hook }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">What to expect, and when</span>
+                  <sc-for list="{{ horoCasts }}" as="c" hint-placeholder-count="2">
+                    <div data-lift="box" style="display:flex;flex-direction:column;gap:7px;border-left:3px solid {{ c.edge }};background:rgba(0,0,0,.26);border-radius:0 12px 12px 0;padding:12px 15px">
+                      <span style="font:600 13px/1.5 var(--fu);color:var(--tx)">{{ c.head }}</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:11px">
+                        <span style="font:600 10px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.when }}</span>
+                        <span style="font:400 10px var(--fu);color:var(--mut)">{{ c.orb }}</span>
+                      </div>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.body }}</span>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ c.land }}</span>
+                      <span style="font:400 13px/1.7 var(--fb);color:var(--ac2-hi);max-width:62ch;text-wrap:pretty">{{ c.act }}</span>
+                      <sc-if value="{{ c.hasSpan }}" hint-placeholder-val="{{ true }}">
+                        <span style="font:400 10.5px var(--fu);color:var(--mut)">Loudest {{ c.span }}</span>
+                      </sc-if>
+                      <button onClick="{{ c.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;font:600 11px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ c.cta }}</button>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ horoNoCasts }}" hint-placeholder-val="{{ false }}">
+                    <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoNoCastText }}</span>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ horoHasRetro }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--bd);padding-top:12px">
+                    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                      <span style="flex:1;min-width:0;font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">Under review</span>
+                      <span style="flex:none;font:600 9px var(--fu);letter-spacing:.06em;color:var(--mut)">{{ horoRetroCount }}</span>
+                    </div>
+                    <sc-for list="{{ horoRetros }}" as="r" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;gap:4px;border-left:2px solid var(--bd);padding-left:12px">
+                        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:9px">
+                          <span style="font:600 12.5px var(--fu);color:var(--tx)">{{ r.name }}</span>
+                          <span style="font:400 10px var(--fu);color:var(--mut)">{{ r.meta }}</span>
+                        </div>
+                        <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ r.text }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
+                  <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)">The next two days</span>
+                  <span style="font:400 13px/1.7 var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ horoMoon }}</span>
+                  <span style="font:400 11.5px/1.6 var(--fu);color:var(--mut);max-width:62ch">{{ horoTail }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
       <div style="display:flex;flex-direction:row-reverse;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
         <div data-ch-col="wheel" style="flex:3 1 470px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
@@ -8190,6 +8249,23 @@ input[type="date"]{color-scheme:dark}
           <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;gap:10px 14px;padding-top:2px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
           
           
+          <!-- THE CYCLE AUDIT, IN THE ASTROLOGY PANEL (owner, 4 November 2026): it left
+               Today and opens from the chart it reads. -->
+          <sc-if value="{{ cwOn }}" hint-placeholder-val="{{ false }}">
+            <div data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad);background:var(--sf);padding:12px 16px">
+              <sc-if value="{{ cwFinding }}" hint-placeholder-val="{{ false }}">
+                <div role="status" style="font:italic 400 14px/1.6 var(--fd);letter-spacing:.02em;color:var(--mut)">Reading the long weather&#8230;</div>
+              </sc-if>
+              <sc-if value="{{ cwReady }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 10px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">The Cycle Audit</span>
+                  <span style="font:400 18px/1.3 var(--fd);color:var(--tx)">{{ cwHead }}</span>
+                  <span style="font:400 12px/1.5 var(--fu);color:var(--mut)">{{ cwSub }}</span>
+                </div>
+                <button data-lift onClick="{{ cwOpenGo }}" aria-haspopup="dialog" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11.5px var(--fu);letter-spacing:.06em;color:var(--ac2-hi)">Open the Cycle Audit <span aria-hidden="true" style="font:400 14px var(--fb)">&#8594;</span></button>
+              </sc-if>
+            </div>
+          </sc-if>
         </div>
         <div data-ch-col="1" style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
         <div role="group" aria-label="The sky now" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:8px">
@@ -8613,6 +8689,52 @@ input[type="date"]{color-scheme:dark}
         <button onClick="{{ spiritBack }}" style="all:unset;cursor:pointer;align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:7px;font:600 11px var(--fu);letter-spacing:.06em;text-transform:uppercase;color:var(--ac)"><span style="font:400 13px var(--fb)">←</span> Back</button>
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Wiring</div>
       </div>
+      <sc-if value="{{ fbHdOn }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+          <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
+            <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+            </button>
+            <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+            <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+            </sc-if>
+          </sc-for>
+          <sc-if value="{{ fbHdOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+              <sc-for list="{{ fbHd }}" as="r" hint-placeholder-count="1">
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                        <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                            <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                            <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                          </button>
+                        </sc-if>
+                        <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                          <div style="display:flex;flex-direction:column;gap:4px">
+                            <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                              <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                            </sc-if>
+                            <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                            </sc-if>
+                            <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:clamp(18px,1.8vw,30px)">
         <div style="flex:1.4 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;flex-direction:column;gap:10px">
@@ -8947,6 +9069,52 @@ input[type="date"]{color-scheme:dark}
         <div style="font:400 clamp(28px,2.5vw,40px)/1.1 var(--fd)">Your Numerology</div>
         <div style="font:400 11.5px/1.5 var(--fu);color:var(--dim)">{{ numerWho }}</div>
       </div>
+      <sc-if value="{{ fbNumOn }}" hint-placeholder-val="{{ false }}">
+        <div role="region" aria-label="Today’s forecast" data-lift="box" style="display:flex;flex-direction:column;gap:8px;border:1px solid rgba(var(--atmc),.46);border-left:3px solid var(--ac2);border-radius:0 var(--rad) var(--rad) 0;background:linear-gradient(100deg,rgba(var(--atmc),.22),transparent 72%),var(--sf);padding:4px 16px 12px">
+          <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
+            <button onClick="{{ r.toggle }}" aria-expanded="{{ r.open }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:10px;width:100%">
+              <span style="flex:none;font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">Today’s Forecast</span>
+              <span style="flex:1;min-width:0;font:400 10.5px var(--fu);color:var(--mut);text-align:left">{{ r.meta }}</span>
+              <span aria-hidden="true" style="flex:none;font:400 17px var(--fu);color:var(--ac)">{{ r.sign }}</span>
+            </button>
+            <span style="font:400 15.5px/1.5 var(--fd);color:var(--tx);text-wrap:pretty">{{ r.text }}</span>
+            <sc-if value="{{ r.hasSrc }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ r.srcGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;font:600 10.5px var(--fu);letter-spacing:.05em;color:var(--ac)">{{ r.srcLabel }}</button>
+            </sc-if>
+          </sc-for>
+          <sc-if value="{{ fbNumOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:13px;max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.7) transparent">
+              <sc-for list="{{ fbNum }}" as="r" hint-placeholder-count="1">
+                <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ r.groups }}" as="g" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:11px">
+                        <sc-if value="{{ g.hasHead }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ g.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:9px;width:100%">
+                            <span style="flex:1;min-width:0;font:600 11.5px/1.45 var(--fu);letter-spacing:.05em;color:var(--ac);text-align:left">{{ g.head }}</span>
+                            <span style="flex:none;font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac)">{{ g.cta }}</span>
+                          </button>
+                        </sc-if>
+                        <sc-for list="{{ g.lines }}" as="l" hint-placeholder-count="3">
+                          <div style="display:flex;flex-direction:column;gap:4px">
+                            <sc-if value="{{ l.hasTag }}" hint-placeholder-val="{{ false }}">
+                              <span style="align-self:flex-start;font:700 7.5px var(--fu);letter-spacing:.1em;padding:2px 6px;border-radius:4px;color:{{ l.tc }};background:{{ l.tb }}">{{ l.tag }}</span>
+                            </sc-if>
+                            <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                              <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ l.head }}</div>
+                            </sc-if>
+                            <div style="font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);max-width:62ch;text-wrap:pretty">{{ l.text }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
       <div data-lift="card" role="group" aria-label="Your numbers, on an orbit around the Life Path" data-noswipe="1" onKeyDown="{{ nsKeys }}" style="display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:var(--rad);overflow:hidden;background:var(--sf);animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both">
         <div data-lift="box" onPointerMove="{{ nsCam }}" onPointerLeave="{{ nsCamOff }}" onTouchStart="{{ nsTouchStart }}" onTouchEnd="{{ nsTouchEnd }}" style="--R:225px;position:relative;height:500px;overflow:hidden;perspective:1100px;perspective-origin:50% 26%;background:radial-gradient(90% 70% at 50% 16%,rgba(var(--atmc),.28),transparent 64%),radial-gradient(60% 42% at 50% 100%,rgba(var(--atmc2),.14),transparent 70%)">
           <span aria-hidden="true" style="position:absolute;left:12px;top:12px;width:18px;height:18px;border-left:1.5px solid var(--ac2);border-top:1.5px solid var(--ac2);pointer-events:none"></span>
@@ -23214,7 +23382,19 @@ class Component extends DCLogic {
       gnowInsideAny: s.inside.length > 0, gnowOutsideAny: s.outside.length > 0,
       gnowInsideEmpty: !s.inside.length, gnowOutsideEmpty: !s.outside.length };
   }
+  /* TODAY'S FORECAST LIVES ON EACH CHART (owner, 4 November 2026): "make it a
+     banner in the charts tab and read for the respective chart". The three
+     rows the alignment already builds, one per system, are handed to the chart
+     they belong to; the open and closed state is the same alignOpen key. */
   todayVals() {
+    const v = this.todayValsBase(), rows = v.alignRows || [];
+    const pick = k => rows.filter(r => r.key === k);
+    const a = pick('astro'), h = pick('hd'), n = pick('num');
+    return { ...v, fbAstro: a, fbAstroOn: a.length > 0, fbAstroOpen: !!(a[0] && a[0].open),
+      fbHd: h, fbHdOn: h.length > 0, fbHdOpen: !!(h[0] && h[0].open),
+      fbNum: n, fbNumOn: n.length > 0, fbNumOpen: !!(n[0] && n[0].open) };
+  }
+  todayValsBase() {
     const st = this.state, d = this.dailyData(this.horoNow());
     const base = { dropOpen: !!st.dropOpen, dropClosed: !st.dropOpen, dropRot: st.dropOpen ? '90deg' : '0deg',
       dropToggle: () => this.setState({ dropOpen: !st.dropOpen }) };
