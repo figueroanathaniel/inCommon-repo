@@ -73,6 +73,7 @@ const LAYERS = {
     'birth-time.js',               /* known / unknown / unanswered, and the offset for the birth date */
     'hd-topology.js',            /* the wiring as facts: channel pairs, gate to centre */
     'hd-wheel.js',                 /* gate order and the boundary rule, as data */
+    'house-systems.js',            /* house cusps from the sky frame, as numbers */
     'hd-transit.js',               /* every body's gate and line at an instant the caller names */
     'hd-composite.js',             /* two bodygraphs overlaid, six states, no score */
     'hd-circle.js',                /* Circle and Ground: structure only, one caution, no seat */

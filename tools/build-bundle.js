@@ -175,6 +175,9 @@ const MODULES = [
   'ephemeris-cache.js',
   /* The wheel order and the boundary rule, as data. */
   'hd-wheel.js',
+  /* House cusps from the sky frame, in every system the Astropedia teaches.
+     Reads nothing; the chart asks it once per render. */
+  'house-systems.js',
   /* The gates the sky stands in at one instant. Reads the wheel above by
      name, so it has to follow it. */
   'hd-transit.js',

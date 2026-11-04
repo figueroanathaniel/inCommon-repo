@@ -522,7 +522,7 @@ if (!hdLine) {
     return appSrc.slice(i, j + 4);
   };
   const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
-    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cycleHouses') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
   /* Today is pinned to the day this was written, so the fixture stays inside
      the scan however long after that the suite is run. */
   class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
@@ -539,6 +539,7 @@ if (!hdLine) {
     natalDate: () => new Date(Date.UTC(1990, 0, 1)),
     chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
     anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    houseSys: () => 'W', houseOf: () => null,
     hdChart: () => ({ type: 'Projector', authority: 'Splenic: the body knows' }), numerology: () => ({ lp: 7 }),
     ORACLE_STRATEGY: { Projector: 'Wait for the invitation' },
     norm360: x => ((x % 360) + 360) % 360,
@@ -4498,6 +4499,45 @@ async function runCloudTests() {
     [missing, thin], [[], []]);
 })();
 
+/* ------------------------------------------------------- HS: house systems
+   app/house-systems.js against the Swiss Ephemeris 2.10.03, read from
+   tools/fixtures/house-systems-swiss.json (made by
+   tools/generate-house-systems-reference.py, never typed). The fixture rounds
+   to 1e-8 degrees, so that is the floor; Placidus is iterated and Swiss's own
+   iteration stops near a millionth, so it gets 2e-6. */
+(() => {
+  const HS = require(path.join(repo, 'app', 'house-systems.js'));
+  const ref = JSON.parse(fs.readFileSync(path.join(repo, 'tools', 'fixtures', 'house-systems-swiss.json'), 'utf8'));
+  const diff = (a, b) => Math.abs(((a - b) % 360 + 540) % 360 - 180);
+  const keys = HS.SYSTEMS.map(s => s.key);
+  t('HS1', 'eleven systems, Whole Sign first and the default', [keys.join(''), HS.DEFAULT], ['WEPOKRCATMX', 'W']);
+  t('HS2', 'the fixture covers every system over both polar circles', [ref.rows.length,
+    keys.every(k => ref.rows.every(r => r.cusps[k] !== undefined)),
+    Math.min(...ref.rows.map(r => r.lat)) <= -70, Math.max(...ref.rows.map(r => r.lat)) >= 70], [384, true, true, true]);
+  const worst = {}, fell = {};
+  ref.rows.forEach(r => keys.forEach(k => {
+    const o = HS.cusps(k, r), sw = r.cusps[k];
+    if (sw === 'polar') { fell[k] = (fell[k] || 0) + (o.fallback && o.system === 'P' && o.asked === k &&
+      o.cusps.every((c, i) => diff(c, r.cusps.P[i]) < 1e-7) ? 0 : 1); return; }
+    const e = o.ok && !o.fallback ? Math.max(...sw.map((c, i) => diff(c, o.cusps[i]))) : 999;
+    worst[k] = Math.max(worst[k] || 0, e);
+  }));
+  t('HS3', 'every system but Placidus agrees with Swiss within 1e-7 degrees at every frame',
+    keys.filter(k => k !== 'O' && !(worst[k] < 1e-7)), []);
+  tTrue('HS4', 'Placidus agrees within 2e-6 degrees wherever it is defined', worst.O < 2e-6);
+  t('HS5', 'inside the polar circle Placidus and Koch draw Porphyry, say so, and nothing else falls back',
+    [Object.keys(fell).sort(), Object.values(fell).every(v => v === 0)], [['K', 'O'], true]);
+  t('HS6', 'the Ascendant and Midheaven agree with Swiss at every frame',
+    ref.rows.every(r => { const a = HS.angles(r.ramc, r.eps, r.lat); return diff(a.asc, r.asc) < 1e-7 && diff(a.mc, r.mc) < 1e-7; }), true);
+  const eq = HS.cusps('E', { ramc: 100, eps: 23.44, lat: 40 });
+  t('HS7', 'a boundary belongs to the house that begins there', [HS.houseOf(eq.cusps[3], eq.cusps), HS.houseOf(eq.cusps[3] - 1e-9, eq.cusps)], [4, 3]);
+  t('HS8', 'an unknown key draws the default; a bad frame and a pole are refused',
+    [HS.cusps('Z', { ramc: 10, eps: 23.44, lat: 10 }).system, HS.cusps('W', { ramc: NaN, eps: 23.44, lat: 10 }).why,
+     HS.cusps('E', { ramc: 10, eps: 23.44, lat: 90 }).why], ['W', 'input', 'pole']);
+  const ws = HS.cusps('W', { ramc: 90, eps: 23.4392911, lat: -66 });
+  t('HS9', 'Whole Sign on an Ascendant that falls exactly on a sign boundary starts at that sign', ws.cusps[0], 180);
+})();
+
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
 
 (function() {
@@ -4525,8 +4565,8 @@ runCloudTests().then(() => {
       ['E', 'minor bodies'], ['P', 'people-library.js'], ['Q', 'pair-cache.js'],
       ['A', 'analytics.js'], ['I', 'iching.js'], ['G', 'hd-circle.js'], ['Y', 'hd-topology.js'], ['X', 'hd-transit.js'],
       ['K', 'incommon-cloud.js'], ['O', 'profile-manager.js'], ['T', 'share-rules.js'], ['H', 'hd-life.js sleep'], ['U', 'master numbers'], ['Z', 'cycle audit'], ['J', 'omni on the server'],
-      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register'], ['F', 'atlas lessons']].forEach(([k, name]) => {
-      const g = rows.filter(r => r.id[0] === k);
+      ['M', 'multiChart.test.js'], ['S', 'skyWire.test.js'], ['L', 'i18n.test.js'], ['N', 'hd authority'], ['R', '1.3 register'], ['F', 'atlas lessons'], ['HS', 'house systems']].forEach(([k, name]) => {
+      const g = rows.filter(r => r.id.startsWith(k) && !(k === 'H' && r.id.startsWith('HS')));
       if (g.length > 0) console.log('  ' + k + ' ' + name.padEnd(16) + g.filter(r => r.pass).length + '/' + g.length);
     });
   }

@@ -12460,6 +12460,7 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
   var SECTIONS = [
     ['signs', 'The Twelve Signs'],
     ['houses', 'The Twelve Houses'],
+    ['housesystems', 'House Systems'],
     ['bodies', 'The Astral Bodies'],
     ['points', 'The Asteroids and Points'],
     ['aspects', 'Aspects'],
@@ -12730,6 +12731,43 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     { name: 'Aspect Patterns', text: 'Three or more aspects can lock together into a shape the tradition reads as a unit rather than as separate contacts. A grand trine links three bodies by trine into a closed triangle, a flow so complete it can run without friction and without much effort either. A T square sets two bodies in opposition with a third squaring them both, a pressure point that usually becomes the chart’s engine. A yod links two bodies in sextile, both quincunx a third, a narrow channel the tradition calls the finger of fate, more a persistent adjustment than a fate exactly. A grand cross squares four bodies around the wheel in two oppositions, the T square’s tension on every side at once, exhausting to carry and hard to set down.' }
   ];
 
+  /* ---------- house systems ----------
+     How the twelve houses are cut. Origins follow the Astrodienst overview of
+     house systems and the Skyscript glossary entry on house division; where
+     the two disagree the entry says so. Sources are listed in
+     docs/astro-upgrade/01-house-systems-sources.md. The key is the one
+     house-systems.js and the app store. */
+  var HOUSE_SYSTEMS_INTRO = 'Every system agrees on what the twelve houses mean and disagrees on where each one begins. Some cut the zodiac itself, some cut the sky around the birthplace, and some cut the time a degree takes to rise. Whole Sign is where inCommon starts, and any system here can be the one the chart is drawn in: the wheel, the house pages, the placements and the Oracle all follow the choice.';
+  var HOUSE_SYSTEMS = [
+    { key: 'W', name: 'Whole Sign', kind: 'Sign based', origin: 'In use since antiquity.',
+      text: 'The whole sign that holds the Ascendant is the first house, the next sign is the second, and so on round the wheel, so every house is exactly one sign. No cusp falls inside a sign, which is why it is the simplest system to read: a sign and a house are always the same room. The Ascendant and the Midheaven still matter as points, but they float inside their houses rather than marking where one begins. Astrodienst notes it is especially popular in Indian sidereal astrology today.' },
+    { key: 'E', name: 'Equal', kind: 'Sign based', origin: 'In use since antiquity.',
+      text: 'Each house is thirty degrees of the zodiac, counted from the exact degree of the Ascendant. The first house begins at the Ascendant itself, so the horizon is honoured to the degree, while the Midheaven floats free of the tenth cusp and usually falls in the ninth, tenth or eleventh house.' },
+    { key: 'P', name: 'Porphyry', kind: 'Quadrant, space', origin: 'Named after the philosopher Porphyry of the third century. Skyscript traces the method further back, to the second century work of Vettius Valens.',
+      text: 'The four angles cut the zodiac into four quadrants, and each quadrant is cut into three equal parts. It is the plainest of the quadrant systems: the angles are cusps, and everything between them is shared out evenly. It is also the system most software draws when Placidus or Koch cannot be computed.' },
+    { key: 'O', name: 'Placidus', kind: 'Quadrant, time', origin: 'Named after the monk and mathematician Placidus de Titis (1603 to 1668); Astrodienst credits its invention to Giovanni Antonio Magini (1555 to 1617). Generally considered the most used system in Western astrology today.',
+      text: 'Each degree of the zodiac takes its own time to climb from the horizon to the Midheaven. A Placidus cusp is the degree that has covered a third, or two thirds, of its own climb, and the same below the horizon. Because it measures time, it cannot be drawn inside the polar circles, where some degrees never rise or never set; a chart born there is drawn in Porphyry instead.' },
+    { key: 'K', name: 'Koch', kind: 'Quadrant, time', origin: 'Named after Walter Koch (1895 to 1970), and also called the birthplace system; Astrodienst credits its invention to Fiedrich Zanzinger and Heinz Specht. Astrodienst calls it time oriented and Skyscript classes it by space.',
+      text: 'Koch takes the time the Midheaven degree needs to rise and divides that one span in three, so every cusp is read from the birthplace’s own horizon at a moment along it. It shares Placidus’s limit: inside the polar circles it cannot be drawn, and the chart is drawn in Porphyry instead.' },
+    { key: 'R', name: 'Regiomontanus', kind: 'Quadrant, space', origin: 'Named after Regiomontanus, Johannes Müller of Königsberg (1436 to 1476); Astrodienst credits its invention to Abraham ibn Ezra in the twelfth century.',
+      text: 'The celestial equator is divided into twelve equal parts, and each division is carried to the zodiac along a great circle through the north and south points of the horizon.' },
+    { key: 'C', name: 'Campanus', kind: 'Quadrant, space', origin: 'Named after the mathematician Campanus of Novara (1220 to 1296).',
+      text: 'The sky above and below the horizon is cut like an orange into twelve equal segments, measured along the prime vertical, the great circle through the east point, the zenith and the west point. Where a segment’s edge meets the zodiac is the cusp. It divides space as the observer stands in it.' },
+    { key: 'A', name: 'Alcabitius', kind: 'Quadrant, time', origin: 'Known by the name of the tenth century astrologer al Qabisi, Alcabitius. Skyscript notes that he popularised it rather than invented it, and that its calculation appears in a chart from 428.',
+      text: 'The time the Ascendant degree takes to travel from the horizon to the meridian is divided into three, and the same below the horizon; the cusps are the zodiac degrees on the meridian at each of those moments. Skyscript counts it among the oldest of the time based systems.' },
+    { key: 'T', name: 'Topocentric', kind: 'Quadrant, time', origin: 'Devised by Wendel Polich and Anthony Nelson Page, and also called Polich Page.',
+      text: 'The cusps come from circles that lean at a third and at two thirds of the birthplace’s latitude. In low and middle latitudes its cusps fall within about a degree of Placidus’s, and unlike Placidus it can be drawn everywhere, though inside the polar circles its houses can come out strange.' },
+    { key: 'M', name: 'Morinus', kind: 'Equator', origin: 'Named after the philosopher and astrologer Jean Baptiste Morin, Morinus (1583 to 1656).',
+      text: 'The celestial equator is divided into twelve equal parts starting from the meridian, and each part is carried to the zodiac through the poles of the zodiac. The Ascendant is not a cusp in this system, which reads the houses from the turning of the sky rather than from the horizon.' },
+    { key: 'X', name: 'Meridian', kind: 'Equator', origin: 'Also called axial rotation.',
+      text: 'Like Morinus it divides the equator into twelve equal parts from the meridian, but carries each part to the zodiac through the celestial poles, so the tenth cusp is the Midheaven and the first cusp is not the Ascendant. It can be read as a division of time and of space at once.' }
+  ];
+  function houseSystem(k) {
+    var x = String(k || '');
+    for (var i = 0; i < HOUSE_SYSTEMS.length; i++) { if (HOUSE_SYSTEMS[i].key === x || HOUSE_SYSTEMS[i].name.toLowerCase() === x.toLowerCase()) return HOUSE_SYSTEMS[i]; }
+    return null;
+  }
+
   /* ---------- the birth chart ---------- */
   var CHART = {
     what: 'A map of the sky at your first breath. Not a fate, but a field of possibilities.',
@@ -12823,10 +12861,10 @@ return Object.freeze({lon,minT,maxT,source:id=>data[id]?data[id].source:null,sam
     return null;
   }
 
-  return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES,
+  return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES, HOUSE_SYSTEMS: HOUSE_SYSTEMS, HOUSE_SYSTEMS_INTRO: HOUSE_SYSTEMS_INTRO,
     ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CONCEPTS: CONCEPTS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, TECHNIQUES: TECHNIQUES, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
-    sign: signByName, house: house, astralBody: astralBody, point: point, aspect: aspect };
+    sign: signByName, house: house, houseSystem: houseSystem, astralBody: astralBody, point: point, aspect: aspect };
 }));
 
 </script>
@@ -17491,6 +17529,244 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
 </script>
 <script>
+/* house-systems.js: where the twelve houses begin, in every system the
+   Astropedia teaches. Mechanics layer: it takes the sky frame (the RAMC, the
+   obliquity and the latitude, all in degrees) and returns twelve ecliptic
+   longitudes. It reads no clock, no storage and no ephemeris, and it holds no
+   writing about what a house means.
+
+   The systems, by the key the app stores:
+     W  Whole Sign      the rising sign is the 1st house, sign by sign
+     E  Equal           30 degrees at a time from the Ascendant
+     P  Porphyry        each quadrant between the angles cut in three
+     O  Placidus        each degree's own diurnal and nocturnal arcs in three
+     K  Koch            the Midheaven degree's arc in three, as Ascendants
+     R  Regiomontanus   the celestial equator in twelve, through the horizon's north and south
+     C  Campanus        the prime vertical in twelve, through the same two points
+     A  Alcabitius      the Ascendant degree's arcs in three, along right ascension
+     T  Topocentric     pole heights a third and two thirds of the latitude
+     M  Morinus         the equator in twelve, carried to the ecliptic through its poles
+     X  Meridian        the equator in twelve, carried through the celestial poles
+
+   Placidus and Koch divide time rather than space, and inside the polar
+   circles (latitude at or beyond 90 less the obliquity) some degrees of the
+   ecliptic never rise or never set, so their cusps do not exist there.
+   cusps() then draws Porphyry and says so (fallback: true, asked: the system
+   that was asked for), which is what the Swiss Ephemeris does. Every other
+   system is defined at every latitude but the poles themselves.
+
+   Every cusp was checked against the Swiss Ephemeris 2.10.03 (pyswisseph,
+   houses_armc_ex2) over 768 sky frames from 75 S to 78 N; the fixture is
+   tools/fixtures/house-systems-swiss.json. Placidus agrees within a
+   millionth of a degree, every other system within a billionth.
+
+   Every cusp is a longitude in [0, 360). House n begins at cusps[n - 1] and
+   runs to cusps[n % 12]; houseOf() decides a boundary the way hd-wheel.js does
+   for gates: a boundary belongs to the house that begins there. */
+(function (root) {
+  'use strict';
+  const R = Math.PI / 180;
+  const norm = x => ((x % 360) + 360) % 360;
+  const sin = d => Math.sin(d * R), cos = d => Math.cos(d * R), tan = d => Math.tan(d * R);
+  const atan2 = (y, x) => norm(Math.atan2(y, x) / R);
+
+  const SYSTEMS = [
+    { key: 'W', name: 'Whole Sign', quadrant: false },
+    { key: 'E', name: 'Equal', quadrant: false },
+    { key: 'P', name: 'Porphyry', quadrant: true },
+    { key: 'O', name: 'Placidus', quadrant: true, polar: true },
+    { key: 'K', name: 'Koch', quadrant: true, polar: true },
+    { key: 'R', name: 'Regiomontanus', quadrant: true },
+    { key: 'C', name: 'Campanus', quadrant: true },
+    { key: 'A', name: 'Alcabitius', quadrant: true },
+    { key: 'T', name: 'Topocentric', quadrant: true },
+    { key: 'M', name: 'Morinus', quadrant: false },
+    { key: 'X', name: 'Meridian', quadrant: false }
+  ];
+  const DEFAULT = 'W';
+
+  /* The ecliptic longitude with right ascension ra (the Midheaven formula). */
+  function lonOfRA(ra, eps) { return atan2(sin(ra), cos(ra) * cos(eps)); }
+  /* The ecliptic degree rising on a horizon of pole height p when the
+     oblique ascension of the east point is h. p = latitude and h = RAMC + 90
+     is the Ascendant itself. */
+  function lonOnCircle(h, p, eps) {
+    return atan2(sin(h), cos(h) * cos(eps) - tan(p) * sin(eps));
+  }
+  function decOf(lon, eps) { return Math.asin(sin(eps) * sin(lon)) / R; }
+  function raOf(lon, eps) { return atan2(sin(lon) * cos(eps), cos(lon)); }
+  /* Diurnal semi arc, in degrees, of a declination at a latitude; null when
+     the point never rises or never sets. */
+  function dsa(dec, lat) {
+    const x = -tan(lat) * tan(dec);
+    if (x < -1 || x > 1) return null;
+    return Math.acos(x) / R;
+  }
+
+  /* The Ascendant and Midheaven, picking the eastern crossing explicitly so a
+     polar chart does not hand back the Descendant. Same rule as the app's
+     ascendant(). */
+  function angles(ramc, eps, lat) {
+    let asc = lonOnCircle(ramc + 90, lat, eps);
+    if (norm(ramc - raOf(asc, eps)) < 180) asc = norm(asc + 180);
+    return { asc: asc, mc: lonOfRA(ramc, eps) };
+  }
+
+  /* Inside the polar circle the Midheaven degree can stand below the horizon.
+     Regiomontanus, Campanus and Topocentric then take the lower meridian
+     crossing as the tenth cusp, as the Swiss Ephemeris does, so the twelve
+     cusps still run in order round the wheel. */
+  function tenth(ang, eps, lat) {
+    return Math.abs(lat - decOf(ang.mc, eps)) > 90 ? norm(ang.mc + 180) : ang.mc;
+  }
+
+  function fill(c11, c12, asc, c2, c3, mc) {
+    return [asc, c2, c3, norm(mc + 180), norm(c11 + 180), norm(c12 + 180),
+      norm(asc + 180), norm(c2 + 180), norm(c3 + 180), mc, c11, c12];
+  }
+
+  function placidus(ramc, eps, lat, ang) {
+    /* Cusp 11 is the ecliptic degree that has risen through a third of its own
+       diurnal semi arc: its right ascension is RAMC + DSA/3, and DSA depends on
+       the degree's own declination, so the answer is iterated. 12 is two
+       thirds; 2 and 3 are the nocturnal arc below the horizon. */
+    const solve = (f, below) => {
+      let lon = below ? norm(ang.asc + 30 * f * 3) : norm(ang.mc + 30 * f * 3), ok = true;
+      for (let i = 0; i < 200; i++) {
+        const d = dsa(decOf(lon, eps), lat);
+        if (d == null) { ok = false; break; }
+        const ra = below ? norm(ramc + 180 - (180 - d) * (1 - f)) : norm(ramc + d * f);
+        const nx = lonOfRA(ra, eps);
+        const step = Math.abs(((nx - lon + 540) % 360) - 180);
+        lon = nx;
+        if (step < 1e-12) break;
+      }
+      return ok ? lon : null;
+    };
+    const c11 = solve(1 / 3, false), c12 = solve(2 / 3, false);
+    const c2 = solve(1 / 3, true), c3 = solve(2 / 3, true);
+    if ([c11, c12, c2, c3].some(x => x == null)) return null;
+    return fill(c11, c12, ang.asc, c2, c3, ang.mc);
+  }
+
+  function koch(ramc, eps, lat, ang) {
+    /* The Midheaven degree's ascensional difference in thirds: cusp 11 is the
+       Ascendant of the moment RAMC stood 60 degrees plus two thirds of it
+       back, 12 is 30 plus one third back, and 2 and 3 run forward the same
+       way. This is the oblique ascension of the Midheaven degree, worked
+       through the Ascendant formula. */
+    if (Math.abs(lat) >= 90 - eps) return null;
+    const sd = sin(ang.mc) * sin(eps) / cos(lat);
+    if (Math.abs(sd) > 1) return null;
+    const ca = Math.sqrt(1 - sd * sd);
+    const c = Math.atan(tan(lat) / ca);
+    const x = Math.sin(c) * sd;
+    if (Math.abs(x) > 1) return null;
+    const ad3 = Math.asin(x) / R / 3;
+    const A = h => lonOnCircle(h, lat, eps);
+    return fill(A(ramc + 30 - 2 * ad3), A(ramc + 60 - ad3), ang.asc,
+      A(ramc + 120 + ad3), A(ramc + 150 + 2 * ad3), ang.mc);
+  }
+
+  function alcabitius(ramc, eps, lat, ang) {
+    const d = dsa(decOf(ang.asc, eps), lat);
+    if (d == null) return null;
+    const n = 180 - d;
+    const c11 = lonOfRA(ramc + d / 3, eps), c12 = lonOfRA(ramc + 2 * d / 3, eps);
+    const c2 = lonOfRA(ramc + d + n / 3, eps), c3 = lonOfRA(ramc + d + 2 * n / 3, eps);
+    return fill(c11, c12, ang.asc, c2, c3, ang.mc);
+  }
+
+  /* A circle through the north and south points of the horizon, meeting the
+     celestial equator at hour distance h from the meridian, has pole height
+     atan(tan(lat) sin(h)). Regiomontanus divides the equator: h = 30, 60. */
+  function regiomontanus(ramc, eps, lat, ang) {
+    const t = tenth(ang, eps, lat), f = t === ang.mc ? 0 : 180;
+    const at = h => norm(lonOnCircle(ramc + h, Math.atan(tan(lat) * sin(h)) / R, eps) + f);
+    return fill(at(30), at(60), ang.asc, at(120), at(150), t);
+  }
+
+  /* Campanus divides the prime vertical. A circle through the horizon's north
+     and south points crossing the prime vertical a degrees from the zenith
+     meets the equator at hour distance atan(tan(a) / cos(lat))... written
+     here from the circle's own geometry instead, as a plane through those
+     points, so it does not lean on that identity. */
+  function campanus(ramc, eps, lat, ang) {
+    const Z = [cos(lat) * cos(ramc), cos(lat) * sin(ramc), sin(lat)];
+    const N = [-sin(lat) * cos(ramc), -sin(lat) * sin(ramc), cos(lat)];
+    const E = [-sin(ramc), cos(ramc), 0];
+    const K = [0, -sin(eps), cos(eps)];
+    const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+    const at = a => {
+      const u = [cos(a) * Z[0] + sin(a) * E[0], cos(a) * Z[1] + sin(a) * E[1], cos(a) * Z[2] + sin(a) * E[2]];
+      let d = cross(K, cross(N, u));
+      if (dot(d, u) < 0) d = d.map(x => -x);
+      /* d is on the ecliptic; its longitude in the ecliptic frame. */
+      const y = d[1] * cos(eps) + d[2] * sin(eps);
+      return atan2(y, d[0]);
+    };
+    return fill(at(30), at(60), ang.asc, at(120), at(150), tenth(ang, eps, lat));
+  }
+
+  function topocentric(ramc, eps, lat, ang) {
+    const t = tenth(ang, eps, lat), f = t === ang.mc ? 0 : 180;
+    const at = (h, k) => norm(lonOnCircle(ramc + h, Math.atan(tan(lat) * k) / R, eps) + f);
+    return fill(at(30, 1 / 3), at(60, 2 / 3), ang.asc, at(120, 2 / 3), at(150, 1 / 3), t);
+  }
+
+  function porphyry(ang) {
+    const ic = norm(ang.mc + 180);
+    const q1 = norm(ang.asc - ang.mc), q2 = norm(ic - ang.asc);
+    return fill(norm(ang.mc + q1 / 3), norm(ang.mc + 2 * q1 / 3), ang.asc,
+      norm(ang.asc + q2 / 3), norm(ang.asc + 2 * q2 / 3), ang.mc);
+  }
+
+  /* cusps(system, frame): frame is { ramc, eps, lat } in degrees. Returns
+     { ok, cusps, asc, mc, system } or { ok: false, why }. */
+  function cusps(system, frame) {
+    const key = SYSTEMS.some(s => s.key === system) ? system : DEFAULT;
+    const ramc = norm(+frame.ramc), eps = +frame.eps, lat = +frame.lat;
+    if (![ramc, eps, lat].every(Number.isFinite)) return { ok: false, why: 'input', system: key };
+    if (Math.abs(lat) >= 90) return { ok: false, why: 'pole', system: key };
+    const ang = angles(ramc, eps, lat);
+    let c = null;
+    if (key === 'W') { const s = Math.floor((ang.asc + 1e-9) / 30) * 30; c = Array.from({ length: 12 }, (_, i) => norm(s + 30 * i)); }
+    else if (key === 'E') c = Array.from({ length: 12 }, (_, i) => norm(ang.asc + 30 * i));
+    else if (key === 'P') c = porphyry(ang);
+    else if (key === 'O') c = placidus(ramc, eps, lat, ang);
+    else if (key === 'K') c = koch(ramc, eps, lat, ang);
+    else if (key === 'R') c = regiomontanus(ramc, eps, lat, ang);
+    else if (key === 'C') c = campanus(ramc, eps, lat, ang);
+    else if (key === 'A') c = alcabitius(ramc, eps, lat, ang);
+    else if (key === 'T') c = topocentric(ramc, eps, lat, ang);
+    else if (key === 'M') c = Array.from({ length: 12 }, (_, i) => atan2(sin(ramc + 90 + 30 * i) * cos(eps), cos(ramc + 90 + 30 * i)));
+    else if (key === 'X') c = Array.from({ length: 12 }, (_, i) => lonOfRA(ramc + 90 + 30 * i, eps));
+    /* Placidus and Koch have no cusps inside the polar circle, because some
+       ecliptic degrees there never rise or never set. The chart is drawn in
+       Porphyry instead, the same substitution the Swiss Ephemeris makes, and
+       the answer says so: system is what was drawn, asked is what was asked. */
+    if (!c) return { ok: true, system: 'P', asked: key, fallback: true, cusps: porphyry(ang), asc: ang.asc, mc: ang.mc };
+    return { ok: true, system: key, asked: key, fallback: false, cusps: c, asc: ang.asc, mc: ang.mc };
+  }
+
+  /* The house holding a longitude, 1 to 12, from twelve cusps. */
+  function houseOf(lon, cs) {
+    const x = norm(lon);
+    for (let i = 0; i < 12; i++) {
+      const a = cs[i], b = cs[(i + 1) % 12];
+      if (norm(x - a) < norm(b - a) || (norm(b - a) === 0 && x === a)) return i + 1;
+    }
+    return 1;
+  }
+
+  const api = { SYSTEMS: SYSTEMS, DEFAULT: DEFAULT, cusps: cusps, houseOf: houseOf, angles: angles };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.HouseSystems = api;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
 /*! hd-transit.js: the gates the sky stands in at one instant. V1.0.0 (UMD)
  *
  * WHAT IT IS. Every body's gate and line at an instant the caller names, in an
@@ -21027,7 +21303,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
   var F_DISC = FOG + [
     'uniform vec3 uBg; uniform vec3 uLine; uniform vec3 uAtm; uniform vec3 uAtm2; uniform vec3 uHi; uniform vec3 uAc2; uniform vec3 uSel;',
     'uniform float uZero; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
-    'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb;',
+    'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb; uniform float uCusp[12];',
     'varying vec2 vUv; varying vec3 vW;',
     'float ring(float r, float at, float w){ float fw = fwidth(r) * 1.2 + 0.002; return 1.0 - smoothstep(w, w + fw, abs(r - at)); }',
     'void main(){',
@@ -21053,8 +21329,15 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     ' c += uLine * inTick * (1.0 - smoothstep(0.006, 0.006 + fw, min(dd, min(d5, d10)))) * 0.42;',
     /* the house band, with its cusps and the one a reader has open */
     ' float inHouse = smoothstep(uSignOut - fw, uSignOut + fw, r) * (1.0 - smoothstep(uOut - fw, uOut + fw, r)) * w1;',
-    ' float hd = abs(fract(rel / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
-    ' float hn = floor(rel / 30.0) + 1.0; float ang = step(abs(mod(hn - 1.0, 3.0)), 0.5);',
+    /* the cusps arrive relative to uZero in uCusp, in whatever house system
+       the reader chose: hd is the distance to the nearest one, hn the house
+       the point is in, the one whose cusp it has most recently passed */
+    ' float hd = 1e3; float hn = 1.0; float best = 1e3; float angC = 0.0;',
+    ' for (int i = 0; i < 12; i++) { float off = mod(rel - uCusp[i] + 720.0, 360.0); float dd = min(off, 360.0 - off);',
+    '   float a = (i == 0 || i == 3 || i == 6 || i == 9) ? 1.0 : 0.0;',
+    '   if (dd * 0.01745 * r < hd) { hd = dd * 0.01745 * r; angC = a; }',
+    '   if (off < best) { best = off; hn = float(i) + 1.0; } }',
+    ' float ang = angC;',
     ' c += uLine * inHouse * (1.0 - smoothstep(0.01 + 0.008 * ang, 0.01 + 0.008 * ang + fw, hd)) * (0.16 + 0.14 * ang);',
     ' c += uSel * inHouse * step(abs(hn - uHouse), 0.5) * 0.16;',
     /* the house cusps carry on across the inner field, faintly */
@@ -21499,7 +21782,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
       uniforms: { uCam: this.U.uCam, uFog: this.U.uFog, uBreath: this.U.uBreath, uBg: { value: new T.Vector3() }, uLine: { value: new T.Vector3() }, uAtm: { value: new T.Vector3() },
         uAtm2: { value: new T.Vector3() }, uHi: { value: new T.Vector3() }, uAc2: { value: new T.Vector3() }, uSel: { value: new T.Vector3() },
         uZero: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
-        uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 } } });
+        uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 }, uCusp: { value: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] } } });
     var disc = new T.Mesh(new T.CircleGeometry(13.4, 160), this.discMat);
     disc.rotation.x = -Math.PI / 2;
     disc.renderOrder = -5;
@@ -21670,6 +21953,27 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
 
   /* ---- Geometry of the chart --------------------------------------------- */
   P.theta = function (lon) { return (180 + lon - this.model.zero) * RAD; };
+  /* The houses as the app hands them: twelve cusps in the reader's house
+     system, or thirty degree houses from zero for a model that carries none. */
+  P.cuspsOf = function () {
+    var m = this.model || {}, z = m.zero || 0;
+    if (m.cusps && m.cusps.length === 12) return m.cusps;
+    var out = []; for (var i = 0; i < 12; i++) out.push(z + i * 30);
+    return out;
+  };
+  P.cuspRel = function () {
+    var z = (this.model && this.model.zero) || 0;
+    return this.cuspsOf().map(function (c) { return ((c - z) % 360 + 720) % 360; });
+  };
+  P.houseMid = function (n) {
+    var cs = this.cuspsOf(), a = cs[n - 1], b = cs[n % 12], span = ((b - a) % 360 + 360) % 360 || 360;
+    return a + span / 2;
+  };
+  P.houseAt = function (lon) {
+    var cs = this.cuspsOf(), best = 1e9, n = 1;
+    for (var i = 0; i < 12; i++) { var off = ((lon - cs[i]) % 360 + 720) % 360; if (off < best) { best = off; n = i + 1; } }
+    return n;
+  };
   P.at = function (lon, r, y) { var th = this.theta(lon); return new T.Vector3(Math.cos(th) * r, y || 0, -Math.sin(th) * r); };
   P.bodyBy = function (key) { return this.model && this.model.bodies.filter(function (b) { return b.key === key; })[0]; };
   P.orbitOf = function (b, i) {
@@ -21712,6 +22016,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
     this.world.add(g);
     this.discMat.uniforms.uZero.value = m.zero;
+    this.discMat.uniforms.uCusp.value = this.cuspRel();
     this.discMat.uniforms.uTimed.value = m.timed ? 1 : 0;
 
     /* The signs: the glyph floats over the middle of its band, in the colour
@@ -21726,7 +22031,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     /* The houses, numbered round the outer band. */
     for (var h = 0; h < 12; h++) {
       var hl = this.text(String(h + 1), { px: Math.max(9, 10.5 * ui), weight: 600, color: tk.cMut });
-      hl.userData.lon = m.zero + h * 30 + 15;
+      hl.userData.lon = this.houseMid(h + 1);
       hl.position.copy(this.at(hl.userData.lon, sc(354), 0.06));
       g.add(hl);
       this.houseLabels.push(hl);
@@ -22120,7 +22425,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
     if (!this.model) return;
     var f = this.flyEngage();
     if (!f) return;
-    var lon = this.model.zero + (n - 1) * 30 + 15, rMid = (R_HOUSE + R_OUT) / 2;
+    var lon = this.houseMid(n), rMid = (R_HOUSE + R_OUT) / 2;
     var at = this.at(lon, rMid, 0), from = this.at(lon, rMid * 0.45, 3.6);
     this.sel = { aspect: this.sel.aspect, house: n, body: this.sel.body };
     f.travel([from.x, from.y, from.z], [at.x, at.y, at.z]);
@@ -22497,8 +22802,7 @@ return Object.freeze({metadata,apogee:t=>at('apogee',t),node:(name,t)=>at(name,t
         var r = Math.hypot(f.x, f.z);
         if (r >= R_HOUSE && r <= R_OUT + 0.2) {
           var lon = ((Math.atan2(-f.z, f.x) / RAD - 180 + this.model.zero) % 360 + 720) % 360;
-          var rel = ((lon - this.model.zero) % 360 + 360) % 360;
-          return { kind: 'house', n: Math.floor(rel / 30) + 1 };
+          return { kind: 'house', n: this.houseAt(lon) };
         }
       }
     }
@@ -30112,6 +30416,7 @@ input[type="date"]{color-scheme:dark}
 
 
 
+
 <!-- The gates the sky stands in now. Reads HDWheel by name, so it follows it. -->
 
 <!-- The People Library, and the cache that stands in front of the composite.
@@ -32979,6 +33284,22 @@ input[type="date"]{color-scheme:dark}
                 <sc-for list="{{ apTerms }}" as="tm" hint-placeholder-count="3">
                   <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ apHsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+                <div id="incommon-ap-hs-head" style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ apHsHead }}</div>
+                <div role="radiogroup" aria-labelledby="incommon-ap-hs-head" style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ apHs }}" as="hs" hint-placeholder-count="11">
+                    <button data-lift role="radio" aria-checked="{{ hs.on }}" onClick="{{ hs.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid {{ hs.bd }};border-radius:999px;background:{{ hs.bg }}">
+                      <span aria-hidden="true" style="font:400 12px/1 var(--fu);color:var(--ac2-hi)">{{ hs.mark }}</span>
+                      <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ hs.name }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ apHsNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:400 12.5px/1.5 var(--fu);color:var(--mut)">{{ apHsNote }}</div>
+                </sc-if>
               </div>
             </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
@@ -39761,6 +40082,22 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
             </sc-if>
+            <sc-if value="{{ apHsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+                <div id="incommon-ap-hs-head" style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ apHsHead }}</div>
+                <div role="radiogroup" aria-labelledby="incommon-ap-hs-head" style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ apHs }}" as="hs" hint-placeholder-count="11">
+                    <button data-lift role="radio" aria-checked="{{ hs.on }}" onClick="{{ hs.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid {{ hs.bd }};border-radius:999px;background:{{ hs.bg }}">
+                      <span aria-hidden="true" style="font:400 12px/1 var(--fu);color:var(--ac2-hi)">{{ hs.mark }}</span>
+                      <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ hs.name }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ apHsNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:400 12.5px/1.5 var(--fu);color:var(--mut)">{{ apHsNote }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
@@ -45464,8 +45801,8 @@ class Component extends DCLogic {
     const ord = k => k + (k === 1 ? 'st' : k === 2 ? 'nd' : k === 3 ? 'rd' : 'th');
     const asc = this.ascendant(), natal = this.fullChart(this.state.chartMode === 'expanded');
     const natalSun = this.chartAt(this.natalDate())[0];
-    const zero = this.wheelZero();
-    const cuspSign = this.signOf(this.norm360(zero + (n - 1) * 30));
+    const cs = this.chartCusps(), span = this.cuspSpan(cs, n - 1);
+    const cuspSign = this.signOf(cs[n - 1]);
     const info = this.SIGN_INFO[cuspSign.sign] || {};
     const ruler = info.ruler || '';
     const rulerBody = ruler.replace(/^the\s+/i, '');
@@ -45473,7 +45810,7 @@ class Component extends DCLogic {
     const cls = this.houseClassOf(n);
     const H = (head, text) => this.headLine(head, text);
     const sg = PC && PC.signs ? PC.signs[cuspSign.sign] : null;
-    const endSign = this.signOf(this.norm360(zero + n * 30));
+    const endSign = this.signOf(cs[n % 12]);
     const rr = natal.find(r => r.name === rulerBody && r.lon != null);
     const rh = rr ? this.houseOf(rr.lon, natalSun, asc) : null;
     /* Two groups, not one list. GEN is true of this house in any chart and belongs on
@@ -45488,8 +45825,8 @@ class Component extends DCLogic {
     gen.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
     const lines = [];
     lines.push(H('Where this house sits', 'The ' + ord(n) + ' house of your chart begins at ' + Math.floor(cuspSign.deg) + '\u00b0 ' + cuspSign.sign +
-      ' and runs thirty degrees to ' + Math.floor(endSign.deg) + '\u00b0 ' + endSign.sign + '. ' +
-      (asc ? 'Your chart is timed, so these are equal houses measured from your ' + asc.sign + ' Ascendant: a real horizon rather than an assumed one.'
+      ' and runs ' + (Math.abs(span - 30) < 0.05 ? 'thirty degrees' : Math.round(span) + ' degrees') + ' to ' + Math.floor(endSign.deg) + '\u00b0 ' + endSign.sign + '. ' +
+      (asc ? 'Your chart is timed, so these are ' + this.houseSysName(this.houseCusps(asc).drawn) + ' houses, drawn from your ' + asc.sign + ' Ascendant: a real horizon rather than an assumed one.'
            : 'Your chart carries no birth time, so this is a whole-sign solar chart counted from your Sun. It is an honest approximation rather than a timed reading; a birth time and a city in Settings redraw it from a genuine Ascendant.')));
     if (h) {
       lines.push(H('What this house is for', h.definition + ' ' + h.inLife));
@@ -46387,9 +46724,85 @@ class Component extends DCLogic {
     let d = b - a; if (d > 180) d -= 360; if (d < -180) d += 360;
     return d / (2 * h);
   }
+  /* THE HOUSE SYSTEM IS THE READER'S CHOICE, and Whole Sign is the default
+     (the owner, 4 November 2026). It is kept with the study path, per profile
+     (studyState().houses), and chosen in the Astropedia's House systems
+     chapter. A timed chart is drawn in it everywhere a house is read: the
+     wheel, the scenes, the house pages, the placements and the Oracle. A chart
+     with no birth time has no horizon, so it stays a whole sign chart counted
+     from the Sun whatever is chosen. house-systems.js does the arithmetic. */
+  houseSys() {
+    /* Read on every house a render draws, so the stored value is read once
+       per profile and per study change, not once per call. */
+    const memo = this.studyKey() + '|' + ((this.state && this.state.studyTick) || 0);
+    if (this._hsysMemo === memo) return this._hsys;
+    const k = this.studyState().houses, H = window.HouseSystems;
+    this._hsysMemo = memo;
+    this._hsys = H && H.SYSTEMS.some(x => x.key === k) ? k : H ? H.DEFAULT : 'W';
+    return this._hsys;
+  }
+  /* The birth stamp with the house system on it, for every memo whose answer
+     holds a house: a new system is a new chart to those, and a new reading to
+     the Oracle. */
+  chartStamp(p) {
+    p = p === undefined ? this.activeProfile() : p;
+    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys();
+  }
+  houseSysSet(k) {
+    const H = window.HouseSystems;
+    if (!H || !H.SYSTEMS.some(x => x.key === k) || k === this.houseSys()) return;
+    this.studySave({ houses: k });
+  }
+  houseSysName(k) {
+    const H = window.HouseSystems, x = H && H.SYSTEMS.find(y => y.key === (k || this.houseSys()));
+    return x ? x.name : 'Whole Sign';
+  }
+  /* The twelve cusps of a timed chart, as longitudes, in the chosen system.
+     Kept on the ascendant object, which every caller already holds, so a
+     render that reads a hundred houses solves the cusps once. drawn names the
+     system actually drawn, which is Porphyry when Placidus or Koch has no
+     cusps at that latitude. */
+  houseCusps(asc) {
+    if (!asc) return null;
+    const k = this.houseSys();
+    if (asc._hcKey === k && asc._hc) return asc._hc;
+    const H = window.HouseSystems, R = this.RAD;
+    let out = null;
+    if (H && [asc.ramc, asc.obliquity, asc.latitude].every(Number.isFinite)) {
+      const r = H.cusps(k, { ramc: asc.ramc / R, eps: asc.obliquity / R, lat: asc.latitude / R });
+      if (r.ok) out = { cusps: r.cusps, drawn: r.system, asked: r.asked, fallback: !!r.fallback };
+    }
+    if (!out) {
+      const s = Math.floor(this.norm360(asc.asc) / 30) * 30;
+      out = { cusps: Array.from({ length: 12 }, (_, i) => this.norm360(s + 30 * i)), drawn: 'W', asked: k, fallback: k !== 'W' };
+    }
+    asc._hcKey = k; asc._hc = out;
+    return out;
+  }
+  /* The cusps of the chart on screen, timed or not: the chosen system from a
+     real horizon, or the solar whole sign chart from the Sun's sign. */
+  chartCusps() {
+    const asc = this.ascendant();
+    if (asc) return this.houseCusps(asc).cusps;
+    const z = this.wheelZero();
+    return Array.from({ length: 12 }, (_, i) => this.norm360(z + 30 * i));
+  }
+  /* The width of house i (0 based) in degrees of longitude. */
+  cuspSpan(cs, i) { return this.norm360(cs[(i + 1) % 12] - cs[i]) || 360; }
   houseOf(lon, natalSun, asc) {
-    if (asc) return Math.floor(this.norm360(lon - asc.asc) / 30) + 1;
+    if (asc) {
+      const cs = this.houseCusps(asc).cusps, H = window.HouseSystems;
+      if (H) return H.houseOf(lon, cs);
+      return ((Math.floor(this.norm360(lon) / 30) - Math.floor(cs[0] / 30) + 12) % 12) + 1;
+    }
     return ((this.signOf(lon).idx - natalSun.idx + 12) % 12) + 1;
+  }
+  /* What the chart's houses are, in a few words: the system and the rising
+     sign, or the solar chart when there is no birth time. */
+  houseModeText(asc) {
+    if (!asc) return 'whole sign solar \u00b7 no birth time';
+    const hc = this.houseCusps(asc);
+    return this.houseSysName(hc.drawn) + ' houses \u00b7 ' + asc.sign + ' rising';
   }
   ANGLE_MEAN = { Ascendant: 'how you arrive and are first met', Descendant: 'what you meet in other people',
     Midheaven: 'vocation and public standing', IC: 'roots and private ground' };
@@ -46487,7 +46900,7 @@ class Component extends DCLogic {
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
   fullChart(expanded) {
-    const p = this.activeProfile(), stamp = (p ? p.birthStamp : 'legacy') + '|' + (expanded ? 'x' : 'b');
+    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b');
     if (this._fcStamp === stamp) return this._fc;
     const t = this.t2000(this.natalDate());
     // Central-difference speed (deg/day) for any PLNS body via the same
@@ -46791,11 +47204,11 @@ class Component extends DCLogic {
     // what the SVG draws, never what this table and its sub-tables list).
     const rows = this.fullChart(true);
     const natalSun = rows[0];
-    const zero = this.wheelZero();
     const houseOf = r => (r.lon == null || r.group === 'angle') ? null : this.houseOf(r.lon, natalSun, asc);
 
+    const cs = this.chartCusps();
     const houses = Array.from({ length: 12 }, (_, i) => {
-      const lon = this.norm360(zero + i * 30), s = this.signOf(lon);
+      const lon = cs[i], s = this.signOf(lon);
       return { h: i + 1, sign: s.sign, deg: Math.floor(s.deg) };
     });
 
@@ -49180,7 +49593,7 @@ class Component extends DCLogic {
     const inside = this.IMPACT_MOVERS.filter(m => S.lon[m] != null && ctx.houseOfLon(S.lon[m]) === h).map(m => {
       const lon = S.lon[m], s = this.signOf(lon), start = ctx.cuspOf(h);
       let mv = S.soon[m] - lon; if (mv > 180) mv -= 360; if (mv < -180) mv += 360;
-      const retro = m !== 'North Node' && mv < 0, through = this.norm360(lon - start) / 30 * 100;
+      const retro = m !== 'North Node' && mv < 0, through = this.norm360(lon - start) / ctx.spanOf(h) * 100;
       return { m: m, glyph: this.impactGlyph(m), w: this.IMPACT_W[m], title: m + ' · ' + Math.floor(s.deg) + '° ' + s.sign,
         pct: Math.max(0, Math.min(100, through)).toFixed(0) + '%',
         t: m + ' is crossing it' + (retro ? ', turning back on itself' : '') + ', bringing ' + this.PL_MEAN[m] + ' into ' + this.HOUSE_THEMES[h - 1] + '.' };
@@ -49287,8 +49700,9 @@ class Component extends DCLogic {
     const st = this.state, open = st.chgOpen || {}, mode = st.chgMode || {}, flip = st.fcFlip || {}, rm = this.motionOff();
     const ctx = { ordinal: o.ordinal, houseOf: o.houseOf, openBody: o.openBody,
       houseOfLon: lon => this.houseOf(lon, o.natalSun, o.asc),
-      cuspOf: h => o.asc ? this.norm360(o.asc.asc + (h - 1) * 30) : ((o.natalSun.idx + h - 1) % 12) * 30,
-      cuspSign: h => this.SIGNS12[((o.asc ? o.asc.idx : o.natalSun.idx) + h - 1) % 12] };
+      cuspOf: h => o.asc ? this.houseCusps(o.asc).cusps[h - 1] : ((o.natalSun.idx + h - 1) % 12) * 30,
+      spanOf: h => o.asc ? this.cuspSpan(this.houseCusps(o.asc).cusps, h - 1) : 30,
+      cuspSign: h => o.asc ? this.signOf(this.houseCusps(o.asc).cusps[h - 1]).sign : this.SIGNS12[(o.natalSun.idx + h - 1) % 12] };
     const flipped = id => !!flip[id];
     const dress = (gk, cards) => cards.map(c => {
       const id = gk + '|' + c.key, on = flipped(id);
@@ -50974,6 +51388,8 @@ class Component extends DCLogic {
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
     A.HOUSES.forEach(h => add({ key: 'house:' + h.n, ch: 'houses', kind: 'house', name: this.apOrd(h.n) + ' House', glyph: String(h.n),
       sub: h.name, c: 'var(--ac2-hi)', idx: h.n - 1, slug: String(h.n), text: h.area + ' ' + h.text }));
+    (A.HOUSE_SYSTEMS || []).forEach(h => add({ key: 'housesys:' + h.key, ch: 'housesystems', kind: 'housesys', hk: h.key, name: h.name, glyph: '\u25EB',
+      sub: h.kind, c: 'var(--ac2-hi)', slug: this.slug(h.name), text: h.origin + ' ' + h.text }));
     A.ASTRAL_BODIES.forEach(p => add({ key: 'body:' + p.name, ch: 'bodies', kind: 'body', name: p.name, glyph: p.glyph + '︎',
       sub: p.rhythm, c: 'var(--tx)', slug: this.slug(p.name), text: p.text + ' ' + p.dignity }));
     A.POINTS.forEach(p => { if (p && p.name) add({ key: 'point:' + p.name, ch: 'points', kind: 'point', name: p.name,
@@ -50996,7 +51412,7 @@ class Component extends DCLogic {
      reader's half is empty under the sample, because a sample is nobody. */
   apSky() {
     const p = this.activeProfile(), sample = this.usingSampleBirth(), now = new Date();
-    const key = (p ? p.birthStamp : '') + '|' + sample + '|' + Math.floor(now.getTime() / 60000);
+    const key = this.chartStamp(p) + '|' + sample + '|' + Math.floor(now.getTime() / 60000);
     if (this._apSkyKey === key) return this._apSky;
     let sky = [], natal = [], asc = null, sunN = null;
     try { sky = this.chartAt(now).filter(r => r.lon != null && this.PLNS.slice(0, 10).some(x => x[0] === r.name)); } catch (e) { sky = []; }
@@ -51139,6 +51555,18 @@ class Component extends DCLogic {
       link('How wide it reaches', '', 'essay:orbs');
       if (!S.sample) { let mineA = []; try { mineA = this.natalAspects(false).filter(x => x.asp === k); } catch (err) { mineA = []; }
         mineA.slice(0, 8).forEach(x => yours.push({ label: x.a.name + ' and ' + x.b.name, text: x.orb.toFixed(1) + '° from exact', go: place(x.a.name) })); }
+    } else if (e.kind === 'housesys') {
+      const h = A.houseSystem(e.hk), HS = window.HouseSystems;
+      kicker = h.kind; lead = h.text; dropcap = true;
+      facets.push({ label: 'Origins', text: h.origin }, { label: 'Why there are many', text: A.HOUSE_SYSTEMS_INTRO });
+      /* The reader's angular cusps as this system would draw them, so two
+         systems can be compared on the reader's own sky. */
+      if (S.asc && HS) {
+        const R = this.RAD, r = HS.cusps(e.hk, { ramc: S.asc.ramc / R, eps: S.asc.obliquity / R, lat: S.asc.latitude / R });
+        if (r.ok) [1, 4, 7, 10].forEach(n => { const c = this.signOf(r.cusps[n - 1]);
+          yours.push({ label: 'Your ' + this.apOrd(n), text: Math.floor(c.deg) + '° ' + c.sign + (r.fallback ? ' (Porphyry)' : ''), go: () => this.apPick('house:' + n, false) }); });
+      }
+      link('The twelve houses', '', 'house:1');
     } else if (e.kind === 'concept' || e.kind === 'technique') {
       lead = (e.kind === 'concept' ? A.CONCEPTS : A.TECHNIQUES).find(c => c.name === e.name).text; dropcap = true;
     } else if (e.kind === 'essay') {
@@ -51159,6 +51587,7 @@ class Component extends DCLogic {
       if (e.name === 'Moon') term('Void of course', 'concept:Void of Course Moon');
       if (e.name === 'Sun') { term('Combust and cazimi', 'concept:Combust and Cazimi'); term('Sect', 'concept:Sect'); } }
     if (e.kind === 'point' && /Node/.test(e.name)) term('Eclipses', 'concept:Eclipses');
+    if (e.kind === 'housesys') term('Intercepted signs', 'concept:Intercepted Signs');
     if (e.kind === 'aspect') { term('Orb', 'essay:orbs'); term('Aspect patterns', 'concept:Aspect Patterns'); }
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = d => sib[(at + d + sib.length) % sib.length];
@@ -51219,6 +51648,20 @@ class Component extends DCLogic {
       apEssay: essay, apEssayOn: essay.length > 0,
       apYours: yours, apYoursOn: yours.length > 0,
       apLinks: links, apLinksOn: links.length > 0,
+      /* The house system the reader's chart is drawn in, chosen here. */
+      ...(() => {
+        const HS = window.HouseSystems, on = e.kind === 'housesys' && !!HS;
+        if (!on) return { apHsOn: false, apHs: [], apHsNoteOn: false, apHsNote: '' };
+        const cur = this.houseSys(), hc = S.asc ? this.houseCusps(S.asc) : null;
+        const note = S.sample ? 'The sample chart follows the choice too. Your own chart will be drawn in it once it is yours.'
+          : !S.asc ? 'Your chart has no birth time, so it has no horizon to divide: it stays a whole sign chart counted from your Sun until a time and a place are added.'
+          : hc && hc.fallback ? this.houseSysName(hc.asked) + ' has no cusps at your birthplace, inside the polar circle, so your chart is drawn in Porphyry.' : '';
+        return { apHsOn: true, apHsNote: note, apHsNoteOn: !!note,
+          apHsHead: 'Your chart is drawn in ' + this.houseSysName(cur),
+          apHs: HS.SYSTEMS.map(x => { const sel = x.key === cur;
+            return { name: x.name, on: sel ? 'true' : 'false', bd: sel ? 'var(--ac2-hi)' : 'var(--bd)', bg: sel ? 'rgba(var(--atmc),.24)' : 'var(--sf2)',
+              mark: sel ? '\u25C9' : '\u25CB', go: () => this.houseSysSet(x.key) }; }) };
+      })(),
       apPrevLabel: '‹ ' + step(-1).name, apNextLabel: step(1).name + ' ›',
       apPrevAria: 'Previous, ' + step(-1).name, apNextAria: 'Next, ' + step(1).name,
       apStepOn: sib.length > 1,
@@ -55499,7 +55942,7 @@ class Component extends DCLogic {
   oracleDeepKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleDeep'; }
   oracleSlot(period, depth) {
     const p = this.activeProfile();
-    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p);
   }
   oracleCached(period, depth) {
     const all = this.readLS(this.oracleStoreKey(), {});
@@ -55538,7 +55981,7 @@ class Component extends DCLogic {
     const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
     const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
     const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
-    const house = lon => asc ? Math.floor(this.norm360(lon - asc.asc) / 30) + 1 : null;
+    const house = lon => asc ? this.houseOf(lon, null, asc) : null;
     const eleven = date => this.chartAt(date).filter(x => x.name !== 'South Node').map(x => ({
       key: this.ORACLE_KEY[x.name], name: x.name, lon: x.lon, sign: x.sign, kind: x.name === 'North Node' ? 'node' : 'planet',
       retro: x.name === 'Sun' || x.name === 'Moon' || x.name === 'North Node' ? false : this.isRetro(x.name, date) }));
@@ -55580,7 +56023,7 @@ class Component extends DCLogic {
     const lines = [];
     if (first) lines.push('NAME: ' + first);
     lines.push('NATAL PLACEMENTS: ' + natal.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
-    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) : 'Birth time unknown: no ascendant or houses.');
+    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) + '; HOUSE SYSTEM: ' + this.houseSysName(this.houseCusps(asc).drawn) : 'Birth time unknown: no ascendant or houses.');
     lines.push('KEY NATAL ASPECTS: ' + aspects.slice(0, 12).join(', '));
     lines.push('CURRENT SKY: ' + sky.map(x => x.name + ' in ' + x.sign + (x.retro ? ' Rx' : '')).join(', '));
     lines.push('ACTIVE TRANSITS TO NATAL: ' + (transits.length ? transits.join('; ') : 'none exact'));
@@ -56531,7 +56974,7 @@ class Component extends DCLogic {
   }
   cycleWindows() {
     const key = this.cycleScanKey();
-    if (this._cyKey === key && this._cy) return this._cy;
+    if (this._cyKey === key && this._cy) return this.cycleHouses(this._cy);
     const today = new Date(), year = today.getFullYear(); today.setHours(12, 0, 0, 0);
     let natal = [];
     try {
@@ -56617,7 +57060,7 @@ class Component extends DCLogic {
     const out = [];
     Object.keys(byContact).forEach(id => byContact[id].forEach(w => {
       const from = toDate(w.from), to = toDate(w.to), passes = w.passes.sort((a, b) => a - b).map(toDate);
-      const openStart = w.from <= t0, house = asc ? Math.floor(this.norm360(w.n.lon - asc.asc) / 30) + 1 : null;
+      const openStart = w.from <= t0, house = asc ? this.houseOf(w.n.lon, null, asc) : null;
       const a = (openStart ? 'since before ' : '') + mY(from), b = mY(to);
       out.push({
         id: w.id + '|' + from.getFullYear(), mover: w.mover, asp: w.asp, natal: w.n.name, natalLon: w.n.lon, house,
@@ -56634,7 +57077,19 @@ class Component extends DCLogic {
     this._cyKey = key;
     this._cyNodes = nodes;
     this._cy = out.sort((a, b) => a.from - b.from);
+    this._cyHsys = this.houseSys();
     return this._cy;
+  }
+  /* The scan is kept for the year, and the house a passage lands in is the
+     one thing on it a change of house system moves, so it is stamped again
+     here rather than running the scan twice. */
+  cycleHouses(ws) {
+    const k = this.houseSys();
+    if (this._cyHsys === k) return ws;
+    const asc = this.ascendant();
+    ws.forEach(w => { w.house = asc ? this.houseOf(w.natalLon, null, asc) : null; });
+    this._cyHsys = k;
+    return ws;
   }
   /* The passages the audit reads: the ones not yet over, at most CY_MAX so
      the reading fits the Oracle's time, chosen by CY_WEIGHT and kept in the
@@ -59287,9 +59742,9 @@ class Component extends DCLogic {
           ...this.themeVals(),
           chartSummary: { head: asc ? 'What this wheel is drawn from' : 'What this wheel is drawn from, and what it is missing',
             text: asc
-              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. With a birth time the houses are equal houses: each is 30 degrees, counted from the exact Ascendant, which is why the time matters. The positions are calculated on this device from an astronomical ephemeris and agree with NASA JPL Horizons to a few hundredths of a degree, so the limit is the birth time rather than the sky: the Ascendant moves about a degree every four minutes, so a time that is a few minutes out can shift the houses by a degree or more, and can carry a cusp across a sign boundary.'
+              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. With a birth time the houses are drawn from the exact horizon in ' + this.houseSysName(this.houseCusps(asc).drawn) + ' houses, which is why the time matters. The positions are calculated on this device from an astronomical ephemeris and agree with NASA JPL Horizons to a few hundredths of a degree, so the limit is the birth time rather than the sky: the Ascendant moves about a degree every four minutes, so a time that is a few minutes out can shift the houses by a degree or more, and can carry a cusp across a sign boundary.'
               : 'Sun at ' + fmtDeg(natalSun) + ', taken from the birth date alone. Without a birth time the chart cannot be set against the horizon, so there is no Ascendant and the houses below are whole-sign houses counted from the Sun\u2019s sign: a solar chart, which is the usual method when no time is known and not a timed reading. The Moon is placed for noon local time on the birth date, and it travels about thirteen degrees a day, so it can be out by as much as six or seven degrees either way. Add a birth time and a city in Settings and the wheel redraws from a real Ascendant, and a fair amount of what follows will read differently.' },
-          houseMode: asc ? 'equal house \u00b7 timed' : 'whole-sign solar \u00b7 no birth time',
+          houseMode: asc ? this.houseSysName(this.houseCusps(asc).drawn) + ' houses \u00b7 timed' : 'whole sign solar \u00b7 no birth time',
           ...(() => {
             const S = window.SabianSymbols, expanded = st.chartMode === 'expanded';
             // Angles are drawn on the rim rather than in the glyph ring: they are
@@ -59303,15 +59758,17 @@ class Component extends DCLogic {
             const placedRows = rows.filter(r => r.lon != null && r.group !== 'angle' && (r.category !== 'comet' || showComets));
             const asps = this.natalAspects(expanded, { rich: expanded, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true }), stel = this.stelliums(expanded);
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
+            const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
             const SG = ['\u2648\uFE0E', '\u2649\uFE0E', '\u264A\uFE0E', '\u264B\uFE0E', '\u264C\uFE0E', '\u264D\uFE0E', '\u264E\uFE0E', '\u264F\uFE0E', '\u2650\uFE0E', '\u2651\uFE0E', '\u2652\uFE0E', '\u2653\uFE0E'];
             const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
             const houseOf = r => this.houseOf(r.lon, natalSun, asc);
             const arc = (lonA, lonB, rOut, rIn) => {
               const a1 = P(lonA, rOut), a2 = P(lonB, rOut), b2 = P(lonB, rIn), b1 = P(lonA, rIn);
+              const big = this.norm360(lonB - lonA) > 180 ? 1 : 0;
               return 'M' + a1.x.toFixed(1) + ' ' + a1.y.toFixed(1) +
-                'A' + rOut + ' ' + rOut + ' 0 0 0 ' + a2.x.toFixed(1) + ' ' + a2.y.toFixed(1) +
+                'A' + rOut + ' ' + rOut + ' 0 ' + big + ' 0 ' + a2.x.toFixed(1) + ' ' + a2.y.toFixed(1) +
                 'L' + b2.x.toFixed(1) + ' ' + b2.y.toFixed(1) +
-                'A' + rIn + ' ' + rIn + ' 0 0 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
+                'A' + rIn + ' ' + rIn + ' 0 ' + big + ' 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
             };
             // Declutter: astral bodies within 9° of each other step inward in turn so
             // glyphs never sit on top of one another. Ring 1 (astral bodies, both
@@ -59358,11 +59815,11 @@ class Component extends DCLogic {
                just drawn from, so the three views cannot disagree. Rebuilt only
                when the chart itself changes; selection travels separately. */
             const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn() || this.scenePending('ChartScene');
-            const csKey = [prof ? prof.birthStamp : 'legacy', expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
+            const csKey = [this.chartStamp(prof), expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
-              this._csModel = { key: csKey, zero, timed: !!asc, owner: prof ? prof.name : '',
-                sub: asc ? 'equal house · ' + asc.sign + ' rising' : 'whole-sign · no birth time',
+              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '',
+                sub: this.houseModeText(asc),
                 signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
                 bodies: placedRows.map(r => {
                   const key = this.pointKey(r), rad = radiusFor[key], ring = r.ring === 2 ? 2 : 1;
@@ -59425,7 +59882,7 @@ class Component extends DCLogic {
               })),
               wheelScale: st.zoom, wheelTx: (st.panX / st.zoom).toFixed(1) + 'px', wheelTy: (st.panY / st.zoom).toFixed(1) + 'px',
               wheelCursor: st.zoom > 1 ? 'grab' : 'default',
-              wheelSub: asc ? 'equal house \u00b7 ' + asc.sign + ' rising' : 'whole-sign \u00b7 no birth time',
+              wheelSub: this.houseModeText(asc),
               wheelHint: 'Tap a glyph, or ASC / DC / MC / IC on the rim, for its full reading, or an aspect line for what it joins. Scroll or use + to zoom; drag to pan when zoomed.',
               zoomIn: deep ? deepZoom(-1) : () => this.setState({ zoom: Math.min(3, +(st.zoom + .35).toFixed(2)) }),
               zoomOut: deep ? deepZoom(1) : () => this.setState({ zoom: Math.max(.5, +(st.zoom - .35).toFixed(2)), panX: st.zoom <= 1.2 ? 0 : st.panX, panY: st.zoom <= 1.2 ? 0 : st.panY }),
@@ -59449,7 +59906,7 @@ class Component extends DCLogic {
                     f: '400 22px Georgia,serif', go: noop });
                 });
                 for (let i = 0; i < 12; i++) {
-                  const n = P(zero + i * 30 + 15, 354), hn = i + 1;
+                  const n = P(mid(i), 354), hn = i + 1;
                   out.push({ hit: '26px', l: pc(n.x), t: pc(n.y), text: String(hn), aria: 'House ' + hn + ', open its details', cur: 'pointer', ls: 'normal',
                     c: '#5f5b6b', f: '400 13px Karla,sans-serif',
                     go: () => this.setState({ dpSel: { kind: 'house', h: hn } }) });
@@ -59470,7 +59927,7 @@ class Component extends DCLogic {
                 });
                 out.push({ hit: '0px', l: '50%', t: '49%', text: prof ? prof.name : '', aria: 'Chart owner', cur: 'default', ls: 'normal',
                   c: '#eef0f8', f: '400 22px Georgia,serif', go: noop });
-                out.push({ hit: '0px', l: '50%', t: '52%', text: asc ? 'equal house \u00b7 ' + asc.sign + ' rising' : 'whole-sign \u00b7 no birth time',
+                out.push({ hit: '0px', l: '50%', t: '52%', text: this.houseModeText(asc),
                   aria: 'House system', cur: 'default', ls: '.1em', c: '#7c7889', f: '400 11px Karla,sans-serif', go: noop });
                 return out.map(w => w.wb ? w : { ...w, wb: '-' });
               })(),
@@ -59484,12 +59941,12 @@ class Component extends DCLogic {
               // The house band is a clickable wedge, not just a cusp line: a 1px line
               // cannot be hit. Inside [data-chart] so the 44px floor does not apply.
               wheelHouses: Array.from({ length: 12 }, (_, i) => {
-                const cusp = zero + i * 30, a = P(cusp, 322), b = P(cusp, 386), n = P(cusp + 15, 354);
+                const cusp = CS[i], a = P(cusp, 322), b = P(cusp, 386), n = P(mid(i), 354);
                 const on = st.dpSel && st.dpSel.kind === 'house' && st.dpSel.h === i + 1;
                 return { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
                   c: i % 3 === 0 ? '#3a3646' : '#26232f', w: i % 3 === 0 ? 1.6 : 1,
                   n: i + 1, nx: n.x.toFixed(1), ny: n.y.toFixed(1),
-                  path: arc(cusp, cusp + 30, 386, 322),
+                  path: arc(cusp, cusp + this.cuspSpan(CS, i), 386, 322),
                   fill: on ? 'rgba(47,255,143,.16)' : 'transparent',
                   aria: 'House ' + (i + 1) + ', open its details',
                   go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) };
