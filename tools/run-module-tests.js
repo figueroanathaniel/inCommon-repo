@@ -522,7 +522,7 @@ if (!hdLine) {
     return appSrc.slice(i, j + 4);
   };
   const src = 'class Z {' + field('CY_MOVERS') + field('CY_ASPECTS') + field('CY_ORB') + field('CY_STEP') + field('CY_WEIGHT') + '\n' + method('cyLon') +
-    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
+    method('cycleScanKey') + method('cycleReady') + method('cycleWindows') + method('cycleHouses') + method('cyclePassages') + method('cycleKey') + method('cycleDossier') + method('cyDash') + '\n}';
   /* Today is pinned to the day this was written, so the fixture stays inside
      the scan however long after that the suite is run. */
   class Today extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.UTC(2026, 9, 18, 12)); } }
@@ -539,6 +539,7 @@ if (!hdLine) {
     natalDate: () => new Date(Date.UTC(1990, 0, 1)),
     chartAt: () => [{ name: 'Sun', lon: 328 }, { name: 'Mars', lon: 315 }],
     anglePoints: () => [], ascendant: () => null, birthName: () => 'Rowan Vale',
+    houseSys: () => 'W', houseOf: () => null,
     hdChart: () => ({ type: 'Projector', authority: 'Splenic: the body knows' }), numerology: () => ({ lp: 7 }),
     ORACLE_STRATEGY: { Projector: 'Wait for the invitation' },
     norm360: x => ((x % 360) + 360) % 360,

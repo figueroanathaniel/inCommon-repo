@@ -5296,6 +5296,43 @@ room: four identities, hardened and not, at 1440 and 375, with a sign, a body,
 an aspect and an essay open, 64 cases, 54 to 77 elements each, no pair under
 4.5:1 and no control under 44px.
 
+## The reader chooses the house system, and Whole Sign is where it starts
+Decided by the owner on 4 November 2026: the Astropedia has a House Systems
+chapter where the reader picks the system they study, and the choice changes
+the chart, the house pages and the Oracle; Whole Sign is the default. Until
+then a timed chart drew Equal houses, so **every timed reader's houses changed
+with this**, and that is worth saying out loud.
+
+**`app/house-systems.js` is the mechanics** (global `HouseSystems`): Whole
+Sign, Equal, Porphyry, Placidus, Koch, Regiomontanus, Campanus, Alcabitius,
+Topocentric, Morinus and Meridian, from the RAMC, the obliquity and the
+latitude. Our keys are not Swiss Ephemeris letters (Porphyry is `P`, Placidus
+`O`, Alcabitius `A`); the reference script maps them. Every system is held to
+the Swiss Ephemeris over 384 frames from the equator to the poles
+(`tools/fixtures/house-systems-swiss.json`, written by
+`tools/generate-house-systems-reference.py` with pyswisseph, which is a test
+reference only and never an app dependency), within 1e-7 degrees, Placidus
+within 2e-6 (HS1 to HS9). Where Swiss has no cusps, Placidus and Koch inside
+the polar circles, the module answers Porphyry with `fallback: true`, and the
+chapter says so. The polar conventions (which side the tenth cusp falls on for
+Regiomontanus, Campanus and Topocentric) were taken from the measured
+comparison, because the Swiss documentation section on them could not be
+reached; `docs/astro-upgrade/01-house-systems-sources.md` has the table.
+
+**One choice, read in one place.** `houseSys()` is `studyState().houses`, in
+the per profile `incommon.p.<id>.study` key, so it is per profile, kept on the
+device and NOT synced. `houseCusps(asc)` and `chartCusps()` are the only cusp
+sources: the wheel, the Ledger's houses, the house pages and flash cards, the
+3D and Orbital stage (`uCusp[12]` in `chart-scene.js`), the Oracle dossier
+(which names the system, so each system is its own reading and costs one of
+the six) and the Cycle Audit's passages all read them. `chartStamp()` adds the
+system to every memo keyed by the birth. A third copy of a house formula
+anywhere is the fault this removed. **An untimed chart is solar whole sign
+whatever is chosen**, because it has no horizon to divide.
+
+**What it does not do yet.** The lessons do not follow the system, and the
+Astropedia's own sky wheel draws the natural houses.
+
 ## The Book of Numbers is a Study room
 Asked for by the owner on 20 October 2026: the matrix that updated the Numbers
 page, as a room in the Library beside the Astropedia and the Human Design

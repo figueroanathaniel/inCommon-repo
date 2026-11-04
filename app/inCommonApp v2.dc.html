@@ -3267,6 +3267,22 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
             </sc-if>
+            <sc-if value="{{ apHsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+                <div id="incommon-ap-hs-head" style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ apHsHead }}</div>
+                <div role="radiogroup" aria-labelledby="incommon-ap-hs-head" style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ apHs }}" as="hs" hint-placeholder-count="11">
+                    <button data-lift role="radio" aria-checked="{{ hs.on }}" onClick="{{ hs.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid {{ hs.bd }};border-radius:999px;background:{{ hs.bg }}">
+                      <span aria-hidden="true" style="font:400 12px/1 var(--fu);color:var(--ac2-hi)">{{ hs.mark }}</span>
+                      <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ hs.name }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ apHsNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:400 12.5px/1.5 var(--fu);color:var(--mut)">{{ apHsNote }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
@@ -10047,6 +10063,22 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
             </sc-if>
+            <sc-if value="{{ apHsOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--bd);padding-top:12px">
+                <div id="incommon-ap-hs-head" style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ apHsHead }}</div>
+                <div role="radiogroup" aria-labelledby="incommon-ap-hs-head" style="display:flex;flex-wrap:wrap;gap:7px">
+                  <sc-for list="{{ apHs }}" as="hs" hint-placeholder-count="11">
+                    <button data-lift role="radio" aria-checked="{{ hs.on }}" onClick="{{ hs.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:7px;padding:0 13px;border:1px solid {{ hs.bd }};border-radius:999px;background:{{ hs.bg }}">
+                      <span aria-hidden="true" style="font:400 12px/1 var(--fu);color:var(--ac2-hi)">{{ hs.mark }}</span>
+                      <span style="font:600 11.5px var(--fu);color:var(--tx)">{{ hs.name }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ apHsNoteOn }}" hint-placeholder-val="{{ false }}">
+                  <div style="font:400 12.5px/1.5 var(--fu);color:var(--mut)">{{ apHsNote }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
             <sc-if value="{{ apYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
                 <div style="font:600 9.5px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">In your chart</div>
@@ -15750,8 +15782,8 @@ class Component extends DCLogic {
     const ord = k => k + (k === 1 ? 'st' : k === 2 ? 'nd' : k === 3 ? 'rd' : 'th');
     const asc = this.ascendant(), natal = this.fullChart(this.state.chartMode === 'expanded');
     const natalSun = this.chartAt(this.natalDate())[0];
-    const zero = this.wheelZero();
-    const cuspSign = this.signOf(this.norm360(zero + (n - 1) * 30));
+    const cs = this.chartCusps(), span = this.cuspSpan(cs, n - 1);
+    const cuspSign = this.signOf(cs[n - 1]);
     const info = this.SIGN_INFO[cuspSign.sign] || {};
     const ruler = info.ruler || '';
     const rulerBody = ruler.replace(/^the\s+/i, '');
@@ -15759,7 +15791,7 @@ class Component extends DCLogic {
     const cls = this.houseClassOf(n);
     const H = (head, text) => this.headLine(head, text);
     const sg = PC && PC.signs ? PC.signs[cuspSign.sign] : null;
-    const endSign = this.signOf(this.norm360(zero + n * 30));
+    const endSign = this.signOf(cs[n % 12]);
     const rr = natal.find(r => r.name === rulerBody && r.lon != null);
     const rh = rr ? this.houseOf(rr.lon, natalSun, asc) : null;
     /* Two groups, not one list. GEN is true of this house in any chart and belongs on
@@ -15774,8 +15806,8 @@ class Component extends DCLogic {
     gen.push(H('The house it argues with', 'Every house works against its opposite. ' + this.HOUSE_AXIS[(n - 1) % 6] + '. Neither end functions well without the other, and a house read on its own is a house read badly.'));
     const lines = [];
     lines.push(H('Where this house sits', 'The ' + ord(n) + ' house of your chart begins at ' + Math.floor(cuspSign.deg) + '\u00b0 ' + cuspSign.sign +
-      ' and runs thirty degrees to ' + Math.floor(endSign.deg) + '\u00b0 ' + endSign.sign + '. ' +
-      (asc ? 'Your chart is timed, so these are equal houses measured from your ' + asc.sign + ' Ascendant: a real horizon rather than an assumed one.'
+      ' and runs ' + (Math.abs(span - 30) < 0.05 ? 'thirty degrees' : Math.round(span) + ' degrees') + ' to ' + Math.floor(endSign.deg) + '\u00b0 ' + endSign.sign + '. ' +
+      (asc ? 'Your chart is timed, so these are ' + this.houseSysName(this.houseCusps(asc).drawn) + ' houses, drawn from your ' + asc.sign + ' Ascendant: a real horizon rather than an assumed one.'
            : 'Your chart carries no birth time, so this is a whole-sign solar chart counted from your Sun. It is an honest approximation rather than a timed reading; a birth time and a city in Settings redraw it from a genuine Ascendant.')));
     if (h) {
       lines.push(H('What this house is for', h.definition + ' ' + h.inLife));
@@ -16673,9 +16705,85 @@ class Component extends DCLogic {
     let d = b - a; if (d > 180) d -= 360; if (d < -180) d += 360;
     return d / (2 * h);
   }
+  /* THE HOUSE SYSTEM IS THE READER'S CHOICE, and Whole Sign is the default
+     (the owner, 4 November 2026). It is kept with the study path, per profile
+     (studyState().houses), and chosen in the Astropedia's House systems
+     chapter. A timed chart is drawn in it everywhere a house is read: the
+     wheel, the scenes, the house pages, the placements and the Oracle. A chart
+     with no birth time has no horizon, so it stays a whole sign chart counted
+     from the Sun whatever is chosen. house-systems.js does the arithmetic. */
+  houseSys() {
+    /* Read on every house a render draws, so the stored value is read once
+       per profile and per study change, not once per call. */
+    const memo = this.studyKey() + '|' + ((this.state && this.state.studyTick) || 0);
+    if (this._hsysMemo === memo) return this._hsys;
+    const k = this.studyState().houses, H = window.HouseSystems;
+    this._hsysMemo = memo;
+    this._hsys = H && H.SYSTEMS.some(x => x.key === k) ? k : H ? H.DEFAULT : 'W';
+    return this._hsys;
+  }
+  /* The birth stamp with the house system on it, for every memo whose answer
+     holds a house: a new system is a new chart to those, and a new reading to
+     the Oracle. */
+  chartStamp(p) {
+    p = p === undefined ? this.activeProfile() : p;
+    return (p ? p.birthStamp : 'legacy') + '|h' + this.houseSys();
+  }
+  houseSysSet(k) {
+    const H = window.HouseSystems;
+    if (!H || !H.SYSTEMS.some(x => x.key === k) || k === this.houseSys()) return;
+    this.studySave({ houses: k });
+  }
+  houseSysName(k) {
+    const H = window.HouseSystems, x = H && H.SYSTEMS.find(y => y.key === (k || this.houseSys()));
+    return x ? x.name : 'Whole Sign';
+  }
+  /* The twelve cusps of a timed chart, as longitudes, in the chosen system.
+     Kept on the ascendant object, which every caller already holds, so a
+     render that reads a hundred houses solves the cusps once. drawn names the
+     system actually drawn, which is Porphyry when Placidus or Koch has no
+     cusps at that latitude. */
+  houseCusps(asc) {
+    if (!asc) return null;
+    const k = this.houseSys();
+    if (asc._hcKey === k && asc._hc) return asc._hc;
+    const H = window.HouseSystems, R = this.RAD;
+    let out = null;
+    if (H && [asc.ramc, asc.obliquity, asc.latitude].every(Number.isFinite)) {
+      const r = H.cusps(k, { ramc: asc.ramc / R, eps: asc.obliquity / R, lat: asc.latitude / R });
+      if (r.ok) out = { cusps: r.cusps, drawn: r.system, asked: r.asked, fallback: !!r.fallback };
+    }
+    if (!out) {
+      const s = Math.floor(this.norm360(asc.asc) / 30) * 30;
+      out = { cusps: Array.from({ length: 12 }, (_, i) => this.norm360(s + 30 * i)), drawn: 'W', asked: k, fallback: k !== 'W' };
+    }
+    asc._hcKey = k; asc._hc = out;
+    return out;
+  }
+  /* The cusps of the chart on screen, timed or not: the chosen system from a
+     real horizon, or the solar whole sign chart from the Sun's sign. */
+  chartCusps() {
+    const asc = this.ascendant();
+    if (asc) return this.houseCusps(asc).cusps;
+    const z = this.wheelZero();
+    return Array.from({ length: 12 }, (_, i) => this.norm360(z + 30 * i));
+  }
+  /* The width of house i (0 based) in degrees of longitude. */
+  cuspSpan(cs, i) { return this.norm360(cs[(i + 1) % 12] - cs[i]) || 360; }
   houseOf(lon, natalSun, asc) {
-    if (asc) return Math.floor(this.norm360(lon - asc.asc) / 30) + 1;
+    if (asc) {
+      const cs = this.houseCusps(asc).cusps, H = window.HouseSystems;
+      if (H) return H.houseOf(lon, cs);
+      return ((Math.floor(this.norm360(lon) / 30) - Math.floor(cs[0] / 30) + 12) % 12) + 1;
+    }
     return ((this.signOf(lon).idx - natalSun.idx + 12) % 12) + 1;
+  }
+  /* What the chart's houses are, in a few words: the system and the rising
+     sign, or the solar chart when there is no birth time. */
+  houseModeText(asc) {
+    if (!asc) return 'whole sign solar \u00b7 no birth time';
+    const hc = this.houseCusps(asc);
+    return this.houseSysName(hc.drawn) + ' houses \u00b7 ' + asc.sign + ' rising';
   }
   ANGLE_MEAN = { Ascendant: 'how you arrive and are first met', Descendant: 'what you meet in other people',
     Midheaven: 'vocation and public standing', IC: 'roots and private ground' };
@@ -16773,7 +16881,7 @@ class Component extends DCLogic {
   // The natal set, cached per birth-data stamp and mode so dragging the wheel
   // never recomputes an ephemeris.
   fullChart(expanded) {
-    const p = this.activeProfile(), stamp = (p ? p.birthStamp : 'legacy') + '|' + (expanded ? 'x' : 'b');
+    const p = this.activeProfile(), stamp = this.chartStamp(p) + '|' + (expanded ? 'x' : 'b');
     if (this._fcStamp === stamp) return this._fc;
     const t = this.t2000(this.natalDate());
     // Central-difference speed (deg/day) for any PLNS body via the same
@@ -17077,11 +17185,11 @@ class Component extends DCLogic {
     // what the SVG draws, never what this table and its sub-tables list).
     const rows = this.fullChart(true);
     const natalSun = rows[0];
-    const zero = this.wheelZero();
     const houseOf = r => (r.lon == null || r.group === 'angle') ? null : this.houseOf(r.lon, natalSun, asc);
 
+    const cs = this.chartCusps();
     const houses = Array.from({ length: 12 }, (_, i) => {
-      const lon = this.norm360(zero + i * 30), s = this.signOf(lon);
+      const lon = cs[i], s = this.signOf(lon);
       return { h: i + 1, sign: s.sign, deg: Math.floor(s.deg) };
     });
 
@@ -19466,7 +19574,7 @@ class Component extends DCLogic {
     const inside = this.IMPACT_MOVERS.filter(m => S.lon[m] != null && ctx.houseOfLon(S.lon[m]) === h).map(m => {
       const lon = S.lon[m], s = this.signOf(lon), start = ctx.cuspOf(h);
       let mv = S.soon[m] - lon; if (mv > 180) mv -= 360; if (mv < -180) mv += 360;
-      const retro = m !== 'North Node' && mv < 0, through = this.norm360(lon - start) / 30 * 100;
+      const retro = m !== 'North Node' && mv < 0, through = this.norm360(lon - start) / ctx.spanOf(h) * 100;
       return { m: m, glyph: this.impactGlyph(m), w: this.IMPACT_W[m], title: m + ' · ' + Math.floor(s.deg) + '° ' + s.sign,
         pct: Math.max(0, Math.min(100, through)).toFixed(0) + '%',
         t: m + ' is crossing it' + (retro ? ', turning back on itself' : '') + ', bringing ' + this.PL_MEAN[m] + ' into ' + this.HOUSE_THEMES[h - 1] + '.' };
@@ -19573,8 +19681,9 @@ class Component extends DCLogic {
     const st = this.state, open = st.chgOpen || {}, mode = st.chgMode || {}, flip = st.fcFlip || {}, rm = this.motionOff();
     const ctx = { ordinal: o.ordinal, houseOf: o.houseOf, openBody: o.openBody,
       houseOfLon: lon => this.houseOf(lon, o.natalSun, o.asc),
-      cuspOf: h => o.asc ? this.norm360(o.asc.asc + (h - 1) * 30) : ((o.natalSun.idx + h - 1) % 12) * 30,
-      cuspSign: h => this.SIGNS12[((o.asc ? o.asc.idx : o.natalSun.idx) + h - 1) % 12] };
+      cuspOf: h => o.asc ? this.houseCusps(o.asc).cusps[h - 1] : ((o.natalSun.idx + h - 1) % 12) * 30,
+      spanOf: h => o.asc ? this.cuspSpan(this.houseCusps(o.asc).cusps, h - 1) : 30,
+      cuspSign: h => o.asc ? this.signOf(this.houseCusps(o.asc).cusps[h - 1]).sign : this.SIGNS12[(o.natalSun.idx + h - 1) % 12] };
     const flipped = id => !!flip[id];
     const dress = (gk, cards) => cards.map(c => {
       const id = gk + '|' + c.key, on = flipped(id);
@@ -21260,6 +21369,8 @@ class Component extends DCLogic {
       text: [s.text, s.key, s.sun, s.moon, s.asc, s.house, s.strengths, s.challenges].join(' ') }));
     A.HOUSES.forEach(h => add({ key: 'house:' + h.n, ch: 'houses', kind: 'house', name: this.apOrd(h.n) + ' House', glyph: String(h.n),
       sub: h.name, c: 'var(--ac2-hi)', idx: h.n - 1, slug: String(h.n), text: h.area + ' ' + h.text }));
+    (A.HOUSE_SYSTEMS || []).forEach(h => add({ key: 'housesys:' + h.key, ch: 'housesystems', kind: 'housesys', hk: h.key, name: h.name, glyph: '\u25EB',
+      sub: h.kind, c: 'var(--ac2-hi)', slug: this.slug(h.name), text: h.origin + ' ' + h.text }));
     A.ASTRAL_BODIES.forEach(p => add({ key: 'body:' + p.name, ch: 'bodies', kind: 'body', name: p.name, glyph: p.glyph + '︎',
       sub: p.rhythm, c: 'var(--tx)', slug: this.slug(p.name), text: p.text + ' ' + p.dignity }));
     A.POINTS.forEach(p => { if (p && p.name) add({ key: 'point:' + p.name, ch: 'points', kind: 'point', name: p.name,
@@ -21282,7 +21393,7 @@ class Component extends DCLogic {
      reader's half is empty under the sample, because a sample is nobody. */
   apSky() {
     const p = this.activeProfile(), sample = this.usingSampleBirth(), now = new Date();
-    const key = (p ? p.birthStamp : '') + '|' + sample + '|' + Math.floor(now.getTime() / 60000);
+    const key = this.chartStamp(p) + '|' + sample + '|' + Math.floor(now.getTime() / 60000);
     if (this._apSkyKey === key) return this._apSky;
     let sky = [], natal = [], asc = null, sunN = null;
     try { sky = this.chartAt(now).filter(r => r.lon != null && this.PLNS.slice(0, 10).some(x => x[0] === r.name)); } catch (e) { sky = []; }
@@ -21425,6 +21536,18 @@ class Component extends DCLogic {
       link('How wide it reaches', '', 'essay:orbs');
       if (!S.sample) { let mineA = []; try { mineA = this.natalAspects(false).filter(x => x.asp === k); } catch (err) { mineA = []; }
         mineA.slice(0, 8).forEach(x => yours.push({ label: x.a.name + ' and ' + x.b.name, text: x.orb.toFixed(1) + '° from exact', go: place(x.a.name) })); }
+    } else if (e.kind === 'housesys') {
+      const h = A.houseSystem(e.hk), HS = window.HouseSystems;
+      kicker = h.kind; lead = h.text; dropcap = true;
+      facets.push({ label: 'Origins', text: h.origin }, { label: 'Why there are many', text: A.HOUSE_SYSTEMS_INTRO });
+      /* The reader's angular cusps as this system would draw them, so two
+         systems can be compared on the reader's own sky. */
+      if (S.asc && HS) {
+        const R = this.RAD, r = HS.cusps(e.hk, { ramc: S.asc.ramc / R, eps: S.asc.obliquity / R, lat: S.asc.latitude / R });
+        if (r.ok) [1, 4, 7, 10].forEach(n => { const c = this.signOf(r.cusps[n - 1]);
+          yours.push({ label: 'Your ' + this.apOrd(n), text: Math.floor(c.deg) + '° ' + c.sign + (r.fallback ? ' (Porphyry)' : ''), go: () => this.apPick('house:' + n, false) }); });
+      }
+      link('The twelve houses', '', 'house:1');
     } else if (e.kind === 'concept' || e.kind === 'technique') {
       lead = (e.kind === 'concept' ? A.CONCEPTS : A.TECHNIQUES).find(c => c.name === e.name).text; dropcap = true;
     } else if (e.kind === 'essay') {
@@ -21445,6 +21568,7 @@ class Component extends DCLogic {
       if (e.name === 'Moon') term('Void of course', 'concept:Void of Course Moon');
       if (e.name === 'Sun') { term('Combust and cazimi', 'concept:Combust and Cazimi'); term('Sect', 'concept:Sect'); } }
     if (e.kind === 'point' && /Node/.test(e.name)) term('Eclipses', 'concept:Eclipses');
+    if (e.kind === 'housesys') term('Intercepted signs', 'concept:Intercepted Signs');
     if (e.kind === 'aspect') { term('Orb', 'essay:orbs'); term('Aspect patterns', 'concept:Aspect Patterns'); }
     const sib = all.filter(x => x.ch === e.ch), at = sib.findIndex(x => x.key === e.key);
     const step = d => sib[(at + d + sib.length) % sib.length];
@@ -21505,6 +21629,20 @@ class Component extends DCLogic {
       apEssay: essay, apEssayOn: essay.length > 0,
       apYours: yours, apYoursOn: yours.length > 0,
       apLinks: links, apLinksOn: links.length > 0,
+      /* The house system the reader's chart is drawn in, chosen here. */
+      ...(() => {
+        const HS = window.HouseSystems, on = e.kind === 'housesys' && !!HS;
+        if (!on) return { apHsOn: false, apHs: [], apHsNoteOn: false, apHsNote: '' };
+        const cur = this.houseSys(), hc = S.asc ? this.houseCusps(S.asc) : null;
+        const note = S.sample ? 'The sample chart follows the choice too. Your own chart will be drawn in it once it is yours.'
+          : !S.asc ? 'Your chart has no birth time, so it has no horizon to divide: it stays a whole sign chart counted from your Sun until a time and a place are added.'
+          : hc && hc.fallback ? this.houseSysName(hc.asked) + ' has no cusps at your birthplace, inside the polar circle, so your chart is drawn in Porphyry.' : '';
+        return { apHsOn: true, apHsNote: note, apHsNoteOn: !!note,
+          apHsHead: 'Your chart is drawn in ' + this.houseSysName(cur),
+          apHs: HS.SYSTEMS.map(x => { const sel = x.key === cur;
+            return { name: x.name, on: sel ? 'true' : 'false', bd: sel ? 'var(--ac2-hi)' : 'var(--bd)', bg: sel ? 'rgba(var(--atmc),.24)' : 'var(--sf2)',
+              mark: sel ? '\u25C9' : '\u25CB', go: () => this.houseSysSet(x.key) }; }) };
+      })(),
       apPrevLabel: '‹ ' + step(-1).name, apNextLabel: step(1).name + ' ›',
       apPrevAria: 'Previous, ' + step(-1).name, apNextAria: 'Next, ' + step(1).name,
       apStepOn: sib.length > 1,
@@ -25785,7 +25923,7 @@ class Component extends DCLogic {
   oracleDeepKey() { const p = this.activeProfile(); return 'incommon.p.' + (p && p.id ? p.id : 'default') + '.oracleDeep'; }
   oracleSlot(period, depth) {
     const p = this.activeProfile();
-    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + (p ? p.birthStamp : 'legacy');
+    return period + '|' + this.oraclePeriod(period, this.oracleLocalDate()).key + '|' + depth + '|' + this.chartStamp(p);
   }
   oracleCached(period, depth) {
     const all = this.readLS(this.oracleStoreKey(), {});
@@ -25824,7 +25962,7 @@ class Component extends DCLogic {
     const nd = this.natalDate(), asc = this.ascendant(), p = this.activeProfile();
     const at = this.oraclePeriod(period, this.oracleLocalDate()).at;
     const fmt = lon => { const s = this.signOf(lon), d = Math.floor(s.deg), m = Math.floor((s.deg - d) * 60); return d + '°' + String(m).padStart(2, '0') + '′ ' + s.sign; };
-    const house = lon => asc ? Math.floor(this.norm360(lon - asc.asc) / 30) + 1 : null;
+    const house = lon => asc ? this.houseOf(lon, null, asc) : null;
     const eleven = date => this.chartAt(date).filter(x => x.name !== 'South Node').map(x => ({
       key: this.ORACLE_KEY[x.name], name: x.name, lon: x.lon, sign: x.sign, kind: x.name === 'North Node' ? 'node' : 'planet',
       retro: x.name === 'Sun' || x.name === 'Moon' || x.name === 'North Node' ? false : this.isRetro(x.name, date) }));
@@ -25866,7 +26004,7 @@ class Component extends DCLogic {
     const lines = [];
     if (first) lines.push('NAME: ' + first);
     lines.push('NATAL PLACEMENTS: ' + natal.map(x => x.name + ' ' + fmt(x.lon) + (asc ? ' (house ' + house(x.lon) + ')' : '') + (x.retro ? ' Rx' : '')).join('; '));
-    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) : 'Birth time unknown: no ascendant or houses.');
+    lines.push(asc ? 'ASCENDANT: ' + fmt(asc.asc) + '; MIDHEAVEN: ' + fmt(asc.mc) + '; HOUSE SYSTEM: ' + this.houseSysName(this.houseCusps(asc).drawn) : 'Birth time unknown: no ascendant or houses.');
     lines.push('KEY NATAL ASPECTS: ' + aspects.slice(0, 12).join(', '));
     lines.push('CURRENT SKY: ' + sky.map(x => x.name + ' in ' + x.sign + (x.retro ? ' Rx' : '')).join(', '));
     lines.push('ACTIVE TRANSITS TO NATAL: ' + (transits.length ? transits.join('; ') : 'none exact'));
@@ -26817,7 +26955,7 @@ class Component extends DCLogic {
   }
   cycleWindows() {
     const key = this.cycleScanKey();
-    if (this._cyKey === key && this._cy) return this._cy;
+    if (this._cyKey === key && this._cy) return this.cycleHouses(this._cy);
     const today = new Date(), year = today.getFullYear(); today.setHours(12, 0, 0, 0);
     let natal = [];
     try {
@@ -26903,7 +27041,7 @@ class Component extends DCLogic {
     const out = [];
     Object.keys(byContact).forEach(id => byContact[id].forEach(w => {
       const from = toDate(w.from), to = toDate(w.to), passes = w.passes.sort((a, b) => a - b).map(toDate);
-      const openStart = w.from <= t0, house = asc ? Math.floor(this.norm360(w.n.lon - asc.asc) / 30) + 1 : null;
+      const openStart = w.from <= t0, house = asc ? this.houseOf(w.n.lon, null, asc) : null;
       const a = (openStart ? 'since before ' : '') + mY(from), b = mY(to);
       out.push({
         id: w.id + '|' + from.getFullYear(), mover: w.mover, asp: w.asp, natal: w.n.name, natalLon: w.n.lon, house,
@@ -26920,7 +27058,19 @@ class Component extends DCLogic {
     this._cyKey = key;
     this._cyNodes = nodes;
     this._cy = out.sort((a, b) => a.from - b.from);
+    this._cyHsys = this.houseSys();
     return this._cy;
+  }
+  /* The scan is kept for the year, and the house a passage lands in is the
+     one thing on it a change of house system moves, so it is stamped again
+     here rather than running the scan twice. */
+  cycleHouses(ws) {
+    const k = this.houseSys();
+    if (this._cyHsys === k) return ws;
+    const asc = this.ascendant();
+    ws.forEach(w => { w.house = asc ? this.houseOf(w.natalLon, null, asc) : null; });
+    this._cyHsys = k;
+    return ws;
   }
   /* The passages the audit reads: the ones not yet over, at most CY_MAX so
      the reading fits the Oracle's time, chosen by CY_WEIGHT and kept in the
@@ -29573,9 +29723,9 @@ class Component extends DCLogic {
           ...this.themeVals(),
           chartSummary: { head: asc ? 'What this wheel is drawn from' : 'What this wheel is drawn from, and what it is missing',
             text: asc
-              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. With a birth time the houses are equal houses: each is 30 degrees, counted from the exact Ascendant, which is why the time matters. The positions are calculated on this device from an astronomical ephemeris and agree with NASA JPL Horizons to a few hundredths of a degree, so the limit is the birth time rather than the sky: the Ascendant moves about a degree every four minutes, so a time that is a few minutes out can shift the houses by a degree or more, and can carry a cusp across a sign boundary.'
+              ? 'Sun at ' + fmtDeg(natalSun) + ', Ascendant at ' + fmtDeg(asc) + ', taken from ' + (prof ? prof.name : 'this profile') + '\u2019s birth date, time, and place. With a birth time the houses are drawn from the exact horizon in ' + this.houseSysName(this.houseCusps(asc).drawn) + ' houses, which is why the time matters. The positions are calculated on this device from an astronomical ephemeris and agree with NASA JPL Horizons to a few hundredths of a degree, so the limit is the birth time rather than the sky: the Ascendant moves about a degree every four minutes, so a time that is a few minutes out can shift the houses by a degree or more, and can carry a cusp across a sign boundary.'
               : 'Sun at ' + fmtDeg(natalSun) + ', taken from the birth date alone. Without a birth time the chart cannot be set against the horizon, so there is no Ascendant and the houses below are whole-sign houses counted from the Sun\u2019s sign: a solar chart, which is the usual method when no time is known and not a timed reading. The Moon is placed for noon local time on the birth date, and it travels about thirteen degrees a day, so it can be out by as much as six or seven degrees either way. Add a birth time and a city in Settings and the wheel redraws from a real Ascendant, and a fair amount of what follows will read differently.' },
-          houseMode: asc ? 'equal house \u00b7 timed' : 'whole-sign solar \u00b7 no birth time',
+          houseMode: asc ? this.houseSysName(this.houseCusps(asc).drawn) + ' houses \u00b7 timed' : 'whole sign solar \u00b7 no birth time',
           ...(() => {
             const S = window.SabianSymbols, expanded = st.chartMode === 'expanded';
             // Angles are drawn on the rim rather than in the glyph ring: they are
@@ -29589,15 +29739,17 @@ class Component extends DCLogic {
             const placedRows = rows.filter(r => r.lon != null && r.group !== 'angle' && (r.category !== 'comet' || showComets));
             const asps = this.natalAspects(expanded, { rich: expanded, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true }), stel = this.stelliums(expanded);
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
+            const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
             const SG = ['\u2648\uFE0E', '\u2649\uFE0E', '\u264A\uFE0E', '\u264B\uFE0E', '\u264C\uFE0E', '\u264D\uFE0E', '\u264E\uFE0E', '\u264F\uFE0E', '\u2650\uFE0E', '\u2651\uFE0E', '\u2652\uFE0E', '\u2653\uFE0E'];
             const ordinal = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
             const houseOf = r => this.houseOf(r.lon, natalSun, asc);
             const arc = (lonA, lonB, rOut, rIn) => {
               const a1 = P(lonA, rOut), a2 = P(lonB, rOut), b2 = P(lonB, rIn), b1 = P(lonA, rIn);
+              const big = this.norm360(lonB - lonA) > 180 ? 1 : 0;
               return 'M' + a1.x.toFixed(1) + ' ' + a1.y.toFixed(1) +
-                'A' + rOut + ' ' + rOut + ' 0 0 0 ' + a2.x.toFixed(1) + ' ' + a2.y.toFixed(1) +
+                'A' + rOut + ' ' + rOut + ' 0 ' + big + ' 0 ' + a2.x.toFixed(1) + ' ' + a2.y.toFixed(1) +
                 'L' + b2.x.toFixed(1) + ' ' + b2.y.toFixed(1) +
-                'A' + rIn + ' ' + rIn + ' 0 0 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
+                'A' + rIn + ' ' + rIn + ' 0 ' + big + ' 1 ' + b1.x.toFixed(1) + ' ' + b1.y.toFixed(1) + 'Z';
             };
             // Declutter: astral bodies within 9° of each other step inward in turn so
             // glyphs never sit on top of one another. Ring 1 (astral bodies, both
@@ -29644,11 +29796,11 @@ class Component extends DCLogic {
                just drawn from, so the three views cannot disagree. Rebuilt only
                when the chart itself changes; selection travels separately. */
             const view = this.chartViewNow(), deep = view !== '2d', deepOn = this.chartSceneOn() || this.scenePending('ChartScene');
-            const csKey = [prof ? prof.birthStamp : 'legacy', expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
+            const csKey = [this.chartStamp(prof), expanded ? 'x' : 'b', showComets ? 'c' : '', st.chartExpandShowMinorAspects === false ? 'm' : '', prof ? prof.name : ''].join('|');
             if (this._csModelKey !== csKey) {
               this._csModelKey = csKey;
-              this._csModel = { key: csKey, zero, timed: !!asc, owner: prof ? prof.name : '',
-                sub: asc ? 'equal house · ' + asc.sign + ' rising' : 'whole-sign · no birth time',
+              this._csModel = { key: csKey, zero, cusps: CS.slice(), timed: !!asc, owner: prof ? prof.name : '',
+                sub: this.houseModeText(asc),
                 signs: SG.map((glyph, i) => ({ glyph, c: this.SIGN_EL_C[i % 4] })),
                 bodies: placedRows.map(r => {
                   const key = this.pointKey(r), rad = radiusFor[key], ring = r.ring === 2 ? 2 : 1;
@@ -29711,7 +29863,7 @@ class Component extends DCLogic {
               })),
               wheelScale: st.zoom, wheelTx: (st.panX / st.zoom).toFixed(1) + 'px', wheelTy: (st.panY / st.zoom).toFixed(1) + 'px',
               wheelCursor: st.zoom > 1 ? 'grab' : 'default',
-              wheelSub: asc ? 'equal house \u00b7 ' + asc.sign + ' rising' : 'whole-sign \u00b7 no birth time',
+              wheelSub: this.houseModeText(asc),
               wheelHint: 'Tap a glyph, or ASC / DC / MC / IC on the rim, for its full reading, or an aspect line for what it joins. Scroll or use + to zoom; drag to pan when zoomed.',
               zoomIn: deep ? deepZoom(-1) : () => this.setState({ zoom: Math.min(3, +(st.zoom + .35).toFixed(2)) }),
               zoomOut: deep ? deepZoom(1) : () => this.setState({ zoom: Math.max(.5, +(st.zoom - .35).toFixed(2)), panX: st.zoom <= 1.2 ? 0 : st.panX, panY: st.zoom <= 1.2 ? 0 : st.panY }),
@@ -29735,7 +29887,7 @@ class Component extends DCLogic {
                     f: '400 22px Georgia,serif', go: noop });
                 });
                 for (let i = 0; i < 12; i++) {
-                  const n = P(zero + i * 30 + 15, 354), hn = i + 1;
+                  const n = P(mid(i), 354), hn = i + 1;
                   out.push({ hit: '26px', l: pc(n.x), t: pc(n.y), text: String(hn), aria: 'House ' + hn + ', open its details', cur: 'pointer', ls: 'normal',
                     c: '#5f5b6b', f: '400 13px Karla,sans-serif',
                     go: () => this.setState({ dpSel: { kind: 'house', h: hn } }) });
@@ -29756,7 +29908,7 @@ class Component extends DCLogic {
                 });
                 out.push({ hit: '0px', l: '50%', t: '49%', text: prof ? prof.name : '', aria: 'Chart owner', cur: 'default', ls: 'normal',
                   c: '#eef0f8', f: '400 22px Georgia,serif', go: noop });
-                out.push({ hit: '0px', l: '50%', t: '52%', text: asc ? 'equal house \u00b7 ' + asc.sign + ' rising' : 'whole-sign \u00b7 no birth time',
+                out.push({ hit: '0px', l: '50%', t: '52%', text: this.houseModeText(asc),
                   aria: 'House system', cur: 'default', ls: '.1em', c: '#7c7889', f: '400 11px Karla,sans-serif', go: noop });
                 return out.map(w => w.wb ? w : { ...w, wb: '-' });
               })(),
@@ -29770,12 +29922,12 @@ class Component extends DCLogic {
               // The house band is a clickable wedge, not just a cusp line: a 1px line
               // cannot be hit. Inside [data-chart] so the 44px floor does not apply.
               wheelHouses: Array.from({ length: 12 }, (_, i) => {
-                const cusp = zero + i * 30, a = P(cusp, 322), b = P(cusp, 386), n = P(cusp + 15, 354);
+                const cusp = CS[i], a = P(cusp, 322), b = P(cusp, 386), n = P(mid(i), 354);
                 const on = st.dpSel && st.dpSel.kind === 'house' && st.dpSel.h === i + 1;
                 return { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
                   c: i % 3 === 0 ? '#3a3646' : '#26232f', w: i % 3 === 0 ? 1.6 : 1,
                   n: i + 1, nx: n.x.toFixed(1), ny: n.y.toFixed(1),
-                  path: arc(cusp, cusp + 30, 386, 322),
+                  path: arc(cusp, cusp + this.cuspSpan(CS, i), 386, 322),
                   fill: on ? 'rgba(47,255,143,.16)' : 'transparent',
                   aria: 'House ' + (i + 1) + ', open its details',
                   go: () => this.setState({ dpSel: { kind: 'house', h: i + 1 } }) };

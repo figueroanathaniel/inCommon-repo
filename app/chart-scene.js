@@ -118,7 +118,7 @@
   var F_DISC = FOG + [
     'uniform vec3 uBg; uniform vec3 uLine; uniform vec3 uAtm; uniform vec3 uAtm2; uniform vec3 uHi; uniform vec3 uAc2; uniform vec3 uSel;',
     'uniform float uZero; uniform float uK; uniform float uSignIn; uniform float uSignOut; uniform float uOut; uniform float uInner;',
-    'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb;',
+    'uniform vec2 uPtr; uniform float uPtrOn; uniform float uBreath; uniform float uHouse; uniform float uTimed; uniform vec3 uOrbits[12]; uniform float uNOrb; uniform float uCusp[12];',
     'varying vec2 vUv; varying vec3 vW;',
     'float ring(float r, float at, float w){ float fw = fwidth(r) * 1.2 + 0.002; return 1.0 - smoothstep(w, w + fw, abs(r - at)); }',
     'void main(){',
@@ -144,8 +144,15 @@
     ' c += uLine * inTick * (1.0 - smoothstep(0.006, 0.006 + fw, min(dd, min(d5, d10)))) * 0.42;',
     /* the house band, with its cusps and the one a reader has open */
     ' float inHouse = smoothstep(uSignOut - fw, uSignOut + fw, r) * (1.0 - smoothstep(uOut - fw, uOut + fw, r)) * w1;',
-    ' float hd = abs(fract(rel / 30.0 + 0.5) - 0.5) * 30.0 * 0.01745 * r;',
-    ' float hn = floor(rel / 30.0) + 1.0; float ang = step(abs(mod(hn - 1.0, 3.0)), 0.5);',
+    /* the cusps arrive relative to uZero in uCusp, in whatever house system
+       the reader chose: hd is the distance to the nearest one, hn the house
+       the point is in, the one whose cusp it has most recently passed */
+    ' float hd = 1e3; float hn = 1.0; float best = 1e3; float angC = 0.0;',
+    ' for (int i = 0; i < 12; i++) { float off = mod(rel - uCusp[i] + 720.0, 360.0); float dd = min(off, 360.0 - off);',
+    '   float a = (i == 0 || i == 3 || i == 6 || i == 9) ? 1.0 : 0.0;',
+    '   if (dd * 0.01745 * r < hd) { hd = dd * 0.01745 * r; angC = a; }',
+    '   if (off < best) { best = off; hn = float(i) + 1.0; } }',
+    ' float ang = angC;',
     ' c += uLine * inHouse * (1.0 - smoothstep(0.01 + 0.008 * ang, 0.01 + 0.008 * ang + fw, hd)) * (0.16 + 0.14 * ang);',
     ' c += uSel * inHouse * step(abs(hn - uHouse), 0.5) * 0.16;',
     /* the house cusps carry on across the inner field, faintly */
@@ -590,7 +597,7 @@
       uniforms: { uCam: this.U.uCam, uFog: this.U.uFog, uBreath: this.U.uBreath, uBg: { value: new T.Vector3() }, uLine: { value: new T.Vector3() }, uAtm: { value: new T.Vector3() },
         uAtm2: { value: new T.Vector3() }, uHi: { value: new T.Vector3() }, uAc2: { value: new T.Vector3() }, uSel: { value: new T.Vector3() },
         uZero: { value: 0 }, uK: { value: 0 }, uSignIn: { value: R_SIGN_IN }, uSignOut: { value: R_HOUSE }, uOut: { value: R_OUT }, uInner: { value: R_INNER },
-        uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 } } });
+        uPtr: { value: new T.Vector2() }, uPtrOn: { value: 0 }, uHouse: { value: -1 }, uTimed: { value: 1 }, uOrbits: { value: orbV }, uNOrb: { value: 0 }, uCusp: { value: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330] } } });
     var disc = new T.Mesh(new T.CircleGeometry(13.4, 160), this.discMat);
     disc.rotation.x = -Math.PI / 2;
     disc.renderOrder = -5;
@@ -761,6 +768,27 @@
 
   /* ---- Geometry of the chart --------------------------------------------- */
   P.theta = function (lon) { return (180 + lon - this.model.zero) * RAD; };
+  /* The houses as the app hands them: twelve cusps in the reader's house
+     system, or thirty degree houses from zero for a model that carries none. */
+  P.cuspsOf = function () {
+    var m = this.model || {}, z = m.zero || 0;
+    if (m.cusps && m.cusps.length === 12) return m.cusps;
+    var out = []; for (var i = 0; i < 12; i++) out.push(z + i * 30);
+    return out;
+  };
+  P.cuspRel = function () {
+    var z = (this.model && this.model.zero) || 0;
+    return this.cuspsOf().map(function (c) { return ((c - z) % 360 + 720) % 360; });
+  };
+  P.houseMid = function (n) {
+    var cs = this.cuspsOf(), a = cs[n - 1], b = cs[n % 12], span = ((b - a) % 360 + 360) % 360 || 360;
+    return a + span / 2;
+  };
+  P.houseAt = function (lon) {
+    var cs = this.cuspsOf(), best = 1e9, n = 1;
+    for (var i = 0; i < 12; i++) { var off = ((lon - cs[i]) % 360 + 720) % 360; if (off < best) { best = off; n = i + 1; } }
+    return n;
+  };
   P.at = function (lon, r, y) { var th = this.theta(lon); return new T.Vector3(Math.cos(th) * r, y || 0, -Math.sin(th) * r); };
   P.bodyBy = function (key) { return this.model && this.model.bodies.filter(function (b) { return b.key === key; })[0]; };
   P.orbitOf = function (b, i) {
@@ -803,6 +831,7 @@
     this.content = g; this.bodies = []; this.aspects = []; this.signs = []; this.houseLabels = []; this.angleObjs = [];
     this.world.add(g);
     this.discMat.uniforms.uZero.value = m.zero;
+    this.discMat.uniforms.uCusp.value = this.cuspRel();
     this.discMat.uniforms.uTimed.value = m.timed ? 1 : 0;
 
     /* The signs: the glyph floats over the middle of its band, in the colour
@@ -817,7 +846,7 @@
     /* The houses, numbered round the outer band. */
     for (var h = 0; h < 12; h++) {
       var hl = this.text(String(h + 1), { px: Math.max(9, 10.5 * ui), weight: 600, color: tk.cMut });
-      hl.userData.lon = m.zero + h * 30 + 15;
+      hl.userData.lon = this.houseMid(h + 1);
       hl.position.copy(this.at(hl.userData.lon, sc(354), 0.06));
       g.add(hl);
       this.houseLabels.push(hl);
@@ -1211,7 +1240,7 @@
     if (!this.model) return;
     var f = this.flyEngage();
     if (!f) return;
-    var lon = this.model.zero + (n - 1) * 30 + 15, rMid = (R_HOUSE + R_OUT) / 2;
+    var lon = this.houseMid(n), rMid = (R_HOUSE + R_OUT) / 2;
     var at = this.at(lon, rMid, 0), from = this.at(lon, rMid * 0.45, 3.6);
     this.sel = { aspect: this.sel.aspect, house: n, body: this.sel.body };
     f.travel([from.x, from.y, from.z], [at.x, at.y, at.z]);
@@ -1588,8 +1617,7 @@
         var r = Math.hypot(f.x, f.z);
         if (r >= R_HOUSE && r <= R_OUT + 0.2) {
           var lon = ((Math.atan2(-f.z, f.x) / RAD - 180 + this.model.zero) % 360 + 720) % 360;
-          var rel = ((lon - this.model.zero) % 360 + 360) % 360;
-          return { kind: 'house', n: Math.floor(rel / 30) + 1 };
+          return { kind: 'house', n: this.houseAt(lon) };
         }
       }
     }

@@ -15,6 +15,7 @@
   var SECTIONS = [
     ['signs', 'The Twelve Signs'],
     ['houses', 'The Twelve Houses'],
+    ['housesystems', 'House Systems'],
     ['bodies', 'The Astral Bodies'],
     ['points', 'The Asteroids and Points'],
     ['aspects', 'Aspects'],
@@ -285,6 +286,43 @@
     { name: 'Aspect Patterns', text: 'Three or more aspects can lock together into a shape the tradition reads as a unit rather than as separate contacts. A grand trine links three bodies by trine into a closed triangle, a flow so complete it can run without friction and without much effort either. A T square sets two bodies in opposition with a third squaring them both, a pressure point that usually becomes the chart’s engine. A yod links two bodies in sextile, both quincunx a third, a narrow channel the tradition calls the finger of fate, more a persistent adjustment than a fate exactly. A grand cross squares four bodies around the wheel in two oppositions, the T square’s tension on every side at once, exhausting to carry and hard to set down.' }
   ];
 
+  /* ---------- house systems ----------
+     How the twelve houses are cut. Origins follow the Astrodienst overview of
+     house systems and the Skyscript glossary entry on house division; where
+     the two disagree the entry says so. Sources are listed in
+     docs/astro-upgrade/01-house-systems-sources.md. The key is the one
+     house-systems.js and the app store. */
+  var HOUSE_SYSTEMS_INTRO = 'Every system agrees on what the twelve houses mean and disagrees on where each one begins. Some cut the zodiac itself, some cut the sky around the birthplace, and some cut the time a degree takes to rise. Whole Sign is where inCommon starts, and any system here can be the one the chart is drawn in: the wheel, the house pages, the placements and the Oracle all follow the choice.';
+  var HOUSE_SYSTEMS = [
+    { key: 'W', name: 'Whole Sign', kind: 'Sign based', origin: 'In use since antiquity.',
+      text: 'The whole sign that holds the Ascendant is the first house, the next sign is the second, and so on round the wheel, so every house is exactly one sign. No cusp falls inside a sign, which is why it is the simplest system to read: a sign and a house are always the same room. The Ascendant and the Midheaven still matter as points, but they float inside their houses rather than marking where one begins. Astrodienst notes it is especially popular in Indian sidereal astrology today.' },
+    { key: 'E', name: 'Equal', kind: 'Sign based', origin: 'In use since antiquity.',
+      text: 'Each house is thirty degrees of the zodiac, counted from the exact degree of the Ascendant. The first house begins at the Ascendant itself, so the horizon is honoured to the degree, while the Midheaven floats free of the tenth cusp and usually falls in the ninth, tenth or eleventh house.' },
+    { key: 'P', name: 'Porphyry', kind: 'Quadrant, space', origin: 'Named after the philosopher Porphyry of the third century. Skyscript traces the method further back, to the second century work of Vettius Valens.',
+      text: 'The four angles cut the zodiac into four quadrants, and each quadrant is cut into three equal parts. It is the plainest of the quadrant systems: the angles are cusps, and everything between them is shared out evenly. It is also the system most software draws when Placidus or Koch cannot be computed.' },
+    { key: 'O', name: 'Placidus', kind: 'Quadrant, time', origin: 'Named after the monk and mathematician Placidus de Titis (1603 to 1668); Astrodienst credits its invention to Giovanni Antonio Magini (1555 to 1617). Generally considered the most used system in Western astrology today.',
+      text: 'Each degree of the zodiac takes its own time to climb from the horizon to the Midheaven. A Placidus cusp is the degree that has covered a third, or two thirds, of its own climb, and the same below the horizon. Because it measures time, it cannot be drawn inside the polar circles, where some degrees never rise or never set; a chart born there is drawn in Porphyry instead.' },
+    { key: 'K', name: 'Koch', kind: 'Quadrant, time', origin: 'Named after Walter Koch (1895 to 1970), and also called the birthplace system; Astrodienst credits its invention to Fiedrich Zanzinger and Heinz Specht. Astrodienst calls it time oriented and Skyscript classes it by space.',
+      text: 'Koch takes the time the Midheaven degree needs to rise and divides that one span in three, so every cusp is read from the birthplace’s own horizon at a moment along it. It shares Placidus’s limit: inside the polar circles it cannot be drawn, and the chart is drawn in Porphyry instead.' },
+    { key: 'R', name: 'Regiomontanus', kind: 'Quadrant, space', origin: 'Named after Regiomontanus, Johannes Müller of Königsberg (1436 to 1476); Astrodienst credits its invention to Abraham ibn Ezra in the twelfth century.',
+      text: 'The celestial equator is divided into twelve equal parts, and each division is carried to the zodiac along a great circle through the north and south points of the horizon.' },
+    { key: 'C', name: 'Campanus', kind: 'Quadrant, space', origin: 'Named after the mathematician Campanus of Novara (1220 to 1296).',
+      text: 'The sky above and below the horizon is cut like an orange into twelve equal segments, measured along the prime vertical, the great circle through the east point, the zenith and the west point. Where a segment’s edge meets the zodiac is the cusp. It divides space as the observer stands in it.' },
+    { key: 'A', name: 'Alcabitius', kind: 'Quadrant, time', origin: 'Known by the name of the tenth century astrologer al Qabisi, Alcabitius. Skyscript notes that he popularised it rather than invented it, and that its calculation appears in a chart from 428.',
+      text: 'The time the Ascendant degree takes to travel from the horizon to the meridian is divided into three, and the same below the horizon; the cusps are the zodiac degrees on the meridian at each of those moments. Skyscript counts it among the oldest of the time based systems.' },
+    { key: 'T', name: 'Topocentric', kind: 'Quadrant, time', origin: 'Devised by Wendel Polich and Anthony Nelson Page, and also called Polich Page.',
+      text: 'The cusps come from circles that lean at a third and at two thirds of the birthplace’s latitude. In low and middle latitudes its cusps fall within about a degree of Placidus’s, and unlike Placidus it can be drawn everywhere, though inside the polar circles its houses can come out strange.' },
+    { key: 'M', name: 'Morinus', kind: 'Equator', origin: 'Named after the philosopher and astrologer Jean Baptiste Morin, Morinus (1583 to 1656).',
+      text: 'The celestial equator is divided into twelve equal parts starting from the meridian, and each part is carried to the zodiac through the poles of the zodiac. The Ascendant is not a cusp in this system, which reads the houses from the turning of the sky rather than from the horizon.' },
+    { key: 'X', name: 'Meridian', kind: 'Equator', origin: 'Also called axial rotation.',
+      text: 'Like Morinus it divides the equator into twelve equal parts from the meridian, but carries each part to the zodiac through the celestial poles, so the tenth cusp is the Midheaven and the first cusp is not the Ascendant. It can be read as a division of time and of space at once.' }
+  ];
+  function houseSystem(k) {
+    var x = String(k || '');
+    for (var i = 0; i < HOUSE_SYSTEMS.length; i++) { if (HOUSE_SYSTEMS[i].key === x || HOUSE_SYSTEMS[i].name.toLowerCase() === x.toLowerCase()) return HOUSE_SYSTEMS[i]; }
+    return null;
+  }
+
   /* ---------- the birth chart ---------- */
   var CHART = {
     what: 'A map of the sky at your first breath. Not a fate, but a field of possibilities.',
@@ -378,8 +416,8 @@
     return null;
   }
 
-  return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES,
+  return { VERSION: VERSION, SECTIONS: SECTIONS, INTRO: INTRO, SIGNS: SIGNS, HOUSES: HOUSES, HOUSE_SYSTEMS: HOUSE_SYSTEMS, HOUSE_SYSTEMS_INTRO: HOUSE_SYSTEMS_INTRO,
     ASTRAL_BODIES: ASTRAL_BODIES, POINTS: POINTS, ASPECTS: ASPECTS, ORBS: ORBS, CONCEPTS: CONCEPTS, CHART: CHART, SABIAN: SABIAN,
     STELLIUM: STELLIUM, TRANSITS: TRANSITS, TECHNIQUES: TECHNIQUES, SYNASTRY: SYNASTRY, EXAMPLE: EXAMPLE,
-    sign: signByName, house: house, astralBody: astralBody, point: point, aspect: aspect };
+    sign: signByName, house: house, houseSystem: houseSystem, astralBody: astralBody, point: point, aspect: aspect };
 }));
