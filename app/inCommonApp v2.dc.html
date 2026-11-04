@@ -2922,14 +2922,15 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
                 <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
-                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
               </div>
               <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
-                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;margin-top:4px;padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
                   <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
                   <div style="display:flex;align-items:center;gap:8px">
                     <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
@@ -2938,6 +2939,7 @@ input[type="date"]{color-scheme:dark}
                   <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
                 </div>
               </sc-if>
+              </div>
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
@@ -9712,14 +9714,15 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
                 <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
-                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
               </div>
               <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
-                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;margin-top:4px;padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
                   <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
                   <div style="display:flex;align-items:center;gap:8px">
                     <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
@@ -9728,6 +9731,7 @@ input[type="date"]{color-scheme:dark}
                   <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
                 </div>
               </sc-if>
+              </div>
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--bd);padding-top:12px">
@@ -21972,7 +21976,13 @@ class Component extends DCLogic {
   /* A Words here chip opens a bubble with the word's own definition, in
      place, and a second press closes it. The folio underneath stays put. */
   atlasBubGo(key) {
-    this.setState({ atlasBub: this.state.atlasBub === key ? null : key });
+    if (this.state.atlasBub === key) { this.setState({ atlasBub: null }); return; }
+    /* The bubble hangs from the pill it defines: it is pulled up over the
+       pills below that one, so the arrow points at that word and not at the
+       end of the row, and it stays in the flow so no card clips it. */
+    const btn = [...document.querySelectorAll('[data-bub-key]')].find(x => x.getAttribute('data-bub-key') === key && x.offsetParent);
+    const row = btn && btn.parentElement, at = btn ? { t: btn.offsetTop + btn.offsetHeight + 10 - (row ? row.offsetTop + row.offsetHeight : 0), x: Math.max(14, Math.round(btn.offsetLeft + btn.offsetWidth / 2 - 6)) } : null;
+    this.setState({ atlasBub: key, atlasBubAt: at });
   }
   atlasBubText(e) {
     const A = this.A(), d = e.d || {};
@@ -22267,7 +22277,7 @@ class Component extends DCLogic {
       hdTermsOn: lv !== 'deep' && terms.length > 0,
       ...(() => { const b = terms.find(t => t.key === st.atlasBub), be = b ? find(b.key) : null;
         return { hdBubOn: lv !== 'deep' && !!be, hdBubName: be ? be.name : '', hdBubText: be ? this.atlasBubText(be) : '',
-          hdBubX: b ? Math.min(85, 6 + terms.indexOf(b) * 11) + '%' : '0%', hdBubClose: () => this.setState({ atlasBub: null }) }; })(),
+          hdBubX: b && st.atlasBubAt ? st.atlasBubAt.x + 'px' : '20px', hdBubTop: b && st.atlasBubAt ? st.atlasBubAt.t + 'px' : '10px', hdBubClose: () => this.setState({ atlasBub: null }) }; })(),
       hdStepOn: sib.length > 1,
       hdPrevLabel: '‹ ' + step(-1).name, hdNextLabel: step(1).name + ' ›',
       hdPrevAria: 'Previous, ' + step(-1).name, hdNextAria: 'Next, ' + step(1).name,
