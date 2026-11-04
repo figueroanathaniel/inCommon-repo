@@ -22141,6 +22141,7 @@ class Component extends DCLogic {
       if (/emotional/i.test(d.authority)) term('Emotional Wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
     if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
+      if (tm.aka) { epi = tm.aka; epiLabel = 'Also called'; }
       if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
     if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
       const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
