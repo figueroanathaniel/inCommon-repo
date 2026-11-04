@@ -23358,21 +23358,21 @@ class Component extends DCLogic {
       ];
       if (hit) {
         you.push(H('What is touching it today', 'Transiting ' + hit.a.name + ' at ' + this.fmtPos(hit.a) + ' is ' + this.aspName(k) + ' this placement, within ' + hit.orb.toFixed(1) + ' degrees. Something moving has lined up with something settled in you.'));
-        you.push(H('How that tends to arrive', 'You may notice it as ' + (this.ASP_POSS[k] || 'a contact you only recognise in hindsight') + '. The same contact lands differently in different lives, and yours is the only one that can say how it landed.'));
+        you.push(H('How that tends to arrive', 'You may notice it as ' + (this.ASP_POSS[k] || 'a contact you only recognise in hindsight') + '. You will know better than anyone how it actually lands.'));
       }
       const W = house ? PC.workingWith(sel.name, r.sign, house) : null;
       const soco = this.dpSocoBlocks({
         strengths: [
-          hz ? 'Use it deliberately in ' + hz.arena.split(',')[0] + ' this week: that is the room where this placement is strongest, and the one where it is least often used on purpose.' : null
+          hz ? 'This week, use it on purpose in ' + hz.arena.split(',')[0] + ', where it already wants to work.' : null
         ].concat(W ? W.strengths : (b.gifts || []).map(g => 'You may find that you ' + g + '.')),
         opportunities: [
-          (b.growth && b.growth[0]) ? 'One move to test: ' + b.growth[0] + '. Give it a fortnight and write down what changed.' : null
+          (b.growth && b.growth[0]) ? 'One move to test: ' + b.growth[0] + '. Give it two weeks, then look at what shifted.' : null
         ].concat(W ? W.opportunities : []),
         challenges: [
-          sg ? 'Watch the manner, not the motive: under pressure this placement will ' + sg.shadow + ', and it will feel like being yourself rather than a choice.' : null
+          sg ? 'Under pressure you may ' + sg.shadow + ', and in the moment it will feel like simply being yourself. A breath is enough to make it a choice again.' : null
         ].concat(W ? W.challenges : (b.shadows || []).map(s => 'You may notice a tendency to ' + s + '.')),
         obstacles: [
-          hz ? 'The recurring cost in this room is ' + hz.block + '. Name it before it is a story about someone else.' : null
+          hz ? 'Keep an eye out for ' + hz.block + '. Name it before it turns into a story about someone else.' : null
         ].concat(W ? W.obstacles : (b.blocks || []).map(x => 'You may encounter ' + x + '.'))
       });
       return pack({ title: sel.name + ' in ' + r.sign, kicker: 'What this is, generally',

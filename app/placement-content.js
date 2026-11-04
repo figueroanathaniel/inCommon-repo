@@ -755,111 +755,135 @@
       definition: 'Cardinal fire, the spark that moves before the reasons arrive. Here courage comes easily and patience has to be practised, and something always wants to start.',
       manner: 'first and fast, before the argument for waiting can be made', demand: 'Aries needs something to actually begin.',
       gift: 'begin without a guarantee', shadow: 'burn the first third of your force on the starting gun',
+      edge: 'and do it first, before anyone else has decided', move: 'make the first move and decide afterwards',
       decans: ['Mars', 'Sun', 'Venus'] },
     'Taurus': { element: 'earth', modality: 'fixed', quality: 'steadiness and sensory trust',
       definition: 'Fixed earth, slow and sure and deeply physical. Taurus trusts what it can touch, keeps its own pace, and will not be rushed into anything it has not chosen.',
       manner: 'slowly, physically, and only once', demand: 'Taurus wants it real, and worth keeping.',
       gift: 'stay with something until it is solid', shadow: 'keep a comfortable arrangement past its expiry',
+      edge: 'and keep at it long after others have drifted off', move: 'slow down, use your hands, and let your body have a vote',
       decans: ['Mercury', 'Moon', 'Saturn'] },
     'Gemini': { element: 'air', modality: 'mutable', quality: 'curiosity and quickness',
       definition: 'Mutable air, quick and curious and always holding a second door open. Gemini gathers, connects, and lets a contradiction sit without needing to settle it.',
       manner: 'in several directions at once, testing as it goes', demand: 'Gemini needs to be interested, and cannot pretend.',
       gift: 'hold two ideas without collapsing them', shadow: 'move on at the moment depth becomes available',
+      edge: 'and find more than one way to say it', move: 'ask two more questions before you settle on an answer',
       decans: ['Jupiter', 'Mars', 'Sun'] },
     'Cancer': { element: 'water', modality: 'cardinal', quality: 'protectiveness and memory',
       definition: 'Cardinal water, moving sideways toward what it loves. Cancer protects, remembers, and treats a feeling as information rather than an interruption.',
       manner: 'protectively, sideways, tending the vulnerable part first', demand: 'Cancer needs to feel safe before it can be honest.',
       gift: 'make a place where people can be unguarded', shadow: 'defend an old hurt as though it were current',
+      edge: 'and make people feel held while you do it', move: 'tend the most tender person in the room first, yourself included',
       decans: ['Venus', 'Mercury', 'Moon'] },
     'Leo': { element: 'fire', modality: 'fixed', quality: 'warmth and expressive pride',
       definition: 'Fixed fire, warm and steady and generous with its light. Leo commits to its own expression and wants what it makes to be truly seen.',
       manner: 'warmly and visibly, with the whole self behind it', demand: 'Leo needs it to matter, and to be witnessed.',
       gift: 'be generous from the centre', shadow: 'need the witness before the act feels real',
+      edge: 'and do it warmly enough that others light up too', move: 'let yourself be seen doing it, wholeheartedly',
       decans: ['Saturn', 'Jupiter', 'Mars'] },
     'Virgo': { element: 'earth', modality: 'mutable', quality: 'precision and usefulness',
       definition: 'Mutable earth, attentive to the small thing that is not quite right. Virgo refines and mends, and loves through competence more than declaration.',
       manner: 'carefully, in small corrections, keeping the standard in view', demand: 'Virgo wants it done with care, properly.',
       gift: 'improve the thing rather than describe it', shadow: 'let the standard become a tax on every attempt',
+      edge: 'and get the small details exactly right', move: 'fix one small thing properly and leave the rest for later',
       decans: ['Sun', 'Venus', 'Mercury'] },
     'Libra': { element: 'air', modality: 'cardinal', quality: 'balance and relation',
       definition: 'Cardinal air, always feeling for the other side of the scale. Libra relates, weighs and begins things through other people, with fairness as its compass.',
       manner: 'relationally, weighing the other side before moving', demand: 'Libra wants it fair, and shared.',
       gift: 'hold two interests at once without erasing one', shadow: 'defer until the decision is made by default',
+      edge: 'and keep everyone at the table while you do it', move: 'say what you want before you start weighing what they want',
       decans: ['Moon', 'Saturn', 'Jupiter'] },
     'Scorpio': { element: 'water', modality: 'fixed', quality: 'depth and intensity',
       definition: 'Fixed water, still on the surface and very deep underneath. Scorpio goes looking for the truth of a feeling, keeps what is hidden, and knows that some things have to end to be reborn.',
       manner: 'quietly and completely, holding the depth of it', demand: 'Scorpio wants the real version, whatever it costs.',
       gift: 'stay with what others look away from', shadow: 'hold on and call the grip loyalty',
+      edge: 'and go one layer deeper than anyone expected', move: 'name what is actually happening underneath',
       decans: ['Mars', 'Sun', 'Venus'] },
     'Sagittarius': { element: 'fire', modality: 'mutable', quality: 'breadth and conviction',
       definition: 'Mutable fire, restless for a horizon. Sagittarius ranges, believes, and will trade comfort for meaning almost every time.',
       manner: 'expansively, aimed at somewhere larger', demand: 'Sagittarius needs room, and a reason.',
       gift: 'keep faith in something bigger than the week', shadow: 'answer before the question is finished',
+      edge: 'and point everyone toward something bigger', move: 'ask what it means and where it could lead',
       decans: ['Mercury', 'Moon', 'Saturn'] },
     'Capricorn': { element: 'earth', modality: 'cardinal', quality: 'discipline and long ambition',
       definition: 'Cardinal earth, patient with the long climb. Capricorn builds, endures, and earns its authority one season at a time.',
       manner: 'strategically and patiently, with the long climb accounted for', demand: 'Capricorn wants it to last.',
       gift: 'stay with a plan past the interesting part', shadow: 'defer the living until the building is finished',
+      edge: 'and build it to last', move: 'take one step you will still be glad of in a year',
       decans: ['Jupiter', 'Mars', 'Sun'] },
     'Aquarius': { element: 'air', modality: 'fixed', quality: 'detachment and principle',
       definition: 'Fixed air, standing a little apart so it can see the whole system. Aquarius holds a position on principle, even when principle costs it a place to belong.',
       manner: 'at a deliberate distance, on principle rather than pressure', demand: 'Aquarius needs it to make sense from the outside.',
       gift: 'see the arrangement nobody questions', shadow: 'stay outside where inside was the point',
+      edge: 'and see the whole pattern while you do it', move: 'step back far enough to see the system, then speak',
       decans: ['Venus', 'Mercury', 'Moon'] },
     'Pisces': { element: 'water', modality: 'mutable', quality: 'porousness and mercy',
       definition: 'Mutable water, where the edges thin and almost everything gets in. In Pisces compassion and escape share a door, and mercy is the native tongue.',
       manner: 'permeably, taking in more than was addressed to you', demand: 'Pisces asks for mercy, your own included.',
       gift: 'feel what has not been said', shadow: 'dissolve the edge that was holding you',
+      edge: 'and feel your way in where logic stalls', move: 'pause, feel it fully, then choose one small kind act',
       decans: ['Saturn', 'Jupiter', 'Mars'] }
   };
 
   /* ---- LAYER 3: houses ---------------------------------------------------- */
   var HOUSES = [
     { theme: 'Self and body', arena: 'self, body, and first arrival',
+      focus: 'first impressions and how you carry yourself', cue: 'you walk into a new room', tryWith: 'the next room you walk into',
       definition: 'The room has already met you before you speak. The 1st House holds that arrival: your body, your manner, the first impression that walks in ahead of you.',
       asks: 'It asks who is really showing up.', gift: 'presence', shadow: 'a manner that outlives its usefulness',
       growth: 'let the presentation catch up to the person', block: 'a style adopted before you had a say' },
     { theme: 'Resources and worth', arena: 'resources, income, and self-worth',
+      focus: 'money, possessions and your sense of worth', cue: 'a money decision or a question of your worth comes up', tryWith: 'one price you set or one purchase you weigh this week',
       definition: 'What you own sits on top of a quieter question, what you believe you are worth. The 2nd House holds both: money and possessions, and the ground of self worth underneath them.',
       asks: 'It asks what you value enough to keep.', gift: 'sustainable footing', shadow: 'worth measured in holdings',
       growth: 'value something that does not appreciate', block: 'a scarcity rule set in an earlier household' },
     { theme: 'Mind and near world', arena: 'thought, siblings, and the near world',
+      focus: 'conversations, learning and your daily rounds', cue: 'a conversation takes a turn', tryWith: 'the next message you write',
       definition: 'Everything within reach lives here: your siblings, your street, the conversations of an ordinary day. The 3rd House holds the near world and the mind that moves through it.',
       asks: 'It asks how you take the world in, and how you hand it back.', gift: 'quick usable intelligence', shadow: 'motion mistaken for movement',
       growth: 'finish one line of thought before starting three', block: 'a household where some things could not be said' },
     { theme: 'Home and roots', arena: 'home, family, and private ground',
+      focus: 'home, family and your private life', cue: 'home goes quiet at the end of the day', tryWith: 'one corner of your home',
       definition: 'Before any public life there is a floor to stand on. The 4th House holds home, family and origin, the private ground that keeps holding you when nobody is watching.',
       asks: 'It asks what holds you up in private.', gift: 'a base that actually holds', shadow: 'a foundation left unexamined',
       growth: 'build a home rather than inherit one', block: 'an early atmosphere still setting the thermostat' },
     { theme: 'Creativity and play', arena: 'creativity, play, romance, and children',
+      focus: 'creative work, romance and play', cue: 'you make something or fall for someone', tryWith: 'one hour of making something with no purpose',
       definition: 'Some things you make only because they delight you. The 5th House keeps creative work, play, romance and children, everything done for its own sake.',
       asks: 'It asks what you would make with no outcome attached.', gift: 'genuine delight', shadow: 'play that has become performance',
       growth: 'make something with no use', block: 'an audience installed in childhood' },
     { theme: 'Work and health', arena: 'daily work, health, and routine',
+      focus: 'work, routine and your body', cue: 'the ordinary workday asks for you', tryWith: 'one small daily habit',
       definition: 'A life is mostly made of ordinary days. The 6th House holds them: work, habit, health, and the small repeated care that keeps everything else running.',
       asks: 'It asks whether your ordinary days can actually sustain you.', gift: 'craft and reliable rhythm', shadow: 'maintenance without meaning',
       growth: 'let the routine serve the life rather than replace it', block: 'a body treated as an instrument' },
     { theme: 'Partnership', arena: 'partnership and one-to-one relating',
+      focus: 'partnership and close one to one bonds', cue: 'someone close sees it differently from you', tryWith: 'your next real conversation with a partner or close friend',
       definition: 'Across from you sits the person met as an equal. The 7th House holds partnership, promises made between two people, and the honest opposition of someone who will not simply agree.',
       asks: 'It asks who you become beside someone else.', gift: 'real mutuality', shadow: 'a self that only appears in company',
       growth: 'stay recognisable inside a bond', block: 'a pattern of partner that keeps arriving' },
     { theme: 'Depth and the shared', arena: 'depth, shared resources, and what is not spoken',
+      focus: 'intimacy, shared money and the things people avoid saying', cue: 'closeness or shared money gets real', tryWith: 'one conversation you have been putting off',
       definition: 'Below the surface of a life run its strongest currents: intimacy, shared resources, endings and what grows after them. The 8th House holds the forces that change you from the inside.',
       asks: 'It asks what you do with power that is not entirely yours.', gift: 'unflinching depth', shadow: 'control where trust was required',
       growth: 'let something end while there is still choice in it', block: 'a secret that has become structural' },
     { theme: 'Meaning and distance', arena: 'meaning, travel, and belief',
+      focus: 'belief, study and travel', cue: 'one of your beliefs meets a different one', tryWith: 'one question you have been a little too sure about',
       definition: 'Far roads and big questions belong here. The 9th House holds belief, study, travel, and the frames you use to make sense of a world larger than your own street.',
       asks: 'It asks what you are willing to hold as true.', gift: 'a working philosophy', shadow: 'conviction defended rather than tested',
       growth: 'let a belief be corrected by experience', block: 'a certainty inherited whole' },
     { theme: 'Work and standing', arena: 'vocation, standing, and ambition',
+      focus: 'your work and the way the world sees you', cue: 'your work goes on show', tryWith: 'one piece of work with your name on it',
       definition: 'At the top of the chart, a life meets the open air. The 10th House holds vocation and reputation, the arc of what you build where others can see it.',
       asks: 'It asks what you are building in the open.', gift: 'a legible contribution', shadow: 'the role consuming the person',
       growth: 'choose the work rather than the standing', block: 'an inherited definition of success' },
     { theme: 'Community and future', arena: 'community, friendship, and the future',
+      focus: 'friends, groups and the future you share', cue: 'a group needs something from you', tryWith: 'one friend or circle you could show up for',
       definition: 'Some futures can only be reached together. The 11th House holds friendship, the groups you choose, and the hopes you carry alongside other people.',
       asks: 'It asks who you are building alongside.', gift: 'belonging without disappearance', shadow: 'a group joined in order to be someone',
       growth: 'contribute to something that outlasts your interest', block: 'a circle held for who you used to be' },
     { theme: 'Interior and release', arena: 'solitude, the unconscious, and release',
+      focus: 'solitude, rest and your inner life', cue: 'you finally have time alone with yourself', tryWith: 'ten quiet minutes at the end of the day',
       definition: 'Behind every visible life is a hidden one. The 12th House holds solitude, dreams, retreat, and whatever needs to be released rather than solved.',
       asks: 'It asks what you carry that nobody else has seen.', gift: 'access to your own depths', shadow: 'a retreat that became a hiding place',
       growth: 'bring one hidden thing into the light on your terms', block: 'a habit of vanishing under pressure' }
@@ -1027,45 +1051,44 @@
           ' Put together: ' + name + ' brings the longing, ' + sign + ' brings the style, and the ' + ord(house) +
           ' house is where life keeps handing it back to you.',
         possibility: 'You may feel this most around ' + h.arena + ', and least when a moment asks you to be the opposite of ' +
-          sign + '. A year of your own noticing will tell you more than any of this.'
+          sign + '. You know your own life better than any page does, so keep what rings true and set the rest aside.'
       };
     },
 
     /* Four lists, drawn from body + sign + house so no two placements read alike. */
     workingWith: function (body, sign, house) {
-      var name = nm(body);
       var b = BODIES[body], s = SIGNS[sign], h = HOUSES[house - 1];
       if (!b || !s || !h) return { strengths: [], challenges: [], opportunities: [], obstacles: [] };
-      var dig = PC.dignity(body, sign);
+      /* Every line joins at least two layers of this exact placement and says
+         something to do or to notice in the moment. No line explains why. */
       var strengths = [
-        'You may find that you naturally ' + b.gifts[0] + '.',
-        'You may find that you can ' + s.gift + ' when what is at stake is ' + h.arena.split(',')[0] + '.',
-        'Quietly, this placement tends to give ' + h.gift + ', the kind of strength you notice only when it holds.'
+        'In ' + h.focus + ', you can ' + b.gifts[0] + ', ' + s.edge + '.',
+        'When ' + h.cue + ', you can ' + s.gift + '.',
+        'You carry ' + h.gift + ' here. Lean on it on the harder days.'
       ];
-      if (b.gifts[2]) strengths.push('You may find that you ' + b.gifts[2] + ' without being asked.');
-      if (dig && dig.strong) strengths.push('Traditionally ' + name + ' is at ease in ' + sign + ', so this part of you tends to give more than it asks.');
+      if (b.gifts[2]) strengths.push('Without being asked, you can ' + b.gifts[2] + '.');
+      else if (b.gifts[1]) strengths.push('Without being asked, you can ' + b.gifts[1] + '.');
       var challenges = [
-        'You may notice a tendency to ' + b.shadows[0] + '.',
-        'You may notice that under pressure you ' + s.shadow + '.',
-        'In this house, go gently with ' + h.shadow + '.'
+        'When ' + h.cue + ', notice the pull to ' + b.shadows[0] + '.',
+        'Under pressure, the ' + sign + ' in you may ' + s.shadow + '.',
+        'Around ' + h.focus.split(',')[0] + ', notice early when ' + h.shadow + ' starts creeping in.'
       ];
-      if (b.shadows[2]) challenges.push('You may notice you ' + b.shadows[2] + ' and give it a kinder name than it has earned.');
-      if (dig && !dig.strong) challenges.push('Traditionally ' + name + ' is a guest in ' + sign + ', no weaker for it, only working without the sign\u2019s help.');
+      if (b.shadows[2]) challenges.push('If you feel yourself starting to ' + b.shadows[2] + ', pause and ask what you actually need.');
+      else if (b.shadows[1]) challenges.push('If you feel yourself starting to ' + b.shadows[1] + ', pause and ask what you actually need.');
       var opportunities = [
-        'This placement invites you to ' + b.growth[0] + '.',
-        'This placement invites you to ' + h.growth + '.'
+        'Try this: ' + b.growth[0] + ', starting with ' + h.tryWith + '.',
+        'Next time ' + h.cue + ', ' + s.move + '.',
+        'In ' + h.focus.split(',')[0] + ', ' + h.growth + '.'
       ];
-      if (b.growth[1]) opportunities.push('This placement invites you to ' + b.growth[1] + '.');
-      opportunities.push('There is room here to let ' + low(s.quality) + ' serve ' + h.arena.split(',')[0] + ' rather than steer it.');
+      if (b.growth[1]) opportunities.push('When it feels right, ' + b.growth[1] + '.');
       var obstacles = [
-        'You may encounter ' + b.blocks[0] + '.',
-        'You may encounter ' + h.block + '.'
+        'Watch for ' + b.blocks[0] + ', especially in ' + h.focus.split(',')[0] + '.',
+        'When you meet ' + h.block + ', name it. Once it has a name, it is easier to step around.'
       ];
-      if (b.blocks[1]) obstacles.push('You may encounter ' + b.blocks[1] + '.');
-      obstacles.push('Sometimes the obstacle is your own fluency in ' + low(s.quality) + ', the strength answering before the question has finished.');
+      if (b.blocks[1]) obstacles.push('Another snag to spot: ' + b.blocks[1] + '.');
+      obstacles.push('Your ease with ' + low(s.quality) + ' can answer before you have finished asking. Give it a beat.');
       return { strengths: strengths, challenges: challenges, opportunities: opportunities, obstacles: obstacles };
     },
-
     /* One call per placement. Returns tagged, ordered sections for the page. */
     build: function (o) {
       var body = keyFor(o.body), name = nm(body), sign = o.sign, house = o.house, degInSign = o.deg || 0;
@@ -1078,7 +1101,7 @@
         house: {
           heading: 'The ' + ord(house) + ' House',
           lines: [T('TRADITIONAL', h.definition), T('TRADITIONAL', h.inLife),
-            T('POSSIBILITY', 'This house tends to speak in seasons rather than all at once. ' + h.asks + ' Your own last year will answer it better than any definition can.')]
+            T('POSSIBILITY', 'This house tends to speak in seasons rather than all at once. ' + h.asks + ' You have lived in this house longer than anyone has read it, and you already know its answer.')]
         },
         signInHouse: {
           heading: sign + ' in the ' + ord(house) + ' House',
