@@ -6058,6 +6058,37 @@ labels, Orbital live and its pixels read back, a drag running the probe, the
 morph to 3D and back, the sheet in Orbital with a tap on an exact date opening
 that passage's card, and Rings in the sheet.
 
+## The Expanded Chart is the wheel, calm
+Asked for by the owner on 4 November 2026: "an expand icon on the chart itself
+to blow it up. Wrap the text and activities around it uniformly. It should feel
+like luxury, not overburdening." A 44px button at the top left of both wheel
+cards ("Open the expanded chart", `chartBloomGo`) opens a full screen dialog
+(`chartBloom`, `chartBloomVals()`, `data-immersive`): the 2D wheel in the
+middle and, from 1100px, two rails of folded groups either side (Luminaries
+& Planets, Nodes, Angles, Derived points; Asteroids, Centaurs, TNOs, Comets,
+Hypotheticals), one column under the wheel below that.
+
+**Every point is on the wheel and the reader switches them** (owner, 4
+November 2026: nothing is left off as mundane, comets included, and the 22
+most used placements start on). `BLOOM_CORE` is those 22 (the ten bodies, both
+nodes, the four angles, Chiron, Ceres, Pallas, Juno, Vesta and Lilith),
+`bloomShowOf()` the current set keyed by `pointKey()`, and each group carries a
+switch (`role="checkbox"`, `mixed` when part of it is on) beside its fold, with
+Show every point and The usual 22 above the rails. Every point is placed and
+staggered once, so nothing moves when a switch is pressed; the ones switched off
+carry `data-bloom-x="1"` and are hidden by the head sheet. On opening,
+`data-bloom-intro` runs `bloomFlash` (opacity and visibility, labels also a
+text glow, no `filter`) so all of them glow in and the hidden ones fade out
+over 3.2s. Aspects are drawn only between points that are on. `radiusFor` and
+`placedRows` stay as they were, because the 3D scene model reads them. Toggles
+go through `this._bloomGrp` and `this._bloomShow`, not state alone, or two
+presses in one tick overwrite each other. Opening it sets
+`chartMode: 'expanded'` and closing (the cross, Escape via `dialogEscape()`)
+puts the previous mode back. A row opens the placement. **The Observatory is
+entered from here only** (the owner's choice, same day): Enter the Observatory
+(`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
+buttons are gone. N40 goes through both.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space
@@ -6066,7 +6097,7 @@ diagonal, ascend, descend, strafe left, strafe right, dash up, and dash back,
 dash left, and dash right. Omni directional motion: on every chart, but
 especially in the full screen observatory in the astrology tab. Generate
 appropriate images for each astral body as they are encroached upon." The
-maximize button (the expand chart button) opens it; `chartExpandOpen` is still
+Expanded Chart's Enter the Observatory button opens it (since 4 November 2026; see "The Expanded Chart is the wheel, calm"); `chartExpandOpen` is still
 its state, so everything that already opened, closed, persisted or escaped the
 old overlay does the same to the Observatory.
 
