@@ -78,6 +78,7 @@ body{margin:0;background:#05060a;font-family:'Karla',system-ui,sans-serif;color:
 a{color:#2fff8f;text-decoration:none}a:hover{color:#7dffb9}
 @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes bubSoft{from{opacity:0}to{opacity:1}}
 @keyframes markIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}@keyframes lensBreathe{0%,100%{opacity:.82}50%{opacity:1}}@media (prefers-reduced-motion:reduce){[style*="markIn"],[style*="lensBreathe"]{animation:none!important}}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -2931,13 +2932,13 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
               <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
-                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
-                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};max-width:460px;padding:4px 4px 12px 14px;border:1px solid rgba(var(--atmc),.45);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.10),transparent 70%),var(--bg);box-shadow:0 2px 10px rgba(0,0,0,.22);animation:bubSoft .45s ease both">
+                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid rgba(var(--atmc),.55);border-top:1px solid rgba(var(--atmc),.55);transform:rotate(45deg)"></span>
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
-                    <button data-lift onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--bd);background:var(--sf2);font:600 14px var(--fu);color:var(--tx)">&#215;</button>
+                    <div style="flex:1;font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdBubName }}</div>
+                    <button onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:400 16px var(--fu);color:var(--mut)">&#215;</button>
                   </div>
-                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
+                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:-6px;padding-right:10px;font:400 15px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
                 </div>
               </sc-if>
               </div>
@@ -9739,13 +9740,13 @@ input[type="date"]{color-scheme:dark}
                 </sc-for>
               </div>
               <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
-                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
-                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};max-width:460px;padding:4px 4px 12px 14px;border:1px solid rgba(var(--atmc),.45);border-radius:12px;background:radial-gradient(120% 90% at 50% 0%,rgba(var(--atmc),.10),transparent 70%),var(--bg);box-shadow:0 2px 10px rgba(0,0,0,.22);animation:bubSoft .45s ease both">
+                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid rgba(var(--atmc),.55);border-top:1px solid rgba(var(--atmc),.55);transform:rotate(45deg)"></span>
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
-                    <button data-lift onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--bd);background:var(--sf2);font:600 14px var(--fu);color:var(--tx)">&#215;</button>
+                    <div style="flex:1;font:600 10px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--ac2-hi)">{{ hdBubName }}</div>
+                    <button onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font:400 16px var(--fu);color:var(--mut)">&#215;</button>
                   </div>
-                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
+                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:-6px;padding-right:10px;font:400 15px/1.55 var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
                 </div>
               </sc-if>
               </div>
@@ -22129,9 +22130,10 @@ class Component extends DCLogic {
      place, and a second press closes it. The folio underneath stays put. */
   atlasBubGo(key) {
     if (this.state.atlasBub === key) { this.setState({ atlasBub: null }); return; }
-    /* The bubble hangs from the pill it defines: it is pulled up over the
-       pills below that one, so the arrow points at that word and not at the
-       end of the row, and it stays in the flow so no card clips it. */
+    /* The bubble opens under the row of pills, in the flow so no card clips
+       it, with its arrow under the pill it defines. It used to be pulled up
+       over the pills below that one, and the owner found that too aggressive
+       (4 November 2026), so it no longer covers anything and only fades in. */
     const btn = [...document.querySelectorAll('[data-bub-key]')].find(x => x.getAttribute('data-bub-key') === key && x.offsetParent);
     const row = btn && btn.parentElement, at = btn ? { t: btn.offsetTop + btn.offsetHeight + 10 - (row ? row.offsetTop + row.offsetHeight : 0), x: Math.max(14, Math.round(btn.offsetLeft + btn.offsetWidth / 2 - 6)) } : null;
     this.setState({ atlasBub: key, atlasBubAt: at });
@@ -22425,11 +22427,11 @@ class Component extends DCLogic {
       hdYours: yours, hdYoursOn: yours.length > 0,
       hdLinks: links, hdLinksOn: links.length > 0,
       ...(fs || { fsOn: false }),
-      hdTerms: terms.map((t, i) => { const o = st.atlasBub === t.key; return Object.assign(t, { open: o ? 'true' : 'false', bs: o ? 'solid' : 'dashed', bc: o ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.7)', bg: o ? 'rgba(var(--atmc),.2)' : 'var(--sf2)' }); }),
+      hdTerms: terms.map((t, i) => { const o = st.atlasBub === t.key; return Object.assign(t, { open: o ? 'true' : 'false', bs: o ? 'solid' : 'dashed', bc: o ? 'rgba(var(--atmc2),.7)' : 'rgba(var(--atmc),.7)', bg: o ? 'rgba(var(--atmc),.12)' : 'var(--sf2)' }); }),
       hdTermsOn: lv !== 'deep' && terms.length > 0,
       ...(() => { const b = terms.find(t => t.key === st.atlasBub), be = b ? find(b.key) : null;
         return { hdBubOn: lv !== 'deep' && !!be, hdBubName: be ? be.name : '', hdBubText: be ? this.atlasBubText(be) : '',
-          hdBubX: b && st.atlasBubAt ? st.atlasBubAt.x + 'px' : '20px', hdBubTop: b && st.atlasBubAt ? st.atlasBubAt.t + 'px' : '10px', hdBubClose: () => this.setState({ atlasBub: null }) }; })(),
+          hdBubX: b && st.atlasBubAt ? st.atlasBubAt.x + 'px' : '20px', hdBubTop: '10px', hdBubClose: () => this.setState({ atlasBub: null }) }; })(),
       hdStepOn: sib.length > 1,
       hdPrevLabel: '‹ ' + step(-1).name, hdNextLabel: step(1).name + ' ›',
       hdPrevAria: 'Previous, ' + step(-1).name, hdNextAria: 'Next, ' + step(1).name,
