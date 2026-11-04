@@ -4398,8 +4398,11 @@ async function runCloudTests() {
     (A.TIERS || []).map(T => [T.name, (A.LESSONS || []).filter(l => l.tier === T.key).map(l => l.name)]),
     [['Bedrock', want.bedrock], ['Weather', want.weather], ['Horizon', want.horizon]]);
   const chapters = A.SECTIONS.map(s => s[0]);
-  t('F2', 'each tier is a chapter of the Atlas, after the introduction and before the reference shelves',
-    chapters.slice(0, 4), ['intro', 'bedrock', 'weather', 'horizon']);
+  /* The lessons are optional (owner, 4 November 2026): the reference
+     shelves come first and the three tiers follow them, before the lexicon. */
+  t('F2', 'each tier is a chapter of the Atlas, after the reference shelves and before the lexicon, and the room opens on the introduction',
+    [chapters[0], chapters.slice(chapters.indexOf('open') + 1, chapters.indexOf('terms'))],
+    ['intro', ['bedrock', 'weather', 'horizon']]);
   /* The same ids atlasEntries() builds, chapter:slug. */
   const ids = new Set(['intro:0', 'example:0', 'cross:what', 'cross:how', 'cross:angles']);
   Object.keys(A.TYPES).forEach(k => ids.add('types:' + sl(k)));

@@ -905,9 +905,6 @@
 
   var SECTIONS = [
     ['intro', 'What Human Design is'],
-    ['bedrock', 'Bedrock'],
-    ['weather', 'Weather'],
-    ['horizon', 'Horizon'],
     ['types', 'The five types'],
     ['lines', 'The six lines'],
     ['profiles', 'The twelve profiles'],
@@ -920,6 +917,9 @@
     ['strategies', 'Strategies'],
     ['authorities', 'Authorities'],
     ['open', 'Defined and undefined'],
+    ['bedrock', 'Bedrock'],
+    ['weather', 'Weather'],
+    ['horizon', 'Horizon'],
     ['terms', 'The lexicon'],
     ['example', 'An example bodygraph']
   ];
