@@ -6136,6 +6136,20 @@ No cover, no turning, no drawing: a warm glow over `--sf2` on an opaque `--bg`.
 "Open the focused read" goes to the packet. `plGlance` is cleared in both clean
 bags, `dialogEscape()` and `vtSheetClose`.
 
+## A number is a packet too, and is glanced the same way
+Asked for by the owner on 4 November 2026: "do the same application to
+numerology. Explanation beats summation." `numerology-content.js` 1.1.0 gives
+every number a `why` (what the number is and why the tradition reads it so),
+a `persona` and an `ask`, and every seat (`POSITIONS`) an `about` that says what
+the seat is drawn from in plain words without the arithmetic. The writing is
+the chart's voice: personal, gentle, no "you are". `numberDetailVals()` arranges
+it as the placement packet is arranged (cover, chapters The Number, The Seat,
+The Double Digit, The Debt and Your Season, Held together, the four practice
+cards and the question), and `numberGlanceVals()` maps the same words into the
+glance, so a passing tap on a number opens the glance and Open the focused read
+opens the packet. `numGlance` is cleared wherever `plGlance` is. On the
+Numbers stage the first press still brings a number forward.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space
