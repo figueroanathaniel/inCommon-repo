@@ -324,3 +324,18 @@ checked at 44px, a note saved to the device with fit and charge apart, the tally
 answering "could not be reached" with Supabase blocked, and the Projector folio with
 its kinds, no page errors. **Not driven**: the signed in send, which needs a live
 project with 0018.
+
+## Voice and labels, 4 November 2026
+
+The owner asked that the founder of the system not be named anywhere in the
+Atlas, that the reader be addressed as you, and that no person be the subject
+of a sentence. Every attribution in the app text and the study notes now reads
+"the founding teaching" or "the original teaching"; the sources in this file
+still name who said what, because this file is the record of where each claim
+came from and is exempt. No claim changed in substance: 119 strings were
+reworded, none added or removed.
+
+Lesson words with no lexicon entry, still opening their lessons, put to the
+owner for direction: Type, Strategy, Inner Authority, Profile, Definition,
+Centers, Circuits (the building blocks); Rave Cosmology, Mechanics, Evolution,
+Cycles, Awareness, Streams, Angle, Variable, Left or Right (lesson topics).

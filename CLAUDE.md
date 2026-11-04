@@ -5155,6 +5155,31 @@ the page, and is on the two-step list. **0018 is not applied**, and it goes afte
 Privacy Policy's "Field notes" paragraph is live, not before. The signed in send was
 never driven against a real project.
 
+## The Atlas speaks to you, names what each line is, and marks its themes
+Asked for by the owner on 4 November 2026. Every Atlas line addresses the reader
+as you; several people are a group (the room, the group, schools, charts), and a
+person is never the subject of a sentence: a Type as subject is "a Projector
+chart", teachers are "schools", and the founder of the system is never named,
+in the text, the sources or the study notes. "You" is allowed in a subordinate
+clause and an imperative; the keynote fragments of gates and lines have no
+subject and were left as they were.
+
+**Every label says what it holds.** The kicker reads "Share of people", "Theme",
+"Function", "In the X centre", "Keynote" or "Strategy for the X"; the epigraph
+has its own label (Signature, Hexagram N, In short, Standing); facets are
+Weight, Fidelity and Origins on a study claim, Low and High expression on a
+gate, and the like. A bare word over a value ("Success", "How reliable") is the
+fault this removed.
+
+**Themes are bold, terms are italic, and both are segments.** `HDAtlas.EMPHASIS`
+holds each Type's and each authority's theme words; `atlasRich()` bolds the
+first use of each and sets the first use of each term chip's label in italic.
+A hole cannot carry HTML, so the lead and the facets render as an `sc-for` over
+`{t, fw, fs}` spans, in both shells. `atlasDefs()` finds lexicon terms in the
+lead and facets and adds them as chips, at most eight. A chip opens the lexicon
+entry where one exists; a lesson word with no lexicon entry still opens its
+lesson.
+
 ## Study paths, the five guides, and the tutorials
 Asked for by the owner on 20 October 2026, after asking how the Astropedia and
 the Book of Numbers would read to somebody brand new: "Add paths the reader can
