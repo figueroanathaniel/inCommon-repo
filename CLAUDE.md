@@ -5119,6 +5119,42 @@ links, and the sixty four gate tiles on screen: four identities, hardened and
 not, at 1440 and 375, 48 cases, 85 to 203 elements each, no pair under 4.5:1
 and no control under 44px.
 
+## The modern study weighs what the field says, and the field study asks the reader
+Asked for by the owner on 4 November 2026: the claims the Atlas will not state as the
+tradition are kept in a chapter of their own, The modern study (`atlasSec` `study`,
+after the terms), each weighed by how far it can be trusted, and anything under 70 is
+a field study the reader can add to. `docs/hd-upgrade/03-atlas-lessons-sources.md`
+holds every score and its sources.
+
+**A weight is a judgement and it is named in the sky.** `HDAtlas.WEIGHTS`: Fixed star
+(91 to 100, which is the Atlas itself and never appears in the study), Bright (80 to
+90), Dim (70 to 79), Twinkling (60 to 69) and Below the horizon (under 60); the last
+two are field studies. `STUDY` holds each claim with its score, a note on how reliable
+it is and where it comes from, and `weightOf()` is the one place a score becomes a
+band. A claim that earns more than 90 moves into the Atlas proper and leaves the study.
+**The reliability notes are the owner's exception to "No disclaimers"**, made for this
+chapter only: do not take it as licence for a method line anywhere else.
+
+**The Gap is four claims, not one.** A group's attention fixing on what it lacks is
+Bright; the newcomer being drawn into the role is Twinkling; one taking it without
+the wiring and the group over relying on its one carrier are Below the horizon. Do not
+fold them back into one sentence: that is how a 40 rode on an 85.
+
+**The field note keeps the fit apart from the charge.** Two questions, never one
+scale: how well it fit, and how charged the moment was. The tally reports fit among
+the sure answers, fit in the quiet moments alone, and fit where the reader's chart
+holds the gate, which is how the excitement of a moment is kept from reading as
+confirmation. Do not merge them into a single rating.
+
+**The words never leave the device** (`incommon.p.<id>.fieldStudy`, the last 500).
+Sent, only when signed in, on a chart of the reader's own, with the switch on: the
+claim key, the two answers and whether the chart holds it (`fieldStudySend`, K54b).
+`server/migrations/0018-field-study.sql` keeps one note per claim per account per
+day, refuses past 40 a day, reads totals to anyone, shows nothing under ten notes on
+the page, and is on the two-step list. **0018 is not applied**, and it goes after the
+Privacy Policy's "Field notes" paragraph is live, not before. The signed in send was
+never driven against a real project.
+
 ## Study paths, the five guides, and the tutorials
 Asked for by the owner on 20 October 2026, after asking how the Astropedia and
 the Book of Numbers would read to somebody brand new: "Add paths the reader can

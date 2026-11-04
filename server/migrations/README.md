@@ -180,9 +180,20 @@ Run each in the Supabase dashboard, SQL Editor, paste, Run, in this order:
    `server/oracle/schema.sql`; no new table, so `server/mfa-policies.sql`
    need not run again. Tested by rows AT1 to AT8.
 
+18. `0018-field-study.sql`: the Human Design Atlas's modern study (the owner,
+   4 November 2026). `field_study_notes`, row level security on and no
+   policy, reached only through `field_study_add()` (signed in, one note per
+   reader per claim per day, the two-step rule checked inside) and
+   `field_study_tally()` (counts for one claim, nothing about a reader). It
+   holds the claim's key, the fit, the charge and whether the chart holds the
+   claim, never the reader's words. **Do not apply before the Privacy Policy
+   names field notes** (section 6 on this branch), then run
+   `server/mfa-policies.sql` again, which lists `field_study_notes`. Tested by
+   rows FS1 to FS8 of `tools/check-hd-study-rls.js`.
+
 0001 to 0003 create no table, so `server/mfa-policies.sql` did not need to be
 run again for them. 0004 does, once its policies are in, 0007 does, once
-0008 is in, and 0014 does, once 0015 is in.
+0008 is in, 0014 does, once 0015 is in, and 0018 does.
 
 Proven on 27 October 2026 against Postgres 16 with `server/cloud-schema.sql`
 (from its v2 section), `server/oracle/schema.sql`, `server/store/schema.sql`,

@@ -3432,7 +3432,7 @@ async function runCloudTests() {
   var covered = ['public.profiles (account_id)', 'public.pairs (account_id)', 'public.throughline_entries (profile_id)', 'public.oki_messages (profile_id)']
     .filter(function (on) { return mig0001.indexOf(' on ' + on) === -1; });
   ts('K73', 'every migration is numbered in order, listed in the README in that order, safe to run twice, carries its down migration, splits nowhere in the SQL Editor, and 0001 indexes what pull() filters on', {
-    files: 17, bad: [], listedInOrder: true, uncovered: []
+    files: 18, bad: [], listedInOrder: true, uncovered: []
   }, { files: migFiles.length, bad: migBad,
     listedInOrder: listed.every(function (p, i) { return p !== -1 && (i === 0 || p > listed[i - 1]); }), uncovered: covered });
 
@@ -4146,6 +4146,37 @@ async function runCloudTests() {
     keys: Object.keys(body).sort(), trimmed: body.email,
     anon: !!hdr && hdr.Authorization === 'Bearer ' + hdr.apikey && /^eyJ/.test(hdr.apikey || ''),
     badTopicFallsBack: sentTopic, invalidSentNothing: sentForInvalid, reasons: reasons
+  });
+
+  /* ---- K54b: the field study (the owner, 4 November 2026). Signed out, a
+     field note is refused before anything is sent; a value outside the
+     bounds is refused before anything is sent; the tally is read with the
+     public key from the one function and comes back as counts. The body the
+     tally sends names the claim and nothing else. ---- */
+  var fsSent = [];
+  var fsFetch = function (answer) { return function (url, init) { fsSent.push({ url: url, init: init }); return Promise.resolve(answer); }; };
+  var fsRow = { ok: true, status: 200, text: function () { return Promise.resolve('[{"notes":12,"sure":10,"fit":6,"quiet_sure":4,"quiet_fit":1,"held_sure":5,"held_fit":4}]'); } };
+  var fsGone = { ok: false, status: 404, text: function () { return Promise.resolve('{"code":"PGRST202","message":"Could not find the function"}'); } };
+  var fsOut = await CL.fieldStudySend({ item: 'gap-newcomer', fit: 2, charge: 0, holds: true, text: 'my words' }, { fetch: fsFetch(fsRow) });
+  var fsBad = [
+    (await CL.fieldStudySend({ item: 'Gap Newcomer', fit: 2, charge: 0 }, { fetch: fsFetch(fsRow) })).reason,
+    (await CL.fieldStudySend({ item: 'gap-newcomer', fit: 4, charge: 0 }, { fetch: fsFetch(fsRow) })).reason,
+    (await CL.fieldStudySend({ item: 'gap-newcomer', fit: null, charge: 3 }, { fetch: fsFetch(fsRow) })).reason
+  ];
+  var fsBefore = fsSent.length;
+  var fsT = await CL.fieldStudyTally('gap-newcomer', { fetch: fsFetch(fsRow) });
+  var fsTB = fsSent[fsBefore] ? JSON.parse(fsSent[fsBefore].init.body) : {};
+  var fsTH = fsSent[fsBefore] ? fsSent[fsBefore].init.headers : {};
+  var fsNot = await CL.fieldStudyTally('gap-newcomer', { fetch: fsFetch(fsGone) });
+  t('K54b', 'a field note is refused signed out and out of bounds before anything is sent, and the tally reads counts for one claim with the public key', {
+    signedOut: 'signedOut', bad: ['item', 'fit', 'charge'], sentBefore: 0,
+    url: true, tallyKeys: ['p_item'], anon: true,
+    tally: { ok: true, notes: 12, sure: 10, fit: 6, quietSure: 4, quietFit: 1, heldSure: 5, heldFit: 4 }, notSetUp: 'notSetUp'
+  }, {
+    signedOut: fsOut.reason, bad: fsBad, sentBefore: fsBefore,
+    url: !!fsSent[fsBefore] && /\/rest\/v1\/rpc\/field_study_tally$/.test(fsSent[fsBefore].url),
+    tallyKeys: Object.keys(fsTB), anon: !!fsTH && fsTH.Authorization === 'Bearer ' + fsTH.apikey,
+    tally: fsT, notSetUp: fsNot.reason
   });
 
   var termsSrc = fs.readFileSync(path.join(repo, 'app', 'terms.html'), 'utf8');

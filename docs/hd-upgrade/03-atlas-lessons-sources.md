@@ -238,3 +238,89 @@ Pages: jovianarchive.com/pages/global-cycles-in-human-design,
 /pages/sacral-authority-in-human-design-trusting-the-gut-response;
 humandesignlife.squarespace.com/blog/2017/3/11/quarters-and-godheads-of-the-human-design-mandala;
 barneyandflow.com/penta.
+
+## The Projector, the modern study and the field study, 4 November 2026
+
+The owner asked for the Projector to be defined with the same effort as the other
+types and its kinds named as modern, for "Pure Generator" to read as Generator, for a
+modern study with named weights, for a field study the reader can contribute to, and
+for the Gap clause to be discerned heavily. This pass supersedes two rows above:
+energy and classic Projector are now defined, and the splenic streams and the
+individual emotional stream were scored again.
+
+**What changed in the Atlas itself**
+
+- The Projector's definition, and three lexicon entries: Energy Projector (Heart,
+  Solar Plexus or Root defined, none joined to the Throat, still a non-energy type),
+  Classic Projector (no motor; definition in the Spleen or the G; splenic or
+  self-projected authority) and Mental Projector (Ra Uru Hu's own name; definition only
+  in the Head, Ajna and Throat; no direct inner authority). The folio carries them as
+  "Kinds, in modern use", saying energy and classic came after him.
+- "Pure Generator" is gone as a term; the Generator entry carries the share and its
+  sibling.
+- The Ajna stream lesson now names the Throat gates (56, 62, 23) and the Solar Plexus
+  lesson names the individual stream (39, 55, 22, 12), each scored 95 below.
+
+A first draft said an energy Projector draws on a motor "in bursts" and takes its
+authority from the highest motor. Neither was supported, and the second is wrong (Root
+to Spleen gives splenic authority), so both were removed before the commit.
+
+**The weights.** Names in the app's own sky: Fixed star (91 to 100, the Atlas itself),
+Bright (80 to 90), Dim (70 to 79), Twinkling (60 to 69, field study) and Below the
+horizon (under 60, field study). The owner's two bands overlap at 60 to 69 and 70 to
+89; the reading taken is that 70 to 89 is mentioned with a reliability note and
+anything under 70 is a field study. A score is judgement over the same four things as
+above: independent agreement, whether Ra's own material says it, contradiction, and
+fit with the wiring the app computes.
+
+| Claim | Score | Weight |
+|---|---|---|
+| Energy and classic Projectors, as defined above | 85 | Bright |
+| Splenic streams 54-32-44, 38-28-57, 58-18-48 | 90 | Bright |
+| A sense per splenic stream | 75 | Dim |
+| Solar Plexus fears of the tribal stream (30, 36, 6) | 85 | Bright |
+| The rest of the Solar Plexus nervousness list | 75 | Dim |
+| Ajna anxieties for 4, 17, 43, 24 | 80 | Bright |
+| The anxiety of gate 47 | 55 | Field study |
+| The anxiety of gate 11 | 50 | Field study |
+| Determination's left and right sides | 85 | Bright |
+| Ajna Throat ends (56, 62, 23) | 95 | Atlas |
+| Individual emotional stream 39, 55, 22, 12 | 95 | Atlas |
+
+**The Gap clause, discerned.** It was one sentence carrying four claims, and they do
+not share a weight:
+
+| Part | Score | Why |
+|---|---|---|
+| A group's attention fixes on what it lacks | 85, Bright | Ra's Group Mechanics names the gaps; teaching sites agree and none contradicts |
+| A newcomer who carries the missing part is pulled into the role | 60, Twinkling | sites and app libraries say it; nothing of Ra's was found that says the arrival takes it |
+| A newcomer without the wiring is conditioned into it | 40, Below the horizon | one app library; it reads as plausible conditioning theory, not as a teaching |
+| The group comes to over rely on the one who carries it | 50, Below the horizon | two teaching sites, no primary source |
+
+**The field study.** Every claim under 70 carries a form: how well it fit (Not at all,
+A little, Mostly, Exactly, Not sure) and, as a separate question, how charged the moment
+was (Quiet, Stirred, Electric). The tally reports fit among the sure answers, fit in the
+quiet moments alone, and fit where the reader's own chart holds the gate, so a claim
+that only fits when a moment is electric shows it. The words stay on the device. Sent,
+if the reader is signed in and chooses: the claim key, the two answers and whether the
+chart holds it. One note a day per claim per account; totals are shown from ten notes.
+Migration 0018 holds it and is not applied: it waits on the Privacy Policy paragraph
+going live.
+
+**Sources this pass**, as recorded on each claim: Rave Anatomy II excerpts, Ra Uru Hu's
+Group Mechanics chapter titles, the founder's publisher (Projector hub, The Gates of
+Fear, The Mental Streams), HD and Me, Human Design Insight, GetHumanDesign, Satyori,
+humandesignlife, and five teaching blogs on the Projector kinds, the earliest dated
+2018. Ra's 2010 remark on determination is as one site quotes it, not read in the
+original.
+
+**Tests run**: module tests 529 of 529 (K54b new: signed out refusal, bounds, tally
+body and parsing); RLS 101 of 101 across 10 runs (FS1 to FS8 new, and a run without
+0018 that must fail five of them); competitor surface, prose repeats, dead controls,
+violet text, atlas map (19 sections), layer boundary, token compare and chart tone all
+clean. Driven in Chromium against a preview bundle at iPhone 13 and 1440x900: the study
+chapter's intro, a Bright claim with no form, a field claim's form, both radios
+checked at 44px, a note saved to the device with fit and charge apart, the tally
+answering "could not be reached" with Supabase blocked, and the Projector folio with
+its kinds, no page errors. **Not driven**: the signed in send, which needs a live
+project with 0018.

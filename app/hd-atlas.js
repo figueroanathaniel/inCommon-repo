@@ -69,7 +69,8 @@
       aura: 'Focused and absorbing, aimed at one person at a time (some teachers say penetrating). It is felt as being seen, and occasionally as being seen rather too accurately.',
       signature: 'Success. Not status, in the tradition’s sense, but the recognition of having guided something correctly.',
       notSelf: 'Bitterness. Read as the signal of having entered without invitation, or of having gone unrecognized for too long.',
-      def: 'No defined Sacral. A non-energy type, read as built to see and guide the energy of others rather than to generate it.',
+      def: 'No defined Sacral and no motor joined to the Throat, with at least one channel defined somewhere in the chart. A non-energy type, read as built to see and guide the energy of others rather than to generate it, and the only type whose strategy waits on being recognised by someone else.',
+      kinds: 'Modern teachers sort Projectors three ways by what is defined. An energy Projector has at least one motor defined, the Heart, the Solar Plexus or the Root, none of them joined to the Throat. A classic Projector has no motor defined and some definition below the Throat, in the Spleen or the G. A mental Projector has definition only in the Head, the Ajna and the Throat. Mental Projector is Ra Uru Hu\u2019s own name; energy and classic came later and are now widely used.',
       strategy: 'Wait for the invitation. Wait to be recognized for the thing you actually are, then enter.',
       authority: 'Various: emotional, splenic, ego projected, self-projected, or mental.',
       male: 'Often reads as observant and incisive, and can turn bitter where recognition never arrives. Needs to be seen for a specific gift.',
@@ -520,7 +521,7 @@
         ['Reflector', 'Nothing defined: all nine centers open. Read as a mirror for its surroundings. About 1 percent.'],
         ['Energy types and non-energy types', 'Manifestors and both kinds of Generator are called energy types. Projectors and Reflectors are non-energy types: the tradition holds they have no consistent working energy of their own and do best when they stop trying to keep pace with those who do.'],
         ['Solar and lunar', 'The four types whose rhythm follows the Sun’s passage through the gates are called solar. The Reflector is called lunar, because the Moon’s monthly passage is what gives its decisions their shape.'],
-        ['Kinds of Projector', 'Ra Uru Hu\u2019s own readings name a chart by its type and its authority: an emotional Projector, a splenic Projector, a self-projected Projector, and the mental Projector, whose definition sits only above the Throat so that it has no direct inner authority, a group it shares with the Reflector. Modern teachers also speak of energy and classic Projectors, but each school draws that line differently, so the Atlas leaves those as names rather than definitions.'],
+        ['Kinds of Projector', 'A modern sorting, by what the chart defines. An energy Projector has the Heart, the Solar Plexus or the Root defined, none of them reaching the Throat; despite the name it is still a non-energy type. A classic Projector has no motor defined and some definition below the Throat, in the Spleen or the G. A mental Projector has definition only above and at the Throat, so it has no direct inner authority, a condition it shares with the Reflector. Ra Uru Hu named the mental Projector and read a chart by its type and authority, an emotional Projector or a splenic one; the energy and classic names came from teachers after him, and nearly every school now draws them the same way.'],
       ],
       see: [['types', 'Manifestor'], ['types', 'Generator'], ['types', 'Manifesting Generator'], ['types', 'Projector'], ['types', 'Reflector']],
       words: [['bedrock', 'Strategy'], ['bedrock', 'Aura'], ['weather', 'Centers']] },
@@ -672,8 +673,8 @@
       lead: 'A stream is a run of gates carrying a potential from a pressure center through an awareness center toward expression. Each awareness center has three, so the wiring holds nine streams of awareness, and teachers follow each one gate by gate as a story of how that kind of knowing matures.',
       parts: [
         ['Spleen: instinct, intuition and taste', 'The Spleen\u2019s awareness is read through three themes: instinct, intuition and taste.'],
-        ['Ajna: abstract, logical, individual', 'Conceptualizing runs in three streams: the abstract idea through gates 64, 47 and 11, the logical fact through 63, 4 and 17, and the individual insight through 61, 24 and 43, each then reaching the Throat.'],
-        ['Solar Plexus: need, uncertainty, desire', 'The emotional wave is read in three variations: the tribal wave of need, the individual wave of uncertainty and the collective wave of desire. The tribal stream runs through gates 19, 49, 37 and 40, and the collective stream of feeling through 41, 30, 36 and 35.'],
+        ['Ajna: abstract, logical, individual', 'Conceptualizing runs in three streams: the abstract idea through gates 64, 47 and 11, the logical fact through 63, 4 and 17, and the individual insight through 61, 24 and 43, each then reaching the Throat at gates 56, 62 and 23 in turn.'],
+        ['Solar Plexus: need, uncertainty, desire', 'The emotional wave is read in three variations: the tribal wave of need, the individual wave of uncertainty and the collective wave of desire. The tribal stream runs through gates 19, 49, 37 and 40, the individual stream through 39, 55, 22 and 12, and the collective stream of feeling through 41, 30, 36 and 35.'],
         ['Why streams matter', 'A stream shows a gate in context: what pressure feeds it, what awareness it carries, and where it wants to come out.']
       ],
       see: [['centers', 'Spleen'], ['centers', 'Ajna'], ['centers', 'Solar Plexus']],
@@ -839,11 +840,14 @@
     { name: 'Earth', text: 'Always the gate opposite the Sun on the same side. It is read as grounding, and with the Sun it makes the Cross.', see: ['cross', 'what'] },
     { name: 'Ego Circuit', text: 'The larger tribal circuit, of resources, bargains, belonging and loyalty, and the only circuit that runs to the Heart rather than the Throat: channels 19-49, 21-45, 26-44, 32-54 and 37-40.', see: ['weather', 'Circuits'] },
     { name: 'Emotional Wave Types', text: 'Three shapes of emotional wave. The tribal wave builds by steps, one forward and one back, until it releases. The individual wave runs level and then spikes. The collective wave climbs gradually and falls sharply. Their themes are given as need, passion and desire; one entry in the published dictionary calls the individual theme uncertainty instead of passion.', see: ['weather', 'Streams'] },
+    { name: 'Energy Projector', text: 'A modern name for a Projector with at least one motor defined, the Heart, the Solar Plexus or the Root, and none of them joined to the Throat. A motor that does not reach the Throat does not make an energy type, so it is still a Projector and still a non-energy type.', see: ['types', 'Projector'] },
+    { name: 'Classic Projector', text: 'A modern name for a Projector with no motor defined and some definition below the Throat, in the Spleen or the G. Its authority is splenic or self-projected.', see: ['types', 'Projector'] },
+    { name: 'Mental Projector', text: 'Ra Uru Hu\u2019s name for a Projector whose definition sits only in the Head, the Ajna and the Throat. It has no direct inner authority, and clarity is read as coming from the right surroundings and from talking things over.', see: ['types', 'Projector'] },
     { name: 'Energy Type', text: 'Manifestors, Generators and Manifesting Generators: the types with a motor defined in a way that gives consistent access to working energy.', see: ['bedrock', 'Type'] },
     { name: 'Environment', text: 'The bottom left arrow, from the Design side: the kind of surroundings the body is said to do best in. Its six colors are Caves, Markets, Kitchens, Mountains, Valleys and Shores.', see: ['horizon', 'Variable'] },
     { name: 'Exaltation and Detriment', text: 'The two poles of a line. Each line is given one or more astral bodies that exalt it and one or more in its detriment, and an activation by one of them is said to fix the line in that expression; fixed both ways at once is a juxtaposition. Ra Uru Hu regretted the two names, because they read as good and bad when they describe a polarity within the line.', see: ['gates', 'g1'] },
     { name: 'Gate', text: 'One of the 64 divisions of the wheel, each matching a hexagram of the I Ching, and each housed in one center. Gate N is hexagram N.', see: ['gates', 'g1'] },
-    { name: 'Generator', text: 'The type with a defined Sacral. In the published convention it is an umbrella with two kinds, the Pure Generator and the Manifesting Generator, together about seven in ten people. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
+    { name: 'Generator', text: 'The type with a defined Sacral and no motor reaching the Throat, about a third of people. Its sibling, the Manifesting Generator, has a motor joined to the Throat, and the two together are about seven in ten. Strategy to respond, signature satisfaction, not-self theme frustration.', see: ['types', 'Generator'] },
     { name: 'Global Cycle', text: 'An era of history read as carrying the theme of one Incarnation Cross. The present one is the Cross of Planning.', see: ['horizon', 'Evolution'] },
     { name: 'Harmonic Gate', text: 'The gate at the other end of a channel. Two harmonic gates make the channel; either alone is a hanging gate.', see: ['terms', 'Hanging Gate'] },
     { name: 'Hexagram', text: 'A figure of six lines from the I Ching. The system lays the 64 hexagrams around the zodiac as its 64 gates, and each line of a hexagram becomes a line of the gate.', see: ['gates', 'g1'] },
@@ -876,7 +880,6 @@
     { name: 'Personality Sun', text: 'The Sun’s gate and line at birth. It gives the first number of the profile and two of the four gates of the Cross.', see: ['weather', 'Profile'] },
     { name: 'Perspective', text: 'The bottom right arrow, from the Personality side, also called view: what the mind is built to notice. Its six colors are Survival, Possibility, Power, Wanting, Probability and Personal.', see: ['horizon', 'Variable'] },
     { name: 'Pressure Centers', text: 'The Head and the Root, which push rather than power: pressure to know and pressure to act.', see: ['weather', 'Centers'] },
-    { name: 'Pure Generator', text: 'A Generator whose Throat is not joined to any motor. The published convention names it beside the Manifesting Generator as the two kinds of Generator, with the same strategy, signature and not-self theme. Given as about half of all Generators.', see: ['types', 'Generator'] },
     { name: 'Program', text: 'The tradition’s word for the patterned, cyclical effect of the neutrino stream on all life, carried by the moving astral bodies.', see: ['horizon', 'Conditioning'] },
     { name: 'Quarter', text: 'One of four arcs of 16 hexagrams on the wheel: Initiation, which opens at gate 13, Civilization at gate 2, Duality at gate 7 and Mutation at gate 1.', see: ['weather', 'Angle'] },
     { name: 'Rave', text: 'The tradition’s name for nine-centered human beings, which it dates from 1781.', see: ['horizon', 'Evolution'] },
@@ -903,6 +906,109 @@
   /* One alphabetical lexicon: the further terms and the rest together. */
   TERMS = TERMS.concat(LEXICON).sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
 
+  /* ---------- the modern study ----------
+     Asked for by the owner on 4 November 2026: what the field teaches beyond
+     what the tradition holds firmly, weighed and named. A claim's weight is
+     the probability, judged from the sources read for it, that it fairly
+     states what the field teaches. It is never a claim that the idea is true
+     of a person. Above 90 a claim belongs in the Atlas itself. From 60 to 90
+     it is named here with a note on how reliable it is. Below 70 it is a
+     field study: speculative, and left to what readers report. The scores
+     and the sources behind each are in docs/hd-upgrade/03-atlas-lessons-sources.md;
+     they are judgement, not a calculation. `gates` lets the app say whether
+     a reader's own chart holds what a claim is about. */
+  var WEIGHTS = [
+    { key: 'fixed', name: 'Fixed star', min: 91, max: 100, glyph: '✦',
+      line: 'Held across the tradition and the schools after it. These are written into the Atlas itself, not listed here.' },
+    { key: 'bright', name: 'Bright', min: 80, max: 90, glyph: '✧',
+      line: 'Taught widely and consistently, but not traced to the founder’s own words, or traced only in part.' },
+    { key: 'dim', name: 'Dim', min: 70, max: 79, glyph: '✩',
+      line: 'Taught by more than one school and contradicted by none found, resting on secondary sources that may be echoing each other.' },
+    { key: 'twinkling', name: 'Twinkling', min: 60, max: 69, glyph: '✴', field: true,
+      line: 'Found in some teaching and absent from the rest. A field study: what readers report decides how it is held.' },
+    { key: 'horizon', name: 'Below the horizon', min: 0, max: 59, glyph: '◌', field: true,
+      line: 'Found in one or two places, or only implied. A field study, held as speculation until experience says otherwise.' }
+  ];
+  function weightOf(score) {
+    for (var i = 0; i < WEIGHTS.length; i++) if (score >= WEIGHTS[i].min && score <= WEIGHTS[i].max) return WEIGHTS[i];
+    return WEIGHTS[WEIGHTS.length - 1];
+  }
+
+  var STUDY = [
+    { key: 'energy-classic', name: 'Energy and classic Projectors', score: 85,
+      claim: 'Projectors divide by what is defined: energy Projectors hold a motor that does not reach the Throat, classic Projectors hold no motor and some definition below it.',
+      note: 'Nearly every school that uses the names draws them this way, the founder’s own publisher included. The names came after Ra Uru Hu, and one school calls the split a later addition to his teaching.',
+      from: 'The founder\u2019s publisher, HD and Me, Human Design Insight, GetHumanDesign and five teaching blogs, the earliest dated in 2018.',
+      see: ['types', 'Projector'], type: 'Projector' },
+    { key: 'splenic-streams', name: 'The three splenic streams', score: 90,
+      claim: 'Splenic awareness runs in three streams through the Spleen: instinct from gate 54 through 32 and 44 to 26, intuition from 38 through 28 and 57 to 20, and taste from 58 through 18 and 48 to 16.',
+      note: 'The paths follow from the channels themselves and agree with the founder’s lecture notes that could be read. They sit at the top of the band because no full primary text was reached.',
+      from: 'Rave Anatomy II excerpt, a teaching school’s account of the Spleen.',
+      see: ['centers', 'Spleen'], gates: [54, 32, 44, 26, 38, 28, 57, 20, 58, 18, 48, 16] },
+    { key: 'splenic-senses', name: 'A sense for each splenic stream', score: 75,
+      claim: 'Each splenic stream is tied to a sense: smell for instinct, hearing for intuition, taste for taste.',
+      note: 'The founder tied gate 57 to the right ear and the Spleen to smell, which supports two of the three. Taste for the third rests on one school.',
+      from: 'Rave Anatomy II excerpt, one teaching school.',
+      see: ['centers', 'Spleen'], gates: [54, 38, 58] },
+    { key: 'solar-fears-group', name: 'Inadequacy, intimacy and fate', score: 85,
+      claim: 'Gate 36 carries a nervousness of inadequacy, gate 6 of intimacy, and gate 30 of fate.',
+      note: 'The founder\u2019s publisher names these three as the Solar Plexus fears, and two schools agree on which gate holds which.',
+      from: 'The founder\u2019s publisher, on The Gates of Fear; two teaching schools.',
+      see: ['centers', 'Solar Plexus'], gates: [36, 6, 30] },
+    { key: 'solar-fears-rest', name: 'The other Solar Plexus nervousnesses', score: 75,
+      claim: 'Gate 55 carries a nervousness about emptiness, 22 about silence and not being heard, 37 about tradition, and 49 about nature and rejection.',
+      note: 'Two schools agree on all four and none contradicts them. Neither cites the founder for these gates.',
+      from: 'Two teaching schools.',
+      see: ['centers', 'Solar Plexus'], gates: [55, 22, 37, 49] },
+    { key: 'ajna-fears-group', name: 'Four Ajna anxieties', score: 80,
+      claim: 'Gate 4 carries an anxiety about chaos, 17 about challenge, 43 about rejection and 24 about not knowing.',
+      note: 'The founder named anxiety as the Ajna’s fear, and his publisher lists challenge, rejection and chaos among the Ajna’s anxieties. Gate 24 rests on two schools.',
+      from: 'Rave Anatomy II excerpt, the founder\u2019s publisher, two teaching schools.',
+      see: ['centers', 'Ajna'], gates: [4, 17, 43, 24] },
+    { key: 'ajna-fear-47', name: 'Gate 47 and futility', score: 55,
+      claim: 'Gate 47 carries an anxiety that nothing will come of the effort to make sense of things.',
+      note: 'One school names it futility; another describes it as confusion. No primary text was reached.',
+      from: 'Two teaching schools, worded differently.',
+      see: ['gates', 'g47'], gates: [47] },
+    { key: 'ajna-fear-11', name: 'Gate 11 and darkness', score: 50,
+      claim: 'Gate 11 carries an anxiety about darkness, or about sharing ideas at all.',
+      note: 'The two schools that name it disagree on what it is about.',
+      from: 'Two teaching schools, in disagreement.',
+      see: ['gates', 'g11'], gates: [11] },
+    { key: 'determination-sides', name: 'The sides of Determination', score: 85,
+      claim: 'Each colour of Determination has a left and a right: consecutive or alternating appetite, open or closed taste, hot or cold thirst, calm or nervous touch, high or low sound, direct or indirect light.',
+      note: 'The pairs are taught the same way everywhere they appear, and a remark of the founder’s, as quoted, places indirect light on the right. Only one page marks every side explicitly.',
+      from: 'Two teaching schools, a remark of Ra Uru Hu from 2010 as one site quotes it.',
+      see: ['terms', 'Variables and the Four Arrows'] },
+    { key: 'gap-attention', name: 'A group looks to what it lacks', score: 85,
+      claim: 'Where nobody in a small group defines part of its wiring, the group’s attention keeps going to that missing part.',
+      note: 'The founder’s book on group mechanics has chapters titled for exactly this, though only the titles could be read. Teachers and analysts repeat it.',
+      from: 'Ra Uru Hu, Group Mechanics (chapter titles); a long running teaching site; several others.',
+      see: ['terms', 'Gap'] },
+    { key: 'gap-newcomer', name: 'A newcomer takes the missing part', score: 60,
+      claim: 'Someone who joins a group and carries the part it lacks is drawn into that role.',
+      note: 'Implied by every source that writes about filling a group’s gaps, and stated by none of the founder’s words that could be read. One business school builds hiring on it.',
+      from: 'Teaching sites and app libraries.',
+      see: ['terms', 'Gap'] },
+    { key: 'gap-without', name: 'A role taken without the wiring', score: 40,
+      claim: 'Someone who does not carry the missing part is pressed into the role anyway, at a cost to them.',
+      note: 'Said outright by one source, which also says no coaching makes the role sustainable for such a person. Plausible from the general teaching on conditioning, and nowhere stated by the founder.',
+      from: 'One app library.',
+      see: ['terms', 'Conditioning'] },
+    { key: 'gap-reliance', name: 'The one who alone carries a part', score: 50,
+      claim: 'A group leans hardest on a member who is the only one defining a part of its wiring, and is shaken most when that member is absent.',
+      note: 'Found on two teaching sites, which may be repeating each other.',
+      from: 'Two teaching sites.',
+      see: ['terms', 'Gap'] }
+  ];
+  STUDY.forEach(function (x) { x.weight = weightOf(x.score).key; x.field = !!weightOf(x.score).field; });
+  /* The two answers a field note keeps apart: how well the claim fit what
+     happened, and how charged the moment was. Only the first is read as
+     evidence; the second is kept so a striking moment can be told from an
+     ordinary one. */
+  var FIELD_FIT = [['0', 'Not at all'], ['1', 'A little'], ['2', 'Mostly'], ['3', 'Exactly'], ['', 'Not sure']];
+  var FIELD_CHARGE = [['0', 'Quiet'], ['1', 'Stirred'], ['2', 'Electric']];
+
   var SECTIONS = [
     ['intro', 'What Human Design is'],
     ['types', 'The five types'],
@@ -921,6 +1027,7 @@
     ['weather', 'Weather'],
     ['horizon', 'Horizon'],
     ['terms', 'The lexicon'],
+    ['study', 'The modern study'],
     ['example', 'An example bodygraph']
   ];
 
@@ -964,7 +1071,8 @@
     CENTERS: CENTERS, AUTHORITIES: AUTHORITIES, STRATEGIES: STRATEGIES, CHANNELS: CHANNELS,
     GATES: GATES, EXAMPLE: EXAMPLE, SECTIONS: SECTIONS,
     DEFINITION: DEFINITION, CROSS: CROSS, CIRCUITS: CIRCUITS, TERMS: TERMS,
-    TIERS: TIERS, LESSONS: LESSONS, CIRCUIT_OF: CIRCUIT_OF, circuitOf: circuitOf,
+    TIERS: TIERS, LESSONS: LESSONS, WEIGHTS: WEIGHTS, STUDY: STUDY, weightOf: weightOf,
+    FIELD_FIT: FIELD_FIT, FIELD_CHARGE: FIELD_CHARGE, CIRCUIT_OF: CIRCUIT_OF, circuitOf: circuitOf,
     CONNECTION_TRADITION: CONNECTION_TRADITION, CONNECTION_ASK: CONNECTION_ASK,
     layers: layers,
     centerOf: centerOf, gateName: gateName, channel: channel, channelKey: channelKey,
