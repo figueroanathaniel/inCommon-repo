@@ -83,10 +83,6 @@ These are in the lessons as written and should be checked by a Human Design revi
 
 ## Deliberately left out
 
-- **Group terms** (the three-to-five person group aura, the larger work group, and
-  the business and career system). Their names are barred marks in
-  `tools/check-competitor-surface.js`. A decision for the owner: describe them
-  without the names, or leave them out.
 - **Biological correlations of the centers** (glands and organs): left out under the no-health-claims rule.
 - **The 192 cross names** and the 64 Ra gate names: the trademark study recommends against Ra's naming.
 - **The older angle names** (personal destiny, fixed fate, transpersonal karma): the
@@ -139,3 +135,38 @@ and any peer reviewed or computed population study (none located).
 (named on Jovian's Generator and MG pages and in its dictionary) and Manifesting
 Generator. "Classic Generator" was looked for and found on no source read, so it is
 not used.
+
+
+## Group terms, added 4 November 2026
+
+The owner decided the group terms belong in the dictionary. `check-competitor-surface.js`
+carries a reasoned override for each name in `app/hd-atlas.js` only, so no inCommon
+surface may take the name. Wa needs none: the gate bars the capital WA.
+
+| Term | What was read | Status |
+|---|---|---|
+| Penta | Jovian "The Penta" article: an aura that forms with three people, "channels that run between the Sacral Center, through the G Center, to the Throat", no Spleen, Ajna, Solar Plexus, Ego or Root; family and small-business use. Size three to five (Wa Immersion talk), three or more (Group Mechanics product page) | the six channel numbers are from knowledge, see below |
+| Wa | Jovian product page: "9 people or more", "nine to sixteen people", "sixteen or more" (all on one page), driven for material success; Wa Immersion talk: built on Pentas | the size disagreement is written into the entry |
+| Trans-Auric Form | Jovian dictionary "Design of Forms": two transpersonal forms, the Penta and the Wa; the Trans-Auric Forms article | sourced |
+| Gap | Wa Immersion talk: "A gap is a place that determines where everybody's attention goes" | the role-filling clause is from knowledge |
+| Alpha | Jovian dictionary, read only through a fetch tool's summary: "three Pentas and an Alpha" | single source, not read verbatim |
+| BG5 | BG5 Business Institute exists (its org chart and practitioners' pages); not on any Jovian page read | described only as the business and career application |
+| OC16 | one passing mention on the Wa Immersion page, as a business knowledge base for large groups | described only that far |
+
+## Everything in this branch that rests on my knowledge, not on a source read
+
+Written openly at the owner's request. None of these has been approved by the owner
+or checked by a Human Design reviewer.
+
+1. **The Penta's six channels**, 2-14, 5-15, 29-46, 1-8, 7-31 and 13-33. The source says Sacral, G and Throat only. The topology also joins the G to the Throat by 10-20, which the entry leaves out on the strength of knowledge alone.
+2. **Gap**: that whoever arrives to fill a gap is pulled into that role.
+3. **Cross of Planning** dated 1615 to 2027, and the Cross of the Sleeping Phoenix after it.
+4. **The four Quarters'** gates and themes.
+5. **Stream gate sequences** for the Spleen and the Ajna, and the Solar Plexus tribal and individual streams. Only 41-30-36-35 was confirmed.
+6. **Minor authority definitions** (ego manifested, ego projected, self-projected, mental, lunar): from the vault's derivation rule, not a page read.
+7. **Determination's left and right pairing.**
+8. **Energy, mental and classic Projector**, written as teachers' terms.
+9. **Splenic fears, Ajna anxieties, Solar Plexus nervousness.**
+10. **Exaltation and detriment** entry.
+11. **Sacral sounds**, rising for yes and falling for no.
+12. **Single source**: the base count of five, the Alpha, the Uranus opposition at 38 to 44.
