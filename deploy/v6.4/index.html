@@ -322,9 +322,11 @@
     box-shadow: 0 0 26px rgba(157, 78, 221, .7), 0 12px 32px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .12);
   }
   .enter:focus-visible { outline: 1px solid rgba(255, 248, 231, .6); outline-offset: 4px; }
+  /* The float is even about the centre, so on average the pill sits on the
+     hole's centre and not a pixel and a half above it. */
   @keyframes pillFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+    0%, 100% { transform: translateY(1.5px); }
+    50% { transform: translateY(-1.5px); }
   }
   .create {
     pointer-events: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
@@ -1112,7 +1114,8 @@
     at(2350, function () {
       try {
         sessionStorage.setItem(HANDOFF_KEY, JSON.stringify({
-          at: Date.now(), cw: turnOf('.ring-slot.l .purple-ring'), ccw: turnOf('.green-line')
+          at: Date.now(), cw: turnOf('.ring-slot.l .purple-ring'), ccw: turnOf('.green-line'),
+          d: ring.getBoundingClientRect().width
         }));
       } catch (e) {}
       location.href = url;
@@ -2307,7 +2310,13 @@ function updateCamera(t) {
   const dist = 30.5 + Math.sin(t * 0.021 + 2.1) * 1.10 * drift;
   const ci = Math.cos(inc), si = Math.sin(inc);
   cam.set(dist * ci * Math.cos(az), dist * si, dist * ci * Math.sin(az));
-  tgt.set(Math.sin(t * 0.0173) * 0.50 * drift, Math.sin(t * 0.0231 + 1.1) * 0.22 * drift, Math.cos(t * 0.0191 + 0.6) * 0.50 * drift);
+  /* The camera always looks straight at the hole (owner, 4 November 2026:
+     "the event horizon should fit perfectly center"). It used to look at a
+     point wandering half a unit round it, which put the shadow up to 39px
+     off the middle of a desktop screen while the ring and the pill sat dead
+     centre. The orbit, the tilt and the distance still drift, so the disk
+     still turns under the reader; only the aim is held. */
+  tgt.set(0, 0, 0);
 
   fwd.copy(tgt).sub(cam).normalize();
   right.crossVectors(fwd, WUP).normalize();
@@ -2330,7 +2339,25 @@ function updateCamera(t) {
      is never in danger of running off the edges the way the mark's outer
      circles were on a portrait phone. */
   mainU.uHoleR.value = finalU.uRingS.value;
+  fitRing(finalU.uRingS.value);
 
+}
+
+/* The ring hugs the shadow. The shadow's screen radius is uRingS in units of
+   half the canvas height, so in CSS pixels it is uRingS * height / 2, and the
+   ring's border sits just outside it, on the photon ring. Where the shadow is
+   too small to hold the Continue pill (a portrait phone draws the disk wide,
+   so its shadow is about 80px across) the ring keeps its own size and stays
+   concentric with the shadow, which is now always the middle of the screen. */
+let ringPx = 0;
+function fitRing(rs) {
+  const el = document.documentElement;
+  const d = Math.round(rs * Math.max(2, el.clientHeight) + 8);
+  const want = d >= 200 && d * 1.5 <= el.clientWidth * 0.92 ? d : 0;
+  if (Math.abs(want - ringPx) < 1) return;
+  ringPx = want;
+  if (want) el.style.setProperty('--ring-d', want + 'px');
+  else el.style.removeProperty('--ring-d');
 }
 
 /* ------------------------------- loop ------------------------------- */

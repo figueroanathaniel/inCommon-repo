@@ -3301,6 +3301,20 @@ C5, C6, and D5/D6/S5/S6 at the wider sizes) were the only thing saying so.
 `build-bundle.js` refuses to ship a bundle whose head has no sheet, or whose
 helmet has one again.
 
+## The hole is the middle of the screen, and the ring hugs it
+Asked for by the owner on 4 November 2026 ("The event horizon should fit
+perfectly center"). The cover's camera looked at a point wandering half a unit
+round the hole, which put the shadow up to 39px off centre on a desktop while
+the ring and the pill sat dead centre. `updateCamera()` now aims at the hole
+(`tgt` is the origin), so `uHoleS` is zero and the shadow is the centre of the
+screen; the orbit, tilt and distance still drift. `fitRing()` sets `--ring-d`
+to the shadow's own diameter plus the border, so the ring sits on the photon
+ring, wherever that is at least 200px and the split mark fits the width. A
+portrait phone draws the disk wide and its shadow is about 80px, too small to
+hold the pill, so there the ring keeps its own size and is concentric. The
+handoff carries the ring's diameter (`d`) so the app's overlay draws the same
+size. The pill's float is even about the centre. No shader changed.
+
 ## The ring, Continue and the registration card (26 October 2026)
 The owner asked for the cover to be simplified and for a new way in. This
 section supersedes, where they disagree, four rules further down: the
@@ -4520,6 +4534,20 @@ sign in form at once and drops the query. The Oracle needs an account because a
 reading is written for one person and kept with them; a sample chart is refused
 on the page before anything is sent, because the Oracle writes for one person
 and a sample is nobody.
+
+## No reading until it is asked for
+Decided by the owner on 4 November 2026: "No readings until requested. That's
+universal law. No reading should populate before request, not even standard
+readings." This overrides every section below that has the page ask on open or
+prepare ahead. `oracleWillAsk()` answers false for every slot, so neither
+`oracleAutoAsk()` nor `cycleSheetAutoAsk()` asks, and `oraclePrepareAuto()`
+returns at `ORACLE_ON_REQUEST_ONLY`. Every Oracle slot, standard, in depth and
+the Cycle Audit, shows Consult the Oracle until it is pressed for that slot in
+this visit (`orOpened`, written by `orOpenDeep()`, which now opens any slot and
+remembers the in-depth wish only for an in-depth one), and a kept reading
+waits behind the same press: it shows at once and costs nothing. Driven with
+the cloud faked, both shells: nothing is asked on open or on switching to In
+Depth, and one press asks once and shows the reading.
 
 ## The in-depth reading is prepared ahead, and still opened with a press
 The owner asked on 10 October 2026 for the Luminary reading to load in seconds.

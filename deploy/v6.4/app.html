@@ -30429,6 +30429,7 @@ input[type="date"]{color-scheme:dark}
   var gap = Math.max(0, Date.now() - h.at), rs = el.querySelectorAll('.purple-ring'), i;
   for (i = 0; i < rs.length; i++) rs[i].style.animationDelay = -((+h.cw || 0) + gap) % 8000 + 'ms';
   el.querySelector('.green-line').style.animationDelay = -((+h.ccw || 0) + gap) % 6000 + 'ms';
+  if (+h.d > 100 && +h.d < 1200) el.style.setProperty('--ring-d', Math.round(+h.d) + 'px');
   el.hidden = false;
   var ring = el.querySelector('.ring-container'), done = false;
   function settle() {
@@ -36797,6 +36798,12 @@ input[type="date"]{color-scheme:dark}
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
           <button data-lift onClick="{{ cyConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyAskGate }}" hint-placeholder-val="{{ false }}">
+        <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button data-lift onClick="{{ cyOpenGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
       <sc-if value="{{ cyGateOn }}" hint-placeholder-val="{{ false }}">
@@ -43462,6 +43469,12 @@ input[type="date"]{color-scheme:dark}
         <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
           <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
           <button data-lift onClick="{{ cyConsentGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cyAskGate }}" hint-placeholder-val="{{ false }}">
+        <div data-lift="card" style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(160deg,var(--sf),var(--sf-g));border:1px solid var(--bd);border-radius:var(--rad);padding:18px;align-items:flex-start">
+          <div style="font:600 10.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ac2-hi)">&#9789; The Oracle</div>
+          <button data-lift onClick="{{ cyOpenGo }}" style="all:unset;cursor:pointer;box-sizing:border-box;align-self:flex-start;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 22px;border-radius:999px;background:var(--ac);color:var(--onac);font:700 13px var(--fu);letter-spacing:.02em">Consult the Oracle</button>
         </div>
       </sc-if>
       <sc-if value="{{ cyGateOn }}" hint-placeholder-val="{{ false }}">
@@ -56845,6 +56858,7 @@ class Component extends DCLogic {
   /* The Cycle Audit was a fourth period here until the owner moved it to
      Today as a widget (18 October 2026). It is still asked of the Oracle as
      period 'cycle', from the widget's sheet, so the plumbing below keeps it. */
+  ORACLE_ON_REQUEST_ONLY = true;
   ORACLE_PERIODS = [['daily', 'Today'], ['weekly', 'This Week'], ['monthly', 'This Month']];
   orPeriodOf(v) { return ['daily', 'weekly', 'monthly'].indexOf(v) !== -1 ? v : 'daily'; }
   oracleLocalDate(d) {
@@ -57050,7 +57064,7 @@ class Component extends DCLogic {
     return Object.keys(this._orBusy || {}).filter(k => !q[k]);
   }
   orOpenDeep(slot) {
-    this.writeLS(this.oracleDeepKey(), true);
+    if (String(slot).indexOf('|deep') !== -1) this.writeLS(this.oracleDeepKey(), true);
     this.setState({ orOpened: { ...(this.state.orOpened || {}), [slot]: true } });
   }
   oracleAsk(period, depth, again, quiet) {
@@ -57767,9 +57781,11 @@ class Component extends DCLogic {
     const st = this.state, cs = st.cloudStatus, slot = this.oracleSlot(period, depth);
     if (!this.cloud || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return false;
     if (!this.readLS(this.oracleConsentKey(), false)) return false;
-    /* In depth is never asked for on open. The reader presses Consult the
-       Oracle, and a reading prepared ahead (oraclePrepareAuto) is waiting. */
-    if (depth === 'deep') return false;
+    /* NO READING UNTIL IT IS ASKED FOR (owner, 4 November 2026: "No readings
+       until requested. That's universal law."). Nothing of any depth or
+       period is asked for on open, prepared ahead, or put on the screen
+       before the reader presses Consult the Oracle for that slot. */
+    if (period || depth) return false;
     /* The Cycle Audit is asked for on open once it is open to this reader and
        there is a passage to read. */
     if (period === 'cycle' && (!this.cycleReady() || !this.addonsOpen() || !this.cyclePassages().length)) return false;
@@ -57826,8 +57842,10 @@ class Component extends DCLogic {
      in-depth reading, for one whose subscription the server has not confirmed,
      or on the sample chart. */
   oraclePrepareAuto() {
+    /* Retired by the rule in oracleWillAsk: a reading prepared before it is
+       asked for is a reading the reader did not ask for. */
     const st = this.state, cs = st.cloudStatus, C = this.cloud;
-    if (!st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
+    if (this.ORACLE_ON_REQUEST_ONLY || !st.ready || !C || !(cs && cs.mode === 'cloud') || this.usingSampleBirth()) return;
     if (!this.readLS(this.oracleConsentKey(), false) || !this.readLS(this.oracleDeepKey(), false)) return;
     if (!this.addonsOpen()) return;
     /* The Cycle Audit has no in-depth form, so a reader looking at it has
@@ -58783,7 +58801,7 @@ class Component extends DCLogic {
     const paras = v => str(v).split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
     const closed = { cyOpen: false, cyListOn: false, cyNone: false, cyFinding: false, cyMoreOn: false, cyRows: [], cyShow: false,
       cyDOn: false, cyDRows: [], cyNOn: false, cyNYears: [], cySample: false, cyNeedSignIn: false, cyConsentOn: false, cyGateOn: false,
-      cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [] };
+      cyBusyOn: false, cyErrOn: false, cyPassages: [], cyOvRest: [], cyAskGate: false };
     const drawn = open && this.cycleReady() && this.cycleDesignReady();
     const cv = this.cycleViewNow(), sceneOn = drawn && (cv === '3d' || cv === 'orbit');
     const base = { cySceneOn: sceneOn, cySceneOff: !sceneOn, cyFlatOn: drawn && !sceneOn,
@@ -58794,8 +58812,9 @@ class Component extends DCLogic {
       cyZoomOut: () => { if (this._cyS) this._cyS.zoom(1); },
       cyClose: () => this.setState({ cyOpen: false }), cyMoreGo: () => this.setState({ cyAll: !st.cyAll }), cyDMoreGo: () => this.setState({ cyDAll: !st.cyDAll }),
       cySignInGo: () => { location.href = this.coverHref() + '?signin=1'; }, cyUseMine: () => { this.setState({ cyOpen: false }); this.birthEntryGo(); },
-      cyConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.oracleAsk('cycle', 'standard'); },
-      cyAskGo: () => this.oracleAsk('cycle', 'standard'), ...this.lumGateVals('cycle', 'cg') };
+      cyConsentGo: () => { this.writeLS(this.oracleConsentKey(), true); this.orOpenDeep(this.oracleSlot('cycle', 'standard')); this.oracleAsk('cycle', 'standard'); },
+      cyOpenGo: () => { const sl = this.oracleSlot('cycle', 'standard'); this.orOpenDeep(sl); if (!this.oracleCached('cycle', 'standard') && !(this._orBusy && this._orBusy[sl])) this.oracleAsk('cycle', 'standard'); },
+      cyAskGo: () => { this.orOpenDeep(this.oracleSlot('cycle', 'standard')); this.oracleAsk('cycle', 'standard'); }, ...this.lumGateVals('cycle', 'cg') };
     if (!open) return { ...closed, ...base };
     const sample = this.usingSampleBirth(), cs = st.cloudStatus, off = !this.cloud, native = this.nativeApp(), lum = st.lum;
     const cyReady = this.cycleReady() && this.cycleDesignReady();
@@ -58812,9 +58831,10 @@ class Component extends DCLogic {
     const cyNone = cyReady && !cyRows.length, cyFinding = !cyReady;
     const cyish = cyReady && !sample && signedIn && !off && !native && !cyNone;
     const cyWait = cyish && !lum, cyLocked = cyish && !!lum && !lum.isPremium;
-    const cr = cached && !sample && !cyLocked && !cyWait && !cyNone ? cached.reading : null;
+    const cyOpened = !!(st.orOpened && st.orOpened[slot]);
+    const cr = cached && cyOpened && !sample && !cyLocked && !cyWait && !cyNone ? cached.reading : null;
     const blocked = sample || off || !!cr || cyLocked || cyWait || cyNone || cyFinding;
-    const waiting = !blocked && !err && signedIn && consented;
+    const waiting = !blocked && !err && signedIn && consented && cyOpened;
     const cyPass = cr ? list(cr.passages).filter(x => x && str(x.contact)) : [];
     /* Each passage the Oracle wrote is drawn against the passage the device
        computed, matched by name (the dossier's order as the fallback), so the
@@ -58844,6 +58864,7 @@ class Component extends DCLogic {
       cySample: sample,
       cyNeedSignIn: !blocked && !busy && !signedIn,
       cyConsentOn: !blocked && !busy && !err && signedIn && !consented,
+      cyAskGate: !blocked && !busy && !err && signedIn && consented && !cyOpened,
       cyGateOn: cyLocked,
       cyBusyOn: !cr && !cyLocked && !sample && (busy || waiting || cyWait),
       cyLoadingText: cyWait ? 'Checking your Codex Luminary…'
@@ -59118,8 +59139,10 @@ class Component extends DCLogic {
     const consented = !!this.readLS(this.oracleConsentKey(), false);
     /* In depth is shown only once the reader has pressed Consult the Oracle for
        it, whether it was written a minute ago or is still to be written. */
-    const deepGate = depth === 'deep' && signedIn && !sample && !off && canDeep && consented && !busy && !err && !opened;
-    const r = hit && !locked && !lumWait && !(depth === 'deep' && !opened) ? hit.reading : null;
+    /* Every reading, of every depth, waits behind Consult the Oracle until
+       it has been pressed for this slot, a kept one included. */
+    const deepGate = signedIn && !sample && !off && (depth !== 'deep' || canDeep) && consented && !busy && !err && !opened;
+    const r = hit && !locked && !lumWait && opened ? hit.reading : null;
     const str = v => typeof v === 'string' ? v : '';
     const list = v => Array.isArray(v) ? v : [];
     const pick = (on, a, b) => on ? a : b;
@@ -59168,7 +59191,7 @@ class Component extends DCLogic {
        class statically, and a computed key is invisible to it. */
     const bOv = segBtn('overview'), bSh = segBtn('shadow'), bRi = segBtn('ritual'), bMa = segBtn('mantra');
     const blocked = sample || off || !!r || locked || lumWait || deepGate;
-    const waiting = !blocked && !err && signedIn && consented;
+    const waiting = !blocked && !err && signedIn && consented && opened;
     /* A subscription from before the one time payment, still running: the
        member line says when it ends and Manage billing cancels it. */
     const end = lum && lum.currentPeriodEnd ? new Date(lum.currentPeriodEnd) : null;
@@ -59190,9 +59213,9 @@ class Component extends DCLogic {
       orOff: !r && !sample && off,
       orNeedSignIn: !blocked && !busy && !signedIn,
       orConsent: !blocked && !busy && !err && signedIn && !consented,
-      orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+      orConsentGo: () => { this.orListenStop(); this.writeLS(this.oracleConsentKey(), true); this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orDeepGate: deepGate,
-      orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, 'deep') && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, 'deep'); },
+      orDeepGo: () => { this.orListenStop(); this.orOpenDeep(slot); if (!this.oracleCached(period, depth) && !(this._orBusy && this._orBusy[slot])) this.oracleAsk(period, depth); },
       orListenGo: () => this.orListenGo(r),
       /* The Codex showed its loading panel from the moment it asked; the
          600ms wait before asking shows the same panel. */
@@ -59201,7 +59224,7 @@ class Component extends DCLogic {
       orErrText: this.ORACLE_ERR[err] || 'The stars clouded over. Please try again.',
       orErrRetry: !!err && ['limit', 'silent', 'notSetUp', 'off', 'signedOut'].indexOf(err) === -1,
       orPrivacy: '',
-      orAskGo: () => { this.orListenStop(); if (depth === 'deep') this.orOpenDeep(slot); this.oracleAsk(period, depth); },
+      orAskGo: () => { this.orListenStop(); this.orOpenDeep(slot); this.oracleAsk(period, depth); },
       orSignInGo: () => { location.href = this.coverHref() + '?signin=1'; },
       orUseMine: () => this.birthEntryGo(),
       orLoadingText: lumWait ? 'Checking your Codex Luminary…'
