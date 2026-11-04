@@ -6123,6 +6123,19 @@ Back and the breadcrumb, and the phone sheet is painted over an opaque `--bg`
 because `--sf` carries alpha. Measured over every page at 1440, 390 and 375,
 four identities hardened and not: no pair under 4.5:1, no control under 44px.
 
+## A passing tap opens the glance, a focused read opens the packet
+Asked for by the owner on 4 November 2026: "It's nice for a focused read. For
+passing, make it a pop up without the fantastic visuals, keep the info, and make
+it radiant." A tap on a body anywhere it is passed (the wheel, the Ledger, the
+lists, the flash cards, a stage's Open the reading) sets `plGlance` and opens a
+dialog, `placementGlanceVals()`, in both shells, rather than the packet. It
+reads `placementVals(key)`, so it carries every word the packet does: the
+epigraph, the seal, every chapter in order, Held together, the four practice
+lists, Conversations (each opens that body's glance), The sky now and the degree.
+No cover, no turning, no drawing: a warm glow over `--sf2` on an opaque `--bg`.
+"Open the focused read" goes to the packet. `plGlance` is cleared in both clean
+bags, `dialogEscape()` and `vtSheetClose`.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space

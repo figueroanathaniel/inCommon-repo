@@ -5553,6 +5553,93 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
+    <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" data-vt-sheet="1" style="box-sizing:border-box;width:100%;max-height:88svh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border-top:1px solid rgba(var(--atmc2),.5);border-radius:26px 26px 0 0;box-shadow:0 -10px 60px rgba(var(--atmc2),.3);animation:vtSheet .26s cubic-bezier(.22,1,.36,1);padding:20px 20px calc(26px + env(safe-area-inset-bottom))">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.55);background:rgba(var(--atmc2),.12);box-shadow:0 0 22px rgba(var(--atmc2),.35);font:400 24px var(--fb);color:var(--tx)">{{ pgGlyph }}</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">{{ pgKind }}</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">{{ pgTitle }}</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ pgWhere }}</span>
+        </div>
+        <button data-lift onClick="{{ pgClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ pgEpiOn }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:italic 400 15.5px/1.6 var(--fb);color:var(--tx);border-left:2px solid rgba(var(--atmc2),.6);padding-left:12px;text-wrap:pretty">{{ pgEpi }}</p>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+        <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fu);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
+          <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
+        </sc-if>
+      </div>
+      <sc-for list="{{ pgWhy }}" as="l" hint-placeholder-count="0">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+      </sc-for>
+      <sc-if value="{{ pgComputed }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <sc-for list="{{ pgChapters }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.kick }}</span>
+              <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ c.heading }}</div>
+              <p style="margin:0;font:italic 400 13.5px/1.65 var(--fb);color:var(--mut);text-wrap:pretty">{{ c.lead }}</p>
+              <sc-for list="{{ c.lines }}" as="l" hint-placeholder-count="2">
+                <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.t }}</p>
+              </sc-for>
+            </div>
+          </sc-for>
+          <div style="display:flex;flex-direction:column;gap:8px;border-radius:16px;border:1px solid rgba(var(--atmc2),.35);background:rgba(var(--atmc2),.08);box-shadow:inset 0 0 30px rgba(var(--atmc2),.08);padding:16px 17px">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Held together</span>
+            <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ pgSynth.heading }}</div>
+            <sc-for list="{{ pgSynth.lines }}" as="l" hint-placeholder-count="2">
+              <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ pgCards }}" as="w" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:9px"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" style="flex:none;stroke:var(--ac2-hi);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="{{ w.d }}"></path></svg><span role="heading" aria-level="3" style="font:400 18px var(--fd);color:var(--tx)">{{ w.label }}</span></div>
+              <sc-for list="{{ w.items }}" as="it" hint-placeholder-count="4">
+                <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty;border-top:1px solid {{ it.sep }};padding-top:{{ it.pad }}">{{ it.t }}</p>
+              </sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ pgAspOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Conversations</span>
+              <sc-for list="{{ pgAsp }}" as="a" hint-placeholder-count="3">
+                <button data-lift onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;gap:5px;border-radius:14px;border:1px solid var(--bd);padding:12px 14px">
+                  <span style="display:flex;align-items:center;gap:9px;width:100%"><span aria-hidden="true" style="flex:none;font:400 15px var(--fb);color:{{ a.edge }}">{{ a.glyph }}</span><span style="flex:1;min-width:0;font:400 15px/1.3 var(--fd);color:var(--tx);text-align:left">{{ a.title }}</span><span style="flex:none;font:400 10.5px var(--fu);color:var(--mut)">{{ a.meta }}</span></span>
+                  <span style="font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left;text-wrap:pretty">{{ a.text }}</span>
+                  <span style="font:600 10.5px var(--fu);color:var(--ac2-hi)">{{ a.cta }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pgTrOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">The sky now</span>
+              <sc-for list="{{ pgTr }}" as="r" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:4px;border-radius:14px;border:1px solid var(--bd);padding:12px 14px"><span style="display:flex;align-items:center;gap:9px"><span aria-hidden="true" style="flex:none;font:400 15px var(--fb);color:{{ r.edge }}">{{ r.glyph }}</span><span style="flex:1;min-width:0;font:400 15px/1.3 var(--fd);color:var(--tx)">{{ r.title }}</span></span><span style="font:400 10.5px var(--fu);color:var(--mut)">{{ r.meta }}</span><span style="font:400 13px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ r.text }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">The degree</span>
+            <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ pgDegree.heading }}</div>
+            <sc-for list="{{ pgDegree.lines }}" as="l" hint-placeholder-count="3">
+              <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+            </sc-for>
+            <sc-if value="{{ pgSabOn }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:6px 0 0;font:italic 400 17px/1.55 var(--fd);color:var(--tx);text-align:center;text-wrap:balance">{{ pgSab }}</p>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--mut);text-align:center">{{ pgSabMeta }}</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ dpOpen }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;animation:vtFade .2s ease">
     <div data-vt-sheet="1" style="width:100%;max-height:92svh;display:flex;flex-direction:column;background:var(--sf);border-top:1px solid var(--bd);border-radius:26px 26px 0 0;animation:vtSheet .26s cubic-bezier(.22,1,.36,1);box-shadow:0 -18px 50px rgba(0,0,0,.6);transform:{{ vtSheetT }}">
@@ -13673,6 +13760,94 @@ input[type="date"]{color-scheme:dark}
      that did NOT force the tab, "Gate N" and "Personal Day N" on Today, set
      dpSel and rendered nothing at all: wired, pressable, and dead on desktop
      while working on mobile. One drawer at one level fixes both. -->
+<!-- The glance: the reading in passing, a plain radiant pop up. The packet is one press further in. -->
+<sc-if value="{{ pgOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ pgClose }}" style="position:fixed;inset:0;z-index:72;background:rgba(8,7,11,.7);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeUp .18s ease">
+    <div onClick="{{ pgStop }}" role="dialog" aria-modal="true" aria-label="{{ pgTitle }}" style="box-sizing:border-box;width:100%;max-width:640px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:16px;background:radial-gradient(130% 55% at 50% -8%,rgba(var(--atmc2),.22),transparent 60%),linear-gradient(var(--sf2),var(--sf2)),var(--bg);border:1px solid rgba(var(--atmc2),.45);border-radius:22px;box-shadow:0 0 0 1px rgba(var(--atmc2),.12),0 0 70px rgba(var(--atmc2),.28),0 30px 80px rgba(0,0,0,.55);padding:22px 24px 26px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <span aria-hidden="true" style="flex:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc2),.55);background:rgba(var(--atmc2),.12);box-shadow:0 0 22px rgba(var(--atmc2),.35);font:400 24px var(--fb);color:var(--tx)">{{ pgGlyph }}</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">{{ pgKind }}</span>
+          <div role="heading" aria-level="2" style="font:400 26px/1.15 var(--fd);color:var(--tx)">{{ pgTitle }}</div>
+          <span style="font:400 13px var(--fu);color:var(--mut)">{{ pgWhere }}</span>
+        </div>
+        <button data-lift onClick="{{ pgClose }}" aria-label="Close" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:999px;font:400 17px var(--fb);color:var(--mut)">×</button>
+      </div>
+      <sc-if value="{{ pgEpiOn }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:italic 400 15.5px/1.6 var(--fb);color:var(--tx);border-left:2px solid rgba(var(--atmc2),.6);padding-left:12px;text-wrap:pretty">{{ pgEpi }}</p>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+        <button data-lift onClick="{{ pgFocus }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:8px;padding:0 18px;border-radius:999px;border:1px solid rgba(var(--atmc2),.6);background:rgba(var(--atmc2),.16);box-shadow:0 0 24px rgba(var(--atmc2),.25);font:600 11.5px var(--fu);color:var(--tx)">Open the focused read<span aria-hidden="true" style="font:400 14px var(--fb);color:var(--ac2-hi)">→</span></button>
+        <sc-if value="{{ pgSealOn }}" hint-placeholder-val="{{ false }}">
+          <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;border:1px solid {{ pgSealC }};font:600 9.5px var(--fu);letter-spacing:.16em;text-transform:uppercase;color:{{ pgSealC }}"><span aria-hidden="true" style="flex:none;width:5px;height:5px;transform:rotate(45deg);background:{{ pgSealC }}"></span>{{ pgSeal }}</span>
+        </sc-if>
+      </div>
+      <sc-for list="{{ pgWhy }}" as="l" hint-placeholder-count="0">
+        <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+      </sc-for>
+      <sc-if value="{{ pgComputed }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <sc-for list="{{ pgChapters }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">{{ c.kick }}</span>
+              <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ c.heading }}</div>
+              <p style="margin:0;font:italic 400 13.5px/1.65 var(--fb);color:var(--mut);text-wrap:pretty">{{ c.lead }}</p>
+              <sc-for list="{{ c.lines }}" as="l" hint-placeholder-count="2">
+                <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.t }}</p>
+              </sc-for>
+            </div>
+          </sc-for>
+          <div style="display:flex;flex-direction:column;gap:8px;border-radius:16px;border:1px solid rgba(var(--atmc2),.35);background:rgba(var(--atmc2),.08);box-shadow:inset 0 0 30px rgba(var(--atmc2),.08);padding:16px 17px">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Held together</span>
+            <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ pgSynth.heading }}</div>
+            <sc-for list="{{ pgSynth.lines }}" as="l" hint-placeholder-count="2">
+              <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+            </sc-for>
+          </div>
+          <sc-for list="{{ pgCards }}" as="w" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:9px"><svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" style="flex:none;stroke:var(--ac2-hi);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="{{ w.d }}"></path></svg><span role="heading" aria-level="3" style="font:400 18px var(--fd);color:var(--tx)">{{ w.label }}</span></div>
+              <sc-for list="{{ w.items }}" as="it" hint-placeholder-count="4">
+                <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty;border-top:1px solid {{ it.sep }};padding-top:{{ it.pad }}">{{ it.t }}</p>
+              </sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ pgAspOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">Conversations</span>
+              <sc-for list="{{ pgAsp }}" as="a" hint-placeholder-count="3">
+                <button data-lift onClick="{{ a.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;min-height:44px;display:flex;flex-direction:column;gap:5px;border-radius:14px;border:1px solid var(--bd);padding:12px 14px">
+                  <span style="display:flex;align-items:center;gap:9px;width:100%"><span aria-hidden="true" style="flex:none;font:400 15px var(--fb);color:{{ a.edge }}">{{ a.glyph }}</span><span style="flex:1;min-width:0;font:400 15px/1.3 var(--fd);color:var(--tx);text-align:left">{{ a.title }}</span><span style="flex:none;font:400 10.5px var(--fu);color:var(--mut)">{{ a.meta }}</span></span>
+                  <span style="font:400 13px/1.6 var(--fb);color:var(--tx);text-align:left;text-wrap:pretty">{{ a.text }}</span>
+                  <span style="font:600 10.5px var(--fu);color:var(--ac2-hi)">{{ a.cta }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pgTrOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">The sky now</span>
+              <sc-for list="{{ pgTr }}" as="r" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:4px;border-radius:14px;border:1px solid var(--bd);padding:12px 14px"><span style="display:flex;align-items:center;gap:9px"><span aria-hidden="true" style="flex:none;font:400 15px var(--fb);color:{{ r.edge }}">{{ r.glyph }}</span><span style="flex:1;min-width:0;font:400 15px/1.3 var(--fd);color:var(--tx)">{{ r.title }}</span></span><span style="font:400 10.5px var(--fu);color:var(--mut)">{{ r.meta }}</span><span style="font:400 13px/1.6 var(--fb);color:var(--tx);text-wrap:pretty">{{ r.text }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font:600 9.5px var(--fu);letter-spacing:.2em;text-transform:uppercase;color:var(--ac2-hi)">The degree</span>
+            <div role="heading" aria-level="3" style="font:400 19px/1.25 var(--fd);color:var(--tx)">{{ pgDegree.heading }}</div>
+            <sc-for list="{{ pgDegree.lines }}" as="l" hint-placeholder-count="3">
+              <p style="margin:0;font:400 14px/1.7 var(--fb);color:var(--tx);text-wrap:pretty">{{ l.text }}</p>
+            </sc-for>
+            <sc-if value="{{ pgSabOn }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:6px 0 0;font:italic 400 17px/1.55 var(--fd);color:var(--tx);text-align:center;text-wrap:balance">{{ pgSab }}</p>
+              <span style="font:600 9.5px var(--fu);letter-spacing:.18em;text-transform:uppercase;color:var(--mut);text-align:center">{{ pgSabMeta }}</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ dpOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ dpClose }}" style="position:fixed;inset:0;z-index:70;background:rgba(8,7,11,.74);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeUp .18s ease">
     <div onClick="{{ dpStop }}" role="dialog" aria-modal="true" aria-label="{{ dpTitle }}" style="box-sizing:border-box;width:100%;max-width:100%;max-height:78%;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:16px;padding:16px 17px">
@@ -14263,7 +14438,7 @@ class Component extends DCLogic {
     alignOpen: false, sabQuery: '', sabSign: null, ack: true, geoManual: false, geoLat: '', geoLon: '',
     geoNet: { status: 'idle', q: '', hits: [], msg: '' }, geoNetSay: '',
     welcomeFor: null, welcomePick: {}, makeDefault: null,
-    chartMode: 'basic', openBody: null, placeSel: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
+    chartMode: 'basic', openBody: null, placeSel: null, plGlance: null, aspSel: null, zoom: 1, panX: 0, panY: 0, hole: null,
     chartExpandOpen: false, chartExpandSearch: '', chartExpandGroup: true, chartExpandSortBy: 'lon', chartExpandSortDir: 'asc',
     alignMode: 'today', alignHit: null, alignGate: null, alignNum: null, alignLast: null, alignSeed: 0,
     libView: null, lexQuery: '', lexSign: null, lexMode: 'mandala', lexDeg: null,
@@ -14984,7 +15159,7 @@ class Component extends DCLogic {
   }
   openPath(path) {
     const seg = path.split('/').filter(Boolean);
-    const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
+    const clean = { spiritView: null, placeSel: null, plGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
       selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null };
     // The arriving path may normalise (a bare /library resolves to practices).
     // That correction is a replace, never a second history entry, or Back has to
@@ -29747,7 +29922,7 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
+      avaDraft: null, dpSel: null, plGlance: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
       ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
@@ -29918,9 +30093,37 @@ class Component extends DCLogic {
           items: (items || []).map((t, i) => ({ t: t, sep: i ? 'var(--bd)' : 'transparent', pad: i ? '11px' : '0' })) }))
     };
   }
-  placementVals() {
-    const st = this.state, PC = window.PlacementContent, sel = st.placeSel;
-    const on = st.tab === 'spirit' && st.spiritView === 'placement';
+  /* The glance: the same reading as the packet, in a plain radiant pop up for
+     a reader who is passing (a tap on the wheel, the Ledger, a list or a card).
+     Every word is the packet's; only the arrangement is lighter: no medallion,
+     no starfield, no pages to turn. Open the focused read goes to the packet. */
+  placementGlanceVals() {
+    const k = this.state.plGlance;
+    if (!k) return { pgOpen: false };
+    const v = this.placementVals(k);
+    if (!v || !v.spiritPlacement) return { pgOpen: false };
+    const close = () => this.setState({ plGlance: null });
+    const base = { pgOpen: true, pgClose: close, pgStop: e => { if (e && e.stopPropagation) e.stopPropagation(); },
+      pgTitle: v.plTitle || (v.plName ? v.plName.charAt(0) + v.plName.slice(1).toLowerCase() : ''), pgGlyph: v.plGlyph || '',
+      pgKind: v.plKind || '', pgFocus: () => this.setState({ plGlance: null, tab: 'spirit', spiritView: 'placement', placeSel: k, aspSel: null }) };
+    if (!v.plComputed) return { ...base, pgComputed: false, pgWhy: v.plWhyLines || [], pgEpiOn: false, pgEpi: '', pgWhere: v.plSummary || '',
+      pgSealOn: false, pgSeal: '', pgSealC: 'var(--mut)', pgChapters: [], pgSynth: { heading: '', lines: [] }, pgCards: [], pgAspOn: false, pgAsp: [],
+      pgTrOn: false, pgTr: [], pgDegree: { heading: '', lines: [] }, pgSabOn: false, pgSab: '', pgSabMeta: '' };
+    return { ...base, pgComputed: true, pgWhy: [],
+      pgWhere: (v.plCoords || []).map(c => c.k === 'House' ? c.v + ' house' : c.v).join(' · '),
+      pgEpiOn: !!v.plEpiOn, pgEpi: v.plEpi || '',
+      pgSealOn: !!v.plSealOn, pgSeal: v.plSeal || '', pgSealC: v.plSealC || 'var(--mut)',
+      pgChapters: (v.plChapters || []).map(c => ({ kick: c.n + ' · ' + c.tab, heading: c.heading, lead: c.lead,
+        lines: [{ t: c.first }].concat(c.rest || []).filter(x => x.t) })),
+      pgSynth: v.plSynth, pgCards: v.plCards || [],
+      pgAspOn: !!v.plAspOn, pgAsp: (v.plAspects || []).map(a => ({ glyph: a.glyph, edge: a.edge, title: a.title, meta: a.meta, text: a.text,
+        cta: a.cta, go: () => this.setState({ plGlance: a.okey, aspSel: null }) })),
+      pgTrOn: !!v.plTrOn, pgTr: v.plTransits || [],
+      pgDegree: v.plDegree, pgSabOn: !!v.plHasSabian, pgSab: v.plSabian || '', pgSabMeta: v.plSabianMeta || '' };
+  }
+  placementVals(glance) {
+    const st = this.state, PC = window.PlacementContent, sel = glance || st.placeSel;
+    const on = glance ? true : st.tab === 'spirit' && st.spiritView === 'placement';
     if (!on || !PC || !sel) return { spiritPlacement: false };
     const all = this.fullChart(true), key = x => this.pointKey(x);
     const r = all.find(x => key(x) === sel) || all.find(x => x.name === sel);
@@ -29963,7 +30166,7 @@ class Component extends DCLogic {
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0',
         text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. Two parts of you in a conversation that never quite ends, and like most long conversations, its tone is set by how you tend it rather than by how it began.',
-        cta: 'See ' + oName + ' \u2192', go: () => this.setState({ placeSel: key(o), aspSel: null }) };
+        cta: 'See ' + oName + ' \u2192', okey: key(o), go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
       ? 'Orbs used here: 8\u00b0 for a conjunction or opposition, 6\u00b0 trine, 4\u00b0 square, 3\u00b0 sextile. Those numbers are a convention, not a law: astrologers argue about them constantly, and a contact does not switch off at the edge. Angle-to-angle pairs are left out, since geometry fixes those rather than your birth.'
@@ -30267,6 +30470,7 @@ class Component extends DCLogic {
           goNumer: () => goSpirit('numerology'),
           spiritBack: () => this.setState({ spiritView: null, placeSel: null, dpSel: null, focusToday: false }),
           ...this.placementVals(),
+          ...this.placementGlanceVals(),
           ...this.focusVals(),
           goAngel: () => this.setState({ tab: 'library', libSub: 'journal', libView: 'angel', selId: null, spiritView: null }),
           goJournalDream: () => this.setState({ tab: 'library', libSub: 'journal', libView: 'dreamj', selId: null, spiritView: null }),
@@ -30393,7 +30597,10 @@ class Component extends DCLogic {
             const svgRadius = bloomGrp ? { ...stagger(svgRows.filter(r => r.ring === 1), 234, 40, 3), ...stagger(svgRows.filter(r => r.ring === 2), 136, 20, 4) } : radiusFor;
             // Clicking a body anywhere in the chart now opens its own placement
             // page rather than an inline accordion.
-            const openBody = n => this.setState({ spiritView: 'placement', placeSel: n, aspSel: null });
+            // A tap in passing opens the glance (the owner, 4 November 2026: "For
+            // passing, make it a pop up without the fantastic visuals, keep the
+            // info, and make it radiant"); the packet is one press further in.
+            const openBody = n => this.setState({ plGlance: n, aspSel: null });
             const degMeaning = r => {
               const d = Math.floor(r.deg), dec = Math.floor(d / 10);
               const band = d <= 2 ? 'the opening degrees, where the sign is raw and unmixed'
@@ -31873,7 +32080,7 @@ class Component extends DCLogic {
          ever addresses a room; this addresses a card, a hexagram, an image and a
          degree, so a jump that did not clear them would open the tarot deck at
          whatever card the last search happened to land on. */
-      const clean = { spiritView: null, placeSel: null, numSel: null, libView: null, ypCat: null, ypPick: false,
+      const clean = { spiritView: null, placeSel: null, plGlance: null, numSel: null, libView: null, ypCat: null, ypPick: false,
         selId: null, focusToday: false, hdSel: null, dpSel: null, atlasSec: null, atlasItem: null, apSec: null, arcSel: null,
         ttSec: null, ttCard: null, icSec: null, icHex: null, icQuery: '',
         dlSec: null, dlOpen: null, dlQuery: '', lexSign: null, lexDeg: null, lexQuery: '', tlOpen: null,
@@ -32782,7 +32989,7 @@ class Component extends DCLogic {
         if (dy > 110) this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 });
         else this.setState({ vtDragY: 0 });
       },
-      vtSheetClose: () => this.setState({ placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
+      vtSheetClose: () => this.setState({ plGlance: null, placeSel: null, numSel: null, dpSel: null, spiritView: null, vtDragY: 0 }),
       isToday: true, isSpirit: true, spiritMain: false,
       spiritAstro: true, spiritHd: true, spiritNumer: true,
       isOracle: true, isSettings: true,
