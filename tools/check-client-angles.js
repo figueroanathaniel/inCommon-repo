@@ -6,7 +6,12 @@ const fixture = require('./fixtures/client-chart-swiss-reference.json');
 if ((source.match(/^  skyFrame\(/gm) || []).length !== 1 ||
     (source.match(/^  chartSkyFrame\(/gm) || []).length !== 1 ||
     /this\.skyFrame\(this\.t2000/.test(source)) throw Error('Canvas and astronomical frame methods collide');
-const app = calculator(['RAD'], ['norm360', 'chartSkyFrame', 'ascendant', 'vertexOf', 'houseOf', 'sectOf', 'expandedLonAt'], { Astronomy });
+const HouseSystems = require('../app/house-systems.js');
+const app = calculator(['RAD'], ['norm360', 'chartSkyFrame', 'ascendant', 'vertexOf', 'houseCusps', 'houseOf', 'sectOf', 'expandedLonAt'], { Astronomy, HouseSystems });
+// The reader chooses the house system; these edges are read in Equal and in
+// Whole Sign, the default, through the app's own houseCusps and houseOf.
+let houseSystem = 'E';
+app.houseSys = () => houseSystem;
 app.signOf = lon => ({ sign: String(Math.floor(lon / 30)), deg: lon % 30, idx: Math.floor(lon / 30) });
 app.t2000 = d => tOf(d.toISOString());
 if (fixture.rows.length < 8) throw Error('Angle fixture lacks date coverage');
@@ -37,15 +42,19 @@ for (const row of fixture.rows) {
       if (error > worst[key]) { worst[key] = error; at[key] = row.utc + ' ' + reference.place; }
       if (error > 1) failures++;
     }
-    // Equal-house cusp edges must agree with the public mathematical rule.
-    // This is boundary arithmetic, separate from the independent angle check.
-    for (let cusp = 0; cusp < 12; cusp++) {
-      for (const delta of [-1e-6, 1e-6]) {
-        const longitude = app.norm360(obtained.asc + cusp * 30 + delta);
-        const expected = delta > 0 ? cusp + 1 : (cusp === 0 ? 12 : cusp);
-        const got = app.houseOf(longitude, { lon: 0 }, obtained);
-        if (got !== expected) throw Error('Equal-house cusp inconsistency at ' + row.utc);
-        edgeChecks++;
+    // Equal and Whole Sign cusp edges must agree with the public mathematical
+    // rule. This is boundary arithmetic, separate from the independent angle check.
+    for (const sys of ['E', 'W']) {
+      houseSystem = sys;
+      const first = sys === 'E' ? obtained.asc : Math.floor(app.norm360(obtained.asc) / 30) * 30;
+      for (let cusp = 0; cusp < 12; cusp++) {
+        for (const delta of [-1e-6, 1e-6]) {
+          const longitude = app.norm360(first + cusp * 30 + delta);
+          const expected = delta > 0 ? cusp + 1 : (cusp === 0 ? 12 : cusp);
+          const got = app.houseOf(longitude, { lon: 0 }, obtained);
+          if (got !== expected) throw Error((sys === 'E' ? 'Equal' : 'Whole Sign') + '-house cusp inconsistency at ' + row.utc);
+          edgeChecks++;
+        }
       }
     }
     count++;
@@ -54,9 +63,10 @@ for (const row of fixture.rows) {
 // Exactly representable cusp values test half-open ownership without a
 // floating-point representation of an observed angle changing the question.
 for (const asc of [0, 15, 232.5]) for (let cusp = 0; cusp < 12; cusp++) {
-  if (app.houseOf(app.norm360(asc + cusp * 30), {}, { asc }) !== cusp + 1) throw Error('Exact cusp ownership failed');
+  const cusps = Array.from({ length: 12 }, (_, i) => app.norm360(asc + i * 30));
+  if (HouseSystems.houseOf(app.norm360(asc + cusp * 30), cusps) !== cusp + 1) throw Error('Exact cusp ownership failed');
   edgeChecks++;
 }
 for (const key of Object.keys(worst)) console.log(`${key}: worst ${worst[key].toFixed(4)} arcsec at ${at[key]}`);
-console.log(`${count} charts, ${edgeChecks} Equal House boundary checks, ${lotChecks} lot-formula checks using reference Sun/Moon; ${failures} angle comparisons above 1 arcsecond; ${sectFailures} day/night failures.`);
+console.log(`${count} charts, ${edgeChecks} Equal and Whole Sign boundary checks, ${lotChecks} lot-formula checks using reference Sun/Moon; ${failures} angle comparisons above 1 arcsecond; ${sectFailures} day/night failures.`);
 if (failures || sectFailures) process.exitCode = 1;
