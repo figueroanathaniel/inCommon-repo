@@ -4436,6 +4436,20 @@ async function runCloudTests() {
   t('F8', 'the Projector entry lists emotional authority, and the five types\' shares of people add to a hundred',
     [/emotional/i.test(A.TYPES.Projector.authority), Object.keys(A.TYPES).reduce((n, k) => n + parseInt(String(A.TYPES[k].pct).replace(/\D+/g, ''), 10), 0)],
     [true, 100]);
+  /* F9: the curriculum is the lessons. Each path's tutorial walks one tier in
+     order, every step lands on a lesson that exists, and no lesson is skipped. */
+  const appSrc = fs.readFileSync(path.join(__dirname, '..', 'app', 'inCommonApp v2.dc.html'), 'utf8');
+  const tutSrc = appSrc.slice(appSrc.indexOf('    hdatlas: {', appSrc.indexOf('  STUDY_TUT = {')), appSrc.indexOf('    astropedia: {', appSrc.indexOf('  STUDY_TUT = {')));
+  const slug = x => String(x).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const tiers = { first: 'bedrock', way: 'weather', deep: 'horizon' };
+  const walked = Object.keys(tiers).map(lv => {
+    const part = tutSrc.slice(tutSrc.indexOf('      ' + lv + ': ['), tutSrc.indexOf('      ]', tutSrc.indexOf('      ' + lv + ': [')));
+    const got = (part.match(new RegExp("'hd:" + tiers[lv] + ":[a-z0-9-]+'", 'g')) || []).map(x => x.slice(4, -1));
+    const want = A.LESSONS.filter(l => l.tier === tiers[lv]).map(l => tiers[lv] + ':' + slug(l.name));
+    return JSON.stringify(got) === JSON.stringify(want);
+  });
+  t('F9', 'each study path walks its tier of lessons in order, and every step names a lesson that exists',
+    walked, [true, true, true]);
 })();
 
 /* ---- Run the three extension suites (Prompts A, B, C) ---- */
