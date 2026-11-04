@@ -6089,6 +6089,24 @@ entered from here only** (the owner's choice, same day): Enter the Observatory
 (`bloomObsGo`, a dome icon) closes this and opens it; the header's old expand
 buttons are gone. N40 goes through both.
 
+## The chart speaks gently, and stays intense
+Decided by the owner on 4 November 2026, after a voice sample he approved: the
+placement, sign, house and aspect writing reads as an invitation rather than a
+definition ("Some things you love before you can say why. Venus keeps that
+pull..." rather than "Venus is attraction, value, and pleasure"). Rewritten in
+that voice: the 21 core definitions and roles and all 75 expanded roles in
+`placement-content.js`, the twelve signs' definitions and demands, the twelve
+houses with their presence and in-life lines, the composer's joining sentences
+and dignity lines, the placement page's section leads, and `ASP_MEAN`,
+`ASP_SHORT`, `ASP_NATURE`, `ASP_POSS` and `ASP_PLAY`. `ASP_CLOSE` and the gift,
+shadow, growth and block lists were left as they were. **Comets say it
+discreetly**: their pages say astrologers read them for whole eras rather than
+single lives, and no reader facing string says mundane. A sign's `demand` is now
+a sentence of its own (the composer no longer strips its full stop), and the
+dignity lines keep the body as subject, because `energy` is a compound phrase.
+New writing here keeps the voice: personal, gentle, no "you are" verdicts, no
+"X is Y, and Y is Z" catalogues.
+
 ## The Observatory: the full screen chart, flown
 Asked for by the owner on 19 October 2026: "Make the full screen expansion an
 Observatory. People should feel like they're going in a certified space

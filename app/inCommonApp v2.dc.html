@@ -15939,7 +15939,7 @@ class Component extends DCLogic {
   ASPECTS = [[0, 'conjunct', 8], [60, 'sextile', 5], [90, 'square', 6], [120, 'trine', 6], [180, 'opposite', 8]];
   ASP_NAME = { conjunct: 'conjunction', sextile: 'sextile', square: 'square', trine: 'trine', opposite: 'opposition' };
   aspName(a) { return this.ASP_NAME[String(a).toLowerCase()] || String(a); }
-  ASP_MEAN = { conjunct: 'a fusion, two drives that act as one and amplify each other', sextile: 'a cooperative opening that grows stronger each time it is used', square: 'productive tension, the pressure that builds skill and resolve', trine: 'a natural gift, talent that flows and ripens when it is put to work', opposite: 'a polarity, two needs that teach balance, often through other people' };
+  ASP_MEAN = { conjunct: 'two drives that have stopped taking turns, moving as one and making each other louder', sextile: 'a friendly opening between two parts of you, one that widens a little every time you use it', square: 'friction that sharpens you, the pressure that slowly turns into skill', trine: 'an ease that runs on its own, a gift that ripens once you give it something to do', opposite: 'a pull across the wheel, two needs learning to share the weight, often through other people' };
   MOON_PHASES = ['New', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
   HD_WHEEL = [41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3, 27, 24, 2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 31, 33, 7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44, 1, 43, 14, 34, 9, 5, 26, 11, 10, 58, 38, 54, 61, 60];
   GATE_NAMES = { 1: 'Self-Expression', 2: 'Direction of the Self', 3: 'Ordering', 4: 'Formulization', 5: 'Fixed Rhythms', 6: 'Friction', 7: 'The Role of the Self', 8: 'Contribution', 9: 'Focus', 10: 'Behaviour of the Self', 11: 'Ideas', 12: 'Caution', 13: 'The Listener', 14: 'Power Skills', 15: 'Extremes', 16: 'Skills', 17: 'Opinions', 18: 'Correction', 19: 'Wanting', 20: 'The Now', 21: 'The Hunter', 22: 'Openness', 23: 'Assimilation', 24: 'Rationalization', 25: 'Spirit of the Self', 26: 'The Egoist', 27: 'Caring', 28: 'The Game Player', 29: 'Saying Yes', 30: 'Recognition of Feelings', 31: 'Influence', 32: 'Continuity', 33: 'Privacy', 34: 'Power', 35: 'Change', 36: 'Crisis', 37: 'Friendship', 38: 'The Fighter', 39: 'Provocation', 40: 'Aloneness', 41: 'Contraction', 42: 'Growth', 43: 'Insight', 44: 'Alertness', 45: 'The Gatherer', 46: 'Determination of the Self', 47: 'Realizing', 48: 'Depth', 49: 'Principles', 50: 'Values', 51: 'Shock', 52: 'Stillness', 53: 'Beginnings', 54: 'Ambition', 55: 'Spirit', 56: 'Stimulation', 57: 'Intuitive Clarity', 58: 'Vitality', 59: 'Sexuality', 60: 'Acceptance', 61: 'Inner Truth', 62: 'Detail', 63: 'Doubt', 64: 'Confusion' };
@@ -16050,9 +16050,9 @@ class Component extends DCLogic {
     { id: 'arrokoth', name: 'Arrokoth', glyph: 'Arr', category: 'tno', tooltip: 'union of opposites, gentle merging', reference: 'harmony, blended wholeness' },
     { id: 'albion', name: 'Albion', glyph: 'Alb', category: 'tno', tooltip: 'first KBO, threshold, pioneer consciousness', reference: 'boundary crossing, new territory' },
     // ---- COMETS (mundane astrology only) ----
-    { id: 'halley', name: 'Halley’s Comet', glyph: 'Hal', category: 'comet', tooltip: 'omen of rulers falling, mundane charts only', reference: 'historical cycles, reign changes (mundane)' },
-    { id: 'halebopp', name: 'Hale-Bopp', glyph: 'HB', category: 'comet', tooltip: 'mass movements, millennium fever, mundane', reference: 'cultural shifts, collective psychology' },
-    { id: 'hyakutake', name: 'Hyakutake', glyph: 'Hya', category: 'comet', tooltip: 'sudden revelation, mundane astrology only', reference: 'unexpected events, sudden awareness' },
+    { id: 'halley', name: 'Halley’s Comet', glyph: 'Hal', category: 'comet', tooltip: 'the close of an era, changes in who rules', reference: 'historical cycles, reign changes' },
+    { id: 'halebopp', name: 'Hale-Bopp', glyph: 'HB', category: 'comet', tooltip: 'mass movements, the mood of a crowd', reference: 'cultural shifts, collective psychology' },
+    { id: 'hyakutake', name: 'Hyakutake', glyph: 'Hya', category: 'comet', tooltip: 'sudden revelation, news from nowhere', reference: 'unexpected events, sudden awareness' },
     // ---- LUNAR NODES & POINTS ----
     { id: 'lilithMean', name: 'Lilith (Mean)', glyph: '⚸', category: 'node', tooltip: 'black moon, repressed rage, raw feminine power', reference: 'shadow, taboo, exile, wildness' },
     { id: 'lilithOsc', name: 'Lilith (Osculating)', glyph: '⚸✦', category: 'node', tooltip: 'black moon, repressed rage (osculating)', reference: 'shadow, current cycle (osculating)' },
@@ -16433,11 +16433,11 @@ class Component extends DCLogic {
   /* How the angle itself behaves in a life, as opposed to what it is. Used for
      the middle of the paragraph, never for the last sentence. */
   ASP_PLAY = {
-    conjunct: 'They do not take turns. Whatever starts one of them starts the other in the same movement, which gives this pair a concentrated force few other parts of your chart can match. The work it offers is learning to see the blend from the inside, so the strength can be aimed rather than only felt.',
-    sextile: 'These two cooperate as soon as they are introduced. Put one in the service of the other, even in small ways, and each makes the other more capable: this is a skill that compounds with practice, and it is often where a modest habit turns into a real ability.',
-    square: 'These two want different things at the same moment, and the moment keeps arriving. That pressure is what builds capacity: each time you find a way to serve both, you gain range and resolve that an easier chart would never have asked you to develop.',
-    trine: 'This runs without supervision, which makes it one of your natural gifts. Because it never cost you anything, it is easy to undervalue, and the opportunity is to treat it as a talent worth training: given a direction, ease here becomes mastery.',
-    opposite: 'You tend to hold one end and meet the other in someone else. That makes relationships the place this pair teaches, and the reward is range: as you learn to hold both ends yourself, the pull becomes perspective, a way of seeing a situation from both sides at once.'
+    conjunct: 'They never wait for each other. Whatever wakes one wakes the other in the same breath, which gives this pair a concentrated force few other parts of your chart can match. The invitation is to learn the blend from the inside, so the strength can be aimed rather than only felt.',
+    sextile: 'These two get along as soon as they meet. Put one in service of the other, even in small ways, and each grows more capable: a quiet skill that compounds with practice, often the place where a modest habit becomes a real ability.',
+    square: 'These two want different things at the same moment, and the moment keeps coming back. That pressure is how capacity grows: each time you find a way to honour both, you gain a range and a resolve that an easier chart would never have asked of you.',
+    trine: 'This runs without supervision, which makes it one of your natural gifts. Because it never cost you anything it is easy to overlook, and the invitation is to treat it as a talent worth training: given a direction, this ease turns into mastery.',
+    opposite: 'You tend to hold one end and meet the other in someone else, which makes your relationships the place this pair does its teaching. The reward is range: as you learn to hold both ends yourself, the pull softens into perspective, a way of seeing a situation from both sides at once.'
   };
   /* THE LAST SENTENCE, AND WHY IT IS BUILT RATHER THAN PICKED.
 
@@ -16508,21 +16508,21 @@ class Component extends DCLogic {
     opposite: (a, b, pa, pb) => 'The stretch is between ' + a + ' asking ' + pa + ' at one end and ' + b + ' asking ' + pb + ' at the other, and you will keep meeting the far end in people until you can hold both ends yourself.'
   };
   ASP_NATURE = {
-    conjunct: 'Zero degrees: the two bodies stand together, usually in the same sign. Their energies merge into a single drive, so each one colours everything the other does. That concentration is the gift. A conjunction is where a chart is most focused, and the blend is often the part other people recognise first, because it arrives at full strength.',
-    sextile: 'Sixty degrees, usually between signs of compatible elements, fire with air or earth with water. The tradition calls it an opportunity aspect: the two bodies speak a common language and cooperate readily. What it offers is a talent that grows with practice, a door that opens a little wider each time it is walked through, so small deliberate efforts here tend to pay back more than their size.',
-    square: 'Ninety degrees, between signs that share a modality but differ in element, so the two bodies pursue the same kind of momentum toward different ends. The tension is real, and it is also the engine of the chart. Squares are where effort gets built: working through this friction tends to produce resilience, skill and a drive that easier contacts never demand, which is why the tradition treats them as the aspects of growth.',
-    trine: 'A hundred and twenty degrees, usually between signs of the same element, so the two bodies already understand each other. Energy moves between them without resistance. The tradition reads a trine as a natural gift: a capacity that feels effortless, and one that grows into real mastery when it is given a direction and some deliberate use rather than left to run on its own.',
-    opposite: 'A hundred and eighty degrees, across the wheel between complementary signs that share a modality. The two bodies face each other like the ends of a balance, each holding what the other lacks. An opposition offers perspective and awareness: it tends to show up in relationships, where other people reflect the far end back, and learning to hold both ends turns the pull into balance, a range most charts do not have.'
+    conjunct: 'Zero degrees: the two bodies stand side by side, usually in the same sign, and their energies blur into a single drive. Each one colours everything the other does. That concentration is the gift. A conjunction is where a chart is most focused, and often the first thing other people feel from you, because it arrives at full strength.',
+    sextile: 'Sixty degrees, usually between signs of friendly elements, fire with air or earth with water. The two bodies speak a common language and help each other readily, and the tradition calls it an opportunity. It behaves like a door that opens a little wider every time you walk through it, so small, deliberate efforts here tend to pay back more than their size.',
+    square: 'Ninety degrees, between signs that share a modality but not an element, so the two bodies are pushing with the same kind of momentum toward different ends. The tension is real, and it is also where the chart keeps its engine. Squares are where effort gets built: working through this friction tends to grow resilience, skill and a drive that easier contacts never ask for, which is why the tradition treats them as the aspects of growth.',
+    trine: 'A hundred and twenty degrees, usually between signs of the same element, so the two bodies already understand each other and energy moves between them without resistance. The tradition reads a trine as a natural gift. It feels effortless, and that is its one risk: given a direction and some deliberate use, it grows into real mastery instead of simply running on its own.',
+    opposite: 'A hundred and eighty degrees, straight across the wheel, between complementary signs that share a modality. The two bodies face each other like the ends of a balance, each holding what the other lacks. An opposition brings perspective. It tends to come alive in relationships, where someone else reflects the far end back to you, and learning to hold both ends turns the pull into balance, a range most charts do not have.'
   };
   /* ASP_NATURE teaches the angle and is too long for a row subtitle or the
      middle of a sentence. ASP_SHORT is the one line version of the same
      reading, for the aspect list and the Today contact paragraph. */
   ASP_SHORT = {
-    conjunct: 'Two drives fused into one concentrated strength.',
-    sextile: 'A cooperative opening that rewards small, deliberate effort.',
-    square: 'Productive tension that builds skill and resolve.',
-    trine: 'A natural gift that deepens when it is put to use.',
-    opposite: 'A polarity that offers perspective and balance.'
+    conjunct: 'Two drives fused into one bright, concentrated strength.',
+    sextile: 'A quiet opening that answers every small, deliberate step.',
+    square: 'Friction that sharpens you, if you let it.',
+    trine: 'An ease you might take for granted, until you aim it.',
+    opposite: 'A pull across the wheel that teaches you to hold both ends.'
   };
   NATAL_ORBS = { conjunct: 8, opposite: 8, trine: 6, square: 4, sextile: 3 };
   // The expanded chart's own aspect table: wider than the basic one (which
@@ -18284,11 +18284,7 @@ class Component extends DCLogic {
   /* ---- Today’s Alignment ----------------------------------------------------
      One reading, three systems kept separate. Every figure here is computed
      from this profile's own birth data and the current minute in New York.  */
-  ASP_POSS = { conjunct: 'a single concentrated drive, two impulses moving as one and gathering strength together',
-    sextile: 'an opening that rewards a small first step and widens each time it is taken',
-    square: 'pressure that sharpens, the kind of push that turns effort into capability',
-    trine: 'an ease that is really a talent, ready to deepen once it is given a direction',
-    opposite: 'a pull between two needs with equal claims, which settles into balance once both are honoured' };
+  ASP_POSS = { conjunct: 'a single gathered drive, two impulses moving as one and growing stronger together', sextile: 'an opening that rewards a small first step and widens each time you take it', square: 'a push that sharpens, the kind of pressure that turns effort into capability', trine: 'an ease that is really a talent, waiting for a direction to deepen into', opposite: 'a pull between two needs with equal claims, which settles into balance once both are honoured' };
   SYS_CHIP = { ASTROLOGY: ['#2fff8f', 'rgba(var(--atmc),.32)'], 'HUMAN DESIGN': ['#b79bff', 'rgba(139,92,246,.16)'], NUMEROLOGY: ['#7d9bff', 'rgba(125,155,255,.16)'] };
   fmtPos(p) { return Math.floor(p.deg) + '\u00b0 ' + p.sign; }
   // Degrees, minutes, seconds within the sign, for the expanded points
@@ -18365,8 +18361,8 @@ class Component extends DCLogic {
         cta: h.b.name + ' \u2192', go: this.dpOpen({ kind: 'astral body', name: h.b.name }),
         lines: [
           H('The measurement', h.a.name + ' at ' + f(h.a) + ' forms a ' + this.aspName(a) + ' to your natal ' + h.b.name + ' at ' + f(h.b) + ', within ' + h.orb.toFixed(1) + ' degrees. That part is arithmetic; everything after it is interpretation, and it is worth keeping the two apart.'),
-          H('What the tradition makes of it', 'A ' + this.aspName(a) + ' between ' + h.a.name + ' and ' + h.b.name + ' is read as ' + (this.ASP_MEAN[a] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(h.a.name) + '. On the other sits ' + this.bodyEnergy(h.b.name) + '. Two things that do not naturally keep the same hours, asked to share a week.'),
-          H('How it may land', 'You may notice this as ' + (this.ASP_POSS[a] || 'a contact you feel before you can name it') + '. The word may is doing real work there: the sky sets the conditions, and what grows in them has always depended on the ground.')
+          H('What the tradition makes of it', 'A ' + this.aspName(a) + ' between ' + h.a.name + ' and ' + h.b.name + ' carries ' + (this.ASP_MEAN[a] || 'a live contact') + '. ' + this.horoCap(this.bodyEnergy(h.a.name)) + ' leans one way, ' + this.bodyEnergy(h.b.name) + ' leans another, and this week they have to share a room.'),
+          H('How it may land', 'You may notice this as ' + (this.ASP_POSS[a] || 'a contact you feel before you can name it') + '. The sky sets the weather; what grows in it has always depended on the ground, and the ground is yours.')
         ] });
     });
     return out;
@@ -20513,7 +20509,7 @@ class Component extends DCLogic {
     return { hasHead: true, head: 'Transiting ' + h.a.name + ' ' + a + ' to your natal ' + h.b.name + (tail ? ' \u00b7 ' + tail : ''),
       cta: h.b.name + ' \u2192', go: this.dpOpen({ kind: 'astral body', name: h.b.name }), lines: [
         T('CALCULATED', h.a.name + ' at ' + f(h.a) + ' ' + whenText + ', ' + a + ' to your natal ' + h.b.name + ' at ' + f(h.b) + ', orb ' + h.orb.toFixed(1) + '\u00b0.'),
-        T('TRADITIONAL', 'In astrology a ' + a + ' between ' + h.a.name + ' and ' + h.b.name + ' is read as ' + (this.ASP_MEAN[k] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(h.a.name) + '. On the other sits ' + this.bodyEnergy(h.b.name) + '.'),
+        T('TRADITIONAL', 'A ' + a + ' between ' + h.a.name + ' and ' + h.b.name + ' carries ' + (this.ASP_MEAN[k] || 'a live contact') + ', with ' + this.bodyEnergy(h.a.name) + ' on one side and ' + this.bodyEnergy(h.b.name) + ' on the other.'),
         T('POSSIBILITY', 'You may notice this as ' + (this.ASP_POSS[k] || 'a contact you feel before you can name it') + '.')
       ] };
   }
@@ -23345,7 +23341,7 @@ class Component extends DCLogic {
         H('What ' + sel.name + ' handles', b.definition + ' ' + b.role),
         sg ? H('What ' + r.sign + ' does to any celestial body', sg.definition + ' ' + sg.demand) : null,
         hz ? H('The ' + PC.ord(house) + ' house, in general', hz.definition + ' ' + hz.arena.charAt(0).toUpperCase() + hz.arena.slice(1) + ' is the subject, in any chart.') : null,
-        hit ? H('What a ' + this.aspName(k) + ' is', (this.ASP_NATURE[k] || 'A live contact between two bodies.') + ' That is the aspect itself, before anyone\u2019s chart is involved.')
+        hit ? H('What a ' + this.aspName(k) + ' is', (this.ASP_NATURE[k] || 'A live contact between two bodies.'))
             : H('Quiet today', 'No transit is within orb of this placement today. That is the ordinary condition of most placements on most days, and it is worth saying so plainly: a chart that is always being activated is a chart being read too generously.')
       ];
       const you = [
@@ -23354,15 +23350,15 @@ class Component extends DCLogic {
           : 'In your chart, ' + sel.name + ' sits at ' + this.fmtPos(r) + (house ? ', in your ' + PC.ord(house) + ' House' : '') + '. That is the fixed version of it: the one you have had since the first day, and the one everything overhead is measured against.'),
         H(sel.name + ' in ' + r.sign + ', in you', PC.astralBodyInSign(sel.name, r.sign)),
         house ? H('And in your ' + PC.ord(house) + ' house', PC.astralBodyInHouse(sel.name, house)) : null,
-        (sg && hz) ? H('The lesson in the pairing', 'The sign says how, the house says where, and they are not interchangeable. Yours reads: ' + b.energy + ', handled ' + sg.manner + ', inside ' + hz.arena + '. ' +
-          'The usual mistake is to take the sign as the whole story. It is only the manner; ' + hz.arena.split(',')[0] + ' is the room where you find out whether the manner works.') : null,
+        (sg && hz) ? H('The lesson in the pairing', 'The sign brings the manner and the house brings the room. In you, ' + b.energy + ' moves ' + sg.manner + ', somewhere inside ' + hz.arena + '. ' +
+          'It is tempting to let the sign tell the whole story, but ' + hz.arena.split(',')[0] + ' is where you get to find out how that manner actually lands.') : null,
         dig ? H('Dignity, which is not a grade', dig.traditional + ' ' + dig.possibility) : null,
         dec ? H('Your degree, more closely', 'At ' + Math.floor(r.deg) + '\u00b0 you are in the ' + dec.word + ' decan of ' + r.sign + ', ruled by ' + dec.rulerName + '. That ruler ' + dec.filter.primary + ', which adds ' + dec.filter.gain + ' and asks: ' + dec.filter.asks + ' ' + dec.character) : null,
         syn ? H('Put together', syn.synthesis) : null
       ];
       if (hit) {
         you.push(H('What is touching it today', 'Transiting ' + hit.a.name + ' at ' + this.fmtPos(hit.a) + ' is ' + this.aspName(k) + ' this placement, within ' + hit.orb.toFixed(1) + ' degrees. Something moving has lined up with something settled in you.'));
-        you.push(H('How that tends to arrive', 'You may notice it as ' + (this.ASP_POSS[k] || 'a contact you only recognise in hindsight') + '. The word may is deliberate there: the same contact reads differently in different lives, and the honest reading waits to hear what actually happened.'));
+        you.push(H('How that tends to arrive', 'You may notice it as ' + (this.ASP_POSS[k] || 'a contact you only recognise in hindsight') + '. The same contact lands differently in different lives, and yours is the only one that can say how it landed.'));
       }
       const W = house ? PC.workingWith(sel.name, r.sign, house) : null;
       const soco = this.dpSocoBlocks({
@@ -29894,7 +29890,7 @@ class Component extends DCLogic {
       return { glyph: o.glyph, edge: edgeOf(k),
         title: name + ' ' + this.aspName(k) + ' ' + oName,
         meta: Math.floor(o.deg) + '\u00b0 ' + o.sign + ' \u00b7 orb ' + x.orb.toFixed(1) + '\u00b0',
-        text: 'Read as ' + (this.ASP_MEAN[k] || 'a live contact') + '. On one side sits ' + this.bodyEnergy(rk) + '; on the other, ' + this.bodyEnergy(key(o)) + '. Two functions of you that are permanently in the same conversation, and like most long conversations, its tone is set by how it is handled rather than by how it began.',
+        text: 'Here is ' + (this.ASP_MEAN[k] || 'a live contact') + ': ' + this.bodyEnergy(rk) + ' on one side, ' + this.bodyEnergy(key(o)) + ' on the other. Two parts of you in a conversation that never quite ends, and like most long conversations, its tone is set by how you tend it rather than by how it began.',
         cta: 'See ' + oName + ' \u2192', go: () => this.setState({ placeSel: key(o), aspSel: null }) };
     });
     const plAspectNote = plAspects.length
@@ -29927,23 +29923,23 @@ class Component extends DCLogic {
       plName: name.toUpperCase(), plGlyph: r.glyph || c.glyph,
       plSummary: name + ' in ' + r.sign + ' at ' + Math.floor(r.deg) + '\u00b0' + min + '\u2032 \u00b7 ' + PC.ord(house) + ' House',
       plSections: [
-        [c.house, 'Start with the room rather than the celestial body. A house is an area of living, not a mood, not a trait, but a place where a particular kind of thing keeps happening to you. Your ' + name + ' does its work here, in the ' + ordH + ', and everything further down this page is a variation on that one fact.'],
-        [c.signInHouse, r.sign + ' sits over this house, which sets the manner the room is handled in. The house is the subject and the sign is the accent: you do not choose an accent, and you generally cannot hear your own.'],
-        [c.body, 'Now the body itself, before it is placed anywhere. ' + name + ' means roughly the same thing in every chart ever drawn; what differs is where it lands and what condition it is in. Learning the plain meaning first prevents a great many clever misreadings.'],
-        [c.astralBodyInHouse, 'Put the two together: ' + name + ' operating in the ' + ordH + ' house. This is the sentence most people are looking for when they open a chart.'],
-        [c.astralBodyInSign, name + ' in ' + r.sign + ' is the same function wearing a different temperament. If the house says where and the sign says how, this is the how: the style that shows up whether or not the situation called for it.']
+        [c.house, 'Begin with the room. A house is a part of living where a certain kind of thing keeps finding you, and your ' + name + ' does its work here, in the ' + ordH + '. Everything further down grows from this.'],
+        [c.signInHouse, r.sign + ' sits over this house and gives the room its accent. Nobody chooses an accent, and most of us can barely hear our own.'],
+        [c.body, 'Now ' + name + ' itself, before it lands anywhere. It carries much the same longing in every chart ever drawn; what changes is where it lands, and how it is held there.'],
+        [c.astralBodyInHouse, 'Bring the two together and you meet ' + name + ' at home in the ' + ordH + ' house, the part of the reading most people come looking for.'],
+        [c.astralBodyInSign, 'The same ' + name + ', dressed in ' + r.sign + '. The house gave it a room; the sign gives it a way of moving, one that tends to show up whether or not the moment asked for it.']
       ].map(x => sec(x[0], x[1])),
       plHasDignity: !!dig,
       plDignity: dig ? { heading: dig.heading, label: dig.label.toUpperCase(),
         c: dig.strong ? 'var(--ac)' : '#7d9bff', bg: dig.strong ? 'rgba(47,255,143,.1)' : 'rgba(125,155,255,.08)',
-        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or working out of a borrowed office. ' + (dig.strong ? 'Yours is in good condition here, which the tradition treats as ease rather than merit: it is a well-lit room, not a virtue.' : 'Yours is in awkward condition here. That reads worse on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
+        lines: [{ text: 'Dignity is the old question of whether a celestial body is at home or a guest. ' + (dig.strong ? 'Yours is at home here, which the tradition counts as ease rather than merit: a well lit room, not a virtue.' : 'Yours is a guest here. That reads harder on paper than it lives; some of the most capable placements are the ones that had to work for it.') }]
           .concat(dig.lines.map(l => ({ text: l.text }))) } : null,
       ...plContacts,
-      plSynth: sec(c.synthesis, 'Everything above, held together. A chart is not a stack of separate verdicts: it is one arrangement seen from several angles, and the reading only earns its keep when the angles agree.'),
+      plSynth: sec(c.synthesis, 'Everything above, held in one hand. A chart is one arrangement seen from several sides, and it speaks most clearly where the sides agree.'),
       plWorking: [['Strengths', c.working.strengths], ['Challenges', c.working.challenges],
         ['Opportunities', c.working.opportunities], ['Obstacles', c.working.obstacles]]
         .map(([label, items]) => ({ label: label, items: items.map(t => ({ t: t })) })),
-      plDegree: sec(c.degree, 'The last layer, and the one to hold most loosely. A single degree is a fine-grained claim, and fine-grained claims depend on a birth time being right to the minute. Read it as a prompt worth sitting with, not as a finding.'),
+      plDegree: sec(c.degree, 'The last layer, and the one to hold most lightly. A single degree is a fine thread to pull on; sit with it as a prompt rather than a finding.'),
       plHasSabian: !!sb && this.degreeSafe(rk),
       plNoSabian: !!sb && !this.degreeSafe(rk),
       plNoSabianWhy: this.bodyAccuracyNote(rk, name),
