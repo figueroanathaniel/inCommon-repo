@@ -30184,6 +30184,10 @@ input[type="date"]{color-scheme:dark}
 [data-dt-modals] > div[data-immersive]{align-items:stretch!important;padding:0!important}
 [data-dt-modals] [role="dialog"][data-immersive]{max-width:none!important;margin:0!important;border-radius:0!important}
 @keyframes dtIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes bloomIn{from{opacity:0}to{opacity:1}}
+@keyframes bloomWheel{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.bloom-row:hover,.bloom-row:focus-visible{background:rgba(var(--atmc),.2)}
+.bloom-rail{scrollbar-width:thin;scrollbar-color:rgba(var(--atmc),.5) transparent}
 [data-dt-pass] > [data-screen-label]{width:100%;max-width:1120px;margin-left:auto;margin-right:auto;box-sizing:border-box}
 [data-dt-pass] > [data-screen-label="Spirit / Number"]{max-width:980px}
 @keyframes atmosDrift{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,-18px,0) scale(1.04)}100%{transform:translate3d(0,0,0) scale(1)}}
@@ -31567,10 +31571,11 @@ input[type="date"]{color-scheme:dark}
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="Expand chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)">⛶</button>
+        <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="The Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></button>
       </div>
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
+        <button data-lift onClick="{{ chartBloomGo }}" aria-label="Open the expanded chart" title="Expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:12px;top:12px;z-index:4;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:radial-gradient(circle at 50% 35%,rgba(var(--atmc),.32),rgba(var(--atmc),.08) 70%);color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M12.5 3.5h4v4M7.5 16.5h-4v-4M16.5 3.5l-4.6 4.6M3.5 16.5l4.6-4.6"></path></svg></button>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:pan-y;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
@@ -35648,6 +35653,175 @@ input[type="date"]{color-scheme:dark}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ chartBloomOn }}" hint-placeholder-val="{{ false }}">
+  <!-- THE EXPANDED CHART (owner, 4 November 2026): opened from the icon on the
+       wheel. The wheel sits in the middle and the placements wrap round it in
+       two even rails, folded to a count until a group is opened. The
+       Observatory is one press away, from the header. -->
+  <div data-immersive="1" style="position:fixed;inset:0;z-index:390;display:flex;background:radial-gradient(60% 55% at 50% 42%,rgba(var(--atmc),.30),transparent 72%),radial-gradient(80% 45% at 50% 112%,rgba(var(--atmc2),.13),transparent 70%),var(--bg)">
+    <div onClick="{{ chartBloomSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded chart" data-immersive="1" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:{{ bloomScroll }};overflow-x:hidden;animation:bloomIn .45s ease both">
+      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:14px clamp(14px,2.6vw,40px) 4px">
+        <div style="justify-self:start"><button data-lift onClick="{{ bloomObsGo }}" aria-label="Enter the Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px 0 12px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span><span style="display:{{ bloomLblD }}">Observatory</span></button></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center">
+          <span style="font:600 10px var(--fu);letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi);white-space:nowrap">{{ bloomName }} &#183; {{ bloomCount }}</span>
+          <h2 style="margin:0;font:400 clamp(24px,2.4vw,34px)/1.1 var(--fd);color:var(--tx);white-space:nowrap">Expanded Chart</h2>
+        </div>
+        <div style="justify-self:end"><button data-lift onClick="{{ chartBloomClose }}" aria-label="Close the expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--sf2);color:var(--tx);font:400 20px/1 var(--fu)">&#215;</button></div>
+      </div>
+      <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
+          <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+          <div style="position:relative;width:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
+          </div>
+          <div class="bloom-rail" style="justify-self:start;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomRight }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ bloomNarrow }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;padding:6px 16px 24px">
+          <div style="position:relative;width:min(100%,72vh);aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
+          </div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
+          <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:none;padding:4px 16px 16px"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div></div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
   <!-- THE OBSERVATORY (owner, 19 October 2026): the chart full screen, flown
        rather than looked at. The scene draws the sky, the worlds, the reticle,
@@ -35702,7 +35876,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
       <div class="obs-top">
-        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac2-hi)"></span></span>
+        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span></span>
         <div style="flex:none;display:flex;flex-direction:column;gap:1px;min-width:0">
           <h2 class="obs-title" style="margin:0;font:400 20px/1.1 var(--fd);color:var(--tx);white-space:nowrap">Observatory</h2>
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
@@ -37821,12 +37995,13 @@ input[type="date"]{color-scheme:dark}
             <button data-lift onClick="{{ m.go }}" role="radio" aria-checked="{{ m.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;padding:0 18px;border-radius:999px;background:{{ m.bg }};font:600 11.5px var(--fu);color:{{ m.c }}">{{ m.label }}</button>
           </sc-for>
         </div>
-        <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="Expand chart" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)">⛶</button>
+        <button data-lift onClick="{{ chartExpandGo }}" aria-label="Expand chart" title="The Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:10px;background:var(--sf2);color:var(--ac2-hi);font:600 16px var(--fu)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></button>
       </div>
       <div style="display:flex;flex-direction:row-reverse;flex-wrap:wrap;align-items:flex-start;gap:clamp(16px,1.6vw,26px)">
         <div data-ch-col="wheel" style="flex:3 1 470px;min-width:0;display:flex;flex-direction:column;gap:12px">
       <div data-lift="card" style="position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 50% 0%,rgba(var(--atmc),.34),transparent 62%),radial-gradient(90% 55% at 50% 112%,rgba(var(--atmc2),.12),transparent 70%),linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid rgba(var(--atmc),.46);border-radius:var(--rad)"><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);opacity:.3"></span><span data-plate-tw="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 12% 18%,var(--tx),transparent 70%),radial-gradient(1px 1px at 82% 12%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 68% 32%,var(--tx),transparent 70%),radial-gradient(1px 1px at 26% 46%,var(--tx),transparent 70%),radial-gradient(1px 1px at 91% 58%,var(--tx),transparent 70%),radial-gradient(1.5px 1.5px at 8% 72%,var(--tx),transparent 70%),radial-gradient(1px 1px at 52% 8%,var(--tx),transparent 70%),radial-gradient(1px 1px at 40% 64%,var(--tx),transparent 70%),radial-gradient(1px 1px at 74% 88%,var(--tx),transparent 70%),radial-gradient(1px 1px at 18% 92%,var(--tx),transparent 70%);background-position:41px 29px"></span>
         <p id="incommon-wheel-summary" aria-hidden="{{ chartSummaryOff }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">A wheel showing twelve houses, eleven bodies, and four angles. Each house is a wedge you can open for its meaning.</p>
+        <button data-lift onClick="{{ chartBloomGo }}" aria-label="Open the expanded chart" title="Expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;position:absolute;left:12px;top:12px;z-index:4;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--atmc),.55);background:radial-gradient(circle at 50% 35%,rgba(var(--atmc),.32),rgba(var(--atmc),.08) 70%);color:var(--ac2-hi)"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M12.5 3.5h4v4M7.5 16.5h-4v-4M16.5 3.5l-4.6 4.6M3.5 16.5l4.6-4.6"></path></svg></button>
         <sc-if value="{{ cvFlat }}" hint-placeholder-val="{{ true }}">
         <div data-chart="wheel" onPointerDown="{{ wheelDown }}" onPointerMove="{{ wheelMove }}" onPointerUp="{{ wheelUp }}" onPointerLeave="{{ wheelUp }}" onWheel="{{ wheelZoomEv }}" style="position:relative;touch-action:none;cursor:{{ wheelCursor }};transform:scale({{ wheelScale }}) translate({{ wheelTx }},{{ wheelTy }});transform-origin:center">
 <svg viewBox="0 0 800 800" role="img" aria-roledescription="astrological chart" aria-describedby="incommon-wheel-summary" aria-label="Natal chart wheel" style="position:relative;display:block;width:100%;height:auto">
@@ -42105,6 +42280,175 @@ input[type="date"]{color-scheme:dark}
 </div>
   </div>
 </main>
+<sc-if value="{{ chartBloomOn }}" hint-placeholder-val="{{ false }}">
+  <!-- THE EXPANDED CHART (owner, 4 November 2026): opened from the icon on the
+       wheel. The wheel sits in the middle and the placements wrap round it in
+       two even rails, folded to a count until a group is opened. The
+       Observatory is one press away, from the header. -->
+  <div data-immersive="1" style="position:fixed;inset:0;z-index:390;display:flex;background:radial-gradient(60% 55% at 50% 42%,rgba(var(--atmc),.30),transparent 72%),radial-gradient(80% 45% at 50% 112%,rgba(var(--atmc2),.13),transparent 70%),var(--bg)">
+    <div onClick="{{ chartBloomSwallow }}" role="dialog" aria-modal="true" aria-label="Expanded chart" data-immersive="1" style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:{{ bloomScroll }};overflow-x:hidden;animation:bloomIn .45s ease both">
+      <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:14px clamp(14px,2.6vw,40px) 4px">
+        <div style="justify-self:start"><button data-lift onClick="{{ bloomObsGo }}" aria-label="Enter the Observatory" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 14px 0 12px;border:1px solid var(--bd);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);letter-spacing:.1em;text-transform:uppercase;color:var(--tx)"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span><span style="display:{{ bloomLblD }}">Observatory</span></button></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center">
+          <span style="font:600 10px var(--fu);letter-spacing:.22em;text-transform:uppercase;color:var(--ac2-hi);white-space:nowrap">{{ bloomName }} &#183; {{ bloomCount }}</span>
+          <h2 style="margin:0;font:400 clamp(24px,2.4vw,34px)/1.1 var(--fd);color:var(--tx);white-space:nowrap">Expanded Chart</h2>
+        </div>
+        <div style="justify-self:end"><button data-lift onClick="{{ chartBloomClose }}" aria-label="Close the expanded chart" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bd);border-radius:50%;background:var(--sf2);color:var(--tx);font:400 20px/1 var(--fu)">&#215;</button></div>
+      </div>
+      <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(18px,2.6vw,48px);padding:4px clamp(14px,2.6vw,40px) 6px">
+          <div class="bloom-rail" style="justify-self:end;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomLeft }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+          <div style="position:relative;width:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
+          </div>
+          <div class="bloom-rail" style="justify-self:start;width:min(340px,100%);max-height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));height:max(380px,min(calc(100dvh - 190px),calc(100vw - 800px)));display:flex;flex-direction:column;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomRight }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ bloomNarrow }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;padding:6px 16px 24px">
+          <div style="position:relative;width:min(100%,72vh);aspect-ratio:1/1;animation:bloomWheel .6s cubic-bezier(.2,.7,.2,1) both">
+            <div data-chart="bloom" style="position:relative;width:100%;height:100%">
+                      <svg viewBox="0 0 800 800" role="img" aria-label="Expanded natal chart wheel" style="display:block;width:100%;height:100%">
+                        <circle cx="400" cy="400" r="386" fill="none" stroke="var(--chl)" stroke-width="1.5"></circle>
+                        <circle cx="400" cy="400" r="322" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="266" fill="none" stroke="var(--chl)" stroke-width="1"></circle>
+                        <circle cx="400" cy="400" r="206" fill="none" stroke="var(--chl2)" stroke-width="1"></circle>
+                        <sc-for list="{{ wheelSigns }}" as="s" hint-placeholder-count="12">
+                          <path d="{{ s.path }}" fill="{{ s.fill }}" stroke="var(--chl)" stroke-width="1"></path>
+                        </sc-for>
+                        <sc-for list="{{ wheelHouses }}" as="h" hint-placeholder-count="12">
+                          <g>
+                            <path d="{{ h.path }}" fill="{{ h.fill }}" stroke="none"></path>
+                            <line x1="{{ h.x1 }}" y1="{{ h.y1 }}" x2="{{ h.x2 }}" y2="{{ h.y2 }}" stroke="{{ h.c }}" stroke-width="{{ h.w }}"></line>
+                          </g>
+                        </sc-for>
+                        <sc-for list="{{ wheelAspects }}" as="a" hint-placeholder-count="10">
+                          <line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" stroke="{{ a.stroke }}" stroke-width="{{ a.w }}" stroke-dasharray="{{ a.dash }}" opacity="{{ a.op }}"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelAngles }}" as="g" hint-placeholder-count="4">
+                          <line x1="{{ g.x1 }}" y1="{{ g.y1 }}" x2="{{ g.x2 }}" y2="{{ g.y2 }}" stroke="#2fff8f" stroke-width="1.4" opacity=".55"></line>
+                        </sc-for>
+                        <sc-for list="{{ wheelBodies }}" as="p" hint-placeholder-count="17">
+                          <g>
+                            <title>{{ p.tip }}</title>
+                            <line x1="{{ p.tx1 }}" y1="{{ p.ty1 }}" x2="{{ p.tx2 }}" y2="{{ p.ty2 }}" stroke="{{ p.c }}" stroke-width="1" opacity=".5"></line>
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="none" stroke="{{ p.c }}" stroke-width="9" opacity=".16"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.bg }}" stroke="{{ p.c }}" stroke-width="{{ p.sw }}"></circle>
+                          </g>
+                        </sc-for>
+                      </svg>
+                      <sc-for list="{{ wheelLabels }}" as="w" hint-placeholder-count="24">
+                        <span aria-hidden="true" style="position:absolute;left:{{ w.l }};top:{{ w.t }};transform:translate(-50%,-50%);white-space:nowrap;text-align:center;font:{{ w.f }};color:{{ w.c }};letter-spacing:{{ w.ls }}">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
+          </div>
+          <div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div>
+          <div style="width:min(100%,560px);display:flex;flex-direction:column;animation:bloomIn .6s ease .15s both">
+          <sc-for list="{{ bloomAll }}" as="g" hint-placeholder-count="4">
+            <div style="flex:none;display:flex;flex-direction:column;border-bottom:1px solid rgba(var(--atmc),.3)">
+              <button onClick="{{ g.go }}" aria-expanded="{{ g.on }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:56px;display:flex;align-items:center;gap:12px;padding:6px 8px">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:400 18px/1.2 var(--fd);color:var(--tx)">{{ g.label }}</span><span aria-hidden="true" style="font:400 12px/1 var(--fu);letter-spacing:.12em;color:var(--mut);white-space:nowrap;overflow:hidden">{{ g.peek }}</span></span>
+                <span style="flex:none;font:600 11px var(--fu);letter-spacing:.1em;color:var(--ac2-hi)">{{ g.count }}</span>
+                <span aria-hidden="true" style="flex:none;width:14px;text-align:center;font:400 16px/1 var(--fu);color:var(--mut);transform:{{ g.chev }};transition:transform .3s ease">&#8250;</span>
+              </button>
+              <sc-if value="{{ g.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;padding:0 0 12px;animation:bloomIn .35s ease both">
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+                    <button onClick="{{ r.go }}" aria-label="{{ r.aria }}" class="bloom-row" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:grid;grid-template-columns:24px minmax(0,1fr) auto 30px;align-items:center;gap:10px;padding:0 8px;border-radius:10px">
+                      <span aria-hidden="true" style="font:400 16px/1 var(--fu);color:{{ r.c }};text-align:center">{{ r.glyph }}</span>
+                      <span style="font:400 15px/1.2 var(--fb);color:{{ r.nc }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                      <span style="font:500 12px var(--fu);letter-spacing:.04em;color:var(--mut);white-space:nowrap">{{ r.pos }}</span>
+                      <span style="font:600 10px var(--fu);letter-spacing:.08em;color:var(--ac2-hi);text-align:right">{{ r.house }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ bloomWide }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:none;padding:4px 16px 16px"><div role="list" aria-label="What the aspect line colours mean" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px"><sc-for list="{{ aspectLegend }}" as="lg" hint-placeholder-count="5"><span role="listitem" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:16px;height:0;border-top:2px {{ lg.style }} {{ lg.c }}"></span><span style="font:400 10px var(--fu);letter-spacing:.04em;color:var(--dim)">{{ lg.label }}</span></span></sc-for></div></div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
 <sc-if value="{{ chartExpandOpen }}" hint-placeholder-val="{{ false }}">
   <!-- THE OBSERVATORY (owner, 19 October 2026): the chart full screen, flown
        rather than looked at. The scene draws the sky, the worlds, the reticle,
@@ -42159,7 +42503,7 @@ input[type="date"]{color-scheme:dark}
       </sc-if>
 
       <div class="obs-top">
-        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac2-hi)"></span></span>
+        <span aria-hidden="true" class="obs-mark" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ac2);box-shadow:0 0 16px rgba(var(--atmc),.6),inset 0 0 10px rgba(var(--atmc2),.35);display:flex;align-items:center;justify-content:center"><span style="display:flex;color:var(--ac2-hi)"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 20.5h17"></path><path d="M6 20.5v-6.5h12v6.5"></path><path d="M6 14a6 6 0 0 1 12 0"></path><path d="M10.6 9.3l5-5M12.6 10.3l5-5M15.6 4.3l2 1"></path><path d="M10.5 20.5v-3.5h3v3.5"></path></svg></span></span>
         <div style="flex:none;display:flex;flex-direction:column;gap:1px;min-width:0">
           <h2 class="obs-title" style="margin:0;font:400 20px/1.1 var(--fd);color:var(--tx);white-space:nowrap">Observatory</h2>
           <span class="obs-mono" style="display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)"><span aria-hidden="true" style="width:6px;height:6px;border-radius:50%;background:{{ obsStatusDot }};box-shadow:0 0 8px {{ obsStatusDot }}"></span>{{ obsStatus }}</span>
@@ -47245,6 +47589,68 @@ class Component extends DCLogic {
       obsTFly: () => { if (S && key) S.flyTo(key); this.setState({ obsDrawer: false }, () => this.obsRefocus()); },
       obsTOpen: () => { if (key) this.setState({ chartExpandOpen: false, chartExpandAspSel: null, spiritView: 'placement', placeSel: key, aspSel: null }); },
       obsTContacts: contacts, obsTContactsOn: contacts.length > 0
+    };
+  }
+  /* The expanded chart, opened from the icon on the wheel itself (owner,
+     4 November 2026: "blow it up ... wrap the text and activities around it
+     uniformly. It should feel like luxury, not overburdening"). The wheel in
+     its expanded mode sits in the middle and the placements are laid round it
+     in two rails of four groups each, folded to a count until opened, so the
+     eighty extra points are there without all being shown at once. Comets are
+     mundane and off the wheel by default, so they stay with the Observatory,
+     which is one press away from here. */
+  chartBloomVals() {
+    const st = this.state, open = !!st.chartBloom;
+    const restore = st.chartBloomPrev || 'basic';
+    const base = {
+      chartBloomOn: open,
+      chartBloomGo: () => (this._bloomGrp = null, this.setState({ chartBloom: true, chartBloomPrev: st.chartMode || 'basic', chartMode: 'expanded', chartBloomGrp: null, aspSel: null, dpSel: null })),
+      chartBloomClose: () => this.setState({ chartBloom: false, chartMode: restore }),
+      chartBloomSwallow: e => { if (e && e.stopPropagation) e.stopPropagation(); }
+    };
+    if (!open) return base;
+    const wide = (st.dtW || (typeof window !== 'undefined' ? window.innerWidth : 1440)) >= 1100;
+    const rows = this.fullChart(true), asc = this.ascendant(), sun = rows[0];
+    const grp = st.chartBloomGrp || {};
+    const SG = this.SIGN_GLYPHS;
+    const group = cat => {
+      const list = rows.filter(r => (r.category || r.group) === cat);
+      if (!list.length) return null;
+      const on = !!grp[cat];
+      return {
+        id: cat, label: this.CAT_LABEL[cat] || cat, count: String(list.length),
+        peek: list.filter(r => r.glyph && r.lon != null).slice(0, 4).map(r => r.glyph).join('  '),
+        on: on ? 'true' : 'false', open: on, chev: on ? 'rotate(90deg)' : 'none',
+        go: () => { this._bloomGrp = { ...(this._bloomGrp || grp), [cat]: !(this._bloomGrp || grp)[cat] }; this.setState({ chartBloomGrp: this._bloomGrp }); },
+        rows: list.map(r => {
+          const known = r.lon != null, key = this.pointKey(r);
+          const h = known && r.group !== 'angle' ? this.houseOf(r.lon, sun, asc) : null;
+          const d = known ? ((r.lon % 30) + 30) % 30 : 0, deg = Math.floor(d), min = Math.floor((d - deg) * 60);
+          return {
+            key, name: this.pointLabel(r), glyph: r.glyph || '·', c: this.CAT_COLOR[cat] || 'var(--ac2-hi)',
+            pos: known ? deg + '°' + String(min).padStart(2, '0') + '′ ' + SG[Math.floor(((r.lon % 360) + 360) % 360 / 30)] : 'not computed',
+            house: h ? 'H' + h : '', nc: known ? 'var(--tx)' : 'var(--mut)',
+            aria: this.pointLabel(r) + (known ? ', ' + deg + ' degrees ' + this.signOf(r.lon).sign + (h ? ', house ' + h : '') : ', not computed') + '. Open the reading.',
+            go: () => this.setState({ chartBloom: false, spiritView: 'placement', placeSel: key, aspSel: null })
+          };
+        })
+      };
+    };
+    const left = ['body', 'node', 'angle', 'derived'].map(group).filter(Boolean);
+    const right = ['asteroid', 'centaur', 'tno', 'hypothetical'].map(group).filter(Boolean);
+    const total = left.concat(right).reduce((n, g) => n + g.rows.length, 0);
+    const p = this.activeProfile ? this.activeProfile() : null;
+    return {
+      ...base,
+      bloomWide: wide, bloomNarrow: !wide, bloomScroll: wide ? 'hidden' : 'auto', bloomLblD: wide ? 'inline' : 'none',
+      bloomName: this.usingSampleBirth() ? 'The sample chart' : ((p && p.name) || 'Your chart'),
+      bloomCount: total + ' placements',
+      bloomLeft: left, bloomRight: right, bloomAll: left.concat(right),
+      bloomObsGo: () => {
+        let seen = true;
+        try { seen = !!localStorage.getItem('incommon.obs.keys'); localStorage.setItem('incommon.obs.keys', '1'); } catch (e) {}
+        this.setState({ chartBloom: false, chartExpandOpen: true, chartMode: 'expanded', openBody: null, aspSel: null, chartExpandAspSel: null, obsDrawer: false, obsHouse: null, obsKeys: !seen });
+      }
     };
   }
   chartExpandVals() {
@@ -59315,7 +59721,8 @@ class Component extends DCLogic {
     this.setState({ searchOpen: false, addOpen: false, voiceOpen: false, helpOpen: false,
       quickOpen: false, switchTo: null, formMode: null, form: null, delOpen: false, phOpen: false, mfOpen: false, supOpen: false, pmenuOpen: false, callOpen: false, cyOpen: false,
       ...(this.state.adBusy ? {} : { adOpen: false }),
-      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null });
+      avaDraft: null, dpSel: null, aspSel: null, memSel: null, welcomeFor: null, alignOpen: false, chartExpandOpen: false, chartExpandAspSel: null,
+      ...(this.state.chartBloom ? { chartBloom: false, chartMode: this.state.chartBloomPrev || 'basic' } : {}) });
   }
 
   /* G15: arrow keys move and select, Home and End jump to the ends. Space
@@ -59828,6 +60235,7 @@ class Component extends DCLogic {
           ...this.circleVals(),
           ...this.birthTimeVals(),
           ...this.chartExpandVals(),
+          ...this.chartBloomVals(),
           ...this.themeVals(),
           chartSummary: { head: asc ? 'What this wheel is drawn from' : 'What this wheel is drawn from, and what it is missing',
             text: asc
@@ -59845,6 +60253,13 @@ class Component extends DCLogic {
             // reach chartExpandRows/the sub-tables below through `rows`
             // directly, just never placedRows, which only feeds the SVG.
             const placedRows = rows.filter(r => r.lon != null && r.group !== 'angle' && (r.category !== 'comet' || showComets));
+            // The expanded chart draws the core and the first ring, and lights a
+            // group's points only while that group is opened in its rails, so
+            // eighty minor points never crowd the wheel at once.
+            const bloomGrp = st.chartBloom ? (st.chartBloomGrp || {}) : null;
+            const svgRows = bloomGrp ? placedRows.filter(r => r.ring !== 2 || !!bloomGrp[r.category || r.group]) : placedRows;
+            const svgLon = bloomGrp ? new Set(svgRows.map(r => r.lon.toFixed(4))) : null;
+            const svgAsp = x => !svgLon || ((x.a.lon == null || x.a.group === 'angle' || svgLon.has(x.a.lon.toFixed(4))) && (x.b.lon == null || x.b.group === 'angle' || svgLon.has(x.b.lon.toFixed(4))));
             const asps = this.natalAspects(expanded, { rich: expanded, minorAspects: st.chartExpandShowMinorAspects !== false, minorScale: true }), stel = this.stelliums(expanded);
             const zero = this.wheelZero(), P = (lon, r) => this.polar(lon, r);
             const CS = this.chartCusps(), mid = i => CS[i] + this.cuspSpan(CS, i) / 2;
@@ -59884,6 +60299,7 @@ class Component extends DCLogic {
             // letter label at that radius; three put them on top of each other.
             const radiusFor = { ...stagger(placedRows.filter(r => r.ring === 1), 234, 40, 3),
               ...stagger(placedRows.filter(r => r.ring === 2), 136, 20, 4) };
+            const svgRadius = bloomGrp ? { ...stagger(svgRows.filter(r => r.ring === 1), 234, 40, 3), ...stagger(svgRows.filter(r => r.ring === 2), 136, 20, 4) } : radiusFor;
             // Clicking a body anywhere in the chart now opens its own placement
             // page rather than an inline accordion.
             const openBody = n => this.setState({ spiritView: 'placement', placeSel: n, aspSel: null });
@@ -60005,9 +60421,9 @@ class Component extends DCLogic {
                   out.push({ hit: '44px', l: pc(l.x), t: pc(l.y), text: label, aria: nm + ', open its reading', cur: 'pointer', ls: '.08em',
                     c: '#7d9bff', f: '600 13px Karla,sans-serif', go: () => openBody(nm) });
                 });
-                placedRows.forEach(r => {
+                svgRows.forEach(r => {
                   const key = this.pointKey(r), label = this.pointLabel(r);
-                  const rad = radiusFor[key], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
+                  const rad = svgRadius[key], pt = P(r.lon, rad), dl = P(r.lon, rad - 30);
                   const minor = r.ring === 2;
                   out.push({ wb: key, hit: '44px', l: pc(pt.x), t: pc(pt.y), text: r.glyph, aria: label, cur: 'pointer', ls: 'normal',
                     c: this.CAT_COLOR[r.category] || '#2fff8f', f: (minor ? '400 13px' : '400 19px') + ' Georgia,serif', go: () => openBody(key) });
@@ -60044,7 +60460,7 @@ class Component extends DCLogic {
                 const a = P(lon, 206), b = P(lon, 322), l = P(lon, 368);
                 return { label, x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1), lx: l.x.toFixed(1), ly: l.y.toFixed(1) };
               }) : [],
-              wheelAspects: asps.slice(0, 40).map((x, i) => {
+              wheelAspects: asps.map((x, i) => ({ x, i })).filter(o => svgAsp(o.x)).slice(0, 40).map(({ x, i }) => {
                 const col = this.ASP_COLOR[x.asp], a = P(x.a.lon, 196), b = P(x.b.lon, 196);
                 return { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1),
                   stroke: col[0], dash: col[1], w: col[2], op: st.aspSel === i ? .9 : .32,
@@ -60061,8 +60477,8 @@ class Component extends DCLogic {
                 // "Expanded Chart" pill, which also sets chartMode:'expanded',
                 // never inherits a stale highlight from a closed modal.
                 const aspSelRow = (st.chartExpandOpen && st.chartExpandAspSel != null) ? asps[st.chartExpandAspSel] : null;
-                return placedRows.map(r => {
-                  const key = this.pointKey(r), rad = radiusFor[key], minor = r.ring === 2, cr = minor ? 13 : 19;
+                return svgRows.map(r => {
+                  const key = this.pointKey(r), rad = svgRadius[key], minor = r.ring === 2, cr = minor ? 13 : 19;
                   const pt = P(r.lon, rad), t1 = P(r.lon, 266), t2 = P(r.lon, rad + cr), dl = P(r.lon, rad - 30);
                   const on = st.placeSel === key || (aspSelRow && (key === (aspSelRow.a.id || aspSelRow.a.name) || key === (aspSelRow.b.id || aspSelRow.b.name)));
                   return { key: key, glyph: r.glyph, x: pt.x.toFixed(1), y: pt.y.toFixed(1), r: cr,
