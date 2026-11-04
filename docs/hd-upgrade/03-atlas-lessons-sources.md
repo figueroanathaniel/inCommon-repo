@@ -339,3 +339,9 @@ Lesson words with no lexicon entry, still opening their lessons, put to the
 owner for direction: Type, Strategy, Inner Authority, Profile, Definition,
 Centers, Circuits (the building blocks); Rave Cosmology, Mechanics, Evolution,
 Cycles, Awareness, Streams, Angle, Variable, Left or Right (lesson topics).
+
+## The lesson words as lexicon entries, 4 November 2026
+
+The owner asked for every word a lesson offers to open a lexicon definition worth reading. Sixteen entries were added (`LESSON_TERMS` in `app/hd-atlas.js`): Type, Strategy, Inner Authority, Profile, Definition, Centers, Circuits, Streams, Rave Cosmology, Mechanics, Evolution, Cycles, Awareness, Angle, Variable and Left or Right. Five existing entries whose words a lesson also offers were lengthened: Aura, Signature, Not-Self Theme, Conditioning and Outer Authority.
+
+No new claim about the system was made. Every sentence restates a claim the lesson of the same name already makes, and those lessons were checked against the sources listed above. Each entry links back to its lesson. F10 in `tools/run-module-tests.js` holds every lesson word to an entry of at least 500 characters that points at its lesson.

@@ -2922,11 +2922,23 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
                 <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
-                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
+              </div>
+              <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
+                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
+                    <button data-lift onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--bd);background:var(--sf2);font:600 14px var(--fu);color:var(--tx)">&#215;</button>
+                  </div>
+                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
+                </div>
+              </sc-if>
               </div>
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
@@ -9702,11 +9714,23 @@ input[type="date"]{color-scheme:dark}
               </div>
             </sc-if>
             <sc-if value="{{ hdTermsOn }}" hint-placeholder-val="{{ false }}">
+              <div data-bub-wrap style="position:relative">
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
                 <span style="font:600 9px var(--fu);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-right:2px">Words here</span>
                 <sc-for list="{{ hdTerms }}" as="tm" hint-placeholder-count="3">
-                  <button data-lift onClick="{{ tm.go }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px dashed rgba(var(--atmc),.7);border-radius:999px;background:var(--sf2);font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
+                  <button data-lift onClick="{{ tm.go }}" aria-expanded="{{ tm.open }}" aria-controls="incommon-atlas-bubble" data-bub-key="{{ tm.key }}" style="all:unset;cursor:pointer;box-sizing:border-box;min-height:44px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px {{ tm.bs }} {{ tm.bc }};border-radius:999px;background:{{ tm.bg }};font:600 11px var(--fu);color:var(--tx)"><span aria-hidden="true" style="color:var(--ac2-hi)">{{ tm.g }}</span>{{ tm.label }}</button>
                 </sc-for>
+              </div>
+              <sc-if value="{{ hdBubOn }}" hint-placeholder-val="{{ false }}">
+                <div id="incommon-atlas-bubble" role="region" aria-label="{{ hdBubName }}" style="position:relative;z-index:8;margin-top:{{ hdBubTop }};padding:12px 14px 12px 14px;border:1px solid var(--ac2-hi);border-radius:14px;background:var(--bg);box-shadow:0 6px 18px rgba(0,0,0,.4);animation:fadeUp .2s ease">
+                  <span aria-hidden="true" style="position:absolute;left:{{ hdBubX }};top:-7px;width:12px;height:12px;background:var(--bg);border-left:1px solid var(--ac2-hi);border-top:1px solid var(--ac2-hi);transform:rotate(45deg)"></span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="flex:1;font:400 17px/1.25 var(--fd);color:var(--tx)">{{ hdBubName }}</div>
+                    <button data-lift onClick="{{ hdBubClose }}" aria-label="Close the definition" style="all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--bd);background:var(--sf2);font:600 14px var(--fu);color:var(--tx)">&#215;</button>
+                  </div>
+                  <div style="max-height:min(40vh,260px);overflow-y:auto;overscroll-behavior:contain;margin-top:6px;font:400 var(--rd2)/var(--rdlh2) var(--fb);color:var(--tx);text-wrap:pretty">{{ hdBubText }}</div>
+                </div>
+              </sc-if>
               </div>
             </sc-if>
             <sc-if value="{{ hdYoursOn }}" hint-placeholder-val="{{ false }}">
@@ -21949,11 +21973,31 @@ class Component extends DCLogic {
     if (!CL || !CL.fieldStudyTally) { this.setState({ fsTally: { ...(this.state.fsTally || {}), [key]: { ok: false, reason: 'offline' } } }); return; }
     CL.fieldStudyTally(key).then(r => this.setState({ fsTally: { ...(this.state.fsTally || {}), [key]: r } }));
   }
+  /* A Words here chip opens a bubble with the word's own definition, in
+     place, and a second press closes it. The folio underneath stays put. */
+  atlasBubGo(key) {
+    if (this.state.atlasBub === key) { this.setState({ atlasBub: null }); return; }
+    /* The bubble hangs from the pill it defines: it is pulled up over the
+       pills below that one, so the arrow points at that word and not at the
+       end of the row, and it stays in the flow so no card clips it. */
+    const btn = [...document.querySelectorAll('[data-bub-key]')].find(x => x.getAttribute('data-bub-key') === key && x.offsetParent);
+    const row = btn && btn.parentElement, at = btn ? { t: btn.offsetTop + btn.offsetHeight + 10 - (row ? row.offsetTop + row.offsetHeight : 0), x: Math.max(14, Math.round(btn.offsetLeft + btn.offsetWidth / 2 - 6)) } : null;
+    this.setState({ atlasBub: key, atlasBubAt: at });
+  }
+  atlasBubText(e) {
+    const A = this.A(), d = e.d || {};
+    if (d.term) { const t = (A.TERMS || []).find(x => x.name === d.term); if (t) return t.text; }
+    if (d.type && A.TYPES[d.type]) return A.TYPES[d.type].def || e.sub;
+    if (d.openc && A.CENTERS[d.openc]) return A.CENTERS[d.openc].wisdom || e.sub;
+    if (d.center && A.CENTERS[d.center]) return A.CENTERS[d.center].fn || e.sub;
+    if (d.lesson) { const l = (A.LESSONS || []).find(x => x.name === d.lesson); if (l && l.lead) return l.lead; }
+    return e.sub;
+  }
   atlasPick(key, scroll) {
     const e = this.atlasEntries().find(x => x.key === key);
     if (!e) return;
     this._atlasScrolled = e.slug;
-    this.setState({ atlasSec: e.ch, atlasItem: e.slug, atlasPeek: null, atlasFlip: (this.state.atlasFlip || 0) + 1, fsFit: null, fsCharge: null, fsNote: '', fsMsg: '' });
+    this.setState({ atlasSec: e.ch, atlasItem: e.slug, atlasPeek: null, atlasBub: null, atlasFlip: (this.state.atlasFlip || 0) + 1, fsFit: null, fsCharge: null, fsNote: '', fsMsg: '' });
     this.speak(e.name + '.', 'polite');
     if (scroll) setTimeout(() => {
       const f = document.querySelector('[data-hd-folio]');
@@ -22074,7 +22118,7 @@ class Component extends DCLogic {
     const hexName = n => { const IC = this.IC(), h = IC && IC.hexagram ? IC.hexagram(n) : null; return h ? h.name : ''; };
     const skyLine = list => list.length ? 'In the sky now: ' + list.join(', ') : '';
     const link = (label, glyph, key, c) => { const x = find(key); if (x && x.key !== e.key) links.push({ label: label, glyph: glyph || x.glyph, c: c || 'var(--ac2-hi)', aria: label, go: () => this.atlasPick(key, false) }); };
-    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key && !terms.some(t => t.key === key)) terms.push({ label: label, key: key, g: '?', go: () => this.atlasPick(key, false) }); };
+    const term = (label, key) => { const x = find(key); if (x && x.key !== e.key && !terms.some(t => t.key === key)) terms.push({ label: label, key: key, g: '?', go: () => this.atlasBubGo(key) }); };
     const wiringGo = this.searchGo(this.searchSpirit('humanDesign', 0));
     const yourLine = (label, text) => yours.push({ label: label, text: text, go: wiringGo });
     if (d.type) { const t = A.TYPES[d.type];
@@ -22141,6 +22185,7 @@ class Component extends DCLogic {
       if (/emotional/i.test(d.authority)) term('Emotional Wave', 'terms:emotional-wave');
       if (myAuth && myAuth.name === d.authority) yourLine('Your authority', String(hd.authority).split(':')[0]); }
     if (d.term) { const tm = A.TERMS.find(x => x.name === d.term); lead = tm.text; dropcap = true;
+      if (tm.aka) { epi = tm.aka; epiLabel = 'Also called'; }
       if (tm.see) { const k = tm.see[0] + ':' + this.atlasSlug(tm.see[1]), x = find(k); if (x) link((A.LESSONS || []).some(l => l.name === x.name && l.tier === x.ch) ? 'The lesson, ' + x.name : x.name, x.glyph, k); } }
     if (d.lesson) { const L = A.LESSONS.find(x => x.name === d.lesson), T = (A.TIERS || []).find(x => x.key === L.tier) || { name: '' };
       const tier = A.LESSONS.filter(x => x.tier === L.tier), at = tier.indexOf(L);
@@ -22228,7 +22273,11 @@ class Component extends DCLogic {
       hdYours: yours, hdYoursOn: yours.length > 0,
       hdLinks: links, hdLinksOn: links.length > 0,
       ...(fs || { fsOn: false }),
-      hdTerms: terms, hdTermsOn: lv !== 'deep' && terms.length > 0,
+      hdTerms: terms.map((t, i) => { const o = st.atlasBub === t.key; return Object.assign(t, { open: o ? 'true' : 'false', bs: o ? 'solid' : 'dashed', bc: o ? 'var(--ac2-hi)' : 'rgba(var(--atmc),.7)', bg: o ? 'rgba(var(--atmc),.2)' : 'var(--sf2)' }); }),
+      hdTermsOn: lv !== 'deep' && terms.length > 0,
+      ...(() => { const b = terms.find(t => t.key === st.atlasBub), be = b ? find(b.key) : null;
+        return { hdBubOn: lv !== 'deep' && !!be, hdBubName: be ? be.name : '', hdBubText: be ? this.atlasBubText(be) : '',
+          hdBubX: b && st.atlasBubAt ? st.atlasBubAt.x + 'px' : '20px', hdBubTop: b && st.atlasBubAt ? st.atlasBubAt.t + 'px' : '10px', hdBubClose: () => this.setState({ atlasBub: null }) }; })(),
       hdStepOn: sib.length > 1,
       hdPrevLabel: '‹ ' + step(-1).name, hdNextLabel: step(1).name + ' ›',
       hdPrevAria: 'Previous, ' + step(-1).name, hdNextAria: 'Next, ' + step(1).name,
