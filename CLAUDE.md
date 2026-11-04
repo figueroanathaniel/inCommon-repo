@@ -3348,11 +3348,14 @@ Beijing mean time before 1929, held to every year from 1900 to 2100
 longitude is the app's apparent longitude less the mean ayanamsa and the
 nutation. `tools/check-chart-traditions.js` (CT1 to CT6) is the gate.
 
-**What changes today is the Oracle, not the wheel.** `studyDossierLines()`
+**What changes today is the Oracle and one card, not the wheel.** `studyDossierLines()`
 adds the chart as the study casts it to every dossier: the Vedic rashis,
 bhavas, nakshatras, dignities and current mahadasha; the sidereal or draconic
 positions; the heliocentric bodies; the Four Pillars and the animal year; the
-Hellenistic sect and chart ruler. The wheel, the Ledger and the placement
+Hellenistic sect and chart ruler. The astrology page draws the same lines as
+a card above the Cycle Audit (`studyPanelVals()`, both shells), without the
+bracketed method, and draws nothing for the four plain Western studies. The
+wheel, the Ledger and the placement
 pages are still drawn in the tropical zodiac under every study. Relabelling
 them is the next step and needs the ayanamsa at each instant a sign is read,
 so it was not done by shifting `chartAt()`: transits are read through
