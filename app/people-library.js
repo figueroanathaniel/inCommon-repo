@@ -50,7 +50,7 @@
   var VERSION = '1.1.0';
   /* Bumped whenever the shape or the arithmetic of computed_state changes, so
      stored records can be recognised as stale and recomputed. It is also what
-     invalidates the pair cache. 2: the ten astral bodies moved from the
+     invalidates the pair cache. 2: the ten celestial bodies moved from the
      hand written series to astronomy-engine, so every stored longitude and
      every cached composite gate list was computed by arithmetic that is gone.
      3: a birth with no time is drawn at noon where it happened rather than

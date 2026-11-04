@@ -82,7 +82,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-/* The ten astral bodies come from astronomy-engine in the app, so the bench
+/* The ten celestial bodies come from astronomy-engine in the app, so the bench
    loads the same vendored file: without it lonRaw() falls back to the old
    series and this would time a branch the app no longer runs. */
 global.window = { MinorBodies: null, Astronomy: require(path.join(repo, 'app', 'astronomy-engine-2.1.19.min.js')) };
@@ -244,7 +244,7 @@ console.log('  ' + compared + ' cached reads compared against uncached, 0 differ
 console.log('  ' + MUTABLE.length + ' window.MinorBodies bodies, none cacheable, pre-install null does not survive');
 console.log('  nothing persisted, ceiling of ' + cache.MAX_ENTRIES + ' holds and clears wholesale');
 console.log('');
-console.log('  one lonRaw call, astral body branch                 ' + us(perCall));
+console.log('  one lonRaw call, celestial body branch                 ' + us(perCall));
 console.log('  transitWindows walk, 1986 calls               ' + ms(perWalk));
 console.log('    the same walk, cached                       ' + ms(perWalkCached) +
             '   (' + (100 * (perWalk - perWalkCached) / perWalk).toFixed(0) + '% faster)');

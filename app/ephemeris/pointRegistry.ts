@@ -21,7 +21,7 @@
 
 export type Category =
   | 'angle'      // ASC, MC, IC, DC
-  | 'body'       // Sun, Moon, astral bodies
+  | 'body'       // Sun, Moon, celestial bodies
   | 'node'       // North, South, lunar points, planetary nodes
   | 'asteroid'   // Belt asteroids + love/shadow group (EXPANDED-only)
   | 'centaur'    // Centaurs, chironic bodies (EXPANDED-only)
@@ -109,7 +109,7 @@ export const BASIC_REGISTRY: PointDef[] = [
     reference: 'emotional nature, instinct, security, family'
   },
 
-  // Astral Bodies
+  // Celestial Bodies
   {
     id: 'mercury',
     name: 'Mercury',

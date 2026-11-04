@@ -2,7 +2,7 @@
 /* fetch-astral-bodies.js: the reference positions check-astral-bodies.js
  * measures the chart against.
  *
- * The ten astral bodies are the foundation every reading stands on, and until
+ * The ten celestial bodies are the foundation every reading stands on, and until
  * this existed nothing in the build compared them with anything outside it:
  * the asteroids were held to 24,240 JPL Horizons positions while the Moon they
  * are aspected to was never measured at all. This asks Horizons for the

@@ -43,7 +43,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'square',
     variants: [
-      'Journal: What are these two astral bodies pushing me to choose? Write both sides. Then write which one you\'re leaning toward and why.',
+      'Journal: What are these two celestial bodies pushing me to choose? Write both sides. Then write which one you\'re leaning toward and why.',
       'Action: Stop avoiding the friction. Have the conversation, make the decision, adjust the plan. Pressure breaks when you push back.',
       'Conversation: Ask a mentor or trusted friend: "What\'s one pressure point in my life right now?" Their perspective might clarify your path.'
     ]
@@ -65,7 +65,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'transit',
     type: 'opposite',
     variants: [
-      'Journal: Write from both sides. "This situation wants..." (one astral body). Then: "...but this situation also needs..." (other astral body). What\'s the integration?',
+      'Journal: Write from both sides. "This situation wants..." (one celestial body). Then: "...but this situation also needs..." (other celestial body). What\'s the integration?',
       'Action: Seek out someone who thinks the opposite way from you on this issue. Genuinely listen. You\'re not trying to win.',
       'Conversation: Ask yourself in the mirror: "What am I not seeing?" Then listen like you\'re talking to someone else.'
     ]
@@ -118,7 +118,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     type: 'T-Square',
     variants: [
       'Action: Identify the empty leg of this T-Square (opposite the apex). That\'s your release valve. Point your effort there.',
-      'Journal: Write the conversation between the two astral bodies pulling you. Let them argue on paper. The resolution is in {theme}.',
+      'Journal: Write the conversation between the two celestial bodies pulling you. Let them argue on paper. The resolution is in {theme}.',
       'Conversation: Find someone who handles similar tension well. Ask: "How do you turn this kind of pressure into motion?"'
     ]
   },
@@ -239,7 +239,7 @@ export const PRACTICAL_HOOKS: PracticalHook[] = [
     category: 'degree-lore',
     type: 'anaretic 29°',
     variants: [
-      'Action: What\'s this astral body asking you to finish? One thing gets closure today. Do it.',
+      'Action: What\'s this celestial body asking you to finish? One thing gets closure today. Do it.',
       'Journal: "This urgency is about..." Finish. Then write what comes after the ending.',
       'Conversation: Ask someone: "What do you think I\'m running out of time to do?" The answer might surprise you.'
     ]

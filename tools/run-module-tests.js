@@ -565,15 +565,15 @@ if (!hdLine) {
   }, { passages: sun.length, passes: sun[0] && sun[0].passes.length,
     onDates: !!sun[0] && sun[0].passes.length === 5 && sun[0].passes.every((d, i) => near(d, SUN[i])),
     after: !!(sun[0] && mars[0]) && ws.indexOf(sun[0]) > ws.indexOf(mars[0]) });
-  tTrue('Z4', 'only the four slow astral bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
+  tTrue('Z4', 'only the four slow celestial bodies are read', ws.length > 0 && ws.every(w => ['Saturn', 'Uranus', 'Neptune', 'Pluto'].indexOf(w.mover) !== -1));
   const dos = z.cycleDossier();
   const dashRe = new RegExp('[' + String.fromCharCode(8212, 8211) + ']');
-  t('Z5', 'the dossier names the first name, the touched points, the design and the Life Path its questions are asked through, and the passages with their dates, and no birth date, no full name, no dash and no planet', {
-    name: true, points: true, design: true, lifePath: true, passage: true, noBirth: true, noSurname: true, noDash: true, noPlanet: true
+  t('Z5', 'the dossier names the first name, the touched points, the design and the Life Path its questions are asked through, and the passages with their dates, and no birth date, no full name, no dash and never the old word astral body', {
+    name: true, points: true, design: true, lifePath: true, passage: true, noBirth: true, noSurname: true, noDash: true, noAstral: true
   }, { name: /^NAME: Rowan$/m.test(dos), points: /Natal Mars 15°00′ Aquarius/.test(dos),
     design: /^HUMAN DESIGN: Projector; Strategy: Wait for the invitation; Authority: Splenic$/m.test(dos), lifePath: /^LIFE PATH: 7$/m.test(dos),
     passage: /Pluto conjunct natal Mars\. In orb .*Exact on [^.]*2032[^.]*2033\./.test(dos),
-    noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noPlanet: !/planet/i.test(dos) });
+    noBirth: !/1990/.test(dos), noSurname: !/Vale/.test(dos), noDash: !dashRe.test(dos), noAstral: !/astral bod/i.test(dos) });
   const k1 = z.cycleKey(); z._cy = null; z._cyKey = null;
   const pending = z.cycleKey(); z.cycleWindows();
   t('Z6', 'the scan is anchored to the calendar year, so the key and the dossier come out the same when asked again, and no key is named before the scan has run', { key: true, dossier: true, pending: 'cypending' },

@@ -141,7 +141,7 @@ export function groupHarmonicPatternsByN(
 
 /**
  * Verify a radix pattern appears in expected harmonics. Generic lookup:
- * finds a harmonic-N pattern claiming the exact same astral body set as a given
+ * finds a harmonic-N pattern claiming the exact same celestial body set as a given
  * radix pattern.
  */
 export function patternAppearanceInHarmonic(
@@ -157,7 +157,7 @@ export function patternAppearanceInHarmonic(
 
 /**
  * Test case helper: verify that a radix Golden Yod (patterns.ts's
- * detectGoldenYod: a quintile [72°] between two astral bodies, both biquintile
+ * detectGoldenYod: a quintile [72°] between two celestial bodies, both biquintile
  * [144°] from a third) collapses to a genuine conjunction at the 5th
  * harmonic.
  *
@@ -226,6 +226,6 @@ export function radixGrandTrineNotIn5th(
 
   return grandTrines.every(gt => {
     const in5H = patternAppearanceInHarmonic(gt, 5, allHarmonicPatterns);
-    return !in5H; // Should NOT find a 5H: Grand Trine for the same astral bodies
+    return !in5H; // Should NOT find a 5H: Grand Trine for the same celestial bodies
   });
 }

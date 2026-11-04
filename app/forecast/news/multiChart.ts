@@ -27,14 +27,14 @@ export interface PartnerChart {
   birthDate: Date;
   birthTime?: string;
   birthPlace?: string;
-  bodies: Record<string, number>;  // astral body name => longitude
+  bodies: Record<string, number>;  // celestial body name => longitude
   points: Record<string, number>;   // ASC, MC, etc.
 }
 
 export interface SynastryContact {
-  movingBody: string;        // Your astral body
+  movingBody: string;        // Your celestial body
   aspect: string;              // conjunction, sextile, square, trine, opposite
-  partnerBody: string;       // Their astral body
+  partnerBody: string;       // Their celestial body
   orb: number;                 // Degrees of separation
   isExact: boolean;            // orb < 0.5
   yourLongitude: number;
@@ -46,7 +46,7 @@ export interface SynastryContact {
 export interface SynastryItemInput {
   contact: SynastryContact;
   partner: { id: string; name: string };
-  isPersonalTouch: boolean;    // Your astral body or point touched
+  isPersonalTouch: boolean;    // Your celestial body or point touched
   hasNatalTouch?: boolean;     // Touches their natal point
   isRare?: boolean;
   date: Date;
@@ -152,11 +152,11 @@ function buildSynastryBody(contact: SynastryContact, partnerName: string): strin
  */
 function getAspectExplainer(aspect: string): string {
   const explainers: Record<string, string> = {
-    conjunction: 'A conjunction is when two astral bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these astral bodies represent are amplified when together, for better and for worse.',
+    conjunction: 'A conjunction is when two celestial bodies occupy the same degree. Between you, it means your energies are merged, speaking as one. Whatever these celestial bodies represent are amplified when together, for better and for worse.',
     sextile: 'A sextile (60°) is one of astrology\'s easy aspects. Between you two, it\'s an opening. Conversation flows. This is an area where mutual support comes naturally.',
-    square: 'A square (90°) is tension in geometric form. Between you, these astral bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
+    square: 'A square (90°) is tension in geometric form. Between you, these celestial bodies want different things, creating productive friction. It\'s the friction that keeps things interesting and sharp.',
     trine: 'A trine (120°) is harmony. Between you, it\'s where things flow. This is where the two of you understand each other without asking. A rare gift that deepens with use.',
-    opposite: 'An opposition (180°) is two astral bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
+    opposite: 'An opposition (180°) is two celestial bodies facing each other. Between you, it\'s mutual reflection. One wants to lead, the other to balance. Integration is the goal, not dominance.'
   };
 
   return explainers[aspect] || 'A contact between your charts.';

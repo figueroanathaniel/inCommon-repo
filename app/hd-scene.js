@@ -18,7 +18,7 @@
 
    Wheel is the same chart with the sky put back round it: the sixty four
    gates as a ring at the body's waist, in their order from gate 41, and every
-   activation leaves its column for the place on the ring its astral body
+   activation leaves its column for the place on the ring its celestial body
    stood, with a thread down to the gate it lights. Moving between the two is a
    morph, not a cut.
 
@@ -756,7 +756,7 @@
     g.fillText(text, w / 2, h / 2);
     return this.sprite(c, px * 1.7, w / h, o);
   };
-  /* An activation: the astral body's glyph in a roundel ringed in its side's
+  /* An activation: the celestial body's glyph in a roundel ringed in its side's
      colour, set on its optical centre, with gate.line beside it. */
   P.activation = function (glyph, label, color, D, focus) {
     var k = 3, c = document.createElement('canvas'), g = c.getContext('2d');

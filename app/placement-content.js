@@ -1,6 +1,6 @@
 /* placement-content.js. Modular content engine for placement detail pages. V1.0.0
 
-   WHY MODULAR: a placement is astral body × sign × house × degree. Enumerated, that is
+   WHY MODULAR: a placement is celestial body × sign × house × degree. Enumerated, that is
    21 × 12 × 12 × 30 = ~90,000 texts. Nobody writes those, and text generated to
    fill that grid reads like filler. So this file holds SIX layers of real written
    material and composes them per request:
@@ -11,7 +11,7 @@
      3 houses   12 entries. Arena, definition, what it asks of whoever lands there
      4 dignity  the traditional rulership/exaltation/detriment/fall table
      5 decans   per-sign decan rulers (Chaldean order) + decan character
-     6 compose  astral body-in-sign, astral body-in-house, sign-in-house, synthesis, and the
+     6 compose  celestial body-in-sign, celestial body-in-house, sign-in-house, synthesis, and the
                 strengths / challenges / opportunities / obstacles lists
 
    Every string is tagged with the app's epistemic vocabulary:
@@ -29,70 +29,70 @@
      verb     how it acts on an arena
      gifts / shadows / growth / blocks  seed the Working With lists            */
   var BODIES = {
-    'Sun': { glyph: '\u2609', kind: 'astral body', energy: 'identity and conscious will',
+    'Sun': { glyph: '\u2609', kind: 'luminary', energy: 'identity and conscious will',
       definition: 'The Sun is vitality, will, and the self that wants to be someone in particular. It is not personality but the thing personality is trying to express.',
       role: 'The Sun shows what you are here to become rather than what you already are, and where your energy renews itself.',
       verb: 'centres', gifts: ['hold a centre other people can locate', 'give warmth without being asked for it', 'know what you actually want when the room is undecided'],
       shadows: ['need the room to notice before something feels real', 'confuse being seen with being understood', 'burn through vitality proving a point'],
       growth: ['spend your warmth where it is received rather than where it is contested', 'let your identity be a practice rather than a verdict'],
       blocks: ['audiences that reward performance over substance', 'a self-image formed before you knew yourself'] },
-    'Moon': { glyph: '\u263D', kind: 'astral body', energy: 'feeling, memory, and what soothes',
+    'Moon': { glyph: '\u263D', kind: 'luminary', energy: 'feeling, memory, and what soothes',
       definition: 'The Moon is feeling, memory, and need. It is the private weather under the public day, and the first place the body reacts before thought arrives.',
       role: 'The Moon shows what actually comforts you, what you return to under pressure, and the emotional habits laid down early.',
       verb: 'softens', gifts: ['read a room before anyone speaks', 'remember what people needed last time', 'self-soothe without needing anyone to arrive'],
       shadows: ['mistake a familiar feeling for a true one', 'withdraw before asking', 'tend everyone\u2019s weather but your own'],
       growth: ['name a need out loud while it is still small', 'let comfort change shape as you do'],
       blocks: ['an old comfort that no longer comforts', 'moods treated as facts rather than reports'] },
-    'Mercury': { glyph: '\u263F', kind: 'astral body', energy: 'thought, language, and exchange',
+    'Mercury': { glyph: '\u263F', kind: 'planet', energy: 'thought, language, and exchange',
       definition: 'Mercury is thinking, speech, and the traffic between minds. It governs how you take information in, sort it, and hand it back.',
       role: 'Mercury shows how you learn, what you notice first, and the shape your explanations take.',
       verb: 'articulates', gifts: ['find the sentence that makes a tangle legible', 'change your mind on new evidence', 'ask the question nobody framed'],
       shadows: ['talk past the point at which you knew', 'use precision as a way of not committing', 'mistake having words for having understanding'],
       growth: ['write down the thought you keep re-thinking', 'let silence carry part of the meaning'],
       blocks: ['a story about yourself repeated until it stopped being examined', 'rooms where speed is mistaken for intelligence'] },
-    'Venus': { glyph: '\u2640', kind: 'astral body', energy: 'affection, taste, and worth',
+    'Venus': { glyph: '\u2640', kind: 'planet', energy: 'affection, taste, and worth',
       definition: 'Venus is attraction, value, and pleasure. It governs what you find beautiful, how you draw close, and what you believe you are worth.',
       role: 'Venus shows how you love, what you consider fair, and the terms on which you accept being cared for.',
       verb: 'harmonises', gifts: ['make people feel welcome without effort', 'know what is worth keeping', 'bring beauty to something purely functional'],
       shadows: ['keep the peace past the point of honesty', 'confuse being wanted with being valued', 'spend on the appearance of a life rather than the life'],
       growth: ['say the unlovely true thing to someone who can hold it', 'let your taste be yours rather than defensible'],
       blocks: ['a standard of worth borrowed from someone who did not love you well', 'pleasure postponed as though it were owed later'] },
-    'Mars': { glyph: '\u2642', kind: 'astral body', energy: 'appetite, anger, and assertion',
+    'Mars': { glyph: '\u2642', kind: 'planet', energy: 'appetite, anger, and assertion',
       definition: 'Mars is action, appetite, and the will to assert. It is how you fight, how you pursue, and how you claim.',
       role: 'Mars shows where your initiative flows most naturally, how your anger behaves, and where conflict tends to find you.',
       verb: 'drives', gifts: ['start the thing while others are still deciding', 'stay in a difficult conversation', 'want something plainly enough to act on it'],
       shadows: ['spend force on the wrong target', 'read friction as proof of aliveness', 'let anger arrive as cold distance instead of speech'],
       growth: ['aim the heat rather than damping it', 'let a want be spoken before it becomes a demand'],
       blocks: ['a rule about anger set by someone else\u2019s temper', 'competition that is not actually a contest'] },
-    'Jupiter': { glyph: '\u2643', kind: 'astral body', energy: 'growth, belief, and meaning',
+    'Jupiter': { glyph: '\u2643', kind: 'planet', energy: 'growth, belief, and meaning',
       definition: 'Jupiter is expansion, faith, and the search for meaning. It governs where you widen, what you trust, and how you make sense of scale.',
       role: 'Jupiter shows where you grow easily, where you overreach, and what you take on faith.',
       verb: 'expands', gifts: ['see the larger frame while others fight the detail', 'give generously without keeping the ledger', 'stay hopeful with your eyes open'],
       shadows: ['promise at the size of your optimism', 'mistake a good story for a true one', 'expand past what you can actually tend'],
       growth: ['let a belief be tested rather than defended', 'choose depth once breadth has been had'],
       blocks: ['a conviction inherited and never examined', 'more open doors than hours'] },
-    'Saturn': { glyph: '\u2644', kind: 'astral body', energy: 'structure, limit, and responsibility',
+    'Saturn': { glyph: '\u2644', kind: 'planet', energy: 'structure, limit, and responsibility',
       definition: 'Saturn is limit, time, and consequence. It governs what must be built slowly and what will not be talked out of its price.',
       role: 'Saturn shows where you meet resistance, where mastery is available but only through repetition, and what you feel responsible for.',
       verb: 'disciplines', gifts: ['finish what stopped being interesting', 'hold a boundary without a speech', 'be the one who is actually reliable'],
       shadows: ['audit yourself in a voice you would not use on anyone else', 'call fear prudence', 'wait for qualification that never certifies itself'],
       growth: ['let sufficiency be a standard you can actually reach', 'build the small structure rather than plan the large one'],
       blocks: ['a standard set by someone who was never satisfied', 'a delay that has become a residence'] },
-    'Uranus': { glyph: '\u2645', kind: 'astral body', energy: 'individuation and the break in the pattern',
+    'Uranus': { glyph: '\u2645', kind: 'planet', energy: 'individuation and the break in the pattern',
       definition: 'Uranus is the break in the pattern. Sudden insight, deviation, the refusal to inherit a life unexamined.',
       role: 'Uranus shows where you cannot be standardised, and where change arrives faster than preparation.',
       verb: 'pursues', gifts: ['see the arrangement everyone stopped questioning', 'tolerate being the odd one', 'change your life in a week when it is warranted'],
       shadows: ['break something because it is intact', 'call restlessness freedom', 'leave before being known'],
       growth: ['stay long enough for a change to take root', 'let difference be a contribution rather than a position'],
       blocks: ['belonging treated as a threat', 'a reflex against structure, including your own'] },
-    'Neptune': { glyph: '\u2646', kind: 'astral body', energy: 'longing and imagination',
+    'Neptune': { glyph: '\u2646', kind: 'planet', energy: 'longing and imagination',
       definition: 'Neptune dissolves the edges. Imagination, compassion, longing, and the pull toward something larger than the self.',
       role: 'Neptune shows where boundaries thin, where inspiration arrives unearned, and where you are most easily fooled.',
       verb: 'thins the edges of', gifts: ['feel what someone will not say', 'make something from almost nothing', 'forgive at scale'],
       shadows: ['soften a fact until it stops requiring action', 'merge until you cannot locate yourself', 'wait for rescue and call it faith'],
       growth: ['put the vision into a form that can be corrected', 'keep compassion and clear sight in the same hand'],
       blocks: ['a fog that arrives whenever a decision does', 'an ideal held close enough to obscure the actual' ] },
-    'Pluto': { glyph: '\u2647', kind: 'astral body', energy: 'power and compulsion',
+    'Pluto': { glyph: '\u2647', kind: 'dwarf planet', energy: 'power and compulsion',
       definition: 'Pluto is depth, power, and forced transformation. What will not stay buried, and what must end for something truer to live.',
       role: 'Pluto shows where you are compulsive, where your power is real, and where life keeps requiring a death and a rebuild.',
       verb: 'transforms', gifts: ['stay present to what others cannot look at', 'rebuild after a loss that should have ended it', 'sense the real power in a room'],
@@ -583,7 +583,7 @@
       shadows: ['rely on grace instead of effort', 'hide from your own shadow behind goodness', 'expect protection and take risks accordingly'],
       growth: ['let good fortune make you generous', 'hold your light and your shadow together'],
       blocks: ['a belief that you must be pure to be protected', 'spaces where kindness is taken for weakness'] },
-    /* planetary nodes: where each astral body's orbit crosses the ecliptic, seen
+    /* planetary nodes: where each celestial body's orbit crosses the ecliptic, seen
        from the Sun. They move so slowly that everyone born within decades
        shares them, so they read as the shared work of a generation. */
     mercuryNode: { label: 'Mercury’s North Node', kind: 'node', energy: 'the thinking of a generation',
@@ -646,7 +646,7 @@
        Sieggruen proposed in the 1920s beyond Neptune. No such bodies have
        been found. Uranian astrology reads them as defined points on an orbit. */
     tnp_cupido: { label: 'Cupido (Hamburg)', kind: 'hypothetical', energy: 'belonging, family and shared art',
-      definition: 'Cupido is the first of the Hamburg School’s hypothetical points, proposed by Alfred Witte in the 1920s. No astral body has been found at this place: it is a point on a defined orbit, used in Uranian astrology. It is read for groups, family, marriage as an institution, and the arts that bind people together. It is not the asteroid Cupido.',
+      definition: 'Cupido is the first of the Hamburg School’s hypothetical points, proposed by Alfred Witte in the 1920s. No celestial body has been found at this place: it is a point on a defined orbit, used in Uranian astrology. It is read for groups, family, marriage as an institution, and the arts that bind people together. It is not the asteroid Cupido.',
       role: 'Cupido shows where you belong to a group, what family and community mean to you, and how you create beauty with others.',
       verb: 'gathers', gifts: ['bring people together into a family of choice', 'create beauty in a group', 'keep traditions that connect people'],
       shadows: ['lose yourself in belonging', 'value the group over its members', 'put up with a group to avoid being alone'],
@@ -731,7 +731,7 @@
       growth: ['align intention with action', 'accept what fortune brings while acting on what you choose'],
       blocks: ['circumstances that limit choice', 'confusion about what you actually want'] },
     ariesPoint: { label: 'Aries Point', kind: 'point', energy: 'contact with the public world',
-      definition: 'The Aries Point is zero degrees of Aries, where the Sun crosses the celestial equator at the March equinox and the tropical zodiac begins. It is the same place in every chart. Uranian astrology gave it weight as the point where personal life meets the world at large, and an astral body near it is read as reaching the public.',
+      definition: 'The Aries Point is zero degrees of Aries, where the Sun crosses the celestial equator at the March equinox and the tropical zodiac begins. It is the same place in every chart. Uranian astrology gave it weight as the point where personal life meets the world at large, and a celestial body near it is read as reaching the public.',
       role: 'The Aries Point shows how a chart meets the wider world. What sits near it, by conjunction, square or opposition, may be where you become visible beyond private life.',
       verb: 'opens', gifts: ['bring a personal matter into public life', 'make a mark beyond your own circle', 'begin something that others notice'],
       shadows: ['seek visibility for its own sake', 'feel exposed by public attention', 'let public events take over private life'],
@@ -871,32 +871,32 @@
        presence  how a body behaves once it lands in this house
        inLife    what the house does to an actual life                          */
   var HOUSE_PRESENCE = [
-    'When astral bodies gather in your 1st House, you feel their presence directly. This is the house of self-presentation. An astral body here does not hide. It becomes part of how others recognise you and how you recognise yourself.',
-    'When astral bodies occupy your 2nd House, they shape what you value and how you secure it. This is the terrain of earned worth. An astral body here asks: what do you build, and what builds you?',
-    'When astral bodies move through your 3rd House, they colour how you speak, learn, and connect with your immediate world. This is the house of daily exchange. An astral body here shows up in conversations, short journeys, and the information you choose to carry.',
-    'When astral bodies rest in your 4th House, they touch the foundation of your life. This is the house of home, heritage, and emotional ground. An astral body here shapes what shelters you and what you are called to shelter.',
-    'When astral bodies shine in your 5th House, they ignite what you create for joy. This is the house of self-expression, romance, and play. An astral body here wants to be seen, felt, and celebrated.',
-    'When astral bodies work in your 6th House, they shape your daily rhythms and how you tend to what needs doing. This is the house of craft, health, and useful labour. An astral body here shows up in your routines and your relationship to your own body.',
-    'When astral bodies mirror in your 7th House, they reveal who stands across from you. This is the house of committed relationship and open opposition. An astral body here draws others in to teach you what you cannot learn alone.',
-    'When astral bodies plunge into your 8th House, they enter the depths where surface life falls away. This is the house of shared resources, intimacy, and what must end to be remade. An astral body here does not skim. It asks for the truth.',
-    'When astral bodies expand in your 9th House, they stretch your understanding of what is possible. This is the house of long journeys, higher learning, and belief. An astral body here calls you beyond the familiar.',
-    'When astral bodies climb to your 10th House, they shape how you are known in the world. This is the house of vocation, reputation, and public life. An astral body here leaves a mark that outlasts the moment.',
-    'When astral bodies gather in your 11th House, they weave you into the fabric of something larger. This is the house of friends, hopes, and collective future. An astral body here shows what you wish for and who wishes it with you.',
-    'When astral bodies dissolve into your 12th House, they work below the level of conscious choice. This is the house of seclusion, undoing, and hidden strengths. An astral body here operates in dreams, in solitude, and in what you release.'
+    'When celestial bodies gather in your 1st House, you feel their presence directly. This is the house of self-presentation. A celestial body here does not hide. It becomes part of how others recognise you and how you recognise yourself.',
+    'When celestial bodies occupy your 2nd House, they shape what you value and how you secure it. This is the terrain of earned worth. A celestial body here asks: what do you build, and what builds you?',
+    'When celestial bodies move through your 3rd House, they colour how you speak, learn, and connect with your immediate world. This is the house of daily exchange. A celestial body here shows up in conversations, short journeys, and the information you choose to carry.',
+    'When celestial bodies rest in your 4th House, they touch the foundation of your life. This is the house of home, heritage, and emotional ground. A celestial body here shapes what shelters you and what you are called to shelter.',
+    'When celestial bodies shine in your 5th House, they ignite what you create for joy. This is the house of self-expression, romance, and play. A celestial body here wants to be seen, felt, and celebrated.',
+    'When celestial bodies work in your 6th House, they shape your daily rhythms and how you tend to what needs doing. This is the house of craft, health, and useful labour. A celestial body here shows up in your routines and your relationship to your own body.',
+    'When celestial bodies mirror in your 7th House, they reveal who stands across from you. This is the house of committed relationship and open opposition. A celestial body here draws others in to teach you what you cannot learn alone.',
+    'When celestial bodies plunge into your 8th House, they enter the depths where surface life falls away. This is the house of shared resources, intimacy, and what must end to be remade. A celestial body here does not skim. It asks for the truth.',
+    'When celestial bodies expand in your 9th House, they stretch your understanding of what is possible. This is the house of long journeys, higher learning, and belief. A celestial body here calls you beyond the familiar.',
+    'When celestial bodies climb to your 10th House, they shape how you are known in the world. This is the house of vocation, reputation, and public life. A celestial body here leaves a mark that outlasts the moment.',
+    'When celestial bodies gather in your 11th House, they weave you into the fabric of something larger. This is the house of friends, hopes, and collective future. A celestial body here shows what you wish for and who wishes it with you.',
+    'When celestial bodies dissolve into your 12th House, they work below the level of conscious choice. This is the house of seclusion, undoing, and hidden strengths. A celestial body here operates in dreams, in solitude, and in what you release.'
   ];
   var HOUSE_IN_LIFE = [
-    'This is where your life becomes visible. An astral body in your 1st House does not stay hidden. It becomes part of your face to the world.',
-    'This is where your values become tangible. An astral body in your 2nd House asks what you are willing to cultivate and what you need in order to feel secure.',
-    'This is where your mind meets the world. An astral body in your 3rd House shapes how you speak, what you notice, and how you move through your daily environment.',
-    'This is where your roots speak. An astral body in your 4th House touches what grounds you, what you come from, and what you need in order to feel at home.',
-    'This is where your joy finds form. An astral body in your 5th House colours what you create, who you love, and what you do simply because it delights you.',
-    'This is where your life finds its rhythm. An astral body in your 6th House shapes your daily work, your health, and how you serve what matters.',
-    'This is where you meet the other. An astral body in your 7th House draws people toward you who mirror what you need to see in yourself.',
-    'This is where surface gives way to depth. An astral body in your 8th House enters the territory of trust, shared power, and what transforms through contact.',
-    'This is where your horizon expands. An astral body in your 9th House pulls you toward meaning, distance, and understanding that reorders what you thought you knew.',
-    'This is where your path becomes public. An astral body in your 10th House shapes how you are remembered and what you build that outlasts you.',
-    'This is where your individual life joins something collective. An astral body in your 11th House shows where your hopes align with others and what future you are willing to work toward.',
-    'This is where the visible world thins. An astral body in your 12th House works in solitude, in surrender, and in the strengths you do not know you have until they are needed.'
+    'This is where your life becomes visible. A celestial body in your 1st House does not stay hidden. It becomes part of your face to the world.',
+    'This is where your values become tangible. A celestial body in your 2nd House asks what you are willing to cultivate and what you need in order to feel secure.',
+    'This is where your mind meets the world. A celestial body in your 3rd House shapes how you speak, what you notice, and how you move through your daily environment.',
+    'This is where your roots speak. A celestial body in your 4th House touches what grounds you, what you come from, and what you need in order to feel at home.',
+    'This is where your joy finds form. A celestial body in your 5th House colours what you create, who you love, and what you do simply because it delights you.',
+    'This is where your life finds its rhythm. A celestial body in your 6th House shapes your daily work, your health, and how you serve what matters.',
+    'This is where you meet the other. A celestial body in your 7th House draws people toward you who mirror what you need to see in yourself.',
+    'This is where surface gives way to depth. A celestial body in your 8th House enters the territory of trust, shared power, and what transforms through contact.',
+    'This is where your horizon expands. A celestial body in your 9th House pulls you toward meaning, distance, and understanding that reorders what you thought you knew.',
+    'This is where your path becomes public. A celestial body in your 10th House shapes how you are remembered and what you build that outlasts you.',
+    'This is where your individual life joins something collective. A celestial body in your 11th House shows where your hopes align with others and what future you are willing to work toward.',
+    'This is where the visible world thins. A celestial body in your 12th House works in solitude, in surrender, and in the strengths you do not know you have until they are needed.'
   ];
   HOUSES.forEach(function (h, i) { h.presence = HOUSE_PRESENCE[i]; h.inLife = HOUSE_IN_LIFE[i]; });
 
@@ -950,10 +950,10 @@
          “drive, desire, and assertion” cannot take a verb without disagreeing.
          Energy is always appended after a colon or preposition, never inflected. */
       var text = {
-        rulership: body + ' rules ' + sign + '. This is one of its home signs, where the astral body operates without translation. The sign asks for exactly what ' + body + ' already does: ' + nrg + '.',
-        exaltation: body + ' is exalted in ' + sign + '. Not its own sign, but a guest treated well: the astral body works through ' + (s ? s.quality : 'the sign\u2019s terms') + ' and gains a discipline it would not find alone, bringing ' + nrg + ' to a form that can hold it.',
-        detriment: body + ' is in detriment in ' + sign + ', the sign opposite its rulership. The astral body meets terms it did not set, and has to reach ' + nrg + ' indirectly.',
-        fall: body + ' is in fall in ' + sign + ', opposite its exaltation. The sign gives the astral body no natural support, so ' + body + ' has to build ' + nrg + ' here rather than assume it.'
+        rulership: body + ' rules ' + sign + '. This is one of its home signs, where the celestial body operates without translation. The sign asks for exactly what ' + body + ' already does: ' + nrg + '.',
+        exaltation: body + ' is exalted in ' + sign + '. Not its own sign, but a guest treated well: the celestial body works through ' + (s ? s.quality : 'the sign\u2019s terms') + ' and gains a discipline it would not find alone, bringing ' + nrg + ' to a form that can hold it.',
+        detriment: body + ' is in detriment in ' + sign + ', the sign opposite its rulership. The celestial body meets terms it did not set, and has to reach ' + nrg + ' indirectly.',
+        fall: body + ' is in fall in ' + sign + ', opposite its exaltation. The sign gives the celestial body no natural support, so ' + body + ' has to build ' + nrg + ' here rather than assume it.'
       }[state];
       var poss = {
         rulership: 'You may find this part of you is difficult to resist once it is pointed at something. And hardest to moderate for the same reason.',
@@ -967,7 +967,7 @@
     },
 
     /* Decan ruler filters. The decan ruler does not replace the sign, it filters
-       it: the same placement, narrowed. One entry per classical astral body, since the
+       it: the same placement, narrowed. One entry per classical celestial body, since the
        Chaldean decan sequence only uses the seven.                              */
     FILTERS: {
       'Mars':    { name: 'Mars', primary: 'intensifies direct action', gain: 'urgency and a competitive edge', asks: 'can the heat be aimed rather than spent?' },

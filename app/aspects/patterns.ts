@@ -29,7 +29,7 @@ export interface ChartPattern {
 export interface PatternConfig {
   showMinorPatterns: boolean;        // Tier 2 (default false)
   showDegreeLore: boolean;           // Tier 3 (default false)
-  includeMinorPointsInPatterns: boolean;  // Use asteroids/nodes (default false, astral bodies only)
+  includeMinorPointsInPatterns: boolean;  // Use asteroids/nodes (default false, celestial bodies only)
   maxOrbScaling: number;             // Multiplier for loosening orbs (default 1.0)
 }
 
@@ -98,7 +98,7 @@ function hasAspect(
 }
 
 /**
- * Filter points for pattern detection (astral bodies only, or include minor points)
+ * Filter points for pattern detection (celestial bodies only, or include minor points)
  */
 function filterPointsForPatterns(
   points: PointData[],
@@ -109,7 +109,7 @@ function filterPointsForPatterns(
     if (p.status !== 'ok') return false;
 
     if (!includeMinor) {
-      // Astral Bodies only: sun–pluto (10 bodies) + angles
+      // Celestial Bodies only: sun–pluto (10 bodies) + angles
       const bodyIds = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Ascendant', 'Midheaven', 'Descendant', 'Nadir'];
       return bodyIds.includes(p.name);
     }
@@ -122,7 +122,7 @@ function filterPointsForPatterns(
 // ============================================================================
 
 /**
- * Grand Trine: 3 astral bodies, 120° apart, all trines
+ * Grand Trine: 3 celestial bodies, 120° apart, all trines
  */
 export function detectGrandTrine(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -147,7 +147,7 @@ export function detectGrandTrine(points: PointData[]): ChartPattern[] {
               { a: p3.id, aspect: 'trine', b: p1.id, orb: a31.actualOrb }
             ],
             tier: 1,
-            description: 'Three astral bodies in harmonious 120° alignment; flowing gift, ease, and natural talent.'
+            description: 'Three celestial bodies in harmonious 120° alignment; flowing gift, ease, and natural talent.'
           });
         }
       }
@@ -157,7 +157,7 @@ export function detectGrandTrine(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * T-Square: 3 astral bodies; 2 opposite (180°), 1 square (90°) to both
+ * T-Square: 3 celestial bodies; 2 opposite (180°), 1 square (90°) to both
  */
 export function detectTSquare(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -190,7 +190,7 @@ export function detectTSquare(points: PointData[]): ChartPattern[] {
               { a: p2.id, aspect: 'square', b: apex.id, orb: sq2.actualOrb }
             ],
             tier: 1,
-            description: 'Two opposite astral bodies square to a third; tension seeking release through the empty leg.'
+            description: 'Two opposite celestial bodies square to a third; tension seeking release through the empty leg.'
           });
         }
       }
@@ -200,7 +200,7 @@ export function detectTSquare(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Grand Cross: 4 astral bodies; 2 oppositions, 4 squares (all cardinal or fixed signs)
+ * Grand Cross: 4 celestial bodies; 2 oppositions, 4 squares (all cardinal or fixed signs)
  */
 export function detectGrandCross(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -234,7 +234,7 @@ export function detectGrandCross(points: PointData[]): ChartPattern[] {
                 { a: p2.id, aspect: 'square', b: p4.id, orb: arcDistance(p2.lon, p4.lon) % 90 }
               ],
               tier: 1,
-              description: 'Four astral bodies in square and opposite aspects; intense challenge with no easy escape, demanding mastery.'
+              description: 'Four celestial bodies in square and opposite aspects; intense challenge with no easy escape, demanding mastery.'
             });
           }
         }
@@ -245,7 +245,7 @@ export function detectGrandCross(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Kite: Grand Trine + 1 astral body sextile to 2 of the trine astral bodies, opposite to 1
+ * Kite: Grand Trine + 1 celestial body sextile to 2 of the trine celestial bodies, opposite to 1
  */
 export function detectKite(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -287,7 +287,7 @@ export function detectKite(points: PointData[]): ChartPattern[] {
                 { a: p3.id, aspect: 'trine', b: p1.id, orb: arcDistance(p3.lon, p1.lon) % 120 }
               ],
               tier: 1,
-              description: 'Grand Trine with tail astral body; directs diffuse trine energy toward apex, adding purpose and drive.'
+              description: 'Grand Trine with tail celestial body; directs diffuse trine energy toward apex, adding purpose and drive.'
             });
           }
         }
@@ -340,8 +340,8 @@ export function detectYod(points: PointData[]): ChartPattern[] {
  * Golden Yod: 1 quintile (72°) + 2 biquintile (144°); the fifth-harmonic
  * counterpart to the classical Yod above, and NOT a variant of it -
  * confirmed against fifth-harmonic literature (e.g. Augurine's "Golden
- * Yod": "Two astral bodies sit 72 degrees apart with a third astral body 144 degrees
- * from each of them"). Two astral bodies a quintile apart, both biquintile from
+ * Yod": "Two celestial bodies sit 72 degrees apart with a third celestial body 144 degrees
+ * from each of them"). Two celestial bodies a quintile apart, both biquintile from
  * a third, forming an isosceles triangle whose apex is the biquintile
  * point. ASPECT_ORBS already carried 'quintile' and 'biquintile' entries
  * with no detector using either; this was the missing one.
@@ -373,7 +373,7 @@ export function detectGoldenYod(points: PointData[]): ChartPattern[] {
               { a: p2.id, aspect: 'biquintile', b: apex.id, orb: b2.actualOrb }
             ],
             tier: 1,
-            description: 'Two astral bodies a quintile apart, both biquintile to a third; a fifth-harmonic signature of focused creative craft and inventive pattern-making.'
+            description: 'Two celestial bodies a quintile apart, both biquintile to a third; a fifth-harmonic signature of focused creative craft and inventive pattern-making.'
           });
         }
       }
@@ -383,7 +383,7 @@ export function detectGoldenYod(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Mystic Rectangle: 2 sextiles, 2 trines (4 astral bodies in rectangle)
+ * Mystic Rectangle: 2 sextiles, 2 trines (4 celestial bodies in rectangle)
  */
 export function detectMysticRectangle(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -413,7 +413,7 @@ export function detectMysticRectangle(points: PointData[]): ChartPattern[] {
                 { a: p4.id, aspect: 'trine', b: p1.id, orb: arcDistance(p4.lon, p1.lon) % 120 }
               ],
               tier: 1,
-              description: 'Four astral bodies in harmonious rectangle; unusual gifts, paradoxical talents, creative flow.'
+              description: 'Four celestial bodies in harmonious rectangle; unusual gifts, paradoxical talents, creative flow.'
             });
           }
         }
@@ -424,7 +424,7 @@ export function detectMysticRectangle(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Stellium: 4+ astral bodies in same sign or conjunction
+ * Stellium: 4+ celestial bodies in same sign or conjunction
  */
 export function detectStellium(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -468,11 +468,11 @@ export function detectStellium(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Boomerang: a Yod (2 quincunx + 1 sextile) plus a 4th astral body in exact
+ * Boomerang: a Yod (2 quincunx + 1 sextile) plus a 4th celestial body in exact
  * opposition to the Yod's apex.
  *
- * PREVIOUSLY built on a T-Square (2 opposed astral bodies + 1 square to both)
- * plus a 4th astral body required to be sextile to BOTH opposed astral bodies. That
+ * PREVIOUSLY built on a T-Square (2 opposed celestial bodies + 1 square to both)
+ * plus a 4th celestial body required to be sextile to BOTH opposed celestial bodies. That
  * is geometrically impossible: if p1 and p2 are exactly opposite, the
  * positions sextile to p1 are p1+/-60, and the positions sextile to p2
  * (=p1+180) are p1+120/p1-120 - two pairs that never coincide, orb or no
@@ -482,18 +482,18 @@ export function detectStellium(points: PointData[]): ChartPattern[] {
  *
  * The actual astrological Boomerang (confirmed against published
  * definitions, e.g. Astrology Weekly's "Yods and Boomerangs": "a boomerang
- * is an extension of a yod... there's a fourth astral body involved that
- * opposes... the apex astral body") extends a YOD, not a T-Square: the fourth
- * astral body only needs to oppose the Yod's apex, nothing more. That is always
+ * is an extension of a yod... there's a fourth celestial body involved that
+ * opposes... the apex celestial body") extends a YOD, not a T-Square: the fourth
+ * celestial body only needs to oppose the Yod's apex, nothing more. That is always
  * geometrically achievable and does not depend on the base pair being an
  * exact opposition at all.
  *
- * `apex` on the returned pattern names the RELEASE astral body (opposite the
+ * `apex` on the returned pattern names the RELEASE celestial body (opposite the
  * Yod's own apex), not the Yod's tension point: it is the new, notable
  * addition a Boomerang has that a plain Yod does not, and forecast copy
  * (headlines.ts, explainer.ts, practical.ts) already calls it the
  * "handle"/"escape route"/"outlet" - {apex} in those templates resolves to
- * this astral body.
+ * this celestial body.
  */
 export function detectBoomerang(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -514,7 +514,7 @@ export function detectBoomerang(points: PointData[]): ChartPattern[] {
 
         if (!q1.matched || !q2.matched || !sx.matched) continue;
 
-        // Check for a 4th astral body opposite the Yod's apex
+        // Check for a 4th celestial body opposite the Yod's apex
         for (let l = 0; l < points.length; l++) {
           if (l === i || l === j || l === k) continue;
 
@@ -533,7 +533,7 @@ export function detectBoomerang(points: PointData[]): ChartPattern[] {
                 { a: apex.id, aspect: 'opposite', b: release.id, orb: opp.actualOrb }
               ],
               tier: 1,
-              description: 'A Yod with a fourth astral body opposite the apex; releases the quincunx pressure outward, offering a focus and an outlet the Yod alone lacks.'
+              description: 'A Yod with a fourth celestial body opposite the apex; releases the quincunx pressure outward, offering a focus and an outlet the Yod alone lacks.'
             });
           }
         }
@@ -574,7 +574,7 @@ export function detectCradle(points: PointData[]): ChartPattern[] {
                 { a: p3.id, aspect: 'sextile', b: p4.id, orb: arcDistance(p3.lon, p4.lon) % 60 }
               ],
               tier: 1,
-              description: 'Four astral bodies in balanced support pattern; protective holding, comfort, safe foundation.'
+              description: 'Four celestial bodies in balanced support pattern; protective holding, comfort, safe foundation.'
             });
           }
         }
@@ -585,7 +585,7 @@ export function detectCradle(points: PointData[]): ChartPattern[] {
 }
 
 /**
- * Talent Triangle: 2 sextiles, 1 trine (3 astral bodies)
+ * Talent Triangle: 2 sextiles, 1 trine (3 celestial bodies)
  */
 export function detectTalentTriangle(points: PointData[]): ChartPattern[] {
   const results: ChartPattern[] = [];
@@ -612,7 +612,7 @@ export function detectTalentTriangle(points: PointData[]): ChartPattern[] {
               { a: p3.id, aspect: 'trine', b: p1.id, orb: arcDistance(p3.lon, p1.lon) % 120 }
             ],
             tier: 1,
-            description: 'Three astral bodies in easy flow; creative talent that naturally expresses, gift waiting to be developed.'
+            description: 'Three celestial bodies in easy flow; creative talent that naturally expresses, gift waiting to be developed.'
           });
         }
       }

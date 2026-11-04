@@ -26,14 +26,14 @@
  * minor-bodies-ephemeris.js (Chiron, Ceres, Pallas, Juno, Vesta, fitted
  * against 81 JPL Horizons positions). Reusing those exact constants
  * rather than re-deriving new ones was meant to keep this module from
- * disagreeing with the chart the app draws. For the ten astral bodies it no
+ * disagreeing with the chart the app draws. For the ten celestial bodies it no
  * longer does: the app takes them from astronomy-engine now, and the series
  * copied below is only lonRaw()'s fallback, measured at up to 6.5 degrees
  * against JPL Horizons by tools/check-astral-bodies.js. Browsers do not run
  * TypeScript, so nothing in the app reads this file's planets.
  *
  * HONESTY ABOUT COVERAGE. Of the registry's 97 points, this file computes
- * a real position for the ten astral bodies, both lunar nodes, the four angles
+ * a real position for the ten celestial bodies, both lunar nodes, the four angles
  * (given, not derived here), Chiron and four asteroids (fitted elements,
  * ported), two more asteroids/TNOs with real cited elements (Eris,
  * Sedna), the eight planetary nodes (published J2000 mean elements), the
@@ -101,9 +101,9 @@ function t2000(jd: number): number { return jd - 2451545.0; }
 
 /**
  * Solve Kepler's equation M = E - e sin E for E, by Newton-Raphson.
- * Shared by every body below: astral bodies, minor bodies, Eris and Sedna all
+ * Shared by every body below: celestial bodies, minor bodies, Eris and Sedna all
  * go through this one function, so a fix here fixes all of them at once
- * rather than needing to be repeated per body the way the old astral body
+ * rather than needing to be repeated per body the way the old celestial body
  * formula (a truncated equation-of-centre series) and the old minor-body
  * formula (this same Newton solve) used to disagree in method.
  */
@@ -355,14 +355,14 @@ export function lunarNode(jd: number): { northNode: number; southNode: number } 
 }
 
 // ============================================================================
-// 5. PLANETARY NODES (ascending node longitude, per astral body)
+// 5. PLANETARY NODES (ascending node longitude, per celestial body)
 // ============================================================================
 
 /**
  * J2000.0 mean longitude of ascending node (degrees) and its centennial
- * rate (degrees/Julian century), for the eight non-Earth astral bodies.
+ * rate (degrees/Julian century), for the eight non-Earth celestial bodies.
  * Source: Standish/JPL "Keplerian elements for approximate positions of
- * the major astral bodies" (mean ecliptic and equinox of J2000), retrieved
+ * the major celestial bodies" (mean ecliptic and equinox of J2000), retrieved
  * 2026-09-13. This is a standard reference table, not a fit: the rate is
  * how fast a slowly precessing plane actually moves, not a free
  * parameter chosen to match anything.
@@ -379,9 +379,9 @@ const PLANET_NODE: Record<string, { om0: number; rateCentury: number }> = {
 };
 
 /**
- * 5. planetaryNodes: the ascending node of each astral body named, as a
+ * 5. planetaryNodes: the ascending node of each celestial body named, as a
  * slowly-precessing mean element (centennial rate applied), not a daily
- * ephemeris position: an astral body's node moves a few arcminutes a year at
+ * ephemeris position: a celestial body's node moves a few arcminutes a year at
  * most, so computing it once per chart (as the brief asks) rather than
  * per render costs nothing and loses nothing.
  */
